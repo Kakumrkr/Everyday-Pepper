@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "48a719d1d612cb99042d81966e3286993b324587220f4ab7fe3b0500575551d3",
+        "fingerprint": "a409b6e125611c01f81a73ddbf7159221abd6a2442598dc176993478676c2333",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_zkynDg2ZpN1IPVM1TZw3Rq2j",
+              "id": "call_iTIavW46NR3uFd6qrNqsYX6W",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,17 +16,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "c06dfc9f268af474fa5471acae494cb809cc75c6fc8df6cbb4f7ab0fcbf5c6b7",
+        "fingerprint": "7b8042678b7d956d68b8eceed4ee89f2c74540a5ac60d7771d6220e5f800ae2a",
         "response": {
-          "text": "No items are waiting for your OK. The feed shows 13 suggestions, but none require approval.",
+          "text": "No items are waiting for your OK right now. The feed shows schedule-gap and rebooking suggestions, but none are awaiting approval.",
           "toolCalls": [],
           "replay": [
             {
@@ -36,10 +36,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11566,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 1666,
-            "outputTokens": 24
+            "inputTokens": 12548,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 1742,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

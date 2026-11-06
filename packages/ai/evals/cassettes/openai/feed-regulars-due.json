@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5f448d309e1fd1d5ab775677cadb317ab756bb4f956b2a34ac137a44d9aa7bef",
+        "fingerprint": "98179d3594459162b586aaf67de714ec4e57a2d050493eebacbe2c63be1367dc",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MJPZc5i6ZlC0qRa1zjf9w3dr",
+              "id": "call_TJ1TFJad0ECw3gFkZ9wSHTja",
               "name": "get_feed",
               "arguments": "{\"kind\":\"rebooking_due\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 20
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "53264ee57916bfe7c1833f7b39e68fde08eb81e81e982227cfa33d5813df0795",
+        "fingerprint": "c75b6ac20c4ec84db58560d1f8e7affc278e1e3137205974dd33541d091f3cf6",
         "response": {
-          "text": "Sara K. and Sarah P. are due back for haircuts with Jess. Sara was due Oct 26, and Sarah was due Oct 27.",
+          "text": "Sara K. and Sarah P. are due back for haircuts with Jess. Their suggested return dates were October 26 and 27, respectively.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10233,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 333,
-            "outputTokens": 35
+            "inputTokens": 11166,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 360,
+            "outputTokens": 34
           },
           "model": "gpt-6-luna"
         }

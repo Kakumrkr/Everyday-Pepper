@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3e94110394306925e545f17747c9c33c67a6959e63372ebf6d7aaacf7e2c1ca3",
+        "fingerprint": "549f6da53113b8971a5117d2aec95dbeef231579a3c81e53388fae4e48cbf654",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_nNIv4UyTwR2BBYkedBjtiqvl",
+              "id": "call_4IT5o8Eqi9nTmY0JI4lOu2nx",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -16,16 +16,61 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10755,
-            "cachedInputTokens": 0,
-            "cacheWriteTokens": 10752,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 11,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "712e7033831f345bb205b20f8d671feb5a8c8d4f162f9c8833ca90912744e75f",
+        "fingerprint": "6a9c82660b7ae0b2fecf08ce57beea17baf4ca97040e25a41b7f909349b88927",
+        "response": {
+          "text": "I don’t see any open to-dos. The list available to me is your own, and it’s empty.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10863,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 57,
+            "outputTokens": 28
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "549f6da53113b8971a5117d2aec95dbeef231579a3c81e53388fae4e48cbf654",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_o0zkmby1iAzyarflVycNCVrF",
+              "name": "list_todos",
+              "arguments": "{\"whose\":\"team\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 11,
+            "outputTokens": 19
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "2a412954a79162084ead192eef2a1d49d974ab66a9ebe7a19b9b1e5e9c9115bb",
         "response": {
           "text": "There are no open to-dos showing for the team.",
           "toolCalls": [],
@@ -37,8 +82,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10812,
-            "cachedInputTokens": 10752,
+            "inputTokens": 10863,
+            "cachedInputTokens": 10803,
             "cacheWriteTokens": 57,
             "outputTokens": 16
           },
@@ -48,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
+        "fingerprint": "549f6da53113b8971a5117d2aec95dbeef231579a3c81e53388fae4e48cbf654",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_POgbajZxABAy3uqALFI1pgNg",
+              "id": "call_5n6IaPOMl3OldVksX9wVhTvN",
               "name": "list_todos",
               "arguments": "{\"whose\":\"team\"}"
             }
@@ -61,17 +106,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "985e1874d30e718fda9eca1489eb707fe81e2bbb2bc26ed0e0cd2f391f80188d",
+        "fingerprint": "b3326c93687e7925e369ca5f331616281087876a515daa1616c82cb963051724",
         "response": {
-          "text": "There are no open to-dos visible for the team, including Lena’s.",
+          "text": "There are no open team to-dos.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,52 +126,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9954,
-            "outputTokens": 20
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "be57be220240672afda1cc55ce2397badcb50109574c449427bd80a5dbecf60a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_pJM4aG6LjBgFpOWp1xdiF3Pn",
-              "name": "list_todos",
-              "arguments": "{\"whose\":\"team\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a96c9861491a5dbe7971f638a9be82a0f43c771dc49716a5b31c43ecb5305bdb",
-        "response": {
-          "text": "There are no open to-dos. The list returned your own to-dos only.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9957,
-            "cachedInputTokens": 9954,
-            "outputTokens": 22
+            "inputTokens": 10863,
+            "cachedInputTokens": 10860,
+            "outputTokens": 13
           },
           "model": "gpt-6-luna"
         }

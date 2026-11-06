@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a646eb038094c515a5c475190d6f8644ecc7a286985233fa25080c067f4dd662",
+        "fingerprint": "0397cd6864915bebdd3d49abfa078a18fc46cc015e7b4d4a52539201959bdfef",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_nAvvl5e0xDE4LrkyPDp1cUcE",
+              "id": "call_PC3ANOWWiO4K1bPq5q3yoXNr",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
+            "inputTokens": 10805,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9896,
+            "cacheWriteTokens": 10802,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "04664bd991585f4580ec99849b813e92694f5feba2b764205b60d33e681d4fd5",
+        "fingerprint": "de7bab39cca768de1fe3d6981f4ae24981dfa45453dfc8d3dceb3ba5343d7531",
         "response": {
-          "text": "Maria’s usual is “Colour with Jess.”",
+          "text": "Maria L. usually gets Colour with Jess.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,9 +37,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10049,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 150,
+            "inputTokens": 10957,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 152,
             "outputTokens": 13
           },
           "model": "gpt-6-luna"
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "a646eb038094c515a5c475190d6f8644ecc7a286985233fa25080c067f4dd662",
+        "fingerprint": "0397cd6864915bebdd3d49abfa078a18fc46cc015e7b4d4a52539201959bdfef",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_fDel4ptse5eoAKt5vBiklkSS",
+              "id": "call_ANomecLOWs5euOarYHEpwyS9",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -61,15 +61,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10802,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "67583cd3308542822e5a4774517b6185beb9603438747991f5639cea28b79a00",
+        "fingerprint": "5119cda0196cdf839d2694ff8396eec94cc30e982b679cb11d00c396dff885e4",
         "response": {
           "text": "Maria usually gets Colour with Jess.",
           "toolCalls": [],
@@ -81,9 +82,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10049,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 150,
+            "inputTokens": 10964,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 159,
             "outputTokens": 11
           },
           "model": "gpt-6-luna"
@@ -92,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "a646eb038094c515a5c475190d6f8644ecc7a286985233fa25080c067f4dd662",
+        "fingerprint": "0397cd6864915bebdd3d49abfa078a18fc46cc015e7b4d4a52539201959bdfef",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_V8YWCjKMmLFeR1M5QRLO18Fp",
+              "id": "call_fd2aAXk2E1yTkfzpYWFxb2hX",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -105,15 +106,15 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "7aef937384debbdab2f04dd8cd50847719fa580f80fa43a636a4814105c989dd",
+        "fingerprint": "e46244f42c4c92aae5bbf9807ee29ae8a00b567bd72ef90db22469207593b58b",
         "response": {
           "text": "Maria usually gets Colour with Jess.",
           "toolCalls": [],
@@ -125,9 +126,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10052,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 153,
+            "inputTokens": 10960,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 155,
             "outputTokens": 11
           },
           "model": "gpt-6-luna"

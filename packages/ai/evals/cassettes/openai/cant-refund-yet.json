@@ -23,6 +23,51 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "5dc291f0b49217fb669dc56c37690431508569a90027075d3b59255426ce3390",
+        "response": {
+          "text": "I can’t issue refunds yet. Please handle Maria’s deposit refund outside Pepper. Automatic booking confirmations and reminders go out by email.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10803,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 8,
+            "outputTokens": 30
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "5dc291f0b49217fb669dc56c37690431508569a90027075d3b59255426ce3390",
+        "response": {
+          "text": "I can’t process refunds yet. You’ll need to handle Maria’s deposit refund outside Pepper.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10803,
+            "cachedInputTokens": 10800,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

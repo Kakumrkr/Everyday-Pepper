@@ -101,10 +101,9 @@ describe('every eval set on its scripted cassettes', () => {
  * `wl-staff-own-client` still read free times later that day as "not full" and refused, or
  * asked again (safe: nothing was written). Phase 9's first session moves that check into the
  * domain (`add_to_waitlist` refuses with the free times), so the model calls it directly.
+ * S44 moved it; S56b's recording passed both (waitlist 12/12): empty again.
  */
-const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {
-  waitlist: ['wl-add-marco-saturday', 'wl-staff-own-client'],
-};
+const KNOWN_REAL_MODEL_MISSES: Readonly<Record<string, readonly string[]>> = {};
 
 describe('the recorded real model, replayed (S27)', () => {
   it(

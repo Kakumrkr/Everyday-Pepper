@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "b5867d6eddcab5d4e1cf6da5462d8dbcd199ef9cee2e7666b39947ab511e37ae",
+        "fingerprint": "0d6d78d222b7e115e966614d43401ecf903f7e2883658ac11ac66d8387085184",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qzpIdyScsvSbTJzbBlukSNrY",
+              "id": "call_DNkqb7dZyskNPmqEZCnqwqNf",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "2a6591662df17c65796f95eafdc3403f78271f519c3d1a9e6bc0604e4c4cfaa8",
+        "fingerprint": "e1ae92231c5e69a7669c8d0691af8d38b2a30d8b85286cffb794ff4db501b10e",
         "response": {
-          "text": "Maria L. has a remembered allergy: “Hazelnut oil”.",
+          "text": "I found Maria L. The business remembers that she has a hazelnut oil allergy.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,40 +37,48 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10054,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 154,
-            "outputTokens": 18
+            "inputTokens": 10967,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 161,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f2b19c19b5ceaf3998a498fe372bb1bb58704e5e70c4356da45044781e4fe153",
+        "fingerprint": "7167799a107113dfaf6b84a15cba6b14fc29e77ad53e653acc5ff347237b4f83",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dhbmFILIBZnNqG3LgCIa5mZZ",
+              "id": "call_mzQbuo69qPYGvySfwNrcxcJv",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_0a2c0024972e1afb016aee407cac1887d18791646dcccc991c",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kB9d29Qbe7N3ApJWDUcH80BrDKFpDj1PGTOtbsF9dd8r3I5_c4l6oWTfTbmZ7C_f96L3DEt_VhiUpF0nd9lOD8SyYH_pbKktRqmC-a31tK6FnpNRQ27bSlXoyLHKW7hYdEB5lVYztUZjx66mZodIRxsSS7BLbE31R0g3ZebMxNYCGCSXaow1QHsZeNoPrP0n7DBRhyu-HoLZVvm4rG_52GzyGww0Sp6uXyakvIytvrks0eHWBvtweonzLu5OIP56RQspiHIGfw4WA6YWRmzSwsum4cDNpCtarHWknBVfDxDzyyXhZZ1sgQJ-0XKs0mh0-pJh3yxjMPlbkRTTpgsDEHhGNnw2CVmAd71Ub8uUSFvR1lMhzIgfnyjufXpKsdRrv6L1ZNPs1_MeFoKnkcgjI5CgRlyQWWv20RRYBwkAeVmzya3XS_7P-AQ4_ezY4aJ6CBKdutVXmhorOaVotp9NvgEr-CRReyjPWQNHdL7K9wEd03Y1pi97DgPJsco69PmH9ipVKF5Gztuz4Elm9QrNt3jM5koJkxWBcbmkTe5iS9RvGGpF5JWEvR5c2ALHgiWbTN9EK9qOv7AHSD4OpAWV_JY8I5ynwNo1pArWwlDgKr-Woz2z7Y0VHGrbc-OVahWGZ2NgY4b-J1XEpi0sp3H0RtXQkGf3I3G-Fej1M-PHgdeTW18u61IwEtXe0gLY4I8KLr2HC2tJHaZ_REE7cGSLdZ1V9h1m_f9_bsb1xkVWc5LyLQTEQW-q1f6APnz0v6pzz5Xwp67d45IEcMzBzyCRfzEsqIxX8Ad1YqAaCF3HZv_bTvSV_xS-r9t8GOnSHZ0s0-1sa9TL0fcTeWPw5x8jF0YVeANEyBKs0mxHqYeYAJnuy4sZZ77JpFDDhsp7Vc-UP335RMTbL3alxtFUEBR-noguXcImweP9zJplDcb_xk8NBb7_RnmpHSUr3qqsWeat1lTE475FbJyd9UZoKIPz0_vgAgg-E3v6WAmGVFYsVszOCi0Nz8GzIZknjAPNnmJx3MlvrX3R7M-Pr0qy444sxiuEjDUxyNGL7DE46TQY700UKlizOb_ag2XBNhweE3ROWffaBKefpPvJZo_MfLjwlUJX2Ibwcrp7nxbQa6hDF3nDYOzRl51oNsUM9QJafut_kphHWgoY8p8awY4wzeVD3xn_YwwLDLdW4lzxPG-UTx-4k4aNaSbyJHpvWvMQWQLCPQZJf5HHLY1Fnb31WI7EPLTSGEX_q2g07mSv2kn38eC12w_od2AE_mJgXalsXU7WfyA_vwh821rb1ZmczkuT-ZQYi6e2H1Q1JactnD-bsm0HqCmF2TP6m5NkzMOdW1ksngjOqbwt8n8OSz5Svr6lMILKlTzWQnFW5atERRf5hEiBkOraVOoXk24TQybBsIWnkPnClhnIeYWz3-aHDR9-QPdGjXtML2LFA6z7_kHr_dGP61T9pTlVqwIbdN_K4M5EbMJDaffwv39Azu6Z8a3lPMwouWQS6hooMebK8AVsh8TPeRH12yhoh8K-J-vMy1YlMVoGLSrecKIWaLIkva_N73sbRUIZ_0IEFO3Ziap3cFFofZPVdBvkzicSsQ9HmdbIbVVMe4a9GOkIEvB4lKk7l70w4__8sVgrJ7KH-Y6o0sTwi7JpmAJwXVXW4wgYh0uwVC9zW2nOFn2gN90tdkUNh8h75UrzzR-vJ0eIhGZA1uKb20f4fPBtfhDob4DXwuetv-axpIlUmNn37nI2vcIflD6YUCvGzx3RK7zaxBugxbzzYdoOjqP5l93xSuI8NeA_LLQxGVcFi96eb7BQ24LbSAXTBK5UcC_L1uMNlaFmn95MdtIrflzwo0a7hTtPuci6dlsr1ldc_qZVkpDsjo17ATuD_67g3dkMWEmiw3XdkJSy9ejK609Iks1GVCwrh5Ucj7Vqwq_F-n-M1rGMM-9Dpg6x9ivNEHYIbxsjEIVV2lQGj_DOz743eNjnMmbMK7IHTPDNyeCnG54j6zO-dr5r_kkBcLDE5xqALhfXN5yAuzv8qWOmB-M0PPmsr2fNQUxi-deUQaOAQu0QucHuBpj31kejPQCWeUe9wDNKM_oGo7ARmKwp9GKmrsJBKS_jWqjTfWB2X6PEdHHaIpt1JGkz_V4UuhthMzko6mEy4JW0Mrh-tR7RkbGVFPpyOBKiUGXTZj5wMb--pDqQHquG2d_nTW01R7CAFobejOLDPLaziDjURidOdcE8Mv3-rBd6lBaN3z4",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10014,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 114,
-            "outputTokens": 40
+            "inputTokens": 10927,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 121,
+            "outputTokens": 96
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d1fb5f29b29ab9acc8dc2074815dd81bc37c623b7660fb55332cb44a28bb8ae0",
+        "fingerprint": "b15f8085a190215e587397187d134d8ae218ec46fb8204b3bd62284c2ba600ee",
         "response": {
-          "text": "Maria L. has a haircut booked with Jess tomorrow, Tuesday, November 3, at 3:00 PM. Her last recorded visit was a colour appointment with Jess on October 23. I don’t have any client notes or preferences recorded for her.",
+          "text": "Maria L. has a haircut booked with Jess tomorrow, Tuesday, Nov 3, at 3:00 PM. Her most recent noted visit was a colour appointment with Jess on Oct 23. I don’t have any other remembered notes about her.",
           "toolCalls": [],
           "replay": [
             {
@@ -80,10 +88,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10442,
-            "cachedInputTokens": 10011,
-            "cacheWriteTokens": 428,
-            "outputTokens": 56
+            "inputTokens": 11458,
+            "cachedInputTokens": 10924,
+            "cacheWriteTokens": 531,
+            "outputTokens": 55
           },
           "model": "gpt-6-luna"
         }

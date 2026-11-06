@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "bede09b366672428fce038960a476e3cf546ed4e2cb62b78443036291f72686a",
+        "fingerprint": "fc813e6d549882b91455dc93fdf01a085544e1a92aa5183f75873b487728ad62",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_HakFyAWTHkiGlWvtKVehgwzd",
+              "id": "call_DPzFF0ouM2meHXFOexTPAsek",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10760,
-            "cachedInputTokens": 10741,
+            "inputTokens": 10811,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 16,
             "outputTokens": 18
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "a5848edd63ae238fcec161d8315e85de1bcc09f6883ccfa0a87a6f80e9218a4c",
+        "fingerprint": "039a07779b9bb4f719772ab04bb96eb3f76f9a9c059cfc2686a189917f67394a",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OeomvKWDbMf7tvMPsRxbNcJu",
+              "id": "call_q8MSsV5JxpLLld8y65Qlq1Kk",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:maria}}\"}"
             }
@@ -38,40 +38,40 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10843,
-            "cachedInputTokens": 10757,
-            "cacheWriteTokens": 83,
-            "outputTokens": 42
+            "inputTokens": 10896,
+            "cachedInputTokens": 10808,
+            "cacheWriteTokens": 85,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f8ce3d579ca5596ecab94c190a09f72ed67639dfaf5ccd00f153171b84719826",
+        "fingerprint": "0feb1154781acae165055bfd5b19750be747bd0e6e3ff08231b0656c38ebb64e",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_X78lOOFgjCK9gbhYuLF4AZyT",
+              "id": "call_ZeqzabgQKvsNMwWmR31Po0E0",
               "name": "send_client_message",
-              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"note\",\"minutesLate\":null,\"note\":\"Please bring your inspiration photos to your appointment.\"}"
+              "arguments": "{\"bookingId\":\"{{booking:maria}}\",\"kind\":\"note\",\"minutesLate\":null,\"note\":\"Please bring your inspiration photos to your appointment tomorrow.\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 11130,
-            "cachedInputTokens": 10840,
-            "cacheWriteTokens": 287,
-            "outputTokens": 63
+            "inputTokens": 11193,
+            "cachedInputTokens": 10893,
+            "cacheWriteTokens": 297,
+            "outputTokens": 65
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "aa270bb86764b91f82746210fd5675bce3e729da8280179c295393bef3c75175",
+        "fingerprint": "1cf8ff0f9081e27cceaa4e80c873a2926d46bb86eccda38c237c8fe89a8234fb",
         "response": {
-          "text": "I drafted a note asking Maria to bring her inspiration photos to tomorrow’s haircut. It’s waiting for your approval on the card.",
+          "text": "I drafted the email asking Maria to bring her inspiration photos to tomorrow’s haircut. It’s waiting for your approval on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,9 +81,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11279,
-            "cachedInputTokens": 11127,
-            "cacheWriteTokens": 149,
+            "inputTokens": 11344,
+            "cachedInputTokens": 11190,
+            "cacheWriteTokens": 151,
             "outputTokens": 30
           },
           "model": "gpt-6-luna"

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "a5078b571f8aa7e27407420f6d5e0b167546bae027f043a52879f3b0452adccc",
+        "fingerprint": "507c31700b96ad0deb04be69e417599e317237af6746d5530c4f8bbc0aec2beb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_LJyDPkht6JatujoHXOgwyqGy",
+              "id": "call_1kZju8bvQ1lhkXqlGSViq2Qm",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10761,
-            "cachedInputTokens": 10741,
+            "inputTokens": 10812,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 17,
             "outputTokens": 16
           },
@@ -25,53 +25,66 @@
         }
       },
       {
-        "fingerprint": "63e31cb5f92911236faddf73e5f819f0d334501a0d42507fbc18a0b3668213c7",
+        "fingerprint": "ae2f9d3e7efba6c6f1d21b94ab9331301a9404fbe9bfde1e03526716c05732ce",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_OjVKGju78beZftcXwA8ZV5og",
+              "id": "call_wuldQSOYYB6QVlGAphipYZTa",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_e72dTAeXC2sJVAZBIuwsaert",
+              "name": "get_day",
+              "arguments": "{\"date\":\"2026-11-03\",\"staffMemberId\":\"{{staff:jess}}\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 11231,
-            "cachedInputTokens": 10758,
-            "cacheWriteTokens": 470,
-            "outputTokens": 19
+            "inputTokens": 11292,
+            "cachedInputTokens": 10809,
+            "cacheWriteTokens": 480,
+            "outputTokens": 85
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b63c092eebce0b96209502809cbcde2addfe40e700b099e83094d469cfe5c2cc",
+        "fingerprint": "ffbaca537dd776e189acbb5566a6c1e6e1b4786433c1b979808a7a21b87dcd04",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_J42esqUTXzVsA0sh8V6BzcNS",
+              "id": "call_kS628ahxdrk84V8XgRPhP7RG",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_03adea983996050f016aee420557f087d191aaeae891387cb8",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kIGaNtNFp1zDTHwxfvzzCuiL-6cZPYCTR3sXrrp2NFngZOfvKCk-tF04hT9MXIhnnYl0BIBA8Cov4T6QI3ziaA1a6834S8KUougHGjhzyoU-RHIIsoAo8MSS_0yKGH2k4MCk5d2meLJU_S0QFK4iF47s89WxfkbOEQC3v-t9Zw77nynXy8B7itzKKWwlUQQESUk4kI--4RfHrlqq38i9MxxOmRK0HyUBoR_q7NFHnPiA32NrOXjrUJBpYxCsyq5ovFiXp0jvf8oT2_bx-F9U30rHEdl5ae6zpaG7n3wA0MJzlgZL8te6pEvx-1dvYiu_doVpc0FGw3pI1iCnc7oE556M9tRQYrZjjcK0MDP6mSoj4irvj0vWrIENkGZ_JKRZqAh1yFb17xViq4Yc2GU2ciPTF57k1FpThkqq-ut2LrXblEOfRZQVhFdOkvQ1ACQ831M_F7MC9JQnX2lNBhtY8BDna0G4dbXw7M3g_SiZrFdKheJJiKLed3oibz1I4_bugOn8u2SeDG3MOuZj0l2JRywwVDoaebpitrlza9tFaVPun1I-EvbhmaQLb5Ik6l-rxLRCqk9sd8xsuFCFCB_GaPeyhL-nm7R5CuxlXcGBD2IGSxM__f0s2OeMXaDMrcNHXlFSvv6Bm1xe0EnZtTFj1nhfbYWD14LxfTIxoEI0b6sRXssCA905eyDxRtSgT1UHlm_0ZffqNHq-E6-5Wqo9zncN8uUnagTvU4dCDrO3oMXATZpo1zYciv4akcUfd64sWBQkOjPKXf3pJm7r8fxcHTD_08Y2AL9m_470ut2ZCN-ZEEHoIvfR5fVQZDnPEYbrgDXtyPGm8i34LADwyuUvOSSrJSeHp-PgOQ54uyWqrYHMoWWjfw1PrQO1V6Ii_a6GmEX1mYA6S4qhVb0x5q1Au25pvnQnDV4whTLui2LIYXjoLJXS5g7CpCrEDKbPKUEhQwMoIcjJa_OO0GP11S2hn2UCBiwuXfD3Jzni9EJzs1Tn49uPh5fGOPmZbHIM6O-P9ObyyxeewMxxvMbMrwOPR_Jaois79U6lwZSCbYKw2VcCdCtwbz6u20Bhmsbz9HuL9joe4PF-7-qNERKH_zA4aNNgHjLkt9T0pPJ934B5dwl0SLlxCRdSk8BicAIXyrwONS4ip9-_0F-O7xqJ7ZNMjPiwe9QOYoINDjm_xYMAjjGLsMTC02V9kQzOySvOqWNFA1TM859AXWZagWh-Gfa2PQn1LVLdq2btwmU3ynoxjQUP1sfVdvDmvNCOajkLD1t087n53wrditoawiw5HYLgd5OPb7UxKaskGoCSPsjRE0oCkLB9-oyYF8QBqdK0nXH0u-0kYym5Dq9sNEWKJfRjXq1Elc4UauUCI0p6C-lZlbD6NwyVC4pDGZhmQLAohP7sZI3BCs3gaoAOKI06VLTA_xrUvIsJ8CVpS6UaWWGlo45nubepuj8aIacZsUPen72NBXEeSr8Ay4-uxxSLNcqP97azNECRSEzjHyP2QcLHMD_JlYpqye9Yy7K1vyYdgYVXyBCqp7shNuf5VuXB0IG2_LImXeSawD06tiQBDEUzEn3Sau2EbgerYPeYNfa4owChQJIaHNxx1TvUHzcM4_3RGxvpqqhbINLSaB0kgCtbYv2g_dF8Xx8Z_jREi8FrugLyIpmpC63HNJtVDSQDgTBZV6qfg==",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 11314,
-            "cachedInputTokens": 11228,
-            "cacheWriteTokens": 83,
-            "outputTokens": 114
+            "inputTokens": 11729,
+            "cachedInputTokens": 11289,
+            "cacheWriteTokens": 437,
+            "outputTokens": 144
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "f6c1c235df8207b0d5d60d5e0cdc6535c8c4548a21aed910268c6e3fceba775c",
+        "fingerprint": "cbf5f28dfd538d45f2b703800a0fb1bc2aa7c22c8839de3564bd0fa9aad0de78",
         "response": {
-          "text": "Jess is unavailable at 3:00 tomorrow. The nearest available times she has are 1:45, 1:30, or 1:15. Which would you like for Sarah?",
+          "text": "Jess is booked at 3:00 tomorrow. The nearest available times for Sarah’s haircut are 1:45, 1:30, or 1:15 PM. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -81,97 +94,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11621,
-            "cachedInputTokens": 11311,
-            "cacheWriteTokens": 307,
-            "outputTokens": 44
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "2cd8907ddb31aaa6c8f8e5e58e55da685ce7d45ff0c83bab402be47762b88bea",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_QSCJeNJYly7NHNm4ab4lp8Bs",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9906,
-            "cachedInputTokens": 9903,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "cba79c352c0947bf633746c04198c385dab55acfc52fb5353c7febf3e8af2259",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_ETCnR8kdggynTA6KjTOBWxrP",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah Park\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10360,
-            "cachedInputTokens": 9903,
-            "cacheWriteTokens": 454,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "7f58340f8c0ecf00d4db77c0e44d362705dc324f6040e54a4cf727f340c9054f",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_cFJQXqiUjq3Rg9bzkUI1xtpO",
-              "name": "create_booking",
-              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10444,
-            "cachedInputTokens": 10357,
-            "cacheWriteTokens": 84,
-            "outputTokens": 111
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "f723e64df6841bc208f3c2eff911be7bf5bacb0d655e439ede8fde52ffcc4fb6",
-        "response": {
-          "text": "Jess isn’t free tomorrow at 3:00 pm. The nearest available times are 1:45, 1:30, or 1:15 pm. Which would you like for Sarah?",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10751,
-            "cachedInputTokens": 10441,
-            "cacheWriteTokens": 307,
+            "inputTokens": 12078,
+            "cachedInputTokens": 11726,
+            "cacheWriteTokens": 349,
             "outputTokens": 45
           },
           "model": "gpt-6-luna"
@@ -180,12 +105,17 @@
     ],
     [
       {
-        "fingerprint": "2cd8907ddb31aaa6c8f8e5e58e55da685ce7d45ff0c83bab402be47762b88bea",
+        "fingerprint": "507c31700b96ad0deb04be69e417599e317237af6746d5530c4f8bbc0aec2beb",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_ebRlnICTyhcLmdQJGLXW1lit",
+              "id": "call_I2yPs9NGWsQi4YTLUGXcRWQ2",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_Jt3yCelRJFwpnTzSeOFphGO8",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -193,42 +123,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9906,
-            "cachedInputTokens": 9903,
-            "outputTokens": 16
+            "inputTokens": 10812,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 17,
+            "outputTokens": 49
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0b211e35bd70c9358500c98c235f69085f378140fe39e5a9ff655cd0345ec1e3",
+        "fingerprint": "37d55baaa624348042a6c3d1fe8b2b2dfa50662a58465b1e0ce1aed810027be7",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FusfnGonxBxMTb8MqWlx1auH",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Sarah Park\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 10371,
-            "cachedInputTokens": 9903,
-            "cacheWriteTokens": 465,
-            "outputTokens": 19
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "a7239866a53e4c281cb9876fb9030f1738c73059fdd01ee9411b45f5a0098713",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_pnCUB1u0G5Fzx2CnU6A2PZwL",
+              "id": "call_F2Vu4qkC4t0LcHRQssLu2wab",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
             }
@@ -236,18 +145,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10456,
-            "cachedInputTokens": 10368,
-            "cacheWriteTokens": 85,
-            "outputTokens": 116
+            "inputTokens": 11381,
+            "cachedInputTokens": 10809,
+            "cacheWriteTokens": 569,
+            "outputTokens": 118
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "d093eb28a545b1cd8ade766e2fa4bfaa9e3657297866b3062f0c27d789ccdf1f",
+        "fingerprint": "2ee2a3ba536661278cb9c9f9b0dfa8a03c49b9ba621590836d5ec5371f5774bc",
         "response": {
-          "text": "Jess isn’t free tomorrow at 3:00 PM. The nearest available times with Jess are 1:45, 1:30, or 1:15 PM. Which would you prefer?",
+          "text": "Jess is booked at 3pm tomorrow. The nearest free times for Sarah’s haircut with Jess are 1:45, 1:30, or 1:15pm. Which would you like?",
           "toolCalls": [],
           "replay": [
             {
@@ -257,10 +166,81 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10771,
-            "cachedInputTokens": 10453,
-            "cacheWriteTokens": 315,
-            "outputTokens": 45
+            "inputTokens": 11698,
+            "cachedInputTokens": 11378,
+            "cacheWriteTokens": 317,
+            "outputTokens": 46
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "507c31700b96ad0deb04be69e417599e317237af6746d5530c4f8bbc0aec2beb",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_EIqg8n9dkin8u6IxS0uNTXWF",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Sarah Park\"}"
+            },
+            {
+              "id": "call_uMxFBRBKbnduRlYEeqlGu9I4",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10812,
+            "cachedInputTokens": 10809,
+            "outputTokens": 49
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "6130e96135cbf336771f80b3dc527b9bd31ffcfa2d758db2b1bb869ad7ed7763",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_uvCAlZwrGQx44GPxK3KnFqjz",
+              "name": "create_booking",
+              "arguments": "{\"clientId\":\"{{client:sarah}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-03\",\"time\":\"15:00\",\"emailClient\":null}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 11384,
+            "cachedInputTokens": 10809,
+            "cacheWriteTokens": 572,
+            "outputTokens": 118
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "a2889a2fce85ba403c9e31119cf4523fb98f616de5535019737c2ef5f2fe3254",
+        "response": {
+          "text": "Jess is booked at 3pm tomorrow. The nearest available times for Sarah’s haircut with Jess are 1:45, 1:30, or 1:15pm. Which would you prefer?",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11704,
+            "cachedInputTokens": 11381,
+            "cacheWriteTokens": 320,
+            "outputTokens": 46
           },
           "model": "gpt-6-luna"
         }

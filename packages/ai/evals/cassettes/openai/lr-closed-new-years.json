@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c6e3eaf8afa23033f633ba93be0489e398503bed210c039d67d0499a7baa60a6",
+        "fingerprint": "ca4c172dc5515f18dcc70d6923b0469e044d798fff2a905433891aa777f63e8b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Lrbv549RPEE2r80ppZJVyUMz",
+              "id": "call_NIfkbciFaLakx6bP9hnlwvPP",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"blackout_window\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":\"2027-01-01\",\"endDate\":\"2027-01-01\",\"weekday\":null,\"notBefore\":null,\"notAfter\":null,\"closed\":null}"
             }
@@ -16,18 +16,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9906,
+            "inputTokens": 10812,
             "cachedInputTokens": 0,
-            "cacheWriteTokens": 9903,
+            "cacheWriteTokens": 10809,
             "outputTokens": 77
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4a879e54aeeca631dd4d4c48946619546637ba38374b29b5cb8263dd5013bfc8",
+        "fingerprint": "f9ade190a2010f4e97a95951f12028542e0dc0ccb6fd95dc1125a13beb46a78b",
         "response": {
-          "text": "I proposed no bookings for January 1, 2027. It hasn’t taken effect yet; please approve it on the card.",
+          "text": "I proposed no bookings for January 1, 2027. Nothing has changed yet; please approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10055,
-            "cachedInputTokens": 9903,
+            "inputTokens": 10961,
+            "cachedInputTokens": 10809,
             "cacheWriteTokens": 149,
-            "outputTokens": 31
+            "outputTokens": 29
           },
           "model": "gpt-6-luna"
         }

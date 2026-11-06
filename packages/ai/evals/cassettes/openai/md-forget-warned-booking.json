@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7cc47498e8b29c8760b1ce67e6ae6722028c941833d6303f36ddf7e20877177a",
+        "fingerprint": "300ba585799659467d01e71384f0a3b7a50a03973c66a3248958492bc479ed08",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_wo4E7vtsV7zF05QPWxpnkhj6",
+              "id": "call_nSWsDAn9Al9ue1Og5r3JSrLA",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,20 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9907,
-            "cachedInputTokens": 9904,
+            "inputTokens": 10813,
+            "cachedInputTokens": 10810,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "a0ac802021a0843a4d4051d8edb618bbf0f563f96089a097b1df53985c18cfd9",
+        "fingerprint": "0862397c63c3e46cf02f53c12b8436b65ae7d5cc521adec8c6113a5483819181",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dSw1zfL3dE4nG2Y04s5H83go",
+              "id": "call_FFVAwzxf2Rpp0vgzCCiQW1xU",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -37,21 +37,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10382,
-            "cachedInputTokens": 9904,
-            "cacheWriteTokens": 475,
+            "inputTokens": 11293,
+            "cachedInputTokens": 10810,
+            "cacheWriteTokens": 480,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "bd031da1a7c2046bfe6c8177493b2a72d3c063614d62edd017e1e89987a87623",
+        "fingerprint": "27593c2e263c66c089d8b9416dc3fd6a600e495104c16ff5ce806c7ae323373d",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_6jzY0YekKRkikmed5Ix2bSrK",
+              "id": "call_MxoLe3SxKTZT3JGfI7T4RneS",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:maria}}\",\"serviceId\":\"{{service:colour}}\",\"staffMemberId\":\"{{staff:jess}}\",\"date\":\"2026-11-04\",\"time\":\"14:00\",\"emailClient\":null}"
             }
@@ -59,18 +59,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10537,
-            "cachedInputTokens": 10379,
-            "cacheWriteTokens": 155,
-            "outputTokens": 119
+            "inputTokens": 11457,
+            "cachedInputTokens": 11290,
+            "cacheWriteTokens": 164,
+            "outputTokens": 122
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "094dcbe13a258dbf5c716f201d13d06212cb5bec0dbea223113fbd26605abfe2",
+        "fingerprint": "dac9b751ad2bd234700155c5415642ea2a20e752275cf08e45292c30858fe2ea",
         "response": {
-          "text": "Maria’s colour with Jess on Wed, Nov 4 at 2:00 PM is awaiting your approval on the card. Her record notes an allergy to “Hazelnut oil.”",
+          "text": "Maria L.’s colour with Jess on Wednesday, November 4 at 2:00 PM is waiting for your OK on the card. Her record notes an allergy to “Hazelnut oil.”",
           "toolCalls": [],
           "replay": [
             {
@@ -80,18 +80,18 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10830,
-            "cachedInputTokens": 10534,
-            "cacheWriteTokens": 293,
-            "outputTokens": 41
+            "inputTokens": 11754,
+            "cachedInputTokens": 11454,
+            "cacheWriteTokens": 297,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "73e66eb0b3a8ec2346cf649b6323b77997d734b3dadb8e70ca998807bb476523",
+        "fingerprint": "32f4f750ff5450b9976f53b6951b65ec1d2f60db37231e6e27ab48551a24fa73",
         "response": {
-          "text": "The booking is waiting for your approval on the card. There are no warnings noted for it.",
+          "text": "The booking is awaiting your approval, and there are no warnings noted for it. You can approve or reject it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -101,10 +101,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10721,
-            "cachedInputTokens": 10379,
-            "cacheWriteTokens": 339,
-            "outputTokens": 23
+            "inputTokens": 11643,
+            "cachedInputTokens": 11290,
+            "cacheWriteTokens": 350,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }

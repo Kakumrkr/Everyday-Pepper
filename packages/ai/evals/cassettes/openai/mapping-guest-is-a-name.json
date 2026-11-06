@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "b0eff9b090824911627fbac2c42c6d5d80c0cff6ac354a7556f60cda8ba207df",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_sqeyOChpd0B4yklpeXMCdbSh",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Loyalty pts\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 875,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "b0eff9b090824911627fbac2c42c6d5d80c0cff6ac354a7556f60cda8ba207df",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_usvNMFPE4Tn5xcsgwdBbNC1U",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Loyalty pts\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 875,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

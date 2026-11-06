@@ -3,9 +3,9 @@
   "trials": [
     [
       {
-        "fingerprint": "d0847d885671d2ae1b7a8e59b7c8af7a440f50c985bcd940a8d6112a79651336",
+        "fingerprint": "0d0abb9b0e209593696e8ea0b25fb839cc0ea973ea5c8d4ec691d8628f9ec904",
         "response": {
-          "text": "I can’t dismiss the suggestion for you. Please dismiss it on its card on Home.",
+          "text": "I can’t dismiss Sara’s suggestion. You’ll need to dismiss it on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -15,31 +15,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
-            "outputTokens": 22
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "d0847d885671d2ae1b7a8e59b7c8af7a440f50c985bcd940a8d6112a79651336",
-        "response": {
-          "text": "I can’t dismiss a suggestion for you. Please dismiss Sara’s suggestion on its card on Home.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
             "outputTokens": 24
           },
           "model": "gpt-6-luna"
@@ -48,9 +26,9 @@
     ],
     [
       {
-        "fingerprint": "d0847d885671d2ae1b7a8e59b7c8af7a440f50c985bcd940a8d6112a79651336",
+        "fingerprint": "0d0abb9b0e209593696e8ea0b25fb839cc0ea973ea5c8d4ec691d8628f9ec904",
         "response": {
-          "text": "I can’t dismiss a suggestion. Please dismiss Sara’s card on Home.",
+          "text": "I can’t dismiss the suggestion. You’ll need to dismiss it on its card on Home.",
           "toolCalls": [],
           "replay": [
             {
@@ -60,9 +38,31 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9897,
-            "outputTokens": 19
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
+            "outputTokens": 23
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "0d0abb9b0e209593696e8ea0b25fb839cc0ea973ea5c8d4ec691d8628f9ec904",
+        "response": {
+          "text": "I can’t dismiss a suggestion. You can dismiss it on its card on Home.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10806,
+            "cachedInputTokens": 10803,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

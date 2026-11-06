@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "7aa1ec15b40effd9f812bdda91febcf59b673d813f02670f8205a6b3e698180b",
+        "fingerprint": "1e4bc4e62a110668c750026c8fe138a0b19a23bbfc7fe5cd0a4679a3d87e75ba",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_znW5RRTvos0YmyR2GKRwtOwJ",
+              "id": "call_zCfshHk2GruAaR8d5Sm2deba",
               "name": "search_memory",
               "arguments": "{\"query\":\"Lena raising prices\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 12,
             "outputTokens": 21
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "36d47d09cce094fc2f434d65238efdc9aee4a9c993213a20f34165367ba34cbf",
+        "fingerprint": "1b5deb964ee33cbef347eb73c9b295ff67b82fc285747fe054d9aa6bb007c1cf",
         "response": {
-          "text": "I don’t remember anything about Lena deciding to raise prices. The only related note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "text": "I don’t remember any decision about raising prices. The only related past note I found was that Jess moved her lunch break to 12:30 on Thursdays.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10019,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10925,
+            "cachedInputTokens": 10804,
             "cacheWriteTokens": 118,
-            "outputTokens": 37
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }
@@ -48,30 +48,31 @@
     ],
     [
       {
-        "fingerprint": "7aa1ec15b40effd9f812bdda91febcf59b673d813f02670f8205a6b3e698180b",
+        "fingerprint": "1e4bc4e62a110668c750026c8fe138a0b19a23bbfc7fe5cd0a4679a3d87e75ba",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_kUsYnGkpWmyQT1PKuj1vOAQy",
+              "id": "call_XRLbIXwvSQnwtPrqIlZ27M3v",
               "name": "search_memory",
-              "arguments": "{\"query\":\"Lena raising prices decision\"}"
+              "arguments": "{\"query\":\"Lena raising prices price increase\"}"
             }
           ],
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
-            "outputTokens": 22
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 12,
+            "outputTokens": 23
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2906c7148744eca6425d4e0fedb58b8164dddead32320969c711b70eeda248ae",
+        "fingerprint": "f4da270b191d11a9104b3213bd7e2695120d3b76e074aabbb2c20b5bca73555d",
         "response": {
-          "text": "I don’t remember a decision about raising prices. The only note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "text": "I don’t remember Lena deciding anything about raising prices.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,10 +82,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10020,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 119,
-            "outputTokens": 34
+            "inputTokens": 10927,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 120,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }
@@ -92,12 +93,12 @@
     ],
     [
       {
-        "fingerprint": "7aa1ec15b40effd9f812bdda91febcf59b673d813f02670f8205a6b3e698180b",
+        "fingerprint": "1e4bc4e62a110668c750026c8fe138a0b19a23bbfc7fe5cd0a4679a3d87e75ba",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Ra3ae0IsEC6guthngYVOS1V2",
+              "id": "call_4YiLngIA7tKuEzdDNlXDHU30",
               "name": "search_memory",
               "arguments": "{\"query\":\"Lena raising prices\"}"
             }
@@ -105,17 +106,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10804,
             "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "df6134fc736a4039a516c5853af348073ad058588e1482e0b11673d76c6a2225",
+        "fingerprint": "9133dfb5882b86178279bf79e1711944676a31cef18a236a987f4a22c010b8c7",
         "response": {
-          "text": "I don’t remember any decision about raising prices. The only note I found was that you moved your lunch break to 12:30 on Thursdays.",
+          "text": "I don’t remember Lena deciding anything about raising prices.",
           "toolCalls": [],
           "replay": [
             {
@@ -125,9 +126,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10019,
-            "cachedInputTokens": 10016,
-            "outputTokens": 34
+            "inputTokens": 10925,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 118,
+            "outputTokens": 15
           },
           "model": "gpt-6-luna"
         }

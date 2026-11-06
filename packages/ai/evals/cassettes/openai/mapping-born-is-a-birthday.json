@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "4beefeeba9555ea2a9afa819e2c48bce249591686ff75e0a1643033f7648755d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_LQbi5lWBzQZSXrw6awPz26vQ",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":\"birthday\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 872,
+            "cachedInputTokens": 0,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "4beefeeba9555ea2a9afa819e2c48bce249591686ff75e0a1643033f7648755d",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_Xl7jvmKoMexUPiRBxfUrFOGd",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Born\",\"field\":\"birthday\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 872,
+            "cachedInputTokens": 0,
+            "outputTokens": 35
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

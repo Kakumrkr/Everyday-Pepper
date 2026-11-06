@@ -3,12 +3,35 @@
   "trials": [
     [
       {
-        "fingerprint": "e7cb868f6e6e8bde57d65ca8f5817dbf2a1bcfe66721b08af788e656ee5a42c9",
+        "fingerprint": "7f74a76aad8b176c53eed2f10decf5d02e7ca0777e716094f41c1cdfdc52d806",
+        "response": {
+          "text": "I can’t look up phone numbers or email addresses in Pepper yet.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 12,
+            "outputTokens": 18
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "7f74a76aad8b176c53eed2f10decf5d02e7ca0777e716094f41c1cdfdc52d806",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_2T5OnkxM601VO0tghIDq6usT",
+              "id": "call_orSv6NJFZsE8HTIjM1zfkjs7",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -16,8 +39,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10756,
-            "cachedInputTokens": 10741,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 12,
             "outputTokens": 18
           },
@@ -25,9 +48,9 @@
         }
       },
       {
-        "fingerprint": "a561ba1e349c091797473cf93090aa403573f3de05672a5d94399b1daa6f1d55",
+        "fingerprint": "3ce20f08bfec8c0961758a8351e33d0deb8b1c41ca1ef1baa524f8f5db03b6ab",
         "response": {
-          "text": "I can’t see clients’ phone numbers or email addresses here. Maria L. is the matching client; you can view her contact details on her client record in the app.",
+          "text": "I can’t access or look up client phone numbers or email addresses.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +60,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10842,
-            "cachedInputTokens": 10753,
-            "cacheWriteTokens": 86,
-            "outputTokens": 39
+            "inputTokens": 10891,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 84,
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
@@ -48,12 +71,12 @@
     ],
     [
       {
-        "fingerprint": "ad019c0fc9a0110d98e65705d09df2d6989ae80368994aec23213d1b443097c6",
+        "fingerprint": "7f74a76aad8b176c53eed2f10decf5d02e7ca0777e716094f41c1cdfdc52d806",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_qEh4bW7i4q3F7m18nD4YBdkR",
+              "id": "call_ftCFvtvoVzaFGt0w06NH4SFp",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
@@ -61,17 +84,17 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
+            "inputTokens": 10807,
+            "cachedInputTokens": 10804,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "35f6ca68bb8070d00e7a302bea3f55febccf674a33b96d9700a5a1199f355c38",
+        "fingerprint": "426bd1e146ccd5f2fb0a685f70f671ba2cd7b43654e4de14df6133be5bec571f",
         "response": {
-          "text": "I found Maria L., but I can’t look up phone numbers or email addresses here.",
+          "text": "I can’t access client phone numbers or email addresses here. I found Maria L., but her contact details aren’t available to me.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,32 +104,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 9983,
-            "cachedInputTokens": 9898,
-            "cacheWriteTokens": 82,
-            "outputTokens": 22
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "ad019c0fc9a0110d98e65705d09df2d6989ae80368994aec23213d1b443097c6",
-        "response": {
-          "text": "I can’t look up phone numbers or email addresses—client searches are by name only, and contact details aren’t available through my tools.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9901,
-            "cachedInputTokens": 9898,
-            "outputTokens": 32
+            "inputTokens": 10890,
+            "cachedInputTokens": 10804,
+            "cacheWriteTokens": 83,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }

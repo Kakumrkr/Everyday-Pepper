@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "54623f9eb1e6d41d7cbd1714176e2dcf71954ecb73555b2ee2c34c081d7bde65",
+        "fingerprint": "d0bc9ce77c93c6d946f2e45ee94615e55a138dd4a3a5e06ae98f8332f635d663",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1UaqxjRRx8uhLdO2QSBJLvS6",
+              "id": "call_5hEu5Xr86x3K6TEs7P64pGB9",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 13,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "7af5413b48a278037215d7c53844d78393324a13c6c4d40bfb6bbc3c9dfddaeb",
+        "fingerprint": "ead67aeb4bbc16cc26088794a8078c19697099a72868aff8c2efa5ffa8c05295",
         "response": {
-          "text": "Sí. Hoy (2 de noviembre) hay bloques de tiempo libres de 9:00 a 17:00 para Jess y Marco. También hay dos clientas con corte atrasado: Sara K. desde el 26 de octubre y Sarah P. desde el 27 de octubre. No hay nadie en la lista de espera.",
+          "text": "Sí. Para hoy, Jess y Marco tienen cada uno un hueco de 9:00 a 17:00. También hay dos clientas a las que les toca volver por un corte: Sara K. y Sarah P. No hay nadie en la lista de espera.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11533,
-            "cachedInputTokens": 9899,
-            "cacheWriteTokens": 1631,
-            "outputTokens": 71
+            "inputTokens": 12493,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 1685,
+            "outputTokens": 60
           },
           "model": "gpt-6-luna"
         }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3e75dc27ddac03a42cb3e19692ec82c27107038f9ee82bd57811ac639e0a6660",
+        "fingerprint": "5e7d719bc56248908a3e5ea17535e41f4484dd01757f3d1702ff8a50196fcdd8",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_0M8iqEx5FuvNYD4p9oV8O8xF",
+              "id": "call_59a1NgG7ns5bA8pQ4cWxgSZA",
               "name": "propose_rule",
               "arguments": "{\"kind\":\"hours_limit\",\"staffMemberId\":null,\"minutes\":null,\"days\":null,\"count\":null,\"startDate\":null,\"endDate\":null,\"weekday\":1,\"notBefore\":\"10:00\",\"notAfter\":null,\"closed\":false}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 14,
             "outputTokens": 68
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "96c22d834b7c0e7b610874f3675cb96a98b60f30c3be83aa47e0ca6eeedba878",
+        "fingerprint": "4cdeea26dbec083bb6e6f7a36fccc48f491150301a021b2592b06e52f629c5c5",
         "response": {
-          "text": "I proposed no bookings before 10:00 on Mondays for the whole business. It’s waiting for your approval on the card.",
+          "text": "I proposed no bookings before 10:00 on Mondays for the whole business. Nothing changes until you approve it on the card.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,8 +37,8 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10042,
-            "cachedInputTokens": 9900,
+            "inputTokens": 10948,
+            "cachedInputTokens": 10806,
             "cacheWriteTokens": 139,
             "outputTokens": 30
           },

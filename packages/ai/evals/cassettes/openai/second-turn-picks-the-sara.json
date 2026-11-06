@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "45b9b94d0a9b63e6c2f84da07089572afc2bcfa26f484912532c7b60a4acac52",
+        "fingerprint": "5242f56ab87267fe346890742c7e7fa939a94584d3f8a28d8ae0daf13ebe5dc3",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_gSEi9D9cmboLZdhxgRZMLbpq",
+              "id": "call_0DEd0qAMzWrowPT0xhcO0PCt",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,20 +16,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9902,
-            "cachedInputTokens": 9899,
+            "inputTokens": 10808,
+            "cachedInputTokens": 10805,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "acea1a4d46f36a4a63b9b2d38a40e2f2010d90253578597caee4f65f4a5b37f2",
+        "fingerprint": "7833e9528e2958254639f0ebcf550229e9b99699c743fd1a24ca7b2b1719da23",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_DeIuuQ50oCU50peZ1ALYsevM",
+              "id": "call_T2PJbGMJnlIayl1dtdDAK53y",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara\"}"
             }
@@ -37,16 +37,16 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10366,
-            "cachedInputTokens": 9899,
-            "cacheWriteTokens": 464,
+            "inputTokens": 11280,
+            "cachedInputTokens": 10805,
+            "cacheWriteTokens": 472,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "650584ab57e79bec9ecd0213dafe81a335fdd9f9305e87b4a8bdbbd969dac042",
+        "fingerprint": "4cb0b529a54babb3a60fa62e732f7b40c4dad58dfb57fd4cbd27a5f52290558a",
         "response": {
           "text": "I found two matches: Sarah P. and Sara K. Which one should I book?",
           "toolCalls": [],
@@ -58,21 +58,21 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10492,
-            "cachedInputTokens": 10363,
-            "cacheWriteTokens": 126,
+            "inputTokens": 11409,
+            "cachedInputTokens": 11277,
+            "cacheWriteTokens": 129,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "ed054a9ecead0195bb5c4f0b63cb285a175abc5b68aa7c4eab7bea4a3d1d0823",
+        "fingerprint": "65accd343628e3bf1192ebdbcfdabb7b1fdaea6547fbba980e9df0a99e431f18",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_Cg3kz3euVEnSQIZkWqbdoonX",
+              "id": "call_pQx2jJkta5VXxkJGVN3tw3Iu",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -80,8 +80,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10522,
-            "cachedInputTokens": 10489,
+            "inputTokens": 11439,
+            "cachedInputTokens": 11406,
             "cacheWriteTokens": 30,
             "outputTokens": 19
           },
@@ -89,12 +89,12 @@
         }
       },
       {
-        "fingerprint": "4cae815ee6ea04e260a6273952fafce78a12cf2adc3bab8d8724d60ec443d2c1",
+        "fingerprint": "e58ab1ffd3111deaebf36050ff10bed4dfc924b04b176a1ccf8992c54efa4d2c",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_AplOZa2Uc39uXROocCfweeYq",
+              "id": "call_4a7gxzeSbHMKpQYm6yNZYnfy",
               "name": "create_booking",
               "arguments": "{\"clientId\":\"{{client:sara}}\",\"serviceId\":\"{{service:haircut}}\",\"staffMemberId\":null,\"date\":\"2026-11-03\",\"time\":\"10:00\",\"emailClient\":null}"
             }
@@ -102,8 +102,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10607,
-            "cachedInputTokens": 10519,
+            "inputTokens": 11524,
+            "cachedInputTokens": 11436,
             "cacheWriteTokens": 85,
             "outputTokens": 94
           },
@@ -111,9 +111,9 @@
         }
       },
       {
-        "fingerprint": "dac38dc9fa34975b6d0203b86f6dea5f9a3885592a1d5baa175f9b2153c37914",
+        "fingerprint": "4bba394812216df5f3e1c2962a2291abf2b48e7372d9ce599b6ff2f0211a7847",
         "response": {
-          "text": "The booking request for Sara K.’s haircut tomorrow at 10:00 with Jess is waiting for your approval on the card.",
+          "text": "Sara K.’s haircut with Jess tomorrow, Nov 3 at 10:00, is waiting for your OK on the card. Nothing is booked yet.",
           "toolCalls": [],
           "replay": [
             {
@@ -123,10 +123,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10781,
-            "cachedInputTokens": 10604,
+            "inputTokens": 11698,
+            "cachedInputTokens": 11521,
             "cacheWriteTokens": 174,
-            "outputTokens": 30
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

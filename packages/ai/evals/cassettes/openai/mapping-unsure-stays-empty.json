@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "066ac7d516dcaa2dde346ea5acc8ec5abc17613010ce6ee0a3e98bd0d163f352",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_A8XHIz5iBeNbEbsS0jKVT9LJ",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Fav colour\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 875,
+            "cachedInputTokens": 0,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "066ac7d516dcaa2dde346ea5acc8ec5abc17613010ce6ee0a3e98bd0d163f352",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_MC5V6EHCXk5latcp16uhU7h5",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"},{\"column\":\"Fav colour\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 875,
+            "cachedInputTokens": 0,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

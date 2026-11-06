@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "350b2129613420468c840984033c564b1bc358809e2c471c5e555e93f5d7a6f6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_wM6JRA8D5z3J4l3yjdKb4r6O",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Patron\",\"field\":\"name\"},{\"column\":\"Note to self\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 885,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "350b2129613420468c840984033c564b1bc358809e2c471c5e555e93f5d7a6f6",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_YmvDYjCGVpuzwIKJksHSmCo8",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Patron\",\"field\":\"name\"},{\"column\":\"Note to self\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 885,
+            "cachedInputTokens": 0,
+            "outputTokens": 38
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

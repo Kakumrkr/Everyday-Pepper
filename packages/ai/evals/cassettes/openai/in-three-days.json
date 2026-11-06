@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "5cd9482269fe38c0baa482610d56567a78370412f1fefa4892510fcb46a5a40a",
+        "fingerprint": "cd26276ce2d0998f3dafa0abbfac0bfaec33627f3793ca81aa76142de4d99b52",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_haawdQJVMO5sUkiRRtaAnLSS",
+              "id": "call_G28AF2ze4CDaTodQhT4cQbPx",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9905,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10811,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 16,
             "outputTokens": 16
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "9bc88020987a50400b95a843264860f5f5bad23e1fdb0807f9db7d98479974e6",
+        "fingerprint": "d48d5baed5ed068336d1385beef3c8cd9970cee32c601410c6af6fc9c069e454",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_1bc6UpHxUBTFHNW4N4OBeJ6Y",
+              "id": "call_qhqWi0yojDSrfE8QFUH8hAf2",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":\"{{staff:marco}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10357,
-            "cachedInputTokens": 9902,
-            "cacheWriteTokens": 452,
-            "outputTokens": 47
+            "inputTokens": 11291,
+            "cachedInputTokens": 10808,
+            "cacheWriteTokens": 480,
+            "outputTokens": 53
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "633bd994c11fb1be69e31a2d6c27f21d9a0427f8c7638ed3768aae98842f62e3",
+        "fingerprint": "394b6bc4a946a7fabf5b280000a91d8cbb8705e82e6d5cd648ca07417ccd2903",
         "response": {
-          "text": "Yes—Marco is free at 2pm on Thursday, November 5. This checks his calendar only; tell me the service if you want me to check whether there’s enough time for it.",
+          "text": "Yes—Marco is free at 2:00 pm on Thursday, November 5.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10458,
-            "cachedInputTokens": 10354,
-            "cacheWriteTokens": 101,
-            "outputTokens": 44
+            "inputTokens": 11398,
+            "cachedInputTokens": 11288,
+            "cacheWriteTokens": 107,
+            "outputTokens": 22
           },
           "model": "gpt-6-luna"
         }

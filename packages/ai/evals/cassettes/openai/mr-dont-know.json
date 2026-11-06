@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "1ef7b390227cdaa955b4ab68309bf504ba3cda8430c52eb8f64bbad1cd077956",
+        "fingerprint": "7d080587680b606bba9a372a76a6f2ec640cb9a7d2dbbebabba65f292387b7e9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_TtxOuIfa7nXjLYWPngDNWLat",
+              "id": "call_qrQtuY8YsRlgmibuARJAKZXs",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 10,
             "outputTokens": 19
           },
@@ -25,12 +25,12 @@
         }
       },
       {
-        "fingerprint": "dc456644cf9a1115e0b4010462b4d61717c69381339ade337a17388b3c87c575",
+        "fingerprint": "e1d23e1962a93d9bf3e8caf7bade375fb7625010c0425e8d6782b987574b6772",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MXTEbGXPW2LzU3qHr6Ur4mPS",
+              "id": "call_28MJnf7YGjVodRdOrPMDo20K",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
@@ -38,18 +38,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9984,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 85,
-            "outputTokens": 43
+            "inputTokens": 10891,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 86,
+            "outputTokens": 44
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "26f84b5e39b8e1a4a1a98579f8cce652021560734c7cbf73d39fa83395a44a66",
+        "fingerprint": "53ad022eaf01ce75e7d16e008f3552a1bf4795126e620072af8fd68c509e6ee1",
         "response": {
-          "text": "I don’t have Sara’s usual service recorded. There are no previous visits or upcoming bookings on her record.",
+          "text": "I don’t know Sara’s usual; there’s no usual-service note or visit history recorded for her.",
           "toolCalls": [],
           "replay": [
             {
@@ -59,10 +59,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10104,
-            "cachedInputTokens": 9981,
-            "cacheWriteTokens": 120,
-            "outputTokens": 26
+            "inputTokens": 11013,
+            "cachedInputTokens": 10888,
+            "cacheWriteTokens": 122,
+            "outputTokens": 25
           },
           "model": "gpt-6-luna"
         }
@@ -70,12 +70,12 @@
     ],
     [
       {
-        "fingerprint": "1ef7b390227cdaa955b4ab68309bf504ba3cda8430c52eb8f64bbad1cd077956",
+        "fingerprint": "7d080587680b606bba9a372a76a6f2ec640cb9a7d2dbbebabba65f292387b7e9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_FTvj8mm2k9LWSbzS2pzBxUlN",
+              "id": "call_3IWgaI5RGBO8zwsjJ34VzETP",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -83,20 +83,21 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 10,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "01aaa0b67805bd77113554acdc2e1c021f1efdae77e3a3eaaa71df69bb0ac5dd",
+        "fingerprint": "0e346f0096818ada830ab81a5c6ff60c1a79533219d96a875273e449bdc12b50",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_CwowaGMC1IgBcdS5easWg1Qv",
+              "id": "call_vQQY90oWJkByfJCre6DMdvpQ",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
@@ -104,18 +105,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9983,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 84,
-            "outputTokens": 42
+            "inputTokens": 10890,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 85,
+            "outputTokens": 43
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "0ef4047ce3db82b27eef121a273139fb38315bb16b5f2503399906ff08174367",
+        "fingerprint": "06df6bf6bc0bacced9cbebfcf71aa9f1d250d754be64aa8157f49fb27e336467",
         "response": {
-          "text": "I don’t have Sara’s usual on record, and there are no earlier visits noted.",
+          "text": "I don’t know Sara’s usual—there’s no usual service or visit history noted.",
           "toolCalls": [],
           "replay": [
             {
@@ -125,9 +126,9 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10101,
-            "cachedInputTokens": 9980,
-            "cacheWriteTokens": 118,
+            "inputTokens": 11010,
+            "cachedInputTokens": 10887,
+            "cacheWriteTokens": 120,
             "outputTokens": 22
           },
           "model": "gpt-6-luna"
@@ -136,12 +137,12 @@
     ],
     [
       {
-        "fingerprint": "1ef7b390227cdaa955b4ab68309bf504ba3cda8430c52eb8f64bbad1cd077956",
+        "fingerprint": "7d080587680b606bba9a372a76a6f2ec640cb9a7d2dbbebabba65f292387b7e9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bfFOAHqPIHsEmimtaH1Z3Dkz",
+              "id": "call_2d4y2LpkGVj1xrrBBdACjgbG",
               "name": "find_clients",
               "arguments": "{\"name\":\"Sara Kim\"}"
             }
@@ -149,20 +150,20 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9899,
-            "cachedInputTokens": 9896,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10802,
             "outputTokens": 19
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "25c77721b2dc76135b5ba250d38cc3a2b2f48308183f8fe68fa5f12f94d441f3",
+        "fingerprint": "b327050c9228da155e015ad141444d246eb37ba81e57dc9c11cb0b55047e9a5b",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_X3GQWVh7pIoOh4bzG7UXL5qP",
+              "id": "call_7nZzjLN513TgS0qaH1up0vcM",
               "name": "find_client_bookings",
               "arguments": "{\"clientId\":\"{{client:sara}}\"}"
             }
@@ -170,18 +171,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9984,
-            "cachedInputTokens": 9896,
-            "cacheWriteTokens": 85,
-            "outputTokens": 43
+            "inputTokens": 10889,
+            "cachedInputTokens": 10802,
+            "cacheWriteTokens": 84,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "2acde120987a644f68fee4f8132def8b86218ec9cadb6c269fe1011ca3b1109b",
+        "fingerprint": "bd79190b9fe3339670bca345c1613e6fc44d9a8b664a5b8452547da7ad0b2e60",
         "response": {
-          "text": "I don’t have Sara’s usual on record. There are no earlier visits or usual-service notes available for Sara K.",
+          "text": "I don’t have Sara’s usual on record. There are no earlier visits or remembered notes available for her.",
           "toolCalls": [],
           "replay": [
             {
@@ -191,10 +192,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10104,
-            "cachedInputTokens": 9981,
-            "cacheWriteTokens": 120,
-            "outputTokens": 28
+            "inputTokens": 11007,
+            "cachedInputTokens": 10886,
+            "cacheWriteTokens": 118,
+            "outputTokens": 26
           },
           "model": "gpt-6-luna"
         }

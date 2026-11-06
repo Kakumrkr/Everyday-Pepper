@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "44028331c8e6d1b500b6b96a3b981e9ebcbca506d5ab53cdd2a3549bab08bb38",
+        "fingerprint": "7c2621b73fe3c482988840d33561c883cb60767cf301e5e3c7da0eb524d390be",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_dtg2Pf46T61h13pACJ1reGB9",
+              "id": "call_x0kF0OKnv44rrxTEXX7jYfd3",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9898,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10804,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 9,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "34909326ddf4407ab22b698c4266ed71128069d2967b667e01794a31b5ed2e2b",
+        "fingerprint": "9f30163ad0935f8897e253f0d362adfcd7cf3762225c5cd9afd7d99ef1ad5f7c",
         "response": {
-          "text": "You have no bookings today, Monday, Nov 2. Your schedule is open from 9 AM to 5 PM. There are also gaps tomorrow through Friday, and two haircut regulars are due back: Sara K. and Sarah P. No items are waiting for your OK, and the waitlist is empty.",
+          "text": "You have no bookings today. Your day is open from 9:00 AM to 5:00 PM. There are seven suggestions: open schedule gaps today through Friday, plus two clients due for a haircut rebooking—Sara K. and Sarah P. No emails are waiting for approval, and the waitlist is empty.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10899,
-            "cachedInputTokens": 9895,
-            "cacheWriteTokens": 1001,
-            "outputTokens": 68
+            "inputTokens": 11849,
+            "cachedInputTokens": 10801,
+            "cacheWriteTokens": 1045,
+            "outputTokens": 70
           },
           "model": "gpt-6-luna"
         }

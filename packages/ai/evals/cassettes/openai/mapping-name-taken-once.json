@@ -23,6 +23,52 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_4syfkc1Dp5XrtJu4mzGoJNSo",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":\"name\"}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 813,
+            "cachedInputTokens": 0,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "e846e31f9599a60adadd84a4d671abaa626a1c4ab7c671198d8f821b5aead003",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_j3aQjruQtEl7zDFkX31RcUjT",
+              "name": "suggest_mapping",
+              "arguments": "{\"columns\":[{\"column\":\"Guest\",\"field\":null}]}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 813,
+            "cachedInputTokens": 0,
+            "outputTokens": 27
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "3dd6462798d2ff89c67b02e88d01fc9fa53657c4b26731c96c27c70a670a78d2",
+        "fingerprint": "2215a228f203598af872f48ecc38adc84883bb5b22bfbfa4430a11757c14feed",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_3gQy4NtPEXptaKhgkUKPzRmQ",
+              "id": "call_RVV4nHIQLTtaEwVsQ3uQzr1I",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9895,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10801,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 6,
             "outputTokens": 18
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "891ee1d9a794372359fe4d0feb9c823fb77f0f8135614843899ef7f48ef7bd6b",
+        "fingerprint": "adaad9ab2e59ad71ef17624fffb4d1e79a639a8fa763b9850d7f2f6b97affeec",
         "response": {
-          "text": "Morning, Lena. There are no bookings today, with two open schedule gaps: Jess and Marco each have 9:00–5:00 available. The feed also flags two regulars due to rebook: Sara K. and Sarah P. No items are waiting for your OK, and the waitlist is empty.",
+          "text": "Juniper Hair Studio has 0 bookings today, with 2 staff openings: Jess and Marco are each open 9am–5pm. There are 2 regulars due for a haircut with Jess: Sara K. and Sarah P. No one is on the waitlist, and there are no items waiting for your OK.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11568,
-            "cachedInputTokens": 9892,
-            "cacheWriteTokens": 1673,
-            "outputTokens": 69
+            "inputTokens": 12594,
+            "cachedInputTokens": 10798,
+            "cacheWriteTokens": 1793,
+            "outputTokens": 71
           },
           "model": "gpt-6-luna"
         }

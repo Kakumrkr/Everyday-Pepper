@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
+        "fingerprint": "c09e3ad1d430641365bf492b8f24330231c7c6f5cce212f5e42b07860f11da2f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_leAfZ7NlwkOB2fshvOh18gXu",
+              "id": "call_FaUPOCEMgomDolcBkj5nkLT7",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 14,
             "outputTokens": 16
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "1c8f62b25b2525dab2598fe47f331cc2ea0298fd4bf97bd2acf0b6c096326734",
+        "fingerprint": "76be9c110f64f648208cbd79c3e6f99797a491996c80d46978e84e43468292ad",
         "response": {
-          "text": "Colour takes 90 minutes, and the studio’s note says: “Needs a patch test 48 hours before”. Jess offers colour; Marco doesn’t.",
+          "text": "The Colour service takes 90 minutes, and a patch test is needed 48 hours beforehand. Jess offers colour; Marco doesn’t.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10470,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 567,
-            "outputTokens": 35
+            "inputTokens": 11387,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 578,
+            "outputTokens": 31
           },
           "model": "gpt-6-luna"
         }
@@ -48,12 +48,12 @@
     ],
     [
       {
-        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
+        "fingerprint": "c09e3ad1d430641365bf492b8f24330231c7c6f5cce212f5e42b07860f11da2f",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_5CpLqrXuTLgqM2wyPLbbezIx",
+              "id": "call_732ff0dfc3c347a5bcd5e6dd542060ec",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
@@ -61,17 +61,18 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9900,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 14,
             "outputTokens": 16
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "638d3a31e982dc634aa54303378545cb553f933b710a09ef1ac33361eefb9ba9",
+        "fingerprint": "46d545f1d14b8ea7798341bfd16ff5a6e3f9927e05ffa71c069f2dc9474bc465",
         "response": {
-          "text": "Colour takes 90 minutes, and the studio’s note says: “Needs a patch test 48 hours before”. Jess offers colour; Marco doesn’t.",
+          "text": "Colour takes 90 minutes, and the business note says it needs a patch test 48 hours beforehand. Jess offers colour; Marco doesn’t.",
           "toolCalls": [],
           "replay": [
             {
@@ -81,54 +82,54 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10458,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 555,
-            "outputTokens": 35
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "c9cd9881f5d6a64bc3d5206b6a19cb2159c4f45ba4d78e860e1783a55b464f60",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_KgK8SGqXUNGxvSIOGtO879rJ",
-              "name": "list_services_and_staff",
-              "arguments": "{}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9900,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "dfd2f48e08a62ee19c4c2227a31b90d23ec30169f395acd9ce340049272f787d",
-        "response": {
-          "text": "Yes—Colour takes 90 minutes, Jess is the only one who offers it, and the service requires a patch test 48 hours beforehand.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 10465,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 562,
+            "inputTokens": 11405,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 596,
             "outputTokens": 33
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "c09e3ad1d430641365bf492b8f24330231c7c6f5cce212f5e42b07860f11da2f",
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_q0WKUI4wbS8hJIMUhBRgnjaD",
+              "name": "list_services_and_staff",
+              "arguments": "{}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 10806,
+            "outputTokens": 16
+          },
+          "model": "gpt-6-luna"
+        }
+      },
+      {
+        "fingerprint": "bee125dd6dadbd70d3c0e9afa7c6d1abd135cb42f83feecdc631025bed5178d8",
+        "response": {
+          "text": "Yes. Colour takes 90 minutes, Jess is the only staff member listed who offers it, and the service note says: “Needs a patch test 48 hours before”.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 11406,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 597,
+            "outputTokens": 39
           },
           "model": "gpt-6-luna"
         }

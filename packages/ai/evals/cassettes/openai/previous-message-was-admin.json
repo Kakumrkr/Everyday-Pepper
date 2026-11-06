@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "70a2e04bed8c162625e7622f372b115da6587a504dcb04ad2383fdfac30c610b",
+        "fingerprint": "1f950cf5c7c01c7241085c6e93addb651bb96e345f1aa91b2267bfb23aa704e6",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_INrLpmlwvkUO9ECD8Z6UCymH",
+              "id": "call_yl5z58BX7oLSP2ohFMQpc8hu",
               "name": "get_day",
               "arguments": "{\"date\":\"2026-11-05\",\"staffMemberId\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10754,
-            "cachedInputTokens": 10741,
+            "inputTokens": 10805,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 10,
             "outputTokens": 29
           },
@@ -25,9 +25,9 @@
         }
       },
       {
-        "fingerprint": "51c8c211b061ec2ffdb526bc2c813e368922fbb4694b635a5d9b87314ee59cd4",
+        "fingerprint": "7aa36cdbc3e77315bc1e6622b1516590cd85457ee744d9f833bbb3ebc64952bb",
         "response": {
-          "text": "Thursday, November 5 is clear—there are no bookings or blocked times.",
+          "text": "Thursday, November 5 is clear: no bookings or blocked time.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,25 +37,25 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10837,
-            "cachedInputTokens": 10751,
+            "inputTokens": 10888,
+            "cachedInputTokens": 10802,
             "cacheWriteTokens": 83,
-            "outputTokens": 20
+            "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "5437bf4851c110605b24d58b96f9fcd6d7335efa1a8c8a2a33dec40688ef8a02",
+        "fingerprint": "0c7a7ea2f512d02e0c144f068bfa78b13a25b2c6390a3c076972a654cab46a67",
         "response": {
-          "text": "Please confirm in your own words that you want me to cancel Ana’s booking. After that, I’ll look up Ana and identify the booking.",
+          "text": "Please confirm in your own words that you want me to delete Ana’s booking.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_04b045d40ba6d25f016aee3c366ea487d19c201b1e97df403d",
+              "id": "rs_02296c2f8147e51b016aee41e2a62c87d1bc5667cd82e3df59",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq7jw3vuckGcetHVzlawhUo05YqQnB1X_UhK7vRB_S4iL1ZxdmFQEzp7wrWiz32fbTLYMcdfI-zAr-r-6-W7Txq-gLTEiUyd9NZn1-QK_fHsLgeSJdvTJupS_VkBacNIlSuRZWE-f4e-7qeopuJlVZ2RuoXy-_wCE_pXYjeE-pXaLo1fzsApn9eGulT4cIu_lDshEvjLjhZxnlM9KTEkUqwYHe0JLMK2KjaHYcFdiEJkJLpwyiMBGNH4Ms7drs1SRSpayyMIQGNs8nUumzgPIgi9Yp83qDmwyk4GJ4hGqcdNdiuQjqsLhnHrBh7d7Wik6ig0a1B-8wlkuoXR4wBJkknsiVzGsDwLF9fLxMeEFEbXma1MAlhVF-EY94FJ6P94K8vOvVuAwcFFCfqeofRg4zKjfOMc1xwxaNPvJRhiBQCtTmMvFhoS1pBFKFqhIpoCfNGvrFVFJ_WbPM96OuVzZaubMn33NORMw0EkOZkLx3bv2k9fCcxvYZo4bqnlYMZJ4ue4jkTyZU3UVtf7aH-RgtfIIE2o2PylbpK7LdPKfQGSqghcd9CxGe2xRgm6S_gzrhQIWVb7EuAA9FzpdD-0285Wb92xkIrMS4ywd9oKjspS_-mlj99EjctlSIqB0MdVwisP_lSAs4w6GQoZCWoR71tK-nZ8IpeJqNSyI7AoZRI3eLe5nrdu9Xc3vGAWYYQ2JoJ8IqHw9iH_Sz6lLW86zblf5YPqreACceOb1HOQ-HlmpFdHZd-6SxcAV7sDuCETlVjEKHhWhdV0C65xlEngY5zIEDliPvnD6YE2m3newctUBZfu6mB6tAvpDW6ivx8esavojtwkMk35aM3VTa00aU3ALdmCX6Htc_OQCODEWgrrx6BplP-UVfBdB9WHUgWY2nT9Wf1clOMpoMBeVzRlXn_FGwuqi1bax92uhVGzDImvRJu04ssQrx1pZUn0WdG2qRJWxLpYNEtv4tyo6d3nuJlbnNH4fCEg2MznctGDbHTUhJL9KvjZuiQX890wgOuHeI2O4Cqcdr8izN0HtPV_IGgGgbm0C9iYMsPc1ej6mCp6_BtD3-qataMeQWLH-Z6IJWecmR4WBriFdObGaGr8WWchSmAZhS3fGyh96vBkVhSDOna_deGgvQ7JpOIrvoJGX6E2SJShKnguZgIlASuJ3nZ36GLHJ7L3CUPHUokuYPXaNcnA8VHFR3vTK-eGJ6n5GpXpGJcGZAXelusbTfRKbYXoFyIjMPWjI1MX_aAixXUIjmDIQSj4g-dZuPslrwZZKxoFNNrno9TpKGsKB3kIOwqsNZ05LHfPcMt26-fT71sCiQXBKP0rU8JlRAh88QnBasLaaH_EVSuYUbR7XDWR050ASWCbSsFR66ypAfwXTsr82Lt-Ut41AIVh64JMRTQP1S7kDZFGSqvZBrHR3vc0kBBfHrWhs0lXbgHajQpT9969W2shbp1Us7-gj7qTuD2lOOk7rfsvEXTL4a2R15HZUiL6txNIXZUjjDRqh-K6UxuYNuw-BXK9AgTL6Nj3fkm0LoQfGdmrw_cKgCrWQ6KoOkU1avHhHPT7lc3PN7Jpydr2yLIBDdmgFN8fpPM66-uMiY9PpPaEPG-ZlAyGGTcxqd4BJZUG8DEjseZ_ywKbGH2sQBaymH-r4SpwGdjB8rdS4p6D1Qza8R27rhYyStPnI04G48YZfQdfUL1VhEWm6Ak0cLoCtT7vkWozsCAM8WsDQKPiKD7MHBpurLIcQa9-BkWNqEM8t-7AvEy3zvSdAA4y0VltdAoZiTCFhdO5NeP_z4CFg0s8x1oHlrF9o7qiFbLzbGTykI1YsE-54wB9xUlGnkWT97Ejf0CZOI6b_pa2ua7wZ_vw_gNcmQEWKLxcGcQU4VRk6KKrm6tLZySXPZDhZy0Dl257zyGsLlKueFdvdc7v2CVqFczsYzi0Pbh1Z6rvh1eHrLou4t5yCaS9yjLmLA6TkxQtbK5hnlH4V0mzEIC42B9sNYBQr0Wf_wf67GttSyeOrXcjJn8WjgzeyavTdpp4gMxTJFEgXVI2UOaDci7GN65_492NVMslHb3_rmLkGdjugCQ2O4sC3sN-ELG8NRQg-ap2z4_hmBbFtYo2mHHxj2MFTnL_sdcYfTK2RqzUcCv6Wz_h90o5um4fA6jwENfo-QKzNdt8F2ZhLpTNnTdocY46MY6lUjSo0H_DltK5Z_BlOPyG8GhuFICFL6w0Lk_qujeS4JFLiTFsjQLXOjrX05_3piveNYHsUc6wydmIoFgOEk9WHzVWBV3NKdqcxthphJ4V0w0S4MZQ3vUnavIjsgBFM4lbSIRH5U6xq-oiUjRQ==",
+              "encrypted_content": "gAAAAABq7kHjaovUSeer56W6E7dHjwrTMBSdKmhXqeJKaiARxWSYO7vyzE0G8ClkcziJAjRFXe5iYOD744Ae26Oah5mnP1oQl7UxWY9KLPlYCg3ncU0Xcptlee06VkVYisgaZtMnfuKNwZRq-rkdGUnOEtfyOaK5otqZ4SMI_ccsXy1ET_Rk7yBmfX_3rnItlkUjF-q--Jr0bz4gKcUNPpem04YGQgmqOIY4CSDEq8l85Wmj3iv21-4WQDWyi6klH-JfdPPVF3rTilmaD0QeUjlyM5aAb8M24vqAc_2YHXeDK9T8WNNTyyT5YOCJhVoJ6yQTDJYDwjN0KsyxwHhKJYL2elXxgPlnXCMv65esjlFJ0i4OugqXpiwoQpDLUqa0OV4I9I2LDAmUrzA5I3lqJh-Fvyhm6Hoj2pkydiEKj5RuTzZHhTYP8OGAyYZmnBMj0yei1RXCJGS4SBN1w0-kMHmOh2J1SpO79wA9T55dXkHKim32jtIHe-yxpHECJGAZSmyRtMrUJGCLu5vP_tvDQ4IIsXCFwovTvbwGmuj0C1bzpuw4QWtbmPG195Yhza6cGoYeKjtYJXw7doqxVn9PFgsyVypD8XNUzRQk2CfaKUZMIVBeYnRj4v-DYRn47ixcNWQWvJGTIPRnYhBFN3PrADsU1vd4OQjhOZcgwN_GeuQNw3BDgGKuswtnep0qqZAFWUPrOLhQZA6zThTrigxCV02fpl0DE49Kkdj-zMKSU9FONZEAaa0hjQ8xR4lWnbPzzdubn34stwFh9dv2E-_CyVQM074s2rL3FL727sfxkS1N8stFHoefYB-G3kvXoJlSE8yb8S7iz5Jwl007nyZdhmopO6Q8AL1Rgdc4WM5jHg_VRIVZS0QDd0kBCi2RexYFUgQwuMsRMtpREnIMYlVsQKWeirKSS6lELZyGAbC7uGzh02XbzbqTncPZjpPcL23ChL-lDEWrAnlvhK7JyOg7-Un-2thUmXAZ5uHQLAlnIKiKq5_-cgBD84CHGasFbi_s0-M06irr2tfjxaNLYJgaG8HQWyJZ8w4hHpKa0L7DP8WWOqYvn0rZzW2mWc4xF33GVPM9-SVA1uL6-TJRTV2-iz-KnSqnuvyoShctfzsWRyOWk-yTM4MzanQeCOo_8O-CNC6FVw5GgkNr9jfXLkp1hc8wQ4K0bBh5i_FCATRemLKY1Zg8tHXMhhCRXOavWh2iFBPQ9_OyIrPg6hVfxMI5rmoZZh17Eg4pY4JTjSUd-LVNhPIF0nPVLEBU7yBLVMlekZli_K3rnYrvCw72cTq9uDdaQ2dvGmYhtn5n4qUTZx5gG8kgh01yKKgT2otQhd4UMu4HgQ7P1ninIzF_hvcC1JcESbV_NXmADWY6wLms__Vl9FqYC0AHIVcdHabxt-1jAbRdZWZWDn0O3MPfgTKlmLAsY2foyUKgQXLDwDDoCmONZXj85rMFtidz_MPqa4cqA0F4oZnYtvNE57fTlKidSOB0t4eJblOtbFBFT0cBsScrvy-EbXpFlgREtpBWREuvEtYRV2kkjsQFFN1NFDJJYMeK3inyUfP1qwealFj0VgIaqRs86SzrOcz_0qdEOFkQORynpHaxDxOIRNaLrg7SQBMnHJOzDW2D8T5D0ZCB8Ko0S1_VR8IlXeGvlRmMsGaDb-vgZH8C6zwHQ5nXpmPXCx8SXYLdrXVCmg==",
               "summary": []
             },
             {
@@ -65,10 +65,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10882,
-            "cachedInputTokens": 10834,
-            "cacheWriteTokens": 45,
-            "outputTokens": 101
+            "inputTokens": 10931,
+            "cachedInputTokens": 10885,
+            "cacheWriteTokens": 43,
+            "outputTokens": 42
           },
           "model": "gpt-6-luna"
         }

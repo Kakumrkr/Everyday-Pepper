@@ -3,31 +3,39 @@
   "trials": [
     [
       {
-        "fingerprint": "d3a1571eb296f399d46da6e0ace2efaeda9c4187da8675a9889db90827b9b336",
+        "fingerprint": "8c388609b2cf79df4b73635f97f2b9be7580713c4b5f029df8b173e13ba08ba9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_MXXebYWlncjuEmIWf4GYWmjx",
+              "id": "call_b4botsgJ1s1iLtCaIHLYu3ho",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_0379a4ca447f37c3016aee41f2259087d19dc2077a2b2f599d",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kHz6yaLnqOxlu9PLZdqnpsUGVyGroa-ADBAiy4_VjT91_jNSWSO5f9NVjBzuwEo2i7ngsw09gqXY0TzwE9pvVTMsJWroIVP3GRnctI_cPmjjXiUChH83J7M0fGrX6zMloJRLZzcDFLFbokHMD8RTsumT7H1Zy_ZvkNd3LOcPtxRsET4IJ8oYrEI0kT_8dMu5CbtGJPOx_x1Oz28SxCXRHq5qdQ1MzMsM6Do4b-Dkf-0IToWWUqYhOMKA1no6hZFpsAoz6CQL5beMPDXAHARn__PxjX8tj1WnCts-Hid-84FxYtbQkpz9guS302m5DF4PF7i_Z_AF_TeODjWiFXhl27MU8o1eM9CWFmIF1ltCTt0Klt5N1-bSTiUR-2My851-kUOkvse4AcJEGQR30OnAnuIOQq6orci_chC6dwBXL76O7kKHYTUzGxD2m-1DIKGwi_jWqASiH8CYH5sizHw1IRhb4ZlOQVveihsvUpu_dqJ2KxdewoWDrlWnf_ENIegy0VeQ6LHcp2r123J-puEUOmr5SMwaBLZX5WeJq8nLPrnYOXpM1aLGVP1P9wJEhFpd4ySf_d0TOXwH5_4XzGfAMktQQWdqSj_PvrE9wt9kLg2L85gYGXP8dL2nJG21oE6q0eFOlbWkeDsfRQU_s387GA1E7YXhy_-_17ukxTzljrIwya3_Bi_Bs4mPB_ZG7NU_Lgt3UGFxKOdZOhgKDheQf3DbZkmZdfAMOlx5lD35zkCg2lV2ZZf0lGxlLU8Zp_yXFCAgkLB4WyVCGsI75g72HDdQcp2tA6Rmm1_wPxa-gm1DwBbtci-na69uJLhHDrF1KhEiD7mDMbaHq8S47ifU4BCQKeZLGC3Grt7gQNFfkUtwaD9WA4gvj-HrYA8VKVbWFc4hjz4l72LV3_faCBVT92RqGkTqmi4EuLdaiEZBsQYbVvzCEDrcy035FbmPUasPeOB9swzxYbYek1RbXepe98IOap-p_lUqKUn_ZpVgQeiSwhUA9YhFmF-AIy0yfeNjgwqucyNPmczqy9ram07hUrxiOCOFy9Avz8lNroZ_qogRYmYZi6AUGBhbrQp_wz_q3vOnZFHD8bon6lxV7K1pUF2X5tip27fyV3qvuw_r1d2w4CONeoZzWsRPi0Oe6mn4XQtpH-eHOxgqfXz0js3igjezPE03gyMzCDLBAI0YkpxLEqbq_1_iTwJD9I9SBTfbDDS9z4ZMSpOk7_Y52oOiTnzkL4dT6dB69f4Lyn-YwmfUa334aQ6MHv3NH-SpEFovkRl4XrHvn32lBE8F-5XqabVrlgU-3XIKs3MqA8Eqfg3iFmFPobzJJ7ctcM3cajLjQIjVs8SyFYmp2brU5TKBVIMoJCid7XE6DV9IKWOwbImn1XjQ6ZZ3laU_62gHT6rzPkJ_3Ql6XJ0gGuZWkt96hwO416R_D6ZBp1ACtdLDgjYrnfXjHvbW6DgJHV5G1VLb_1QNBzS4nesYootG5TdMJEAQGUcGkZ89AFCbkMZSyHmwT9EFb3BR--5Oi-v9CtFZmsq36pEYw7pU6O4egJ-fd5ebdxNshed1MoJ789AbwP-aHSL4dwr_5MAW1d-i5TQsuBrw34h29qKdjA_Pnu48RDH04O-RIF4hAeub8jWHkKLOW3L_CYRG3Xm1nuCxC1GRGSCu1h0AVSZUa_K5k5nTcS83dhYVfTMdna8HIM8hdnAXmlA6cpYJZSkPO1oXt9TBFonbYD67Qa3YbousSPiWfWNZerGp4Gqpys8rJgyAZzQVlIpdb08sNwWe-oEbl7aahXc75H5_MGjvAwmZA0ZYy-jHrT43F0T49w7ddm7IaFMzkoGvXo0TVCpX1M6jyEB-Wb3dnyfcyo3FOgQV00ng8HdHADwJ058qjDY9cYcTGh_VVnHPuHFxls3Peubx48ATo_BnwDOXiT1UnbGNYPinfPhlWqLZwVCnqzpPRjQE0MZ-CUybIRF0sffyXL0JAc6kKHqgiU9VEcwvi1CxnwatYZVUrhprU__ZFjPuaM-QV5GNK0MbWur3fQHTdbeCGve3dT3BUAmYTaqGDiljNPcWIrb9GDXN2BhX0lA-1DZGSuvqHFAskWzD9lKAuM45DiZyoilBGUb1w-h6DUwtdcALrHTleEWDL5QdgkgrrcsgRn5GWoImkpnPVeDgM-e80D_GbR9TXW7Y7yT5hI8O8vBwdoWQeQLkRFW6aiXHLvb3m3w5LFiS_Z9iPtWfeTqBxbc5i8l7yvQmRDkmMuJu4WnI5Jmkch8AJ9oM8wYvmCthYQmLGQFNfYq_o2MS0aT-813FUHkKJz28H20rQgHA45WGRRxxFazdQxuVA1WIcDFEuibDbMXwj_iCu9-ZWCjVSW8xsVxP7YU1Xk4oW4L7pTV3iurcSZdLPaEy7vV5xb2ev8lST_uPLlafyorpQAEKZBkWfRrUl75wPXpx2ecKlXEV28T_-pfN4-eH0WkBWtIRZUpxOXlLSD2sIBYJtXLUKiYb5Moof-e-30SH3K3w83RqkCpQQ4OsbpNBRIZOewUEv6QSGMyAs-LLQXmyB007-ESLFD5H2cRdctH3SnDOfU8Rpljf4oqOPo7PdvNMWIf51Kh2v8Gw_gByfrhdFl8lAr90WMBj-Lhb8mvIEGsk9kX4_kEENZL431MV4y_O497Va17BsUTxCfO3Hv29kQ9oyaKKzL7",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10763,
-            "cachedInputTokens": 10741,
+            "inputTokens": 10814,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 19,
-            "outputTokens": 18
+            "outputTokens": 102
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "291653c75b07948121c5a49dcb7adb6a8ee7f2db03e846c4cdec7ea71b9ef429",
+        "fingerprint": "ddd53b1696913fbb879b2b5ebc00512d375a069b2da86bf77f27fb7f266f50f1",
         "response": {
-          "text": "I found Maria L. Which of Jess’s blocked times would you like me to remove? I can’t unblock all of them at once; I can look up a day’s schedule and remove a specific block.",
+          "text": "I found Maria L. For Jess’s blocked time, which day should I check? I can then identify the block to remove.",
           "toolCalls": [],
           "replay": [
             {
@@ -37,10 +45,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10850,
-            "cachedInputTokens": 10760,
-            "cacheWriteTokens": 87,
-            "outputTokens": 46
+            "inputTokens": 10985,
+            "cachedInputTokens": 10811,
+            "cacheWriteTokens": 171,
+            "outputTokens": 30
           },
           "model": "gpt-6-luna"
         }
@@ -48,74 +56,96 @@
     ],
     [
       {
-        "fingerprint": "7688c1cc5687ae54060e185ac76d7009b2dcf9eb2c3b0daf43b13f4647eabf4a",
+        "fingerprint": "8c388609b2cf79df4b73635f97f2b9be7580713c4b5f029df8b173e13ba08ba9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_80pJ2V8THNpfD9xO3XtAnYHT",
+              "id": "call_nvafEWC1YC2POpnqNNpZftDR",
               "name": "find_clients",
               "arguments": "{\"name\":\"Maria\"}"
             }
           ],
-          "replay": [],
+          "replay": [
+            {
+              "id": "rs_08d199c419c6c849016aee48f0d58c87d19ea847eebeb7f9ef",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kjyN-7iruLX0IRMtxfmJ8qSr14H2yED1OjdD5d4TP6oZfGEPEEGC8TZlLlO_S5oeXR8iJfvtqckwoZWmzutS97FyKe1ocf0hK3NU492BQxpYYGo7_brocYIQKbRHCOkXQ3mBxX-v9mRTSMO2mXhlDRbHfjE3Z0Q7ZLHLLKiyKSBDj26-Q4HUsy5HiusTrAMTOXYB0Plv_cQ0K2Q64V0GD1PmU6B3_4TyMkIjPukh6kIH9NOhVru_tG2WhgTrUKGyuzGRJHhpSzRmSFu1v0ZcEAPPLFxc7SLzyg0Pmtp4GGlZVpLNKIkyMu2CgR7xQr5CekqAZYekFZFSlhLZPPCQZ24icKPn0G3li1GGGanlGNnf2D_UKnmVU18tZFVG91gQsEnhDav31uN3wvWYwA9VRfcosRKBca-xQIskSG6KCqmSSX_DP0L7z5dJUrykxTWhyzJARN1uTW3d2E3HYZZtl-ULwW_cZIOnrNyuypqDX5eCRVh8gV_Icx_ZhYpNfzsN7Zj0E8d-390x9M7Yb9xDspccBNgVI3erAuSh39OOjzn2NQWUSJa7MH4FlVuujyYmdbL6tdsFNSPSZXaTxiVLk6QADzZm0A-gpPovf4YeeZak8n_K4oXUw1bsdlsOSCV_aylark0ppjQHozhr-JH8O6D61jZIS-6AY9vKjtdhTJx1Wmu4aravEWpjHhv6UxI13J0H0OiZ_zoBiMfqx5DNNyk3LEzdeqaoKVZrOwBX_rclFYvIwIPwHjGg3ZVpIFiGjjOgQr_d3ahjWyQRcWtoG_DmOBR8TGuwmYwzxtTMnZc66ZW_U8VuvrGN2v5ZEbPR6_DdmPwmM0PnoeUOrWaCs1WxbKzfMCJFMGVsPmaEfaEKs_MhAhXfV83YzAWDCShD8dO4_nq2lPfbMeqIk1ftEtwGaiv5_t5npR_FpCJVVeHgPMXBJLJa20LEdIsqcNcOyVc4HTvqQCMxUjwdbX5Z1qtBPNhobKiAlP82gkbjV1Yl684CQyOvo-OHRc7ctrlgNet9t8TXwJJsYVgcd01qFdDAXtqguSj2q7y_jYtdZmIOxWkYrnoX6AXIXDtHCWd_R6wXS77LHdVUQyTDPs5I_pT757imFVDsZi9k39qRa3liWAginZGrPksk4_WmQqTHIU1aNeFF6nJIbgzoAl88BL1JEsT7xHOTSqxCbGl7_ls9A0C_Wh5d75iskZMKuwRO2GUtiuV48ZiHiBDlCI5JV6UxyB88WabCW_1OnX5xilwICTUwxhOIyPXozhUQa984rYyH1cePelJaNbwzq5j65OL_pJKozHHTIygZNLFWUuRhyT0kvh1EmA_ko1kFMAKBQY6vVk0hlyUN5ohUWH4IHzT-EtUATDJbB1LU6ZGhuABrusn7azsRJc3ihT0BHKXhmgC5ZqBNRw0HV58jQxniMdfYQ4bZkyPaW110J4gHLn3XdcCekUG30nmJ4NXRqQyVo2Y8RBvskTILSyMIamIkiiSgdFb8Zms4jiYWOsmikjxe2OtFelgWdFrnY7ctSPO5APw-TIJg0OiGLaeM4oR90YVTNJmOFEer12nkor3Qv4BCb8uylxKDmxjNLBHAMgZkQDFhNvLAAyKsTL1p7G0h0dsHmGfBQNpG3dmbFiFNI1vW8pMDV1148ms0Q6nhkX7GOP5zDCGCXvn-p9kpPBSVEWm-90z779znUG-vkwoqtkUT1W-_X9wo8yaKWq7ofO3v085mKqlf5Gm_DT2vsp2ATKMyXKYdz7o0Ib7UU6mkecrgGJ58lw11ZGe06zEVZiwPLRuP5IpuVtBq3WK8xRcZToKI3Eb9ViqJgbxC5O82Hidg4SPLcn-Rjn46vdrlABkc0_-2XlNvARx1J-bxaVVKj6M8yHI3oC00GBPOtEDvZLAFt7kcuFhXxlMYt58twGd2CvF2pFoZTmjVq5LBqtIuvL0Vha8udnYfV9IB2ujk74IGZL3U5XOe0ajb4w1QulSSwWGra8zg_bRllJhApm2pcY5X1dpzW5fPkHP1VfLJ1jOeIWmZOmpfCLrSQhyR5S9LSuNV9vPWDJL4g5WgVCYj-qGbM2tBpMaQeNKJMvwA59ImsWPsAv4ogHgSWBqedPOQZ4B_qB2R8KDVpdVIib7bWz86rsvDiQrc_-I2SBOOnts8gS0zb4xNWKlhfMzcqeUkSGRp-ElvbTjjxuc23s8H5wt8fxNOhpcE8qiNyFgadJiCMGVBhHCkxlNglsIcH2Yc1vo7hmDmEgcN4-nhXIUqPoJJ0jWdq3Vf9JzXqCG2cxm61c-3ZCJLN038nkIoQHzhmCemdJc1gMRucLICDPLlfkxj02ngo3ulKv6CLFGc0q7Dx9fy5N6NpcBD4AO6KmQ9aF5un2-AaA3CJV3LfvIWleNehdGwA_SbOr4YbkI7K5-f1hzcr7dHv4-WtOhRSiOvrU8QZatFwBMl4YUDNq05z9uagafLS9wucjTsEpXt0BZBEfPAxprp-OmQZfdfWopfTuzz6-wW1Aaf9lErvHKBnhxTnyBxl1JD9mlgw-S_E3nntBmhDkanRKKTu0nsRxCg9-L4wpiAptG2VW0rF__YzhVgCS6FDqxnTp2RTkh9kw4_3-8JvfsG6D9oJsSnOmHvgPgH_d9reFSQ3sgyu9WgoqIKVmTZvr9lTnJdw-mPtrk1lvELbfiF62vn9hdtusQr_WCSc0HK9zj7ev2z-JqECJYiUUi-DbkBD4xped7nlxX5CcSAQT9fje6BeaNe2KZg2pRg_e_KkyTNP2PgEZb5fuJnaO22zCQ6KflNM82J4-7W_k=",
+              "summary": []
+            }
+          ],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9908,
-            "cachedInputTokens": 9905,
-            "outputTokens": 18
+            "inputTokens": 10814,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 19,
+            "outputTokens": 110
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "01c9172811e5ec8c7ad3bf110e0cbd41cdf1944b798a29d3a22bdd1ef20a41c3",
+        "fingerprint": "732dce30142683a4f3d81717addee61a7211fb8add6f725aa66973a2a52fc4b7",
+        "response": {
+          "text": "I found Maria L. For Jess’s blocked time, which date or dates should I check? I can remove a block once we identify it on the calendar.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10989,
+            "cachedInputTokens": 10811,
+            "cacheWriteTokens": 175,
+            "outputTokens": 36
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "8c388609b2cf79df4b73635f97f2b9be7580713c4b5f029df8b173e13ba08ba9",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_BLfMzhaXudxyWNkAYK7FXUsK",
+              "id": "call_cvEo6rGQuCbm0IMQXxq3zwf6",
+              "name": "find_clients",
+              "arguments": "{\"name\":\"Maria\"}"
+            },
+            {
+              "id": "call_E6cuftXnmnqzZhQt9GBrshXw",
               "name": "list_services_and_staff",
               "arguments": "{}"
             }
           ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9989,
-            "cachedInputTokens": 9905,
-            "cacheWriteTokens": 81,
-            "outputTokens": 16
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "298e7561e8a7466b22c784acca0fd885db2107c0edb76e575881285d5e4ac99d",
-        "response": {
-          "text": "",
-          "toolCalls": [
+          "replay": [
             {
-              "id": "call_XlZ7Ca9GiRODlFxvjvS6z5jj",
-              "name": "get_day",
-              "arguments": "{\"date\":\"2026-11-02\",\"staffMemberId\":\"{{staff:jess}}\"}"
+              "id": "rs_0de1b66ee4a9ce22016aee48f8582487d18f12fe943cdf338a",
+              "type": "reasoning",
+              "content": [],
+              "encrypted_content": "gAAAAABq7kj72YYO_hzl0Fw5PsuVas5pAoVs08B2V40OQa2V5QB3BbTzC4BkWDp5dXBIyahwMhy09Hvza_Fp_-uWAoLQ7VX6gnZI7qhcAVsmAx_DxRPwaIkbWV0NQ4m7Vd8PhOkY-zh5OOw5_xi_kDl1bFGbbXx1Z-2ZMGMVi98ytCMTa0CbnXE_awdmWn03YRQ2-kkaruv1KMSSp1tYP5wI5HSwTv3RcBC4nNx3R287CWt1eh9pjgVSVBpRES17L2JwMYxFJbsSMYNQgRt8hanT0BaB0fR9ZLnrJR9aSmE_Eq6SU8hB-3vvBSUajUStNDmoYPThxnQswnDNyJuCSa0LwrwHMKFB6hAVE59aed8bl3SDtxTem_qcxRMzKShzVs-9ovNp_ZO9-lF9heDuFCGnjY8bJ3frcWagYQsG4x01owkpNd8wxR75K2aAiwukbVqt2Gr3BZH19bZqKKIpUPpaTaPOns74qDevffihovbjlrCU6W2alV28tfF5-Ig35uHdGebsFofNjNdeB7AUSdaL1wzMuvMDs_J6k-nyr-7ti-TzuRuYVOpsklLHNkp6MeIVcxqntRRQgxGKiu8gkhKObZTnJ3VUNWY1NpokZk0XfancvQlIW7t-LI6jpdGz5-xpHFmnFKJ1jIV1RMRVrHRMsPJq7hE9a6WIOM2bUQx2BnMYaYLiepm8wRI96eyisbMUI9WNjVAOG81odk98_uhVNLTVkAm023rHZ51arWG2vMWtTL-zESqEs1odIraZSIX9Rw4YvKN_vbykx9aRi1kNjuIA8Z8iG60XOfpWzM4IZ6i0QBQXK-_v4vMzlVvGAMfttRVDMHa0C8xuQRCfLC5DqD5iNVbP9Iy-x0wNGGHQK6044rZmGz2hmz0i5UDPMll3HkSh61vSSZ1D_gJ4-LBKfYA_j2pRhUoUsW9vrPn3foJy8-epE0G-g9bTELC-XMrC632BO7vxXrBaujRLc6GGIyyQJvpo81gCAvHIZ4O000pSgWzOWnY5ps9f_zVeexyF2jDksvmuM3KcVCgK7kunjIaT4NpN4_2mmQTFWXTq7bqBAfgUEVbCFTd6L_PvpoRqqhghhHBg4Ks6MvoTwpDI091wpibs3_Q4J9D52KqKkvVH7P7x_pOyVhJxcQGbFJxTtaPAD5bfoxcRHxnS0imOtJ2C5iv3LATHaVjrHkQbnjr2z0S2wDLdK8TPsobUjVZf-4XhYnMuhRnQdkedB4GFA6GQUZMoFIbLmJeg-vD9FowsxSxqXkwMN4Tkm1fhq2TJgFVHSXADraeJxHRZhezzCPj1U2dpb8BMaznq57k60JWm_Rhe3J_SLagGgMBqJZEk9n_7M77vXBiU9idA7X7xLs8nZdmnwcgOQYOK9WeabcRSDZl4xdV8owqlnScoLKSkvNjTk7yE4_RpmXcZ6kbgIbzqWTvuLLicYRPPdody0SdCxZAshF9QqtGmshLtVhzIJyDkh5gvQ1mLH-zMrFCXODfJsFLU8wlVwjilp83BqbHbKNrMd-1zhUv-KZPXRS52SpZVfcn61vYjo0GLQ4AqPf901ixWUkCOC-B6QQS8BBx8MvyDC3V6uRHpMGPIxxsjG13KShG_3GE9p5W0FB3G_sRc9hgBqIMhh72yEb2pppO4oy3fSLaEQ_1TpwMb02Yq9UBOvT6r29PkXIY3ktsqNS9elPnI-iR3rfHjGk2poMgd-rXTPlVI3OcnDqRAiM5hpINsrUbtIctcUQ_w-KG174uDm5u-nyFHhVlCB3xZ2ls7juUqim16-k5x_bLovKjwYTEl5rIhinXNnpjAzhH_xy8M7xtxNDmwCmS8Zvd3vD2NjRu0v8YEczDCtuAunRD0HNjmVGodjTQBh99rR2mW_ytHM6-h6tLrNQ8xSIFWF7aBsZyNl749Yq3OI7yTyuhBOyjLh3mL6ZV4pJnSknCkItXvS5mII_YNjH-ImqmrfJC_qlxbSdEv3Xqk9wGZy6C4j7eBAHHmU2jS3ifVbwS-Yr6fe_nfD-ZcYkac4S_nq3qanMefZSKvMoHK-sddJ3EKWnGl6vbrYJe08PuKWIc1mN3vbQWR6maz0fQ_WmV9HMB3cB2zp7LqwIDoM2RYysxuNxEFc3upmkwjsiTd2Xlw98HnyW7KtqapCEOCPuK05pblnVr-ax_lw6CyuOfyT51DpolR1vB4dh8Z8SfO1F30st04GlTiuFmQImGKLcgtVuRPK3e0Rg_FAXkzkMBkqsf5y_pg9nWZEQWX9Lo-YP5SD1lVV7K4XQfhAs71MDAM-CG-uaG96HAO84QkKvd8h8liC1fwFTH_1FklAfqDo3J_Fu0Srbbu3JFtPgE3dbNC9eDXdQlcC4ZS23mIWLJRAgAdWWCiKW2_zhp2KfSF5bue7ZAHEUuO2hbVOgnLQvxnrif0d4NE0BojnP_5oOgXdvdNYYGqMWX1rltGw05j4S_sux2Ch7FM9kcQtj87Zdn28tC-qudjI2Es3uw1yaiqFuaTw1q6c77avZxdoobw3xHuKI9EZVqXQM34J4kDyVZ88MtzfYiIFu8JKUU7dpkMmoqKEHlfx9ip2AsuA6EyH1VKAs0lP5DgvlDOd_tFT5w-gi1YqbfhM5M-Mw9AZnGel_5iTB2z-9jo4zLziC2hthjjrRvzI7qG2_h9dRjoxerogn0zKGTnMOpHtzz4bBfGvIMcp41geQ5T9X-p_AM8qSdn4uQsXVFafDEEPSFCH2-JDWFeYfxdFN8K0botlSrTDDcZgHjnQG6mo91g2Ehq_-Q7Rlh9yYWnfEtFLc9rK0wZZzWQsXEsE_LxJ5rZM4Wy1xw1ODUbyoZWeMld1pD9_W0O-yKtFM5G8DTNG-eWh5UR01N64tsj5mka1HF-1R3RuJ4nODTn1zDhQwvxCPLeeColoeXnnn6A7GemGdsY9FbqRxKp_MUL2uKr-HgSLJaxDSz7VHtfVOHio-LaeMC-7KsmFBKxruMXeOzx36kgXX1-cu0NYWoR9MukA3RWHBfyNgjAdQz8TRSqhqdBnt3-fyzMYO9GtzdBRWLTZhprLBkp7KPO5RswxCirjn4Ry-8YiF1lE2LzFzhRCMl_HRR7y_lw-wjVrWv0t8t82gryAgUm70XAxFB3qQqRSCHZgKxlt9XZCptDJ_XAJmFMRxaq3hbVU8t7QlqPrT7m3xi7kFr3gtYsBcfxqM33Ip-CchyPEJgkdXiPEBeWrCLs2QHDQPKctk21NUmkHcpUbIzyVIB99_ZY4HXJKP0mLuBNNULgCd8BhvxeHRFmqNaJxzbFnSm6oEXMBKj2FgWlPDsjC44EQMHJoY8xQjbV7fpXEWcuLoLEBKdpzQyCyPzmFkFe0m9vhfP9Vp_jcULn6qyNolhRvzT-96qYojNvg1qHWHK6GnAd8Rn163eC3IzGRbSW_N-AZjSZdJ7qXXKtAto-uuJyw8FSkvdmvoJcTxilFb1qCOUAtdZqvsi2C7ZGWjTbM6tEaOOrF_mTIa-s-LrJXeRzzXJfffTXqc_NJc5amVackMiU5pf8oo-z_zRDPKl5zG_2ex1B2mGYt2-yATCNFEruPtEZF1lT9Wp6ObVl41obaxRzEZgK-zcnxxV959ahoPjCfbl2w2AGYkQKL7iHrQLCFnDV85qhBr4x51OefUFD6jEYQi3tAq6iVG3AnnI2O-L1HBt2Zd62bow8FTuaJbcMtDdCLUdX9XoLE_tGxlrgQlyvpEoRbTHVbZoMpXoNgrdiVCEMaLMsZlzzoNmi2Zig4HizXifjW3wZZCDh-qnV9IkTsIXg6oRS2gaA73lxv4NKIcTfcxXitq5Mk6cMlR4BDNc7XOEXZoKFaq1RURozpdac-MTGKaGYeJyAu1-B8a25AZVeRjK0n4_clP2nH52UeczSUY_M_TE5eSmuDLP7vOOmdwc7ozrCqRoRHygDXTSvX7pGdMTXyo_Kgnv4EhPGCir0ev_H0cLhGnJPt--mgxzk2d_JDMGgsunhzKz_Mtn7AndDVdUnoTjVtzmnvc8oqLYErKIvkNE6R2qiN6SPF-rp6NkzrSkFbp8mAZxVstvdPwDt0EI6OKkQwlpOm_KOi4PsD5kmzw9kqNbGI1GOPlndu2tHrBPTRFUESo9nyiwReaX3okIBeeSTjsufhc2u2xwq0jjTzTgCxEHqWZkcbsQNrTA5epxVYiQ5t5N-_zCwx-Lt0BBCp2BlHA5qk5EYPSrPelyfcflvUQFGwUK9kpr21yTg_XwJFG_yLOY3hzG6_PeHGwC7Ry4HC_Tft-rcWyWJoMO8PmugGVeLJ-8B77V3K_JY4sXSLWV0VUX2gbXY4ksOvNDUv1yoPXyIdL-moBHcD83Z_phwHeVnR8bRgNZdLRLp96ex4QL3zCYAU7hn1Eo7ivncziSlXfG2CE3fd9zNPl0mudNTvAL6v4ucvdNpM3VqnvCtdXvq3FzWbaEvWjBThqStSw3h1VofI68v8FKhgXAe7Dnjzhq_bWLO8fPnfmweNb8HmVlrhMYhe9F5Ke9jerSELp0DfVmMjXBotPFUDUV6caXu0-cCBodWc9584FvsDSb-FCOseJpQBHi9pGFCoCGVjP_kMToFDHv4jB7qMJtG9FcfPzRrLdUPfA0JrRYk4RtkOkDcNw69AlORR2iEGRiLYGwLJZ94Ff_RTEal2jcID0sqFGkCMZ4RdB9BOE1mmj0_a5bWPg-YL5flZkA9PCoozPwIo8Ga-3QhIKHIA4EeiTO7Qqka7wLUrWYxbdoXWVq8RssGfMSi3GTROzk5MAd6BETsPCxt0adoBO1EWdOw8EARWK_EuEaEb_ru91GqcAPUruNc581AWKHUOgfrb8T0zBtBEfAID5H4-pltpTRUxDoC4qNsKSOiU1uVoMlE4sNjaDPLgzhA0-Pliv3oPLRogBXOY_WucKaSlbe5obfWY4u_n1tbX4mMx9bpiCNl4UBk48_k6nSHf8jNJjSEO6WhJ_hordrYOzsyf00_K8TWf-x8UZjA9zNMb_c6O5kFDsOPokt31PkP4TvQRqhnx7VqeDnrY8X--PdG4r1BQjokS7iifNDuEJ8NKsV1kXkYczAENfYBiNj9cKn5Mgu5dRumSm1agi0ejpyQSOQeizzTSb9V-YFGvKm3qcBKB_WtvCwu1piOPBAz2rbPv-B1OLCQyLR483Rt6PZ0OI8wQYZMfBr0MR4t_sJzT3nTt87fb0SK8AksE0uwNYy_j8Pqu2nMImbNa8bGxbbYC2J1n2xUpDU-BVl1RCbRMG6vOE8Um_4kehCaWSDuHIfyRXuZiR8Lt8t9usTeWxsB8UO8qgEgT5-lT3rENvbVn-ih-WGw6zCcgI1edIyDg64koEUDu7Z1JHI9GRffvaoQDAFOi8ptHkQp_0Lr4OFVVR_HnWIbc6CIE7q7yNTJ6XXtZYvFo9SU6WZCfClui474ZFu0n-jpAkkDGSiZHez9-Wc-p43eF43DLsNOm4rrTgpZUWcUDQzzL8hxy4ILb2qy2NUBLir-L7c=",
+              "summary": []
             }
           ],
-          "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 10450,
-            "cachedInputTokens": 9986,
-            "cacheWriteTokens": 461,
-            "outputTokens": 50
+            "inputTokens": 10814,
+            "cachedInputTokens": 10811,
+            "outputTokens": 340
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "b35c8b76f79f2aef2ba5945c333d9630ed3bbc684a52ed8814d8266061a631e1",
+        "fingerprint": "bba3822e6f9837d315ffa960a6184d6a687d54127cc6198be64d06e724b9a04f",
         "response": {
-          "text": "Found Maria L. Jess has no blocked time today, November 2, to unblock. Tell me which day you meant for Jess’s time.",
+          "text": "I found Maria L. Which date or dates do you want to unblock for Jess?",
           "toolCalls": [],
           "replay": [
             {
@@ -125,54 +155,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10554,
-            "cachedInputTokens": 10447,
-            "cacheWriteTokens": 104,
-            "outputTokens": 33
-          },
-          "model": "gpt-6-luna"
-        }
-      }
-    ],
-    [
-      {
-        "fingerprint": "7688c1cc5687ae54060e185ac76d7009b2dcf9eb2c3b0daf43b13f4647eabf4a",
-        "response": {
-          "text": "",
-          "toolCalls": [
-            {
-              "id": "call_hWhlK6BrUzcW0WsHCIs6N0T9",
-              "name": "find_clients",
-              "arguments": "{\"name\":\"Maria\"}"
-            }
-          ],
-          "replay": [],
-          "finishReason": "tool_calls",
-          "usage": {
-            "inputTokens": 9908,
-            "cachedInputTokens": 9905,
-            "outputTokens": 18
-          },
-          "model": "gpt-6-luna"
-        }
-      },
-      {
-        "fingerprint": "71908bd0001b1f9954dd8262adb06919ec41965f414214ce166f7d0e47102687",
-        "response": {
-          "text": "I found Maria L. Which of Jess’s blocked times would you like me to remove? I can check a day’s calendar to see the blocks.",
-          "toolCalls": [],
-          "replay": [
-            {
-              "type": "pepper.message_phase",
-              "phase": "final_answer"
-            }
-          ],
-          "finishReason": "stop",
-          "usage": {
-            "inputTokens": 9991,
-            "cachedInputTokens": 9905,
-            "cacheWriteTokens": 83,
-            "outputTokens": 34
+            "inputTokens": 11665,
+            "cachedInputTokens": 10811,
+            "cacheWriteTokens": 851,
+            "outputTokens": 21
           },
           "model": "gpt-6-luna"
         }

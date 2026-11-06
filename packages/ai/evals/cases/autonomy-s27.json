@@ -18,7 +18,7 @@
         "proposed": ["create_booking"]
       },
       "replyMatches": ["(approve|approval|confirm|your ok|the ok|okay|tap)"],
-      "replyMustNotMatch": ["\\b(I|I.ve|I have) booked\\b", "is booked"]
+      "replyMustNotMatch": ["\\b(I|I.ve|I have) booked\\b", "(?<!nothing )\\bis booked\\b"]
     }
   },
   {

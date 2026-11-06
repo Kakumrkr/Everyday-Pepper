@@ -23,6 +23,51 @@
           "model": "gpt-6-luna"
         }
       }
+    ],
+    [
+      {
+        "fingerprint": "d307dfbbe40b1f4178aa3de5cc9741fb2ebf26a337fa5cd955aece50f1747c57",
+        "response": {
+          "text": "I can’t send texts or message all clients yet. Holiday hours that stop bookings can be proposed as a rule, and hours are managed on the Team page in More. Appointment confirmations and reminders go out automatically by email.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
+            "cacheWriteTokens": 14,
+            "outputTokens": 48
+          },
+          "model": "gpt-6-luna"
+        }
+      }
+    ],
+    [
+      {
+        "fingerprint": "d307dfbbe40b1f4178aa3de5cc9741fb2ebf26a337fa5cd955aece50f1747c57",
+        "response": {
+          "text": "I can’t send texts or message multiple clients yet. You can update holiday hours on the Team page in More on a phone. Appointment confirmations and reminders go out automatically by email.",
+          "toolCalls": [],
+          "replay": [
+            {
+              "type": "pepper.message_phase",
+              "phase": "final_answer"
+            }
+          ],
+          "finishReason": "stop",
+          "usage": {
+            "inputTokens": 10809,
+            "cachedInputTokens": 10806,
+            "outputTokens": 40
+          },
+          "model": "gpt-6-luna"
+        }
+      }
     ]
   ]
 }

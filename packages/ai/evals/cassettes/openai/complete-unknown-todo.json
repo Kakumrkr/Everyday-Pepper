@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "18a9e3c3ca70509687c24426d690037e2f2c72bc80787d7a6bb9c348640f8db4",
+        "fingerprint": "4f6629d4ee603021eb5f53d46d08dbc802013d8b3e5c335692a95e25d33251ff",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_jsqp98jEFLCLltAhlWSbBeHu",
+              "id": "call_24wgyONJZiRQFmJNGRPo8inc",
               "name": "list_todos",
               "arguments": "{\"whose\":\"mine\"}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9900,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10806,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 11,
             "outputTokens": 19
           },
@@ -25,18 +25,11 @@
         }
       },
       {
-        "fingerprint": "cc40b4094fb9a11c83c0e0dc6995fadfe9f396e89ac6ab4e8e9c9b9f7676318b",
+        "fingerprint": "8bec138b31f6f9bb2f0d3fabd516fe2f8a0228ebb793c6ed2d0f21d2e7800c85",
         "response": {
-          "text": "I don’t see a bank to-do. The only open one is “Call Maria about her colour.” Which one should I mark done?",
+          "text": "I don’t see a bank to-do in your open list. The only one listed is “Call Maria about her colour.” Which to-do did you mean?",
           "toolCalls": [],
           "replay": [
-            {
-              "id": "rs_063a25c2317cf88f016addf5cd788c87d28de5c97e898d652b",
-              "type": "reasoning",
-              "content": [],
-              "encrypted_content": "gAAAAABq3fXNV8VncqDX--xvV8ngGsQm8fexkswarDKViBay9NkJMQ9CFMb5iKbDl_xs5vKC0QGnF4KaBgEIsPNrx9IdlQBMPFLKfPtMeOuLbWGZpgekKOwR2j3NL7JoyBzOxameGT312W8vHwL1I_tYHs0Ii-nOu4t0WVW4gqWgr1b9yk4ueS5NhO3LMuDxvVg_H060hZ05wE9HBeWVnXf9Xa3Rjmi1g3btqzv50MOHdfjcggmwRri8bMDf_QKCXlu2k3zDgwsIrhk62Oa37u6ZIb-7cgywxkFX5lreSB1KnmkUCPs8lxbcQQXwmzc_jJDElToNLHQYI6AuhRcdoopJtNNROrYIrvSJ-Ln5Cssc5qKkPffTyJLQZBg08CpcVXnYNpkAhYy5vZQmPaY-2fo38MfXudxxFQvhdhqbM6LgGAvBs-jWkXxc3EcrTdawJ1wRn8_ZIzDejhnfZUbNhLzw-N1GGL5050bm0aS0yxqv_Fi3ARh-6tXTRRhkkUMCGbie0bpg_Nk4ByNdvAFBsa_GLoULq4xlFPkeFdZ_ig-EnDL9jLL4tT5GD1R6Ka0yesHLJLxQiEzNQaa1TBQJuVkdRGlS1JeWOno0SkfFtUNWnmjDS_i1Our5E_Q-ee4sOOQIUF05pGBLDfIb5lzvgArFv-PxWlBXvfbQBpawge8Epe1s9X85pRNJpDAdeF_H6q-SI1wev2Ak6DbaWe9wVrfJ_HUwWVHZfI9G5PiUdSl4IbGy2_jO62xKGDvfMo82sZ_dSycdpQwDO32liZpQ5g5QKSg5iXpTpwYTE8SHE46PB32xKhdgVKhUMeFzZ6JGW57O1eg97Xa3bdPRjUiTu-yK4K-Rr6x4rBm5cXQbPPhmgZ-wxkhsCoBKMINwHEnTYQ64KN7Ls02u48jvS4bEACgPcZ_x1dn14OH3-6etewdZqmLliPcsQhOw-4qxgVSB4X78yb1lGcMRhNzKbV_B48QEha13wX3V08gS6jzHiv3wMaeIO9kBk2TcT6DDa-eGgaJkF7hmTquf45S2uZ_B3_AHuXn1JfUI73GG5rvaVlpLR0-c5t3GO62Al-bLTsGOD5neZ0Wl6TPpgPZ-SoiRA-fGJhDoQqdKIF6x4BIVAxIZIcSeeTUCnXOf10IlUwaM5fL_nB4CpgkMN793J_SAfOnte8IzJzv75wv9v93yPHl_z_Zsiy48s5_WZk25paWsKT_GElG3sKxSHuT96yy1HpS1-ztU6givOzxKRuVtvoTwv5uMqudfYdc7CI0im3IunyRI9_q-oC-X6pvMJ5gpqLIzwmaZteT7aN6bnUPxccnONuhxXIzPw4TqZKk_lHlgwogN3xsDz69Idxx9GVZzVHxZt--9GX2-3XVo0v09kQ6mX8RnwNYoDOP3-jgbEm4ZSTQb5i9xn1rQP2qUkoa4-MVjihh9cWjEHdd-hijRiCck-nzUYQENQsO49bHKqIfS1HoQlAOlH7m5rmb4HWDtc-GQz3S72qAd1al8pOha2QwHg-EnKenwRQd8CYqhP048m9avrGDNkWmuVE3o923GcdPIB21jE-b1GR5AQCFdkx6CIBxO4ZiofVcBRYnkF0qB9qN8yQLbU7ZB",
-              "summary": []
-            },
             {
               "type": "pepper.message_phase",
               "phase": "final_answer"
@@ -44,10 +37,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 10005,
-            "cachedInputTokens": 9897,
-            "cacheWriteTokens": 105,
-            "outputTokens": 50
+            "inputTokens": 10917,
+            "cachedInputTokens": 10803,
+            "cacheWriteTokens": 111,
+            "outputTokens": 36
           },
           "model": "gpt-6-luna"
         }

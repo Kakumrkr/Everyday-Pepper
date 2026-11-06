@@ -3,12 +3,12 @@
   "trials": [
     [
       {
-        "fingerprint": "67648318a30858f493367fe2e9ec2719f2e5dd6cf3add4eb52736b3d02035760",
+        "fingerprint": "3317175c5f134d44583e0e4d3c4a07f88cc6d123ead8a6d5d3e32478457ded35",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_O3x1ospJ9hSB6ndo9y6OVUBy",
+              "id": "call_jIMZUFyNZOWcNc1xcD6VJmDU",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -16,8 +16,8 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9886,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10792,
             "cacheWriteTokens": 14,
             "outputTokens": 18
           },
@@ -25,16 +25,16 @@
         }
       },
       {
-        "fingerprint": "4efe28270e73f1d07642516c6b0728133a07dd975409dc88b7bd75ea4a091cbf",
+        "fingerprint": "56f5e82e177a9bd2f449050ce57b9d1a0dc65a853007f2e5d700a170447999c6",
         "response": {
-          "text": "Today: no bookings, 2 open schedule gaps, 2 regulars due back, and nothing waiting for approval or on the waitlist. There are 13 feed suggestions total, mostly schedule gaps for Jess and Marco this week, plus rebooking reminders for Sara K. and Sarah P.\n\nI can’t clear or dismiss feed items. You can dismiss suggestions on their cards on Home.",
+          "text": "Today there are no bookings. The feed shows 2 open gaps today, 2 regulars due back, and 13 suggestions total: 11 schedule-gap suggestions and 2 rebooking reminders. Nothing is waiting for approval, and the waitlist is empty.\n\nI can’t clear or dismiss feed suggestions. You can dismiss them on their cards on Home.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_05895548005790ae016addf615118c87d297b2f45ceb18d6b4",
+              "id": "rs_0a6e451bb5d90de9016aee3f97154887d185123c170ba8fc38",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3fYVSb94-BQZ54xOueW1Mdl1_3BCvIO9oGbxLoeKtcRypowPwv8f_H_4BGyG6G7UP2mtGxt8JoNS-QTyFCmTbZ22RtZfRqn8lhX99RPyBw_Uj3qY_EFuSLri1hRJeIISt3Go5laUH0tSdFhYRYeqwscTIgHdwPhGlr-4Azr3TcIF8anbKOXAYypgY3igdpEy-WTcrwjSKeg9WGOn7i45OOg_aRUzgf41kjE0Q1PKrxD_njCiF6CB3hcixSSsj19pGbWDM-BwV-imJBzlYUfKATBIuVkPVAXYy4D70c_xOCFTBcWXdstfAftS1FD9WnjeGJmTaLVAwsDdX7uK-GcxPiTkWcZez9F9rfyimpt3ZS-rn_2O1a3Fmf6_bmdVlWr-Oz2ChVLyIVLA9nPaVht-JsOf_xGJfT75myuSHBwI3WMfFq569NjTe-VO-MlS7QdyDfZbrCi9O8g6-2PnQyZZZqNpU6a1ZSjCEB5Y1iPhDgbVRheBlv2FKrDZ6NCyB7fO_QqdwiozZa8qustk4xrNETASNjTbl5j-wLcNFPrb6yK-e1q_i0V04qubUP3_7lgO5z3XnaZz07E7FH4BS-GHfVEqkR2ru5IEg2sKHcWL896V-bjQ658LbdzLUlcCbFOd_QNbVw0TW9raplwWMocDbWpcim0d83esJHYxGsKp1TPuIi23YyPTNC_9BSKFk_xZxbffORuS3Uuu5A0wFjGkjn1Lu1G-9w1pzUI6wM9Ksj7E2lQuFyAxR0xSllL9CYsbpplsTptWvtshoDUqlJ7Bfw4DPt5yDo4v8tPE1l6tY3w35rhGfN4RTEl8-hIVPwBJn2r6h7k34QL5LXoDaQ1bItmEk6YelAUw2mTEqAA8-Bm-d0NMk1bTubY1-FqYLohEBqn9DUBJb-PCfOomnUjNuQGkTWM4c0y4e1AjmDtgkhhMHZn-sIHLKNrjW2Td2IUd5M9rT8KFxqngou2Z_w3l_ALKAi6fjXJcxOUz05EKw-wKWnk4xQUpD5EZmR7WKdG39TUP6-PMD7WNCC3ryi8Yq0XKlCjCTCozoEAJmiJpbiZFq5TDgbGS5r2ub8soWFZZxUeqKfN4_1ZQA3BqV8nNibIg8M3LvXfYomT2T6uKdhaZOj0EB2pM3Gt_ut6fCGhnO2pRUVOtt_ariYsqrbOmB9YC0784HaO0sz3a5Bx8hES_T-b1iCtY4wwXxryjClyixNs1HGyICamQ8UrXU7oGbJPXQpl0WzF_Kcw4H3lIO1OiyxIBuYKIyDOStEoVzlisREGAn3h_csHUaxNILIWdHcv2E5KzESrGQdrclpm-8iaRxpN1Wwl9y8oHx4XMPxuCqE-_Q1nfncBE_piDmPItSPMIbG-gtCV99EIIfQjkJn8IPjOFogvwIFRRTfxInMBGSPvGe4ktuRS-vc67yk_bt7TV_2vewhVR-RiEPVSDKWMA_mihX3lzrWI6jjwktDGw7wAAdVhOqqrAbDe8YKMemWMdN7MHCEstCms1bm074woDl2x5JNpNtFdGUHmv-Z42qFx3h3ZexPTg6OJ3rCN2LVDJ14TrmCsS3LF4vAmu4mKGLOScV-qmPfSFS8PClcnIo82R4RPqyyUVZjryti5rGAPyH7LPbVg4Gn0qdWlASzsVR8mHmqQP7RV4yV31O1O3xVfw3QzhNyI6tVNIC6H-dXliptv36hR5BPsOK1-FKeeQY_3QKK5VaScmtWJW0BW4EhfLExsXwievHVGhfBlgBunJs9fkeuIGNLN1gzmEDj3Q470wA_MktapZoND3e-86pkJu5YdZnuu8Z-PGdqCp1drMvA==",
+              "encrypted_content": "gAAAAABq7j-YUGHSMjqb82dlZ8so7nZUCeK-IpO-GZNgK1s5C9n-VZw06Qo_aFEI1G7ER2sbHGbQXYW8yRZNuTtE_xe33Rp1O2SeErp37WzHBZZ1hlTk_a3ZrjSzMKXUAu_9DMFvBoWuu6NdqyLaU0-hnIkuj7C_MvBu_0UtGNl7e7u3ZBmT6sptozhRoMeRBXSb1Rk0EhkwUMDAFgEUJ_qUT-iwWSuiGkH5fQm53WgPUL9GstUwugoVz2mv5MlzvovaYxytZY_u0Jt9AWUA6oz9JKK1XrZpfnV24_f3Ihjw-2XkqhR31X43QxhYWrT0XdIMuiE51Bj2S9cAJ_bDPOMtKoSVoVhmBMjWf3y_2qP1-BCe3-XEwe817MM6biOCqXWJUnRh_FpNQhZO7loW-J2XMCgXNCAqsrmM5HKIBXcCAoP1224GNL_4RzlfyrtSHiV9gPnM4SKVs9C6vN3OupXFOhweUs4B1Gs4CdWH1VNhRl7VNd0xi95FZuw20enDIo9VHkBumLABX3SduAKIZC0b-vYfoHi88UMklx9jpGroNPi2s4-xDl5tsfAv2l8C5fdM3BPpuDxLe6VqfOy6cCnDhKC71CwJZLhcB1u8qF5KzKbzSxLbZ8dAO5cSAIGffY1XEJA-lV_UiE1r2GTUeZptZLOhrV57v_LuPYKr1wKlSi-jUzRXaAg_fEJoFLq5VgWjJVn6TEvKcLeVqIUiMreV-xyVOaA4iFEb7U4oB0UaxVOeog9KAc2anz8on7_Fhj606PrncHRR9tKqUbOkmn5olBIpKzdEQ6BBpId4QfRspcnwWXNOqO3RWxjhjN93s28P7N3PwFYkt9xIalDr-R6cNnPMXFgPX42mWMXn7RyTxf2Q8PIrn2aIMN3l0ws0eewSLgQ5ktGYFJ5li6KAKeMeHaC_YkSqGY1D1kXXhUbW31XS_192-W_rXnHfGwgGWezYIKF15RgKAg_8F6Vgoddtq7d1da7lg7QgDy4Q7pB1SR-dec8iPxB6iapJ_rcXQGnNlrUEfBUSujPJppkNcIpE7754fSY7_LadQ452lHBns6zUMPmGqqe9apgMfJHtZugFM4_ZlGqTsmGrH4KImPtFDrTltRiV8mo1wUc9qpJ27AXxYO-ppMHcxkB9GRcg4CXFUGIXvkDd7SgS__8WvOa4Iw3UlTI3xcYNK7Gy78pS0JB3WCXSCjMGOAGVZx2HqGH7tLLhG1lt0udHmVZHOeSW_iOTVEtMpe8CzYu8sqWzU4lf3qo2AXjOHgEVbuHlSN2bsD4oVnYFn46uXIYqqhF8xUpN-edk05OU8za_oBqdNEr8gRxrm4t1UggpR6GhXr3Jk781OJ_dFRPLUEzVsegX90oG4aKYfYDaGvuchVdmfXaK59BTPx-eNeUZslsD2k0LZdeinFrYv85Bgp4TNXFoGtrnTHUJGe2phjxyA9nnv4dO8xvmrdMlWAHdGRGIjORbZvssMFgCyU0WnsrZ6JGpvnmGLLEV8xp4iyp3wElP-kIt4KnDMmreGGAFulKBYsMIOjZFHs2zWOuIy-XHjCD9c2gS2QcAA1YLUbI-nsXUoTtDPeynVv_DNNJ00CGW4XJlPdh6Cvcuj92-yVkzRP-lpUFFHGfPz_5FnRFFl2fQQ_IjBR_eRxEFShZvZVrh8EZ7GHT5dIDUAxNmuLsIQkXwjuplqe63biVfG2mCVVbuceqFyHayZC_qgkhn1iom7i5XW4RdoYZ18m1MrFmicznRDHZ_Q7c8z4Lmdae8m0RpuyhqKNfzeOCxfsp63YLuysj3ZpVP3-tO5U1wbJEDmzsuoGtEi1D3_x07K4zgGts8j1LuxRsnuclzuA5vgOdHxZmwEXiLY-KBrPl7_4vHk_xvGH6Uj17UXdTzCh0oa3oE789J-wTiJrFYK7gZaqkkAQ7zsBjWLaszuXt9TRdcw_Z1rrJBfbNWqjubBuihtB9DCgnn8VTNbPg=",
               "summary": []
             },
             {
@@ -44,10 +44,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11614,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 1711,
-            "outputTokens": 114
+            "inputTokens": 12569,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 1760,
+            "outputTokens": 104
           },
           "model": "gpt-6-luna"
         }
@@ -55,12 +55,12 @@
     ],
     [
       {
-        "fingerprint": "67648318a30858f493367fe2e9ec2719f2e5dd6cf3add4eb52736b3d02035760",
+        "fingerprint": "3317175c5f134d44583e0e4d3c4a07f88cc6d123ead8a6d5d3e32478457ded35",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_bwQ8dy4tX9AvaxHlWFDDoWOI",
+              "id": "call_j18eEuh5X4hT3o6M6bUqPcIV",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -68,24 +68,24 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9900,
+            "inputTokens": 10809,
+            "cachedInputTokens": 10806,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "8afc13729253e7277e6c7b6f14f7454fe7f9941e49ddda6e76cb17cbdec8d39e",
+        "fingerprint": "c9b3647f77ab81385ef87267fdd29d06d5dc18daa41c45ac8f3ceda59dd08d4c",
         "response": {
-          "text": "Today has no bookings, 2 open schedule gaps, 2 regulars due back, and no items waiting for your OK or clients on the waitlist. The feed shows 13 suggestions: schedule gaps for Jess and Marco from today through Saturday, plus rebooking reminders for Sara K. and Sarah P.\n\nI can’t clear or dismiss feed suggestions; you can dismiss them on their cards on Home.",
+          "text": "Today has no bookings. Your feed has 13 suggestions: 11 schedule-gap items for Jess and Marco through Saturday, and 2 regulars due back (Sara K. and Sarah P.). There are no emails waiting for approval and nobody on the waitlist.\n\nI can’t clear or dismiss feed suggestions. You can dismiss them on their cards on Home.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0a88347b91276eb1016addfa89558887d297056bc1f8848c75",
+              "id": "rs_01c658b2985e146f016aee44b3371c87d1b881f6c72f822a32",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3fqKdsR8MBqqriWtzg_pYfb5cPt2pNGRR3SR1e9X_3HWu1bCjIZ__DhandPnjy4Qpetc2Ea3VjqaE9n9yhyB-lPsYddhrFkss6_aSQlyvMhTLyW7UUSikWnYrrOLEvnk5N9mO3hLFanXHQ1iw7zdeutZrMol7E6vNjTSZuM0fGbmHbGdD7KI2GbhFJ2DEbYAp3TlBQ-piHmdghHi82dd6v8jyrnkFTrAOTLHBkr3qrwHFGiMJa1IPRs-MmUWmEwGkguYeFQq09SYWtkezuqBzm4UB92f6Z8ce6OomtAEy3OobxGOxqvnWHsi2W1rggizOLTUH-j0IsM0AUQQLHHzlYeehyD11YVJkrh4ynq6xfOa9rgwOckGrqzC-9QffIltRR6Pi-eLcxuxrGcJRsHDG4EC93oe_6LSUD0sBH14AJuacZ8Je6PkJKbnbtxvu4aCDGAvZgEcBdnAt4lfe6FlR_NtPryFiR5d9A5dqT5hpQiZ1NYOUx_Iu4yTE1E6DwwNh2AngJqJZfoK1EfQyBqmqUy0Ac0HlCsz3WYIkbyBL6NXbgCqjcx-v34GvlUPmLa4YCVfxNErNjcz61BnkJWf4rkpCfbowZW9WSVNbk5yK3RPYdfGvobUUnkbpK9ZyHTVgjKdNDifdMWE3Gctm-rJKrvuBx__xJ-0dizdzpHN5WlqglIS9mLUy9fkDoiBFLVlBLK4s7GcPD7jLpkSlfTZENplnk9l9DXba7SlDAR9rO5oLwDpLggwCFiiXQKtVoXfKJ8L0mJ0B-fvOANiogm4NNJUsWzT-pVyZSAeN31HQiMXAUlmYRO7sWNV_jeNGZE9FKvsR3V707fA-nTrmJiYANAMIIfJegrJknUg3ZkhC68fQC1bn8U0vJD1GneDL9w6HNpquKzF5rnB2dretAvgqGEiKVHAnlYHVVkbmNG64XpdtQmPx7DdZYSDENDuUbYJUDjp4xadaP1yjtUJZAsEAPQ136_YprqgXDGALxEBOBz_SI2NyXMGTDzKomVPRoDLulFJBqgFufh0Iz3RQ_xQg9daCYzNmtRcFpB8ZypikOdahY9tjwZnhTz18N0BcEE961msohOFTt3zEJeEgEKRNNh8ZYzzCcWMBdaFsfZwOaFoqf4FLabkzY7HhjErIC2oRY-zLwHxal_63Yrv1kIErwBC1jN4NqzvScE3nRixA9tYzDTSlQRVk-ZjTpZwscVjjgGUkL3mpgBRyu4hhJagIf2VedkWqv96rc_F7Ur414dDShyJfqVYsRyjFYuzTyeSu8ETO3MY0wtM9N7UKKiFGH7fOp_Xp4ThBck0nricrcpA3aBKjRce0iWz14I7zU4FCFYr0aXEqEvNRB_7toWHnW2RipTbkmyi8iur1HwjHbotZm_CPR6jMsoDIxKZ-jeMpKLxapVfGixIXf9qa5C-ND4nyOC-V-OvS4jrRdDlxXMMkmuxB7dPuYe7_b_GvyP4t7MzOywzDf_TAZG3weMAiSKSSm9OefMTV0RPbn63ghxESQKeVRGDsBGlLyyftnDpjsaFJ1iTyWdAEiVcTCE840sDEesH4aOY-kbdohL5CE-fxnf13mo__TzLlKUWp2W-h6N7xiXcTFGzHtrNmbuEaYfJsrotQ_lDitQnKb-wyXRhYsCE6bMJhr2bRn6KLZYk9URCnhIJE2qO3xNq0J1b82E8z--NSnN5-VGzWakCw6CY7_ezwB9QxKRpufEDP-u7ibFJHOX4wSp6E8UOzBRjSarTstVYLCqDtidsB_CeYiJm6kbBWi81KPnempCd3jiEGXC3",
+              "encrypted_content": "gAAAAABq7kS0LInBhVghl-qba32csiE1v4uokC_BDRKpvjnEIMWrAGrtGmhsgq8gmcWc-hPTWbd4VOhQljiOH4E86YqyHRViNy_4FC670VaVTLzNubEBVGmTjJXO0GIj0BHVjb6bneaXBB4RYNnzO5Oh_GNhA8yXcTZ8SjYeUv0lIfVZBj9XC1TiZF-mrGDT0Dc8L-2rOoi9KvPN8jzuWxokC7uz5x-zdI2IztgFEdh6tO7F3NE7sMakPW4tHosL_jOmcI2HzvjsIAl9-mXvp7_O6ftXI0Q5RO47AvjJDRyg8r2AW0tQEFz--XfKnPAOe8dWgr_geyQOhPMDQYen-vs1P6nTAvf8KUgnAxFWWZLczyTdalV4gpiLiLKUxPyPhMnO69lnJM4bQQ9f_FCs79HWkVr4btu_hQiWddwLsePFvntc1SYqh6ATV6x-aJ0PH9U93hx4a6MplvghKiwVTCcFm7OxQ6vQl4djSc1SYo3iT8ulDGmg02nQbZHBen-m3xBWvlsb58Nx7eBiwLxBR4DNj8mGB5kNI-RwPYex19qOSGQvgWvqpJ4EEhCgycm2JLWU_231EjaOHiLwoXWjGIEBh-2MKcWkQVBjZ0nhZdFpJaSTCofvgC5kheI62MDuCyV5J3wCmFNQCeLL2dQaLKCbNpaKJgcpzi2VyXMiBnqMY5TWohtET8-BHIYLRvbp3eoIXM00YRfuInpoSQinvIsRRGG9xa3NEYUVNoIiT7nvSmWEPKyBwBUChIbmKWhVZ7AK5CYDXyOIewXH1fcvko-LC-oy-gUgh5PivfjcVaYrsPOrQBKa0MNIe7A-lcA82HH4unBApzaIcBlg9bkDkN6I1rsRa1bSmNhDPJNjoOww__mOEHSXDpaEk5kUS4z-Ar7haFTe8aIeb8r8WJw24HBd665P-tSI-nHtb2CV1fr0lHkqSy_Kk2ocCUtbN3yrlvCxeznzXk0QIndA7qL6IL3NVYGJ8PlMsPAJdnlkEIVFDSPsAhc0OEGtrLI2AN4YWbEk5hEbgTYG-G-mMVOcLbrNiYaBTPJycK013hN0eqPajdrZ_TSb9ZthE9drRcXbmPc2f4feE6YqBi3lwQNNJN1yVIjDITz8pw1OguMPfh4XdLGfRsGioNLY-aEVp-RBX74eWxnvctFBtMHCVjat4ywAuwLaZ9JuUZmhDnWOVGfqGCU1xToRcu3dTemdIZ_wO9-fNAIXcawMYdhZ82EHN4cj-j80MJD76qUEhSV_iW0FMugkqBYTd_268ayB2y7FLsAQQ3sutBivpb89Htg8oPwhJ4RZKmWO3pPCjewTwk9vJSlRZqBoVceeh20FyybbJMstY62aOVwKyEBswkZDx7fD5LGVncCUc0azOrKUjRmSYuIY_4yWd_plefWIa1ygd8XAByK7Rw1zLU63GH3TZn7jg5J-VCB13hUsBFUaLcRZ0Y2GjeUyh7kJ_Zs3YBKMdize8JWcvqVzhx4fWe1J_f6UX7vkl673gPTNoBtC5-i4FdJpWgdCqCfJ5xZAomPPx3H9Kcg0KLG7Hx1PaU1UQGdd4O-qAMIXiHv-kTp4VInyG_YnTmmqQeAhk_Ng_-h2C6rL8brMfI3vuTglez1Qi5309Md1Qu9QnYXeFXDKO7e_bCzbQZCEB43ukEsDJFF4KE2x7UNsFQwvcgrlGQ96qFF-YuCPuqtJer9Xnc49DsXwcb1bAinSZB9EhGVPvEuh-VBSb5VlAG68JVebgJdNlY3_vg7qG5Cc3ZkRFbE4NZPh0edlm8asgUFh9ZI1H0DiAcKg9PvDBKYTRVUZ1Lh3r6MLXQ5_oZ-phMvDBBm6aZyZH1IL84J1EEJmL8FSn5TbRlyFKSiT0TheQTbuCjcG-RBstY2P0u0R2ROYe-DCdfdxbQkVzTUcN8Cj5lqBbWcjmgD_lRc5p7sSByrD8X785lkLOM-zngAQ3G9chrSV0ZY0EXd5DbMru8ROZrsQ3F7BlVJiJas3QmMJ1lYW_koaE1S_dzqo9tZ4i67uItbBEQQbrNansIcBedTZbo2GLJMFM7oE_eO_jeEP8ETD0gMYHoWKEqXQmTiRQafdQ2ALDDMIeIyAuLfK2AORuoSoZaCsTd-L3FeMEsGvd3XytprTreb1LV7ZWHSdP7qgmGteHIBrvQhLIBKhJwMTd8usoMF_z1aEnY4H8b6G5Wz94-fO4-rc185rjXywHButoKpIjD5-o1-RMyqaUnOa_bowl0xjsX3WAoCJVnOwPV0rU9MhRCSdjZXqA72RYEJ5r_vGIpSSw-uYKg-vV590i6eaeoLNEBwK97pOiTHIgRVn_lqnsv5B7xUO4QOD5Qz8ZB3Al0sJYIQ2Swfi2ebfZI-sV8dGECXWDzyTH6zoZsZSACVNs-Uz9Hk5Mk11-_pepoIRQRc8nSAR3zFxlj_XWWoSNo0jo8M4HZSVUTn9h5OvnFhjhQXxsni26Ide3cwLchgqKieKouVfrow7syKavP-vSFqepm5q82bPW7UySdRFjjYynpvTeqxdks6cHpPPiuToeTw-pjXruJ4kWzgoaix0Jo5rk42D1QSOzUj0",
               "summary": []
             },
             {
@@ -95,10 +95,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11670,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 1767,
-            "outputTokens": 113
+            "inputTokens": 12581,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 1772,
+            "outputTokens": 161
           },
           "model": "gpt-6-luna"
         }
@@ -106,12 +106,12 @@
     ],
     [
       {
-        "fingerprint": "67648318a30858f493367fe2e9ec2719f2e5dd6cf3add4eb52736b3d02035760",
+        "fingerprint": "3317175c5f134d44583e0e4d3c4a07f88cc6d123ead8a6d5d3e32478457ded35",
         "response": {
           "text": "",
           "toolCalls": [
             {
-              "id": "call_irT32UEkcY96t523Af24RzRg",
+              "id": "call_MF7IISCCCpJ9u7ZfjzLRZAGq",
               "name": "get_feed",
               "arguments": "{\"kind\":null}"
             }
@@ -119,24 +119,25 @@
           "replay": [],
           "finishReason": "tool_calls",
           "usage": {
-            "inputTokens": 9903,
-            "cachedInputTokens": 9900,
+            "inputTokens": 10809,
+            "cachedInputTokens": 0,
+            "cacheWriteTokens": 10806,
             "outputTokens": 18
           },
           "model": "gpt-6-luna"
         }
       },
       {
-        "fingerprint": "4a2968ad2dab03c1bfbf27fe0bba226c8790f62e50abd7f5e67ebd880fac779b",
+        "fingerprint": "823107c7373568c6353adf14d3b66677897e525c4dfb81582b3a081528f86e71",
         "response": {
-          "text": "Today has no bookings. There are 2 open schedule gaps today, 13 suggestions on your feed, and 2 regulars due back. No approvals are waiting, and the waitlist is empty.\n\nI can’t clear or dismiss feed items; you can dismiss suggestions on their cards on Home.",
+          "text": "Today you have no bookings, 2 open schedule gaps, and 2 regulars due back. There are no items waiting for your OK and no one on the waitlist. The feed has 13 suggestions: open gaps for Jess and Marco this week, plus rebooking reminders for Sara K. and Sarah P.\n\nI can’t clear or dismiss feed items; you can dismiss suggestions on their cards on Home.",
           "toolCalls": [],
           "replay": [
             {
-              "id": "rs_0b11372732527e2c016addfa8cda7087d2bf0835aecbdf8c02",
+              "id": "rs_08919f34a2b4baf2016aee44b990fc87d19c059b2ec2ef2629",
               "type": "reasoning",
               "content": [],
-              "encrypted_content": "gAAAAABq3fqNqbLNRhbmknCFX1Q4b6RUaJZ4hBb62n8X0nVkOyRTtmnaVQTMiAu0YDhkvwj6Kk3vOWjn98mwK3XezqXX5HhbLllBSK-Vrf4Kr0DioYyGYqkgKYFizQ1AlqitMhz_Imwy_K70sorUPltHA7vUN4lBtpTHDEKTpykztb-wHd5sztSPBbSOLdTnUXwMUkTttGAgEpF3i6GpziBDnhdWm3HpnCXx93h26KGKVFYVS88H0hpadLfN8PjtIEMvPlY2XJKwzPdwO-K9gyUW9hAkf6VIrDtodtOkHj_XZtvcgG3zI-lZkHpHUIbSOqHGsR4IqtuHXFxeNpFLLlmzPbi48ELb1N6BsaQmH5D2e5Y1iogsbET4hF05o7fYIfdRYt-SRCoXvlwXIEBL-NL8N9L6Fd-M4VtOkxxmCBZmHCwlg0Hw__9b4CgDkdjOr0rdiO2FLb-y0XBFUvaHPMd-raT9jpvv6Ez_yWFNLsadqfAZnIrQL5EgS80TEvdvaAtm-ajz_xEHxtBW47bAWBU1UYbATFagpICZMBrbxZWP6-vpgFBdTWLUK2ppmPs2ZO4XGWnxdoPJDFuTglAbxRQi26YNDZ9pwp5bgDYIY9g4CUDu2KV97iZ-i1mQjHQHkhep-2ac0x0opBNQjuA1PYePURNYaRIkXCSaOcA-1HR2X_FeRJGVxrVUYOWwcqUKcxEGafy3BXFi-WacW3F6LrDwA3nMXKsl60uHuqw-2kt80MqaVGawfAj6aY4_9gew41qU0aqnM2a4MbXLHvpnmdu8Y-XnBzLqDCq-oxaJfQtJyhF3jj_MO9i8bk48OugSK7aFxIvfKLg9-nZ0o0M0nGkgo4CNBf8KOcTYDkj4RzfmXdivKSxlJBmFIQLI-FRZ-ICbGYM5NyU-euI3yfRks6-C_w66FUS3XVUdLu7Fqr6MdMWmkp0yXoIyOaexMtOksjQ4HD_uxkTDxMDRaV1FPDyScOK9ZlQKXBH0o3CXEg8vA-PzE96p8_8kJJfomebMLU-5g_6ee5HYjXQ6IFrjMUoVB4P2ILkzfipsU1u6l2YSl_Ayi64Dfm4ATgB6jYkgyUzmGgcJ10T8SgTNZtMAKcWRwL0sTBMLSo5x8poBje1YwAzLQPcGQGeMk3gAWit43ivjWBJnV2X9TKMYprCJfYQN5M7bQhQABMhuHOPc8SXB4NSwABp6wY6BwrNJ82pz8p5zhVEsnYzkJs8FtROTDg4QoGqU6KGpL5u-VnX36dXC5z7q79BZvY1PB7gADE2gb4M1Iy0G4J2oVlT7OC68VHeEPeP6Z-ZSAlf0ExzRlg6sp7u5jxzIXjJMS6j089MfVxvvtWDUNR_MWlGYJ25QEqDnd_6KHyUNIyV_IIaThuG3ShZxsJuIuwUA1gHrtVLs-W9QqBiO8rAy3MoxD6Wmq4tEhQtkCuYHnoDNVkaBHIvRw6jyfRXAAjN3cFwzP-ky_wVHKhSn7Qe2koPc-NgvYPw2cR9ojcelEAewuxiaVwo_afGbj1nKllAUB5SMgUdqCpXEQCFImtIphlLzGL6ftZL7y9gOl5mOAyo56Gu2SkZSBBf8ibzq3fI7SD3SfJIBeP7htAUoYZR-AyvTkPtnTIJjE_CryhH2cN7YOcHzGFkf8gomqOtLIQofelisQnez2nRZb-6CHOYjVnH6oL4svmV7VTtp2rE8ePSZUIIuAHD9htMNsn4HxhnnSK4NpuFCTfnB2J90ap4HU5h2ScZy5NIWtsH9fopAyHQK_DJnmjUiavFdp_AwMHscFD9ytqTIcUw_gicQ22enDoQqZbXxuJbB_xQSqP0ijVCNE86Lv5XU3qY87jA1EYS_deHGlU5jj_weBhF1nGH6Wr6Sd9CGqZrjzWbH1qxUm0H0rmennP1u2YpYC0_5Fjg=",
+              "encrypted_content": "gAAAAABq7kS6ia2owFCJV7516wUrFBb8TqxA9EHn0iB5IHMLDr6ea_20jCAMlg8eeSR7uY9OYMvqQfYmZrUq8HR3J8rS3LqLOLf8V6l4BEglYMpbmD3VBbJUv9-uhJpYB_fZ8eq6Aj1y4ApqBRhjw3f2SSm_UL-rv__Vt-_Q-5ED4PsLZ8qIZN-fyJmcf632oh8wM-Lm7naw6PTWY6PMwq-lY7-_6Pcvdu-0ms7wHk8G1zjyX3Dac-lCB1sd7nqicuHKr8g8_xOWdxzzqyTMm9jcTDUi6eV0jTDQdr4rgmAr2BfEldbNlGcBF9QPOm2jczO_Rt6tZfW6zjkeqgEaAvQDAglDS6fZxGBH6QOPaeT_jDNWcgeHjY4sPDVI1tSEyQRGTBPwWmby96f5Butmetf6yQJAseFz4dz1UeirJIDucP7PQgPoGkolY0mfkwcQ9dnLWGER016u8tGSuoeLyEgnFr4Y0yjnyZH8FqWD240bg4yXBe7Ql-ZX7eGYPBv--dBWGmENlphKrxWXnqxJliEkv1oEZedz8PemyWYVwUg6O9W6zh-NH7X-2POCW9iDrW8Q6cXjQqXRyaN-QnmN6kOxMM7-cQtnZBfiQu6tsI6S8_vAmg0Tq1sAU1p6zo_sCRUoJ_ob5dIzpPxZZUZPV_EfbijRVNmNWgb2zcWoS40YGqEOxxLLt5aMWN4a5T_whlw-FOahD8-UMacbnCd8s9pkdVZerWysVLrzxcWdPC_y8eymzf4CRhOyCxC0ETiNIuQuuREzz7dk7slA5L1n-sMu5WgqU9-fnv7dTztJ87HdLtqDTdd074R3yp0UYBA1LxnDehVNXMrA_dg5SeX-TSwpUFfQtO7v5ZII-iGk4ortzULjhRDhNyEo9onUWW1b2aInKkB7p3jGrYHHa-5nqfXJJRpjsAGHlEmqdI0L6R2Bonr4X4MARL8hPBJEli5aak9CUQJI_YBQR1GwExOcK5Sks9bNBxBpJpiRhYw17IF2rkA18NIYbbCR2toaJw1c-LK8aWUATXLV17Pajaym1mqYOVY2WLJkFdAH-KTnRGyb8ePuFuMekBFTRu2y4ceLHdj-miLlYfoxa4h49R7RZLMBa-9G9D5jpAg5jjDvfpDoHzUAkFhxxucMRC-CqGMUQinOmUwfvVZZyl6R3hqBtplPJwQDSxS8EdTFgW1mlyUnxLENh3qzXs1V_KpADG7nVX0qYib9TaJBNtx02Al4hkle8B4TlcRFiQf1Ajx6NBq9q6sdVBb0iXxKkuB_zac1yyWqPa-Nfxlk2rXpdfDjHCVksbXnxOVE9i1YwhnTAkJhQzt3GaTQuJdUxXxnJFgiCjsc23SMBjuKwCBIycJPcSGfFoNJXUIPf0H9lGLEsINCOm_HgLEHY3beu7Rf8NWFyDX6Y_16D4MwkkeTZdWxXNxFYmeTGFkXoejzYF2mq0hJNXti6C0YtjChTmngKeFTowpQBh5C-XSd8lHnaqQaljq8IiF4ohvrSho6He3nsklPL4-3Nb19EQgMJVU9wIURODtjzA8oIffkBbq6-YKMDvObpH8iy0nSlqvUVDT_HhQ30K99Z9bG5u2PxyAJylfvzJ9qyUrr2ngqkUr_J4TqaAfAXpng9WGEB943p9cKWjhEAH7jGR5kJDArU6PAsMw0T9HsfWfsXPD5cFwQmBe8r4DO3Bxw2fICL1-nLlpzRQHzr-XKYR1rtM0tlIwbrZ_-ZoKEx1uk1JLx",
               "summary": []
             },
             {
@@ -146,10 +147,10 @@
           ],
           "finishReason": "stop",
           "usage": {
-            "inputTokens": 11600,
-            "cachedInputTokens": 9900,
-            "cacheWriteTokens": 1697,
-            "outputTokens": 100
+            "inputTokens": 12588,
+            "cachedInputTokens": 10806,
+            "cacheWriteTokens": 1779,
+            "outputTokens": 112
           },
           "model": "gpt-6-luna"
         }
