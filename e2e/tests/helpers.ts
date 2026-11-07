@@ -1,4 +1,6 @@
+import { execFileSync } from 'node:child_process';
 import { randomInt } from 'node:crypto';
+import { resolve } from 'node:path';
 import { ImportPreviewSchema } from '@pepper/contracts';
 import { totpCode } from '@pepper/testing';
 import {
@@ -362,4 +364,28 @@ export async function importVisitsFile(page: Page, csv: string): Promise<void> {
       { timeout: 60_000, intervals: [500, 1_000, 2_000] },
     )
     .toBe('done');
+}
+
+/**
+ * Grants Pepper's operator role (S59.2, ADR-0062) to the account with `email`, the way the
+ * runbook does: the `operator` script in the Compose `migrate` image, as the migration role.
+ */
+export function makeOperator(email: string): void {
+  execFileSync(
+    'docker',
+    [
+      'compose',
+      'run',
+      '--rm',
+      '--no-deps',
+      '-T',
+      'migrate',
+      'node',
+      'node_modules/@pepper/db/dist/operator-cli.js',
+      'grant',
+      email,
+      'e2e: the support console',
+    ],
+    { cwd: resolve(import.meta.dirname, '../..'), stdio: 'pipe', timeout: 120_000 },
+  );
 }

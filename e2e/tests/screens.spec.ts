@@ -20,6 +20,7 @@ import {
   IMPORT_CSV,
   importVisitsFile,
   linkTo,
+  makeOperator,
   onboardOwner,
   ownClientAddress,
   PASSWORD,
@@ -1080,7 +1081,7 @@ for (const width of WIDTHS) {
     await shots('help-contact');
 
     // Signed in (AC-X-14/15): no requests yet, the form, then a request's thread and the list.
-    await onboardOwner(page, { business: 'Southside Cuts' });
+    const owner = await onboardOwner(page, { business: 'Southside Cuts' });
     await page.goto('/support');
     await expect(page.getByText('No requests yet')).toBeVisible();
     await shots('support-empty');
@@ -1108,5 +1109,28 @@ for (const width of WIDTHS) {
     await page.goto('/support');
     await expect(page.getByRole('link', { name: /Can Randy have his own hours/ })).toBeVisible();
     await shots('support-list', [page.getByText(/^PEP-/), page.getByText(/^· Today, /)]);
+
+    // The support console (S59.2, AC-X-21): this owner is made a Pepper operator for the shots.
+    makeOperator(owner.email);
+    await page.goto(`/ops/threads/${created.id ?? ''}`);
+    await hydrated(page.getByRole('button', { name: 'Save note' }));
+    await shots('ops-thread', [
+      page.getByTestId('ops-thread-reference'),
+      page.getByText(/^Today, .*UTC$/),
+      page.getByText(/^· Southside Cuts$/),
+    ]);
+    const signedOut = await page.request.post('/v1/public/support', {
+      data: { email: 'locked-out@example.test', name: 'Mo', message: 'I can’t sign in to Pepper.' },
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(signedOut.status()).toBe(201);
+    const { reference } = SupportCreatedSchema.parse(await signedOut.json());
+    await page.goto('/ops');
+    await page
+      .getByRole('link', { name: new RegExp(reference) })
+      .first()
+      .click();
+    await hydrated(page.getByRole('button', { name: 'Save note' }));
+    await shots('ops-request', [page.getByText(reference), page.getByText(/UTC$/)]);
   });
 }
