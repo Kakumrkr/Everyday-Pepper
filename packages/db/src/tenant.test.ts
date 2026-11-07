@@ -4,6 +4,8 @@ import type { SQL } from 'drizzle-orm';
 import { describe, expect, it, vi } from 'vitest';
 import type { Database } from './client.js';
 import {
+  isPlatformOperator,
+  withOperator,
   setTransactionTenant,
   setTransactionUser,
   withMember,
@@ -160,5 +162,73 @@ describe('setTransactionTenant / setTransactionUser', () => {
     await expect(setTransactionTenant(open, 'nope' as TenantId)).rejects.toThrow();
     await expect(setTransactionUser(open, 'nope' as UserId)).rejects.toThrow();
     expect(executed).toEqual([]);
+  });
+});
+
+describe('withOperator (S59.2, ADR-0062)', () => {
+  it('opens the access with its log row before the work, as bound parameters', async () => {
+    const { db, tx, executed } = fakeDb();
+    const target = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708194';
+    const result = await withOperator(
+      db,
+      { operatorUserId: USER, action: 'thread.read', targetId: target },
+      (given) => {
+        expect(given).toBe(tx);
+        expect(executed).toHaveLength(1);
+        return Promise.resolve('seen');
+      },
+    );
+    expect(result).toBe('seen');
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- asserted length 1 above
+    const query = new PgDialect().sqlToQuery(executed[0]!);
+    expect(query.sql).toBe('SELECT begin_operator_access($1::uuid, $2::uuid, $3, $4::uuid)');
+    expect(query.params.slice(1)).toEqual([USER, 'thread.read', target]);
+  });
+
+  it('logs an inbox read without a target', async () => {
+    const { db, executed } = fakeDb();
+    await withOperator(db, { operatorUserId: USER, action: 'inbox.read', targetId: null }, () =>
+      Promise.resolve(),
+    );
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- one statement ran
+    expect(new PgDialect().sqlToQuery(executed[0]!).params.slice(1)).toEqual([
+      USER,
+      'inbox.read',
+      null,
+    ]);
+  });
+
+  it.each([
+    [{ operatorUserId: 'nope', action: 'inbox.read', targetId: null }],
+    [{ operatorUserId: USER, action: 'clients.read', targetId: null }],
+    [{ operatorUserId: USER, action: 'thread.read', targetId: "x'; --" }],
+  ])('rejects %j before touching the database', async (access) => {
+    const { db, transaction } = fakeDb();
+    await expect(
+      withOperator(db, access as Parameters<typeof withOperator>[1], () => Promise.resolve()),
+    ).rejects.toThrow();
+    expect(transaction).not.toHaveBeenCalled();
+  });
+});
+
+describe('isPlatformOperator', () => {
+  it('asks the database function, and only says yes to true', async () => {
+    for (const [rows, expected] of [
+      [[{ operator: true }], true],
+      [[{ operator: false }], false],
+      [[], false],
+    ] as const) {
+      const execute = vi.fn(() => Promise.resolve({ rows }));
+      const db = { execute } as unknown as Database;
+      expect(await isPlatformOperator(db, USER)).toBe(expected);
+    }
+  });
+
+  it('rejects a malformed id before asking', async () => {
+    const execute = vi.fn();
+    await expect(
+      isPlatformOperator({ execute } as unknown as Database, 'x' as UserId),
+    ).rejects.toThrow();
+    expect(execute).not.toHaveBeenCalled();
   });
 });

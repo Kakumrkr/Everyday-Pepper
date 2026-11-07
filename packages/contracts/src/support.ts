@@ -173,6 +173,8 @@ export type SupportThreadList = z.infer<typeof SupportThreadListSchema>;
 
 export const SupportThreadSchema = SupportThreadSummarySchema.extend({
   messages: z.array(SupportMessageSchema),
+  /** When the Pepper team last opened it (S59.2, AC-X-22); `null`: not yet. */
+  seenByPepperAt: UtcDateTimeSchema.nullable(),
   /** The email address the team's answers are sent to: the requester's. `null` for others. */
   replyTo: z.string().nullable(),
 });
@@ -204,3 +206,127 @@ export const SupportCreatedSchema = z.object({
   replyTo: z.string(),
 });
 export type SupportCreated = z.infer<typeof SupportCreatedSchema>;
+
+// The operator console (S59.2, ADR-0062, AC-X-19…22): Pepper's own team, across businesses.
+
+/** A public request's status: open (waits on Pepper), answered (by email), solved. */
+export const PublicSupportStatusSchema = z.enum(['open', 'answered', 'solved']);
+export type PublicSupportStatus = z.infer<typeof PublicSupportStatusSchema>;
+
+export const PublicSupportRequestIdSchema = z
+  .uuid()
+  .toLowerCase()
+  .brand<'PublicSupportRequestId'>();
+
+/** The inbox's three views: waiting on Pepper, answered (waiting on them), solved. */
+export const OperatorInboxViewSchema = z.enum(['waiting', 'answered', 'solved']);
+export type OperatorInboxView = z.infer<typeof OperatorInboxViewSchema>;
+
+export const OperatorInboxQuerySchema = z
+  .object({ view: OperatorInboxViewSchema.default('waiting') })
+  .strict();
+export type OperatorInboxQuery = z.input<typeof OperatorInboxQuerySchema>;
+
+export const OperatorInboxItemSchema = z.discriminatedUnion('source', [
+  z.object({
+    source: z.literal('thread'),
+    id: SupportThreadIdSchema,
+    reference: SupportReferenceSchema,
+    kind: SupportKindSchema,
+    status: SupportStatusSchema,
+    /** The business's name. */
+    business: z.string(),
+    preview: z.string(),
+    /** Since when it waits (the oldest message not answered yet), for "3 h waiting". */
+    waitingSince: UtcDateTimeSchema,
+  }),
+  z.object({
+    source: z.literal('public'),
+    id: PublicSupportRequestIdSchema,
+    reference: SupportReferenceSchema,
+    status: PublicSupportStatusSchema,
+    preview: z.string(),
+    waitingSince: UtcDateTimeSchema,
+  }),
+]);
+export type OperatorInboxItem = z.infer<typeof OperatorInboxItemSchema>;
+
+/** `GET /v1/ops/inbox`: the view's requests, the longest waiting first. */
+export const OperatorInboxSchema = z.object({
+  view: OperatorInboxViewSchema,
+  items: z.array(OperatorInboxItemSchema),
+  /** Requests waiting on Pepper, whatever the view. */
+  waiting: z.number().int().nonnegative(),
+});
+export type OperatorInbox = z.infer<typeof OperatorInboxSchema>;
+
+/** A note of the team's, never shown to a member. */
+export const SupportNoteSchema = z.object({
+  id: z.uuid(),
+  /** The operator's name; `null` once their account is gone. */
+  author: z.string().nullable(),
+  body: z.string(),
+  createdAt: UtcDateTimeSchema,
+});
+export type SupportNote = z.infer<typeof SupportNoteSchema>;
+
+/** Who wrote a message, as the console shows it. */
+export const OperatorMessageSchema = z.object({
+  id: z.uuid(),
+  author: z.discriminatedUnion('kind', [
+    z.object({ kind: z.literal('member'), name: z.string().nullable() }).strict(),
+    z.object({ kind: z.literal('pepper') }).strict(),
+  ]),
+  body: z.string(),
+  createdAt: UtcDateTimeSchema,
+});
+export type OperatorMessage = z.infer<typeof OperatorMessageSchema>;
+
+/** `GET /v1/ops/threads/:id`: a business's request, as the console opens it. */
+export const OperatorThreadSchema = z.object({
+  id: SupportThreadIdSchema,
+  reference: SupportReferenceSchema,
+  kind: SupportKindSchema,
+  status: SupportStatusSchema,
+  business: z.string(),
+  /** The opener's name and role; `null` once their account is gone. */
+  openedBy: z.object({ name: z.string(), role: z.string().nullable() }).nullable(),
+  /** What the request was sent with (page, version, browser, setup state): never client data. */
+  context: SupportContextSchema.nullable(),
+  messages: z.array(OperatorMessageSchema),
+  notes: z.array(SupportNoteSchema),
+  createdAt: UtcDateTimeSchema,
+  lastMessageAt: UtcDateTimeSchema,
+});
+export type OperatorThread = z.infer<typeof OperatorThreadSchema>;
+
+/** `GET /v1/ops/requests/:id`: a public request. */
+export const OperatorPublicRequestSchema = z.object({
+  id: PublicSupportRequestIdSchema,
+  reference: SupportReferenceSchema,
+  status: PublicSupportStatusSchema,
+  email: z.string(),
+  name: z.string().nullable(),
+  body: z.string(),
+  page: z.string().nullable(),
+  topic: z.string().nullable(),
+  notes: z.array(SupportNoteSchema),
+  createdAt: UtcDateTimeSchema,
+});
+export type OperatorPublicRequest = z.infer<typeof OperatorPublicRequestSchema>;
+
+/** `POST /v1/ops/…/:id/notes`. */
+export const SupportNoteInputSchema = z.object({ note: SupportMessageTextSchema }).strict();
+export type SupportNoteInput = z.input<typeof SupportNoteInputSchema>;
+
+/** `PATCH /v1/ops/threads/:id`: any status. */
+export const OperatorThreadChangeSchema = z.object({ status: SupportStatusSchema }).strict();
+export type OperatorThreadChange = z.input<typeof OperatorThreadChangeSchema>;
+
+/** `PATCH /v1/ops/requests/:id`: any status. */
+export const OperatorPublicChangeSchema = z.object({ status: PublicSupportStatusSchema }).strict();
+export type OperatorPublicChange = z.input<typeof OperatorPublicChangeSchema>;
+
+/** `GET /v1/ops/me`: the console opens for an operator only. */
+export const OperatorMeSchema = z.object({ operator: z.literal(true), name: z.string() });
+export type OperatorMe = z.infer<typeof OperatorMeSchema>;

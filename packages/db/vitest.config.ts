@@ -15,6 +15,8 @@ export default defineConfig({
         'src/test-support.ts',
         'src/migrate.ts',
         'src/migrate-cli.ts',
+        'src/operators.ts',
+        'src/operator-cli.ts',
         'src/repositories/**',
       ],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },

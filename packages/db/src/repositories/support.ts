@@ -1,22 +1,28 @@
 import {
+  PublicSupportStatusSchema,
   SupportKindSchema,
   SupportReferenceSchema,
   SupportStatusSchema,
   UserIdSchema,
+  type PublicSupportStatus,
   type SupportKind,
   type SupportStatus,
   type UserId,
 } from '@pepper/contracts';
-import { and, asc, desc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, inArray, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import {
+  memberships,
   publicSupportRequests,
   supportMessages,
+  supportNotes,
   supportReads,
   supportThreads,
   users,
 } from '../schema.js';
+import { isUniqueViolation } from '../errors.js';
+import { newId } from '../ids.js';
 import type { TenantTx } from '../tenant.js';
 
 // Support threads (S59, PCR-010, AC-X-14…18). Rows only: who may do what is the core
@@ -360,9 +366,12 @@ export async function insertPublicSupportRequest(
     now: Date;
   },
 ): Promise<{ id: string } | null> {
-  const [row] = await db
-    .insert(publicSupportRequests)
-    .values({
+  // No RETURNING and no ON CONFLICT: the form's role may insert a request but not read one
+  // back, which both need (ADR-0062). A taken reference is a unique violation instead.
+  const id = newId();
+  try {
+    await db.insert(publicSupportRequests).values({
+      id,
       reference: SupportReferenceSchema.parse(input.reference),
       email: input.email,
       name: input.name,
@@ -370,8 +379,295 @@ export async function insertPublicSupportRequest(
       page: input.page,
       topic: input.topic,
       createdAt: input.now,
+    });
+  } catch (error) {
+    if (isUniqueViolation(error, 'public_support_requests_reference_unique')) return null;
+    throw error;
+  }
+  return { id };
+}
+
+// The operator console (S59.2, ADR-0062). These run in `withOperator`, whose `operator_*`
+// policies show support rows of every business; writes to a business's thread bind the
+// transaction to that business first (`setTransactionTenant`) and go through its own policies.
+
+/** A request in the console's inbox: a business's thread or a public one. */
+export interface OperatorInboxRow {
+  source: 'thread' | 'public';
+  id: string;
+  tenantId: string | null;
+  reference: string;
+  kind: SupportKind | null;
+  status: string;
+  preview: string;
+  /** Since when it waits on whoever has to answer next (the oldest unanswered message). */
+  waitingSince: Date;
+  lastMessageAt: Date;
+}
+
+/** Business threads in `statuses`, the longest waiting first. */
+export async function listOperatorThreads(
+  tx: TenantTx,
+  query: { statuses: readonly SupportStatus[]; limit: number },
+): Promise<OperatorInboxRow[]> {
+  const statuses = z.array(SupportStatusSchema).min(1).parse(query.statuses);
+  const limit = z.number().int().min(1).max(500).parse(query.limit);
+  const { rows } = await tx.execute<{
+    id: string;
+    tenant_id: string;
+    reference: string;
+    kind: string;
+    status: string;
+    preview: string | null;
+    waiting_since: string;
+    last_message_at: string;
+  }>(sql`
+    SELECT t.id, t.tenant_id, t.reference, t.kind, t.status, t.last_message_at,
+           (SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m
+             WHERE m.thread_id = t.id ORDER BY m.created_at, m.id LIMIT 1) AS preview,
+           CASE WHEN t.status = 'waiting_on_pepper' THEN COALESCE(
+             (SELECT min(m.created_at) FROM support_messages m
+               WHERE m.thread_id = t.id AND m.author_kind = 'member'
+                 AND m.created_at > COALESCE(
+                   (SELECT max(p.created_at) FROM support_messages p
+                     WHERE p.thread_id = t.id AND p.author_kind = 'pepper'),
+                   '-infinity'::timestamptz)),
+             t.created_at)
+           ELSE t.last_message_at END AS waiting_since
+      FROM support_threads t
+     WHERE t.status IN (${sql.join(
+       statuses.map((status) => sql`${status}`),
+       sql`, `,
+     )})
+     ORDER BY waiting_since, t.id
+     LIMIT ${limit}`);
+  return rows.map((row) => ({
+    source: 'thread',
+    id: row.id,
+    tenantId: row.tenant_id,
+    reference: row.reference,
+    kind: SupportKindSchema.parse(row.kind),
+    status: SupportStatusSchema.parse(row.status),
+    preview: row.preview ?? '',
+    waitingSince: new Date(row.waiting_since),
+    lastMessageAt: new Date(row.last_message_at),
+  }));
+}
+
+/** Public requests in `statuses`, the longest waiting first. */
+export async function listOperatorPublicRequests(
+  tx: TenantTx,
+  query: { statuses: readonly PublicSupportStatus[]; limit: number },
+): Promise<OperatorInboxRow[]> {
+  const statuses = z.array(PublicSupportStatusSchema).min(1).parse(query.statuses);
+  const limit = z.number().int().min(1).max(500).parse(query.limit);
+  const waitingSince = sql<Date>`COALESCE(${publicSupportRequests.statusChangedAt}, ${publicSupportRequests.createdAt})`;
+  const rows = await tx
+    .select({
+      id: publicSupportRequests.id,
+      reference: publicSupportRequests.reference,
+      status: publicSupportRequests.status,
+      preview: sql<string>`left(${publicSupportRequests.body}, ${sql.raw(String(PREVIEW_LENGTH))})`,
+      createdAt: publicSupportRequests.createdAt,
+      statusChangedAt: publicSupportRequests.statusChangedAt,
     })
-    .onConflictDoNothing({ target: publicSupportRequests.reference })
-    .returning({ id: publicSupportRequests.id });
-  return row ?? null;
+    .from(publicSupportRequests)
+    .where(inArray(publicSupportRequests.status, statuses))
+    .orderBy(asc(waitingSince), asc(publicSupportRequests.id))
+    .limit(limit);
+  return rows.map((row) => ({
+    source: 'public',
+    id: row.id,
+    tenantId: null,
+    reference: row.reference,
+    kind: null,
+    status: PublicSupportStatusSchema.parse(row.status),
+    preview: row.preview,
+    waitingSince: row.statusChangedAt ?? row.createdAt,
+    lastMessageAt: row.statusChangedAt ?? row.createdAt,
+  }));
+}
+
+/** The businesses' names for the inbox (`operator_business_names`: nothing else of them). */
+export async function listOperatorBusinessNames(
+  tx: TenantTx,
+  tenantIds: readonly string[],
+): Promise<Map<string, string>> {
+  const ids = z
+    .array(Id)
+    .max(500)
+    .parse([...new Set(tenantIds)]);
+  if (ids.length === 0) return new Map();
+  const { rows } = await tx.execute<{ id: string; name: string }>(
+    sql`SELECT id, name FROM operator_business_names(${`{${ids.join(',')}}`}::uuid[])`,
+  );
+  return new Map(rows.map((row) => [row.id, row.name]));
+}
+
+/** One thread as the console opens it: with its business and the opener's role. */
+export interface OperatorThreadRecord extends SupportThreadRecord {
+  tenantId: string;
+  openedByRole: string | null;
+  pepperSeenAt: Date | null;
+}
+
+export async function findOperatorThread(
+  tx: TenantTx,
+  id: string,
+): Promise<OperatorThreadRecord | undefined> {
+  const [row] = await tx
+    .select({
+      ...threadColumns(null),
+      tenantId: supportThreads.tenantId,
+      pepperSeenAt: supportThreads.pepperSeenAt,
+    })
+    .from(supportThreads)
+    .leftJoin(users, eq(users.id, supportThreads.openedByUserId))
+    .where(eq(supportThreads.id, Id.parse(id)))
+    .limit(1);
+  if (row === undefined) return undefined;
+  const { tenantId, pepperSeenAt, ...thread } = row;
+  return { ...toThreadRecord(thread), tenantId, pepperSeenAt, openedByRole: null };
+}
+
+/** The opener's role in the business; run bound to the thread's business. */
+export async function findSupportOpenerRole(
+  tx: TenantTx,
+  userId: string | null,
+): Promise<string | null> {
+  if (userId === null) return null;
+  const [row] = await tx
+    .select({ role: memberships.role })
+    .from(memberships)
+    .where(eq(memberships.userId, Id.parse(userId)))
+    .limit(1);
+  return row?.role ?? null;
+}
+
+/** Records that Pepper opened the thread (bound to its business). */
+export async function markSupportThreadSeenByPepper(
+  tx: TenantTx,
+  threadId: string,
+  now: Date,
+): Promise<void> {
+  await tx
+    .update(supportThreads)
+    .set({ pepperSeenAt: now })
+    .where(eq(supportThreads.id, Id.parse(threadId)));
+}
+
+/** When Pepper last opened a thread the transaction's member may read. */
+export async function findSupportThreadSeenAt(
+  tx: TenantTx,
+  threadId: string,
+): Promise<Date | null> {
+  const [row] = await tx
+    .select({ seenAt: supportThreads.pepperSeenAt })
+    .from(supportThreads)
+    .where(eq(supportThreads.id, Id.parse(threadId)))
+    .limit(1);
+  return row?.seenAt ?? null;
+}
+
+export interface PublicSupportRequestRecord {
+  id: string;
+  reference: string;
+  email: string;
+  name: string | null;
+  body: string;
+  page: string | null;
+  topic: string | null;
+  status: PublicSupportStatus;
+  createdAt: Date;
+  statusChangedAt: Date | null;
+}
+
+/** One public request; `lock` holds it for a status change. */
+export async function findPublicSupportRequest(
+  tx: TenantTx,
+  id: string,
+  options: { lock?: boolean } = {},
+): Promise<PublicSupportRequestRecord | undefined> {
+  const query = tx
+    .select({
+      id: publicSupportRequests.id,
+      reference: publicSupportRequests.reference,
+      email: publicSupportRequests.email,
+      name: publicSupportRequests.name,
+      body: publicSupportRequests.body,
+      page: publicSupportRequests.page,
+      topic: publicSupportRequests.topic,
+      status: publicSupportRequests.status,
+      createdAt: publicSupportRequests.createdAt,
+      statusChangedAt: publicSupportRequests.statusChangedAt,
+    })
+    .from(publicSupportRequests)
+    .where(eq(publicSupportRequests.id, Id.parse(id)))
+    .limit(1);
+  const [row] = options.lock === true ? await query.for('update') : await query;
+  return row === undefined
+    ? undefined
+    : { ...row, status: PublicSupportStatusSchema.parse(row.status) };
+}
+
+export async function setPublicSupportRequestStatus(
+  tx: TenantTx,
+  id: string,
+  status: PublicSupportStatus,
+  now: Date,
+): Promise<void> {
+  await tx
+    .update(publicSupportRequests)
+    .set({ status: PublicSupportStatusSchema.parse(status), statusChangedAt: now })
+    .where(eq(publicSupportRequests.id, Id.parse(id)));
+}
+
+export interface SupportNoteRecord {
+  id: string;
+  authorUserId: string | null;
+  authorName: string | null;
+  body: string;
+  createdAt: Date;
+}
+
+type NoteTarget = { threadId: string } | { publicRequestId: string };
+
+/** The team's notes on a request, oldest first (an operator transaction only). */
+export async function listSupportNotes(
+  tx: TenantTx,
+  target: NoteTarget,
+): Promise<SupportNoteRecord[]> {
+  return tx
+    .select({
+      id: supportNotes.id,
+      authorUserId: supportNotes.authorUserId,
+      authorName: users.name,
+      body: supportNotes.body,
+      createdAt: supportNotes.createdAt,
+    })
+    .from(supportNotes)
+    .leftJoin(users, eq(users.id, supportNotes.authorUserId))
+    .where(
+      'threadId' in target
+        ? eq(supportNotes.threadId, Id.parse(target.threadId))
+        : eq(supportNotes.publicRequestId, Id.parse(target.publicRequestId)),
+    )
+    .orderBy(asc(supportNotes.createdAt), asc(supportNotes.id));
+}
+
+export async function insertSupportNote(
+  tx: TenantTx,
+  input: NoteTarget & { authorUserId: UserId; body: string; now: Date },
+): Promise<{ id: string }> {
+  const id = newId();
+  await tx.insert(supportNotes).values({
+    id,
+    ...('threadId' in input
+      ? { threadId: Id.parse(input.threadId) }
+      : { publicRequestId: Id.parse(input.publicRequestId) }),
+    authorUserId: UserIdSchema.parse(input.authorUserId),
+    body: input.body,
+    createdAt: input.now,
+  });
+  return { id };
 }

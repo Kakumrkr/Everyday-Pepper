@@ -63,6 +63,17 @@ function jobScan(
   });
 }
 
+/**
+ * Support rows a Pepper operator reads across businesses (S59.2, ADR-0062): only in a
+ * transaction holding its own row of the operator access log (`begin_operator_access`), so a
+ * read can't happen without its record. Defined in migration 0068; evaluated once a statement.
+ */
+const operatorAccess = sql`(SELECT current_operator_id()) IS NOT NULL`;
+
+function operatorRead(): ReturnType<typeof pgPolicy> {
+  return pgPolicy('operator_read', { for: 'select', using: operatorAccess });
+}
+
 function memberRead(using: SQL): ReturnType<typeof pgPolicy> {
   return pgPolicy('member_read', {
     for: 'select',
@@ -330,7 +341,12 @@ export const memberships = pgTable(
   ],
 );
 
-export const auditActorKind = pgEnum('audit_actor_kind', ['user', 'system', 'ai_on_behalf_of']);
+export const auditActorKind = pgEnum('audit_actor_kind', [
+  'user',
+  'system',
+  'ai_on_behalf_of',
+  'operator',
+]);
 
 /**
  * What changed in a business, who changed it and when (ADR-0013). Append-only: the services
@@ -364,7 +380,7 @@ export const auditLog = pgTable(
     // deleted. Written without naming the new kind, which a migration's own transaction can't use.
     check(
       'audit_log_system_has_no_user',
-      sql`${table.actorKind} <> 'system' OR ${table.actorUserId} IS NULL`,
+      sql`${table.actorKind} IN ('user', 'ai_on_behalf_of') OR ${table.actorUserId} IS NULL`,
     ),
     check('audit_log_request_id_length', sql`length(${table.requestId}) <= 128`),
     // Newest-first pages per tenant.
@@ -2714,6 +2730,8 @@ export const supportThreads = pgTable(
     context: jsonb('context').notNull(),
     lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
     solvedAt: timestamp('solved_at', { withTimezone: true }),
+    /** When a Pepper operator last opened it (S59.2, AC-X-22): "Seen by Pepper". */
+    pepperSeenAt: timestamp('pepper_seen_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -2744,6 +2762,7 @@ export const supportThreads = pgTable(
       using: sql`${memberSeesAll} OR opened_by_user_id = ${currentUserId}`,
       withCheck: sql`${memberSeesAll} OR opened_by_user_id = ${currentUserId}`,
     }),
+    operatorRead(),
   ],
 );
 
@@ -2787,6 +2806,7 @@ export const supportMessages = pgTable(
       using: sql`thread_id IN (SELECT id FROM support_threads)`,
       withCheck: sql`thread_id IN (SELECT id FROM support_threads)`,
     }),
+    operatorRead(),
   ],
 );
 
@@ -2842,10 +2862,24 @@ export const publicSupportRequests = pgTable(
     body: text('body').notNull(),
     page: text('page'),
     topic: text('topic'),
+    /** S59.2 (AC-X-21): open → answered (the team wrote back by email) → solved. */
+    status: text('status').notNull().default('open'),
+    statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     index('public_support_requests_created_idx').on(table.createdAt),
+    check(
+      'public_support_requests_status_known',
+      sql`${table.status} IN ('open', 'answered', 'solved')`,
+    ),
+    // Anyone may send the form; only an operator in a logged transaction reads or moves it.
+    pgPolicy('public_submit', { for: 'insert', withCheck: sql`true` }),
+    pgPolicy('operator_access', {
+      for: 'all',
+      using: operatorAccess,
+      withCheck: operatorAccess,
+    }),
     check(
       'public_support_requests_reference_format',
       sql`${table.reference} ~ '^PEP-[0-9A-HJKMNP-TV-Z]{6}$'`,
@@ -2868,3 +2902,75 @@ export const publicSupportRequests = pgTable(
 );
 export type SupportThreadRow = typeof supportThreads.$inferSelect;
 export type SupportMessageRow = typeof supportMessages.$inferSelect;
+
+/**
+ * Pepper's operators (S59.2, ADR-0062): the accounts that may open the support console. Granted
+ * and revoked only by the `operator` script on the migration role; the services' role has no
+ * privilege on it and asks `is_platform_operator()` instead.
+ */
+export const platformOperators = pgTable('platform_operators', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  grantedAt: timestamp('granted_at', { withTimezone: true }).notNull().defaultNow(),
+  /** Who granted it and why, as typed to the script. */
+  note: text('note').notNull(),
+});
+
+/**
+ * Every operator access (S59.2, AC-X-22), written by `begin_operator_access` in the transaction
+ * of the access itself (`txid`). Kept when the business or the account goes. Ids only.
+ */
+export const operatorAccessLog = pgTable(
+  'operator_access_log',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    operatorUserId: uuid('operator_user_id').notNull(),
+    action: text('action').notNull(),
+    targetId: uuid('target_id'),
+    txid: bigint('txid', { mode: 'bigint' }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('operator_access_log_txid_idx').on(table.txid, table.operatorUserId),
+    index('operator_access_log_created_idx').on(table.createdAt),
+    check(
+      'operator_access_log_action_known',
+      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status')`,
+    ),
+  ],
+);
+
+/**
+ * The team's internal notes on a request (S59.2, AC-X-21): on a business thread or a public
+ * request, never shown to a member (only an operator's logged transaction reaches them).
+ * Append-only; gone with their request.
+ */
+export const supportNotes = pgTable(
+  'support_notes',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    threadId: uuid('thread_id').references(() => supportThreads.id, { onDelete: 'cascade' }),
+    publicRequestId: uuid('public_request_id').references(() => publicSupportRequests.id, {
+      onDelete: 'cascade',
+    }),
+    authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('support_notes_thread_idx').on(table.threadId, table.createdAt),
+    index('support_notes_public_idx').on(table.publicRequestId, table.createdAt),
+    index('support_notes_author_idx').on(table.authorUserId),
+    check(
+      'support_notes_one_request',
+      sql`(${table.threadId} IS NULL) <> (${table.publicRequestId} IS NULL)`,
+    ),
+    check('support_notes_body_length', sql`length(${table.body}) BETWEEN 1 AND 4000`),
+    pgPolicy('operator_access', {
+      for: 'all',
+      using: operatorAccess,
+      withCheck: operatorAccess,
+    }),
+  ],
+);

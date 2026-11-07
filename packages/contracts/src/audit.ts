@@ -43,6 +43,9 @@ export const AuditActorSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('user'), userId: UserIdSchema }).strict(),
   z.object({ kind: z.literal('ai_on_behalf_of'), userId: UserIdSchema }).strict(),
   z.object({ kind: z.literal('system') }).strict(),
+  // The Pepper team in the support console (S59.2, ADR-0062): no person is named to the
+  // business; the operator access log holds who it was.
+  z.object({ kind: z.literal('operator') }).strict(),
 ]);
 export type AuditActor = z.infer<typeof AuditActorSchema>;
 
@@ -653,6 +656,23 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: z.object({ status: z.literal('solved') }).strict(),
     })
     .strict(),
+  // The Pepper team opened a request (S59.2, AC-X-22), or moved it to any status.
+  z
+    .object({
+      action: z.literal('support_thread.seen'),
+      entity: entity('support_thread'),
+      before: z.null(),
+      after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('support_thread.status_changed'),
+      entity: entity('support_thread'),
+      before: z.object({ status: SupportStatusSchema }).strict(),
+      after: z.object({ status: SupportStatusSchema }).strict(),
+    })
+    .strict(),
 ]);
 export type AuditChange = z.infer<typeof AuditChangeSchema>;
 export type AuditAction = AuditChange['action'];
@@ -663,7 +683,7 @@ export const AuditLogEntrySchema = z
     id: z.uuid(),
     at: UtcDateTimeSchema,
     actor: z.object({
-      kind: z.enum(['user', 'ai_on_behalf_of', 'system']),
+      kind: z.enum(['user', 'ai_on_behalf_of', 'system', 'operator']),
       userId: UserIdSchema.nullable(),
     }),
   })

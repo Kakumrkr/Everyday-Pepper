@@ -477,6 +477,13 @@
       "when": 1794021798557,
       "tag": "0067_support",
       "breakpoints": true
+    },
+    {
+      "idx": 68,
+      "version": "7",
+      "when": 1794057417376,
+      "tag": "0068_operator_console",
+      "breakpoints": true
     }
   ]
 }

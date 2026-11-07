@@ -9,6 +9,7 @@ import {
 import { sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from './client.js';
+import { newId } from './ids.js';
 
 /** A transaction bound to one tenant: RLS limits every statement in it to that tenant's rows. */
 export type TenantTx = Parameters<Parameters<Database['transaction']>[0]>[0];
@@ -132,4 +133,58 @@ export async function withJobScan<T>(
     },
     { accessMode: 'read only' },
   );
+}
+
+/** What an operator transaction is for (S59.2, ADR-0062), as its access log row names it. */
+export type OperatorAction =
+  | 'inbox.read'
+  | 'thread.read'
+  | 'thread.reply'
+  | 'thread.note'
+  | 'thread.status'
+  | 'public.read'
+  | 'public.note'
+  | 'public.status';
+
+const OperatorActionSchema = z.enum([
+  'inbox.read',
+  'thread.read',
+  'thread.reply',
+  'thread.note',
+  'thread.status',
+  'public.read',
+  'public.note',
+  'public.status',
+]);
+
+/**
+ * Runs `work` as a Pepper operator (S59.2, ADR-0062): `begin_operator_access` first checks the
+ * grant and writes the access log row for `access`, in this transaction, and only then do the
+ * `operator_*` policies show support rows of every business (threads, messages, notes, public
+ * requests; nothing else). A thrown error rolls the access and its row back together.
+ * `operatorUserId` must come from the authenticated session (`OperatorGuard`).
+ */
+export async function withOperator<T>(
+  db: Database,
+  access: { operatorUserId: UserId; action: OperatorAction; targetId: string | null },
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  const operator = UserIdSchema.parse(access.operatorUserId);
+  const action = OperatorActionSchema.parse(access.action);
+  const target = access.targetId === null ? null : z.uuid().parse(access.targetId);
+  return db.transaction(async (tx) => {
+    await tx.execute(
+      sql`SELECT begin_operator_access(${newId()}::uuid, ${operator}::uuid, ${action}, ${target}::uuid)`,
+    );
+    return work(tx);
+  });
+}
+
+/** Whether `userId` holds the operator grant (`is_platform_operator`, ADR-0062). */
+export async function isPlatformOperator(db: Database, userId: UserId): Promise<boolean> {
+  const id = UserIdSchema.parse(userId);
+  const { rows } = await db.execute<{ operator: boolean }>(
+    sql`SELECT is_platform_operator(${id}::uuid) AS operator`,
+  );
+  return rows[0]?.operator === true;
 }

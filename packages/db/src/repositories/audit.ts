@@ -31,7 +31,7 @@ export async function appendAuditEntry(tx: TenantTx, input: AuditEntryInput): Pr
   const change = AuditChangeSchema.parse(input.change);
   await tx.insert(auditLog).values({
     actorKind: actor.kind,
-    actorUserId: actor.kind === 'system' ? null : actor.userId,
+    actorUserId: actor.kind === 'system' || actor.kind === 'operator' ? null : actor.userId,
     action: change.action,
     entityType: change.entity.type,
     entityId: change.entity.id,
