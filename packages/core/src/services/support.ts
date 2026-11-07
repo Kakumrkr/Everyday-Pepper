@@ -38,6 +38,7 @@ import {
   listSupportThreads as listSupportThreadRows,
   listTenantMembers,
   lockSupportThread,
+  lockSupportWriter,
   markSupportThreadRead,
   setSupportThreadStatus,
   withMember,
@@ -435,6 +436,7 @@ async function checkLimits(
   now: Date,
   writing: 'thread' | 'message',
 ): Promise<void> {
+  await lockSupportWriter(tx, userId);
   const counts = await countSupportWrites(tx, userId, new Date(now.getTime() - DAY_MS));
   if (writing === 'thread' && counts.threads >= SUPPORT_THREADS_PER_DAY) {
     throw new SupportLimitReachedError('threads');

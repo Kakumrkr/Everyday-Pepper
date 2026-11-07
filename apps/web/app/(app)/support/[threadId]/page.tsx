@@ -1,7 +1,7 @@
 import { SupportThreadSchema } from '@pepper/contracts';
 import type { Metadata } from 'next';
 import { SUPPORT_PATHS } from '../../../../lib/support';
-import { TextLink } from '../../../_components/auth-page';
+import { PlainLink } from '../../../_components/help/help-link';
 import { SupportThreadView } from '../../../_components/support/support-thread';
 import { currentAccount, currentBusiness, currentJson } from '../../../_server/account';
 
@@ -32,12 +32,15 @@ export default async function SupportThreadPage({
         );
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-5">
-      <TextLink href={SUPPORT_PATHS.list}>Your requests</TextLink>
+      <PlainLink href={SUPPORT_PATHS.list} back>
+        Your requests
+      </PlainLink>
       {thread === null ? (
         <div className="flex flex-col gap-2">
-          <h1 className="m-0 type-display">Request not found</h1>
+          <h1 className="m-0 type-display">I couldn’t open this request</h1>
           <p className="m-0 type-body text-ink-2">
-            It may belong to someone else on your team, or to another business.
+            Try again in a moment. If it still doesn’t open, it may be someone else’s on your team,
+            or another business’s: your own are all in Your requests.
           </p>
         </div>
       ) : (

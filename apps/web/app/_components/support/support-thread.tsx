@@ -3,7 +3,7 @@
 import { SUPPORT_MESSAGE_MAX, SupportThreadSchema, type SupportThread } from '@pepper/contracts';
 import { Badge, Button, cx, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
-import { useId, useState, type SubmitEvent } from 'react';
+import { useEffect, useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { SUPPORT_KIND_LABEL, SUPPORT_STATUS, authorLabel, supportTime } from '../../../lib/support';
@@ -29,6 +29,11 @@ export function SupportThreadView({
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [now] = useState(() => Date.now());
   const status = SUPPORT_STATUS[thread.status];
+  // The shell's unread count may have been read before this page marked the answers read (a
+  // layout and its page load side by side): read it again once, now that they are.
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
 
   function take(data: unknown): boolean {
     const parsed = SupportThreadSchema.safeParse(data);
@@ -107,7 +112,7 @@ export function SupportThreadView({
               </span>
               <p
                 className={cx(
-                  'm-0 max-w-[88%] rounded-lg px-4 py-3 type-body break-words whitespace-pre-wrap text-ink',
+                  'm-0 max-w-11/12 rounded-lg px-4 py-3 type-body break-words whitespace-pre-wrap text-ink',
                   pepper ? 'border border-line bg-surface' : 'bg-brand-soft',
                 )}
               >

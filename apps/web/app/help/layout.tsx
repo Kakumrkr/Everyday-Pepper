@@ -17,7 +17,7 @@ export default function HelpLayout({ children }: { children: ReactNode }) {
         <Link
           href={HELP_PATH}
           aria-label="Pepper help centre"
-          className={cx('no-underline', FOCUS_RING)}
+          className={cx('inline-flex min-h-11 items-center no-underline', FOCUS_RING)}
         >
           <Logo />
         </Link>

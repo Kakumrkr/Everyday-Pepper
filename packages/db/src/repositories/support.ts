@@ -288,6 +288,17 @@ export async function countUnreadSupportThreads(tx: TenantTx, reader: UserId): P
   return rows[0]?.count ?? 0;
 }
 
+/**
+ * Holds `userId`'s support writes in the business until the transaction ends, so two requests
+ * sent at once count each other against the day's limits (AC-X-14).
+ */
+export async function lockSupportWriter(tx: TenantTx, userId: UserId): Promise<void> {
+  const id = UserIdSchema.parse(userId);
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtextextended('support:' || current_tenant_id()::text || ':' || ${id}, 0))`,
+  );
+}
+
 /** What `userId` wrote in the business since `since`: threads opened and messages. */
 export async function countSupportWrites(
   tx: TenantTx,

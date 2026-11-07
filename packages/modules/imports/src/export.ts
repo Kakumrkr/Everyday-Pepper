@@ -153,6 +153,13 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
     ),
   ];
   const at = (date: Date) => date.toISOString();
+  // Each thread's messages, in their order, grouped once (support.json, S59).
+  const supportMessages = new Map<string, BusinessExportData['support']['messages']>();
+  for (const message of data.support.messages) {
+    const list = supportMessages.get(message.threadId) ?? [];
+    list.push(message);
+    supportMessages.set(message.threadId, list);
+  }
   const jsonFiles: [string, string][] = [
     [
       'business.json',
@@ -234,13 +241,11 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
           kind: thread.kind,
           status: thread.status,
           openedAt: at(thread.createdAt),
-          messages: data.support.messages
-            .filter((message) => message.threadId === thread.id)
-            .map((message) => ({
-              from: message.authorKind === 'pepper' ? 'Pepper team' : 'Your team',
-              text: message.body,
-              at: at(message.createdAt),
-            })),
+          messages: (supportMessages.get(thread.id) ?? []).map((message) => ({
+            from: message.authorKind === 'pepper' ? 'Pepper team' : 'Your team',
+            text: message.body,
+            at: at(message.createdAt),
+          })),
         })),
       ),
     ],

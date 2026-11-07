@@ -1,8 +1,9 @@
+import { HelpArticleSlugSchema } from '@pepper/contracts';
 import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import { HELP_PATH } from '../../../lib/help';
 import { newRequestHref } from '../../../lib/support';
-import { TextLink } from '../../_components/auth-page';
+import { PlainLink } from '../../_components/help/help-link';
 import { PublicSupportForm } from '../../_components/help/public-support-form';
 import { currentAccount } from '../../_server/account';
 
@@ -18,13 +19,15 @@ type Query = Record<string, string | string[] | undefined>;
 export default async function HelpContactPage({ searchParams }: { searchParams: Promise<Query> }) {
   const query = await searchParams;
   const raw = query['topic'];
-  const topic = typeof raw === 'string' && /^[a-z0-9-]{1,80}$/.test(raw) ? raw : null;
+  const topic = HelpArticleSlugSchema.safeParse(raw).success ? (raw as string) : null;
   if ((await currentAccount()).state === 'signed-in') {
     redirect(newRequestHref({ page: '/help/contact', ...(topic !== null && { topic }) }));
   }
   return (
     <>
-      <TextLink href={HELP_PATH}>All help</TextLink>
+      <PlainLink href={HELP_PATH} back>
+        All help
+      </PlainLink>
       <header className="flex flex-col gap-2">
         <h1 className="m-0 type-display">Write to us</h1>
         <p className="m-0 type-body text-ink-2">

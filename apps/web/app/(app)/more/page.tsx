@@ -1,4 +1,4 @@
-import { DeletionStatusSchema, FeedResponseSchema, SupportUnreadSchema } from '@pepper/contracts';
+import { DeletionStatusSchema, FeedResponseSchema } from '@pepper/contracts';
 import { Badge, buttonStyle, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
@@ -16,7 +16,12 @@ import { kitLink } from '../../_components/kit-link';
 import { NotificationsCard } from '../../_components/push/notifications-card';
 import { ReviewLinkSetting } from '../../_components/feed/review-link-setting';
 import { MailingAddressSetting } from '../../_components/feed/mailing-address-setting';
-import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
+import {
+  currentAccount,
+  currentBusiness,
+  currentJson,
+  currentSupportUnread,
+} from '../../_server/account';
 
 // Per request: the page depends on the session cookie.
 export const dynamic = 'force-dynamic';
@@ -42,9 +47,9 @@ export default async function MorePage() {
   const [businessDeletion, accountDeletion, support] = await Promise.all([
     current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
     currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
-    current === null ? null : currentJson('/v1/support/unread', SupportUnreadSchema),
+    current === null ? null : currentSupportUnread(),
   ]);
-  const unread = support?.unread ?? 0;
+  const unread = support ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
   const businessDueAt = businessDeletion?.dueAt ?? null;
   const accountDueAt = accountDeletion?.dueAt ?? null;

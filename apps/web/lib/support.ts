@@ -1,8 +1,9 @@
-import type {
-  SupportAuthor,
-  SupportContextInput,
-  SupportKind,
-  SupportStatus,
+import {
+  SupportContextInputSchema,
+  type SupportAuthor,
+  type SupportContextInput,
+  type SupportKind,
+  type SupportStatus,
 } from '@pepper/contracts';
 
 // "Tell us what went wrong" and "Your requests" (S59, PCR-010, AC-X-14…16): the words the
@@ -54,34 +55,32 @@ export function authorLabel(author: SupportAuthor): string {
   }
 }
 
-const APP_PATH = /^\/(?!\/)[A-Za-z0-9\-._~/%]*$/;
-const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-const ERROR_REF = /^[A-Za-z0-9._:-]{1,100}$/;
-
 /**
  * The context of a new request from the address's query (`?from=/clients/import&topic=…&error=…`)
- * and the screen's size: only values of the shapes the api takes, so a pasted link can't fill
- * in anything else. The rest (version, browser, setup) the server adds.
+ * and the screen's size: each value only when the api's own schema takes it, so a pasted link
+ * can't fill in anything else. The rest (version, browser, setup) the server adds.
  */
 export function supportContext(
   query: { from?: string | null; topic?: string | null; error?: string | null },
   viewport: { width: number; height: number } | null,
 ): SupportContextInput {
-  const page = query.from ?? null;
-  const topic = query.topic ?? null;
-  const error = query.error ?? null;
-  return {
-    ...(page !== null && page.length <= 200 && APP_PATH.test(page) && { page }),
-    ...(topic !== null && topic.length <= 80 && SLUG.test(topic) && { topic }),
-    ...(error !== null && ERROR_REF.test(error) && { errorRef: error }),
-    ...(viewport !== null &&
-      viewport.width >= 1 &&
-      viewport.height >= 1 && {
-        viewport: {
+  const fields = SupportContextInputSchema.shape;
+  const page = fields.page.safeParse(query.from ?? undefined);
+  const topic = fields.topic.safeParse(query.topic ?? undefined);
+  const errorRef = fields.errorRef.safeParse(query.error ?? undefined);
+  const size = fields.viewport.safeParse(
+    viewport === null
+      ? undefined
+      : {
           width: Math.min(10_000, Math.round(viewport.width)),
           height: Math.min(10_000, Math.round(viewport.height)),
         },
-      }),
+  );
+  return {
+    ...(page.success && page.data !== undefined && { page: page.data }),
+    ...(topic.success && topic.data !== undefined && { topic: topic.data }),
+    ...(errorRef.success && errorRef.data !== undefined && { errorRef: errorRef.data }),
+    ...(size.success && size.data !== undefined && { viewport: size.data }),
   };
 }
 

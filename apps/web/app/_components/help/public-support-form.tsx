@@ -1,11 +1,16 @@
 'use client';
 
-import { SUPPORT_MESSAGE_MAX, SupportCreatedSchema, type SupportCreated } from '@pepper/contracts';
+import {
+  HelpArticleSlugSchema,
+  SUPPORT_MESSAGE_MAX,
+  SupportCreatedSchema,
+  type SupportCreated,
+} from '@pepper/contracts';
 import { Button, Input, Textarea } from '@pepper/ui';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { TextLink } from '../auth-page';
+import { PlainLink } from './help-link';
 import { Notice } from '../form-parts';
 import { HELP_PATH } from '../../../lib/help';
 
@@ -50,7 +55,7 @@ export function PublicSupportForm({ topic }: { topic: string | null }) {
       message,
       ...(name !== '' && { name }),
       ...(website !== '' && { website }),
-      ...(topic !== null && /^[a-z0-9-]{1,80}$/.test(topic) && { topic }),
+      ...(topic !== null && HelpArticleSlugSchema.safeParse(topic).success && { topic }),
       page: '/help/contact',
     });
     setBusy(false);
@@ -84,7 +89,7 @@ export function PublicSupportForm({ topic }: { topic: string | null }) {
           . A person on the Pepper team will write to{' '}
           <span className="font-semibold break-all">{created.replyTo}</span> the same day.
         </p>
-        <TextLink href={HELP_PATH}>Back to the help centre</TextLink>
+        <PlainLink href={HELP_PATH}>Back to the help centre</PlainLink>
       </section>
     );
   }
@@ -111,7 +116,7 @@ export function PublicSupportForm({ topic }: { topic: string | null }) {
         error={errors.message}
       />
       {/* A field people never see; a bot that fills it in is quietly ignored (AC-X-17). */}
-      <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
+      <div aria-hidden="true" className="sr-only">
         <label>
           Website
           <input name="website" type="text" tabIndex={-1} autoComplete="off" />

@@ -1,6 +1,11 @@
 import { headers } from 'next/headers';
 import { cache } from 'react';
-import type { CurrentBusinessResponse, Invite, Member } from '@pepper/contracts';
+import {
+  SupportUnreadSchema,
+  type CurrentBusinessResponse,
+  type Invite,
+  type Member,
+} from '@pepper/contracts';
 import type { z } from 'zod';
 import {
   loadAccount,
@@ -74,3 +79,13 @@ export async function publicPage(slug: string): Promise<PublicPage> {
     forwardedFor: (await headers()).get('x-forwarded-for'),
   });
 }
+
+/**
+ * The member's unread support answers (S59, AC-X-16), once per request: the shell and More both
+ * show it. `null` when the api can't say (no count is shown then).
+ */
+export const currentSupportUnread = cache(async (): Promise<number | null> => {
+  return (
+    (await loadJson('/v1/support/unread', SupportUnreadSchema, await callOptions()))?.unread ?? null
+  );
+});

@@ -175,7 +175,10 @@ export function SupportForm({
         </Button>
         <Link
           href={SUPPORT_PATHS.list}
-          className={cx('type-label text-ink-2 underline underline-offset-4', FOCUS_RING)}
+          className={cx(
+            'inline-flex min-h-11 items-center type-label text-ink-2 underline underline-offset-4',
+            FOCUS_RING,
+          )}
         >
           Your requests
         </Link>

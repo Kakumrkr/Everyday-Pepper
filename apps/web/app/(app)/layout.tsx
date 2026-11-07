@@ -8,8 +8,7 @@ import { MANIFEST_URL } from '../../lib/pwa';
 import { AppNav } from '../_components/app-nav';
 import { ServiceWorker } from '../_components/service-worker';
 import { Unavailable } from '../_components/unavailable';
-import { SupportUnreadSchema } from '@pepper/contracts';
-import { currentAccount, currentBusiness, currentJson } from '../_server/account';
+import { currentAccount, currentBusiness, currentSupportUnread } from '../_server/account';
 
 // Per request: the shell depends on the session cookie.
 export const dynamic = 'force-dynamic';
@@ -35,10 +34,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const step = requiredStep(account);
   if (step !== null) redirect(step);
   if (account.state !== 'signed-in') return <Unavailable />;
-  const current = await currentBusiness();
-  // Unread support answers (S59, AC-X-16); a failed read shows no count rather than an error.
-  const support =
-    current === null ? null : await currentJson('/v1/support/unread', SupportUnreadSchema);
+  // Unread support answers (S59, AC-X-16), read beside the business; a failed read (or no
+  // business) shows no count rather than an error.
+  const [current, unread] = await Promise.all([currentBusiness(), currentSupportUnread()]);
 
   // One place for toasts (S43): above the tabs on phones, so a note stays in view.
   return (
@@ -47,7 +45,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <AppNav
           nav={appNav(current?.permissions ?? null)}
           businessName={current?.business.name ?? null}
-          supportUnread={support?.unread ?? 0}
+          supportUnread={current === null ? 0 : (unread ?? 0)}
         />
         <main
           className={cx(

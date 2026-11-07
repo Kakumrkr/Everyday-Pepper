@@ -10,7 +10,7 @@ import {
   type HelpBlock,
 } from '../../../lib/help';
 import { newRequestHref } from '../../../lib/support';
-import { TextLink } from '../../_components/auth-page';
+import { PlainLink } from '../../_components/help/help-link';
 import { currentAccount } from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
@@ -39,7 +39,9 @@ export default async function HelpArticlePage({ params }: { params: Params }) {
   ).slice(0, 2);
   return (
     <>
-      <TextLink href={HELP_PATH}>All help</TextLink>
+      <PlainLink href={HELP_PATH} back>
+        All help
+      </PlainLink>
       <article className="flex flex-col gap-5">
         <header className="flex flex-col gap-2">
           <p className="m-0 type-caption text-ink-2">{article.topic}</p>
@@ -68,9 +70,9 @@ export default async function HelpArticlePage({ params }: { params: Params }) {
         <nav aria-label="More on this" className="flex flex-col gap-2">
           <p className="m-0 type-label text-ink-2">More on {article.topic.toLowerCase()}</p>
           {related.map((other) => (
-            <TextLink key={other.slug} href={`${HELP_PATH}/${other.slug}`}>
+            <PlainLink key={other.slug} href={`${HELP_PATH}/${other.slug}`}>
               {other.title}
-            </TextLink>
+            </PlainLink>
           ))}
         </nav>
       )}
