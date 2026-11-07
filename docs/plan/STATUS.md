@@ -1,25 +1,20 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59 done; next **S59.2** (operator console); S57 waits for the domain
+**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.2 done; next **S59.2.2** (console part 2); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S59.2 operator console** (branch `claude/dreamy-lovelace-joo4sz`). Brief approved: "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 `platform_operators` + script; D-3 definer functions, log row in the same transaction; D-4 both logs; D-5 three statuses, public open/answered/solved; D-6 `/ops` + `v1/ops/*`).
-- [x] 1 ACs AC-X-19…22, playbook/PCR/STATUS rows.
-- [x] 2 Migration 0068 (grants, access log, notes, public status, `operator_*` policies), `withOperator`, `operator` script; db operator 14/14, isolation+export+deletion+migrate 453/453.
-- [x] 3 Core `operator-support.ts` (inbox oldest first, read/reply/note/status, audit `operator`); int 7/7, S59 support 12/12.
-- [x] 4 `/v1/ops/*` + `OperatorGuard` (grant + MFA); api support 23/23.
-- [ ] 5 web `/ops` · [ ] 6 Seen by Pepper on the thread · ADR-0062 · close.
+Nothing in progress. Next: **S59.2.2** (console part 2) from "Planned sessions".
 ## Last sessions
+- **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md), [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Full entry in [session-log.md](session-log.md).
+  - **Built:** migration 0068 (grants, access log, notes, `operator_*` policies needing the access row in the same transaction), `operator` script, `/v1/ops/*` (grant + MFA), `/ops` inbox oldest first with the wait in words, replies, notes, every status, "Seen by Pepper"; AC-X-19…22.
+  - **Checks:** `pnpm check` green; affected integration 22/22 (db 782, core 216); ops 1/1, support+help 4/4, screens' support test 3/3.
 - **S59 Phase 13 · Help centre and support threads, owner side (2026-11-07)** ([PCR-010](changes/PCR-010.md), branch `claude/youthful-dijkstra-9hsw6i`). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0067 (threads, messages, reads, public requests; staff own, owners and managers all), `/v1/support/*` and the public form, 5 a day under a lock, `SUPPORT_EMAIL` with `Reply-To`, `support.json` in the export; Your requests, the thread, the unread badge; the help centre (15 articles, search, contact) and help links; AC-X-13…18.
   - **Checks:** `pnpm check` green; affected integration 22/22 (db 768); support 2/2, help 2/2, screens 30/30 twice with headless shell 1248.
-- **S56b Phase 12 "b" · Recorded on the real model, Phase 12 gate (2026-11-06)** ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84), with S56a and S56a.2; ADR-0060/0061 results). Full entry in [session-log.md](session-log.md).
-  - **Recorded:** $0.81 of $3.00; probe fixes (prompt v9, the suggester's instructions, `get_feed` v6); every gate met; pass^3 100% on the gated sets (import_mapping 7/8 over 0.8); `KNOWN_REAL_MODEL_MISSES` empty; top-up: the preview says only the counts there are.
-  - **Gate:** Phase 12 met (C1 8, C5 8, C8 9, scorecard §8). Checks: `pnpm check`, affected integration 22/22 (ai 194/194), import 4/4 + screens 6/6.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -36,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.2 (user, 2026-11-07):** at the brief "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 grants by script; D-3 the access row in the same transaction; D-4 both logs; D-5 statuses; D-6 `/ops`). **Claude:** MFA for operators; no mail to typed addresses; notes operator-only, not exported; one "seen" an hour; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S59 (user, 2026-11-07):** S57 waits for the domain; build our own support system "production ready, like big companies", in the S59 series ([PCR-010](changes/PCR-010.md)). Full wording in [decisions.md](decisions.md).
 - **S56b (user, 2026-11-06):** at the brief "Pre-approved with your recommendations, complete the session" (D-1 no split; D-2 zeros dropped in both sentences; D-3 guards unchanged; D-4 results in the ADRs); "Allow, these 12 only" (`--max-cost 2`). **Claude:** the probe's 5 fixes; graders fitted then tightened; `EVAL_PHASE` required; C1 scored 8. Full wording in [decisions.md](decisions.md).
 - **S56a.2 (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 no split; D-2 the screen asks once by itself; D-3 shape-masked samples, untrusted names; D-4 a field or none; D-5 ADR-0061). **Claude:** stored on the batch's columns, no migration; `@pepper/ai` may import `@pepper/imports`; the `import_mapping` set; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
@@ -92,11 +88,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.2 | Operator console: role, inbox (oldest first, age in words), replies, notes, statuses (ADR-0062) | 13 | Every status reachable; reads audited |
 | S59.2.2 | Console part 2: saved replies, auto-close, overdue reminder, 👍/👎, screenshots | 13 | Job + isolation tests |
 | S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
