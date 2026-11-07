@@ -61,15 +61,20 @@ describe('the eval fixtures hold only made-up contacts (S56a)', () => {
     );
   });
 
+  // Hundreds of files: read side by side, and a limit fit for a CI runner busy with every
+  // package's suite at once (it passed the 5 s default here and timed out in CI, S59.2).
   it('finds none in the cases, cassettes, retrieval sets or the seeded world', async () => {
     const files = (await Promise.all(SCANNED.map((path) => filesUnder(join(root, path))))).flat();
     expect(files.length).toBeGreaterThan(100);
-    const found: string[] = [];
-    for (const file of files) {
-      for (const contact of realLookingContacts(await readFile(file, 'utf8'))) {
-        found.push(`${file.slice(root.length)}: ${contact}`);
-      }
-    }
+    const found = (
+      await Promise.all(
+        files.map(async (file) =>
+          realLookingContacts(await readFile(file, 'utf8')).map(
+            (contact) => `${file.slice(root.length)}: ${contact}`,
+          ),
+        ),
+      )
+    ).flat();
     expect(found).toEqual([]);
-  });
+  }, 60_000);
 });
