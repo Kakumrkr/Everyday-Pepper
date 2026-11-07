@@ -76,3 +76,11 @@ S59 gave every business support threads that only its own members can read. Some
 4. **The console (AC-X-30).** Operators read screenshots through `withOperator` with the action `screenshot.read`: one access-log row per image served, in the same transaction (the `operator_read` policy needs it). Opening the thread lists them without serving the bytes. The inbox counts each request's sent screenshots.
 5. **Export and deletion (AC-X-31).** The export zip has `support/screenshots/<id>.webp` (the full width), named in `support.json` on its message. The business's deletion removes the objects through the worker's `beforeBusinessDeleted` hook, next to the photos; the rows go by cascade.
 6. **A storage port (layer rules).** `packages/core` may import only contracts and db, so support's screenshots go through a `ScreenshotStorage` port defined in core (check and remake, put, get, delete). `createScreenshotStore(objectStore)` in `@pepper/storage` is its adapter; the api, the worker and the export wire it in, as the outbox's `Mailer` is wired.
+
+### Built (S59.2.3)
+- db: migration 0070, `repositories/support-screenshots.ts`, screenshot counts on threads and the inbox.
+- storage: the `screenshot` kind, `screenshotObjectKey`, `createScreenshotStore`.
+- core: `services/support-screenshots.ts` (the port, upload, attach, reads, sweep, deletion, export reads); attach in `openSupportThread`/`replyToSupportThread`; `readOperatorScreenshotImage`.
+- api: `ScreenshotStoreModule`, `/v1/support/screenshots`, `/v1/ops/screenshots/:id`; worker: the sweep and the deletion hook; imports: images in the export.
+- web: the screenshot picker, `MessageScreenshots`, the counts.
+- Tests: `support-screenshots.int.test.ts` (db, core), `isolation.int.test.ts`, `screenshots.test.ts`/`images.test.ts` (storage), `screenshots.controller.test.ts`, `photos.int.test.ts`, `export.test.ts`, `jobs.module.test.ts`, `support.spec.ts`, `ops.spec.ts`, `screens.spec.ts`.
