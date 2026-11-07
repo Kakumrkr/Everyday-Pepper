@@ -195,9 +195,7 @@ export const SupportThreadSchema = SupportThreadSummarySchema.extend({
   /** Who solved it (S59.2.2); `null` while open. `auto`: "Closed after 7 quiet days". */
   solvedBy: SupportSolvedBySchema.nullable(),
   /** "Did this help?": asked of the opener only, once solved (AC-X-26). */
-  rating: z
-    .object({ canRate: z.boolean(), value: SupportRatingSchema.nullable() })
-    .strict(),
+  rating: z.object({ canRate: z.boolean(), value: SupportRatingSchema.nullable() }).strict(),
   /** The email address the team's answers are sent to: the requester's. `null` for others. */
   replyTo: z.string().nullable(),
 });
@@ -383,11 +381,7 @@ export type SupportSavedReplyList = z.infer<typeof SupportSavedReplyListSchema>;
 /** `POST /v1/ops/replies`, `PUT /v1/ops/replies/:id`. */
 export const SupportSavedReplyInputSchema = z
   .object({
-    title: z
-      .string()
-      .trim()
-      .min(1, 'Give it a title.')
-      .max(80, 'Keep the title to 80 characters.'),
+    title: z.string().trim().min(1, 'Give it a title.').max(80, 'Keep the title to 80 characters.'),
     body: SupportMessageTextSchema,
   })
   .strict();
