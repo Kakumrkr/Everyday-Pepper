@@ -1,5 +1,6 @@
 import {
   SupportCreatedSchema,
+  SupportSavedReplyListSchema,
   ClientSchema,
   CurrentBusinessResponseSchema,
   ServiceSchema,
@@ -78,6 +79,38 @@ async function fixUndoDay(page: Page): Promise<void> {
 
 const SCHEMES = ['light', 'dark'] as const;
 const SHOT = { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.01 } as const;
+/**
+ * A part of a screen whose surroundings are shared data (S59.2.2: the team's saved replies):
+ * clipped to its box at whole pixels, so where the list puts it doesn't change the image's size.
+ */
+/** Deletes the team's saved replies titled `title`, so reruns don't fill the list (max 100). */
+async function deleteSavedReplies(page: Page, title: string): Promise<void> {
+  const listed = SupportSavedReplyListSchema.parse(
+    await (await page.request.get('/v1/ops/replies')).json(),
+  );
+  for (const reply of listed.replies.filter((row) => row.title === title)) {
+    const removed = await page.request.delete(`/v1/ops/replies/${reply.id}`, {
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(removed.status()).toBe(204);
+  }
+}
+
+async function partShot(page: Page, part: Locator, name: string): Promise<void> {
+  await part.scrollIntoViewIfNeeded();
+  const box = await part.boundingBox();
+  if (box === null) throw new Error(`${name}: not on the screen`);
+  await expect.soft(page).toHaveScreenshot(name, {
+    animations: 'disabled',
+    maxDiffPixelRatio: 0.01,
+    clip: {
+      x: Math.floor(box.x),
+      y: Math.floor(box.y),
+      width: Math.ceil(box.width),
+      height: Math.ceil(box.height),
+    },
+  });
+}
 
 // The widths are set here, so one project is enough.
 test.beforeEach(async ({ context }) => {
@@ -1119,8 +1152,56 @@ for (const width of WIDTHS) {
       page.getByText(/^Today, .*UTC$/),
       page.getByText(/^· Southside Cuts$/),
     ]);
+    // S59.2.2 (AC-X-26): solved by the team, the requester is asked whether it helped.
+    const solved = await page.request.patch(`/v1/ops/threads/${created.id ?? ''}`, {
+      data: { status: 'solved' },
+      headers: { origin: new URL(page.url()).origin },
+    });
+    expect(solved.status()).toBe(200);
+    await page.goto(`/support/${created.id ?? ''}`);
+    await hydrated(page.getByRole('button', { name: 'Not helpful', exact: true }));
+    await shots('support-thread-solved', [
+      page.getByTestId('support-thread-reference'),
+      page.getByText(/^Today, /),
+      page.getByTestId('support-thread-seen'),
+    ]);
+    // The team's saved replies (AC-X-23) are shared by every operator, so only the form and
+    // this test's own reply are shot, not the list around them.
+    await page.goto('/ops/replies');
+    await hydrated(page.getByRole('button', { name: 'Save reply' }));
+    const addForm = page.getByRole('region', { name: 'Add a saved reply' });
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await partShot(page, addForm, `ops-replies-add-${String(width)}-${scheme}.png`);
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+    // Titled to sort first, above anything the team (or another test) has saved.
+    await page.getByLabel('Title', { exact: true }).fill('A barber’s own hours');
+    await page
+      .getByLabel('Reply', { exact: true })
+      .fill('Hi {first name}, open Team, pick the barber and set their hours.');
+    await page.getByRole('button', { name: 'Save reply' }).click();
+    await expect(page.getByRole('status')).toContainText('Saved “A barber’s own hours”.');
+    if (phone) {
+      await expectTapTargets(page, 'ops-replies');
+      const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(wide, 'ops-replies scrolls sideways').toBeLessThanOrEqual(width);
+    }
+    const ownReply = page.getByRole('listitem').first();
+    await expect(ownReply).toContainText('A barber’s own hours');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await partShot(page, ownReply, `ops-replies-item-${String(width)}-${scheme}.png`);
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+    await deleteSavedReplies(page, 'A barber’s own hours');
     const signedOut = await page.request.post('/v1/public/support', {
-      data: { email: 'locked-out@example.test', name: 'Mo', message: 'I can’t sign in to Pepper.' },
+      // Its own address each run: the form takes 3 an hour per email (AC-X-17).
+      data: {
+        email: `locked-out-${unique('mo')}@example.test`,
+        name: 'Mo',
+        message: 'I can’t sign in to Pepper.',
+      },
       headers: { origin: new URL(page.url()).origin },
     });
     expect(signedOut.status()).toBe(201);
@@ -1131,6 +1212,10 @@ for (const width of WIDTHS) {
       .first()
       .click();
     await hydrated(page.getByRole('button', { name: 'Save note' }));
-    await shots('ops-request', [page.getByText(reference), page.getByText(/UTC$/)]);
+    await shots('ops-request', [
+      page.getByText(reference),
+      page.getByText(/UTC$/),
+      page.getByText(/^locked-out-.*@example\.test$/),
+    ]);
   });
 }

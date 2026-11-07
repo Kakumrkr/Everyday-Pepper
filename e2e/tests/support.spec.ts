@@ -103,6 +103,17 @@ test('support (AC-X-14/15): an owner asks from More, the team hears, the owner r
   await page.getByRole('button', { name: 'Mark as solved' }).click();
   await expect(page.getByText('Solved', { exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Mark as solved' })).toHaveCount(0);
+  // AC-X-26: the opener is asked once it's solved; the answer can change; a reply reopens it
+  // and the question goes.
+  const notHelpful = page.getByRole('button', { name: 'Not helpful', exact: true });
+  await notHelpful.click();
+  await expect(notHelpful).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Helpful', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Helpful', exact: true })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  );
+  await expect(notHelpful).toHaveAttribute('aria-pressed', 'false');
 
   await page.getByRole('link', { name: 'Your requests' }).click();
   await expect(page).toHaveURL(/\/support$/);

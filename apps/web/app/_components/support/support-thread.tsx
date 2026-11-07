@@ -1,7 +1,13 @@
 'use client';
 
-import { SUPPORT_MESSAGE_MAX, SupportThreadSchema, type SupportThread } from '@pepper/contracts';
-import { Badge, Button, cx, Textarea } from '@pepper/ui';
+import {
+  SUPPORT_MESSAGE_MAX,
+  SUPPORT_QUIET_DAYS,
+  SupportThreadSchema,
+  type SupportRating,
+  type SupportThread,
+} from '@pepper/contracts';
+import { Badge, Button, cx, FOCUS_RING, Icon, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useEffect, useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
@@ -24,7 +30,7 @@ export function SupportThreadView({
   const ids = useId();
   const router = useRouter();
   const [thread, setThread] = useState(initial);
-  const [busy, setBusy] = useState<'reply' | 'solve' | null>(null);
+  const [busy, setBusy] = useState<'reply' | 'solve' | 'rate' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [now] = useState(() => Date.now());
@@ -74,6 +80,18 @@ export function SupportThreadView({
     const result = await sendJson('PATCH', `/v1/support/threads/${thread.id}`, {
       status: 'solved',
     });
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.message);
+      return;
+    }
+    take(result.data);
+  }
+
+  async function rate(rating: SupportRating) {
+    setError(null);
+    setBusy('rate');
+    const result = await sendJson('PUT', `/v1/support/threads/${thread.id}/rating`, { rating });
     setBusy(null);
     if (!result.ok) {
       setError(result.message);
@@ -138,9 +156,20 @@ export function SupportThreadView({
           Did that answer it? Reply if not, or mark it solved.
         </p>
       ) : thread.status === 'solved' ? (
-        <p className="m-0 rounded-md bg-ok-soft px-4 py-3 type-body text-ink">
-          Solved. Reply below if it comes back, and we’ll pick it up again.
-        </p>
+        <div className="flex flex-col gap-3 rounded-md bg-ok-soft px-4 py-3">
+          <p className="m-0 type-body text-ink" data-testid="support-thread-solved">
+            {thread.solvedBy === 'auto'
+              ? `Closed after ${String(SUPPORT_QUIET_DAYS)} quiet days. Reply below if it isn’t sorted, and we’ll pick it up again.`
+              : 'Solved. Reply below if it comes back, and we’ll pick it up again.'}
+          </p>
+          {thread.rating.canRate ? (
+            <RateHelp
+              value={thread.rating.value}
+              busy={busy !== null}
+              onRate={(rating) => void rate(rating)}
+            />
+          ) : null}
+        </div>
       ) : (
         <p className="m-0 type-caption text-ink-2">
           We answer the same day
@@ -180,6 +209,60 @@ export function SupportThreadView({
           )}
         </div>
       </form>
+    </div>
+  );
+}
+
+const RATINGS: readonly { value: SupportRating; label: string; icon: 'thumbUp' | 'thumbDown' }[] = [
+  { value: 'helpful', label: 'Helpful', icon: 'thumbUp' },
+  { value: 'not_helpful', label: 'Not helpful', icon: 'thumbDown' },
+];
+
+/**
+ * "Did this help?" (S59.2.2, AC-X-26): two toggle buttons, words beside the thumbs, the chosen
+ * one pressed; changeable until the request opens again.
+ */
+function RateHelp({
+  value,
+  busy,
+  onRate,
+}: {
+  value: SupportRating | null;
+  busy: boolean;
+  onRate: (rating: SupportRating) => void;
+}) {
+  const ids = useId();
+  return (
+    <div role="group" aria-labelledby={`${ids}-ask`} className="flex flex-col gap-2">
+      <p id={`${ids}-ask`} className="m-0 type-label text-ink">
+        {value === null ? 'Did this help?' : 'Thanks for telling us. You can change it.'}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {RATINGS.map((option) => {
+          const pressed = value === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={pressed}
+              disabled={busy}
+              onClick={() => {
+                if (!pressed) onRate(option.value);
+              }}
+              className={cx(
+                'inline-flex min-h-11 items-center gap-2 rounded-pill border px-4 type-label',
+                pressed
+                  ? 'border-ink bg-surface text-ink'
+                  : 'border-line-strong bg-transparent text-ink-2 hover:text-ink',
+                FOCUS_RING,
+              )}
+            >
+              <Icon name={option.icon} />
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -3,14 +3,16 @@
 import {
   OperatorThreadSchema,
   SUPPORT_MESSAGE_MAX,
+  SUPPORT_QUIET_DAYS,
   type OperatorThread,
+  type SupportSavedReply,
   type SupportStatus,
 } from '@pepper/contracts';
-import { Badge, Button, cx, DetailTable, Segmented, Textarea } from '@pepper/ui';
-import { useId, useState, type SubmitEvent } from 'react';
+import { Badge, Button, cx, DetailTable, Icon, Segmented, Select, Textarea } from '@pepper/ui';
+import { useId, useRef, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
-import { OPS_THREAD_STATUS } from '../../../lib/ops';
+import { fillSavedReply, OPS_RATING, OPS_THREAD_STATUS } from '../../../lib/ops';
 import { SUPPORT_KIND_LABEL, supportTime } from '../../../lib/support';
 import { Notice } from '../form-parts';
 import { OpsNotes } from './ops-notes';
@@ -26,10 +28,18 @@ function isStatus(value: string): value is SupportStatus {
 /**
  * A business's request in the console (S59.2, AC-X-21): who sent it and with what, the
  * conversation (the business on the left, the team on the right), the reply that reaches the
- * requester, the team's notes, and every status.
+ * requester (a saved reply may start it, S59.2.2), the team's notes, and every status; once
+ * solved, how and whether it helped (AC-X-24/26).
  */
-export function OpsThreadView({ initial }: { initial: OperatorThread }) {
+export function OpsThreadView({
+  initial,
+  savedReplies,
+}: {
+  initial: OperatorThread;
+  savedReplies: readonly SupportSavedReply[];
+}) {
   const ids = useId();
+  const replyForm = useRef<HTMLFormElement>(null);
   const [thread, setThread] = useState(initial);
   const [busy, setBusy] = useState<'reply' | 'note' | 'status' | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +85,18 @@ export function OpsThreadView({ initial }: { initial: OperatorThread }) {
     }
   }
 
+  /** Puts a saved reply in the reply box, for the operator to edit and send (AC-X-23). */
+  function applySaved(replyId: string) {
+    const saved = savedReplies.find((reply) => reply.id === replyId);
+    const box = replyForm.current?.elements.namedItem('message');
+    if (saved === undefined || !(box instanceof HTMLTextAreaElement)) return;
+    box.value = fillSavedReply(saved.body, thread.openedBy?.name ?? null);
+    setFieldError(undefined);
+    box.focus();
+  }
+
   const context = thread.context;
+  const rating = thread.rating === null ? null : OPS_RATING[thread.rating];
   return (
     <div className="flex flex-col gap-6">
       <header className="flex flex-col gap-2">
@@ -92,6 +113,18 @@ export function OpsThreadView({ initial }: { initial: OperatorThread }) {
               ? 'A former team member'
               : `${thread.openedBy.name}${thread.openedBy.role === null ? '' : `, ${thread.openedBy.role}`}`}
           </span>
+          {thread.solvedBy === 'auto' ? (
+            <span>· Closed after {SUPPORT_QUIET_DAYS} quiet days</span>
+          ) : null}
+          {rating === null ? null : (
+            <Badge tone={rating.tone}>
+              <Icon
+                name={thread.rating === 'helpful' ? 'thumbUp' : 'thumbDown'}
+                className="size-4"
+              />
+              {rating.label}
+            </Badge>
+          )}
         </p>
       </header>
       {context === null ? null : (
@@ -146,6 +179,7 @@ export function OpsThreadView({ initial }: { initial: OperatorThread }) {
         })}
       </ol>
       <form
+        ref={replyForm}
         noValidate
         aria-labelledby={`${ids}-reply`}
         onSubmit={(event) => void reply(event)}
@@ -154,6 +188,19 @@ export function OpsThreadView({ initial }: { initial: OperatorThread }) {
         <h2 id={`${ids}-reply`} className="sr-only">
           Reply
         </h2>
+        {/* The same picker whatever the team has saved (added under "Saved replies"). */}
+        <Select
+          label="Use a saved reply"
+          hint="It goes in the box below for you to edit."
+          value=""
+          options={[
+            { value: '', label: 'Choose one' },
+            ...savedReplies.map((saved) => ({ value: saved.id, label: saved.title })),
+          ]}
+          onChange={(event) => {
+            applySaved(event.currentTarget.value);
+          }}
+        />
         <Textarea
           label="Reply to the business"
           hint="They see it in the app and by email."

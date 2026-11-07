@@ -1,8 +1,11 @@
 import {
   OperatorMeSchema,
+  SAVED_REPLY_FIRST_NAME,
+  SUPPORT_OVERDUE_HOURS,
   type OperatorInboxView,
   type OperatorMe,
   type PublicSupportStatus,
+  type SupportRating,
   type SupportReference,
   type SupportStatus,
 } from '@pepper/contracts';
@@ -13,6 +16,7 @@ import { errorCodeOf } from './client-api';
 
 export const OPS_PATHS = {
   inbox: '/ops',
+  replies: '/ops/replies',
   view: (view: OperatorInboxView) => (view === 'waiting' ? '/ops' : `/ops?view=${view}`),
   thread: (id: string) => `/ops/threads/${id}`,
   request: (id: string) => `/ops/requests/${id}`,
@@ -71,7 +75,32 @@ export function waitingWords(view: OperatorInboxView, since: string, now: number
 
 /** Waited past the same day we promise (AC-X-14's "we answer the same day"): 4 h and more. */
 export function waitedLong(since: string, now: number): boolean {
-  return now - Date.parse(since) >= 4 * HOUR;
+  return now - Date.parse(since) >= SUPPORT_OVERDUE_HOURS * HOUR;
+}
+
+/**
+ * What the inbox says of a request waiting past the same-day promise (S59.2.2, AC-X-25): in
+ * words, not only in colour. `null` in the other views and under 4 h.
+ */
+export function overdueNote(view: OperatorInboxView, since: string, now: number): string | null {
+  return view === 'waiting' && waitedLong(since, now)
+    ? `Over ${String(SUPPORT_OVERDUE_HOURS)} h: answer next`
+    : null;
+}
+
+/** The opener's "Did this help?" in the console's words (AC-X-26). */
+export const OPS_RATING: Readonly<Record<SupportRating, { label: string; tone: 'ok' | 'warn' }>> = {
+  helpful: { label: 'Helpful', tone: 'ok' },
+  not_helpful: { label: 'Not helpful', tone: 'warn' },
+};
+
+/**
+ * A saved reply ready to edit (AC-X-23): `{first name}` becomes the requester's first name, or
+ * "there" ("Hi there,") when there is none.
+ */
+export function fillSavedReply(body: string, requesterName: string | null): string {
+  const first = requesterName?.trim().split(/\s+/)[0] ?? '';
+  return body.split(SAVED_REPLY_FIRST_NAME).join(first === '' ? 'there' : first);
 }
 
 /**

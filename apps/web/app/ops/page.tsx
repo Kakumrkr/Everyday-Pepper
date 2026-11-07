@@ -1,13 +1,15 @@
 import { OperatorInboxSchema, type OperatorInboxView } from '@pepper/contracts';
-import { Badge, cx, EmptyState, FOCUS_RING, List, ListRow } from '@pepper/ui';
+import { Badge, cx, EmptyState, FOCUS_RING, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { SUPPORT_KIND_LABEL } from '../../lib/support';
 import {
   OPS_PATHS,
   OPS_PUBLIC_STATUS,
+  OPS_RATING,
   OPS_THREAD_STATUS,
   OPS_VIEWS,
   opsView,
+  overdueNote,
   waitedLong,
   waitingWords,
 } from '../../lib/ops';
@@ -27,7 +29,9 @@ const EMPTY: Readonly<Record<OperatorInboxView, { title: string; body: string }>
 
 /**
  * The inbox (S59.2, AC-X-20): every request waiting on the team, from every business and the
- * public form, the one that has waited longest first, with how long in words.
+ * public form, the one that has waited longest first, with how long in words; past the same-day
+ * promise it says so in words too ("Over 4 h: answer next", S59.2.2). Solved requests show the
+ * requester's "Did this help?" (AC-X-26).
  */
 export default async function OpsInboxPage({
   searchParams,
@@ -92,6 +96,8 @@ export default async function OpsInboxPage({
                 ? OPS_THREAD_STATUS[item.status]
                 : OPS_PUBLIC_STATUS[item.status];
             const late = view === 'waiting' && waitedLong(item.waitingSince, now);
+            const note = overdueNote(view, item.waitingSince, now);
+            const rating = item.source === 'thread' && item.rating !== null ? item.rating : null;
             return (
               <ListRow
                 key={item.id}
@@ -108,12 +114,26 @@ export default async function OpsInboxPage({
                     >
                       {waitingWords(view, item.waitingSince, now)}
                     </span>
+                    {note === null ? null : (
+                      <Badge tone="warn" className="font-semibold">
+                        <span data-testid="ops-overdue">{note}</span>
+                      </Badge>
+                    )}
                     <span>· {item.source === 'thread' ? item.business : 'Signed-out'}</span>
                     <span className="tabular-nums">· {item.reference}</span>
                     {item.source === 'thread' ? (
                       <span>· {SUPPORT_KIND_LABEL[item.kind]}</span>
                     ) : null}
                     {view === 'waiting' ? null : <Badge tone={status.tone}>{status.label}</Badge>}
+                    {rating === null ? null : (
+                      <Badge tone={OPS_RATING[rating].tone}>
+                        <Icon
+                          name={rating === 'helpful' ? 'thumbUp' : 'thumbDown'}
+                          className="size-4"
+                        />
+                        {OPS_RATING[rating].label}
+                      </Badge>
+                    )}
                   </span>
                 }
               />

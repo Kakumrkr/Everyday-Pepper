@@ -54,7 +54,19 @@ export default async function OpsLayout({ children }: { children: ReactNode }) {
           <Logo />
           <span className="type-label text-ink-2">Support</span>
         </Link>
-        <span className="truncate type-caption text-ink-2">{me.name}</span>
+        <nav aria-label="Console" className="flex min-w-0 items-center gap-3">
+          <Link
+            href={OPS_PATHS.replies}
+            className={cx(
+              'inline-flex min-h-11 items-center type-label whitespace-nowrap text-brand underline-offset-4 hover:underline',
+              FOCUS_RING,
+            )}
+          >
+            Saved replies
+          </Link>
+          {/* Who is signed in, from a tablet up; a phone's header keeps the link whole. */}
+          <span className="hidden truncate type-caption text-ink-2 sm:inline">{me.name}</span>
+        </nav>
       </header>
       <main className="mx-auto flex w-full min-w-0 max-w-3xl flex-col gap-6 px-4 pt-6 pb-16 sm:px-6">
         {children}
