@@ -4,6 +4,8 @@ import {
   BookingRulesResponseSchema,
 } from '@pepper/contracts';
 import type { Metadata } from 'next';
+import { HELP_LINKS } from '../../../lib/help';
+import { HelpLink } from '../../_components/help/help-link';
 import { AutonomySettings } from '../../_components/autonomy/autonomy-settings';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
@@ -65,6 +67,7 @@ function AutonomyHeader() {
         Choose what I do on my own. Start careful and give me more room as you get comfortable. I
         can suggest changes, but only you can make them here, and every change is logged.
       </p>
+      <HelpLink article={HELP_LINKS.autonomy} />
     </header>
   );
 }

@@ -52,6 +52,8 @@ export const OutboxEmailSchema = z.object({
     .url({ protocol: /^https?$/ })
     .max(500)
     .optional(),
+  /** Where a reply goes, when not to the sender (S59: support mail, AC-X-14/16). */
+  replyTo: z.email().max(254).optional(),
 });
 export type OutboxEmail = z.infer<typeof OutboxEmailSchema>;
 export type OutboxEmailInput = z.input<typeof OutboxEmailSchema>;

@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { profileFields, profileFromFields, type ProfileFields } from '../../../lib/booking-profile';
 import { sendJson } from '../../../lib/client-api';
+import { HELP_LINKS } from '../../../lib/help';
+import { HelpLink } from '../help/help-link';
 import { Notice } from '../form-parts';
 
 /**
@@ -47,9 +49,12 @@ export function BookingPageCard({
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-3">
-      <h2 id={headingId} className="m-0 type-heading">
-        Your booking page
-      </h2>
+      <div className="flex flex-wrap items-center justify-between gap-x-4">
+        <h2 id={headingId} className="m-0 type-heading">
+          Your booking page
+        </h2>
+        <HelpLink article={HELP_LINKS.bookingPage} />
+      </div>
       <div className="flex flex-col gap-3 rounded-lg bg-surface p-4">
         <p className="m-0 type-body text-ink-2">
           Clients book here themselves, after confirming their email.{' '}

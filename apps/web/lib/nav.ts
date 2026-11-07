@@ -7,6 +7,8 @@ export interface NavItem {
   href: string;
   label: string;
   icon: IconName;
+  /** New things there (S59: unread support answers on More). */
+  badge?: number | undefined;
 }
 
 /** The app's places for one role, grouped as the shell shows them (S41, AC-X-5). */

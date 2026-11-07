@@ -4,6 +4,8 @@ import {
   MemorySettingsSchema,
 } from '@pepper/contracts';
 import type { Metadata } from 'next';
+import { HELP_LINKS } from '../../../lib/help';
+import { HelpLink } from '../../_components/help/help-link';
 import { MemoryScreen } from '../../_components/memory/memory-screen';
 import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
 
@@ -35,6 +37,7 @@ export default async function MemoryPage() {
           anything that’s wrong. When you delete something, I forget it everywhere, chats included,
           and it can’t be undone.
         </p>
+        <HelpLink article={HELP_LINKS.memory} />
       </header>
       {current === null || facts === null || episodes === null || settings === null ? (
         <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">

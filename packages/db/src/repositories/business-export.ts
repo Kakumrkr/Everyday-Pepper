@@ -13,6 +13,7 @@ import {
   workingHours,
 } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
+import { listSupportForExport } from './support.js';
 
 // A business's export (S51, ADR-0053, AC-W1-37): everything the owner can take with them, read
 // in the business's own transaction (RLS keeps it to its rows). Each table is read with the
@@ -66,6 +67,9 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   insight_runs: 'Pepper’s working state',
   insight_requests: 'Pepper’s working state',
   activation_events: 'Pepper’s record of a business’s first steps',
+  support_threads: true,
+  support_messages: true,
+  support_reads: 'when each member last opened a support request',
 };
 
 /** What a business's export holds, as read. */
@@ -161,6 +165,11 @@ export interface BusinessExportData {
     createdAt: Date;
     updatedAt: Date;
   }[];
+  /** Requests to the Pepper team (S59, AC-X-18) and their messages, the team's included. */
+  support: {
+    threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
+    messages: { threadId: string; authorKind: string; body: string; createdAt: Date }[];
+  };
 }
 
 /**
@@ -323,5 +332,6 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
     bookings: bookingRows,
     waitlist,
     facts,
+    support: await listSupportForExport(tx),
   };
 }

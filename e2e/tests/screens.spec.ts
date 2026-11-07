@@ -1,4 +1,5 @@
 import {
+  SupportCreatedSchema,
   ClientSchema,
   CurrentBusinessResponseSchema,
   ServiceSchema,
@@ -1045,4 +1046,67 @@ async function expectImportActionAtTheBottom(page: Page): Promise<void> {
   if (box === null) return;
   expect(box.y + box.height, 'the actions near the bottom').toBeGreaterThan(height - 160);
   expect(box.y + box.height, 'the actions on the screen').toBeLessThanOrEqual(height);
+}
+
+for (const width of WIDTHS) {
+  test(`The help centre and support at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(240_000);
+    await page.setViewportSize({ width, height: 900 });
+    const phone = width === 375;
+    const shots = async (name: string, mask: ReturnType<Page['locator']>[] = []) => {
+      if (phone) {
+        await expectTapTargets(page, name);
+        const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+        expect(wide, `${name} scrolls sideways`).toBeLessThanOrEqual(width);
+      }
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+      }
+      await page.emulateMedia({ colorScheme: 'light' });
+    };
+
+    // Signed out (S59, AC-X-13/17): the help centre, an article and the public form.
+    await page.goto('/help');
+    await expect(page.getByRole('heading', { name: 'How can we help?', level: 1 })).toBeVisible();
+    await shots('help');
+    await page.goto('/help/import-clients');
+    await expect(page.getByRole('heading', { name: 'Still stuck?' })).toBeVisible();
+    await shots('help-article');
+    await page.goto('/help/contact');
+    await hydrated(page.getByRole('button', { name: 'Send to Pepper' }));
+    await shots('help-contact');
+
+    // Signed in (AC-X-14/15): no requests yet, the form, then a request's thread and the list.
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    await page.goto('/support');
+    await expect(page.getByText('No requests yet')).toBeVisible();
+    await shots('support-empty');
+    await page.goto('/support/new?from=%2Fmore');
+    await hydrated(page.getByRole('button', { name: 'Send to Pepper' }));
+    await shots('support-new', [page.getByText(/@example\.test/)]);
+    const created = await post(
+      page,
+      '/v1/support/threads',
+      {
+        kind: 'question',
+        message: 'Can Randy have his own hours on Saturdays?',
+        context: { page: '/team' },
+      },
+      SupportCreatedSchema,
+    );
+    await page.goto(`/support/${created.id ?? ''}`);
+    await expect(page.getByText('Waiting on Pepper')).toBeVisible();
+    // The reference and the times change every run.
+    await shots('support-thread', [
+      page.getByTestId('support-thread-reference'),
+      page.getByText(/^Today, /),
+      page.getByText(/@example\.test/),
+    ]);
+    await page.goto('/support');
+    await expect(page.getByRole('link', { name: /Can Randy have his own hours/ })).toBeVisible();
+    await shots('support-list', [page.getByText(/^PEP-/), page.getByText(/^· Today, /)]);
+  });
 }

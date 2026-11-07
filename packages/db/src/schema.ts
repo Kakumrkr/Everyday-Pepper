@@ -2688,3 +2688,183 @@ export const clientImportRefs = pgTable(
 );
 export type ImportBatchRow = typeof importBatches.$inferSelect;
 export type ImportRowRow = typeof importRows.$inferSelect;
+
+/**
+ * A support request of a member (S59, PCR-010, AC-X-14/15): a thread the Pepper team answers.
+ * The person who opened it reads it, and so do the business's owners and managers (policy
+ * `member_scope`: they see every record of the business); other staff don't. `reference` is
+ * what people quote ("PEP-7K3Q9D"), unique across businesses. `context` is what was added to
+ * the request (`SupportContextSchema`: the page, the version, the browser, the setup state):
+ * never client data. The opener is NULL once their account is deleted; the thread stays.
+ */
+export const supportThreads = pgTable(
+  'support_threads',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    reference: text('reference').notNull().unique(),
+    kind: text('kind').notNull(),
+    status: text('status').notNull().default('waiting_on_pepper'),
+    openedByUserId: uuid('opened_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    context: jsonb('context').notNull(),
+    lastMessageAt: timestamp('last_message_at', { withTimezone: true }).notNull().defaultNow(),
+    solvedAt: timestamp('solved_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    unique('support_threads_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('support_threads_recent_idx').on(table.tenantId, table.lastMessageAt),
+    index('support_threads_opened_by_idx').on(table.openedByUserId),
+    check(
+      'support_threads_reference_format',
+      sql`${table.reference} ~ '^PEP-[0-9A-HJKMNP-TV-Z]{6}$'`,
+    ),
+    check('support_threads_kind_known', sql`${table.kind} IN ('problem', 'question', 'idea')`),
+    check(
+      'support_threads_status_known',
+      sql`${table.status} IN ('waiting_on_pepper', 'pepper_replied', 'solved')`,
+    ),
+    check(
+      'support_threads_solved_at',
+      sql`(${table.status} = 'solved') = (${table.solvedAt} IS NOT NULL)`,
+    ),
+    check(
+      'support_threads_context_size',
+      sql`jsonb_typeof(${table.context}) = 'object' AND length(${table.context}::text) <= 2000`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${memberSeesAll} OR opened_by_user_id = ${currentUserId}`,
+      withCheck: sql`${memberSeesAll} OR opened_by_user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
+/**
+ * One message of a support thread (S59, AC-X-15/16): a member's (`member`, the writer NULL once
+ * their account is deleted) or the Pepper team's (`pepper`, never a user). Append-only for the
+ * services; gone with its thread. A member reaches the messages of the threads they reach.
+ */
+export const supportMessages = pgTable(
+  'support_messages',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    threadId: uuid('thread_id').notNull(),
+    authorKind: text('author_kind').notNull(),
+    authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
+    body: text('body').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('support_messages_thread_idx').on(table.tenantId, table.threadId, table.createdAt),
+    index('support_messages_author_idx').on(table.authorUserId),
+    check('support_messages_author_known', sql`${table.authorKind} IN ('member', 'pepper')`),
+    check(
+      'support_messages_pepper_has_no_user',
+      sql`${table.authorKind} = 'member' OR ${table.authorUserId} IS NULL`,
+    ),
+    check('support_messages_body_length', sql`length(${table.body}) BETWEEN 1 AND 4000`),
+    foreignKey({
+      name: 'support_messages_thread_fk',
+      columns: [table.tenantId, table.threadId],
+      foreignColumns: [supportThreads.tenantId, supportThreads.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`thread_id IN (SELECT id FROM support_threads)`,
+      withCheck: sql`thread_id IN (SELECT id FROM support_threads)`,
+    }),
+  ],
+);
+
+/**
+ * When a member last opened a support thread (S59, AC-X-16): the team's answers after it are
+ * unread. Each member reaches only their own rows (work without a user reaches all, as for
+ * push subscriptions); gone with the thread or the account.
+ */
+export const supportReads = pgTable(
+  'support_reads',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    threadId: uuid('thread_id').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    readAt: timestamp('read_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    unique('support_reads_thread_user_unique').on(table.threadId, table.userId),
+    index('support_reads_user_idx').on(table.userId),
+    foreignKey({
+      name: 'support_reads_thread_fk',
+      columns: [table.tenantId, table.threadId],
+      foreignColumns: [supportThreads.tenantId, supportThreads.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+      withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
+    }),
+  ],
+);
+
+/**
+ * A request from someone who can't sign in (S59, AC-X-17): the email they gave, an optional
+ * name and the message. No business: global, written only by the api's public form and read
+ * by S59.2's console. Nothing is ever emailed to `email`; the team replies from their inbox.
+ */
+export const publicSupportRequests = pgTable(
+  'public_support_requests',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    reference: text('reference').notNull().unique(),
+    email: text('email').notNull(),
+    name: text('name'),
+    body: text('body').notNull(),
+    page: text('page'),
+    topic: text('topic'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('public_support_requests_created_idx').on(table.createdAt),
+    check(
+      'public_support_requests_reference_format',
+      sql`${table.reference} ~ '^PEP-[0-9A-HJKMNP-TV-Z]{6}$'`,
+    ),
+    check('public_support_requests_email_length', sql`length(${table.email}) BETWEEN 3 AND 254`),
+    check(
+      'public_support_requests_name_length',
+      sql`${table.name} IS NULL OR length(${table.name}) BETWEEN 1 AND 100`,
+    ),
+    check('public_support_requests_body_length', sql`length(${table.body}) BETWEEN 1 AND 4000`),
+    check(
+      'public_support_requests_page_length',
+      sql`${table.page} IS NULL OR length(${table.page}) <= 200`,
+    ),
+    check(
+      'public_support_requests_topic_length',
+      sql`${table.topic} IS NULL OR length(${table.topic}) <= 80`,
+    ),
+  ],
+);
+export type SupportThreadRow = typeof supportThreads.$inferSelect;
+export type SupportMessageRow = typeof supportMessages.$inferSelect;

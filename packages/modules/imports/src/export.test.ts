@@ -90,6 +90,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     ],
     waitlist: [],
     facts: [],
+    support: { threads: [], messages: [] },
     ...overrides,
   };
 }
@@ -149,6 +150,44 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       waitlist: 0,
       facts: 0,
     });
+  });
+
+  it('writes support.json: each request with its messages, the team’s marked (AC-X-18)', () => {
+    const thread = '0190a000-0000-7000-8000-000000000900';
+    const files = unzip(
+      buildBusinessExport(
+        data({
+          support: {
+            threads: [
+              {
+                id: thread,
+                reference: 'PEP-7K3Q9D',
+                kind: 'question',
+                status: 'pepper_replied',
+                createdAt: AT,
+              },
+            ],
+            messages: [
+              { threadId: thread, authorKind: 'member', body: 'How do I import?', createdAt: AT },
+              { threadId: thread, authorKind: 'pepper', body: 'Clients → Import.', createdAt: AT },
+            ],
+          },
+        }),
+        AT,
+      ).bytes,
+    );
+    expect(JSON.parse(files['support.json'] ?? '')).toEqual([
+      {
+        reference: 'PEP-7K3Q9D',
+        kind: 'question',
+        status: 'pepper_replied',
+        openedAt: AT.toISOString(),
+        messages: [
+          { from: 'Your team', text: 'How do I import?', at: AT.toISOString() },
+          { from: 'Pepper team', text: 'Clients → Import.', at: AT.toISOString() },
+        ],
+      },
+    ]);
   });
 
   it('writes clients.csv in Pepper’s columns', () => {

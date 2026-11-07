@@ -16,6 +16,7 @@ import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
+import { SupportModule } from './support/support.controller.js';
 import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
 
@@ -52,6 +53,12 @@ export class AppModule {
         }),
         PhotosModule.forRoot(config.storage),
         UnsubscribeModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
+        SupportModule.forRoot({
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+          supportEmail: config.supportEmail,
+          baseUrl: config.auth.baseUrl,
+          release: config.release ?? 'unknown',
+        }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

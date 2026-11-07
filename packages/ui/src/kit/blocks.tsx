@@ -396,6 +396,25 @@ export interface TabItem {
   label: string;
   icon: IconName;
   href: string;
+  /** Something new there (S59: unread support answers), shown as a count on the icon. */
+  badge?: number | undefined;
+}
+
+/** A tab's or a sidebar item's count of new things, with its words for screen readers. */
+export function NavBadge({ count }: { count: number | undefined }) {
+  if (count === undefined || count <= 0) return null;
+  const text = count > 9 ? '9+' : String(count);
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="inline-flex h-5 min-w-5 items-center justify-center rounded-pill bg-brand px-1.5 type-caption leading-none font-semibold text-brand-ink tabular-nums"
+      >
+        {text}
+      </span>
+      <span className="sr-only">{`, ${String(count)} new`}</span>
+    </>
+  );
 }
 
 /** The phone's bottom tabs: Home · Calendar · Clients · Chat · More; the current in a pill. */
@@ -436,11 +455,16 @@ export function BottomTabBar({
                   <>
                     <span
                       className={cx(
-                        'inline-flex h-7.5 w-13 items-center justify-center rounded-pill',
+                        'relative inline-flex h-7.5 w-13 items-center justify-center rounded-pill',
                         active && 'bg-brand-soft text-brand',
                       )}
                     >
                       <Icon name={item.icon} />
+                      {item.badge === undefined || item.badge <= 0 ? null : (
+                        <span className="absolute -top-1 right-2">
+                          <NavBadge count={item.badge} />
+                        </span>
+                      )}
                     </span>
                     {item.label}
                   </>

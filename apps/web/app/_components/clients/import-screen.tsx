@@ -22,6 +22,9 @@ import {
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
+import { HELP_LINKS } from '../../../lib/help';
+import { newRequestHref } from '../../../lib/support';
+import { HelpLink } from '../help/help-link';
 import { errorCodeOf, fetchJson } from '../../../lib/client-api';
 import { ahaSentence, WIN_BACK_PATH } from '../../../lib/win-back';
 import {
@@ -248,6 +251,7 @@ export function ImportScreen({
         <h1 ref={heading} tabIndex={-1} className="m-0 type-display outline-none">
           Bring your clients
         </h1>
+        <HelpLink article={HELP_LINKS.import} />
         <StepBar
           steps={importSteps(preview?.batch.kind ?? 'clients')}
           current={stepIndex(step)}
@@ -255,12 +259,14 @@ export function ImportScreen({
         />
       </header>
       {error === null ? null : (
-        <p
-          role="alert"
-          className="m-0 rounded-md bg-danger-soft px-4 py-3 type-body text-danger"
-          data-testid="import-error"
-        >
-          {error}
+        <p role="alert" className="m-0 rounded-md bg-danger-soft px-4 py-3 type-body text-danger">
+          <span data-testid="import-error">{error}</span>{' '}
+          <Link
+            href={newRequestHref({ page: ROUTES.clients + '/import' })}
+            className="font-semibold text-danger underline underline-offset-2"
+          >
+            Tell us what went wrong
+          </Link>
         </p>
       )}
       {step === 'upload' || preview === null ? (
