@@ -7,7 +7,13 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S59.2.2** (console part 2) from "Planned sessions".
+**S59.2.2 · Console, part 2** (brief preapproved by the user "with your recommendation": D-1 screenshots → S59.2.3; D-2 platform saved replies at `/ops/replies`, `{first name}`; D-3 auto-close only what waits on the business, one email; D-4 one 4 h reminder a wait; D-5 opener rates a solved request, a reopen clears; ADR-0062 "Part 2").
+- [x] 1. AC-X-23…26 in acceptance-criteria and traceability.
+- [ ] 2. Migration 0069 + repositories (isolation, operator.int).
+- [ ] 3. Core: saved replies, rating, housekeeping pass.
+- [ ] 4. Worker support job; api routes.
+- [ ] 5. Web: inbox top-up, saved replies page + picker, rating, auto-close copy.
+Next: task 2.
 ## Last sessions
 - **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md), [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0068 (grants, access log, notes, `operator_*` policies needing the access row in the same transaction), `operator` script, `/v1/ops/*` (grant + MFA), `/ops` inbox oldest first with the wait in words, replies, notes, every status, "Seen by Pepper"; AC-X-19…22.
