@@ -10,10 +10,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S59 · Help centre + support threads, owner side** (branch `claude/youthful-dijkstra-9hsw6i`; [PCR-010](changes/PCR-010.md); AC-X-13…18). Brief approved 2026-11-07: our own support system (not a helpdesk), the S59 series S59–S59.5, then S58a, S57 (after the domain), S58b. No ADR this session (ADR-0062 in S59.2); screenshots with the console in S59.2.
 - [x] T1 PCR-010 + plan docs + ACs
 - [x] T2 Support backend: migration 0067 (`support_threads`, `support_messages`, `support_reads`, `public_support_requests`), repo, core `services/support.ts` (incl. `answerSupportThread` for S59.2), `/v1/support/*`, `/v1/public/support`, `SUPPORT_EMAIL`, `replyTo` on outbox emails, `support.json` in the export (deletion by cascade). Isolation 429/429, core support int 12/12, api 9/9
-- [ ] T3 Support screens: new request (More, articles, error states), Your requests, thread + reply, unread count on More
-- [ ] T4 Help centre: `/help`, articles, search, `/help/contact`, help links on Import, Autonomy, What I know, booking page
+- [x] T3 Support screens: `/support/new` (from More, articles, the app's error screen, a failed import), `/support` (Your requests), `/support/[id]` (thread, reply, solve), unread count on the More tab and the Settings item (kit `NavBadge`)
+- [x] T4 Help centre: `/help` (15 articles in `lib/help.ts`, 6 topics, search), `/help/[slug]` with "Still stuck?", `/help/contact` (public form, honeypot), help links on Import, Autonomy, What I know, the booking-page card, sign-in. Unit tests green; Playwright still to write
 - [ ] T5 Close: review, tier 3, walkthrough, PR, CI, merge
-Next step: T3 (screens).
+Next step: Playwright `support.spec.ts` + `help.spec.ts`, screens baselines (More, sign-in, Autonomy, What I know, Services, Import, data page), then T5 close.
 
 ## Last sessions
 - **S56b Phase 12 "b" · Recorded on the real model, Phase 12 gate (2026-11-06)** ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84), with S56a and S56a.2; ADR-0060/0061 results). Full entry in [session-log.md](session-log.md).

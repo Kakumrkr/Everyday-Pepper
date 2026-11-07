@@ -6,6 +6,7 @@ import { useId, useState, type ReactNode, type SubmitEvent } from 'react';
 import { errorCodeOf, sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
 import { confirmedUrl, ROUTES, withNext } from '../../lib/account';
+import { HELP_LINKS, helpHref } from '../../lib/help';
 import { AuthPage, TextLink } from './auth-page';
 import { CheckInbox } from './check-inbox';
 import { Notice } from './form-parts';
@@ -110,6 +111,9 @@ export function SignInForm({
         </Link>
         <p className="m-0 type-body text-ink-2">
           New to Pepper? <TextLink href={withNext(ROUTES.signUp, next)}>Create an account</TextLink>
+        </p>
+        <p className="m-0 type-body text-ink-2">
+          Can’t sign in? <TextLink href={helpHref(HELP_LINKS.signIn)}>Get help</TextLink>
         </p>
       </AuthPage>
     );

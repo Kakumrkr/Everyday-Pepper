@@ -8,7 +8,8 @@ import { MANIFEST_URL } from '../../lib/pwa';
 import { AppNav } from '../_components/app-nav';
 import { ServiceWorker } from '../_components/service-worker';
 import { Unavailable } from '../_components/unavailable';
-import { currentAccount, currentBusiness } from '../_server/account';
+import { SupportUnreadSchema } from '@pepper/contracts';
+import { currentAccount, currentBusiness, currentJson } from '../_server/account';
 
 // Per request: the shell depends on the session cookie.
 export const dynamic = 'force-dynamic';
@@ -35,6 +36,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (step !== null) redirect(step);
   if (account.state !== 'signed-in') return <Unavailable />;
   const current = await currentBusiness();
+  // Unread support answers (S59, AC-X-16); a failed read shows no count rather than an error.
+  const support =
+    current === null ? null : await currentJson('/v1/support/unread', SupportUnreadSchema);
 
   // One place for toasts (S43): above the tabs on phones, so a note stays in view.
   return (
@@ -43,6 +47,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <AppNav
           nav={appNav(current?.permissions ?? null)}
           businessName={current?.business.name ?? null}
+          supportUnread={support?.unread ?? 0}
         />
         <main
           className={cx(

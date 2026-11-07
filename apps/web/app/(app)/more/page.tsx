@@ -1,5 +1,5 @@
-import { DeletionStatusSchema, FeedResponseSchema } from '@pepper/contracts';
-import { buttonStyle, Icon, List, ListRow } from '@pepper/ui';
+import { DeletionStatusSchema, FeedResponseSchema, SupportUnreadSchema } from '@pepper/contracts';
+import { Badge, buttonStyle, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
 import {
@@ -9,6 +9,8 @@ import {
 } from '../../../lib/deletion';
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
+import { HELP_PATH } from '../../../lib/help';
+import { newRequestHref, SUPPORT_PATHS } from '../../../lib/support';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
 import { NotificationsCard } from '../../_components/push/notifications-card';
@@ -37,10 +39,12 @@ export default async function MorePage() {
       ? await currentJson('/v1/feed', FeedResponseSchema)
       : null;
   // A business or an account being deleted says so here (S51.2, ADR-0054).
-  const [businessDeletion, accountDeletion] = await Promise.all([
+  const [businessDeletion, accountDeletion, support] = await Promise.all([
     current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
     currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
+    current === null ? null : currentJson('/v1/support/unread', SupportUnreadSchema),
   ]);
+  const unread = support?.unread ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
   const businessDueAt = businessDeletion?.dueAt ?? null;
   const accountDueAt = accountDeletion?.dueAt ?? null;
@@ -77,6 +81,41 @@ export default async function MorePage() {
       )}
       <Places title="Pepper" items={nav.pepper} />
       <Places title="Business" items={nav.business} />
+      <section aria-labelledby="more-help">
+        <h2 id="more-help" className="m-0 mb-1 type-heading">
+          Help
+        </h2>
+        <List>
+          <ListRow
+            title={<HelpTitle icon="help">Help centre</HelpTitle>}
+            meta="Short answers to the common questions"
+            href={HELP_PATH}
+            renderLink={kitLink}
+          />
+          {current === null ? null : (
+            <>
+              <ListRow
+                title={<HelpTitle icon="chat">Tell us what went wrong</HelpTitle>}
+                meta="A person answers the same day"
+                href={newRequestHref({ page: ROUTES.more })}
+                renderLink={kitLink}
+              />
+              <ListRow
+                title={<HelpTitle icon="activity">Your requests</HelpTitle>}
+                trailing={
+                  unread > 0 ? (
+                    <Badge tone="brand">
+                      {unread === 1 ? '1 new answer' : `${String(unread)} new answers`}
+                    </Badge>
+                  ) : undefined
+                }
+                href={SUPPORT_PATHS.list}
+                renderLink={kitLink}
+              />
+            </>
+          )}
+        </List>
+      </section>
       {current === null ? null : <NotificationsCard />}
       {feed?.canChangeSettings === true ? (
         <section aria-labelledby="rebooking-heading" className="flex flex-col gap-3">
@@ -121,6 +160,15 @@ export default async function MorePage() {
         )}
       </section>
     </div>
+  );
+}
+
+function HelpTitle({ icon, children }: { icon: 'help' | 'chat' | 'activity'; children: string }) {
+  return (
+    <span className="flex items-center gap-3">
+      <Icon name={icon} className="shrink-0 text-brand" />
+      {children}
+    </span>
   );
 }
 

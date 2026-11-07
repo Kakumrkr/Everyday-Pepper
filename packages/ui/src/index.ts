@@ -98,6 +98,7 @@ export {
   EmptyState,
   List,
   ListRow,
+  NavBadge,
   Receipt,
   Stat,
   StepBar,

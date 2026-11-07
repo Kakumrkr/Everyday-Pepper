@@ -1,6 +1,6 @@
 'use client';
 
-import { BottomTabBar, cx, FOCUS_RING, Icon, Logo } from '@pepper/ui';
+import { BottomTabBar, cx, FOCUS_RING, Icon, Logo, NavBadge } from '@pepper/ui';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { currentKey, tabItems, type Nav, type NavItem } from '../../lib/nav';
@@ -11,8 +11,21 @@ import { kitLink } from './kit-link';
  * Calendar · Clients · Chat · More), a sidebar from 960 px with the Pepper and business groups.
  * Only one of the two is displayed (the other is `display: none`, so out of the a11y tree).
  */
-export function AppNav({ nav, businessName }: { nav: Nav; businessName: string | null }) {
+export function AppNav({
+  nav: places,
+  businessName,
+  supportUnread = 0,
+}: {
+  nav: Nav;
+  businessName: string | null;
+  /** Support answers the member hasn't read (S59, AC-X-16): a count on More and Settings. */
+  supportUnread?: number;
+}) {
   const pathname = usePathname();
+  const nav: Nav =
+    places.more === null || supportUnread <= 0
+      ? places
+      : { ...places, more: { ...places.more, badge: supportUnread } };
   const sideKey = currentKey(nav, pathname, false);
   const settings: NavItem | null =
     nav.more === null ? null : { ...nav.more, label: 'Settings', icon: 'settings' };
@@ -84,7 +97,8 @@ function SideGroup({
                 )}
               >
                 <Icon name={item.icon} className={active ? 'text-brand' : undefined} />
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                <NavBadge count={item.badge} />
               </Link>
             </li>
           );
