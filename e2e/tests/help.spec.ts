@@ -1,11 +1,15 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { hydrated, onboardOwner, unique } from './helpers.js';
+import { hydrated, onboardOwner, ownClientAddress, unique } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // The help centre (S59, PCR-010, AC-X-13, AC-X-17): public, searchable, and every article ends
 // in a way to ask: the public form when signed out (it reaches the team only), the app's form
 // when signed in.
+
+test.beforeEach(async ({ context }) => {
+  await ownClientAddress(context);
+});
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const MAILPIT_URL = process.env['MAILPIT_URL'] ?? 'http://localhost:8025';

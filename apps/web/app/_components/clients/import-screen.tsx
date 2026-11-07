@@ -259,12 +259,8 @@ export function ImportScreen({
         />
       </header>
       {error === null ? null : (
-        <p
-          role="alert"
-          className="m-0 rounded-md bg-danger-soft px-4 py-3 type-body text-danger"
-          data-testid="import-error"
-        >
-          {error}{' '}
+        <p role="alert" className="m-0 rounded-md bg-danger-soft px-4 py-3 type-body text-danger">
+          <span data-testid="import-error">{error}</span>{' '}
           <Link
             href={newRequestHref({ page: ROUTES.clients + '/import' })}
             className="font-semibold text-danger underline underline-offset-2"

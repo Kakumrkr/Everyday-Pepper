@@ -1,12 +1,16 @@
 import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
-import { hydrated, onboardOwner, unique } from './helpers.js';
+import { hydrated, onboardOwner, ownClientAddress, unique } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 
 // Pepper's own support through the screens (S59, PCR-010, AC-X-14/15): an owner sends "Tell us
 // what went wrong" from More, the team's address gets it with Reply-To the owner, and the
 // request lives on in Your requests, where the owner replies and marks it solved. Who reads
 // which request, the team's answers and the unread count are in core's support.int.test.ts.
+
+test.beforeEach(async ({ context }) => {
+  await ownClientAddress(context);
+});
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const MAILPIT_URL = process.env['MAILPIT_URL'] ?? 'http://localhost:8025';
