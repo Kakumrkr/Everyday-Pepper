@@ -116,10 +116,17 @@ export function PublicSupportForm({ topic }: { topic: string | null }) {
         error={errors.message}
       />
       {/* A field people never see; a bot that fills it in is quietly ignored (AC-X-17). */}
-      <div aria-hidden="true" className="sr-only">
-        <label>
+      {/* Zero-sized rather than `sr-only` (1 px): nothing anyone can see, hear, reach or tap. */}
+      <div aria-hidden="true" className="absolute size-0 overflow-hidden">
+        <label className="block size-0 overflow-hidden">
           Website
-          <input name="website" type="text" tabIndex={-1} autoComplete="off" />
+          <input
+            name="website"
+            type="text"
+            tabIndex={-1}
+            autoComplete="off"
+            className="block size-0 min-h-0 border-0 p-0"
+          />
         </label>
       </div>
       {error === null ? null : <Notice tone="error">{error}</Notice>}

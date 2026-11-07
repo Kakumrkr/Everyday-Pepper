@@ -1,32 +1,20 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → now: **S59** (help centre + support threads); S57 waits for the domain
+**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59 done; next **S59.2** (operator console); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S59 · Help centre + support threads, owner side** (branch `claude/youthful-dijkstra-9hsw6i`; [PCR-010](changes/PCR-010.md); AC-X-13…18). Brief approved 2026-11-07: our own support system (not a helpdesk), the S59 series S59–S59.5, then S58a, S57 (after the domain), S58b. No ADR this session (ADR-0062 in S59.2); screenshots with the console in S59.2.
-- [x] T1 PCR-010 + plan docs + ACs
-- [x] T2 Support backend: migration 0067 (`support_threads`, `support_messages`, `support_reads`, `public_support_requests`), repo, core `services/support.ts` (incl. `answerSupportThread` for S59.2), `/v1/support/*`, `/v1/public/support`, `SUPPORT_EMAIL`, `replyTo` on outbox emails, `support.json` in the export (deletion by cascade). Isolation 429/429, core support int 12/12, api 9/9
-- [x] T3 Support screens: `/support/new` (from More, articles, the app's error screen, a failed import), `/support` (Your requests), `/support/[id]` (thread, reply, solve), unread count on the More tab and the Settings item (kit `NavBadge`)
-- [x] T4 Help centre: `/help` (15 articles in `lib/help.ts`, 6 topics, search), `/help/[slug]` with "Still stuck?", `/help/contact` (public form, honeypot), help links on Import, Autonomy, What I know, the booking-page card, sign-in
-- [x] Playwright `support.spec.ts` 2/2 and `help.spec.ts` 2/2 green on mobile (before the review fixes)
-- [x] `/code-review` (medium): 10 found, 8 fixed (topic check by `HelpArticleSlugSchema`, advisory lock on a member's support writes, the thread page refreshes the shell's unread count, an honest "couldn't open" on the thread page, `currentSupportUnread` cached per request and read beside the business, `supportContext` through the contract's schemas, the export groups messages once, no raw sizes); left 2 (the baselines, below; the e2e Mailpit loops duplicate `helpers.ts`, minor). `/security-review`: no finding
-- [ ] T5 Close, **paused here (user, 2026-11-07)**. Next steps, in order:
-  1. Screenshot baselines need CI's browser, headless shell **1248**. This session's image only has 1243, and the "Default" environment blocked `cdn.playwright.dev`. The user approved a personal environment **everyday-pepper** that allows it. In a new session on that environment, install it: `PLAYWRIGHT_BROWSERS_PATH=~/.cache/pepper-playwright PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD='' pnpm --filter @pepper/e2e exec playwright install --only-shell chromium`, then `export PLAYWRIGHT_CHROMIUM_EXECUTABLE=~/.cache/pepper-playwright/chromium_headless_shell-1248/chrome-headless-shell-linux64/chrome-headless-shell`. A 1243 run rewrote unrelated baselines (text wrap, chip borders), so they were thrown away and **none are committed**.
-  2. `pnpm check`; `TURBO_SCM_BASE=origin/main pnpm turbo run test:integration --affected` (db isolation and core support were green before the review fixes; the advisory lock is new).
-  3. `e2e-stack.sh start`, run `support.spec.ts` and `help.spec.ts` again (after the review fixes), then `screens.spec.ts --project=desktop --update-snapshots`. Expected changes: More, sign-in (auth-*), Autonomy, What I know, Services, Import, Your data (support.json line), plus the new help-* and support-* shots. Check that nothing else moved, then run once more.
-  4. Walkthrough at 375 px; docs (STATUS last sessions, decisions.md S59, session-log with retro, traceability tests for AC-X-13…18); PR; CI; merge.
-  Local tip: repeated sign-ups hit the rate limit, so run `docker compose exec -T redis redis-cli FLUSHALL` before reruns.
+Nothing in progress. Next: **S59.2** (operator console, ADR-0062) from "Planned sessions".
 ## Last sessions
+- **S59 Phase 13 · Help centre and support threads, owner side (2026-11-07)** ([PCR-010](changes/PCR-010.md), branch `claude/youthful-dijkstra-9hsw6i`). Full entry in [session-log.md](session-log.md).
+  - **Built:** migration 0067 (threads, messages, reads, public requests; staff own, owners and managers all), `/v1/support/*` and the public form, 5 a day under a lock, `SUPPORT_EMAIL` with `Reply-To`, `support.json` in the export; Your requests, the thread, the unread badge; the help centre (15 articles, search, contact) and help links; AC-X-13…18.
+  - **Checks:** `pnpm check` green; affected integration 22/22 (db 768); support 2/2, help 2/2, screens 30/30 twice with headless shell 1248.
 - **S56b Phase 12 "b" · Recorded on the real model, Phase 12 gate (2026-11-06)** ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84), with S56a and S56a.2; ADR-0060/0061 results). Full entry in [session-log.md](session-log.md).
   - **Recorded:** $0.81 of $3.00; probe fixes (prompt v9, the suggester's instructions, `get_feed` v6); every gate met; pass^3 100% on the gated sets (import_mapping 7/8 over 0.8); `KNOWN_REAL_MODEL_MISSES` empty; top-up: the preview says only the counts there are.
   - **Gate:** Phase 12 met (C1 8, C5 8, C8 9, scorecard §8). Checks: `pnpm check`, affected integration 22/22 (ai 194/194), import 4/4 + screens 6/6.
-- **S56a.2 Phase 12 "a" · AI-suggested import mapping (2026-11-06)** ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md), branch `claude/dreamy-keller-y57zq0` with S56a merged, no PR until S56b). Full entry in [session-log.md](session-log.md).
-  - **Built:** columns nothing placed go to the model as names (untrusted) and shape-masked samples only; one forced `suggest_mapping` call, checked by the domain, stored on the batch, used only by "Use it"; `POST /v1/imports/:id/suggestions`; the `import_mapping` eval set (7 scripted cases); top-up: the preview's one-line "Not imported: … (why)"; AC-W1-46…48.
-  - **Checks:** `pnpm check` green; affected integration green but the planned stale replay (532 stale calls, as in S56a); every scripted eval set green; Playwright import 4/4.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -99,11 +87,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59 | Help centre + support threads, owner side ([PCR-010](changes/PCR-010.md)) | 13 | AC-X-13…18 green |
 | S59.2 | Operator console: inbox, replies, notes, saved replies, statuses, auto-close, overdue reminder, 👍/👎, screenshots (ADR-0062) | 13 | Every status reachable; reads audited |
 | S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
