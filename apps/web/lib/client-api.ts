@@ -89,6 +89,13 @@ const MESSAGES: Record<string, string> = {
   photo_too_large: 'That photo is over 10 MB. Pick a smaller one.',
   gallery_full: 'The gallery holds 12 photos. Remove one to add another.',
   storage_unavailable: 'Photos can’t be saved right now. Try again soon.',
+  // Screenshots on a request (S59.2.3).
+  screenshot_not_found: 'That screenshot is gone.',
+  screenshot_rejected: 'That file is not a screenshot we can use. Try a JPEG, PNG or WebP.',
+  screenshot_too_large: 'That screenshot is over 10 MB. Crop it or pick a smaller one.',
+  screenshots_not_attachable:
+    'One of your screenshots can’t be sent any more. Remove it and add it again.',
+  screenshots_unavailable: 'Screenshots can’t be added right now. Send your message without them.',
   // Rebooking emails (S36).
   draft_refused:
     'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',

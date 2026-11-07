@@ -61,6 +61,12 @@ export const ApiErrorCodeSchema = z.enum([
   'support_not_ratable',
   'saved_reply_not_found',
   'saved_replies_full',
+  // Screenshots on a request (S59.2.3).
+  'screenshot_not_found',
+  'screenshot_rejected',
+  'screenshot_too_large',
+  'screenshots_not_attachable',
+  'screenshots_unavailable',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',
   'waitlist_offer_used',

@@ -60,6 +60,7 @@ import {
 } from '../errors.js';
 import type { Mailer } from '../outbox.js';
 import { queueEmail } from './outbox.js';
+import { attachScreenshotsToMessage, screenshotsByMessage } from './support-screenshots.js';
 
 // Pepper's own support (S59, PCR-010, AC-X-14…18). Every member may ask for help: there is no
 // permission to check, only who may read which thread, which the tables' RLS decides (the
@@ -132,7 +133,7 @@ export async function openSupportThread(
         firstBooking: await hasActivation(tx, 'first_booking'),
       },
     });
-    let created: { id: string; reference: string } | null = null;
+    let created: { id: string; reference: string; messageId: string } | null = null;
     for (let attempt = 0; attempt < REFERENCE_TRIES && created === null; attempt += 1) {
       const reference = newSupportReference();
       const row = await insertSupportThread(tx, {
@@ -143,9 +144,16 @@ export async function openSupportThread(
         body: parsed.message,
         now,
       });
-      if (row !== null) created = { id: row.id, reference };
+      if (row !== null) created = { id: row.id, reference, messageId: row.messageId };
     }
     if (created === null) throw new Error('No free support reference');
+    const screenshots = await attachScreenshotsToMessage(tx, {
+      userId,
+      screenshotIds: parsed.screenshotIds,
+      threadId: created.id,
+      messageId: created.messageId,
+      now,
+    });
     // The opener has seen everything in it so far.
     await markSupportThreadRead(tx, created.id, userId, now);
     await appendAuditEntry(tx, {
@@ -166,6 +174,7 @@ export async function openSupportThread(
       message: parsed.message,
       requester,
       context,
+      screenshots,
       dedupeKey: `support.opened:${created.id}`,
       now,
       first: true,
@@ -225,7 +234,7 @@ export async function replyToSupportThread(
   options: SupportOptions,
 ): Promise<SupportThread> {
   const id = parseThreadId(threadId);
-  const { message } = SupportReplyInputSchema.parse(input);
+  const { message, screenshotIds } = SupportReplyInputSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
   const { userId } = actor.context;
   return withMember(db, actor.context, async (tx) => {
@@ -237,6 +246,13 @@ export async function replyToSupportThread(
       author: { kind: 'member', userId },
       body: message,
       status: 'waiting_on_pepper',
+      now,
+    });
+    const screenshots = await attachScreenshotsToMessage(tx, {
+      userId,
+      screenshotIds,
+      threadId: id,
+      messageId: written.id,
       now,
     });
     await markSupportThreadRead(tx, id, userId, now);
@@ -259,6 +275,7 @@ export async function replyToSupportThread(
       message,
       requester: await requesterOf(tx, userId),
       context: null,
+      screenshots,
       dedupeKey: `support.replied:${written.id}`,
       now,
       first: false,
@@ -549,6 +566,8 @@ async function emailTeam(
     message: string;
     requester: Requester;
     context: SupportContext | null;
+    /** How many screenshots came with it: seen in the console, never emailed (AC-X-29). */
+    screenshots?: number;
     dedupeKey: string;
     now: Date;
     first: boolean;
@@ -583,6 +602,12 @@ async function emailTeam(
         '',
         mail.message,
         '',
+        ...((mail.screenshots ?? 0) > 0
+          ? [
+              `Screenshots: ${String(mail.screenshots)} — open the request in the console to see ${mail.screenshots === 1 ? 'it' : 'them'}.`,
+              '',
+            ]
+          : []),
         ...details,
         `Thread: ${mail.threadId}`,
       ].join('\n'),
@@ -612,6 +637,7 @@ function toSummary(row: SupportThreadRecord, reader: UserId): SupportThreadSumma
     preview: row.preview,
     openedBy: authorOf('member', row.openedByUserId, row.openedByName, reader),
     unread: row.unread,
+    screenshotCount: row.screenshotCount,
     createdAt: UtcDateTimeSchema.parse(row.createdAt.toISOString()),
     lastMessageAt: UtcDateTimeSchema.parse(row.lastMessageAt.toISOString()),
   };
@@ -623,6 +649,7 @@ async function toThread(
   reader: UserId,
 ): Promise<SupportThread> {
   const messages: SupportMessageRecord[] = await listSupportMessages(tx, row.id);
+  const screenshots = await screenshotsByMessage(tx, row.id);
   const requester =
     row.openedByUserId === reader ? await requesterOf(tx, reader).catch(() => null) : null;
   return SupportThreadSchema.parse({
@@ -631,6 +658,7 @@ async function toThread(
       id: message.id,
       author: authorOf(message.authorKind, message.authorUserId, message.authorName, reader),
       body: message.body,
+      screenshots: screenshots.get(message.id) ?? [],
       createdAt: message.createdAt.toISOString(),
     })),
     replyTo: requester?.email ?? null,

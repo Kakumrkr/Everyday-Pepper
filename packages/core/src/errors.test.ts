@@ -21,6 +21,10 @@ import {
   SavedReplyNotFoundError,
   SupportLimitReachedError,
   SupportNotRatableError,
+  SupportScreenshotNotFoundError,
+  SupportScreenshotRejectedError,
+  SupportScreenshotsNotAttachableError,
+  SupportScreenshotsUnavailableError,
   SupportThreadNotFoundError,
   UnsubscribeLinkInvalidError,
 } from './errors.js';
@@ -46,6 +50,28 @@ describe('domain errors', () => {
       new SupportLimitReachedError('messages'),
       'SupportLimitReachedError',
       'Too many support messages today',
+    ],
+    // S59.2.3: screenshots.
+    [
+      new SupportLimitReachedError('screenshots'),
+      'SupportLimitReachedError',
+      'Too many support screenshots today',
+    ],
+    [new SupportScreenshotNotFoundError(), 'SupportScreenshotNotFoundError', 'No such screenshot'],
+    [
+      new SupportScreenshotsNotAttachableError(),
+      'SupportScreenshotsNotAttachableError',
+      'A screenshot can’t be attached',
+    ],
+    [
+      new SupportScreenshotRejectedError('heic', 'HEIC screenshots are not supported yet.'),
+      'SupportScreenshotRejectedError',
+      'HEIC screenshots are not supported yet.',
+    ],
+    [
+      new SupportScreenshotsUnavailableError(),
+      'SupportScreenshotsUnavailableError',
+      'Screenshots are not available',
     ],
     [
       new DeletionNameMismatchError(),

@@ -18,6 +18,7 @@ import {
   cleanUp,
   runDueDeletions,
   runSupportHousekeeping,
+  deleteAllSupportScreenshotImages,
   sendDueTaskPushes,
   systemClock,
   type Clock,
@@ -25,7 +26,7 @@ import {
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE, MAILER } from '@pepper/runtime';
-import type { ObjectStore } from '@pepper/storage';
+import { createScreenshotStore, type ObjectStore } from '@pepper/storage';
 import { templateDrafts, templateInsights } from '@pepper/templates';
 import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
 import { Periodic } from './periodic.js';
@@ -181,6 +182,11 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.logger,
     );
     const support = options.support ?? { supportEmail: null, baseUrl: null, pollMs: 5 * 60_000 };
+    // Support screenshots on the same store as photos (S59.2.3, ADR-0062 Part 3).
+    const screenshots =
+      options.objectStore === undefined || options.objectStore === null
+        ? null
+        : createScreenshotStore(options.objectStore);
     this.support = new Periodic(
       'Support job',
       support.pollMs,
@@ -191,11 +197,12 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
           baseUrl: support.baseUrl,
           mailer,
           clock,
+          store: screenshots,
         });
         // Counts only: never a request's reference or a business.
-        if (result.closed > 0 || result.reminded > 0) {
+        if (result.closed > 0 || result.reminded > 0 || result.swept > 0) {
           this.logger.log(
-            `Support: ${String(result.reminded)} reminders, ${String(result.closed)} closed after quiet days`,
+            `Support: ${String(result.reminded)} reminders, ${String(result.closed)} closed after quiet days, ${String(result.swept)} unsent screenshots swept`,
           );
         }
         if (result.failed > 0) this.logger.warn(`Support: ${String(result.failed)} failed`);
@@ -211,6 +218,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
           clock,
           beforeBusinessDeleted: async (tenantId) => {
             await deleteAllPhotoImages(db, tenantId, store);
+            await deleteAllSupportScreenshotImages(db, tenantId, screenshots);
           },
         });
         // Counts only: never a business's or an account's id or name.

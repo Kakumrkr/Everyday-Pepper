@@ -23,6 +23,7 @@ import { systemClock, type Clock } from '../clock.js';
 import type { Mailer } from '../outbox.js';
 import { queueEmail } from './outbox.js';
 import { findSupportOpener, firstNameOf, SUPPORT_KIND_LABELS } from './support.js';
+import { sweepUnsentSupportScreenshots, type ScreenshotStorage } from './support-screenshots.js';
 
 // The support job (S59.2.2, ADR-0062, AC-X-24/25), run by the worker every few minutes. It
 // keeps two promises without anyone watching the inbox: a request waiting on Pepper for 4 h
@@ -43,6 +44,8 @@ export interface SupportHousekeepingOptions {
   clock?: Clock;
   /** Threads looked at in one pass (the rest wait for the next). */
   limit?: number;
+  /** Where screenshots live: unsent ones over a day old are swept (S59.2.3, AC-X-28). */
+  store?: ScreenshotStorage | null;
 }
 
 export interface SupportHousekeepingResult {
@@ -50,6 +53,8 @@ export interface SupportHousekeepingResult {
   closed: number;
   /** Reminders sent (queued) to the team's address. */
   reminded: number;
+  /** Unsent screenshots deleted after 24 h. */
+  swept: number;
   /** Threads (or the public sweep) that failed; the next pass tries again. */
   failed: number;
 }
@@ -66,7 +71,7 @@ export async function runSupportHousekeeping(
   const now = (options.clock ?? systemClock).now();
   const overdueBefore = new Date(now.getTime() - SUPPORT_OVERDUE_HOURS * HOUR_MS);
   const quietBefore = new Date(now.getTime() - SUPPORT_QUIET_DAYS * DAY_MS);
-  const result: SupportHousekeepingResult = { closed: 0, reminded: 0, failed: 0 };
+  const result: SupportHousekeepingResult = { closed: 0, reminded: 0, swept: 0, failed: 0 };
   const due = await listDueSupportThreads(db, {
     // Without a team address nothing is reminded, or marked: those waits aren't even looked at.
     overdueBefore: options.supportEmail === null ? new Date(0) : overdueBefore,
@@ -96,6 +101,14 @@ export async function runSupportHousekeeping(
   }
   try {
     await sweepPublic(db, now, options, result);
+  } catch {
+    result.failed += 1;
+  }
+  try {
+    result.swept = await sweepUnsentSupportScreenshots(db, {
+      store: options.store ?? null,
+      clock: { now: () => now },
+    });
   } catch {
     result.failed += 1;
   }

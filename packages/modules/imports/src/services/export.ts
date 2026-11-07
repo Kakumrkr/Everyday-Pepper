@@ -1,4 +1,12 @@
-import { requirePermission, auditActorOf, systemClock, type Actor, type Clock } from '@pepper/core';
+import {
+  auditActorOf,
+  readScreenshotsForExport,
+  requirePermission,
+  systemClock,
+  type Actor,
+  type Clock,
+  type ScreenshotStorage,
+} from '@pepper/core';
 import { appendAuditEntry, readBusinessExport, withMember, type Database } from '@pepper/db';
 import { buildBusinessExport, type BusinessExport } from '../export.js';
 
@@ -6,15 +14,25 @@ import { buildBusinessExport, type BusinessExport } from '../export.js';
 // in Pepper. Read in one transaction and audited with counts only; the bytes go straight to
 // the owner and no copy is kept.
 
-/** The business's export as a ZIP; the owner only (`business.export`). */
+/**
+ * The business's export as a ZIP; the owner only (`business.export`). With `store`, the
+ * support screenshots' images go in it too (S59.2.3, AC-X-31).
+ */
 export async function exportBusiness(
   db: Database,
   actor: Actor,
   clock: Clock = systemClock,
+  store: ScreenshotStorage | null = null,
 ): Promise<BusinessExport> {
   requirePermission(actor, 'business.export');
   return withMember(db, actor.context, async (tx) => {
-    const built = buildBusinessExport(await readBusinessExport(tx), clock.now());
+    const data = await readBusinessExport(tx);
+    const images = await readScreenshotsForExport(
+      actor.context.tenantId,
+      data.support.screenshots,
+      store,
+    );
+    const built = buildBusinessExport(data, clock.now(), images);
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
       change: {

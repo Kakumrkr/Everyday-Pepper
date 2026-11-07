@@ -88,7 +88,7 @@ export async function insertSupportThread(
     body: string;
     now: Date;
   },
-): Promise<{ id: string } | null> {
+): Promise<{ id: string; messageId: string } | null> {
   const openedByUserId = UserIdSchema.parse(input.openedByUserId);
   const [thread] = await tx
     .insert(supportThreads)
@@ -105,14 +105,18 @@ export async function insertSupportThread(
     .onConflictDoNothing({ target: supportThreads.reference })
     .returning({ id: supportThreads.id });
   if (thread === undefined) return null;
-  await tx.insert(supportMessages).values({
-    threadId: thread.id,
-    authorKind: 'member',
-    authorUserId: openedByUserId,
-    body: input.body,
-    createdAt: input.now,
-  });
-  return thread;
+  const [message] = await tx
+    .insert(supportMessages)
+    .values({
+      threadId: thread.id,
+      authorKind: 'member',
+      authorUserId: openedByUserId,
+      body: input.body,
+      createdAt: input.now,
+    })
+    .returning({ id: supportMessages.id });
+  if (message === undefined) throw new Error('The first message was not written');
+  return { id: thread.id, messageId: message.id };
 }
 
 /** The columns "Your requests" shows; `reader` decides `unread`. */

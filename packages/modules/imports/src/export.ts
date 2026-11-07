@@ -69,6 +69,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
     ...csvNames
       .filter((name) => !BUSINESS_EXPORT_FILES.some((file) => file.name === name))
       .map((name) => `${name}  More rows of the file before it (10,000 rows a file)`),
+    ...(data.support.screenshots.length > 0
+      ? ['support/screenshots/  The screenshots sent with your requests, named in support.json']
+      : []),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
     `visits.csv gives each visit's date and time in ${localTimeLabel(data.business.timeZone, exportedAt.getTime())}, the business's time zone.`,
@@ -88,7 +91,12 @@ export interface BusinessExport {
 }
 
 /** The business's export as a ZIP (AC-W1-37). */
-export function buildBusinessExport(data: BusinessExportData, exportedAt: Date): BusinessExport {
+export function buildBusinessExport(
+  data: BusinessExportData,
+  exportedAt: Date,
+  /** The sent screenshots' images by id (S59.2.3, AC-X-31); a missing one is counted, not named. */
+  screenshots: ReadonlyMap<string, Uint8Array> = new Map(),
+): BusinessExport {
   const zone = data.business.timeZone;
   const services = new Map(data.services.map((s) => [s.id, s]));
   const staff = new Map(data.staff.map((s) => [s.id, s]));
@@ -160,6 +168,25 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
     list.push(message);
     supportMessages.set(message.threadId, list);
   }
+  // Each message's screenshots, as files next to support.json (S59.2.3).
+  const screenshotFile = (id: string) => `support/screenshots/${id}.webp`;
+  const messageScreenshots = new Map<string, string[]>();
+  for (const screenshot of data.support.screenshots) {
+    const list = messageScreenshots.get(screenshot.messageId) ?? [];
+    list.push(screenshot.id);
+    messageScreenshots.set(screenshot.messageId, list);
+  }
+  const screenshotsOf = (messageId: string): Record<string, unknown> => {
+    const ids = messageScreenshots.get(messageId) ?? [];
+    if (ids.length === 0) return {};
+    const included = ids.filter((id) => screenshots.has(id));
+    return {
+      screenshots: included.map(screenshotFile),
+      ...(included.length < ids.length && {
+        screenshotsNotIncluded: ids.length - included.length,
+      }),
+    };
+  };
   const jsonFiles: [string, string][] = [
     [
       'business.json',
@@ -245,6 +272,7 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
             from: message.authorKind === 'pepper' ? 'Pepper team' : 'Your team',
             text: message.body,
             at: at(message.createdAt),
+            ...screenshotsOf(message.id),
           })),
         })),
       ),
@@ -265,6 +293,12 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
   );
   for (const [name, text] of csvFiles) add(name, text);
   for (const [name, text] of jsonFiles) add(name, text);
+  for (const screenshot of data.support.screenshots) {
+    const image = screenshots.get(screenshot.id);
+    // WebP is compressed already: stored as is.
+    if (image !== undefined)
+      files[screenshotFile(screenshot.id)] = [image, { mtime: exportedAt, level: 0 }];
+  }
 
   const day = formatDate(toZoned(zone, exportedAt.getTime()));
   return {

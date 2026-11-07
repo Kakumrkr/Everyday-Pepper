@@ -14,6 +14,7 @@ import {
   SupportSavedReplyInputSchema,
   SupportSavedReplyListSchema,
   SupportSavedReplySchema,
+  SupportScreenshotIdSchema,
   SupportThreadIdSchema,
   type OperatorInbox,
   type OperatorInboxQuery,
@@ -29,6 +30,7 @@ import {
   type SupportSavedReply,
   type SupportSavedReplyInput,
   type SupportSavedReplyList,
+  type SupportScreenshotSize,
   type SupportStatus,
   type TenantId,
   type UserId,
@@ -43,6 +45,7 @@ import {
   lockSupportSavedReplies,
   updateSupportSavedReply,
   findOperatorThread,
+  findSupportScreenshot,
   findPublicSupportRequest,
   findSupportOpenerRole,
   insertSupportNote,
@@ -72,9 +75,17 @@ import {
   OperatorAccessRefusedError,
   SavedRepliesFullError,
   SavedReplyNotFoundError,
+  SupportScreenshotNotFoundError,
+  SupportScreenshotsNotAttachableError,
   SupportThreadNotFoundError,
 } from '../errors.js';
 import { answerInThread, type SupportOptions } from './support.js';
+import {
+  imageOf,
+  screenshotsByMessage,
+  type ScreenshotImage,
+  type ScreenshotOptions,
+} from './support-screenshots.js';
 
 // Pepper's support console (S59.2, ADR-0062, AC-X-19…22). Only accounts holding the operator
 // grant (the `operator` script) get here, and each call is one `withOperator` transaction whose
@@ -200,6 +211,7 @@ function toInboxItem(row: OperatorInboxRow, names: Map<string, string>): Record<
     source: 'thread',
     status: row.status,
     rating: row.rating,
+    screenshotCount: row.screenshotCount,
     kind: row.kind,
     business: (row.tenantId === null ? undefined : names.get(row.tenantId)) ?? 'A business',
   };
@@ -245,7 +257,9 @@ export async function replyAsOperator(
   options: SupportOptions,
 ): Promise<OperatorThread> {
   const id = parseThreadId(threadId);
-  const { message } = SupportReplyInputSchema.parse(input);
+  const { message, screenshotIds } = SupportReplyInputSchema.parse(input);
+  // The team doesn't attach screenshots (S59.2.3): only members do.
+  if (screenshotIds.length > 0) throw new SupportScreenshotsNotAttachableError();
   const now = (options.clock ?? systemClock).now();
   return asOperator(db, operator, 'thread.reply', id, async (tx) => {
     const { tenantId } = await bindToThread(tx, id);
@@ -253,6 +267,26 @@ export async function replyAsOperator(
     await markSupportThreadSeenByPepper(tx, id, now);
     return toOperatorThread(tx, id, tenantId);
   });
+}
+
+/**
+ * A screenshot's image for the console (AC-X-30): one `screenshot.read` row in the operator
+ * access log per image served, in the transaction that finds it (the database shows a sent
+ * screenshot to an operator only then). The image is read from storage once the row is in.
+ */
+export async function readOperatorScreenshotImage(
+  db: Database,
+  operator: Operator,
+  screenshotId: string,
+  size: SupportScreenshotSize,
+  options: ScreenshotOptions,
+): Promise<ScreenshotImage> {
+  const parsed = SupportScreenshotIdSchema.safeParse(screenshotId);
+  if (!parsed.success) throw new SupportScreenshotNotFoundError();
+  const row = await asOperator(db, operator, 'screenshot.read', parsed.data, (tx) =>
+    findSupportScreenshot(tx, parsed.data),
+  );
+  return imageOf(row, size, options.store);
 }
 
 /** Moves a business's request to any status (AC-X-21); the same status changes nothing. */
@@ -478,6 +512,7 @@ async function toOperatorThread(
   const thread = await findOperatorThread(tx, id);
   if (thread === undefined) throw new SupportThreadNotFoundError();
   const messages = await listSupportMessages(tx, id);
+  const screenshots = await screenshotsByMessage(tx, id);
   const notes = await listSupportNotes(tx, { threadId: id });
   const names = await listOperatorBusinessNames(tx, [tenantId]);
   const context = SupportContextSchema.safeParse(thread.context);
@@ -502,6 +537,7 @@ async function toOperatorThread(
           ? { kind: 'pepper' }
           : { kind: 'member', name: message.authorName },
       body: message.body,
+      screenshots: screenshots.get(message.id) ?? [],
       createdAt: message.createdAt.toISOString(),
     })),
     notes: notes.map(toNote),

@@ -63,6 +63,12 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   support_not_ratable: 'Only the person who asked can rate a request, once it’s solved',
   saved_reply_not_found: 'No such saved reply',
   saved_replies_full: 'That’s 100 saved replies: delete one you don’t use first',
+  screenshot_not_found: 'No such screenshot',
+  screenshot_rejected: 'That file is not a screenshot we can use: use a JPEG, PNG or WebP',
+  screenshot_too_large: 'That screenshot is over 10 MB',
+  screenshots_not_attachable:
+    'One of these screenshots can’t be sent any more: remove it and add it again',
+  screenshots_unavailable: 'Screenshots can’t be added right now',
   waitlist_offer_not_found: 'This offer link is not valid',
   waitlist_offer_used: 'This offer has already been claimed',
   waitlist_offer_taken: 'Sorry, this time has been taken',

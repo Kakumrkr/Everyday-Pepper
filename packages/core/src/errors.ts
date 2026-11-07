@@ -347,9 +347,47 @@ export class SupportThreadNotFoundError extends Error {
 
 /** Over a day's support requests or messages for one person (S59, AC-X-14). */
 export class SupportLimitReachedError extends Error {
-  constructor(readonly limit: 'threads' | 'messages') {
+  constructor(readonly limit: 'threads' | 'messages' | 'screenshots') {
     super(`Too many support ${limit} today`);
     this.name = 'SupportLimitReachedError';
+  }
+}
+
+/** No such screenshot, or not one the reader may see (S59.2.3, AC-X-29): one answer for both. */
+export class SupportScreenshotNotFoundError extends Error {
+  constructor() {
+    super('No such screenshot');
+    this.name = 'SupportScreenshotNotFoundError';
+  }
+}
+
+/**
+ * A request or reply names a screenshot that isn't the sender's own unsent upload (another
+ * person's, already sent, removed or swept after 24 h): nothing is sent (AC-X-27).
+ */
+export class SupportScreenshotsNotAttachableError extends Error {
+  constructor() {
+    super('A screenshot can’t be attached');
+    this.name = 'SupportScreenshotsNotAttachableError';
+  }
+}
+
+/** An upload that isn't a screenshot Pepper keeps (AC-X-28): the reason and words to show. */
+export class SupportScreenshotRejectedError extends Error {
+  constructor(
+    readonly reason: string,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'SupportScreenshotRejectedError';
+  }
+}
+
+/** No object store is configured, so screenshots can't be kept or served (ADR-0048). */
+export class SupportScreenshotsUnavailableError extends Error {
+  constructor() {
+    super('Screenshots are not available');
+    this.name = 'SupportScreenshotsUnavailableError';
   }
 }
 

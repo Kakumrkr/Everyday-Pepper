@@ -24,3 +24,8 @@ export {
   type StoredObject,
 } from './object-store.js';
 export { S3ObjectStore } from './s3.js';
+export {
+  createScreenshotStore,
+  type ScreenshotProcessing,
+  type ScreenshotStore,
+} from './screenshots.js';
