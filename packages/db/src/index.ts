@@ -29,6 +29,7 @@ export * from './repositories/outbox.js';
 export * from './repositories/push-subscriptions.js';
 export * from './repositories/reminders.js';
 export * from './repositories/support.js';
+export * from './repositories/support-screenshots.js';
 export * from './repositories/remembered-devices.js';
 export * from './repositories/sessions.js';
 export * from './repositories/tasks.js';

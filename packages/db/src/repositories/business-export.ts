@@ -13,6 +13,7 @@ import {
   workingHours,
 } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
+import { listSupportScreenshotsForExport } from './support-screenshots.js';
 import { listSupportForExport } from './support.js';
 
 // A business's export (S51, ADR-0053, AC-W1-37): everything the owner can take with them, read
@@ -70,6 +71,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_threads: true,
   support_messages: true,
   support_reads: 'when each member last opened a support request',
+  support_screenshots: true,
 };
 
 /** What a business's export holds, as read. */
@@ -168,7 +170,9 @@ export interface BusinessExportData {
   /** Requests to the Pepper team (S59, AC-X-18) and their messages, the team's included. */
   support: {
     threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
-    messages: { threadId: string; authorKind: string; body: string; createdAt: Date }[];
+    messages: { id: string; threadId: string; authorKind: string; body: string; createdAt: Date }[];
+    /** The screenshots sent with them (S59.2.3, AC-X-31): the images are read from storage. */
+    screenshots: { id: string; messageId: string; widths: number[] }[];
   };
 }
 
@@ -332,6 +336,13 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
     bookings: bookingRows,
     waitlist,
     facts,
-    support: await listSupportForExport(tx),
+    support: {
+      ...(await listSupportForExport(tx)),
+      screenshots: (await listSupportScreenshotsForExport(tx)).flatMap((row) =>
+        row.messageId === null
+          ? []
+          : [{ id: row.id, messageId: row.messageId, widths: row.widths }],
+      ),
+    },
   };
 }

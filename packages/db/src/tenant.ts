@@ -148,6 +148,7 @@ const OperatorActionSchema = z.enum([
   'replies.read',
   'replies.write',
   'public.status',
+  'screenshot.read',
 ]);
 export type OperatorAction = z.infer<typeof OperatorActionSchema>;
 

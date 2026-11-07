@@ -2807,6 +2807,8 @@ export const supportMessages = pgTable(
   },
   (table) => [
     index('support_messages_thread_idx').on(table.tenantId, table.threadId, table.createdAt),
+    // The key a screenshot names its message by (S59.2.3): same business, same thread.
+    unique('support_messages_tenant_thread_id_unique').on(table.tenantId, table.threadId, table.id),
     index('support_messages_author_idx').on(table.authorUserId),
     check('support_messages_author_known', sql`${table.authorKind} IN ('member', 'pepper')`),
     check(
@@ -2865,6 +2867,83 @@ export const supportReads = pgTable(
       using: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
       withCheck: sql`${currentUserId} IS NULL OR user_id = ${currentUserId}`,
     }),
+  ],
+);
+
+/**
+ * A screenshot a member attached to a support request or reply (S59.2.3, ADR-0062 Part 3,
+ * AC-X-27…31). Uploaded first (unsent: no thread, seen only by its uploader), then attached to
+ * one message, after which it never changes. The images live in object storage at
+ * `tenants/<t>/support/<id>/<width>.webp`, at `widths` (narrowest first); `bytes` is the widest's
+ * size. `discarded_at`: removed before sending; the row stays until the support job sweeps it,
+ * so the day's upload count holds.
+ */
+export const supportScreenshots = pgTable(
+  'support_screenshots',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    uploadedByUserId: uuid('uploaded_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    threadId: uuid('thread_id'),
+    messageId: uuid('message_id'),
+    width: integer('width').notNull(),
+    height: integer('height').notNull(),
+    widths: integer('widths').array().notNull(),
+    bytes: integer('bytes').notNull(),
+    attachedAt: timestamp('attached_at', { withTimezone: true }),
+    discardedAt: timestamp('discarded_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('support_screenshots_message_idx').on(table.tenantId, table.threadId, table.messageId),
+    index('support_screenshots_uploader_idx').on(table.uploadedByUserId, table.createdAt),
+    index('support_screenshots_created_idx').on(table.createdAt),
+    check(
+      'support_screenshots_attached',
+      sql`(${table.threadId} IS NULL) = (${table.messageId} IS NULL) AND (${table.threadId} IS NULL) = (${table.attachedAt} IS NULL)`,
+    ),
+    check(
+      'support_screenshots_discarded_unsent',
+      sql`${table.discardedAt} IS NULL OR ${table.threadId} IS NULL`,
+    ),
+    check(
+      'support_screenshots_size',
+      sql`${table.width} BETWEEN 1 AND 100000 AND ${table.height} BETWEEN 1 AND 100000 AND ${table.bytes} BETWEEN 1 AND 20971520`,
+    ),
+    check(
+      'support_screenshots_widths',
+      sql`cardinality(${table.widths}) BETWEEN 1 AND 4 AND 0 < ALL(${table.widths}) AND 4097 > ALL(${table.widths})`,
+    ),
+    foreignKey({
+      name: 'support_screenshots_message_fk',
+      columns: [table.tenantId, table.threadId, table.messageId],
+      foreignColumns: [supportMessages.tenantId, supportMessages.threadId, supportMessages.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Unsent: its uploader only (work without a user, the sweep, reaches all). Sent: whoever
+    // reaches its thread (AC-X-29).
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: sql`CASE WHEN thread_id IS NULL THEN ${currentUserId} IS NULL OR uploaded_by_user_id = ${currentUserId} ELSE thread_id IN (SELECT id FROM support_threads) END`,
+      withCheck: sql`CASE WHEN thread_id IS NULL THEN ${currentUserId} IS NULL OR uploaded_by_user_id = ${currentUserId} ELSE thread_id IN (SELECT id FROM support_threads) END`,
+    }),
+    // A sent screenshot goes only with its message (the foreign key, which RLS doesn't stop).
+    pgPolicy('member_scope_unsent_delete', {
+      as: 'restrictive',
+      for: 'delete',
+      using: sql`thread_id IS NULL`,
+    }),
+    pgPolicy('operator_read', {
+      for: 'select',
+      using: sql`${operatorAccess} AND thread_id IS NOT NULL`,
+    }),
+    jobScan('support'),
   ],
 );
 
@@ -2959,7 +3038,7 @@ export const operatorAccessLog = pgTable(
     index('operator_access_log_created_idx').on(table.createdAt),
     check(
       'operator_access_log_action_known',
-      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write')`,
+      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write', 'screenshot.read')`,
     ),
   ],
 );

@@ -55,6 +55,8 @@ export interface SupportThreadRecord {
   rating: SupportRating | null;
   /** The team answered after the reader last opened it (the reader's own threads only). */
   unread: boolean;
+  /** How many screenshots its messages carry (S59.2.3, AC-X-27/30). */
+  screenshotCount: number;
   context: unknown;
   createdAt: Date;
   lastMessageAt: Date;
@@ -130,6 +132,7 @@ function threadColumns(reader: UserId | null) {
     solvedBy: supportThreads.solvedBy,
     rating: supportThreads.rating,
     preview: sql<string>`(SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m WHERE m.thread_id = ${supportThreads.id} ORDER BY m.created_at, m.id LIMIT 1)`,
+    screenshotCount: sql<number>`(SELECT count(*)::int FROM support_screenshots s WHERE s.thread_id = ${supportThreads.id})`,
     unread: sql<boolean>`(${supportThreads.openedByUserId} = ${readerId} AND EXISTS (SELECT 1 FROM support_messages m WHERE m.thread_id = ${supportThreads.id} AND m.author_kind = 'pepper' AND m.created_at > COALESCE((SELECT r.read_at FROM support_reads r WHERE r.thread_id = ${supportThreads.id} AND r.user_id = ${readerId}), '-infinity'::timestamptz)))`,
   };
 }
@@ -149,6 +152,7 @@ function toThreadRecord(row: {
   rating: string | null;
   preview: string | null;
   unread: boolean | null;
+  screenshotCount: number | null;
 }): SupportThreadRecord {
   return {
     ...row,
@@ -158,6 +162,7 @@ function toThreadRecord(row: {
     rating: row.rating === null ? null : SupportRatingSchema.parse(row.rating),
     preview: row.preview ?? '',
     unread: row.unread === true,
+    screenshotCount: row.screenshotCount ?? 0,
   };
 }
 
@@ -533,7 +538,7 @@ export async function countSupportWrites(
 /** The transaction business's threads and their messages, for its export (ADR-0053). */
 export async function listSupportForExport(tx: TenantTx): Promise<{
   threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
-  messages: { threadId: string; authorKind: string; body: string; createdAt: Date }[];
+  messages: { id: string; threadId: string; authorKind: string; body: string; createdAt: Date }[];
 }> {
   const threads = await tx
     .select({
@@ -547,6 +552,7 @@ export async function listSupportForExport(tx: TenantTx): Promise<{
     .orderBy(asc(supportThreads.createdAt), asc(supportThreads.id));
   const messages = await tx
     .select({
+      id: supportMessages.id,
       threadId: supportMessages.threadId,
       authorKind: supportMessages.authorKind,
       body: supportMessages.body,
@@ -612,6 +618,8 @@ export interface OperatorInboxRow {
   lastMessageAt: Date;
   /** The opener's "Did this help?" (business threads, S59.2.2). */
   rating: SupportRating | null;
+  /** How many screenshots it carries (S59.2.3's top-up, AC-X-30); public requests have none. */
+  screenshotCount: number;
 }
 
 /**
@@ -634,8 +642,11 @@ export async function listOperatorThreads(
     waiting_since: string;
     last_message_at: string;
     rating: string | null;
+    screenshot_count: number;
   }>(sql`
     SELECT t.id, t.tenant_id, t.reference, t.kind, t.status, t.last_message_at, t.rating,
+           (SELECT count(*)::int FROM support_screenshots s WHERE s.thread_id = t.id)
+             AS screenshot_count,
            (SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m
              WHERE m.thread_id = t.id ORDER BY m.created_at, m.id LIMIT 1) AS preview,
            ${WAITING_SINCE} AS waiting_since
@@ -657,6 +668,7 @@ export async function listOperatorThreads(
     waitingSince: new Date(row.waiting_since),
     lastMessageAt: new Date(row.last_message_at),
     rating: row.rating === null ? null : SupportRatingSchema.parse(row.rating),
+    screenshotCount: row.screenshot_count,
   }));
 }
 
@@ -696,6 +708,7 @@ export async function listOperatorPublicRequests(
     waitingSince: row.statusChangedAt ?? row.createdAt,
     lastMessageAt: row.statusChangedAt ?? row.createdAt,
     rating: null,
+    screenshotCount: 0,
   }));
 }
 
