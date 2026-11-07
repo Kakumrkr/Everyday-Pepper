@@ -20,6 +20,8 @@ import {
   signupEvents,
   supportMessages,
   supportReads,
+  platformOperators,
+  supportNotes,
   supportSavedReplies,
   supportThreads,
   tasks,
@@ -41,6 +43,22 @@ function foreignKeys(table: PgTable) {
 }
 
 describe('schema foreign keys', () => {
+  it('keeps the team’s notes and saved replies when an operator goes; grants go with them (S59.2, S59.2.2)', () => {
+    expect(foreignKeys(platformOperators)).toEqual([
+      { from: ['user_id'], to: 'users(id)', onDelete: 'cascade' },
+    ]);
+    expect(foreignKeys(supportNotes)).toEqual(
+      expect.arrayContaining([
+        { from: ['thread_id'], to: 'support_threads(id)', onDelete: 'cascade' },
+        { from: ['public_request_id'], to: 'public_support_requests(id)', onDelete: 'cascade' },
+        { from: ['author_user_id'], to: 'users(id)', onDelete: 'set null' },
+      ]),
+    );
+    expect(foreignKeys(supportSavedReplies)).toEqual([
+      { from: ['updated_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+    ]);
+  });
+
   it('removes activation events with their business and a sign-up with its account (S45)', () => {
     expect(foreignKeys(activationEvents)).toEqual(
       expect.arrayContaining([

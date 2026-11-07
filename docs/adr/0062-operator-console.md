@@ -50,3 +50,21 @@ S59 gave every business support threads that only its own members can read. Some
   - `ops.test.ts` (web);
   - `ops.spec.ts`;
   - the ops shots in `screens.spec.ts`.
+
+## Part 2 (S59.2.2, preapproved at its brief)
+1. **Saved replies (AC-X-23).** `support_saved_replies` is platform data: forced RLS, only the `operator_access` policy, at most 100 (an advisory lock holds the count). The access log has `replies.read` and `replies.write`. In a request, "Use a saved reply" adds its text below the operator's draft, with `{first name}` filled in, for them to edit and send; it is never sent by itself.
+2. **The support job (AC-X-24/25).** The worker runs it every 5 minutes (`SUPPORT_POLL_MS`). It scans with `withJobScan('support')`, a read-only `job_scan` policy on threads and their messages, then checks each thread again under its lock, bound to its business.
+   - A request waiting on Pepper for 4 h (the same-day promise) sends one reminder to `SUPPORT_EMAIL` per wait (`overdue_reminded_at`), through the business's outbox. A request that opens again starts a new wait, counted from `status_changed_at`, which moves only when the status changes. Without a team address nothing is marked.
+   - A request the team answered that has been quiet for 7 days (since its last message or status change) is solved with `solved_by = 'auto'`, audited as `system`, and its opener is emailed once. A request waiting on Pepper is never closed.
+   - Public requests have no business: three definer functions (close, list overdue, mark one) fix the 7-day and 4 h windows and refuse a "now" ahead of the database's clock. Each reminder is marked and mailed in its own short transaction, so a refused email undoes only its own mark.
+3. **"Did this help?" (AC-X-26).** Only the opener rates, once the request is solved; the answer can change; a reply that reopens it clears the answer (`setSupportThreadStatus`). It is audited as `support_thread.rated` with the answer only. The console shows it on the request and in the Solved view. Thumb icons always come with their words (DESIGN §6: no emoji).
+4. **Screenshots** moved to S59.2.3 (the brief's D-1). They need storage, upload, serving under the operator access log, and the export and deletion.
+
+### Built (S59.2.2)
+- db: migration 0069, the job scan, the saved-reply, rating and reminder repositories, the three public functions.
+- contracts: the rating, solved-by, saved-reply schemas, `SUPPORT_QUIET_DAYS`, `SUPPORT_OVERDUE_HOURS`, `support_thread.rated`.
+- core: `services/support-housekeeping.ts`, `rateSupportThread`, saved replies in `operator-support.ts`.
+- worker: the `Support job`.
+- api: `PUT /v1/support/threads/:id/rating`, `/v1/ops/replies`.
+- web: `/ops/replies`, the reply picker, "Over 4 h: answer next" on the inbox, "Did this help?" and "Closed after 7 quiet days" on the thread.
+- Tests: `support-housekeeping.int.test.ts` and `.test.ts` (core); `operator.int.test.ts` and `isolation.int.test.ts` (db); the controller tests; `jobs.module.test.ts`; `ops.test.ts`; `ops.spec.ts`, `support.spec.ts`; `screens.spec.ts` (`ops-replies-*`, `support-thread-solved-*`).
