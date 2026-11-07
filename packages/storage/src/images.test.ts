@@ -8,7 +8,7 @@ import {
   solidColorPhoto,
   variantWidths,
   type ImageRejection,
-  type PhotoKind,
+  type ImageKind,
 } from './images.js';
 
 const background = { r: 200, g: 120, b: 80 };
@@ -39,7 +39,7 @@ function pngHeaderOnly(width: number, height: number): Uint8Array {
   ]);
 }
 
-async function rejection(input: Uint8Array, kind: PhotoKind): Promise<ImageRejection> {
+async function rejection(input: Uint8Array, kind: ImageKind): Promise<ImageRejection> {
   const error: unknown = await processImage(input, kind).catch((caught: unknown) => caught);
   expect(error).toBeInstanceOf(ImageRejectedError);
   return (error as ImageRejectedError).reason;
@@ -144,6 +144,68 @@ describe('processImage (AC-W8-10)', () => {
   it('refuses a truncated photo', async () => {
     const whole = await image(800, 800).jpeg().toBuffer();
     expect(await rejection(whole.subarray(0, whole.byteLength / 2), 'gallery')).toBe('unreadable');
+  });
+});
+
+describe('processImage, screenshot kind (AC-X-28)', () => {
+  it('keeps a desktop screenshot at 2560 px wide with a 480 px thumbnail, sharp for text', async () => {
+    const result = await processImage(await image(3840, 2160).png().toBuffer(), 'screenshot');
+    expect(result).toMatchObject({ width: 3840, height: 2160 });
+    expect(result.variants.map((v) => v.width)).toEqual([480, 2560]);
+    for (const variant of result.variants) {
+      expect((await sharp(variant.data).metadata()).format).toBe('webp');
+    }
+  });
+
+  it('accepts a long phone screenshot (1:8) and a small dialog, never enlarged', async () => {
+    const tall = await processImage(await image(400, 3200).png().toBuffer(), 'screenshot');
+    expect(tall.variants.map((v) => v.width)).toEqual([400]);
+    const small = await processImage(await image(120, 16).png().toBuffer(), 'screenshot');
+    expect(small.variants.map((v) => v.width)).toEqual([120]);
+  });
+
+  it('strips the device and location, and turns it upright', async () => {
+    const tagged = await image(900, 600)
+      .jpeg()
+      .withExif({
+        IFD0: { Make: 'PepperPhone' },
+        IFD3: { GPSLatitudeRef: 'N', GPSLatitude: '40/1 44/1 0/1' },
+      })
+      .withMetadata({ orientation: 6 })
+      .toBuffer();
+    const result = await processImage(tagged, 'screenshot');
+    expect(result).toMatchObject({ width: 600, height: 900 });
+    const after = await sharp(result.variants.at(-1)?.data).metadata();
+    expect(after.exif).toBeUndefined();
+    expect(after.xmp).toBeUndefined();
+    expect(after.orientation).toBeUndefined();
+  });
+
+  it('refuses by content, with words about a screenshot', async () => {
+    const gif = await image(800, 800).gif().toBuffer();
+    await expect(processImage(gif, 'screenshot')).rejects.toMatchObject({
+      reason: 'unsupported_type',
+      message: 'Use a JPEG, PNG or WebP screenshot.',
+    });
+    const heic = await image(800, 800).heif({ compression: 'av1' }).toBuffer();
+    await expect(processImage(heic, 'screenshot')).rejects.toMatchObject({
+      reason: 'heic',
+      message: 'HEIC screenshots are not supported yet. Save it as a JPEG or PNG.',
+    });
+    await expect(
+      processImage(new Uint8Array(MAX_PHOTO_BYTES + 1), 'screenshot'),
+    ).rejects.toMatchObject({ reason: 'too_large', message: 'That screenshot is over 10 MB.' });
+    expect(await rejection(pngHeaderOnly(8000, 6000), 'screenshot')).toBe('too_many_pixels');
+    expect(await rejection(await image(400, 15).png().toBuffer(), 'screenshot')).toBe('too_small');
+  });
+
+  it('refuses shapes longer than 1:8', async () => {
+    expect(await rejection(await image(200, 1601).png().toBuffer(), 'screenshot')).toBe(
+      'bad_shape',
+    );
+    await expect(
+      processImage(await image(200, 1600).png().toBuffer(), 'screenshot'),
+    ).resolves.toBeDefined();
   });
 });
 
