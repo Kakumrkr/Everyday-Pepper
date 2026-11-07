@@ -1,13 +1,19 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-06 · **Plan version:** 0.35 ([PCR-009](changes/PCR-009.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → next: **S57** (deploy)
+**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → now: **S59** (help centre + support threads); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. S56b merged S56a and S56a.2 and closed Phase 12 ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84)). Next: **S57** (deploy).
+**S59 · Help centre + support threads, owner side** (branch `claude/youthful-dijkstra-9hsw6i`; [PCR-010](changes/PCR-010.md); AC-X-13…18). Brief approved 2026-11-07: our own support system (not a helpdesk), the S59 series S59–S59.5, then S58a, S57 (after the domain), S58b. No ADR this session (ADR-0062 in S59.2); screenshots with the console in S59.2.
+- [x] T1 PCR-010 + plan docs + ACs
+- [ ] T2 Support backend: migration 0067 (`support_threads`, `support_messages`, `support_reads`, `public_support_requests`), repo, core service, `/v1/support/*`, `/v1/public/support`, `SUPPORT_EMAIL`, `replyTo` on outbox emails, export + deletion
+- [ ] T3 Support screens: new request (More, articles, error states), Your requests, thread + reply, unread count on More
+- [ ] T4 Help centre: `/help`, articles, search, `/help/contact`, help links on Import, Autonomy, What I know, booking page
+- [ ] T5 Close: review, tier 3, walkthrough, PR, CI, merge
+Next step: T2.
 
 ## Last sessions
 - **S56b Phase 12 "b" · Recorded on the real model, Phase 12 gate (2026-11-06)** ([PR #84](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/84), with S56a and S56a.2; ADR-0060/0061 results). Full entry in [session-log.md](session-log.md).
@@ -32,6 +38,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59 (user, 2026-11-07):** S57 waits for the domain; build our own support system "production ready, like big companies", in the S59 series ([PCR-010](changes/PCR-010.md)). Full wording in [decisions.md](decisions.md).
 - **S56b (user, 2026-11-06):** at the brief "Pre-approved with your recommendations, complete the session" (D-1 no split; D-2 zeros dropped in both sentences; D-3 guards unchanged; D-4 results in the ADRs); "Allow, these 12 only" (`--max-cost 2`). **Claude:** the probe's 5 fixes; graders fitted then tightened; `EVAL_PHASE` required; C1 scored 8. Full wording in [decisions.md](decisions.md).
 - **S56a.2 (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 no split; D-2 the screen asks once by itself; D-3 shape-masked samples, untrusted names; D-4 a field or none; D-5 ADR-0061). **Claude:** stored on the batch's columns, no migration; `@pepper/ai` may import `@pepper/imports`; the `import_mapping` set; the review's 4 fixes. Full wording in [decisions.md](decisions.md).
 - **S56a (user, 2026-11-06):** at the brief "Pre-approved with your recommendations" (D-1 split → S56a.2 import mapping; D-2 domain words, a checked note, `message.client` asks; D-3 `booking.no_show` notify; D-4 ADR-0060). **Claude:** messages only about a booked visit; a 200-character note; staff undo their own no-show; chunks of 17; the stop at $13.80; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
@@ -80,7 +87,7 @@ Older ones (S25–S33) are in [decisions.md](decisions.md).
 Raised by Claude at the brief of the session named.
 1. **During Phase 10 (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks; needed in S70).
 2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
-3. **By S57 (Phase 13):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
+3. **By S57 (Phase 13, after S59–S59.5 and S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
 5. **Before SMS and Stripe go live (Phases 14–15):** form the LLC, register 10DLC (4–8 weeks), open the Stripe account (test mode needs only a sign-up, from S65).
 
@@ -91,9 +98,14 @@ S1–S56b, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S57 | Deploy: VPS, neutral domain, TLS, Resend + SPF/DKIM/DMARC, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
-| S58 | Backups + restore drill, Sentry/Grafana, Redis rate limits, load test | 13 | Restore drill passes; SLOs met |
-| S59 | Support button, help page, terms + privacy, AI disclosure, pilot metrics page | 13 | Every metric has a number |
+| S59 | Help centre + support threads, owner side ([PCR-010](changes/PCR-010.md)) | 13 | AC-X-13…18 green |
+| S59.2 | Operator console: inbox, replies, notes, saved replies, statuses, auto-close, overdue reminder, 👍/👎, screenshots (ADR-0062) | 13 | Every status reachable; reads audited |
+| S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
+| S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
+| S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
+| S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
+| S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
+| S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
 | S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
 | S61 | SMS channel: adapter, consent, STOP/HELP, quiet hours, sandbox | 14 | Contract tests; STOP < 1 min |
 | S62 | SMS reminders (incl. < 24 h bookings), confirm by text | 14 | Timing + idempotency tests |

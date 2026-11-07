@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.36 — 2026-11-07
+- At the S59 brief (user): **our own support system, before deploy** ([PCR-010](changes/PCR-010.md)). S57 waits for the domain the user hasn't bought; S59 becomes five sessions: S59 help centre and support threads (owner side), S59.2 operator console (ADR-0062), S59.3 email both ways (Resend inbound, live in S57), S59.4 pilot metrics, S59.5 terms, privacy and the AI disclosure. S58 splits into S58a (local) and S58b (on the VPS). Order: S59–S59.5, S58a, S57, S58b, S60. AC-X-13…18.
+
+  **Compatibility:** additive tables, routes and pages; no tool, prompt or event change; $0 of the AI budget.
+
 ## 0.35 — 2026-10-29
 - Before S46 (owner's standing authorization): **setup confidence and lean sessions through launch** ([PCR-009](changes/PCR-009.md)). S46 now distinguishes automatic bookability from an explicit per-business setup review; keeps current readiness warnings after acknowledgment; defines public staff/service eligibility, bounded first-free-day selection, accurate zone labels and retry without losing selections. AC-W1-11/12 and AC-W8-3…6 are added as planned criteria. Contact/profile details remain S47, correcting the original ambiguous S46 private-review gate.
 - The same planning refinement updates existing session-brief/session-close instructions and the maintained testing strategy for all remaining sessions: explicit check profiles, narrow prose-only checks, no repeated unchanged targeted checks, diagnosis before repeated full runs, valid-stack reuse, compact timing evidence, and existing-file continuity. There is no per-session report-file requirement; Claude's existing approval and GitHub closeout flow stays intact.
