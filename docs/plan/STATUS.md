@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.2.3 Screenshots on a request** (brief preapproved by the user, 2026-11-07: "go with your decisions… industry level"; ADR-0062 "Part 3"; AC-X-27…31). Decisions: D-1 3 a message, JPEG/PNG/WebP by content, 10 MB, 40 MP, 1:8, HEIC refused, WebP q90 ≤ 2560 px + 480 thumb, no metadata, 20 a day; D-2 upload then attach ids, unsent swept after 24 h; D-3 members by `member_scope`, operators via `withOperator('screenshot.read')` one row per image, not on the public form; D-4 images in the export zip; D-5 ADR-0062 Part 3; D-6 one session, T6–T7 → S59.2.4 if context runs short. Claude: 2560 px (not 2000), paste and drop, a "crop out client details" line.
+- [x] T1 ACs, traceability, ADR Part 3
+- [ ] T2 storage `screenshot` kind + key · T3 migration 0070 + repo + isolation · T4 core (upload, attach, read, sweep, export, deletion) · T5 api + contracts · T6 owner screens · T7 ops screens + inbox count
 
 ## Last sessions
 - **S59.2.2 Phase 13 · Console, part 2 (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 2", [PR #87](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/87)). Full entry in [session-log.md](session-log.md).
