@@ -53,7 +53,9 @@ test('support (AC-X-14/15): an owner asks from More, the team hears, the owner r
   await page.goto('/more');
   await page.getByRole('link', { name: /Tell us what went wrong/ }).click();
   await expect(page).toHaveURL(/\/support\/new\?from=%2Fmore$/);
-  await expect(page.getByRole('heading', { name: 'Tell us what went wrong', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Tell us what went wrong', level: 1 }),
+  ).toBeVisible();
   await expect(page.getByText('Never your clients’ details.')).toBeVisible();
   await expect(page.getByText(owner.email)).toBeVisible();
   await scanned(page);

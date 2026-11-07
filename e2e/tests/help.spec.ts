@@ -29,14 +29,18 @@ test('help (AC-X-13/17): signed out, search, read an article and write to the te
 
   const search = await hydrated(page.getByLabel('Search the help centre'));
   await search.fill('IMPORT');
-  await expect(page.getByRole('link', { name: /Bring your clients from another app/ })).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: /Bring your clients from another app/ }),
+  ).toBeVisible();
   await expect(page.getByRole('link', { name: /Invite your team/ })).toHaveCount(0);
   await search.fill('zebra quantum');
   await expect(page.getByText('No article matches')).toBeVisible();
   await search.fill('import');
   await page.getByRole('link', { name: /Bring your clients from another app/ }).click();
 
-  await expect(page.getByRole('heading', { name: 'Bring your clients from another app', level: 1 })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Bring your clients from another app', level: 1 }),
+  ).toBeVisible();
   await expect(page.getByText('Undo an import for 7 days', { exact: false })).toBeVisible();
   await page.getByRole('link', { name: 'Write to us' }).click();
   await expect(page).toHaveURL(/\/help\/contact\?topic=import-clients$/);
@@ -62,7 +66,9 @@ test('help (AC-X-13/17): signed out, search, read an article and write to the te
     if (found === undefined) await new Promise((resolve) => setTimeout(resolve, 500));
   }
   expect(found?.Subject).toBe(`[${reference}] Signed-out request`);
-  const message = (await (await fetch(`${MAILPIT_URL}/api/v1/message/${found?.ID ?? ''}`)).json()) as {
+  const message = (await (
+    await fetch(`${MAILPIT_URL}/api/v1/message/${found?.ID ?? ''}`)
+  ).json()) as {
     To: { Address: string }[];
     ReplyTo: { Address: string }[];
     Text: string;
@@ -85,7 +91,9 @@ test('help (AC-X-13): a screen’s help link opens its article; signed in, “St
   await page.getByRole('link', { name: 'How this works' }).click();
   await expect(page).toHaveURL(/\/help\/import-clients$/);
   await page.getByRole('link', { name: 'Tell us what went wrong' }).click();
-  await expect(page).toHaveURL(/\/support\/new\?from=%2Fhelp%2Fimport-clients&topic=import-clients$/);
+  await expect(page).toHaveURL(
+    /\/support\/new\?from=%2Fhelp%2Fimport-clients&topic=import-clients$/,
+  );
   await expect(page.getByRole('radio', { name: /A question/ })).toBeChecked();
   // Signed in, the public form sends people to the app's own.
   await page.goto('/help/contact?topic=team');
