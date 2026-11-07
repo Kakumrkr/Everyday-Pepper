@@ -93,7 +93,7 @@ async function openWith(
     });
     if (thread === null) throw new Error('reference taken');
     const messageId = await firstMessage(tx, thread.id);
-    const locked = await lockAttachableSupportScreenshots(tx, userId, screenshotIds);
+    const locked = await lockAttachableSupportScreenshots(tx, userId, screenshotIds, new Date(0));
     await attachSupportScreenshots(tx, {
       ids: locked.map((row) => row.id),
       threadId: thread.id,
@@ -188,7 +188,7 @@ describe('attaching (AC-X-27)', () => {
     expect(attached.map((row) => row.id)).toEqual([mine]);
     // Already sent: not attachable again, to this thread or another.
     const again = await withMember(db, { tenantId: tenantA, userId: staff }, (tx) =>
-      lockAttachableSupportScreenshots(tx, staff, [mine]),
+      lockAttachableSupportScreenshots(tx, staff, [mine], new Date(0)),
     );
     expect(again).toEqual([]);
   });
@@ -230,7 +230,9 @@ describe('attaching (AC-X-27)', () => {
       await as((tx) => discardSupportScreenshot(tx, otherStaff, id, new Date())),
     ).toBeUndefined();
     expect(await as((tx) => findSupportScreenshot(tx, id))).toBeUndefined();
-    expect(await as((tx) => lockAttachableSupportScreenshots(tx, otherStaff, [id]))).toEqual([]);
+    expect(
+      await as((tx) => lockAttachableSupportScreenshots(tx, otherStaff, [id], new Date(0))),
+    ).toEqual([]);
     expect(
       await as((tx) => countSupportScreenshotUploads(tx, otherStaff, since)),
     ).toBeGreaterThanOrEqual(1);
@@ -291,10 +293,17 @@ describe('the sweep, the export and the deletion (AC-X-28/31)', () => {
     expect(ids).toContain(stale);
     expect(ids).not.toContain(sentOld);
     expect(ids).not.toContain(fresh);
+    // A long backlog in one business goes in one pass (the sweep lists up to 500).
+    const backlog = Array.from({ length: 150 }, () => newId());
     const deleted = await withTenant(db, tenantA, (tx) =>
-      deleteStaleSupportScreenshots(tx, [stale, sentOld, fresh], before),
+      deleteStaleSupportScreenshots(tx, [stale, sentOld, fresh, ...backlog], before),
     );
     expect(deleted.map((row) => row.id)).toEqual([stale]);
+    // An upload older than the window can't be attached.
+    const late = await withMember(db, { tenantId: tenantA, userId: staff }, (tx) =>
+      lockAttachableSupportScreenshots(tx, staff, [fresh], new Date(Date.now() + 60_000)),
+    );
+    expect(late).toEqual([]);
   });
 
   it('the export lists sent ones only; the business’s deletion takes every row', async () => {

@@ -11,6 +11,7 @@ import type { TenantTx } from '../tenant.js';
 
 const Id = z.uuid();
 const Ids = z.array(Id).max(100);
+const SweepIds = z.array(Id).max(1000);
 
 /** A stored screenshot: its upright size and the widths kept (narrowest first). */
 export interface SupportScreenshotRecord {
@@ -90,6 +91,8 @@ export async function lockAttachableSupportScreenshots(
   tx: TenantTx,
   userId: UserId,
   ids: readonly string[],
+  /** Uploads before this are too old to send (the sweep's window starts an hour after). */
+  uploadedAfter: Date,
 ): Promise<SupportScreenshotRecord[]> {
   const wanted = Ids.parse([...new Set(ids)]);
   if (wanted.length === 0) return [];
@@ -102,6 +105,7 @@ export async function lockAttachableSupportScreenshots(
         eq(supportScreenshots.uploadedByUserId, UserIdSchema.parse(userId)),
         isNull(supportScreenshots.threadId),
         isNull(supportScreenshots.discardedAt),
+        gt(supportScreenshots.createdAt, uploadedAfter),
       ),
     )
     .for('update');
@@ -217,7 +221,7 @@ export async function deleteStaleSupportScreenshots(
   ids: readonly string[],
   before: Date,
 ): Promise<SupportScreenshotRecord[]> {
-  const wanted = Ids.parse([...new Set(ids)]);
+  const wanted = SweepIds.parse([...new Set(ids)]);
   if (wanted.length === 0) return [];
   return tx
     .delete(supportScreenshots)

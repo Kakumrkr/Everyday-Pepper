@@ -38,6 +38,28 @@ describe('createScreenshotStore (S59.2.3, AC-X-28)', () => {
     });
   });
 
+  it('deletes a long list in batches of 50', async () => {
+    const memory = new MemoryObjectStore();
+    const calls: number[] = [];
+    const spy = {
+      put: memory.put.bind(memory),
+      get: memory.get.bind(memory),
+      head: memory.head.bind(memory),
+      delete: (keys: readonly string[]) => {
+        calls.push(keys.length);
+        return memory.delete(keys);
+      },
+    };
+    const ids = Array.from(
+      { length: 30 },
+      (_, i) => `0190a0a0-0000-7000-8000-${String(i).padStart(12, '0')}`,
+    );
+    await createScreenshotStore(spy).delete(
+      ids.map((id) => ({ tenantId: TENANT, id, widths: [480, 2560] })),
+    );
+    expect(calls).toEqual([50, 10]);
+  });
+
   it('refuses keys outside a business’s prefix', async () => {
     const store = createScreenshotStore(new MemoryObjectStore());
     await expect(store.put('../x', SHOT, 480, new Uint8Array(1))).rejects.toThrow(

@@ -29,6 +29,7 @@ export interface ScreenshotStore {
 }
 
 const WEBP = 'image/webp';
+const DELETE_BATCH = 50;
 
 export function createScreenshotStore(store: ObjectStore): ScreenshotStore {
   return {
@@ -58,7 +59,10 @@ export function createScreenshotStore(store: ObjectStore): ScreenshotStore {
       const keys = screenshots.flatMap(({ tenantId, id, widths }) =>
         widths.map((width) => screenshotObjectKey(tenantId, id, width)),
       );
-      if (keys.length > 0) await store.delete(keys);
+      // In batches: a business's deletion can hold thousands of images.
+      for (let start = 0; start < keys.length; start += DELETE_BATCH) {
+        await store.delete(keys.slice(start, start + DELETE_BATCH));
+      }
     },
   };
 }

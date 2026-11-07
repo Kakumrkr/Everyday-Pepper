@@ -25,14 +25,16 @@ export async function exportBusiness(
   store: ScreenshotStorage | null = null,
 ): Promise<BusinessExport> {
   requirePermission(actor, 'business.export');
+  // Read in one transaction; the screenshots' images are fetched after it closes (S59.2.3), so
+  // storage round-trips never hold a database connection.
+  const data = await withMember(db, actor.context, readBusinessExport);
+  const images = await readScreenshotsForExport(
+    actor.context.tenantId,
+    data.support.screenshots,
+    store,
+  );
+  const built = buildBusinessExport(data, clock.now(), images);
   return withMember(db, actor.context, async (tx) => {
-    const data = await readBusinessExport(tx);
-    const images = await readScreenshotsForExport(
-      actor.context.tenantId,
-      data.support.screenshots,
-      store,
-    );
-    const built = buildBusinessExport(data, clock.now(), images);
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
       change: {

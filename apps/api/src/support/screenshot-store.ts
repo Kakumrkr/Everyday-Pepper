@@ -1,6 +1,12 @@
 import type { ScreenshotImage, ScreenshotStorage } from '@pepper/core';
 import { createScreenshotStore, S3ObjectStore, type StorageConfig } from '@pepper/storage';
-import { Global, Module, type DynamicModule } from '@nestjs/common';
+import {
+  Global,
+  Inject,
+  Module,
+  type DynamicModule,
+  type OnApplicationShutdown,
+} from '@nestjs/common';
 import type { ServerResponse } from 'node:http';
 
 // Support screenshots' storage (S59.2.3, ADR-0062 Part 3): core's `ScreenshotStorage` port on the
@@ -8,21 +14,32 @@ import type { ServerResponse } from 'node:http';
 // uploads answer 503 `screenshots_unavailable` and images are not found.
 
 export const SCREENSHOT_STORE = Symbol('SCREENSHOT_STORE');
+const SCREENSHOT_S3 = Symbol('SCREENSHOT_S3');
 
 @Global()
 @Module({})
-export class ScreenshotStoreModule {
+export class ScreenshotStoreModule implements OnApplicationShutdown {
+  constructor(@Inject(SCREENSHOT_S3) private readonly s3: S3ObjectStore | null) {}
+
   static forRoot(config: StorageConfig | null): DynamicModule {
     return {
       module: ScreenshotStoreModule,
       providers: [
+        { provide: SCREENSHOT_S3, useValue: config === null ? null : new S3ObjectStore(config) },
         {
           provide: SCREENSHOT_STORE,
-          useValue: config === null ? null : createScreenshotStore(new S3ObjectStore(config)),
+          inject: [SCREENSHOT_S3],
+          useFactory: (s3: S3ObjectStore | null) =>
+            s3 === null ? null : createScreenshotStore(s3),
         },
       ],
       exports: [SCREENSHOT_STORE],
     };
+  }
+
+  /** The S3 client's sockets go with the app. */
+  onApplicationShutdown(): void {
+    this.s3?.close();
   }
 }
 

@@ -70,9 +70,16 @@ export function useScreenshotDraft() {
         state: problem === null ? 'adding' : 'failed',
         ...(problem !== null && { error: problem }),
       };
+      // Counted at once, so a second paste before the next render sees this one.
+      live.current = [...live.current, draft];
       setDrafts((current) => [...current, draft]);
       if (problem !== null) continue;
       void uploadScreenshot(file).then((answer) => {
+        // Removed while it was uploading: take it back from the server too.
+        if (!live.current.some((d) => d.key === key)) {
+          if (answer.ok) void discardScreenshot(answer.data.id);
+          return;
+        }
         setDrafts((current) =>
           current.map((d) =>
             d.key !== key
@@ -92,12 +99,14 @@ export function useScreenshotDraft() {
     if (draft === undefined) return;
     URL.revokeObjectURL(draft.preview);
     if (draft.id !== undefined) void discardScreenshot(draft.id);
+    live.current = live.current.filter((d) => d.key !== key);
     setDrafts((current) => current.filter((d) => d.key !== key));
   }, []);
 
   /** After sending: the previews go, the ids are the message's now. */
   const reset = useCallback(() => {
     for (const draft of live.current) URL.revokeObjectURL(draft.preview);
+    live.current = [];
     setDrafts([]);
     setNote(null);
   }, []);

@@ -136,7 +136,7 @@ function threadColumns(reader: UserId | null) {
     solvedBy: supportThreads.solvedBy,
     rating: supportThreads.rating,
     preview: sql<string>`(SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m WHERE m.thread_id = ${supportThreads.id} ORDER BY m.created_at, m.id LIMIT 1)`,
-    screenshotCount: sql<number>`(SELECT count(*)::int FROM support_screenshots s WHERE s.thread_id = ${supportThreads.id})`,
+    screenshotCount: sql<number>`(SELECT count(*)::int FROM support_screenshots s WHERE s.tenant_id = ${supportThreads.tenantId} AND s.thread_id = ${supportThreads.id})`,
     unread: sql<boolean>`(${supportThreads.openedByUserId} = ${readerId} AND EXISTS (SELECT 1 FROM support_messages m WHERE m.thread_id = ${supportThreads.id} AND m.author_kind = 'pepper' AND m.created_at > COALESCE((SELECT r.read_at FROM support_reads r WHERE r.thread_id = ${supportThreads.id} AND r.user_id = ${readerId}), '-infinity'::timestamptz)))`,
   };
 }
@@ -649,7 +649,8 @@ export async function listOperatorThreads(
     screenshot_count: number;
   }>(sql`
     SELECT t.id, t.tenant_id, t.reference, t.kind, t.status, t.last_message_at, t.rating,
-           (SELECT count(*)::int FROM support_screenshots s WHERE s.thread_id = t.id)
+           (SELECT count(*)::int FROM support_screenshots s
+               WHERE s.tenant_id = t.tenant_id AND s.thread_id = t.id)
              AS screenshot_count,
            (SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m
              WHERE m.thread_id = t.id ORDER BY m.created_at, m.id LIMIT 1) AS preview,

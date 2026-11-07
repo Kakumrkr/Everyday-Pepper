@@ -402,11 +402,21 @@ describe('the sweep, the export and the deletion (AC-X-28, AC-X-31)', () => {
         clock,
         store,
       });
-    // Earlier tests' leftovers go in the first pass; this test's wait a day.
-    clock.advanceBy(23 * 60 * 60 * 1000);
+    // Earlier tests' leftovers go in the first pass; this test's wait 24 h, plus the margin.
+    clock.advanceBy(24.5 * 60 * 60 * 1000);
     await sweep();
     expect(store.has(tenant, unsent.id, 480)).toBe(true);
-    clock.advanceBy(2 * 60 * 60 * 1000);
+    // Too old to send by now, though not swept yet.
+    await expect(
+      openSupportThread(
+        db,
+        actor(jess, 'staff'),
+        { kind: 'problem', message: 'Late', screenshotIds: [unsent.id] },
+        meta,
+        options,
+      ),
+    ).rejects.toBeInstanceOf(SupportScreenshotsNotAttachableError);
+    clock.advanceBy(1 * 60 * 60 * 1000);
     const result = await sweep();
     expect(result.swept).toBeGreaterThanOrEqual(1);
     expect(result.failed).toBe(0);

@@ -83,8 +83,12 @@ export interface ScreenshotImage {
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const UNSENT_MS = SUPPORT_SCREENSHOT_UNSENT_HOURS * 60 * 60 * 1000;
+// The sweep takes uploads an hour past the window in which they can be sent, so it never
+// deletes the images of one being attached at the same moment.
+const SWEEP_AFTER_MS = UNSENT_MS + 60 * 60 * 1000;
 const WEBP = 'image/webp';
 const SWEEP_BATCH = 500;
+const EXPORT_READS_AT_ONCE = 4;
 
 function toScreenshot(row: SupportScreenshotRecord): SupportScreenshot {
   return SupportScreenshotSchema.parse({ id: row.id, width: row.width, height: row.height });
@@ -125,10 +129,10 @@ export async function uploadSupportScreenshot(
   const widths = image.variants.map((variant) => variant.width);
   const widest = image.variants.at(-1);
   if (widest === undefined) throw new Error('A screenshot has at least one width');
-  await Promise.all(
-    image.variants.map((variant) => store.put(tenantId, id, variant.width, variant.data)),
-  );
   try {
+    await Promise.all(
+      image.variants.map((variant) => store.put(tenantId, id, variant.width, variant.data)),
+    );
     await withMember(db, actor.context, async (tx) => {
       const now = clock.now();
       await checkUploadLimit(tx, userId, now);
@@ -143,7 +147,8 @@ export async function uploadSupportScreenshot(
       });
     });
   } catch (error) {
-    // Nothing points at the images: take them back (the sweep can't find them without a row).
+    // Nothing points at the images (or a put failed): take back every width, as the sweep
+    // can't find them without a row.
     await store.delete([{ tenantId, id, widths }]).catch(() => undefined);
     throw error;
   }
@@ -185,7 +190,12 @@ export async function attachScreenshotsToMessage(
   },
 ): Promise<number> {
   if (input.screenshotIds.length === 0) return 0;
-  const locked = await lockAttachableSupportScreenshots(tx, input.userId, input.screenshotIds);
+  const locked = await lockAttachableSupportScreenshots(
+    tx,
+    input.userId,
+    input.screenshotIds,
+    new Date(input.now.getTime() - UNSENT_MS),
+  );
   if (locked.length !== new Set(input.screenshotIds).size) {
     throw new SupportScreenshotsNotAttachableError();
   }
@@ -250,15 +260,15 @@ export async function imageOf(
 }
 
 /**
- * The support job's sweep (AC-X-28): unsent screenshots (removed or never sent) older than 24 h
- * lose their rows and images. Found across businesses with the read-only job scan, deleted
+ * The support job's sweep (AC-X-28): unsent screenshots (removed or never sent) that can't be
+ * sent any more (24 h, plus an hour's margin) lose their rows and images. Found across businesses with the read-only job scan, deleted
  * bound to each business. Returns how many rows went.
  */
 export async function sweepUnsentSupportScreenshots(
   db: Database,
   options: ScreenshotOptions,
 ): Promise<number> {
-  const before = new Date((options.clock ?? systemClock).now().getTime() - UNSENT_MS);
+  const before = new Date((options.clock ?? systemClock).now().getTime() - SWEEP_AFTER_MS);
   const stale = await withJobScan(db, 'support', (tx) =>
     listStaleSupportScreenshots(tx, before, SWEEP_BATCH),
   );
@@ -307,12 +317,17 @@ export async function readScreenshotsForExport(
 ): Promise<Map<string, Uint8Array>> {
   const images = new Map<string, Uint8Array>();
   if (store === null) return images;
-  for (const screenshot of screenshots) {
-    const width = screenshot.widths.at(-1);
-    if (width === undefined) continue;
-    const stored = await store.get(tenantId, screenshot.id, width);
-    if (stored !== null) images.set(screenshot.id, stored);
-  }
+  // A few at a time: quick for a big export without a burst of requests.
+  const queue = [...screenshots];
+  const worker = async () => {
+    for (let next = queue.shift(); next !== undefined; next = queue.shift()) {
+      const width = next.widths.at(-1);
+      if (width === undefined) continue;
+      const stored = await store.get(tenantId, next.id, width);
+      if (stored !== null) images.set(next.id, stored);
+    }
+  };
+  await Promise.all(Array.from({ length: EXPORT_READS_AT_ONCE }, worker));
   return images;
 }
 

@@ -82,10 +82,9 @@ export function SupportThreadView({
       setError(result.message);
       return;
     }
-    if (take(result.data)) {
-      form.reset();
-      screenshots.reset();
-    }
+    // Stored with its screenshots, whether or not the answer could be shown.
+    screenshots.reset();
+    if (take(result.data)) form.reset();
   }
 
   async function solve() {
