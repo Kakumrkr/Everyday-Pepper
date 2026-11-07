@@ -17,6 +17,7 @@ export const BUSINESS_EXPORT_FILES = [
   { name: 'appointments.json', holds: 'Every appointment, including cancelled ones' },
   { name: 'waitlist.json', holds: 'Who is waiting for a time' },
   { name: 'pepper-knows.json', holds: 'What Pepper knows about your business and clients' },
+  { name: 'support.json', holds: 'Your requests to the Pepper team, with every reply' },
 ] as const;
 export type BusinessExportFileName = (typeof BUSINESS_EXPORT_FILES)[number]['name'];
 

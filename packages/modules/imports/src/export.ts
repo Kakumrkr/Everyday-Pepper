@@ -226,6 +226,24 @@ export function buildBusinessExport(data: BusinessExportData, exportedAt: Date):
         })),
       ),
     ],
+    [
+      'support.json',
+      json(
+        data.support.threads.map((thread) => ({
+          reference: thread.reference,
+          kind: thread.kind,
+          status: thread.status,
+          openedAt: at(thread.createdAt),
+          messages: data.support.messages
+            .filter((message) => message.threadId === thread.id)
+            .map((message) => ({
+              from: message.authorKind === 'pepper' ? 'Pepper team' : 'Your team',
+              text: message.body,
+              at: at(message.createdAt),
+            })),
+        })),
+      ),
+    ],
   ];
 
   const files: Zippable = {};

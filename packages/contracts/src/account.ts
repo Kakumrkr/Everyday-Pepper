@@ -55,6 +55,9 @@ export const ApiErrorCodeSchema = z.enum([
   'waitlist_expired',
   'waitlist_times_free',
   'waitlist_day_too_far',
+  // Support (S59, PCR-010).
+  'support_thread_not_found',
+  'support_limit_reached',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',
   'waitlist_offer_used',

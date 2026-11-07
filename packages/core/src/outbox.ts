@@ -19,6 +19,8 @@ export interface EmailMessage {
    * `List-Unsubscribe` with `List-Unsubscribe-Post: List-Unsubscribe=One-Click`.
    */
   unsubscribeUrl?: string | undefined;
+  /** Where a reply goes (`Reply-To`), when not to the sender (S59, support mail). */
+  replyTo?: string | undefined;
   /**
    * A stable id for the email (the outbox message's), sent as its `Message-ID`, so a mail
    * server or provider that dedupes on it drops a resend after a crash.

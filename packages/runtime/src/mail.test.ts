@@ -72,6 +72,25 @@ describe('SmtpMailer', () => {
     expect(booking).not.toHaveProperty('headers');
   });
 
+  it('sends Reply-To only when the message has one (S59, support mail)', async () => {
+    const sendMail = vi.fn(() => Promise.resolve({}));
+    const transport = { sendMail, close: vi.fn() } as unknown as Transporter;
+    const mailer = new SmtpMailer(
+      { smtpUrl: 'smtp://localhost:1025', from: 'a@b.example' },
+      transport,
+    );
+    await mailer.send({
+      to: 'help@pepper.test',
+      subject: 'S',
+      text: 'T',
+      replyTo: 'ana@example.test',
+    });
+    await mailer.send({ to: 'sara@example.test', subject: 'S', text: 'T' });
+    const [support, booking] = sendMail.mock.calls.map((call) => (call as unknown[])[0]);
+    expect(support).toMatchObject({ replyTo: 'ana@example.test' });
+    expect(booking).not.toHaveProperty('replyTo');
+  });
+
   it('builds an SMTP transport from the URL', () => {
     expect(
       () => new SmtpMailer({ smtpUrl: 'smtp://localhost:1025', from: 'Pepper <a@b.c>' }),

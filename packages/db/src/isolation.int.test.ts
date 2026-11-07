@@ -59,6 +59,7 @@ import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
 import { savePushSubscription } from './repositories/push-subscriptions.js';
 import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
+import { insertSupportThread, markSupportThreadRead } from './repositories/support.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './repositories/feed.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
@@ -85,6 +86,8 @@ const GLOBAL_TABLES: Record<string, string> = {
   two_factors: 'TOTP secret and backup codes of a global user',
   signup_events:
     'an account’s sign-up (S45, ADR-0046), before any business; its id and the time only',
+  public_support_requests:
+    'a request from someone who can’t sign in (S59, PCR-010): no business to belong to',
 };
 
 interface TenantTable {
@@ -595,6 +598,55 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  // Support (S59, PCR-010): the opener and the business's owners and managers read a thread;
+  // its messages follow the thread; each member reaches only their own read marks.
+  support_threads: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => (await seedSupportThread(tx)).threadId,
+    touch: 'kind = kind',
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: `(${SEES_ALL} OR (opened_by_user_id = current_user_id()))`,
+        with_check: `(${SEES_ALL} OR (opened_by_user_id = current_user_id()))`,
+      },
+    ],
+  },
+  support_messages: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const { threadId } = await seedSupportThread(tx);
+      return idWhere(tx, 'support_messages', 'thread_id', threadId);
+    },
+    touch: 'body = body',
+    appendOnly: true,
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '(thread_id IN ( SELECT support_threads.id\n   FROM support_threads))',
+        with_check: '(thread_id IN ( SELECT support_threads.id\n   FROM support_threads))',
+      },
+    ],
+  },
+  support_reads: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const { threadId, userId } = await seedSupportThread(tx);
+      await markSupportThreadRead(tx, threadId, userId, new Date());
+      return idWhere(tx, 'support_reads', 'thread_id', threadId);
+    },
+    touch: 'read_at = read_at',
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+        with_check: '((current_user_id() IS NULL) OR (user_id = current_user_id()))',
+      },
+    ],
+  },
   push_subscriptions: {
     tenantColumn: 'tenant_id',
     seed: async (tx) => {
@@ -997,6 +1049,22 @@ async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
 }
 
 /** The id of the one row of `table` that `column` = `value` selects. */
+async function seedSupportThread(tx: TenantTx): Promise<{ threadId: string; userId: UserId }> {
+  const userId = await insertUser(db);
+  const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+  const reference = `PEP-${[...randomBytes(6)].map((byte) => alphabet[byte % 32] ?? '0').join('')}`;
+  const row = await insertSupportThread(tx, {
+    reference,
+    kind: 'question',
+    openedByUserId: userId,
+    context: { appVersion: 'test' },
+    body: 'How do I import my clients?',
+    now: new Date(),
+  });
+  if (row === null) throw new Error('reference taken');
+  return { threadId: row.id, userId };
+}
+
 async function idWhere(tx: TenantTx, table: string, column: string, value: string) {
   const { rows } = await tx.execute<{ id: string }>(
     sql.raw(`SELECT id::text FROM ${table} WHERE ${column} = '${value}'`),

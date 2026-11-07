@@ -31,6 +31,14 @@ const AuthEnvSchema = z.object({
     ),
 });
 
+const SupportEnvSchema = z.object({
+  /**
+   * The Pepper team's address for support requests (S59, PCR-010), e.g. `support@pepper.app`.
+   * Unset: requests are kept for the console and nothing is emailed.
+   */
+  SUPPORT_EMAIL: z.email().max(254).optional(),
+});
+
 const AiEnvSchema = z.object({
   /** A business's monthly allowance of model tokens (ADR-0030); soft limit at 80%. */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
@@ -80,6 +88,8 @@ export interface ApiConfig extends ServiceConfig {
   ai: AiConfig;
   /** Object storage for booking page photos (ADR-0048); `null`: photos are off. */
   storage: StorageConfig | null;
+  /** The team's support address (`SUPPORT_EMAIL`); `null`: requests are kept, not emailed. */
+  supportEmail: string | null;
 }
 
 /**
@@ -99,6 +109,7 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     pushPublicKey: loadPushPublicKey('api', env),
     ai: loadAiConfig(env, present, service.environment),
     storage: loadStorageConfig('api', env),
+    supportEmail: loadEnv('api', SupportEnvSchema, present).SUPPORT_EMAIL ?? null,
   };
 }
 

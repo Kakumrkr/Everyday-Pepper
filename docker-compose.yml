@@ -122,6 +122,8 @@ services:
       # The booking page's codes (ADR-0022) go straight to Mailpit's inbox (port 8025).
       SMTP_URL: ${SMTP_URL:-smtp://mailpit:1025}
       MAIL_FROM: ${MAIL_FROM:-Pepper <bookings@pepper.localhost>}
+      # Support requests (S59) to the team's address, in Mailpit locally.
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@pepper.localhost}
       # Web Push (ADR-0026): the api only needs the public key. Local-only default key pair (the
       # worker has the private half); generate your own for anything real.
       VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-BOaUPqJhSDXmacBl4Z6i_HCIBlCN8COqIGiY2jpVS8WxSO0bs5v6zR4YigbzbnlF45tJsCNBHQaAle1oMU1q2Ic}

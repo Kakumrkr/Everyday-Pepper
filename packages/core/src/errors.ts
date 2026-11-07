@@ -336,3 +336,19 @@ export class AccountBeingDeletedError extends Error {
     this.name = 'AccountBeingDeletedError';
   }
 }
+
+/** No such support request in the business, or not one the member may read (S59). */
+export class SupportThreadNotFoundError extends Error {
+  constructor() {
+    super('No such support request');
+    this.name = 'SupportThreadNotFoundError';
+  }
+}
+
+/** Over a day's support requests or messages for one person (S59, AC-X-14). */
+export class SupportLimitReachedError extends Error {
+  constructor(readonly limit: 'threads' | 'messages') {
+    super(`Too many support ${limit} today`);
+    this.name = 'SupportLimitReachedError';
+  }
+}

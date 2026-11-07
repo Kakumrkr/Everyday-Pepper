@@ -17,6 +17,7 @@ import {
 import { BusinessPhotoKindSchema } from './photos.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { RuleSchema } from './rules.js';
+import { SupportKindSchema, SupportStatusSchema } from './support.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
 import {
   ActionProposalIdSchema,
@@ -624,6 +625,32 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('client_import'),
       before: z.null(),
       after: ImportUndoSchema.strict(),
+    })
+    .strict(),
+  // Support requests (S59, PCR-010, AC-X-15): the kind and the status only, never the text.
+  z
+    .object({
+      action: z.literal('support_thread.opened'),
+      entity: entity('support_thread'),
+      before: z.null(),
+      after: z.object({ kind: SupportKindSchema, status: SupportStatusSchema }).strict(),
+    })
+    .strict(),
+  // A reply by a member (`user`) or by the Pepper team (`system`), with the status it led to.
+  z
+    .object({
+      action: z.literal('support_thread.replied'),
+      entity: entity('support_thread'),
+      before: z.object({ status: SupportStatusSchema }).strict(),
+      after: z.object({ status: SupportStatusSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('support_thread.solved'),
+      entity: entity('support_thread'),
+      before: z.object({ status: SupportStatusSchema }).strict(),
+      after: z.object({ status: z.literal('solved') }).strict(),
     })
     .strict(),
 ]);
