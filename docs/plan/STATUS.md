@@ -12,8 +12,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 2. Migration 0069 + repositories (isolation 100%, operator.int: 452 green).
 - [x] 3. Core: saved replies, rating, housekeeping pass (`support-housekeeping.int.test.ts` 8/8; unit 1495).
 - [x] 4. Worker `Support job` (5 min, `SUPPORT_EMAIL`, `SUPPORT_POLL_MS`); api `PUT …/rating`, `/v1/ops/replies` (api support 32/32).
-- [ ] 5. Web: inbox top-up, saved replies page + picker, rating, auto-close copy.
-Next: task 5 (web).
+- [x] 5. Web: inbox top-up, `/ops/replies` + picker, "Did this help?", auto-close copy (ops+support 3/3, screens' support test 3/3 twice).
+Next: `/session-close` (review, `pnpm check`, affected integration, PR).
 ## Last sessions
 - **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md), [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0068 (grants, access log, notes, `operator_*` policies needing the access row in the same transaction), `operator` script, `/v1/ops/*` (grant + MFA), `/ops` inbox oldest first with the wait in words, replies, notes, every status, "Seen by Pepper"; AC-X-19…22.
