@@ -17,7 +17,10 @@ import {
   TaskNotFoundError,
   MemberNotFoundError,
   NudgeNotSendableError,
+  SavedRepliesFullError,
+  SavedReplyNotFoundError,
   SupportLimitReachedError,
+  SupportNotRatableError,
   SupportThreadNotFoundError,
   UnsubscribeLinkInvalidError,
 } from './errors.js';
@@ -26,6 +29,14 @@ describe('domain errors', () => {
   it.each([
     [new ForbiddenError(), 'ForbiddenError', 'Not allowed'],
     [new SupportThreadNotFoundError(), 'SupportThreadNotFoundError', 'No such support request'],
+    // S59.2.2: rating, and the team's saved replies.
+    [
+      new SupportNotRatableError(),
+      'SupportNotRatableError',
+      'Only the person who asked rates a solved request',
+    ],
+    [new SavedReplyNotFoundError(), 'SavedReplyNotFoundError', 'No such saved reply'],
+    [new SavedRepliesFullError(), 'SavedRepliesFullError', 'Too many saved replies'],
     [
       new SupportLimitReachedError('threads'),
       'SupportLimitReachedError',
