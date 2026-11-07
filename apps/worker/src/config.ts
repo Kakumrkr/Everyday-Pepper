@@ -43,6 +43,10 @@ const JobsEnvSchema = z.object({
   WAITLIST_POLL_MS: z.coerce.number().int().min(500).max(60_000).default(5000),
   /** How often the client import relay looks for committed imports (S48, ADR-0049). */
   IMPORT_POLL_MS: z.coerce.number().int().min(500).max(60_000).default(2000),
+  /** The team's support address (S59.2.2): the same-day reminders go there; unset, none. */
+  SUPPORT_EMAIL: z.email().max(254).optional(),
+  /** How often the support job runs (S59.2.2): reminders at 4 h, auto-close at 7 days. */
+  SUPPORT_POLL_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(300_000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -89,6 +93,8 @@ export interface WorkerConfig extends ServiceConfig {
   waitlist: { baseUrl: string; pollMs: number } | null;
   /** How often committed client imports are looked for (S48, ADR-0049). */
   importPollMs: number;
+  /** The support job (S59.2.2): the team's address and the web origin for links. */
+  support: { supportEmail: string | null; baseUrl: string | null; pollMs: number };
 }
 
 /**
@@ -111,6 +117,11 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     insightsPollMs: jobs.INSIGHTS_POLL_MS,
     morningPollMs: jobs.DRAFTS_POLL_MS,
     importPollMs: jobs.IMPORT_POLL_MS,
+    support: {
+      supportEmail: jobs.SUPPORT_EMAIL ?? null,
+      baseUrl: jobs.AUTH_BASE_URL === undefined ? null : new URL(jobs.AUTH_BASE_URL).origin,
+      pollMs: jobs.SUPPORT_POLL_MS,
+    },
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
     waitlist:

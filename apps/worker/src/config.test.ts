@@ -91,6 +91,29 @@ describe('loadWorkerConfig', () => {
     ).toThrow(/WAITLIST_POLL_MS/);
   });
 
+  it('runs the support job every 5 min, with the team address and the web origin (S59.2.2)', () => {
+    expect(loadWorkerConfig(required).support).toEqual({
+      supportEmail: null,
+      baseUrl: null,
+      pollMs: 300_000,
+    });
+    expect(
+      loadWorkerConfig({
+        ...required,
+        SUPPORT_EMAIL: 'support@pepper.test',
+        AUTH_BASE_URL: 'https://app.pepper.test/path',
+        SUPPORT_POLL_MS: '60000',
+      }).support,
+    ).toEqual({
+      supportEmail: 'support@pepper.test',
+      baseUrl: 'https://app.pepper.test',
+      pollMs: 60_000,
+    });
+    expect(() => loadWorkerConfig({ ...required, SUPPORT_EMAIL: 'not an address' })).toThrow(
+      /SUPPORT_EMAIL/,
+    );
+  });
+
   it('looks for committed client imports every 2 s by default (S48)', () => {
     expect(loadWorkerConfig(required).importPollMs).toBe(2000);
     expect(loadWorkerConfig({ ...required, IMPORT_POLL_MS: '500' }).importPollMs).toBe(500);

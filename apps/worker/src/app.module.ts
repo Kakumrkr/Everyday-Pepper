@@ -35,6 +35,7 @@ export class AppModule {
           drafts: config.drafts,
           pushes: config.push !== null,
           objectStore: config.storage === null ? null : new S3ObjectStore(config.storage),
+          support: config.support,
         }),
         ImportsModule.forRoot({ redisUrl: config.redisUrl, pollMs: config.importPollMs }),
         ...(config.waitlist === null

@@ -2,6 +2,7 @@ import {
   PUBLIC_SUPPORT_PER_HOUR,
   PublicSupportInputSchema,
   SupportCreatedSchema,
+  SupportRatingInputSchema,
   SupportReplyInputSchema,
   SupportThreadChangeSchema,
   SupportThreadInputSchema,
@@ -17,6 +18,7 @@ import {
   countSupportUnread,
   listSupportThreads,
   openSupportThread,
+  rateSupportThread,
   readSupportThread,
   replyToSupportThread,
   solveSupportThread,
@@ -39,6 +41,7 @@ import {
   Param,
   Patch,
   Post,
+  Put,
   Req,
   UseGuards,
   type DynamicModule,
@@ -182,6 +185,25 @@ export class SupportController {
     parseBody(SupportThreadChangeSchema, body);
     return SupportThreadSchema.parse(
       await answering(() => solveSupportThread(this.db, actorOf(tenant), threadId, this.options)),
+    );
+  }
+
+  /**
+   * "Did this help?" (S59.2.2, AC-X-26): the opener's answer on a solved request; 409
+   * `support_not_ratable` otherwise; 404 `support_thread_not_found`.
+   */
+  @Put('threads/:threadId/rating')
+  async rate(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<SupportThread> {
+    const { threadId } = parseBody(ThreadParamsSchema, params);
+    const input = parseBody(SupportRatingInputSchema, body);
+    return SupportThreadSchema.parse(
+      await answering(() =>
+        rateSupportThread(this.db, actorOf(tenant), threadId, input, this.options),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ import {
   Injectable,
   Logger,
   Module,
+  Optional,
   type DynamicModule,
   type OnApplicationBootstrap,
   type OnApplicationShutdown,
@@ -13,9 +14,17 @@ import {
   runDueInsights,
   sendDueReminders,
 } from '@pepper/appointments';
-import { cleanUp, runDueDeletions, sendDueTaskPushes, systemClock, type Clock } from '@pepper/core';
+import {
+  cleanUp,
+  runDueDeletions,
+  runSupportHousekeeping,
+  sendDueTaskPushes,
+  systemClock,
+  type Clock,
+  type Mailer,
+} from '@pepper/core';
 import type { Database } from '@pepper/db';
-import { DATABASE } from '@pepper/runtime';
+import { DATABASE, MAILER } from '@pepper/runtime';
 import type { ObjectStore } from '@pepper/storage';
 import { templateDrafts, templateInsights } from '@pepper/templates';
 import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
@@ -56,6 +65,11 @@ export interface JobsOptions {
   deletionPollMs?: number;
   /** The photos' store, whose images go before their business; `null`: none configured. */
   objectStore?: ObjectStore | null;
+  /**
+   * The support job (S59.2.2, ADR-0062): the same-day reminder to the team's address and the
+   * 7-day auto-close. `supportEmail` `null`: nothing is reminded; `baseUrl` `null`: no links.
+   */
+  support?: { supportEmail: string | null; baseUrl: string | null; pollMs: number };
   clock?: Clock;
 }
 
@@ -81,10 +95,12 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly deletions: Periodic;
   readonly insights: Periodic;
   readonly morning: Periodic;
+  readonly support: Periodic;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
     @Inject(JOBS_OPTIONS) options: JobsOptions,
+    @Optional() @Inject(MAILER) mailer: Mailer | null = null,
   ) {
     const { db } = database;
     const clock = options.clock ?? systemClock;
@@ -164,6 +180,28 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       },
       this.logger,
     );
+    const support = options.support ?? { supportEmail: null, baseUrl: null, pollMs: 5 * 60_000 };
+    this.support = new Periodic(
+      'Support job',
+      support.pollMs,
+      async () => {
+        const result = await runSupportHousekeeping(db, {
+          outboxKey: options.key,
+          supportEmail: support.supportEmail,
+          baseUrl: support.baseUrl,
+          mailer,
+          clock,
+        });
+        // Counts only: never a request's reference or a business.
+        if (result.closed > 0 || result.reminded > 0) {
+          this.logger.log(
+            `Support: ${String(result.reminded)} reminders, ${String(result.closed)} closed after quiet days`,
+          );
+        }
+        if (result.failed > 0) this.logger.warn(`Support: ${String(result.failed)} failed`);
+      },
+      this.logger,
+    );
     const store = options.objectStore ?? null;
     this.deletions = new Periodic(
       'Deletion job',
@@ -207,6 +245,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     this.dueTasks?.start();
     this.insights.start();
     this.morning.start();
+    this.support.start();
     this.cleanup.start({ immediately: true });
   }
 
@@ -216,13 +255,17 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.dueTasks?.stop(),
       this.insights.stop(),
       this.morning.stop(),
+      this.support.stop(),
       this.cleanup.stop(),
       this.deletions.stop(),
     ]);
   }
 }
 
-/** The reminder, due-task, insights, morning (drafts, briefing), clean-up and deletion jobs. Needs `ConnectionsModule`. */
+/**
+ * The reminder, due-task, insights, morning (drafts, briefing), support, clean-up and deletion
+ * jobs. Needs `ConnectionsModule`; `MailModule` for the public requests' reminders.
+ */
 @Module({})
 export class JobsModule {
   static forRoot(options: JobsOptions): DynamicModule {
