@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S59.2** (operator console, ADR-0062) from "Planned sessions".
+**S59.2 operator console** (branch `claude/dreamy-lovelace-joo4sz`). Brief approved: "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 `platform_operators` + script; D-3 definer functions, log row in the same transaction; D-4 both logs; D-5 three statuses, public open/answered/solved; D-6 `/ops` + `v1/ops/*`).
+- [x] 1 ACs AC-X-19…22, playbook/PCR/STATUS rows.
+- [ ] 2 Migration 0068 + db repo + isolation · [ ] 3 core service · [ ] 4 api + script · [ ] 5 web `/ops` · [ ] 6 Seen by Pepper · ADR-0062 · close.
 ## Last sessions
 - **S59 Phase 13 · Help centre and support threads, owner side (2026-11-07)** ([PCR-010](changes/PCR-010.md), branch `claude/youthful-dijkstra-9hsw6i`). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0067 (threads, messages, reads, public requests; staff own, owners and managers all), `/v1/support/*` and the public form, 5 a day under a lock, `SUPPORT_EMAIL` with `Reply-To`, `support.json` in the export; Your requests, the thread, the unread badge; the help centre (15 articles, search, contact) and help links; AC-X-13…18.
@@ -91,7 +93,8 @@ S1–S56b, S59, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new loo
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.2 | Operator console: inbox, replies, notes, saved replies, statuses, auto-close, overdue reminder, 👍/👎, screenshots (ADR-0062) | 13 | Every status reachable; reads audited |
+| S59.2 | Operator console: role, inbox (oldest first, age in words), replies, notes, statuses (ADR-0062) | 13 | Every status reachable; reads audited |
+| S59.2.2 | Console part 2: saved replies, auto-close, overdue reminder, 👍/👎, screenshots | 13 | Job + isolation tests |
 | S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
