@@ -13,10 +13,14 @@ import {
   memberships,
   memoryEpisodes,
   memoryFacts,
+  publicSupportRequests,
   pushSubscriptions,
   rememberedDevices,
   sessions,
   signupEvents,
+  supportMessages,
+  supportReads,
+  supportThreads,
   tasks,
   tenants,
   twoFactors,
@@ -207,5 +211,52 @@ describe('memory (ADR-0034)', () => {
         .policies.map((policy) => policy.name)
         .sort(),
     ).toEqual(['member_scope', 'tenant_isolation']);
+  });
+});
+
+describe('support (S59, PCR-010)', () => {
+  it("goes with its business; keeps a deleted account's requests and messages, not its reads", () => {
+    expect(foreignKeys(supportThreads)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['opened_by_user_id'], to: 'users(id)', onDelete: 'set null' },
+    ]);
+    expect(foreignKeys(supportMessages)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['author_user_id'], to: 'users(id)', onDelete: 'set null' },
+      {
+        from: ['tenant_id', 'thread_id'],
+        to: 'support_threads(tenant_id,id)',
+        onDelete: 'cascade',
+      },
+    ]);
+    expect(foreignKeys(supportReads)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+      { from: ['user_id'], to: 'users(id)', onDelete: 'cascade' },
+      {
+        from: ['tenant_id', 'thread_id'],
+        to: 'support_threads(tenant_id,id)',
+        onDelete: 'cascade',
+      },
+    ]);
+    expect(foreignKeys(publicSupportRequests)).toEqual([]);
+  });
+
+  it('declares the member-scope policies, one read per member and no business on the public form', () => {
+    for (const table of [supportThreads, supportMessages, supportReads]) {
+      expect(
+        getTableConfig(table)
+          .policies.map((policy) => policy.name)
+          .sort(),
+      ).toEqual(['member_scope', 'tenant_isolation']);
+    }
+    expect(getTableConfig(supportReads).uniqueConstraints.map((u) => u.name)).toEqual([
+      'support_reads_thread_user_unique',
+    ]);
+    const publicForm = getTableConfig(publicSupportRequests);
+    expect(publicForm.policies).toEqual([]);
+    expect(publicForm.columns.map((column) => column.name)).not.toContain('tenant_id');
+    expect(publicForm.checks.map((check) => check.name)).toContain(
+      'public_support_requests_body_length',
+    );
   });
 });

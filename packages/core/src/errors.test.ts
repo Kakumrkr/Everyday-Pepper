@@ -17,12 +17,25 @@ import {
   TaskNotFoundError,
   MemberNotFoundError,
   NudgeNotSendableError,
+  SupportLimitReachedError,
+  SupportThreadNotFoundError,
   UnsubscribeLinkInvalidError,
 } from './errors.js';
 
 describe('domain errors', () => {
   it.each([
     [new ForbiddenError(), 'ForbiddenError', 'Not allowed'],
+    [new SupportThreadNotFoundError(), 'SupportThreadNotFoundError', 'No such support request'],
+    [
+      new SupportLimitReachedError('threads'),
+      'SupportLimitReachedError',
+      'Too many support threads today',
+    ],
+    [
+      new SupportLimitReachedError('messages'),
+      'SupportLimitReachedError',
+      'Too many support messages today',
+    ],
     [
       new DeletionNameMismatchError(),
       'DeletionNameMismatchError',
