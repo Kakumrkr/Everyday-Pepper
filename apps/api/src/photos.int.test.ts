@@ -92,6 +92,9 @@ function browser() {
     put: (path: string, body: object) => send(agent.put(path)).send(body),
     patch: (path: string, body: object) => send(agent.patch(path)).send(body),
     delete: (path: string) => send(agent.delete(path)),
+    /** A raw image body to `path` (support screenshots, S59.2.3). */
+    raw: (path: string, bytes: Buffer, type: string) =>
+      send(agent.post(path)).set('content-type', type).send(bytes),
     upload: (kind: string, bytes: Buffer, type = 'image/jpeg') =>
       send(agent.post(`/v1/tenant/photos?kind=${kind}`))
         .set('content-type', type)
@@ -246,5 +249,59 @@ describe('photos through the api (S47.2)', () => {
       .send(await solidColorPhoto(300, 300))
       .expect(403);
     expect(b.slug).toBeDefined();
+  });
+});
+
+describe('support screenshots through the api (S59.2.3, AC-X-27…29)', () => {
+  it('a member’s screenshot is cleaned, sent with a request and served privately to its readers', async () => {
+    const { owner, staff } = await business();
+    const tagged = await sharp({
+      create: { width: 1170, height: 2532, channels: 3, background: '#f4efe8' },
+    })
+      .jpeg()
+      .withExif({
+        IFD0: { Make: 'PepperPhone' },
+        IFD3: { GPSLatitudeRef: 'N', GPSLatitude: '40/1 44/1 0/1' },
+      })
+      .toBuffer();
+    const uploaded = await staff.raw('/v1/support/screenshots', tagged, 'image/jpeg').expect(201);
+    const shot = (uploaded.body as { id: string }).id;
+    expect(uploaded.body).toEqual({ id: shot, width: 1170, height: 2532 });
+    await staff
+      .post('/v1/support/threads', {
+        kind: 'problem',
+        message: 'The calendar is empty',
+        screenshotIds: [shot],
+      })
+      .expect(201);
+    // The owner reads every request of the business: the image is WebP, without its EXIF.
+    const full = await owner
+      .get(`/v1/support/screenshots/${shot}?size=full`)
+      .buffer(true)
+      .parse((response, done) => {
+        const chunks: Buffer[] = [];
+        response.on('data', (chunk: Buffer) => chunks.push(chunk));
+        response.on('end', () => {
+          done(null, Buffer.concat(chunks));
+        });
+      })
+      .expect(200);
+    expect(full.headers['cache-control']).toBe('private, no-store');
+    const metadata = await sharp(full.body as Buffer).metadata();
+    expect(metadata).toMatchObject({ format: 'webp', width: 1170, height: 2532 });
+    expect(metadata.exif).toBeUndefined();
+    // Another business's owner and an anonymous caller get nothing.
+    const other = await business();
+    await other.owner.get(`/v1/support/screenshots/${shot}`).expect(404);
+    await request(server).get(`/v1/support/screenshots/${shot}`).expect(401);
+    // Not a screenshot by its bytes: refused in words, whatever it was sent as.
+    const refused = await staff
+      .raw(
+        '/v1/support/screenshots',
+        Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"/>'),
+        'image/png',
+      )
+      .expect(415);
+    expect(refused.body).toMatchObject({ code: 'screenshot_rejected' });
   });
 });

@@ -28,6 +28,7 @@ import {
   noteOnThread,
   readOperatorInbox,
   readOperatorThread,
+  readOperatorScreenshotImage,
   readPublicRequest,
   removeSavedReply,
   replyAsOperator,
@@ -46,21 +47,30 @@ import {
   HttpCode,
   Inject,
   Injectable,
+  Optional,
   Param,
   Patch,
   Post,
   Put,
   Query,
+  Res,
   UseGuards,
   type CanActivate,
   type ExecutionContext,
 } from '@nestjs/common';
+import type { ServerResponse } from 'node:http';
 import { z } from 'zod';
 import type { AuthSession } from '../auth/auth.service.js';
 import { apiError, CurrentSession, SessionGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
 import { parseBody } from '../http/zod-body.js';
+import {
+  SCREENSHOT_STORE,
+  sendScreenshot,
+  type ScreenshotStoreOrNone,
+} from './screenshot-store.js';
 import { SUPPORT_OPTIONS, type SupportModuleOptions } from './support-options.js';
+import { ScreenshotParamsSchema, ScreenshotQuerySchema } from './screenshot-params.js';
 
 // Pepper's support console (S59.2, ADR-0062, AC-X-19…22): `/v1/ops/*`, for the accounts the
 // `operator` script granted, with two-step verification on. Every call is one logged operator
@@ -110,8 +120,32 @@ export class OpsController {
   constructor(
     @Inject(DATABASE) database: { db: Database },
     @Inject(SUPPORT_OPTIONS) private readonly options: SupportModuleOptions,
+    @Optional()
+    @Inject(SCREENSHOT_STORE)
+    private readonly screenshots: ScreenshotStoreOrNone = null,
   ) {
     this.db = database.db;
+  }
+
+  /**
+   * A request's screenshot (`?size=thumb|full`), AC-X-30: each image served writes its own
+   * `screenshot.read` row in the operator access log; 404 `screenshot_not_found`. Never cached.
+   */
+  @Get('screenshots/:screenshotId')
+  async screenshot(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+    @Query() query: unknown,
+    @Res() response: ServerResponse,
+  ): Promise<void> {
+    const { screenshotId } = parseBody(ScreenshotParamsSchema, params);
+    const { size } = parseBody(ScreenshotQuerySchema, query);
+    const image = await answering(() =>
+      readOperatorScreenshotImage(this.db, operatorOf(session), screenshotId, size, {
+        store: this.screenshots,
+      }),
+    );
+    sendScreenshot(response, image);
   }
 
   /** The console opens (the web asks before showing it). */

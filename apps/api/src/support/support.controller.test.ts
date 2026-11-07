@@ -54,9 +54,18 @@ const THREAD = {
   preview: 'How do I import?',
   openedBy: { kind: 'you' },
   unread: false,
+  screenshotCount: 0,
   createdAt: AT,
   lastMessageAt: AT,
-  messages: [{ id: THREAD_ID, author: { kind: 'you' }, body: 'How do I import?', createdAt: AT }],
+  messages: [
+    {
+      id: THREAD_ID,
+      author: { kind: 'you' },
+      body: 'How do I import?',
+      screenshots: [],
+      createdAt: AT,
+    },
+  ],
   replyTo: 'ana@example.test',
   seenByPepperAt: null,
   solvedBy: null,
@@ -175,6 +184,7 @@ describe('/v1/support', () => {
           kind: 'problem',
           message: 'It broke',
           context: { page: '/calendar', viewport: { width: 375, height: 812 } },
+          screenshotIds: [],
         },
         { userAgent: 'TestBrowser/1.0' },
         OPTIONS,
@@ -248,7 +258,7 @@ describe('/v1/support', () => {
       {},
       { context: context(), requestId: undefined },
       THREAD_ID,
-      { message: 'Still broken' },
+      { message: 'Still broken', screenshotIds: [] },
       OPTIONS,
     );
     const solved = await send('patch', `/v1/support/threads/${THREAD_ID}`, {

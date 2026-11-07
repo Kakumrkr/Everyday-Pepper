@@ -96,6 +96,8 @@ const MESSAGES: Record<string, string> = {
   screenshots_not_attachable:
     'One of your screenshots can’t be sent any more. Remove it and add it again.',
   screenshots_unavailable: 'Screenshots can’t be added right now. Send your message without them.',
+  screenshot_limit_reached:
+    'That’s 20 screenshots today. Send what you have, or add more tomorrow.',
   // Rebooking emails (S36).
   draft_refused:
     'Leave out links, email addresses, phone numbers and anything sensitive, and keep it to 120 words.',

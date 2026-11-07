@@ -24,6 +24,18 @@ export const PHOTO_UPLOAD: UploadKind = {
   tooLarge: () => new PayloadTooLargeError(apiError('photo_too_large')),
 };
 
+/** A support screenshot (S59.2.3, AC-X-28): the image itself; its type is decided by its bytes. */
+export const SCREENSHOT_UPLOAD: UploadKind = {
+  types: /^(image\/[a-z0-9.+-]+|application\/octet-stream)(;|$)/i,
+  rejected: () =>
+    new UnsupportedMediaTypeError({
+      ...apiError('screenshot_rejected'),
+      message: 'Send the screenshot itself (JPEG, PNG or WebP).',
+      reason: 'unsupported_type',
+    }),
+  tooLarge: () => new PayloadTooLargeError(apiError('screenshot_too_large')),
+};
+
 /**
  * A client export (S48, ADR-0049): CSV or JSONL as text, or any file as bytes. JSON is sent as
  * `application/octet-stream` or `text/plain` (an `application/json` body is the JSON parser's).

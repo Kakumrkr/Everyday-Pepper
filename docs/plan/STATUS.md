@@ -11,7 +11,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T1 ACs, traceability, ADR Part 3
 - [x] T2 storage kind + key · T3 migration 0070, repo, isolation 442/442, int 8/8
 - [x] T4 core on a `ScreenshotStorage` port (layer rule: core can't import storage; adapter `createScreenshotStore`), sweep in the support job, deletion hook, export zip; core int 8/8 + support 30/30, worker 60/60, imports 189
-- [ ] T5 api + contracts · T6 owner screens · T7 ops screens + inbox count
+- [x] T5 api: `POST/GET/DELETE /v1/support/screenshots`, `GET /v1/ops/screenshots/:id`, `ScreenshotStoreModule` (global), private headers, error codes; api 477 + screenshots 10, photos.int 5/5 (real SeaweedFS: EXIF gone)
+- [ ] T6 owner screens (attach on new + reply, paste/drop, privacy line, thumbnails, count in list) · T7 ops screens + inbox count
 
 ## Last sessions
 - **S59.2.2 Phase 13 · Console, part 2 (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 2", [PR #87](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/87)). Full entry in [session-log.md](session-log.md).
