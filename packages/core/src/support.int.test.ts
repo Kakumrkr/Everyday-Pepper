@@ -9,7 +9,9 @@ import {
   deleteAccountIfDue,
   supportThreads,
   withTenant,
+  createDatabase,
   type Database,
+  type DatabaseHandle,
 } from '@pepper/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
@@ -66,7 +68,9 @@ const actor = (userId: UserId, role: 'owner' | 'manager' | 'staff', at = tenant)
 });
 const meta = { userAgent: 'Mozilla/5.0 (iPhone) Test' };
 
-const publicRequests = () => db.select().from(publicSupportRequests);
+// Only an operator's logged transaction reads public requests (S59.2): tests read as the owner.
+let admin: DatabaseHandle;
+const publicRequests = () => admin.db.select().from(publicSupportRequests);
 
 /** Delivers every due email and returns them. */
 async function deliverAll(): Promise<EmailMessage[]> {
@@ -80,6 +84,7 @@ async function deliverAll(): Promise<EmailMessage[]> {
 beforeAll(async () => {
   database = await startTestDatabase();
   db = database.app.db;
+  admin = createDatabase({ url: database.migrationUrl, maxConnections: 1 });
   ana = await insertUser(db, 'Ana Ruiz', 'ana@juniper.test');
   cara = await insertUser(db, 'Cara Diaz', 'cara@juniper.test');
   jess = await insertUser(db, 'Jess Park', 'jess@juniper.test');
@@ -122,6 +127,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
+  await admin.close();
   await database.stop();
 });
 

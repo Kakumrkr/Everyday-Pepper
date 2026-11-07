@@ -74,10 +74,14 @@ import { withMember, withTenant, withUser, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
 /**
- * Tables that are not tenant-owned, with why. They have no RLS: the services' role reads and
+ * Tables that are not tenant-owned, with why. Most have no RLS: the services' role reads and
  * writes them, and only Better Auth (through `authDatabaseAdapter`) and the session repository
- * use them (ADR-0012).
+ * use them (ADR-0012). The support console's (S59.2, ADR-0062) are proven in
+ * `operator.int.test.ts`: no privilege for the services, or forced RLS for operators only.
  */
+/** The operator policies' predicate (S59.2), as Postgres prints it. */
+const OPERATOR_ACCESS = '(( SELECT current_operator_id() AS current_operator_id) IS NOT NULL)';
+
 const GLOBAL_TABLES: Record<string, string> = {
   users: 'auth identity; one person may belong to several businesses',
   sessions: 'Better Auth looks sessions up by cookie token before any tenant is known',
@@ -87,7 +91,12 @@ const GLOBAL_TABLES: Record<string, string> = {
   signup_events:
     'an account’s sign-up (S45, ADR-0046), before any business; its id and the time only',
   public_support_requests:
-    'a request from someone who can’t sign in (S59, PCR-010): no business to belong to',
+    'a request from someone who can’t sign in (S59, PCR-010): no business to belong to; forced RLS, the form inserts, an operator reads (S59.2)',
+  platform_operators: 'Pepper’s own team (S59.2, ADR-0062): no privilege for the services',
+  operator_access_log:
+    'every operator access, kept beyond the business (S59.2): no privilege for the services',
+  support_notes:
+    'the team’s notes on a business’s or a public request (S59.2): forced RLS, operators only',
 };
 
 interface TenantTable {
@@ -107,6 +116,8 @@ interface TenantTable {
   outboxScan?: string;
   /** The `job_scan` (withJobScan) predicate, as Postgres prints it, if any. */
   jobScan?: string;
+  /** Has the `operator_read` policy (withOperator, S59.2, ADR-0062). */
+  operatorRead?: true;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
   /** The services may insert, read and update, but not delete (receipts, ADR-0028). */
@@ -604,6 +615,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     tenantColumn: 'tenant_id',
     seed: async (tx) => (await seedSupportThread(tx)).threadId,
     touch: 'kind = kind',
+    operatorRead: true,
     memberScope: [
       {
         policyname: 'member_scope',
@@ -621,6 +633,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'body = body',
     appendOnly: true,
+    operatorRead: true,
     memberScope: [
       {
         policyname: 'member_scope',
@@ -1190,6 +1203,18 @@ describe('catalog', () => {
           permissive: 'RESTRICTIVE',
           roles: ['public'],
         })),
+        ...(spec.operatorRead === undefined
+          ? []
+          : [
+              {
+                policyname: 'operator_read',
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: ['public'],
+                qual: OPERATOR_ACCESS,
+                with_check: null,
+              },
+            ]),
         ...(spec.outboxScan === undefined
           ? []
           : [

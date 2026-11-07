@@ -22,6 +22,7 @@
     "test:coverage": "vitest run --coverage",
     "test:integration": "vitest run --config vitest.int.config.ts",
     "migrate": "node --env-file-if-exists=../../.env dist/migrate-cli.js",
+    "operator": "node --env-file-if-exists=../../.env dist/operator-cli.js",
     "generate": "drizzle-kit generate"
   },
   "dependencies": {

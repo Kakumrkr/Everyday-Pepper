@@ -38,3 +38,4 @@ export * from './repositories/usage.js';
 export * from './repositories/users.js';
 export * from './schema.js';
 export * from './tenant.js';
+export * from './operators.js';

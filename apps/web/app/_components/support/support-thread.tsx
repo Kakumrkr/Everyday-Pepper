@@ -94,6 +94,17 @@ export function SupportThreadView({
           {thread.openedBy.kind === 'you' ? null : (
             <span>· from {authorLabel(thread.openedBy)}</span>
           )}
+          {thread.seenByPepperAt === null ? null : (
+            <span data-testid="support-thread-seen">
+              · Seen by Pepper,{' '}
+              <span className="tabular-nums">
+                {supportTime(thread.seenByPepperAt, timeZone, now).replace(
+                  /^(Today|Yesterday)/,
+                  (word) => word.toLowerCase(),
+                )}
+              </span>
+            </span>
+          )}
         </p>
       </header>
       <ol aria-label="Messages" className="m-0 flex list-none flex-col gap-3 p-0">

@@ -1512,3 +1512,23 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **CI:** the first run's E2E was red: the import error's test id took in the new link's text, and the two new specs shared one sign-up rate-limit bucket in a full run (no `ownClientAddress`). Fixed both; the full suite locally 122 passed (export's fixed name collides on a reused local database only).
   - **For later:** the e2e Mailpit loops could use `helpers.ts`; sign-in's "Get help" sits below the auth screenshots' fold.
   - **Retro:** went well: the RLS scopes and the isolation suite made the who-reads-what rules provable before any screen · do better: run `pnpm check` (format, coverage) before the first review, and check the browser revision at the session's start, not at the screenshots · top-up for S59.2: the console's inbox shows each request's age in words ("3 h waiting") and sorts the oldest first.
+
+- **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md); branch `claude/dreamy-lovelace-joo4sz`; [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Split at the brief → S59.2.2 (decisions.md S59.2).
+  - **Built:**
+    - migration 0068: `platform_operators`, `operator_access_log`, `support_notes`, the public status, `pepper_seen_at`, the `operator` actor;
+    - `begin_operator_access` / `current_operator_id` / `operator_business_names`, and the `operator_*` policies that need the access row in the same transaction;
+    - `withOperator`, the `operator` script;
+    - core `operator-support.ts`, `/v1/ops/*` behind `OperatorGuard` (grant + MFA);
+    - `/ops` inbox (oldest waiting first, "3 h waiting": S59's top-up), thread, public request, team notes, every status;
+    - "Seen by Pepper" on the requester's thread. AC-X-19…22.
+  - **Checks:** `pnpm check` green after 3 fixes (journal format, a lint narrowing, S59's schema test naming the new policies). Affected integration 22/22 (db 782 incl. isolation and `operator.int.test.ts` 14; core 216; appointments 238; ai 194; api 105; imports 29; worker 18; runtime 2). Playwright: ops 1/1 (mobile); support + help 4/4; screens' help/support test 3/3 (desktop, headless shell 1248). New baselines `ops-thread-*` and `ops-request-*`; nothing else moved.
+  - **Review:** `/code-review` found 10.
+    - Fixed 8: answered/solved cut the newest; the waiting count changed per view; a thread moved back to waiting counted from its creation; a revoked grant gave 500; MFA gave 404; a "seen" on every refresh; an extra query; duplicated lists.
+    - Left 2: the double thread read per action; one shared `call` hook.
+
+    `/security-review`: no finding at confidence ≥ 8.
+  - **Walkthrough:** the operator's flow on the phone project (`ops.spec.ts`): inbox → thread → note → reply → Solved → a signed-out request by email. The 375 px baselines were checked in light and dark: notes stand apart, and the main action sits above the status control.
+  - **Timing:** Compose image build failed on the proxy's certificate, so the e2e stack ran via `e2e-stack.sh` (~3 min ×2); `pnpm check` ~10 min ×4; affected integration 9 min; ops/support/help specs < 30 s; screens test 23 s; CI unknown at writing.
+  - **CI:** the first run's unit job was red: the eval-fixture privacy scan (`packages/ai`, not this diff) timed out at vitest's 5 s default on the loaded runner; fixed at its root (files read side by side, an explicit 60 s limit). Integration, evals and E2E green on the first run.
+  - **For later:** an operator session shorter than an owner's, and access-volume alerting (S60); notes in a GDPR request (decide with S59.5's privacy page).
+  - **Retro:** went well: the database requiring the access row made "reads audited" a test, not a promise · do better: run `pnpm check` (format, lint, coverage) before the first review, again; it took 4 runs · top-up for S59.2.2: the inbox marks a request waiting past 4 h in words ("Over 4 h: answer next"), not only in colour.

@@ -1,4 +1,7 @@
+import { execFileSync } from 'node:child_process';
 import { randomInt } from 'node:crypto';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { ImportPreviewSchema } from '@pepper/contracts';
 import { totpCode } from '@pepper/testing';
 import {
@@ -362,4 +365,36 @@ export async function importVisitsFile(page: Page, csv: string): Promise<void> {
       { timeout: 60_000, intervals: [500, 1_000, 2_000] },
     )
     .toBe('done');
+}
+
+/**
+ * Grants Pepper's operator role (S59.2, ADR-0062) to the account with `email`, the way the
+ * runbook does: the `operator` script as the migration role. Against the Compose stack (CI) it
+ * runs in the `migrate` image; against the cloud session's stack (`e2e-stack.sh`: built
+ * packages and a `.env`) it runs the built script with that `.env`.
+ */
+export function makeOperator(email: string): void {
+  const root = resolve(import.meta.dirname, '../..');
+  const script = 'packages/db/dist/operator-cli.js';
+  const local = existsSync(resolve(root, '.env')) && existsSync(resolve(root, script));
+  const [command, args] = local
+    ? ['node', ['--env-file=.env', script]]
+    : [
+        'docker',
+        [
+          'compose',
+          'run',
+          '--rm',
+          '--no-deps',
+          '-T',
+          'migrate',
+          'node',
+          'node_modules/@pepper/db/dist/operator-cli.js',
+        ],
+      ];
+  execFileSync(command, [...args, 'grant', email, 'e2e: the support console'], {
+    cwd: root,
+    stdio: 'pipe',
+    timeout: 120_000,
+  });
 }

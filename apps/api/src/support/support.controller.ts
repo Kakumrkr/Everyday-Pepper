@@ -22,7 +22,6 @@ import {
   solveSupportThread,
   submitPublicSupportRequest,
   type Actor,
-  type Clock,
   type Mailer,
   type SupportOptions,
   type TenantContext,
@@ -50,22 +49,15 @@ import { CurrentTenant, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
 import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { parseBody } from '../http/zod-body.js';
+import { OperatorGuard, OpsController } from './ops.controller.js';
 
 // Pepper's own support (S59, PCR-010, AC-X-14…17). `/v1/support/*`: every member of the
 // active business, in the threads the database lets them read (their own; owners and managers
 // all of the business's), so another's is simply not found. `/v1/public/support`: the form for
 // people who can't sign in. Message text is never logged.
 
-export interface SupportModuleOptions {
-  outboxKey: Buffer;
-  /** `SUPPORT_EMAIL`; `null`: requests are kept, nothing is emailed. */
-  supportEmail: string | null;
-  baseUrl: string;
-  release: string;
-  clock?: Clock;
-}
-
-export const SUPPORT_OPTIONS = Symbol('SUPPORT_OPTIONS');
+export { SUPPORT_OPTIONS, type SupportModuleOptions } from './support-options.js';
+import { SUPPORT_OPTIONS, type SupportModuleOptions } from './support-options.js';
 
 // The domain's own limits (5 requests, 50 messages a day per person) are exact; this one only
 // stops a script hammering the api between them.
@@ -243,8 +235,8 @@ export class SupportModule {
   static forRoot(options: SupportModuleOptions): DynamicModule {
     return {
       module: SupportModule,
-      controllers: [SupportController, PublicSupportController],
-      providers: [{ provide: SUPPORT_OPTIONS, useValue: options }, RateLimiter],
+      controllers: [SupportController, PublicSupportController, OpsController],
+      providers: [{ provide: SUPPORT_OPTIONS, useValue: options }, RateLimiter, OperatorGuard],
     };
   }
 }

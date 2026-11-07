@@ -242,18 +242,28 @@ describe('support (S59, PCR-010)', () => {
   });
 
   it('declares the member-scope policies, one read per member and no business on the public form', () => {
-    for (const table of [supportThreads, supportMessages, supportReads]) {
+    // S59.2 (ADR-0062): an operator's logged transaction reads threads and messages too.
+    for (const table of [supportThreads, supportMessages]) {
       expect(
         getTableConfig(table)
           .policies.map((policy) => policy.name)
           .sort(),
-      ).toEqual(['member_scope', 'tenant_isolation']);
+      ).toEqual(['member_scope', 'operator_read', 'tenant_isolation']);
     }
+    expect(
+      getTableConfig(supportReads)
+        .policies.map((policy) => policy.name)
+        .sort(),
+    ).toEqual(['member_scope', 'tenant_isolation']);
     expect(getTableConfig(supportReads).uniqueConstraints.map((u) => u.name)).toEqual([
       'support_reads_thread_user_unique',
     ]);
     const publicForm = getTableConfig(publicSupportRequests);
-    expect(publicForm.policies).toEqual([]);
+    // S59.2: the form only inserts; only an operator's logged transaction reads or moves one.
+    expect(publicForm.policies.map((policy) => [policy.name, policy.for]).sort()).toEqual([
+      ['operator_access', 'all'],
+      ['public_submit', 'insert'],
+    ]);
     expect(publicForm.columns.map((column) => column.name)).not.toContain('tenant_id');
     expect(publicForm.checks.map((check) => check.name)).toContain(
       'public_support_requests_body_length',
