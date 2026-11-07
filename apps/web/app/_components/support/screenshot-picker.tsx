@@ -169,7 +169,8 @@ export function ScreenshotPicker({ draft }: { draft: ScreenshotDraft }) {
           Add a screenshot
         </Button>
         <span id={`${ids}-hint`} className="type-caption text-ink-2">
-          Up to 3. You can also paste or drop them here.
+          Up to 3.
+          <span className="hidden sm:inline"> You can also paste or drop them here.</span>
         </span>
       </div>
       <p className="m-0 type-caption text-ink-2" data-testid="screenshot-privacy">
