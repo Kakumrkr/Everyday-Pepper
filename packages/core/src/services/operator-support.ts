@@ -83,14 +83,15 @@ async function asOperator<T>(
   targetId: string | null,
   work: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
-  let begun = false;
+  // Set once the access is open: a refusal before it is the grant's, after it the work's.
+  const access = { begun: false };
   try {
     return await withOperator(db, { operatorUserId: operator.userId, action, targetId }, (tx) => {
-      begun = true;
+      access.begun = true;
       return work(tx);
     });
   } catch (error) {
-    if (!begun && isPolicyViolation(error)) throw new OperatorAccessRefusedError();
+    if (!access.begun && isPolicyViolation(error)) throw new OperatorAccessRefusedError();
     throw error;
   }
 }
