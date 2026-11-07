@@ -9,7 +9,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S59.2 operator console** (branch `claude/dreamy-lovelace-joo4sz`). Brief approved: "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 `platform_operators` + script; D-3 definer functions, log row in the same transaction; D-4 both logs; D-5 three statuses, public open/answered/solved; D-6 `/ops` + `v1/ops/*`).
 - [x] 1 ACs AC-X-19…22, playbook/PCR/STATUS rows.
-- [ ] 2 Migration 0068 + db repo + isolation · [ ] 3 core service · [ ] 4 api + script · [ ] 5 web `/ops` · [ ] 6 Seen by Pepper · ADR-0062 · close.
+- [x] 2 Migration 0068 (grants, access log, notes, public status, `operator_*` policies), `withOperator`, `operator` script; db operator 14/14, isolation+export+deletion+migrate 453/453.
+- [x] 3 Core `operator-support.ts` (inbox oldest first, read/reply/note/status, audit `operator`); int 7/7, S59 support 12/12.
+- [x] 4 `/v1/ops/*` + `OperatorGuard` (grant + MFA); api support 23/23.
+- [ ] 5 web `/ops` · [ ] 6 Seen by Pepper on the thread · ADR-0062 · close.
 ## Last sessions
 - **S59 Phase 13 · Help centre and support threads, owner side (2026-11-07)** ([PCR-010](changes/PCR-010.md), branch `claude/youthful-dijkstra-9hsw6i`). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0067 (threads, messages, reads, public requests; staff own, owners and managers all), `/v1/support/*` and the public form, 5 a day under a lock, `SUPPORT_EMAIL` with `Reply-To`, `support.json` in the export; Your requests, the thread, the unread badge; the help centre (15 articles, search, contact) and help links; AC-X-13…18.
