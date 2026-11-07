@@ -111,13 +111,7 @@ export async function withUser<T>(
 
 /** A worker job that may scan across businesses through its `job_scan` policy (ADR-0025). */
 export type ScanJob =
-  | 'reminders'
-  | 'cleanup'
-  | 'tasks'
-  | 'insights'
-  | 'waitlist'
-  | 'imports'
-  | 'support';
+  'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports' | 'support';
 
 /**
  * Runs `work` in a read-only transaction without a tenant in which the `job_scan` policies of

@@ -113,7 +113,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  clock = new ManualClock(new Date('2026-11-09T09:00:00Z'));
+  clock = new ManualClock(new Date('2025-11-09T09:00:00Z'));
   options = {
     outboxKey: key,
     supportEmail: 'support@pepper.test',
@@ -137,18 +137,18 @@ afterAll(async () => {
 
 describe('the same-day reminder (AC-X-25)', () => {
   it('reminds the team once a wait, at 4 h, and again after a new wait', async () => {
-    at('2026-11-10T09:00:00Z');
+    at('2025-11-10T09:00:00Z');
     const thread = await open();
     const reminders = async () =>
       (await deliverAll()).filter(
         (mail) => mail.to === 'support@pepper.test' && mail.subject.includes('Waiting'),
       );
-    at('2026-11-10T12:59:00Z');
+    at('2025-11-10T12:59:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect((await reminders()).filter((mail) => mail.subject.includes(thread.reference))).toEqual(
       [],
     );
-    at('2026-11-10T13:00:00Z');
+    at('2025-11-10T13:00:00Z');
     // Two workers side by side, then again: one reminder.
     await Promise.all([
       runSupportHousekeeping(db, jobOptions),
@@ -162,7 +162,7 @@ describe('the same-day reminder (AC-X-25)', () => {
     // Never the request's own text.
     expect(sent[0]?.text).not.toContain('calendar is empty');
     // Answered: no reminder however long it waits on the business.
-    at('2026-11-10T14:00:00Z');
+    at('2025-11-10T14:00:00Z');
     await replyAsOperator(
       db,
       operator,
@@ -170,22 +170,57 @@ describe('the same-day reminder (AC-X-25)', () => {
       { message: 'Reconnect it in Settings.' },
       options,
     );
-    at('2026-11-10T20:00:00Z');
+    at('2025-11-10T20:00:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect((await reminders()).filter((mail) => mail.subject.includes(thread.reference))).toEqual(
       [],
     );
     // Their reply starts a new wait: reminded again 4 h later.
     await replyToSupportThread(db, owner(), thread.id, { message: 'Still empty.' }, options);
-    at('2026-11-11T00:00:00Z');
+    at('2025-11-11T00:00:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect(
       (await reminders()).filter((mail) => mail.subject.includes(thread.reference)),
     ).toHaveLength(1);
   });
 
+  it('starts a new wait when a solved request is reopened without an answer in between', async () => {
+    at('2025-11-11T09:00:00Z');
+    const thread = await open('Bookings vanish');
+    at('2025-11-11T13:00:00Z');
+    await runSupportHousekeeping(db, jobOptions);
+    await solveSupportThread(db, owner(), thread.id, { clock });
+    at('2025-11-21T09:00:00Z');
+    await replyToSupportThread(db, owner(), thread.id, { message: 'It’s back.' }, options);
+    await deliverAll();
+    const inbox = await readOperatorInbox(db, operator, { view: 'waiting' });
+    expect(inbox.items.find((item) => item.id === thread.id)?.waitingSince).toBe(
+      '2025-11-21T09:00:00.000Z',
+    );
+    at('2025-11-21T13:00:00Z');
+    await runSupportHousekeeping(db, jobOptions);
+    const sent = (await deliverAll()).filter((mail) =>
+      mail.subject.startsWith(`[${thread.reference}] Waiting 4 h`),
+    );
+    expect(sent).toHaveLength(1);
+  });
+
+  it('marks nothing without a team address, so the reminder goes once there is one', async () => {
+    at('2025-11-11T10:00:00Z');
+    const thread = await open('Nobody told');
+    at('2025-11-11T15:00:00Z');
+    expect((await runSupportHousekeeping(db, { ...jobOptions, supportEmail: null })).reminded).toBe(
+      0,
+    );
+    await runSupportHousekeeping(db, jobOptions);
+    const sent = (await deliverAll()).filter((mail) =>
+      mail.subject.includes(`[${thread.reference}] Waiting 5 h`),
+    );
+    expect(sent).toHaveLength(1);
+  });
+
   it('reminds of a public request by the mailer, once, and tries again if it refused', async () => {
-    at('2026-11-12T09:00:00Z');
+    at('2025-11-12T09:00:00Z');
     const request = await submitPublicSupportRequest(
       db,
       null,
@@ -194,7 +229,7 @@ describe('the same-day reminder (AC-X-25)', () => {
     );
     const mailer = new FakeMailer();
     mailer.failing = true;
-    at('2026-11-12T13:30:00Z');
+    at('2025-11-12T13:30:00Z');
     const failed = await runSupportHousekeeping(db, { ...jobOptions, mailer });
     expect(failed.failed).toBeGreaterThanOrEqual(1);
     mailer.failing = false;
@@ -212,17 +247,17 @@ describe('the same-day reminder (AC-X-25)', () => {
 
 describe('auto-close after 7 quiet days (AC-X-24)', () => {
   it('solves an answered request once, tells its requester once, and audits it as the system', async () => {
-    at('2026-11-13T09:00:00Z');
+    at('2025-11-13T09:00:00Z');
     const thread = await open('Where is my booking page?');
-    at('2026-11-13T10:00:00Z');
+    at('2025-11-13T10:00:00Z');
     await replyAsOperator(db, operator, thread.id, { message: 'Under More.' }, options);
     await deliverAll();
-    at('2026-11-20T09:59:00Z');
+    at('2025-11-20T09:59:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect((await readSupportThread(db, owner(), thread.id, { clock })).status).toBe(
       'pepper_replied',
     );
-    at('2026-11-20T10:00:00Z');
+    at('2025-11-20T10:00:00Z');
     await Promise.all([
       runSupportHousekeeping(db, jobOptions),
       runSupportHousekeeping(db, jobOptions),
@@ -246,10 +281,10 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
   });
 
   it('never closes a request waiting on Pepper; a status set by the team counts as activity', async () => {
-    at('2026-11-21T09:00:00Z');
+    at('2025-11-21T09:00:00Z');
     const waiting = await open('Nobody answered');
     const moved = await open('Moved by the team');
-    at('2026-11-25T09:00:00Z');
+    at('2025-11-25T09:00:00Z');
     await setThreadStatusAsOperator(
       db,
       operator,
@@ -257,7 +292,7 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
       { status: 'pepper_replied' },
       { clock },
     );
-    at('2026-11-30T09:00:00Z');
+    at('2025-11-30T09:00:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect((await readSupportThread(db, owner(), waiting.id, { clock })).status).toBe(
       'waiting_on_pepper',
@@ -265,13 +300,13 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
     expect((await readSupportThread(db, owner(), moved.id, { clock })).status).toBe(
       'pepper_replied',
     );
-    at('2026-12-02T09:00:00Z');
+    at('2025-12-02T09:00:00Z');
     await runSupportHousekeeping(db, jobOptions);
     expect((await readSupportThread(db, owner(), moved.id, { clock })).status).toBe('solved');
   });
 
   it('closes a public request marked answered once it is quiet', async () => {
-    at('2026-12-03T09:00:00Z');
+    at('2025-12-03T09:00:00Z');
     const request = await submitPublicSupportRequest(
       db,
       null,
@@ -282,7 +317,7 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
     const item = inbox.items.find((row) => row.reference === request.reference);
     if (item === undefined) throw new Error('not in the inbox');
     await setPublicStatusAsOperator(db, operator, item.id, { status: 'answered' }, { clock });
-    at('2026-12-10T09:00:00Z');
+    at('2025-12-10T09:00:00Z');
     await runSupportHousekeeping(db, jobOptions);
     const solved = await readOperatorInbox(db, operator, { view: 'solved' });
     expect(solved.items.map((row) => row.reference)).toContain(request.reference);
@@ -291,7 +326,7 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
 
 describe('"Did this help?" (AC-X-26)', () => {
   it('is the opener’s, once solved; a reopen clears it; the console sees it', async () => {
-    at('2026-12-11T09:00:00Z');
+    at('2025-12-11T09:00:00Z');
     const thread = await open('Can I change my hours?');
     await expect(
       rateSupportThread(db, owner(), thread.id, { rating: 'helpful' }, { clock }),

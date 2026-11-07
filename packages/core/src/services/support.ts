@@ -390,13 +390,9 @@ export async function answerInThread(
     },
   });
   const row = await findSupportThread(tx, id, null);
-  const openerId = row?.openedByUserId ?? null;
-  const opener =
-    openerId === null
-      ? undefined
-      : (await listTenantMembers(tx)).find((member) => member.userId === openerId);
+  const opener = await findSupportOpener(tx, row?.openedByUserId ?? null);
   if (opener !== undefined) {
-    const firstName = opener.name.trim().split(/\s+/)[0] ?? '';
+    const firstName = firstNameOf(opener.name);
     const link = `${options.baseUrl}/support/${id}`;
     await queueEmail(
       tx,
@@ -484,6 +480,20 @@ export async function submitPublicSupportRequest(
     }
   }
   return { id: null, reference, replyTo: parsed.email, sent };
+}
+
+/** The request's opener while they are still a member (for the emails that go to them). */
+export async function findSupportOpener(
+  tx: TenantTx,
+  openerId: string | null,
+): Promise<{ name: string; email: string } | undefined> {
+  if (openerId === null) return undefined;
+  return (await listTenantMembers(tx)).find((member) => member.userId === openerId);
+}
+
+/** The first word of a name ("Ana" of "Ana Ruiz"), or "" for none. */
+export function firstNameOf(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? '';
 }
 
 function parseThreadId(threadId: string): string {

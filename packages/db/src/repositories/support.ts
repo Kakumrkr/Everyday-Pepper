@@ -279,7 +279,8 @@ export async function setSupportThreadStatus(
     .update(supportThreads)
     .set({
       status,
-      statusChangedAt: now,
+      // Only a change of status: a member's second message while waiting starts no new wait.
+      statusChangedAt: sql`CASE WHEN ${supportThreads.status} = ${status} THEN ${supportThreads.statusChangedAt} ELSE ${now.toISOString()}::timestamptz END`,
       solvedAt: solved ? now : null,
       solvedBy: solved ? SupportSolvedBySchema.parse(options.solvedBy ?? 'member') : null,
       ...(!solved && { rating: null, ratedAt: null }),
@@ -303,8 +304,9 @@ export async function setSupportThreadRating(
 
 /**
  * Since when a thread waits on whoever answers next (`t` is the thread): waiting on Pepper,
- * the member's oldest message after the team last wrote (or, moved back to waiting by the
- * team, since the team last wrote; else since it opened); otherwise its last message.
+ * the member's oldest message after the team last wrote and since it last became "waiting"
+ * (a reopened request starts a new wait, S59.2.2); moved back to waiting by the team with
+ * nothing new, since the team last wrote; else since it opened. Otherwise its last message.
  */
 const WAITING_SINCE = sql.raw(`CASE WHEN t.status = 'waiting_on_pepper' THEN COALESCE(
   (SELECT min(m.created_at) FROM support_messages m
@@ -312,14 +314,15 @@ const WAITING_SINCE = sql.raw(`CASE WHEN t.status = 'waiting_on_pepper' THEN COA
       AND m.created_at > COALESCE(
         (SELECT max(p.created_at) FROM support_messages p
           WHERE p.thread_id = t.id AND p.author_kind = 'pepper'),
-        '-infinity'::timestamptz)),
+        '-infinity'::timestamptz)
+      AND m.created_at >= COALESCE(t.status_changed_at, '-infinity'::timestamptz)),
   (SELECT max(p.created_at) FROM support_messages p
     WHERE p.thread_id = t.id AND p.author_kind = 'pepper'),
   t.created_at)
 ELSE t.last_message_at END`);
 
 /** Since when a thread has been quiet: its last message or status change, the later. */
-const QUIET_SINCE = sql.raw(`GREATEST(t.last_message_at, COALESCE(t.status_changed_at, t.last_message_at))`);
+const QUIET_SINCE = sql.raw(`GREATEST(t.last_message_at, t.status_changed_at)`);
 
 /** A thread the support job has to look at (S59.2.2, AC-X-24/25). */
 export interface SupportDueThread {
@@ -417,42 +420,53 @@ export async function markSupportThreadReminded(
     .where(eq(supportThreads.id, Id.parse(threadId)));
 }
 
-/** What `support_public_sweep` changed among public requests (S59.2.2, AC-X-24/25). */
-export interface PublicSupportSwept {
-  action: 'closed' | 'overdue';
+/**
+ * Solves the public requests answered and quiet for 7 days (`support_public_close_quiet`, the
+ * window fixed in the database); `now` may not run ahead of its clock. Returns how many.
+ */
+export async function closeQuietPublicSupportRequests(db: Database, now: Date): Promise<number> {
+  const { rows } = await db.execute<{ closed: number }>(
+    sql`SELECT support_public_close_quiet(${now.toISOString()}::timestamptz) AS closed`,
+  );
+  return rows[0]?.closed ?? 0;
+}
+
+/** An open public request waiting 4 h or more, not reminded of this wait (AC-X-25). */
+export interface PublicSupportOverdue {
   id: string;
   reference: string;
-  preview: string;
   waitingSince: Date;
 }
 
-/**
- * Closes the public requests answered and quiet since `quietBefore`, and marks reminded the
- * open ones waiting since `overdueBefore` that weren't reminded of this wait. In the caller's
- * transaction, so an email that fails can undo it.
- */
-export async function sweepPublicSupportRequests(
-  tx: TenantTx,
-  input: { now: Date; overdueBefore: Date; quietBefore: Date },
-): Promise<PublicSupportSwept[]> {
-  const { rows } = await tx.execute<{
-    action: string;
-    id: string;
-    reference: string;
-    preview: string;
-    waiting_since: string;
-  }>(sql`
-    SELECT action, id, reference, preview, waiting_since
-      FROM support_public_sweep(${input.now.toISOString()}::timestamptz,
-                                ${input.overdueBefore.toISOString()}::timestamptz,
-                                ${input.quietBefore.toISOString()}::timestamptz)`);
+export async function listOverduePublicSupportRequests(
+  db: Database,
+  now: Date,
+  limit: number,
+): Promise<PublicSupportOverdue[]> {
+  const { rows } = await db.execute<{ id: string; reference: string; waiting_since: string }>(
+    sql`SELECT id, reference, waiting_since
+          FROM support_public_overdue(${now.toISOString()}::timestamptz, ${z.number().int().min(1).max(1000).parse(limit)})`,
+  );
   return rows.map((row) => ({
-    action: row.action === 'closed' ? 'closed' : 'overdue',
     id: row.id,
     reference: row.reference,
-    preview: row.preview,
     waitingSince: new Date(row.waiting_since),
   }));
+}
+
+/**
+ * Marks one public request reminded, if it still is overdue and unreminded; `false` otherwise.
+ * In the caller's transaction, so the email sent in it can undo the mark.
+ */
+export async function markPublicSupportRequestReminded(
+  tx: TenantTx,
+  id: string,
+  now: Date,
+): Promise<boolean> {
+  const { rows } = await tx.execute<{ marked: boolean }>(
+    sql`SELECT support_public_mark_reminded(${Id.parse(id)}::uuid, ${now.toISOString()}::timestamptz) AS marked`,
+  );
+  return rows[0]?.marked === true;
 }
 
 /** Records that `userId` opened the thread at `now` (later opens move it forward only). */

@@ -10,7 +10,6 @@ import {
   OPS_VIEWS,
   opsView,
   overdueNote,
-  waitedLong,
   waitingWords,
 } from '../../lib/ops';
 import { kitLink } from '../_components/kit-link';
@@ -95,8 +94,8 @@ export default async function OpsInboxPage({
               item.source === 'thread'
                 ? OPS_THREAD_STATUS[item.status]
                 : OPS_PUBLIC_STATUS[item.status];
-            const late = view === 'waiting' && waitedLong(item.waitingSince, now);
             const note = overdueNote(view, item.waitingSince, now);
+            const late = note !== null;
             const rating = item.source === 'thread' && item.rating !== null ? item.rating : null;
             return (
               <ListRow

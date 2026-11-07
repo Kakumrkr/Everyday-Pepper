@@ -33,46 +33,95 @@ ALTER TABLE "support_saved_replies" FORCE ROW LEVEL SECURITY;
 CREATE TRIGGER "support_saved_replies_set_updated_at" BEFORE UPDATE ON "support_saved_replies"
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 --> statement-breakpoint
--- The support job's one write to public requests (AC-X-24/25), which have no business to bind
--- to: "Answered" ones quiet since `p_quiet_before` become solved, and "Open" ones waiting since
--- `p_overdue_before` or earlier, not yet reminded of this wait, are marked reminded. Returns
--- what it changed, for the job's emails. Runs as the owner, whose own policy below is the only
--- way in besides an operator's: the services' role can't read or write these rows otherwise.
+-- The support job's writes to public requests (AC-X-24/25), which have no business to bind to,
+-- as three narrow definer functions. Each runs as the owner, whose own policy below is the only
+-- way in besides an operator's; the windows (7 quiet days, a 4 h wait) are fixed here, so a
+-- caller can't close or mark anything early, and `p_now` may not run ahead of the database's
+-- clock (it is a parameter so the tests can replay a past day).
 CREATE POLICY "support_sweep" ON "public_support_requests" AS PERMISSIVE FOR ALL TO CURRENT_USER
   USING (true) WITH CHECK (true);
 --> statement-breakpoint
-CREATE FUNCTION support_public_sweep(p_now timestamptz, p_overdue_before timestamptz, p_quiet_before timestamptz)
-  RETURNS TABLE (action text, id uuid, reference text, preview text, waiting_since timestamptz)
-  LANGUAGE plpgsql SECURITY DEFINER
+CREATE FUNCTION support_sweep_now(p_now timestamptz) RETURNS timestamptz
+  LANGUAGE plpgsql STABLE
   SET search_path = public, pg_temp
   AS $$
 BEGIN
-  IF p_overdue_before > p_now OR p_quiet_before > p_now THEN
-    RAISE EXCEPTION 'the sweep looks back, not ahead' USING ERRCODE = '22023';
+  IF p_now IS NULL OR p_now > now() + interval '5 minutes' THEN
+    RAISE EXCEPTION 'the support job can''t run ahead of the clock' USING ERRCODE = '22023';
   END IF;
-  RETURN QUERY
-  WITH closed AS (
-    UPDATE public_support_requests r
-       SET status = 'solved', status_changed_at = p_now
-     WHERE r.status = 'answered'
-       AND COALESCE(r.status_changed_at, r.created_at) <= p_quiet_before
-    RETURNING r.id, r.reference, left(r.body, 140) AS preview, r.created_at
-  ), reminded AS (
-    UPDATE public_support_requests r
-       SET overdue_reminded_at = p_now
-     WHERE r.status = 'open'
-       AND COALESCE(r.status_changed_at, r.created_at) <= p_overdue_before
-       AND (r.overdue_reminded_at IS NULL
-            OR r.overdue_reminded_at < COALESCE(r.status_changed_at, r.created_at))
-    RETURNING r.id, r.reference, left(r.body, 140) AS preview,
-              COALESCE(r.status_changed_at, r.created_at) AS waiting_since
-  )
-  SELECT 'closed'::text, c.id, c.reference, c.preview, c.created_at FROM closed c
-  UNION ALL
-  SELECT 'overdue'::text, o.id, o.reference, o.preview, o.waiting_since FROM reminded o;
+  RETURN p_now;
 END;
 $$;
 --> statement-breakpoint
-REVOKE EXECUTE ON FUNCTION support_public_sweep(timestamptz, timestamptz, timestamptz) FROM PUBLIC;
+-- "Answered" requests quiet for 7 days become solved; returns how many.
+CREATE FUNCTION support_public_close_quiet(p_now timestamptz) RETURNS integer
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = public, pg_temp
+  AS $$
+DECLARE
+  at timestamptz := support_sweep_now(p_now);
+  closed integer;
+BEGIN
+  UPDATE public_support_requests r
+     SET status = 'solved', status_changed_at = at
+   WHERE r.status = 'answered'
+     AND COALESCE(r.status_changed_at, r.created_at) <= at - interval '7 days';
+  GET DIAGNOSTICS closed = ROW_COUNT;
+  RETURN closed;
+END;
+$$;
 --> statement-breakpoint
-GRANT EXECUTE ON FUNCTION support_public_sweep(timestamptz, timestamptz, timestamptz) TO pepper_app;
+-- "Open" requests waiting 4 h or more, not reminded of this wait yet (read only).
+CREATE FUNCTION support_public_overdue(p_now timestamptz, p_limit integer)
+  RETURNS TABLE (id uuid, reference text, waiting_since timestamptz)
+  LANGUAGE plpgsql STABLE SECURITY DEFINER
+  SET search_path = public, pg_temp
+  AS $$
+DECLARE
+  at timestamptz := support_sweep_now(p_now);
+BEGIN
+  RETURN QUERY
+  SELECT r.id, r.reference, COALESCE(r.status_changed_at, r.created_at)
+    FROM public_support_requests r
+   WHERE r.status = 'open'
+     AND COALESCE(r.status_changed_at, r.created_at) <= at - interval '4 hours'
+     AND (r.overdue_reminded_at IS NULL
+          OR r.overdue_reminded_at < COALESCE(r.status_changed_at, r.created_at))
+   ORDER BY 3, 1
+   LIMIT LEAST(GREATEST(p_limit, 1), 1000);
+END;
+$$;
+--> statement-breakpoint
+-- Marks one request reminded if it still is overdue and unreminded (under its row lock); the
+-- caller sends the email in the same transaction, so a refused email undoes only this mark.
+CREATE FUNCTION support_public_mark_reminded(p_id uuid, p_now timestamptz) RETURNS boolean
+  LANGUAGE plpgsql SECURITY DEFINER
+  SET search_path = public, pg_temp
+  AS $$
+DECLARE
+  at timestamptz := support_sweep_now(p_now);
+BEGIN
+  UPDATE public_support_requests r
+     SET overdue_reminded_at = at
+   WHERE r.id = p_id
+     AND r.status = 'open'
+     AND COALESCE(r.status_changed_at, r.created_at) <= at - interval '4 hours'
+     AND (r.overdue_reminded_at IS NULL
+          OR r.overdue_reminded_at < COALESCE(r.status_changed_at, r.created_at));
+  RETURN FOUND;
+END;
+$$;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION support_sweep_now(timestamptz) FROM PUBLIC;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION support_public_close_quiet(timestamptz) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION support_public_close_quiet(timestamptz) TO pepper_app;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION support_public_overdue(timestamptz, integer) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION support_public_overdue(timestamptz, integer) TO pepper_app;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION support_public_mark_reminded(uuid, timestamptz) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION support_public_mark_reminded(uuid, timestamptz) TO pepper_app;

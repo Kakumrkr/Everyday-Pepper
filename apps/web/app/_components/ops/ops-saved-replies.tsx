@@ -9,7 +9,7 @@ import {
 } from '@pepper/contracts';
 import { Button, Input, Textarea } from '@pepper/ui';
 import { useId, useState, type SubmitEvent } from 'react';
-import { sendJson } from '../../../lib/client-api';
+import { errorCodeOf, sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { Notice } from '../form-parts';
 
@@ -48,6 +48,11 @@ export function OpsSavedReplies({ initial }: { initial: readonly SupportSavedRep
   const [fieldErrors, setFieldErrors] = useState<Record<string, string | undefined>>({});
   const full = replies.length >= SUPPORT_SAVED_REPLIES_MAX;
 
+  /** A teammate deleted it meanwhile: it leaves the list too. */
+  function gone(result: { status: number; body?: unknown }): boolean {
+    return result.status === 404 && errorCodeOf(result.body) === 'saved_reply_not_found';
+  }
+
   function fieldError(form: string, field: 'title' | 'body'): string | undefined {
     return fieldErrors[`${form}:${field}`];
   }
@@ -73,6 +78,10 @@ export function OpsSavedReplies({ initial }: { initial: readonly SupportSavedRep
     );
     setBusy(null);
     if (!result.ok) {
+      if (id !== null && gone(result)) {
+        setEditing(null);
+        setReplies((current) => current.filter((reply) => reply.id !== id));
+      }
       setError(result.message);
       return;
     }
@@ -96,7 +105,7 @@ export function OpsSavedReplies({ initial }: { initial: readonly SupportSavedRep
     const result = await sendJson('DELETE', `/v1/ops/replies/${reply.id}`, undefined);
     setBusy(null);
     setConfirming(null);
-    if (!result.ok) {
+    if (!result.ok && !gone(result)) {
       setError(result.message);
       return;
     }

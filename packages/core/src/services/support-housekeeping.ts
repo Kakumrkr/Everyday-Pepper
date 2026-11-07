@@ -7,12 +7,13 @@ import {
 import {
   appendAuditEntry,
   findCurrentTenant,
+  closeQuietPublicSupportRequests,
   listDueSupportThreads,
-  listTenantMembers,
+  listOverduePublicSupportRequests,
   lockDueSupportThread,
+  markPublicSupportRequestReminded,
   markSupportThreadReminded,
   setSupportThreadStatus,
-  sweepPublicSupportRequests,
   withTenant,
   type Database,
   type SupportThreadDue,
@@ -21,7 +22,7 @@ import {
 import { systemClock, type Clock } from '../clock.js';
 import type { Mailer } from '../outbox.js';
 import { queueEmail } from './outbox.js';
-import { SUPPORT_KIND_LABELS } from './support.js';
+import { findSupportOpener, firstNameOf, SUPPORT_KIND_LABELS } from './support.js';
 
 // The support job (S59.2.2, ADR-0062, AC-X-24/25), run by the worker every few minutes. It
 // keeps two promises without anyone watching the inbox: a request waiting on Pepper for 4 h
@@ -67,7 +68,8 @@ export async function runSupportHousekeeping(
   const quietBefore = new Date(now.getTime() - SUPPORT_QUIET_DAYS * DAY_MS);
   const result: SupportHousekeepingResult = { closed: 0, reminded: 0, failed: 0 };
   const due = await listDueSupportThreads(db, {
-    overdueBefore,
+    // Without a team address nothing is reminded, or marked: those waits aren't even looked at.
+    overdueBefore: options.supportEmail === null ? new Date(0) : overdueBefore,
     quietBefore,
     limit: options.limit ?? DEFAULT_LIMIT,
   });
@@ -76,8 +78,9 @@ export async function runSupportHousekeeping(
       const done = await withTenant(db, TenantIdSchema.parse(tenantId), async (tx) => {
         const thread = await lockDueSupportThread(tx, threadId);
         if (thread === undefined) return null;
-        if (isOverdue(thread, overdueBefore)) {
-          return (await remindTeam(tx, thread, now, options)) ? 'reminded' : null;
+        if (options.supportEmail !== null && isOverdue(thread, overdueBefore)) {
+          await remindTeam(tx, thread, now, options.supportEmail, options);
+          return 'reminded';
         }
         if (thread.status === 'pepper_replied' && thread.quietSince <= quietBefore) {
           await closeQuiet(tx, thread, now, options);
@@ -92,9 +95,7 @@ export async function runSupportHousekeeping(
     }
   }
   try {
-    const swept = await sweepPublic(db, { now, overdueBefore, quietBefore }, options);
-    result.closed += swept.closed;
-    result.reminded += swept.reminded;
+    await sweepPublic(db, now, options, result);
   } catch {
     result.failed += 1;
   }
@@ -141,16 +142,15 @@ export function overdueEmail(input: {
   };
 }
 
-/** Queues the team's reminder and records it; `false` without a team address. */
+/** Queues the team's reminder and records it, in the business's transaction. */
 async function remindTeam(
   tx: TenantTx,
   thread: SupportThreadDue,
   now: Date,
+  supportEmail: string,
   options: SupportHousekeepingOptions,
-): Promise<boolean> {
-  // Recorded either way, so the scan doesn't pick the same wait up every pass.
+): Promise<void> {
   await markSupportThreadReminded(tx, thread.id, now);
-  if (options.supportEmail === null) return false;
   const tenant = await findCurrentTenant(tx);
   const mail = overdueEmail({
     reference: thread.reference,
@@ -161,14 +161,13 @@ async function remindTeam(
   });
   await queueEmail(
     tx,
-    { to: options.supportEmail, ...mail },
+    { to: supportEmail, ...mail },
     {
       key: options.outboxKey,
       dedupeKey: `support.overdue:${thread.id}:${thread.waitingSince.toISOString()}`,
       now,
     },
   );
-  return true;
 }
 
 /** Solves a quiet request as the system and tells its requester once (AC-X-24). */
@@ -188,13 +187,9 @@ async function closeQuiet(
       after: { status: 'solved' },
     },
   });
-  const openerId = thread.openedByUserId;
-  const opener =
-    openerId === null
-      ? undefined
-      : (await listTenantMembers(tx)).find((member) => member.userId === openerId);
+  const opener = await findSupportOpener(tx, thread.openedByUserId);
   if (opener === undefined) return;
-  const firstName = opener.name.trim().split(/\s+/)[0] ?? '';
+  const firstName = firstNameOf(opener.name);
   const link = options.baseUrl === null ? null : `${options.baseUrl}/support/${thread.id}`;
   await queueEmail(
     tx,
@@ -222,33 +217,42 @@ async function closeQuiet(
 }
 
 /**
- * Public requests (no business, no outbox): the sweep closes and marks them in one statement,
- * and each reminder is sent inside its transaction, so a mail server that refuses undoes the
- * marks for the next pass.
+ * Public requests (no business, no outbox): quiet answered ones close in one statement; each
+ * reminder is its own short transaction, marked and sent together, so a refused email undoes
+ * only its own mark and the next pass tries it again (nothing else is sent twice).
  */
 async function sweepPublic(
   db: Database,
-  window: { now: Date; overdueBefore: Date; quietBefore: Date },
+  now: Date,
   options: SupportHousekeepingOptions,
-): Promise<{ closed: number; reminded: number }> {
-  // A transaction without a business: the sweep is a definer function of its own.
-  return db.transaction(async (tx) => {
-    const swept = await sweepPublicSupportRequests(tx, window);
-    let reminded = 0;
-    const { mailer, supportEmail } = options;
-    if (mailer !== null && supportEmail !== null) {
-      for (const request of swept.filter((row) => row.action === 'overdue')) {
+  result: SupportHousekeepingResult,
+): Promise<void> {
+  try {
+    result.closed += await closeQuietPublicSupportRequests(db, now);
+  } catch {
+    result.failed += 1;
+  }
+  const { mailer, supportEmail } = options;
+  // Nothing to send with: nothing is marked, so the reminders go once there is.
+  if (mailer === null || supportEmail === null) return;
+  const overdue = await listOverduePublicSupportRequests(db, now, options.limit ?? DEFAULT_LIMIT);
+  for (const request of overdue) {
+    try {
+      const sent = await db.transaction(async (tx) => {
+        if (!(await markPublicSupportRequestReminded(tx, request.id, now))) return false;
         const mail = overdueEmail({
           reference: request.reference,
           kind: null,
           business: null,
-          waited: waitedHours(request.waitingSince, window.now),
+          waited: waitedHours(request.waitingSince, now),
           link: options.baseUrl === null ? null : `${options.baseUrl}/ops/requests/${request.id}`,
         });
         await mailer.send({ to: supportEmail, ...mail });
-        reminded += 1;
-      }
+        return true;
+      });
+      if (sent) result.reminded += 1;
+    } catch {
+      result.failed += 1;
     }
-    return { closed: swept.filter((row) => row.action === 'closed').length, reminded };
-  });
+  }
 }

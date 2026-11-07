@@ -85,12 +85,25 @@ export function OpsThreadView({
     }
   }
 
-  /** Puts a saved reply in the reply box, for the operator to edit and send (AC-X-23). */
+  /**
+   * Puts a saved reply in the reply box for the operator to edit and send (AC-X-23): below what
+   * they have already written, never over it; too long once the name is in, it says so.
+   */
   function applySaved(replyId: string) {
     const saved = savedReplies.find((reply) => reply.id === replyId);
     const box = replyForm.current?.elements.namedItem('message');
     if (saved === undefined || !(box instanceof HTMLTextAreaElement)) return;
-    box.value = fillSavedReply(saved.body, thread.openedBy?.name ?? null);
+    const filled = fillSavedReply(saved.body, thread.openedBy?.name ?? null);
+    const draft = box.value.trimEnd();
+    const next = draft === '' ? filled : `${draft}\n\n${filled}`;
+    if (next.length > SUPPORT_MESSAGE_MAX) {
+      setFieldError(
+        `That would make the reply longer than ${String(SUPPORT_MESSAGE_MAX)} characters. Shorten it first.`,
+      );
+      box.focus();
+      return;
+    }
+    box.value = next;
     setFieldError(undefined);
     box.focus();
   }
