@@ -53,6 +53,7 @@ const THREAD = {
   lastMessageAt: AT,
   messages: [{ id: THREAD_ID, author: { kind: 'you' }, body: 'How do I import?', createdAt: AT }],
   replyTo: 'ana@example.test',
+  seenByPepperAt: null,
 } as unknown as SupportThread;
 
 class FakeAuth extends AuthService {
@@ -218,6 +219,7 @@ describe('/v1/support', () => {
     const summary: Partial<SupportThread> = { ...THREAD };
     delete summary.messages;
     delete summary.replyTo;
+    delete summary.seenByPepperAt;
     expect((await get('/v1/support/threads').expect(200)).body).toEqual({
       threads: [summary],
       unread: 1,
