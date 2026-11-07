@@ -9,7 +9,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import { grantOperator, listOperators, revokeOperator } from './operators.js';
 import {
+  deleteSupportSavedReply,
   findPublicSupportRequest,
+  insertSupportSavedReply,
+  listSupportSavedReplies,
+  sweepPublicSupportRequests,
+  updateSupportSavedReply,
   insertPublicSupportRequest,
   insertSupportNote,
   insertSupportThread,
@@ -353,5 +358,161 @@ describe('public requests (AC-X-17/21)', () => {
       );
       expect(after?.status).toBe(status);
     }
+  });
+});
+
+describe('saved replies (S59.2.2, AC-X-23)', () => {
+  it('an operator adds, edits and deletes them, each access logged', async () => {
+    const reply = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: null },
+      (tx) =>
+        insertSupportSavedReply(tx, {
+          title: 'Calendar sync',
+          body: 'Hi {first name}, reconnect Google Calendar in Settings.',
+          updatedByUserId: operator,
+          now: new Date(),
+        }),
+    );
+    const edited = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: reply.id },
+      (tx) =>
+        updateSupportSavedReply(tx, reply.id, {
+          title: 'Calendar sync',
+          body: 'Hi {first name}, open Settings → Calendar.',
+          updatedByUserId: operator,
+        }),
+    );
+    expect(edited?.body).toContain('Settings → Calendar');
+    const listed = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.read', targetId: null },
+      listSupportSavedReplies,
+    );
+    expect(listed.map((row) => row.id)).toContain(reply.id);
+    const deleted = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: reply.id },
+      (tx) => deleteSupportSavedReply(tx, reply.id),
+    );
+    expect(deleted).toBe(true);
+    const log = await asAdmin<{ action: string }>(
+      `SELECT action FROM operator_access_log WHERE operator_user_id = $1 AND action LIKE 'replies.%'`,
+      [operator],
+    );
+    expect(log.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('are out of reach of the services and of every business without the logged access', async () => {
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: null },
+      (tx) =>
+        insertSupportSavedReply(tx, {
+          title: 'Hidden',
+          body: 'Only the team sees this.',
+          updatedByUserId: operator,
+          now: new Date(),
+        }),
+    );
+    const [flags] = await asAdmin<{ forced: boolean }>(
+      `SELECT relforcerowsecurity AS forced FROM pg_class WHERE oid = 'public.support_saved_replies'::regclass`,
+    );
+    expect(flags?.forced).toBe(true);
+    for (const run of [
+      (statement: string) => db.execute(sql.raw(statement)),
+      (statement: string) => withTenant(db, tenantA, (tx) => tx.execute(sql.raw(statement))),
+    ]) {
+      for (const statement of [
+        'SELECT * FROM support_saved_replies',
+        "UPDATE support_saved_replies SET title = 'x'",
+        'DELETE FROM support_saved_replies',
+      ]) {
+        const result = await run(statement);
+        expect(result.rows.length + (result.rowCount ?? 0), statement).toBe(0);
+      }
+      const error = await run(
+        `INSERT INTO support_saved_replies (id, title, body) VALUES (gen_random_uuid(), 't', 'b')`,
+      ).catch((e: unknown) => e);
+      expect(sqlState(error)).toBe('42501');
+    }
+  });
+});
+
+describe('the public sweep (S59.2.2, AC-X-24/25)', () => {
+  async function publicRequest(at: Date): Promise<string> {
+    const sent = await insertPublicSupportRequest(db, {
+      reference: reference(),
+      email: 'sweep@example.test',
+      name: null,
+      body: 'Locked out again',
+      page: null,
+      topic: null,
+      now: at,
+    });
+    if (sent === null) throw new Error('reference taken');
+    return sent.id;
+  }
+  const sweep = (now: Date) =>
+    db.transaction((tx) =>
+      sweepPublicSupportRequests(tx, {
+        now,
+        overdueBefore: new Date(now.getTime() - 4 * 3_600_000),
+        quietBefore: new Date(now.getTime() - 7 * 86_400_000),
+      }),
+    );
+
+  it('reminds an open request once a wait, closes a quiet answered one, and nothing else', async () => {
+    const now = new Date('2031-03-10T15:00:00Z');
+    const late = await publicRequest(new Date('2031-03-10T10:00:00Z'));
+    const fresh = await publicRequest(new Date('2031-03-10T13:00:00Z'));
+    const quiet = await publicRequest(new Date('2031-03-01T10:00:00Z'));
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'public.status', targetId: quiet },
+      (tx) =>
+        setPublicSupportRequestStatus(tx, quiet, 'answered', new Date('2031-03-02T10:00:00Z')),
+    );
+    const first = await sweep(now);
+    const mine = (rows: typeof first) =>
+      rows.filter((row) => [late, fresh, quiet].includes(row.id)).map((row) => [row.action, row.id]);
+    expect(mine(first).sort()).toEqual(
+      [
+        ['closed', quiet],
+        ['overdue', late],
+      ].sort(),
+    );
+    // Twice side by side, then again: nothing more.
+    const again = await Promise.all([sweep(now), sweep(now)]);
+    expect(again.flatMap(mine)).toEqual([]);
+    const status = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'public.read', targetId: quiet },
+      (tx) => findPublicSupportRequest(tx, quiet),
+    );
+    expect(status?.status).toBe('solved');
+    // Reopened later: a new wait reminds again.
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'public.status', targetId: late },
+      (tx) => setPublicSupportRequestStatus(tx, late, 'open', new Date('2031-03-11T08:00:00Z')),
+    );
+    const later = await sweep(new Date('2031-03-11T12:30:00Z'));
+    expect(mine(later)).toContainEqual(['overdue', late]);
+  });
+
+  it('refuses a sweep that looks ahead', async () => {
+    const now = new Date();
+    const error = await db
+      .transaction((tx) =>
+        sweepPublicSupportRequests(tx, {
+          now,
+          overdueBefore: new Date(now.getTime() + 1000),
+          quietBefore: now,
+        }),
+      )
+      .catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('22023');
   });
 });

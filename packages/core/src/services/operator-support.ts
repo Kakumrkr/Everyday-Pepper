@@ -9,6 +9,11 @@ import {
   SupportContextSchema,
   SupportNoteInputSchema,
   SupportReplyInputSchema,
+  SUPPORT_SAVED_REPLIES_MAX,
+  SupportSavedReplyIdSchema,
+  SupportSavedReplyInputSchema,
+  SupportSavedReplyListSchema,
+  SupportSavedReplySchema,
   SupportThreadIdSchema,
   type OperatorInbox,
   type OperatorInboxQuery,
@@ -21,6 +26,9 @@ import {
   type SupportNote,
   type SupportNoteInput,
   type SupportReplyInput,
+  type SupportSavedReply,
+  type SupportSavedReplyInput,
+  type SupportSavedReplyList,
   type SupportStatus,
   type TenantId,
   type UserId,
@@ -28,6 +36,12 @@ import {
 import {
   appendAuditEntry,
   countOperatorWaiting,
+  countSupportSavedReplies,
+  deleteSupportSavedReply,
+  insertSupportSavedReply,
+  listSupportSavedReplies,
+  lockSupportSavedReplies,
+  updateSupportSavedReply,
   findOperatorThread,
   findPublicSupportRequest,
   findSupportOpenerRole,
@@ -50,10 +64,16 @@ import {
   type OperatorInboxRow,
   type OperatorThreadRecord,
   type SupportNoteRecord,
+  type SupportSavedReplyRecord,
   type TenantTx,
 } from '@pepper/db';
 import { systemClock, type Clock } from '../clock.js';
-import { OperatorAccessRefusedError, SupportThreadNotFoundError } from '../errors.js';
+import {
+  OperatorAccessRefusedError,
+  SavedRepliesFullError,
+  SavedReplyNotFoundError,
+  SupportThreadNotFoundError,
+} from '../errors.js';
 import { answerInThread, type SupportOptions } from './support.js';
 
 // Pepper's support console (S59.2, ADR-0062, AC-X-19…22). Only accounts holding the operator
@@ -179,6 +199,7 @@ function toInboxItem(row: OperatorInboxRow, names: Map<string, string>): Record<
     ...base,
     source: 'thread',
     status: row.status,
+    rating: row.rating,
     kind: row.kind,
     business: (row.tenantId === null ? undefined : names.get(row.tenantId)) ?? 'A business',
   };
@@ -250,7 +271,7 @@ export async function setThreadStatusAsOperator(
     const thread = await lockSupportThread(tx, id);
     if (thread === undefined) throw new SupportThreadNotFoundError();
     if (thread.status !== status) {
-      await setSupportThreadStatus(tx, id, status, now);
+      await setSupportThreadStatus(tx, id, status, now, { solvedBy: 'pepper' });
       await appendAuditEntry(tx, {
         actor: { kind: 'operator' },
         change: {
@@ -342,6 +363,89 @@ export async function noteOnPublicRequest(
   });
 }
 
+/** The team's saved replies, by title (AC-X-23). */
+export async function listSavedReplies(
+  db: Database,
+  operator: Operator,
+): Promise<SupportSavedReplyList> {
+  return asOperator(db, operator, 'replies.read', null, async (tx) =>
+    SupportSavedReplyListSchema.parse({
+      replies: (await listSupportSavedReplies(tx)).map(toSavedReply),
+    }),
+  );
+}
+
+/** Adds a saved reply (AC-X-23): at most `SUPPORT_SAVED_REPLIES_MAX`. */
+export async function addSavedReply(
+  db: Database,
+  operator: Operator,
+  input: SupportSavedReplyInput,
+  options: { clock?: Clock } = {},
+): Promise<SupportSavedReply> {
+  const { title, body } = SupportSavedReplyInputSchema.parse(input);
+  const now = (options.clock ?? systemClock).now();
+  return asOperator(db, operator, 'replies.write', null, async (tx) => {
+    await lockSupportSavedReplies(tx);
+    if ((await countSupportSavedReplies(tx)) >= SUPPORT_SAVED_REPLIES_MAX) {
+      throw new SavedRepliesFullError();
+    }
+    const row = await insertSupportSavedReply(tx, {
+      title,
+      body,
+      updatedByUserId: operator.userId,
+      now,
+    });
+    return SupportSavedReplySchema.parse(toSavedReply(row));
+  });
+}
+
+/** Changes a saved reply's title and text (AC-X-23). */
+export async function editSavedReply(
+  db: Database,
+  operator: Operator,
+  replyId: string,
+  input: SupportSavedReplyInput,
+): Promise<SupportSavedReply> {
+  const id = parseSavedReplyId(replyId);
+  const { title, body } = SupportSavedReplyInputSchema.parse(input);
+  return asOperator(db, operator, 'replies.write', id, async (tx) => {
+    const row = await updateSupportSavedReply(tx, id, {
+      title,
+      body,
+      updatedByUserId: operator.userId,
+    });
+    if (row === undefined) throw new SavedReplyNotFoundError();
+    return SupportSavedReplySchema.parse(toSavedReply(row));
+  });
+}
+
+/** Deletes a saved reply (AC-X-23). */
+export async function removeSavedReply(
+  db: Database,
+  operator: Operator,
+  replyId: string,
+): Promise<void> {
+  const id = parseSavedReplyId(replyId);
+  await asOperator(db, operator, 'replies.write', id, async (tx) => {
+    if (!(await deleteSupportSavedReply(tx, id))) throw new SavedReplyNotFoundError();
+  });
+}
+
+function toSavedReply(row: SupportSavedReplyRecord): Record<keyof SupportSavedReply, unknown> {
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+function parseSavedReplyId(replyId: string): string {
+  const parsed = SupportSavedReplyIdSchema.safeParse(replyId);
+  if (!parsed.success) throw new SavedReplyNotFoundError();
+  return parsed.data;
+}
+
 /** Finds the thread across businesses, then binds the transaction to its business. */
 async function bindToThread(tx: TenantTx, id: string): Promise<OperatorThreadRecord> {
   const thread = await findOperatorThread(tx, id);
@@ -403,6 +507,8 @@ async function toOperatorThread(
     notes: notes.map(toNote),
     createdAt: thread.createdAt.toISOString(),
     lastMessageAt: thread.lastMessageAt.toISOString(),
+    solvedBy: thread.solvedBy,
+    rating: thread.rating,
   });
 }
 

@@ -32,6 +32,19 @@ export type SupportKind = z.infer<typeof SupportKindSchema>;
 export const SupportStatusSchema = z.enum(['waiting_on_pepper', 'pepper_replied', 'solved']);
 export type SupportStatus = z.infer<typeof SupportStatusSchema>;
 
+/** Who solved a request (S59.2.2): the business, the Pepper team, or 7 quiet days (AC-X-24). */
+export const SupportSolvedBySchema = z.enum(['member', 'pepper', 'auto']);
+export type SupportSolvedBy = z.infer<typeof SupportSolvedBySchema>;
+
+/** The opener's answer to "Did this help?" after a request is solved (S59.2.2, AC-X-26). */
+export const SupportRatingSchema = z.enum(['helpful', 'not_helpful']);
+export type SupportRating = z.infer<typeof SupportRatingSchema>;
+
+/** A request quiet this long after the team's answer is closed by the support job (AC-X-24). */
+export const SUPPORT_QUIET_DAYS = 7;
+/** A request waiting on Pepper this long reminds the team: the same-day promise (AC-X-25). */
+export const SUPPORT_OVERDUE_HOURS = 4;
+
 export const SUPPORT_MESSAGE_MAX = 4_000;
 /** New requests one person may open in a day (AC-X-14). */
 export const SUPPORT_THREADS_PER_DAY = 5;
@@ -128,6 +141,10 @@ export type SupportReplyInput = z.input<typeof SupportReplyInputSchema>;
 export const SupportThreadChangeSchema = z.object({ status: z.literal('solved') }).strict();
 export type SupportThreadChange = z.input<typeof SupportThreadChangeSchema>;
 
+/** `PUT /v1/support/threads/:id/rating`: the opener's answer once it is solved (AC-X-26). */
+export const SupportRatingInputSchema = z.object({ rating: SupportRatingSchema }).strict();
+export type SupportRatingInput = z.input<typeof SupportRatingInputSchema>;
+
 /**
  * Who wrote a message, as the reader sees it: themselves, a teammate (by name), a member whose
  * account is gone, or the Pepper team.
@@ -175,6 +192,12 @@ export const SupportThreadSchema = SupportThreadSummarySchema.extend({
   messages: z.array(SupportMessageSchema),
   /** When the Pepper team last opened it (S59.2, AC-X-22); `null`: not yet. */
   seenByPepperAt: UtcDateTimeSchema.nullable(),
+  /** Who solved it (S59.2.2); `null` while open. `auto`: "Closed after 7 quiet days". */
+  solvedBy: SupportSolvedBySchema.nullable(),
+  /** "Did this help?": asked of the opener only, once solved (AC-X-26). */
+  rating: z
+    .object({ canRate: z.boolean(), value: SupportRatingSchema.nullable() })
+    .strict(),
   /** The email address the team's answers are sent to: the requester's. `null` for others. */
   replyTo: z.string().nullable(),
 });
@@ -239,6 +262,8 @@ export const OperatorInboxItemSchema = z.discriminatedUnion('source', [
     preview: z.string(),
     /** Since when it waits (the oldest message not answered yet), for "3 h waiting". */
     waitingSince: UtcDateTimeSchema,
+    /** The opener's "Did this help?" once solved (S59.2.2, AC-X-26). */
+    rating: SupportRatingSchema.nullable(),
   }),
   z.object({
     source: z.literal('public'),
@@ -297,6 +322,10 @@ export const OperatorThreadSchema = z.object({
   notes: z.array(SupportNoteSchema),
   createdAt: UtcDateTimeSchema,
   lastMessageAt: UtcDateTimeSchema,
+  /** Who solved it (S59.2.2); `null` while open. */
+  solvedBy: SupportSolvedBySchema.nullable(),
+  /** The opener's "Did this help?" (AC-X-26). */
+  rating: SupportRatingSchema.nullable(),
 });
 export type OperatorThread = z.infer<typeof OperatorThreadSchema>;
 
@@ -330,3 +359,39 @@ export type OperatorPublicChange = z.input<typeof OperatorPublicChangeSchema>;
 /** `GET /v1/ops/me`: the console opens for an operator only. */
 export const OperatorMeSchema = z.object({ operator: z.literal(true), name: z.string() });
 export type OperatorMe = z.infer<typeof OperatorMeSchema>;
+
+/** At most this many saved replies (AC-X-23). */
+export const SUPPORT_SAVED_REPLIES_MAX = 100;
+
+export const SupportSavedReplyIdSchema = z.uuid().toLowerCase();
+
+/** A saved reply of the team's (S59.2.2, AC-X-23): `{first name}` is filled in when used. */
+export const SupportSavedReplySchema = z.object({
+  id: z.uuid(),
+  title: z.string(),
+  body: z.string(),
+  updatedAt: UtcDateTimeSchema,
+});
+export type SupportSavedReply = z.infer<typeof SupportSavedReplySchema>;
+
+/** `GET /v1/ops/replies`. */
+export const SupportSavedReplyListSchema = z.object({
+  replies: z.array(SupportSavedReplySchema),
+});
+export type SupportSavedReplyList = z.infer<typeof SupportSavedReplyListSchema>;
+
+/** `POST /v1/ops/replies`, `PUT /v1/ops/replies/:id`. */
+export const SupportSavedReplyInputSchema = z
+  .object({
+    title: z
+      .string()
+      .trim()
+      .min(1, 'Give it a title.')
+      .max(80, 'Keep the title to 80 characters.'),
+    body: SupportMessageTextSchema,
+  })
+  .strict();
+export type SupportSavedReplyInput = z.input<typeof SupportSavedReplyInputSchema>;
+
+/** The placeholder a saved reply may hold for the requester's first name. */
+export const SAVED_REPLY_FIRST_NAME = '{first name}';

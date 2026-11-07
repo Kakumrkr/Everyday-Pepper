@@ -60,6 +60,9 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   support_thread_not_found: 'No such support request',
   support_limit_reached:
     'That’s a lot of requests for one day: try again tomorrow, or reply to an open one',
+  support_not_ratable: 'Only the person who asked can rate a request, once it’s solved',
+  saved_reply_not_found: 'No such saved reply',
+  saved_replies_full: 'That’s 100 saved replies: delete one you don’t use first',
   waitlist_offer_not_found: 'This offer link is not valid',
   waitlist_offer_used: 'This offer has already been claimed',
   waitlist_offer_taken: 'Sorry, this time has been taken',

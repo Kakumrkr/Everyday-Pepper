@@ -4,6 +4,7 @@ import {
   SUPPORT_MESSAGES_PER_DAY,
   SUPPORT_THREADS_PER_DAY,
   SupportContextSchema,
+  SupportRatingInputSchema,
   SupportReplyInputSchema,
   SupportThreadIdSchema,
   SupportThreadInputSchema,
@@ -14,6 +15,7 @@ import {
   type SupportContext,
   type SupportCreated,
   type SupportKind,
+  type SupportRatingInput,
   type SupportReplyInput,
   type SupportThread,
   type SupportThreadInput,
@@ -40,6 +42,7 @@ import {
   lockSupportThread,
   lockSupportWriter,
   markSupportThreadRead,
+  setSupportThreadRating,
   setSupportThreadStatus,
   withMember,
   withTenant,
@@ -50,7 +53,11 @@ import {
 } from '@pepper/db';
 import { auditActorOf, type Actor } from '../actor.js';
 import { systemClock, type Clock } from '../clock.js';
-import { SupportLimitReachedError, SupportThreadNotFoundError } from '../errors.js';
+import {
+  SupportLimitReachedError,
+  SupportNotRatableError,
+  SupportThreadNotFoundError,
+} from '../errors.js';
 import type { Mailer } from '../outbox.js';
 import { queueEmail } from './outbox.js';
 
@@ -274,7 +281,7 @@ export async function solveSupportThread(
     const thread = await lockSupportThread(tx, id);
     if (thread === undefined) throw new SupportThreadNotFoundError();
     if (thread.status !== 'solved') {
-      await setSupportThreadStatus(tx, id, 'solved', now);
+      await setSupportThreadStatus(tx, id, 'solved', now, { solvedBy: 'member' });
       await appendAuditEntry(tx, {
         actor: auditActorOf(actor),
         change: {
@@ -289,6 +296,46 @@ export async function solveSupportThread(
     const row = await findSupportThread(tx, id, userId);
     if (row === undefined) throw new SupportThreadNotFoundError();
     return toThread(tx, row, userId);
+  });
+}
+
+/**
+ * The opener's "Did this help?" on their solved request (S59.2.2, AC-X-26): changeable while it
+ * stays solved; anyone else, or an open request, is `SupportNotRatableError`. Audited without
+ * text; the same answer again changes nothing.
+ */
+export async function rateSupportThread(
+  db: Database,
+  actor: Actor,
+  threadId: string,
+  input: SupportRatingInput,
+  options: { clock?: Clock } = {},
+): Promise<SupportThread> {
+  const id = parseThreadId(threadId);
+  const { rating } = SupportRatingInputSchema.parse(input);
+  const now = (options.clock ?? systemClock).now();
+  const { userId } = actor.context;
+  return withMember(db, actor.context, async (tx) => {
+    if ((await lockSupportThread(tx, id)) === undefined) throw new SupportThreadNotFoundError();
+    const row = await findSupportThread(tx, id, userId);
+    if (row === undefined) throw new SupportThreadNotFoundError();
+    if (row.status !== 'solved' || row.openedByUserId !== userId) {
+      throw new SupportNotRatableError();
+    }
+    if (row.rating !== rating) {
+      await setSupportThreadRating(tx, id, rating, now);
+      await appendAuditEntry(tx, {
+        actor: auditActorOf(actor),
+        change: {
+          action: 'support_thread.rated',
+          entity: { type: 'support_thread', id },
+          before: { rating: row.rating },
+          after: { rating },
+        },
+        requestId: actor.requestId,
+      });
+    }
+    return toThread(tx, { ...row, rating }, userId);
   });
 }
 
@@ -578,5 +625,11 @@ async function toThread(
     })),
     replyTo: requester?.email ?? null,
     seenByPepperAt: row.pepperSeenAt?.toISOString() ?? null,
+    solvedBy: row.solvedBy,
+    // Only the opener is asked, and only they see their answer (AC-X-26).
+    rating: {
+      canRate: row.status === 'solved' && row.openedByUserId === reader,
+      value: row.openedByUserId === reader ? row.rating : null,
+    },
   });
 }

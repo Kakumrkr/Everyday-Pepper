@@ -20,6 +20,7 @@ import {
   signupEvents,
   supportMessages,
   supportReads,
+  supportSavedReplies,
   supportThreads,
   tasks,
   tenants,
@@ -242,14 +243,22 @@ describe('support (S59, PCR-010)', () => {
   });
 
   it('declares the member-scope policies, one read per member and no business on the public form', () => {
-    // S59.2 (ADR-0062): an operator's logged transaction reads threads and messages too.
+    // S59.2 (ADR-0062): an operator's logged transaction reads threads and messages too;
+    // S59.2.2: so does the support job's read-only scan.
     for (const table of [supportThreads, supportMessages]) {
       expect(
         getTableConfig(table)
           .policies.map((policy) => policy.name)
           .sort(),
-      ).toEqual(['member_scope', 'operator_read', 'tenant_isolation']);
+      ).toEqual(['job_scan', 'member_scope', 'operator_read', 'tenant_isolation']);
     }
+    // S59.2.2 (AC-X-23): saved replies are the team's alone.
+    expect(
+      getTableConfig(supportSavedReplies).policies.map((policy) => [policy.name, policy.for]),
+    ).toEqual([['operator_access', 'all']]);
+    expect(getTableConfig(supportSavedReplies).columns.map((c) => c.name)).not.toContain(
+      'tenant_id',
+    );
     expect(
       getTableConfig(supportReads)
         .policies.map((policy) => policy.name)

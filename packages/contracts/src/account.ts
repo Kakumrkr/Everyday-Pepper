@@ -58,6 +58,9 @@ export const ApiErrorCodeSchema = z.enum([
   // Support (S59, PCR-010).
   'support_thread_not_found',
   'support_limit_reached',
+  'support_not_ratable',
+  'saved_reply_not_found',
+  'saved_replies_full',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',
   'waitlist_offer_used',

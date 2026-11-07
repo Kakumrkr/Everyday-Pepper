@@ -59,7 +59,11 @@ import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
 import { savePushSubscription } from './repositories/push-subscriptions.js';
 import { listDueBookingReminders, planBookingReminder } from './repositories/reminders.js';
-import { insertSupportThread, markSupportThreadRead } from './repositories/support.js';
+import {
+  insertSupportThread,
+  listDueSupportThreads,
+  markSupportThreadRead,
+} from './repositories/support.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './repositories/feed.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
@@ -97,6 +101,8 @@ const GLOBAL_TABLES: Record<string, string> = {
     'every operator access, kept beyond the business (S59.2): no privilege for the services',
   support_notes:
     'the team’s notes on a business’s or a public request (S59.2): forced RLS, operators only',
+  support_saved_replies:
+    'the team’s saved replies (S59.2.2, AC-X-23): platform data; forced RLS, operators only',
 };
 
 interface TenantTable {
@@ -616,6 +622,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     seed: async (tx) => (await seedSupportThread(tx)).threadId,
     touch: 'kind = kind',
     operatorRead: true,
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('support'::text))",
     memberScope: [
       {
         policyname: 'member_scope',
@@ -634,6 +641,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: 'body = body',
     appendOnly: true,
     operatorRead: true,
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('support'::text))",
     memberScope: [
       {
         policyname: 'member_scope',
@@ -1782,6 +1790,7 @@ describe.each([
   ['tasks', 'tasks'],
   ['insights', 'insight_runs'],
   ['waitlist', 'waitlist_matches'],
+  ['support', 'support_threads'],
 ] as const)('job scan %s (withJobScan: the job finds work across businesses)', (job, table) => {
   /** Runs `statement` in a transaction with `app.job_scan` set to `name` (and a tenant). */
   async function scanning(statement: string, options: { name?: string; tenant?: TenantId } = {}) {
@@ -1810,7 +1819,15 @@ describe.each([
             ? (await listDueInsightRuns(db, at, 3_600_000, 1000)).map((due) => due.runId)
             : job === 'waitlist'
               ? (await listDueWaitlistMatches(db, new Date(), 1000)).map((due) => due.matchId)
-              : await listTenantIdsForCleanup(db, null, 1000);
+              : job === 'support'
+                ? (
+                    await listDueSupportThreads(db, {
+                      overdueBefore: new Date('2999-01-01T00:00:00Z'),
+                      quietBefore: new Date('2999-01-01T00:00:00Z'),
+                      limit: 1000,
+                    })
+                  ).map((due) => due.threadId)
+                : await listTenantIdsForCleanup(db, null, 1000);
     expect(found).toEqual(expect.arrayContaining(seeded()));
   });
 
@@ -1828,9 +1845,18 @@ describe.each([
       'bookings',
       'clients',
       'outbox_dispatch',
+      'support_threads',
+      'support_messages',
     ]) {
-      // The insights job reads its two tables: runs, and the requests that make one due.
-      if (other === table || (job === 'insights' && other === 'insight_requests')) continue;
+      // The insights job reads its two tables: runs, and the requests that make one due; the
+      // support job reads threads and their messages (how long each has waited).
+      if (
+        other === table ||
+        (job === 'insights' && other === 'insight_requests') ||
+        (job === 'support' && other === 'support_messages')
+      ) {
+        continue;
+      }
       const { rows: seen } = await scanning(`SELECT * FROM ${other}`);
       expect(seen, other).toEqual([]);
     }
