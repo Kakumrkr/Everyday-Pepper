@@ -203,7 +203,7 @@ describe('the routes (AC-X-20/21)', () => {
     );
     expect(core.noteOnThread).toHaveBeenCalledWith({}, operator, ID, { note: 'SMS off' }, OPTIONS);
     const moved = await send('patch', `/v1/ops/threads/${ID}`, { status: 'solved' });
-    expect(moved.body.status).toBe('solved');
+    expect((moved.body as { status: string }).status).toBe('solved');
     expect(core.setThreadStatusAsOperator).toHaveBeenCalledWith(
       {},
       operator,
@@ -219,7 +219,7 @@ describe('the routes (AC-X-20/21)', () => {
       (await send('post', `/v1/ops/requests/${ID}/notes`, { note: 'Sent steps' })).status,
     ).toBe(201);
     const moved = await send('patch', `/v1/ops/requests/${ID}`, { status: 'answered' });
-    expect(moved.body.status).toBe('answered');
+    expect((moved.body as { status: string }).status).toBe('answered');
     expect(core.setPublicStatusAsOperator).toHaveBeenCalledWith(
       {},
       operator,
