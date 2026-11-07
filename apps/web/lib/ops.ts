@@ -1,9 +1,12 @@
-import type {
-  OperatorInboxView,
-  PublicSupportStatus,
-  SupportReference,
-  SupportStatus,
+import {
+  OperatorMeSchema,
+  type OperatorInboxView,
+  type OperatorMe,
+  type PublicSupportStatus,
+  type SupportReference,
+  type SupportStatus,
 } from '@pepper/contracts';
+import { errorCodeOf } from './client-api';
 
 // Pepper's support console (S59.2, ADR-0062, AC-X-19…22): its paths and words. The api decides
 // who may open it; these only say things.
@@ -79,4 +82,26 @@ export function waitedLong(since: string, now: number): boolean {
 export function replyByEmailHref(email: string, reference: SupportReference): string {
   const subject = encodeURIComponent(`Re: [${reference}] Your Pepper support request`);
   return `mailto:${encodeURIComponent(email).replace('%40', '@')}?subject=${subject}`;
+}
+
+/** What `/ops` may show the signed-in account (AC-X-19). */
+export type OpsAccess =
+  | { state: 'operator'; me: OperatorMe }
+  | { state: 'mfa_required' }
+  | { state: 'refused' }
+  | { state: 'unavailable' };
+
+/**
+ * `GET /v1/ops/me`'s answer as what the console shows: the console, "turn on two-step
+ * verification" (only an operator hears `mfa_required`: the api checks the grant first), not
+ * found, or "try again".
+ */
+export function opsAccessOf(status: number, body: unknown): OpsAccess {
+  if (status === 200) {
+    const me = OperatorMeSchema.safeParse(body);
+    return me.success ? { state: 'operator', me: me.data } : { state: 'unavailable' };
+  }
+  if (status === 403 && errorCodeOf(body) === 'mfa_required') return { state: 'mfa_required' };
+  if (status === 401 || status === 403) return { state: 'refused' };
+  return { state: 'unavailable' };
 }

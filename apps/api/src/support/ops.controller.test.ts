@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import type { IncomingHttpHeaders, Server } from 'node:http';
 import { ApiErrorSchema, TenantIdSchema, UserIdSchema } from '@pepper/contracts';
-import { SupportThreadNotFoundError } from '@pepper/core';
+import { OperatorAccessRefusedError, SupportThreadNotFoundError } from '@pepper/core';
 import type * as Core from '@pepper/core';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
@@ -244,5 +244,12 @@ describe('the routes (AC-X-20/21)', () => {
     const response = await get(`/v1/ops/threads/${ID}`);
     expect(response.status).toBe(404);
     expect(ApiErrorSchema.parse(response.body).code).toBe('support_thread_not_found');
+  });
+
+  it('403 forbidden when the grant was revoked while the request was on its way', async () => {
+    core.readOperatorInbox.mockRejectedValue(new OperatorAccessRefusedError());
+    const response = await get('/v1/ops/inbox');
+    expect(response.status).toBe(403);
+    expect(ApiErrorSchema.parse(response.body).code).toBe('forbidden');
   });
 });

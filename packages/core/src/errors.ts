@@ -352,3 +352,14 @@ export class SupportLimitReachedError extends Error {
     this.name = 'SupportLimitReachedError';
   }
 }
+
+/**
+ * The account doesn't hold Pepper's operator grant (any more): revoked while a console request
+ * was on its way (S59.2, ADR-0062). Answered as 403 `forbidden`, like `OperatorGuard`.
+ */
+export class OperatorAccessRefusedError extends Error {
+  constructor() {
+    super('Not a Pepper operator');
+    this.name = 'OperatorAccessRefusedError';
+  }
+}

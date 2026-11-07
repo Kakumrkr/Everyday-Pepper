@@ -1,12 +1,11 @@
-import { OperatorMeSchema } from '@pepper/contracts';
-import { cx, FOCUS_RING, Logo } from '@pepper/ui';
+import { buttonStyle, cx, FOCUS_RING, Logo } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { ROUTES } from '../../lib/account';
 import { OPS_PATHS } from '../../lib/ops';
-import { currentAccount, currentJson } from '../_server/account';
+import { currentAccount, currentOpsAccess } from '../_server/account';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = {
@@ -22,9 +21,29 @@ export const metadata: Metadata = {
 export default async function OpsLayout({ children }: { children: ReactNode }) {
   const account = await currentAccount();
   if (account.state === 'signed-out') redirect(ROUTES.signIn);
-  const me =
-    account.state === 'signed-in' ? await currentJson('/v1/ops/me', OperatorMeSchema) : null;
-  if (me === null) notFound();
+  const access = account.state === 'signed-in' ? await currentOpsAccess() : null;
+  if (access?.state === 'refused') notFound();
+  if (access?.state !== 'operator') {
+    const mfa = access?.state === 'mfa_required';
+    return (
+      <main className="mx-auto flex min-h-dvh w-full max-w-xl flex-col gap-3 bg-bg px-4 pt-16">
+        <h1 className="m-0 type-display">
+          {mfa ? 'Turn on two-step verification first' : 'The console isn’t answering'}
+        </h1>
+        <p className="m-0 type-body text-ink-2">
+          {mfa
+            ? 'The support console reads every business’s requests, so it needs your second step.'
+            : 'Try again in a moment.'}
+        </p>
+        {mfa ? (
+          <Link href="/security/two-factor" className={buttonStyle({ variant: 'primary' })}>
+            Set it up
+          </Link>
+        ) : null}
+      </main>
+    );
+  }
+  const { me } = access;
   return (
     <div className="min-h-dvh bg-bg">
       <header className="mx-auto flex w-full max-w-3xl items-center justify-between gap-4 px-4 pt-5 sm:px-6">

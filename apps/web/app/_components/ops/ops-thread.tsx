@@ -15,11 +15,9 @@ import { SUPPORT_KIND_LABEL, supportTime } from '../../../lib/support';
 import { Notice } from '../form-parts';
 import { OpsNotes } from './ops-notes';
 
-const STATUSES: readonly { value: SupportStatus; label: string }[] = [
-  { value: 'waiting_on_pepper', label: 'Waiting on us' },
-  { value: 'pepper_replied', label: 'We replied' },
-  { value: 'solved', label: 'Solved' },
-];
+const STATUSES: readonly { value: SupportStatus; label: string }[] = Object.entries(
+  OPS_THREAD_STATUS,
+).map(([value, { label }]) => ({ value: value as SupportStatus, label }));
 
 function isStatus(value: string): value is SupportStatus {
   return STATUSES.some((status) => status.value === value);

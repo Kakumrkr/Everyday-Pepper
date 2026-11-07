@@ -13,7 +13,7 @@ import {
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
-import { SupportThreadNotFoundError } from './errors.js';
+import { OperatorAccessRefusedError, SupportThreadNotFoundError } from './errors.js';
 import { outboxKeyFrom, type EmailMessage, type Mailer } from './outbox.js';
 import { createBusiness } from './services/business.js';
 import { deliverOutboxMessage } from './services/outbox.js';
@@ -132,7 +132,9 @@ describe('the operator role (AC-X-19)', () => {
   it('opens for the granted account only; an owner gets nothing', async () => {
     expect(await isOperator(db, operator.userId)).toBe(true);
     expect(await isOperator(db, ana)).toBe(false);
-    await expect(readOperatorInbox(db, notOperator, {})).rejects.toThrow();
+    await expect(readOperatorInbox(db, notOperator, {})).rejects.toBeInstanceOf(
+      OperatorAccessRefusedError,
+    );
   });
 });
 
@@ -208,6 +210,42 @@ describe('the inbox (AC-X-20)', () => {
     );
     answered = await readOperatorInbox(db, operator, { view: 'answered' });
     expect(answered.items.map((item) => item.id)).not.toContain(id);
+    expect(answered.waiting).toBe(waiting.waiting);
+
+    // Moved back to waiting by the team, with nothing new from them: waiting since our reply.
+    minutes(60);
+    await replyAsOperator(db, operator, id, { message: 'Refunds are in Settings.' }, options);
+    minutes(30);
+    await setThreadStatusAsOperator(db, operator, id, { status: 'waiting_on_pepper' }, { clock });
+    const again = await readOperatorInbox(db, operator, { view: 'waiting' });
+    expect(again.items.find((item) => item.id === id)?.waitingSince).toBe(
+      '2026-11-09T12:05:00.000Z',
+    );
+  });
+
+  it('lists the answered and solved views latest first', async () => {
+    const ids: string[] = [];
+    for (const message of ['First solved', 'Second solved']) {
+      const created = await openSupportThread(
+        db,
+        actor(olga, 'owner', fig),
+        { kind: 'question', message, context: {} },
+        meta,
+        options,
+      );
+      minutes(10);
+      await setThreadStatusAsOperator(
+        db,
+        operator,
+        created.id ?? '',
+        { status: 'solved' },
+        { clock },
+      );
+      ids.push(created.id ?? '');
+    }
+    const solved = await readOperatorInbox(db, operator, { view: 'solved' });
+    const order = solved.items.map((item) => item.id).filter((id) => ids.includes(id));
+    expect(order).toEqual([...ids].reverse());
   });
 });
 
@@ -249,9 +287,13 @@ describe('a business’s request (AC-X-21/22)', () => {
       { action: 'thread.read', target: id },
       { action: 'thread.note', target: id },
     ]);
+    // Opened again within the hour: logged for Pepper, not news for the business.
+    minutes(5);
+    await readOperatorThread(db, operator, id, { clock });
     const audit = await withTenant(db, juniper, (tx) => listAuditEntries(tx, { limit: 20 }));
-    const seen = audit.find((e) => e.action === 'support_thread.seen' && e.entity.id === id);
-    expect(seen?.actor).toEqual({ kind: 'operator', userId: null });
+    const seen = audit.filter((e) => e.action === 'support_thread.seen' && e.entity.id === id);
+    expect(seen.map((e) => e.actor)).toEqual([{ kind: 'operator', userId: null }]);
+    expect((await accessLog()).at(-1)).toEqual({ action: 'thread.read', target: id });
   });
 
   it('a reply reaches the requester once, and every status is reachable', async () => {
@@ -269,9 +311,10 @@ describe('a business’s request (AC-X-21/22)', () => {
     expect(replied.status).toBe('pepper_replied');
     expect(replied.messages.at(-1)?.author).toEqual({ kind: 'pepper' });
     const mails = await deliverAll();
-    expect(mails.map((m) => [m.to, m.subject])).toEqual([
-      ['jess@juniper-ops.test', `Pepper replied to ${created.reference}`],
-    ]);
+    // Earlier tests ran later in the day: only this request's mail counts.
+    expect(
+      mails.filter((m) => m.subject.includes(created.reference)).map((m) => [m.to, m.subject]),
+    ).toEqual([['jess@juniper-ops.test', `Pepper replied to ${created.reference}`]]);
     expect(await countSupportUnread(db, actor(jess, 'staff', juniper))).toBe(1);
     for (const status of ['solved', 'waiting_on_pepper', 'pepper_replied', 'solved'] as const) {
       const moved = await setThreadStatusAsOperator(db, operator, id, { status }, { clock });

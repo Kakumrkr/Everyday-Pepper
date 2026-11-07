@@ -42,6 +42,8 @@ export interface SupportThreadRecord {
   openedByName: string | null;
   /** The first message, cut to 140 characters. */
   preview: string;
+  /** When the Pepper team last opened it (S59.2). */
+  pepperSeenAt: Date | null;
   /** The team answered after the reader last opened it (the reader's own threads only). */
   unread: boolean;
   context: unknown;
@@ -115,6 +117,7 @@ function threadColumns(reader: UserId | null) {
     context: supportThreads.context,
     createdAt: supportThreads.createdAt,
     lastMessageAt: supportThreads.lastMessageAt,
+    pepperSeenAt: supportThreads.pepperSeenAt,
     preview: sql<string>`(SELECT left(m.body, ${sql.raw(String(PREVIEW_LENGTH))}) FROM support_messages m WHERE m.thread_id = ${supportThreads.id} ORDER BY m.created_at, m.id LIMIT 1)`,
     unread: sql<boolean>`(${supportThreads.openedByUserId} = ${readerId} AND EXISTS (SELECT 1 FROM support_messages m WHERE m.thread_id = ${supportThreads.id} AND m.author_kind = 'pepper' AND m.created_at > COALESCE((SELECT r.read_at FROM support_reads r WHERE r.thread_id = ${supportThreads.id} AND r.user_id = ${readerId}), '-infinity'::timestamptz)))`,
   };
@@ -130,6 +133,7 @@ function toThreadRecord(row: {
   context: unknown;
   createdAt: Date;
   lastMessageAt: Date;
+  pepperSeenAt: Date | null;
   preview: string | null;
   unread: boolean | null;
 }): SupportThreadRecord {
@@ -405,10 +409,13 @@ export interface OperatorInboxRow {
   lastMessageAt: Date;
 }
 
-/** Business threads in `statuses`, the longest waiting first. */
+/**
+ * Business threads in `statuses`: the longest waiting first, or (`newestFirst`, the answered
+ * and solved views) the latest activity first, so the newest are never cut by the limit.
+ */
 export async function listOperatorThreads(
   tx: TenantTx,
-  query: { statuses: readonly SupportStatus[]; limit: number },
+  query: { statuses: readonly SupportStatus[]; limit: number; newestFirst?: boolean },
 ): Promise<OperatorInboxRow[]> {
   const statuses = z.array(SupportStatusSchema).min(1).parse(query.statuses);
   const limit = z.number().int().min(1).max(500).parse(query.limit);
@@ -432,6 +439,9 @@ export async function listOperatorThreads(
                    (SELECT max(p.created_at) FROM support_messages p
                      WHERE p.thread_id = t.id AND p.author_kind = 'pepper'),
                    '-infinity'::timestamptz)),
+             -- Moved back to waiting by the team: waiting since the team last wrote.
+             (SELECT max(p.created_at) FROM support_messages p
+               WHERE p.thread_id = t.id AND p.author_kind = 'pepper'),
              t.created_at)
            ELSE t.last_message_at END AS waiting_since
       FROM support_threads t
@@ -439,7 +449,7 @@ export async function listOperatorThreads(
        statuses.map((status) => sql`${status}`),
        sql`, `,
      )})
-     ORDER BY waiting_since, t.id
+     ORDER BY ${query.newestFirst === true ? sql`waiting_since DESC, t.id DESC` : sql`waiting_since, t.id`}
      LIMIT ${limit}`);
   return rows.map((row) => ({
     source: 'thread',
@@ -454,10 +464,10 @@ export async function listOperatorThreads(
   }));
 }
 
-/** Public requests in `statuses`, the longest waiting first. */
+/** Public requests in `statuses`, ordered as `listOperatorThreads`. */
 export async function listOperatorPublicRequests(
   tx: TenantTx,
-  query: { statuses: readonly PublicSupportStatus[]; limit: number },
+  query: { statuses: readonly PublicSupportStatus[]; limit: number; newestFirst?: boolean },
 ): Promise<OperatorInboxRow[]> {
   const statuses = z.array(PublicSupportStatusSchema).min(1).parse(query.statuses);
   const limit = z.number().int().min(1).max(500).parse(query.limit);
@@ -473,7 +483,11 @@ export async function listOperatorPublicRequests(
     })
     .from(publicSupportRequests)
     .where(inArray(publicSupportRequests.status, statuses))
-    .orderBy(asc(waitingSince), asc(publicSupportRequests.id))
+    .orderBy(
+      ...(query.newestFirst === true
+        ? [desc(waitingSince), desc(publicSupportRequests.id)]
+        : [asc(waitingSince), asc(publicSupportRequests.id)]),
+    )
     .limit(limit);
   return rows.map((row) => ({
     source: 'public',
@@ -486,6 +500,14 @@ export async function listOperatorPublicRequests(
     waitingSince: row.statusChangedAt ?? row.createdAt,
     lastMessageAt: row.statusChangedAt ?? row.createdAt,
   }));
+}
+
+/** How many requests wait on the team: business threads and public requests. */
+export async function countOperatorWaiting(tx: TenantTx): Promise<number> {
+  const { rows } = await tx.execute<{ count: number }>(sql`
+    SELECT (SELECT count(*) FROM support_threads WHERE status = 'waiting_on_pepper')::int
+         + (SELECT count(*) FROM public_support_requests WHERE status = 'open')::int AS count`);
+  return rows[0]?.count ?? 0;
 }
 
 /** The businesses' names for the inbox (`operator_business_names`: nothing else of them). */
@@ -507,8 +529,6 @@ export async function listOperatorBusinessNames(
 /** One thread as the console opens it: with its business and the opener's role. */
 export interface OperatorThreadRecord extends SupportThreadRecord {
   tenantId: string;
-  openedByRole: string | null;
-  pepperSeenAt: Date | null;
 }
 
 export async function findOperatorThread(
@@ -516,18 +536,14 @@ export async function findOperatorThread(
   id: string,
 ): Promise<OperatorThreadRecord | undefined> {
   const [row] = await tx
-    .select({
-      ...threadColumns(null),
-      tenantId: supportThreads.tenantId,
-      pepperSeenAt: supportThreads.pepperSeenAt,
-    })
+    .select({ ...threadColumns(null), tenantId: supportThreads.tenantId })
     .from(supportThreads)
     .leftJoin(users, eq(users.id, supportThreads.openedByUserId))
     .where(eq(supportThreads.id, Id.parse(id)))
     .limit(1);
   if (row === undefined) return undefined;
-  const { tenantId, pepperSeenAt, ...thread } = row;
-  return { ...toThreadRecord(thread), tenantId, pepperSeenAt, openedByRole: null };
+  const { tenantId, ...thread } = row;
+  return { ...toThreadRecord(thread), tenantId };
 }
 
 /** The opener's role in the business; run bound to the thread's business. */
@@ -554,19 +570,6 @@ export async function markSupportThreadSeenByPepper(
     .update(supportThreads)
     .set({ pepperSeenAt: now })
     .where(eq(supportThreads.id, Id.parse(threadId)));
-}
-
-/** When Pepper last opened a thread the transaction's member may read. */
-export async function findSupportThreadSeenAt(
-  tx: TenantTx,
-  threadId: string,
-): Promise<Date | null> {
-  const [row] = await tx
-    .select({ seenAt: supportThreads.pepperSeenAt })
-    .from(supportThreads)
-    .where(eq(supportThreads.id, Id.parse(threadId)))
-    .limit(1);
-  return row?.seenAt ?? null;
 }
 
 export interface PublicSupportRequestRecord {

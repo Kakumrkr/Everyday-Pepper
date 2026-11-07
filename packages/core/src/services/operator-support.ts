@@ -27,11 +27,13 @@ import {
 } from '@pepper/contracts';
 import {
   appendAuditEntry,
+  countOperatorWaiting,
   findOperatorThread,
   findPublicSupportRequest,
   findSupportOpenerRole,
   insertSupportNote,
   isPlatformOperator,
+  isPolicyViolation,
   listOperatorBusinessNames,
   listOperatorPublicRequests,
   listOperatorThreads,
@@ -44,12 +46,14 @@ import {
   setTransactionTenant,
   withOperator,
   type Database,
+  type OperatorAction,
   type OperatorInboxRow,
+  type OperatorThreadRecord,
   type SupportNoteRecord,
   type TenantTx,
 } from '@pepper/db';
 import { systemClock, type Clock } from '../clock.js';
-import { SupportThreadNotFoundError } from '../errors.js';
+import { OperatorAccessRefusedError, SupportThreadNotFoundError } from '../errors.js';
 import { answerInThread, type SupportOptions } from './support.js';
 
 // Pepper's support console (S59.2, ADR-0062, AC-X-19…22). Only accounts holding the operator
@@ -65,6 +69,31 @@ export interface Operator {
 }
 
 const INBOX_LIMIT = 200;
+/** A business's audit log gets one `seen` an hour per thread, or after a new message. */
+const SEEN_AGAIN_MS = 60 * 60 * 1000;
+
+/**
+ * `withOperator` for the console: a grant revoked since `OperatorGuard` looked is
+ * `OperatorAccessRefusedError` (403), not a database error.
+ */
+async function asOperator<T>(
+  db: Database,
+  operator: Operator,
+  action: OperatorAction,
+  targetId: string | null,
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  let begun = false;
+  try {
+    return await withOperator(db, { operatorUserId: operator.userId, action, targetId }, (tx) => {
+      begun = true;
+      return work(tx);
+    });
+  } catch (error) {
+    if (!begun && isPolicyViolation(error)) throw new OperatorAccessRefusedError();
+    throw error;
+  }
+}
 
 const THREAD_STATUSES: Readonly<Record<OperatorInboxView, readonly SupportStatus[]>> = {
   waiting: ['waiting_on_pepper'],
@@ -83,8 +112,9 @@ export async function isOperator(db: Database, userId: UserId): Promise<boolean>
 }
 
 /**
- * The inbox (AC-X-20): the view's business threads and public requests together, the one that
- * has waited longest first; `waiting` counts what waits on Pepper whatever the view.
+ * The inbox (AC-X-20): the view's business threads and public requests together. Waiting: the
+ * one that has waited longest first. Answered and solved: the latest first. `waiting` counts
+ * what waits on Pepper whatever the view.
  */
 export async function readOperatorInbox(
   db: Database,
@@ -92,34 +122,35 @@ export async function readOperatorInbox(
   query: OperatorInboxQuery,
 ): Promise<OperatorInbox> {
   const { view } = OperatorInboxQuerySchema.parse(query);
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'inbox.read', targetId: null },
-    async (tx) => {
-      const rows = sortOldestFirst([
-        ...(await listOperatorThreads(tx, { statuses: THREAD_STATUSES[view], limit: INBOX_LIMIT })),
-        ...(await listOperatorPublicRequests(tx, {
-          statuses: PUBLIC_STATUSES[view],
-          limit: INBOX_LIMIT,
-        })),
-      ]).slice(0, INBOX_LIMIT);
-      const names = await listOperatorBusinessNames(
-        tx,
-        rows.flatMap((row) => (row.tenantId === null ? [] : [row.tenantId])),
-      );
-      const waiting =
-        view === 'waiting'
-          ? rows.length
-          : (await listOperatorThreads(tx, { statuses: ['waiting_on_pepper'], limit: 500 }))
-              .length +
-            (await listOperatorPublicRequests(tx, { statuses: ['open'], limit: 500 })).length;
-      return OperatorInboxSchema.parse({
-        view,
-        items: rows.map((row) => toInboxItem(row, names)),
-        waiting,
-      });
-    },
-  );
+  return asOperator(db, operator, 'inbox.read', null, async (tx) => {
+    const newestFirst = view !== 'waiting';
+    const found = [
+      ...(await listOperatorThreads(tx, {
+        statuses: THREAD_STATUSES[view],
+        limit: INBOX_LIMIT,
+        newestFirst,
+      })),
+      ...(await listOperatorPublicRequests(tx, {
+        statuses: PUBLIC_STATUSES[view],
+        limit: INBOX_LIMIT,
+        newestFirst,
+      })),
+    ];
+    const rows = (newestFirst ? sortOldestFirst(found).reverse() : sortOldestFirst(found)).slice(
+      0,
+      INBOX_LIMIT,
+    );
+    const names = await listOperatorBusinessNames(
+      tx,
+      rows.flatMap((row) => (row.tenantId === null ? [] : [row.tenantId])),
+    );
+    const waiting = await countOperatorWaiting(tx);
+    return OperatorInboxSchema.parse({
+      view,
+      items: rows.map((row) => toInboxItem(row, names)),
+      waiting,
+    });
+  });
 }
 
 /** The longest waiting first; ties by reference, so the order is stable. */
@@ -165,11 +196,9 @@ export async function readOperatorThread(
 ): Promise<OperatorThread> {
   const id = parseThreadId(threadId);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'thread.read', targetId: id },
-    async (tx) => {
-      const tenantId = await bindToThread(tx, id);
+  return asOperator(db, operator, 'thread.read', id, async (tx) => {
+    const thread = await bindToThread(tx, id);
+    if (seenAgain(thread, now)) {
       await markSupportThreadSeenByPepper(tx, id, now);
       await appendAuditEntry(tx, {
         actor: { kind: 'operator' },
@@ -180,9 +209,9 @@ export async function readOperatorThread(
           after: null,
         },
       });
-      return toOperatorThread(tx, id, tenantId);
-    },
-  );
+    }
+    return toOperatorThread(tx, id, thread.tenantId);
+  });
 }
 
 /** The team's reply from the console (AC-X-21): as AC-X-16, the actor `operator`. */
@@ -196,16 +225,12 @@ export async function replyAsOperator(
   const id = parseThreadId(threadId);
   const { message } = SupportReplyInputSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'thread.reply', targetId: id },
-    async (tx) => {
-      const tenantId = await bindToThread(tx, id);
-      await answerInThread(tx, id, message, { kind: 'operator' }, options, now);
-      await markSupportThreadSeenByPepper(tx, id, now);
-      return toOperatorThread(tx, id, tenantId);
-    },
-  );
+  return asOperator(db, operator, 'thread.reply', id, async (tx) => {
+    const { tenantId } = await bindToThread(tx, id);
+    await answerInThread(tx, id, message, { kind: 'operator' }, options, now);
+    await markSupportThreadSeenByPepper(tx, id, now);
+    return toOperatorThread(tx, id, tenantId);
+  });
 }
 
 /** Moves a business's request to any status (AC-X-21); the same status changes nothing. */
@@ -219,28 +244,24 @@ export async function setThreadStatusAsOperator(
   const id = parseThreadId(threadId);
   const { status } = OperatorThreadChangeSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'thread.status', targetId: id },
-    async (tx) => {
-      const tenantId = await bindToThread(tx, id);
-      const thread = await lockSupportThread(tx, id);
-      if (thread === undefined) throw new SupportThreadNotFoundError();
-      if (thread.status !== status) {
-        await setSupportThreadStatus(tx, id, status, now);
-        await appendAuditEntry(tx, {
-          actor: { kind: 'operator' },
-          change: {
-            action: 'support_thread.status_changed',
-            entity: { type: 'support_thread', id },
-            before: { status: thread.status },
-            after: { status },
-          },
-        });
-      }
-      return toOperatorThread(tx, id, tenantId);
-    },
-  );
+  return asOperator(db, operator, 'thread.status', id, async (tx) => {
+    const { tenantId } = await bindToThread(tx, id);
+    const thread = await lockSupportThread(tx, id);
+    if (thread === undefined) throw new SupportThreadNotFoundError();
+    if (thread.status !== status) {
+      await setSupportThreadStatus(tx, id, status, now);
+      await appendAuditEntry(tx, {
+        actor: { kind: 'operator' },
+        change: {
+          action: 'support_thread.status_changed',
+          entity: { type: 'support_thread', id },
+          before: { status: thread.status },
+          after: { status },
+        },
+      });
+    }
+    return toOperatorThread(tx, id, tenantId);
+  });
 }
 
 /** A note of the team's on a business's request (AC-X-21): never shown to its members. */
@@ -254,20 +275,16 @@ export async function noteOnThread(
   const id = parseThreadId(threadId);
   const { note } = SupportNoteInputSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'thread.note', targetId: id },
-    async (tx) => {
-      const tenantId = await bindToThread(tx, id);
-      await insertSupportNote(tx, {
-        threadId: id,
-        authorUserId: operator.userId,
-        body: note,
-        now,
-      });
-      return toOperatorThread(tx, id, tenantId);
-    },
-  );
+  return asOperator(db, operator, 'thread.note', id, async (tx) => {
+    const { tenantId } = await bindToThread(tx, id);
+    await insertSupportNote(tx, {
+      threadId: id,
+      authorUserId: operator.userId,
+      body: note,
+      now,
+    });
+    return toOperatorThread(tx, id, tenantId);
+  });
 }
 
 /** A public request (AC-X-21). */
@@ -277,11 +294,7 @@ export async function readPublicRequest(
   requestId: string,
 ): Promise<OperatorPublicRequest> {
   const id = parsePublicId(requestId);
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'public.read', targetId: id },
-    (tx) => toPublicRequest(tx, id),
-  );
+  return asOperator(db, operator, 'public.read', id, (tx) => toPublicRequest(tx, id));
 }
 
 /** Moves a public request to any status (AC-X-21): "answered" once the team wrote back. */
@@ -295,16 +308,12 @@ export async function setPublicStatusAsOperator(
   const id = parsePublicId(requestId);
   const { status } = OperatorPublicChangeSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'public.status', targetId: id },
-    async (tx) => {
-      const request = await findPublicSupportRequest(tx, id, { lock: true });
-      if (request === undefined) throw new SupportThreadNotFoundError();
-      if (request.status !== status) await setPublicSupportRequestStatus(tx, id, status, now);
-      return toPublicRequest(tx, id);
-    },
-  );
+  return asOperator(db, operator, 'public.status', id, async (tx) => {
+    const request = await findPublicSupportRequest(tx, id, { lock: true });
+    if (request === undefined) throw new SupportThreadNotFoundError();
+    if (request.status !== status) await setPublicSupportRequestStatus(tx, id, status, now);
+    return toPublicRequest(tx, id);
+  });
 }
 
 /** A note of the team's on a public request (AC-X-21). */
@@ -318,37 +327,48 @@ export async function noteOnPublicRequest(
   const id = parsePublicId(requestId);
   const { note } = SupportNoteInputSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withOperator(
-    db,
-    { operatorUserId: operator.userId, action: 'public.note', targetId: id },
-    async (tx) => {
-      if ((await findPublicSupportRequest(tx, id)) === undefined) {
-        throw new SupportThreadNotFoundError();
-      }
-      await insertSupportNote(tx, {
-        publicRequestId: id,
-        authorUserId: operator.userId,
-        body: note,
-        now,
-      });
-      return toPublicRequest(tx, id);
-    },
-  );
+  return asOperator(db, operator, 'public.note', id, async (tx) => {
+    if ((await findPublicSupportRequest(tx, id)) === undefined) {
+      throw new SupportThreadNotFoundError();
+    }
+    await insertSupportNote(tx, {
+      publicRequestId: id,
+      authorUserId: operator.userId,
+      body: note,
+      now,
+    });
+    return toPublicRequest(tx, id);
+  });
 }
 
 /** Finds the thread across businesses, then binds the transaction to its business. */
-async function bindToThread(tx: TenantTx, id: string): Promise<TenantId> {
+async function bindToThread(tx: TenantTx, id: string): Promise<OperatorThreadRecord> {
   const thread = await findOperatorThread(tx, id);
   if (thread === undefined) throw new SupportThreadNotFoundError();
-  const tenantId = thread.tenantId as TenantId;
-  await setTransactionTenant(tx, tenantId);
-  return tenantId;
+  await setTransactionTenant(tx, thread.tenantId as TenantId);
+  return thread;
+}
+
+/**
+ * Whether opening the thread is news for the business: never seen, a message since, or an hour
+ * since. The access log has every open either way.
+ */
+export function seenAgain(
+  thread: { pepperSeenAt: Date | null; lastMessageAt: Date },
+  now: Date,
+): boolean {
+  const seen = thread.pepperSeenAt;
+  return (
+    seen === null ||
+    seen.getTime() < thread.lastMessageAt.getTime() ||
+    now.getTime() - seen.getTime() >= SEEN_AGAIN_MS
+  );
 }
 
 async function toOperatorThread(
   tx: TenantTx,
   id: string,
-  tenantId: TenantId,
+  tenantId: string,
 ): Promise<OperatorThread> {
   const thread = await findOperatorThread(tx, id);
   if (thread === undefined) throw new SupportThreadNotFoundError();

@@ -136,16 +136,6 @@ export async function withJobScan<T>(
 }
 
 /** What an operator transaction is for (S59.2, ADR-0062), as its access log row names it. */
-export type OperatorAction =
-  | 'inbox.read'
-  | 'thread.read'
-  | 'thread.reply'
-  | 'thread.note'
-  | 'thread.status'
-  | 'public.read'
-  | 'public.note'
-  | 'public.status';
-
 const OperatorActionSchema = z.enum([
   'inbox.read',
   'thread.read',
@@ -156,6 +146,7 @@ const OperatorActionSchema = z.enum([
   'public.note',
   'public.status',
 ]);
+export type OperatorAction = z.infer<typeof OperatorActionSchema>;
 
 /**
  * Runs `work` as a Pepper operator (S59.2, ADR-0062): `begin_operator_access` first checks the

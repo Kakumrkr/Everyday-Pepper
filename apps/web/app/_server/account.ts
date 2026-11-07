@@ -19,6 +19,7 @@ import {
 } from '../../lib/account';
 import { loadCalendarDay, type CalendarDay } from '../../lib/calendar-data';
 import { loadWebServerEnv } from '../../lib/env';
+import { opsAccessOf, type OpsAccess } from '../../lib/ops';
 
 async function callOptions() {
   const { API_INTERNAL_URL } = loadWebServerEnv(process.env);
@@ -89,3 +90,15 @@ export const currentSupportUnread = cache(async (): Promise<number | null> => {
     (await loadJson('/v1/support/unread', SupportUnreadSchema, await callOptions()))?.unread ?? null
   );
 });
+
+/** What `/ops` may show this account (S59.2, AC-X-19), from the api's own check. */
+export async function currentOpsAccess(): Promise<OpsAccess> {
+  const { baseUrl, cookie } = await callOptions();
+  const response = await fetch(new URL('/v1/ops/me', baseUrl), {
+    headers: cookie === null ? {} : { cookie },
+    cache: 'no-store',
+    signal: AbortSignal.timeout(5_000),
+  }).catch(() => null);
+  if (response === null) return opsAccessOf(0, undefined);
+  return opsAccessOf(response.status, await response.json().catch(() => undefined));
+}

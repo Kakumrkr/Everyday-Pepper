@@ -13,11 +13,9 @@ import { supportTime } from '../../../lib/support';
 import { Notice } from '../form-parts';
 import { OpsNotes } from './ops-notes';
 
-const STATUSES: readonly { value: PublicSupportStatus; label: string }[] = [
-  { value: 'open', label: 'Open' },
-  { value: 'answered', label: 'Answered' },
-  { value: 'solved', label: 'Solved' },
-];
+const STATUSES: readonly { value: PublicSupportStatus; label: string }[] = Object.entries(
+  OPS_PUBLIC_STATUS,
+).map(([value, { label }]) => ({ value: value as PublicSupportStatus, label }));
 
 function isStatus(value: string): value is PublicSupportStatus {
   return STATUSES.some((status) => status.value === value);

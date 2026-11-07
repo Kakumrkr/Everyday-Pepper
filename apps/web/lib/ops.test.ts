@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { OPS_PATHS, opsView, replyByEmailHref, waitedFor, waitedLong, waitingWords } from './ops';
+import {
+  OPS_PATHS,
+  opsAccessOf,
+  opsView,
+  replyByEmailHref,
+  waitedFor,
+  waitedLong,
+  waitingWords,
+} from './ops';
 
 const NOW = Date.parse('2026-11-09T15:00:00Z');
 const ago = (ms: number) => new Date(NOW - ms).toISOString();
@@ -61,5 +69,22 @@ describe('replyByEmailHref (AC-X-21)', () => {
     expect(replyByEmailHref('mo+x@out.test', 'PEP-ABCDEF')).toBe(
       'mailto:mo%2Bx@out.test?subject=Re%3A%20%5BPEP-ABCDEF%5D%20Your%20Pepper%20support%20request',
     );
+  });
+});
+
+describe('opsAccessOf (AC-X-19)', () => {
+  it('reads the api’s answer', () => {
+    expect(opsAccessOf(200, { operator: true, name: 'Olive' })).toEqual({
+      state: 'operator',
+      me: { operator: true, name: 'Olive' },
+    });
+    expect(opsAccessOf(200, { name: 'Olive' })).toEqual({ state: 'unavailable' });
+    expect(opsAccessOf(403, { code: 'mfa_required', message: 'x' })).toEqual({
+      state: 'mfa_required',
+    });
+    expect(opsAccessOf(403, { code: 'forbidden', message: 'x' })).toEqual({ state: 'refused' });
+    expect(opsAccessOf(401, undefined)).toEqual({ state: 'refused' });
+    expect(opsAccessOf(502, undefined)).toEqual({ state: 'unavailable' });
+    expect(opsAccessOf(0, undefined)).toEqual({ state: 'unavailable' });
   });
 });

@@ -30,7 +30,6 @@ import {
   findCurrentTenant,
   findMembership,
   findSupportThread,
-  findSupportThreadSeenAt,
   hasActivation,
   insertPublicSupportRequest,
   insertSupportThread,
@@ -578,6 +577,6 @@ async function toThread(
       createdAt: message.createdAt.toISOString(),
     })),
     replyTo: requester?.email ?? null,
-    seenByPepperAt: (await findSupportThreadSeenAt(tx, row.id))?.toISOString() ?? null,
+    seenByPepperAt: row.pepperSeenAt?.toISOString() ?? null,
   });
 }
