@@ -1,5 +1,10 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { SupportCreatedSchema, SupportSavedReplyListSchema } from '@pepper/contracts';
+import { solidColorPhoto } from '@pepper/storage';
+import {
+  SupportCreatedSchema,
+  SupportSavedReplyListSchema,
+  SupportScreenshotSchema,
+} from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import {
   anotherPerson,
@@ -190,3 +195,63 @@ async function savedReplyId(page: Page, title: string): Promise<string> {
   if (found === undefined) throw new Error(`no saved reply "${title}"`);
   return found.id;
 }
+
+test('the console’s screenshots (AC-X-30): counted in the inbox row, shown in the thread', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(180_000);
+  await onboardOwner(page, { business: `Fig ${unique('shots')}` });
+  await page.goto('/more');
+  const origin = new URL(baseURL ?? 'http://localhost:3000').origin;
+  const shotIds: string[] = [];
+  for (const size of [
+    [1170, 2532],
+    [800, 600],
+  ] as const) {
+    const uploaded = await page.request.post('/v1/support/screenshots', {
+      data: await solidColorPhoto(size[0], size[1], 'png'),
+      headers: { origin, 'content-type': 'image/png' },
+    });
+    expect(uploaded.status()).toBe(201);
+    shotIds.push(SupportScreenshotSchema.parse(await uploaded.json()).id);
+  }
+  const created = await callApi(
+    page,
+    'POST',
+    '/v1/support/threads',
+    { kind: 'problem', message: 'The week view is blank', screenshotIds: shotIds },
+    SupportCreatedSchema,
+  );
+
+  const ops = await anotherPerson(browser, baseURL);
+  const operator = await onboardOwner(ops, { business: `Pepper HQ ${unique('team')}` });
+  makeOperator(operator.email);
+  await ops.goto('/ops');
+  const row = ops
+    .getByRole('link', { name: /The week view is blank/ })
+    .filter({ hasText: created.reference });
+  await expect(row.getByTestId('ops-screenshots')).toHaveText('2 screenshots');
+  await row.click();
+  const images = ops.getByTestId('message-screenshots').getByRole('img');
+  await expect(images).toHaveCount(2);
+  await expect(images.first()).toHaveAttribute(
+    'alt',
+    /^Screenshot 1 of 2 from .+, opens full size$/,
+  );
+  await expect
+    .poll(() => images.first().evaluate((img) => (img as HTMLImageElement).naturalWidth), {
+      timeout: 15_000,
+    })
+    .toBeGreaterThan(0);
+  const full = await ops.request.get(
+    (await ops.getByTestId('message-screenshots').getByRole('link').first().getAttribute('href')) ??
+      '',
+  );
+  expect(full.status()).toBe(200);
+  expect(full.headers()['cache-control']).toBe('private, no-store');
+  // A member can't use the console's address.
+  expect((await page.request.get(`/v1/ops/screenshots/${shotIds[0] ?? ''}`)).status()).toBe(403);
+  await scanned(ops, 'ops thread with screenshots');
+});

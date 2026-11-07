@@ -1,5 +1,6 @@
 import { SupportThreadListSchema } from '@pepper/contracts';
 import { Badge, buttonStyle, EmptyState, List, ListRow } from '@pepper/ui';
+import { screenshotCountLabel } from '../../../lib/support-screenshots';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -94,6 +95,11 @@ export default async function SupportRequestsPage() {
                     <span className="tabular-nums">{thread.reference}</span>
                     <span>· {SUPPORT_KIND_LABEL[thread.kind]}</span>
                     {by === null ? null : <span>· {by}</span>}
+                    {screenshotCountLabel(thread.screenshotCount) === null ? null : (
+                      <span data-testid="support-row-screenshots">
+                        · {screenshotCountLabel(thread.screenshotCount)}
+                      </span>
+                    )}
                     <span className="tabular-nums">
                       · {supportTime(thread.lastMessageAt, timeZone, now)}
                     </span>
