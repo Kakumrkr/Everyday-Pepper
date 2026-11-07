@@ -27,6 +27,7 @@ export * from './services/memory.js';
 export * from './services/outbox.js';
 export * from './services/push.js';
 export * from './services/support.js';
+export * from './services/operator-support.js';
 export * from './services/tasks.js';
 export * from './services/team.js';
 export * from './services/usage.js';

@@ -30,6 +30,7 @@ import {
   findCurrentTenant,
   findMembership,
   findSupportThread,
+  findSupportThreadSeenAt,
   hasActivation,
   insertPublicSupportRequest,
   insertSupportThread,
@@ -307,57 +308,72 @@ export async function answerSupportThread(
   const id = parseThreadId(threadId);
   const { message } = SupportReplyInputSchema.parse(input);
   const now = (options.clock ?? systemClock).now();
-  return withTenant(db, tenantId, async (tx) => {
-    const thread = await lockSupportThread(tx, id);
-    if (thread === undefined) throw new SupportThreadNotFoundError();
-    const written = await appendSupportMessage(tx, {
-      threadId: id,
-      author: { kind: 'pepper' },
-      body: message,
-      status: 'pepper_replied',
-      now,
-    });
-    await appendAuditEntry(tx, {
-      actor: { kind: 'system' },
-      change: {
-        action: 'support_thread.replied',
-        entity: { type: 'support_thread', id },
-        before: { status: thread.status },
-        after: { status: 'pepper_replied' },
-      },
-    });
-    const row = await findSupportThread(tx, id, null);
-    const openerId = row?.openedByUserId ?? null;
-    const opener =
-      openerId === null
-        ? undefined
-        : (await listTenantMembers(tx)).find((member) => member.userId === openerId);
-    if (opener !== undefined) {
-      const firstName = opener.name.trim().split(/\s+/)[0] ?? '';
-      const link = `${options.baseUrl}/support/${id}`;
-      await queueEmail(
-        tx,
-        {
-          to: opener.email,
-          subject: `Pepper replied to ${thread.reference}`,
-          text: [
-            firstName === '' ? 'Hi,' : `Hi ${firstName},`,
-            '',
-            `The Pepper team answered your request ${thread.reference}:`,
-            '',
-            message,
-            '',
-            `Read it and reply in the app: ${link}`,
-            '',
-            '— The Pepper team',
-          ].join('\n'),
-          ...(options.supportEmail !== null && { replyTo: options.supportEmail }),
-        },
-        { key: options.outboxKey, dedupeKey: `support.answered:${written.id}`, now },
-      );
-    }
-    return { messageId: written.id };
+  return withTenant(db, tenantId, (tx) =>
+    answerInThread(tx, id, message, { kind: 'system' }, options, now),
+  );
+}
+
+/**
+ * The team's answer inside a transaction bound to the thread's business: by the console
+ * (`operator`, S59.2) or a job (`system`).
+ */
+export async function answerInThread(
+  tx: TenantTx,
+  id: string,
+  message: string,
+  actor: { kind: 'system' } | { kind: 'operator' },
+  options: SupportOptions,
+  now: Date,
+): Promise<{ messageId: string }> {
+  const thread = await lockSupportThread(tx, id);
+  if (thread === undefined) throw new SupportThreadNotFoundError();
+  const written = await appendSupportMessage(tx, {
+    threadId: id,
+    author: { kind: 'pepper' },
+    body: message,
+    status: 'pepper_replied',
+    now,
   });
+  await appendAuditEntry(tx, {
+    actor,
+    change: {
+      action: 'support_thread.replied',
+      entity: { type: 'support_thread', id },
+      before: { status: thread.status },
+      after: { status: 'pepper_replied' },
+    },
+  });
+  const row = await findSupportThread(tx, id, null);
+  const openerId = row?.openedByUserId ?? null;
+  const opener =
+    openerId === null
+      ? undefined
+      : (await listTenantMembers(tx)).find((member) => member.userId === openerId);
+  if (opener !== undefined) {
+    const firstName = opener.name.trim().split(/\s+/)[0] ?? '';
+    const link = `${options.baseUrl}/support/${id}`;
+    await queueEmail(
+      tx,
+      {
+        to: opener.email,
+        subject: `Pepper replied to ${thread.reference}`,
+        text: [
+          firstName === '' ? 'Hi,' : `Hi ${firstName},`,
+          '',
+          `The Pepper team answered your request ${thread.reference}:`,
+          '',
+          message,
+          '',
+          `Read it and reply in the app: ${link}`,
+          '',
+          '— The Pepper team',
+        ].join('\n'),
+        ...(options.supportEmail !== null && { replyTo: options.supportEmail }),
+      },
+      { key: options.outboxKey, dedupeKey: `support.answered:${written.id}`, now },
+    );
+  }
+  return { messageId: written.id };
 }
 
 /**
@@ -562,5 +578,6 @@ async function toThread(
       createdAt: message.createdAt.toISOString(),
     })),
     replyTo: requester?.email ?? null,
+    seenByPepperAt: (await findSupportThreadSeenAt(tx, row.id))?.toISOString() ?? null,
   });
 }
