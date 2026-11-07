@@ -13,7 +13,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 3. Core: saved replies, rating, housekeeping pass (`support-housekeeping.int.test.ts` 8/8; unit 1495).
 - [x] 4. Worker `Support job` (5 min, `SUPPORT_EMAIL`, `SUPPORT_POLL_MS`); api `PUT …/rating`, `/v1/ops/replies` (api support 32/32).
 - [x] 5. Web: inbox top-up, `/ops/replies` + picker, "Did this help?", auto-close copy (ops+support 3/3, screens' support test 3/3 twice).
-Next: `/session-close` (review, `pnpm check`, affected integration, PR).
+- [x] Close step 1: `/code-review` 10 findings, 9 fixed (commit 7f8d5dc), 1 left (a `replies.read` access row per opened thread: correct and cheap); `/security-review` nothing at confidence ≥ 8. After the fixes: db operator.int 20/20, core housekeeping+support+operator-support 30/30.
+- [x] `pnpm check`: format, lint, typecheck green; db unit coverage was 79.76% functions → schema FK test added (d698b39), db coverage 82.65%. Drafted: ADR-0062 "Part 2" and the decisions.md S59.2.2 entry (committed).
+- Next (resume here after /compact): (1) `pnpm test:coverage && pnpm build` (the rest of `pnpm check`; the run was interrupted); (2) `TURBO_SCM_BASE=origin/main pnpm turbo run test:integration --affected`; (3) e2e stack restart (`.claude/skills/session-close/e2e-stack.sh start <scratchpad>`), `ops.spec.ts`, `support.spec.ts` (mobile) and `screens.spec.ts -g "help centre and support"` (desktop): the web changed after the last e2e run (append + length check, stale reply); (4) open the PR, subscribe; while CI runs write STATUS "Last sessions", the session-log entry (retro: top-up for S59.2.3), Recent decisions line; push docs after green; merge.
+- Branch pushed: `claude/funny-edison-lag5he` (no PR yet).
 ## Last sessions
 - **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md), [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0068 (grants, access log, notes, `operator_*` policies needing the access row in the same transaction), `operator` script, `/v1/ops/*` (grant + MFA), `/ops` inbox oldest first with the wait in words, replies, notes, every status, "Seen by Pepper"; AC-X-19…22.
