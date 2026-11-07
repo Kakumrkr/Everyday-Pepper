@@ -8,19 +8,28 @@ import {
   OperatorThreadSchema,
   SupportNoteInputSchema,
   SupportReplyInputSchema,
+  SupportSavedReplyInputSchema,
+  SupportSavedReplyListSchema,
+  SupportSavedReplySchema,
   UserIdSchema,
   type OperatorInbox,
   type OperatorMe,
   type OperatorPublicRequest,
   type OperatorThread,
+  type SupportSavedReply,
+  type SupportSavedReplyList,
 } from '@pepper/contracts';
 import {
+  addSavedReply,
+  editSavedReply,
   isOperator,
+  listSavedReplies,
   noteOnPublicRequest,
   noteOnThread,
   readOperatorInbox,
   readOperatorThread,
   readPublicRequest,
+  removeSavedReply,
   replyAsOperator,
   setPublicStatusAsOperator,
   setThreadStatusAsOperator,
@@ -31,13 +40,16 @@ import { DATABASE } from '@pepper/runtime';
 import {
   Body,
   Controller,
+  Delete,
   ForbiddenException,
   Get,
+  HttpCode,
   Inject,
   Injectable,
   Param,
   Patch,
   Post,
+  Put,
   Query,
   UseGuards,
   type CanActivate,
@@ -201,6 +213,51 @@ export class OpsController {
         noteOnPublicRequest(this.db, operatorOf(session), id, input, this.options),
       ),
     );
+  }
+
+  /** The team's saved replies (S59.2.2, AC-X-23). */
+  @Get('replies')
+  async replies(@CurrentSession() session: AuthSession): Promise<SupportSavedReplyList> {
+    return SupportSavedReplyListSchema.parse(
+      await answering(() => listSavedReplies(this.db, operatorOf(session))),
+    );
+  }
+
+  /** 201 the saved reply; 409 `saved_replies_full` at 100. */
+  @Post('replies')
+  async addReply(
+    @CurrentSession() session: AuthSession,
+    @Body() body: unknown,
+  ): Promise<SupportSavedReply> {
+    const input = parseBody(SupportSavedReplyInputSchema, body);
+    return SupportSavedReplySchema.parse(
+      await answering(() => addSavedReply(this.db, operatorOf(session), input, this.options)),
+    );
+  }
+
+  /** 404 `saved_reply_not_found`. */
+  @Put('replies/:id')
+  async editReply(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<SupportSavedReply> {
+    const { id } = parseBody(IdParamsSchema, params);
+    const input = parseBody(SupportSavedReplyInputSchema, body);
+    return SupportSavedReplySchema.parse(
+      await answering(() => editSavedReply(this.db, operatorOf(session), id, input)),
+    );
+  }
+
+  /** 204; 404 `saved_reply_not_found`. */
+  @Delete('replies/:id')
+  @HttpCode(204)
+  async removeReply(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+  ): Promise<void> {
+    const { id } = parseBody(IdParamsSchema, params);
+    await answering(() => removeSavedReply(this.db, operatorOf(session), id));
   }
 
   @Patch('requests/:id')

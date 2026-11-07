@@ -1,7 +1,12 @@
 import 'reflect-metadata';
 import type { IncomingHttpHeaders, Server } from 'node:http';
 import { ApiErrorSchema, TenantIdSchema, UserIdSchema } from '@pepper/contracts';
-import { OperatorAccessRefusedError, SupportThreadNotFoundError } from '@pepper/core';
+import {
+  OperatorAccessRefusedError,
+  SavedRepliesFullError,
+  SavedReplyNotFoundError,
+  SupportThreadNotFoundError,
+} from '@pepper/core';
 import type * as Core from '@pepper/core';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
@@ -28,6 +33,10 @@ const core = vi.hoisted(() => ({
   readPublicRequest: vi.fn(),
   noteOnPublicRequest: vi.fn(),
   setPublicStatusAsOperator: vi.fn(),
+  listSavedReplies: vi.fn(),
+  addSavedReply: vi.fn(),
+  editSavedReply: vi.fn(),
+  removeSavedReply: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({ ...(await original<typeof Core>()), ...core }));
 
@@ -48,6 +57,8 @@ const THREAD = {
   notes: [],
   createdAt: AT,
   lastMessageAt: AT,
+  solvedBy: null,
+  rating: null,
 };
 const PUBLIC = {
   id: ID,
@@ -61,6 +72,8 @@ const PUBLIC = {
   notes: [],
   createdAt: AT,
 };
+
+const REPLY = { id: ID, title: 'Calendar', body: 'Hi {first name}', updatedAt: AT };
 
 class FakeAuth extends AuthService {
   session: AuthSession = {
@@ -132,11 +145,15 @@ beforeEach(() => {
   core.readPublicRequest.mockResolvedValue(PUBLIC);
   core.noteOnPublicRequest.mockResolvedValue(PUBLIC);
   core.setPublicStatusAsOperator.mockResolvedValue({ ...PUBLIC, status: 'answered' });
+  core.listSavedReplies.mockResolvedValue({ replies: [REPLY] });
+  core.addSavedReply.mockResolvedValue(REPLY);
+  core.editSavedReply.mockResolvedValue(REPLY);
+  core.removeSavedReply.mockResolvedValue(undefined);
 });
 
 const operator = { userId: USER };
 const get = (path: string) => request(server).get(path).set('Cookie', 'signed-in');
-const send = (method: 'post' | 'patch', path: string, body: object) =>
+const send = (method: 'post' | 'patch' | 'put', path: string, body: object) =>
   request(server)[method](path).set('Cookie', 'signed-in').set('Origin', ORIGIN).send(body);
 
 describe('who may open the console (AC-X-19)', () => {
@@ -251,5 +268,54 @@ describe('the routes (AC-X-20/21)', () => {
     const response = await get('/v1/ops/inbox');
     expect(response.status).toBe(403);
     expect(ApiErrorSchema.parse(response.body).code).toBe('forbidden');
+  });
+});
+
+describe('saved replies (S59.2.2, AC-X-23)', () => {
+  it('lists, adds, edits and deletes, as the session’s operator', async () => {
+    expect((await get('/v1/ops/replies')).body).toEqual({ replies: [REPLY] });
+    expect(core.listSavedReplies).toHaveBeenCalledWith({}, operator);
+    const input = { title: 'Calendar', body: 'Hi {first name}' };
+    expect((await send('post', '/v1/ops/replies', input)).status).toBe(201);
+    expect(core.addSavedReply).toHaveBeenCalledWith({}, operator, input, OPTIONS);
+    expect((await send('put', `/v1/ops/replies/${ID}`, input)).status).toBe(200);
+    expect(core.editSavedReply).toHaveBeenCalledWith({}, operator, ID, input);
+    const removed = await request(server)
+      .delete(`/v1/ops/replies/${ID}`)
+      .set('Cookie', 'signed-in')
+      .set('Origin', ORIGIN);
+    expect(removed.status).toBe(204);
+    expect(core.removeSavedReply).toHaveBeenCalledWith({}, operator, ID);
+  });
+
+  it('are refused to anyone but an operator', async () => {
+    core.isOperator.mockResolvedValue(false);
+    expect((await get('/v1/ops/replies')).status).toBe(403);
+    expect(core.listSavedReplies).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ title: '', body: 'x' }],
+    [{ title: 'x'.repeat(81), body: 'x' }],
+    [{ title: 'x', body: '' }],
+    [{ title: 'x', body: 'y', updatedBy: USER }],
+  ])('400 for %j', async (body) => {
+    expect((await send('post', '/v1/ops/replies', body)).status).toBe(400);
+    expect(core.addSavedReply).not.toHaveBeenCalled();
+  });
+
+  it('409 saved_replies_full and 404 saved_reply_not_found', async () => {
+    core.addSavedReply.mockRejectedValue(new SavedRepliesFullError());
+    const full = await send('post', '/v1/ops/replies', { title: 'x', body: 'y' });
+    expect([full.status, ApiErrorSchema.parse(full.body).code]).toEqual([
+      409,
+      'saved_replies_full',
+    ]);
+    core.editSavedReply.mockRejectedValue(new SavedReplyNotFoundError());
+    const missing = await send('put', `/v1/ops/replies/${ID}`, { title: 'x', body: 'y' });
+    expect([missing.status, ApiErrorSchema.parse(missing.body).code]).toEqual([
+      404,
+      'saved_reply_not_found',
+    ]);
   });
 });

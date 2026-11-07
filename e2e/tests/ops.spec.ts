@@ -1,5 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
-import { SupportCreatedSchema } from '@pepper/contracts';
+import { SupportCreatedSchema, SupportSavedReplyListSchema } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import {
   anotherPerson,
@@ -16,7 +16,9 @@ import { expectTapTargets } from './tap-targets.js';
 // open it; an operator finds the owner's request in the inbox with how long it has waited,
 // opens it (the owner sees "Seen by Pepper"), notes, replies and solves it, and answers a
 // signed-out request by email. Every status and the access log are in core's
-// operator-support.int.test.ts; the database rules in db's operator.int.test.ts.
+// operator-support.int.test.ts; the database rules in db's operator.int.test.ts. S59.2.2
+// (AC-X-23/26): the reply starts from a saved reply, and the owner says whether it helped,
+// which the console shows; the job's rules are in core's support-housekeeping.int.test.ts.
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -76,10 +78,14 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
   // AC-X-20: the inbox, the longest waiting first, with the wait in words.
   await ops.goto('/ops');
   await expect(ops.getByRole('heading', { name: 'Inbox', level: 1 })).toBeVisible();
-  const row = ops.getByRole('link', { name: /Reminders didn’t go out this morning/ });
+  const row = ops
+    .getByRole('link', { name: /Reminders didn’t go out this morning/ })
+    .filter({ hasText: created.reference });
   await expect(row).toContainText(created.reference);
   await expect(row).toContainText(/Just in|\d+ min waiting/);
-  const publicRow = ops.getByRole('link', { name: /I can’t sign in at all/ });
+  const publicRow = ops
+    .getByRole('link', { name: /I can’t sign in at all/ })
+    .filter({ hasText: publicReference });
   await expect(publicRow).toContainText('Signed-out');
   const rows = await ops.getByTestId('ops-waited').count();
   expect(rows).toBeGreaterThanOrEqual(2);
@@ -98,25 +104,63 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
   await ops.getByLabel('Add a note').fill('Their reminder job ran; check the SMS consent');
   await ops.getByRole('button', { name: 'Save note' }).click();
   await expect(ops.getByText('Their reminder job ran; check the SMS consent')).toBeVisible();
+
+  // AC-X-23: a saved reply, added once, starts the answer with the owner's first name.
+  await ops.getByRole('link', { name: 'Saved replies' }).click();
+  await expect(ops.getByRole('heading', { name: 'Saved replies', level: 1 })).toBeVisible();
+  await (await hydrated(ops.getByRole('button', { name: 'Save reply' }))).click();
+  await expect(ops.getByText('Give it a title.')).toBeVisible();
+  const title = `Reminders fixed ${unique('r')}`;
+  await ops.getByLabel('Title', { exact: true }).fill(title);
   await ops
-    .getByLabel('Reply to the business')
-    .fill('Fixed: reminders go out again from tomorrow.');
+    .getByLabel('Reply', { exact: true })
+    .fill('Hi {first name}, fixed: reminders go out again from tomorrow.');
+  await ops.getByRole('button', { name: 'Save reply' }).click();
+  await expect(ops.getByRole('status')).toContainText(`Saved “${title}”.`);
+  await expect(ops.getByRole('heading', { name: title, level: 2 })).toBeVisible();
+  await scanned(ops, 'ops saved replies');
+  await ops.goBack();
+  await ops.goto(`/ops/threads/${threadId}`);
+  await (await hydrated(ops.getByLabel('Use a saved reply'))).selectOption({ label: title });
+  await expect(ops.getByLabel('Reply to the business')).toHaveValue(
+    'Hi Ana, fixed: reminders go out again from tomorrow.',
+  );
   await ops.getByRole('button', { name: 'Send reply' }).click();
-  await expect(ops.getByText('Fixed: reminders go out again from tomorrow.')).toBeVisible();
+  await expect(ops.getByText('Hi Ana, fixed: reminders go out again from tomorrow.')).toBeVisible();
   await expect(ops.getByText('We replied').first()).toBeVisible();
   await ops.getByRole('radio', { name: 'Solved' }).click();
   await expect(ops.getByRole('radio', { name: 'Solved' })).toHaveAttribute('data-state', 'on');
 
   // The owner sees the team's answer and that Pepper saw it; never the note.
   await page.goto(`/support/${threadId}`);
-  await expect(page.getByText('Fixed: reminders go out again from tomorrow.')).toBeVisible();
+  await expect(
+    page.getByText('Hi Ana, fixed: reminders go out again from tomorrow.'),
+  ).toBeVisible();
   await expect(page.getByTestId('support-thread-seen')).toContainText('Seen by Pepper');
   await expect(page.getByText('Solved', { exact: true })).toBeVisible();
   await expect(page.getByText(/check the SMS consent/)).toHaveCount(0);
 
+  // AC-X-26: the owner who asked says whether it helped; the console shows it.
+  const helpful = page.getByRole('button', { name: 'Helpful', exact: true });
+  await expect(page.getByText('Did this help?')).toBeVisible();
+  await scanned(page, 'support thread, solved');
+  await (await hydrated(helpful)).click();
+  await expect(helpful).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('Thanks for telling us. You can change it.')).toBeVisible();
+  await ops.goto('/ops?view=solved');
+  // Every business's solved requests are listed: this one by its reference.
+  await expect(
+    ops
+      .getByRole('link', { name: /Reminders didn’t go out this morning/ })
+      .filter({ hasText: created.reference }),
+  ).toContainText('Helpful');
+
   // A signed-out request: reply by email from the team's inbox, then mark it answered.
   await ops.goto('/ops');
-  await ops.getByRole('link', { name: /I can’t sign in at all/ }).click();
+  await ops
+    .getByRole('link', { name: /I can’t sign in at all/ })
+    .filter({ hasText: publicReference })
+    .click();
   await expect(ops.getByText(publicReference)).toBeVisible();
   const mail = ops.getByRole('link', { name: 'Reply by email' });
   await expect(mail).toHaveAttribute(
@@ -127,8 +171,22 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
   await (await hydrated(ops.getByRole('radio', { name: 'Answered' }))).click();
   await expect(ops.getByRole('radio', { name: 'Answered' })).toHaveAttribute('data-state', 'on');
   await ops.goto('/ops?view=answered');
-  await expect(ops.getByRole('link', { name: /I can’t sign in at all/ })).toContainText(
-    /ago|Just in/,
-  );
+  await expect(
+    ops.getByRole('link', { name: /I can’t sign in at all/ }).filter({ hasText: publicReference }),
+  ).toContainText(/ago|Just in/);
+  // Leaves the team's list as it found it (saved replies are shared, at most 100).
+  const removed = await ops.request.delete(`/v1/ops/replies/${await savedReplyId(ops, title)}`, {
+    headers: { origin: new URL(baseURL ?? 'http://localhost:3000').origin },
+  });
+  expect(removed.status()).toBe(204);
   await ops.context().close();
 });
+
+async function savedReplyId(page: Page, title: string): Promise<string> {
+  const listed = SupportSavedReplyListSchema.parse(
+    await (await page.request.get('/v1/ops/replies')).json(),
+  );
+  const found = listed.replies.find((reply) => reply.title === title);
+  if (found === undefined) throw new Error(`no saved reply "${title}"`);
+  return found.id;
+}

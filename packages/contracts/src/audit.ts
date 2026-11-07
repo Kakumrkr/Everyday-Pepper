@@ -17,7 +17,7 @@ import {
 import { BusinessPhotoKindSchema } from './photos.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { RuleSchema } from './rules.js';
-import { SupportKindSchema, SupportStatusSchema } from './support.js';
+import { SupportKindSchema, SupportRatingSchema, SupportStatusSchema } from './support.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
 import {
   ActionProposalIdSchema,
@@ -671,6 +671,15 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('support_thread'),
       before: z.object({ status: SupportStatusSchema }).strict(),
       after: z.object({ status: SupportStatusSchema }).strict(),
+    })
+    .strict(),
+  // The opener's "Did this help?" (S59.2.2, AC-X-26): the answer only.
+  z
+    .object({
+      action: z.literal('support_thread.rated'),
+      entity: entity('support_thread'),
+      before: z.object({ rating: SupportRatingSchema.nullable() }).strict(),
+      after: z.object({ rating: SupportRatingSchema }).strict(),
     })
     .strict(),
 ]);

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  fillSavedReply,
   OPS_PATHS,
+  overdueNote,
   opsAccessOf,
   opsView,
   replyByEmailHref,
@@ -86,5 +88,30 @@ describe('opsAccessOf (AC-X-19)', () => {
     expect(opsAccessOf(401, undefined)).toEqual({ state: 'refused' });
     expect(opsAccessOf(502, undefined)).toEqual({ state: 'unavailable' });
     expect(opsAccessOf(0, undefined)).toEqual({ state: 'unavailable' });
+  });
+});
+
+describe('overdueNote (S59.2.2, AC-X-25)', () => {
+  it('says it in words from 4 h, in the waiting view only', () => {
+    expect(overdueNote('waiting', ago(4 * 60 * MIN - 1), NOW)).toBeNull();
+    expect(overdueNote('waiting', ago(4 * 60 * MIN), NOW)).toBe('Over 4 h: answer next');
+    expect(overdueNote('waiting', ago(3 * 24 * 60 * MIN), NOW)).toBe('Over 4 h: answer next');
+    expect(overdueNote('answered', ago(5 * 60 * MIN), NOW)).toBeNull();
+    expect(overdueNote('solved', ago(5 * 60 * MIN), NOW)).toBeNull();
+  });
+});
+
+describe('fillSavedReply (S59.2.2, AC-X-23)', () => {
+  it('fills every {first name} with the requester’s first name, or "there"', () => {
+    expect(fillSavedReply('Hi {first name}, thanks {first name}.', 'Ana Ruiz')).toBe(
+      'Hi Ana, thanks Ana.',
+    );
+    expect(fillSavedReply('Hi {first name},', null)).toBe('Hi there,');
+    expect(fillSavedReply('Hi {first name},', '  ')).toBe('Hi there,');
+    expect(fillSavedReply('No placeholder.', 'Ana')).toBe('No placeholder.');
+  });
+
+  it('has the saved replies’ page', () => {
+    expect(OPS_PATHS.replies).toBe('/ops/replies');
   });
 });

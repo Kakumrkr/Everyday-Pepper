@@ -55,7 +55,7 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
 function jobScan(
-  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports',
+  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports' | 'support',
 ): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
@@ -2732,6 +2732,15 @@ export const supportThreads = pgTable(
     solvedAt: timestamp('solved_at', { withTimezone: true }),
     /** When a Pepper operator last opened it (S59.2, AC-X-22): "Seen by Pepper". */
     pepperSeenAt: timestamp('pepper_seen_at', { withTimezone: true }),
+    /** When its status last changed (S59.2.2): the 7 quiet days count from here or the last message. */
+    statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
+    /** Who solved it (S59.2.2, AC-X-24): `member`, `pepper` (an operator) or `auto` (7 quiet days). */
+    solvedBy: text('solved_by'),
+    /** The opener's answer to "Did this help?" (S59.2.2, AC-X-26); cleared when it reopens. */
+    rating: text('rating'),
+    ratedAt: timestamp('rated_at', { withTimezone: true }),
+    /** When the team's address was reminded of its current wait (S59.2.2, AC-X-25). */
+    overdueRemindedAt: timestamp('overdue_reminded_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -2752,6 +2761,15 @@ export const supportThreads = pgTable(
       sql`(${table.status} = 'solved') = (${table.solvedAt} IS NOT NULL)`,
     ),
     check(
+      'support_threads_solved_by',
+      sql`${table.solvedBy} IS NULL OR (${table.status} = 'solved' AND ${table.solvedBy} IN ('member', 'pepper', 'auto'))`,
+    ),
+    check(
+      'support_threads_rating',
+      sql`(${table.rating} IS NULL) = (${table.ratedAt} IS NULL) AND (${table.rating} IS NULL OR (${table.status} = 'solved' AND ${table.rating} IN ('helpful', 'not_helpful')))`,
+    ),
+    index('support_threads_status_idx').on(table.status, table.lastMessageAt),
+    check(
       'support_threads_context_size',
       sql`jsonb_typeof(${table.context}) = 'object' AND length(${table.context}::text) <= 2000`,
     ),
@@ -2763,6 +2781,8 @@ export const supportThreads = pgTable(
       withCheck: sql`${memberSeesAll} OR opened_by_user_id = ${currentUserId}`,
     }),
     operatorRead(),
+    // The support job finds what is overdue or quiet across businesses (S59.2.2).
+    jobScan('support'),
   ],
 );
 
@@ -2807,6 +2827,7 @@ export const supportMessages = pgTable(
       withCheck: sql`thread_id IN (SELECT id FROM support_threads)`,
     }),
     operatorRead(),
+    jobScan('support'),
   ],
 );
 
@@ -2865,6 +2886,8 @@ export const publicSupportRequests = pgTable(
     /** S59.2 (AC-X-21): open → answered (the team wrote back by email) → solved. */
     status: text('status').notNull().default('open'),
     statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
+    /** When the team's address was reminded of its current wait (S59.2.2, AC-X-25). */
+    overdueRemindedAt: timestamp('overdue_reminded_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -2936,7 +2959,7 @@ export const operatorAccessLog = pgTable(
     index('operator_access_log_created_idx').on(table.createdAt),
     check(
       'operator_access_log_action_known',
-      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status')`,
+      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write')`,
     ),
   ],
 );
@@ -2967,6 +2990,33 @@ export const supportNotes = pgTable(
       sql`(${table.threadId} IS NULL) <> (${table.publicRequestId} IS NULL)`,
     ),
     check('support_notes_body_length', sql`length(${table.body}) BETWEEN 1 AND 4000`),
+    pgPolicy('operator_access', {
+      for: 'all',
+      using: operatorAccess,
+      withCheck: operatorAccess,
+    }),
+  ],
+);
+
+/**
+ * The team's saved replies (S59.2.2, AC-X-23): platform data, not a business's. Only an
+ * operator's logged transaction reads or changes them (`operator_access`, ADR-0062).
+ */
+export const supportSavedReplies = pgTable(
+  'support_saved_replies',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    title: text('title').notNull(),
+    body: text('body').notNull(),
+    updatedByUserId: uuid('updated_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    ...timestamps,
+  },
+  (table) => [
+    index('support_saved_replies_updated_by_idx').on(table.updatedByUserId),
+    check('support_saved_replies_title_length', sql`length(${table.title}) BETWEEN 1 AND 80`),
+    check('support_saved_replies_body_length', sql`length(${table.body}) BETWEEN 1 AND 4000`),
     pgPolicy('operator_access', {
       for: 'all',
       using: operatorAccess,

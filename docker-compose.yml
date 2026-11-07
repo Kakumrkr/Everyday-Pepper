@@ -178,6 +178,10 @@ services:
       # the routine model; off unless OPENAI_API_KEY is set. Links in them use the web origin.
       AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
       DRAFTS_POLL_MS: ${DRAFTS_POLL_MS:-}
+      # The support job (S59.2.2): a request waiting 4 h reminds the team's address (Mailpit
+      # locally); one the team answered closes after 7 quiet days.
+      SUPPORT_EMAIL: ${SUPPORT_EMAIL:-support@pepper.localhost}
+      SUPPORT_POLL_MS: ${SUPPORT_POLL_MS:-}
       # Deleting a business after its 30 days (S51.2, ADR-0054) deletes its photos' images
       # first: the same store as the api's.
       S3_ENDPOINT: http://seaweedfs:8333

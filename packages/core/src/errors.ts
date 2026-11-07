@@ -363,3 +363,30 @@ export class OperatorAccessRefusedError extends Error {
     this.name = 'OperatorAccessRefusedError';
   }
 }
+
+/**
+ * "Did this help?" is asked of the request's opener once it is solved (S59.2.2, AC-X-26): anyone
+ * else, or an open request, is refused.
+ */
+export class SupportNotRatableError extends Error {
+  constructor() {
+    super('Only the person who asked rates a solved request');
+    this.name = 'SupportNotRatableError';
+  }
+}
+
+/** No such saved reply (S59.2.2, AC-X-23). */
+export class SavedReplyNotFoundError extends Error {
+  constructor() {
+    super('No such saved reply');
+    this.name = 'SavedReplyNotFoundError';
+  }
+}
+
+/** The team already has the most saved replies allowed (S59.2.2, AC-X-23). */
+export class SavedRepliesFullError extends Error {
+  constructor() {
+    super('Too many saved replies');
+    this.name = 'SavedRepliesFullError';
+  }
+}

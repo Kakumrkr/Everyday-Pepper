@@ -110,7 +110,8 @@ export async function withUser<T>(
 }
 
 /** A worker job that may scan across businesses through its `job_scan` policy (ADR-0025). */
-export type ScanJob = 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports';
+export type ScanJob =
+  'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports' | 'support';
 
 /**
  * Runs `work` in a read-only transaction without a tenant in which the `job_scan` policies of
@@ -124,7 +125,7 @@ export async function withJobScan<T>(
   work: (tx: TenantTx) => Promise<T>,
 ): Promise<T> {
   const name = z
-    .enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist', 'imports'])
+    .enum(['reminders', 'cleanup', 'tasks', 'insights', 'waitlist', 'imports', 'support'])
     .parse(job);
   return db.transaction(
     async (tx) => {
@@ -144,6 +145,8 @@ const OperatorActionSchema = z.enum([
   'thread.status',
   'public.read',
   'public.note',
+  'replies.read',
+  'replies.write',
   'public.status',
 ]);
 export type OperatorAction = z.infer<typeof OperatorActionSchema>;

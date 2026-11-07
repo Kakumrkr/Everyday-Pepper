@@ -7,7 +7,11 @@ import {
   type MembershipRole,
   type SupportThread,
 } from '@pepper/contracts';
-import { SupportLimitReachedError, SupportThreadNotFoundError } from '@pepper/core';
+import {
+  SupportLimitReachedError,
+  SupportNotRatableError,
+  SupportThreadNotFoundError,
+} from '@pepper/core';
 import type * as Core from '@pepper/core';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
@@ -32,6 +36,7 @@ const core = vi.hoisted(() => ({
   readSupportThread: vi.fn(),
   replyToSupportThread: vi.fn(),
   solveSupportThread: vi.fn(),
+  rateSupportThread: vi.fn(),
   submitPublicSupportRequest: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({ ...(await original<typeof Core>()), ...core }));
@@ -54,6 +59,8 @@ const THREAD = {
   messages: [{ id: THREAD_ID, author: { kind: 'you' }, body: 'How do I import?', createdAt: AT }],
   replyTo: 'ana@example.test',
   seenByPepperAt: null,
+  solvedBy: null,
+  rating: { canRate: false, value: null },
 } as unknown as SupportThread;
 
 class FakeAuth extends AuthService {
@@ -140,7 +147,7 @@ beforeEach(() => {
 
 const context = () => ({ tenantId: TENANT, userId: USER, role });
 const get = (path: string) => request(server).get(path).set('cookie', 'signed-in');
-const send = (method: 'post' | 'patch', path: string, body: object, origin = ORIGIN) =>
+const send = (method: 'post' | 'patch' | 'put', path: string, body: object, origin = ORIGIN) =>
   request(server)[method](path).set('cookie', 'signed-in').set('origin', origin).send(body);
 const code = (body: unknown) => ApiErrorSchema.parse(body).code;
 
@@ -220,6 +227,8 @@ describe('/v1/support', () => {
     delete summary.messages;
     delete summary.replyTo;
     delete summary.seenByPepperAt;
+    delete summary.solvedBy;
+    delete summary.rating;
     expect((await get('/v1/support/threads').expect(200)).body).toEqual({
       threads: [summary],
       unread: 1,
@@ -249,6 +258,35 @@ describe('/v1/support', () => {
     await send('patch', `/v1/support/threads/${THREAD_ID}`, { status: 'waiting_on_pepper' }).expect(
       400,
     );
+  });
+
+  it('takes the opener’s "Did this help?" (S59.2.2, AC-X-26)', async () => {
+    const rated = {
+      ...THREAD,
+      status: 'solved',
+      solvedBy: 'member',
+      rating: { canRate: true, value: 'helpful' },
+    };
+    core.rateSupportThread.mockResolvedValue(rated);
+    const answer = await send('put', `/v1/support/threads/${THREAD_ID}/rating`, {
+      rating: 'helpful',
+    }).expect(200);
+    expect(answer.body).toEqual(rated);
+    expect(core.rateSupportThread).toHaveBeenCalledWith(
+      {},
+      { context: context(), requestId: undefined },
+      THREAD_ID,
+      { rating: 'helpful' },
+      OPTIONS,
+    );
+    for (const body of [{ rating: 'meh' }, { rating: 'helpful', userId: USER }, {}]) {
+      await send('put', `/v1/support/threads/${THREAD_ID}/rating`, body).expect(400);
+    }
+    core.rateSupportThread.mockRejectedValue(new SupportNotRatableError());
+    const refused = await send('put', `/v1/support/threads/${THREAD_ID}/rating`, {
+      rating: 'not_helpful',
+    }).expect(409);
+    expect(code(refused.body)).toBe('support_not_ratable');
   });
 
   it('answers 404 support_thread_not_found for a thread the member can’t read', async () => {

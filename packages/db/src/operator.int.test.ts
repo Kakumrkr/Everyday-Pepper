@@ -9,7 +9,14 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import { grantOperator, listOperators, revokeOperator } from './operators.js';
 import {
+  deleteSupportSavedReply,
   findPublicSupportRequest,
+  insertSupportSavedReply,
+  listSupportSavedReplies,
+  closeQuietPublicSupportRequests,
+  listOverduePublicSupportRequests,
+  markPublicSupportRequestReminded,
+  updateSupportSavedReply,
   insertPublicSupportRequest,
   insertSupportNote,
   insertSupportThread,
@@ -353,5 +360,167 @@ describe('public requests (AC-X-17/21)', () => {
       );
       expect(after?.status).toBe(status);
     }
+  });
+});
+
+describe('saved replies (S59.2.2, AC-X-23)', () => {
+  it('an operator adds, edits and deletes them, each access logged', async () => {
+    const reply = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: null },
+      (tx) =>
+        insertSupportSavedReply(tx, {
+          title: 'Calendar sync',
+          body: 'Hi {first name}, reconnect Google Calendar in Settings.',
+          updatedByUserId: operator,
+          now: new Date(),
+        }),
+    );
+    const edited = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: reply.id },
+      (tx) =>
+        updateSupportSavedReply(tx, reply.id, {
+          title: 'Calendar sync',
+          body: 'Hi {first name}, open Settings → Calendar.',
+          updatedByUserId: operator,
+        }),
+    );
+    expect(edited?.body).toContain('Settings → Calendar');
+    const listed = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.read', targetId: null },
+      listSupportSavedReplies,
+    );
+    expect(listed.map((row) => row.id)).toContain(reply.id);
+    const deleted = await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: reply.id },
+      (tx) => deleteSupportSavedReply(tx, reply.id),
+    );
+    expect(deleted).toBe(true);
+    const log = await asAdmin<{ action: string }>(
+      `SELECT action FROM operator_access_log WHERE operator_user_id = $1 AND action LIKE 'replies.%'`,
+      [operator],
+    );
+    expect(log.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('are out of reach of the services and of every business without the logged access', async () => {
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'replies.write', targetId: null },
+      (tx) =>
+        insertSupportSavedReply(tx, {
+          title: 'Hidden',
+          body: 'Only the team sees this.',
+          updatedByUserId: operator,
+          now: new Date(),
+        }),
+    );
+    const [flags] = await asAdmin<{ forced: boolean }>(
+      `SELECT relforcerowsecurity AS forced FROM pg_class WHERE oid = 'public.support_saved_replies'::regclass`,
+    );
+    expect(flags?.forced).toBe(true);
+    for (const run of [
+      (statement: string) => db.execute(sql.raw(statement)),
+      (statement: string) => withTenant(db, tenantA, (tx) => tx.execute(sql.raw(statement))),
+    ]) {
+      for (const statement of [
+        'SELECT * FROM support_saved_replies',
+        "UPDATE support_saved_replies SET title = 'x'",
+        'DELETE FROM support_saved_replies',
+      ]) {
+        const result = await run(statement);
+        expect(result.rows.length + (result.rowCount ?? 0), statement).toBe(0);
+      }
+      const error = await run(
+        `INSERT INTO support_saved_replies (id, title, body) VALUES (gen_random_uuid(), 't', 'b')`,
+      ).catch((e: unknown) => e);
+      expect(sqlState(error)).toBe('42501');
+    }
+  });
+});
+
+describe('the public sweep (S59.2.2, AC-X-24/25)', () => {
+  const HOUR = 3_600_000;
+  // Days in the past: the database refuses a "now" ahead of its own clock.
+  const base = Date.now() - 30 * 24 * HOUR;
+  const at = (hours: number) => new Date(base + hours * HOUR);
+  async function publicRequest(when: Date): Promise<string> {
+    const sent = await insertPublicSupportRequest(db, {
+      reference: reference(),
+      email: 'sweep@example.test',
+      name: null,
+      body: 'Locked out again',
+      page: null,
+      topic: null,
+      now: when,
+    });
+    if (sent === null) throw new Error('reference taken');
+    return sent.id;
+  }
+  const mark = (id: string, now: Date) =>
+    db.transaction((tx) => markPublicSupportRequestReminded(tx, id, now));
+
+  it('reminds an open request once a wait, at 4 h, and a reopened one again', async () => {
+    const late = await publicRequest(at(0));
+    const fresh = await publicRequest(at(1));
+    const mine = async (now: Date) =>
+      (await listOverduePublicSupportRequests(db, now, 1000))
+        .filter((row) => [late, fresh].includes(row.id))
+        .map((row) => row.id);
+    expect(await mine(at(3.9))).toEqual([]);
+    expect(await mine(at(4))).toEqual([late]);
+    expect(await mark(fresh, at(4))).toBe(false);
+    // Two marks side by side: one wins.
+    expect((await Promise.all([mark(late, at(4)), mark(late, at(4))])).sort()).toEqual([
+      false,
+      true,
+    ]);
+    expect(await mine(at(6))).toEqual([fresh]);
+    // Answered, then reopened later: a new wait, reminded again 4 h after it.
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'public.status', targetId: late },
+      (tx) => setPublicSupportRequestStatus(tx, late, 'open', at(24)),
+    );
+    expect(await mine(at(27))).toEqual([fresh]);
+    expect(await mine(at(28))).toEqual(expect.arrayContaining([late, fresh]));
+  });
+
+  it('closes an answered request after 7 quiet days, never sooner', async () => {
+    const quiet = await publicRequest(at(0));
+    await withOperator(
+      db,
+      { operatorUserId: operator, action: 'public.status', targetId: quiet },
+      (tx) => setPublicSupportRequestStatus(tx, quiet, 'answered', at(1)),
+    );
+    await closeQuietPublicSupportRequests(db, at(1 + 7 * 24 - 0.1));
+    const statusOf = () =>
+      withOperator(db, { operatorUserId: operator, action: 'public.read', targetId: quiet }, (tx) =>
+        findPublicSupportRequest(tx, quiet),
+      );
+    expect((await statusOf())?.status).toBe('answered');
+    await closeQuietPublicSupportRequests(db, at(1 + 7 * 24));
+    expect((await statusOf())?.status).toBe('solved');
+  });
+
+  it('refuses a "now" ahead of the database’s clock, so nothing closes early', async () => {
+    const ahead = new Date(Date.now() + 8 * 24 * HOUR);
+    for (const run of [
+      () => closeQuietPublicSupportRequests(db, ahead),
+      () => listOverduePublicSupportRequests(db, ahead, 10),
+      () => mark(publicId, ahead),
+    ]) {
+      expect(sqlState(await run().catch((e: unknown) => e))).toBe('22023');
+    }
+  });
+
+  it('can’t be bypassed: the services still can’t read or change public requests directly', async () => {
+    const result = await db.execute(sql`UPDATE public_support_requests SET status = 'solved'`);
+    expect(result.rowCount ?? 0).toBe(0);
+    const helper = await db.execute(sql`SELECT support_sweep_now(now())`).catch((e: unknown) => e);
+    expect(sqlState(helper)).toBe('42501');
   });
 });

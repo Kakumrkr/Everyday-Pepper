@@ -115,6 +115,19 @@ const PATHS = {
       <path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01" />
     </>
   ),
+  // "Did this help?" (S59.2.2): always beside their words, never alone.
+  thumbUp: (
+    <>
+      <path d="M7 10v11" />
+      <path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 7.6a2 2 0 0 1-1.9 1.4H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h2.8a2 2 0 0 0 1.8-1.1L12 3a3 3 0 0 1 3 2.9Z" />
+    </>
+  ),
+  thumbDown: (
+    <>
+      <path d="M17 14V3" />
+      <path d="M9 18.1 10 14H4.2a2 2 0 0 1-1.9-2.6l2.3-7.6A2 2 0 0 1 6.5 2.4H20a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-2.8a2 2 0 0 0-1.8 1.1L12 21a3 3 0 0 1-3-2.9Z" />
+    </>
+  ),
 } satisfies Record<string, ReactNode>;
 
 export type IconName = keyof typeof PATHS;

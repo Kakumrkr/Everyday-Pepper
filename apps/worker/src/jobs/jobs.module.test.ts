@@ -14,13 +14,18 @@ const appointments = vi.hoisted(() => ({
   runDueBriefings: vi.fn(),
 }));
 vi.mock('@pepper/appointments', () => appointments);
-const core = vi.hoisted(() => ({ cleanUp: vi.fn(), sendDueTaskPushes: vi.fn() }));
+const core = vi.hoisted(() => ({
+  cleanUp: vi.fn(),
+  sendDueTaskPushes: vi.fn(),
+  runSupportHousekeeping: vi.fn(),
+}));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   cleanUp: core.cleanUp,
   sendDueTaskPushes: core.sendDueTaskPushes,
+  runSupportHousekeeping: core.runSupportHousekeeping,
 }));
-vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE') }));
+vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE'), MAILER: Symbol('MAILER') }));
 const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
 vi.mock('./drafts.js', () => ({ morningDraftsJob: drafts.morningDraftsJob }));
 
@@ -50,6 +55,7 @@ beforeEach(() => {
     conversations: 6,
   });
   core.sendDueTaskPushes.mockResolvedValue(1);
+  core.runSupportHousekeeping.mockResolvedValue({ closed: 1, reminded: 2, failed: 0 });
   appointments.runDueBriefings.mockResolvedValue({ businesses: 1, written: 2, pushes: 0 });
   drafts.run.mockResolvedValue({ businesses: 1, drafted: 3, failed: 0 });
   drafts.morningDraftsJob.mockReturnValue(drafts.run);
@@ -175,6 +181,43 @@ describe('JobsRunner', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('runs the support job with the team address, the links, the mailer and the clock (S59.2.2)', async () => {
+    const mailer = { send: vi.fn() };
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const runner = new JobsRunner(
+      DB as never,
+      {
+        ...OPTIONS,
+        support: {
+          supportEmail: 'support@pepper.test',
+          baseUrl: 'https://app.pepper.test',
+          pollMs: 300_000,
+        },
+      },
+      mailer,
+    );
+    await runner.support.runOnce();
+    expect(core.runSupportHousekeeping).toHaveBeenCalledWith(DB.db, {
+      outboxKey: OPTIONS.key,
+      supportEmail: 'support@pepper.test',
+      baseUrl: 'https://app.pepper.test',
+      mailer,
+      clock,
+    });
+    // Counts only.
+    expect(log).toHaveBeenCalledWith('Support: 2 reminders, 1 closed after quiet days');
+    log.mockRestore();
+  });
+
+  it('runs the support job without an address, links or mailer when none is configured', async () => {
+    const runner = new JobsRunner(DB as never, OPTIONS);
+    await runner.support.runOnce();
+    expect(core.runSupportHousekeeping).toHaveBeenCalledWith(
+      DB.db,
+      expect.objectContaining({ supportEmail: null, baseUrl: null, mailer: null }),
+    );
   });
 
   it('cleans up with the clock', async () => {
