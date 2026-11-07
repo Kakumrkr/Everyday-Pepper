@@ -1,5 +1,6 @@
 import {
   SupportCreatedSchema,
+  SupportScreenshotSchema,
   SupportSavedReplyListSchema,
   ClientSchema,
   CurrentBusinessResponseSchema,
@@ -34,6 +35,23 @@ import {
 } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 import { solidColorPhoto } from '@pepper/storage';
+
+/** Waits until every image `images` finds has loaded (S59.2.3's thumbnails). */
+async function loaded(images: Locator): Promise<void> {
+  await expect(images.first()).toBeVisible();
+  await expect
+    .poll(
+      () =>
+        images.evaluateAll((all) =>
+          all.every(
+            (img) =>
+              (img as HTMLImageElement).complete && (img as HTMLImageElement).naturalWidth > 0,
+          ),
+        ),
+      { timeout: 15_000 },
+    )
+    .toBe(true);
+}
 
 // The signed-in screens on the kit (S41, DESIGN.md D6; AC-X-3): Home, Chat and More (S41), and
 // Calendar, Clients and a client's profile (S42, AC-X-8) at 375, 412 and 1280 px in light and
@@ -1121,6 +1139,12 @@ for (const width of WIDTHS) {
     await page.goto('/support/new?from=%2Fmore');
     await hydrated(page.getByRole('button', { name: 'Send to Pepper' }));
     await shots('support-new', [page.getByText(/@example\.test/)]);
+    // One screenshot with it (S59.2.3): a fixed image, so the thumbnails shoot the same each run.
+    const uploaded = await page.request.post('/v1/support/screenshots', {
+      data: await solidColorPhoto(1170, 2532, 'png', { r: 214, g: 196, b: 176 }),
+      headers: { origin: new URL(page.url()).origin, 'content-type': 'image/png' },
+    });
+    expect(uploaded.status()).toBe(201);
     const created = await post(
       page,
       '/v1/support/threads',
@@ -1128,11 +1152,13 @@ for (const width of WIDTHS) {
         kind: 'question',
         message: 'Can Randy have his own hours on Saturdays?',
         context: { page: '/team' },
+        screenshotIds: [SupportScreenshotSchema.parse(await uploaded.json()).id],
       },
       SupportCreatedSchema,
     );
     await page.goto(`/support/${created.id ?? ''}`);
     await expect(page.getByText('Waiting on Pepper')).toBeVisible();
+    await loaded(page.getByTestId('message-screenshots').getByRole('img'));
     // The reference and the times change every run.
     await shots('support-thread', [
       page.getByTestId('support-thread-reference'),
@@ -1147,6 +1173,7 @@ for (const width of WIDTHS) {
     makeOperator(owner.email);
     await page.goto(`/ops/threads/${created.id ?? ''}`);
     await hydrated(page.getByRole('button', { name: 'Save note' }));
+    await loaded(page.getByTestId('message-screenshots').getByRole('img'));
     await shots('ops-thread', [
       page.getByTestId('ops-thread-reference'),
       page.getByText(/^Today, .*UTC$/),

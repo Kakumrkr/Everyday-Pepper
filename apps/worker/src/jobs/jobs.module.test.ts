@@ -12,18 +12,23 @@ const appointments = vi.hoisted(() => ({
   sendDueReminders: vi.fn(),
   runDueInsights: vi.fn(),
   runDueBriefings: vi.fn(),
+  deleteAllPhotoImages: vi.fn(),
 }));
 vi.mock('@pepper/appointments', () => appointments);
 const core = vi.hoisted(() => ({
   cleanUp: vi.fn(),
   sendDueTaskPushes: vi.fn(),
   runSupportHousekeeping: vi.fn(),
+  runDueDeletions: vi.fn(),
+  deleteAllSupportScreenshotImages: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   cleanUp: core.cleanUp,
   sendDueTaskPushes: core.sendDueTaskPushes,
   runSupportHousekeeping: core.runSupportHousekeeping,
+  runDueDeletions: core.runDueDeletions,
+  deleteAllSupportScreenshotImages: core.deleteAllSupportScreenshotImages,
 }));
 vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE'), MAILER: Symbol('MAILER') }));
 const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
@@ -55,7 +60,8 @@ beforeEach(() => {
     conversations: 6,
   });
   core.sendDueTaskPushes.mockResolvedValue(1);
-  core.runSupportHousekeeping.mockResolvedValue({ closed: 1, reminded: 2, failed: 0 });
+  core.runSupportHousekeeping.mockResolvedValue({ closed: 1, reminded: 2, swept: 3, failed: 0 });
+  core.runDueDeletions.mockResolvedValue({ businesses: 0, accounts: 0, deferred: 0 });
   appointments.runDueBriefings.mockResolvedValue({ businesses: 1, written: 2, pushes: 0 });
   drafts.run.mockResolvedValue({ businesses: 1, drafted: 3, failed: 0 });
   drafts.morningDraftsJob.mockReturnValue(drafts.run);
@@ -205,10 +211,43 @@ describe('JobsRunner', () => {
       baseUrl: 'https://app.pepper.test',
       mailer,
       clock,
+      store: null,
     });
     // Counts only.
-    expect(log).toHaveBeenCalledWith('Support: 2 reminders, 1 closed after quiet days');
+    expect(log).toHaveBeenCalledWith(
+      'Support: 2 reminders, 1 closed after quiet days, 3 unsent screenshots swept',
+    );
     log.mockRestore();
+  });
+
+  it('sweeps screenshots and deletes a business’s images on the object store (S59.2.3)', async () => {
+    const objectStore = { put: vi.fn(), get: vi.fn(), head: vi.fn(), delete: vi.fn() };
+    const runner = new JobsRunner(DB as never, { ...OPTIONS, objectStore });
+    await runner.support.runOnce();
+    const [, supportOptions] = core.runSupportHousekeeping.mock.calls[0] as [
+      unknown,
+      { store: { process?: unknown; delete?: unknown } | null },
+    ];
+    const store = supportOptions.store;
+    expect(typeof store?.process).toBe('function');
+    expect(typeof store?.delete).toBe('function');
+    await runner.deletions.runOnce();
+    const [, deletionOptions] = core.runDueDeletions.mock.calls[0] as [
+      unknown,
+      { beforeBusinessDeleted: (tenantId: string) => Promise<void> },
+    ];
+    const hook = deletionOptions.beforeBusinessDeleted;
+    await hook('0190a0a0-0000-7000-8000-000000000001');
+    expect(appointments.deleteAllPhotoImages).toHaveBeenCalledWith(
+      DB.db,
+      '0190a0a0-0000-7000-8000-000000000001',
+      objectStore,
+    );
+    expect(core.deleteAllSupportScreenshotImages).toHaveBeenCalledWith(
+      DB.db,
+      '0190a0a0-0000-7000-8000-000000000001',
+      store,
+    );
   });
 
   it('runs the support job without an address, links or mailer when none is configured', async () => {

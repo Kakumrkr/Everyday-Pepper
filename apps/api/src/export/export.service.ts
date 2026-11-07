@@ -3,6 +3,7 @@ import type { Database } from '@pepper/db';
 import { exportBusiness, type BusinessExport } from '@pepper/imports';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { Inject, Injectable, Optional } from '@nestjs/common';
+import { SCREENSHOT_STORE, type ScreenshotStoreOrNone } from '../support/screenshot-store.js';
 
 /** The clock an export is dated by (tests replace it). */
 export const EXPORT_CLOCK = Symbol('EXPORT_CLOCK');
@@ -19,6 +20,10 @@ export class ExportService {
   constructor(
     @Inject(DATABASE) database: { db: Database },
     @Optional() @Inject(EXPORT_CLOCK) clock?: Clock,
+    // The support screenshots' images go in the export (S59.2.3, AC-X-31).
+    @Optional()
+    @Inject(SCREENSHOT_STORE)
+    private readonly screenshots: ScreenshotStoreOrNone = null,
   ) {
     this.db = database.db;
     this.clock = clock ?? systemClock;
@@ -29,6 +34,7 @@ export class ExportService {
       this.db,
       { context: tenant, requestId: currentRequestContext()?.requestId },
       this.clock,
+      this.screenshots,
     );
   }
 }

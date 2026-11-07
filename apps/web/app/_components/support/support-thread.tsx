@@ -13,7 +13,10 @@ import { useEffect, useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { SUPPORT_KIND_LABEL, SUPPORT_STATUS, authorLabel, supportTime } from '../../../lib/support';
+import { screenshotSrc } from '../../../lib/support-screenshots';
 import { Notice } from '../form-parts';
+import { MessageScreenshots } from './message-screenshots';
+import { ScreenshotPicker, useScreenshotDraft } from './screenshot-picker';
 
 /**
  * A support request as a thread (S59, PCR-010, AC-X-15/16): the team's answers on the left in
@@ -34,6 +37,7 @@ export function SupportThreadView({
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [now] = useState(() => Date.now());
+  const screenshots = useScreenshotDraft();
   const status = SUPPORT_STATUS[thread.status];
   // The shell's unread count may have been read before this page marked the answers read (a
   // layout and its page load side by side): read it again once, now that they are.
@@ -64,13 +68,22 @@ export function SupportThreadView({
     }
     setFieldError(undefined);
     setError(null);
+    if (screenshots.adding) {
+      setError('Wait a moment: your screenshots are still being added.');
+      return;
+    }
     setBusy('reply');
-    const result = await sendJson('POST', `/v1/support/threads/${thread.id}/messages`, { message });
+    const result = await sendJson('POST', `/v1/support/threads/${thread.id}/messages`, {
+      message,
+      screenshotIds: screenshots.ids,
+    });
     setBusy(null);
     if (!result.ok) {
       setError(result.message);
       return;
     }
+    // Stored with its screenshots, whether or not the answer could be shown.
+    screenshots.reset();
     if (take(result.data)) form.reset();
   }
 
@@ -147,6 +160,12 @@ export function SupportThreadView({
               >
                 {message.body}
               </p>
+              <MessageScreenshots
+                screenshots={message.screenshots}
+                from={authorLabel(message.author)}
+                src={screenshotSrc}
+                align={pepper ? 'start' : 'end'}
+              />
             </li>
           );
         })}
@@ -180,6 +199,7 @@ export function SupportThreadView({
         noValidate
         aria-labelledby={`${ids}-reply`}
         onSubmit={(event) => void reply(event)}
+        onPaste={screenshots.onPaste}
         className="flex flex-col gap-3"
       >
         <h2 id={`${ids}-reply`} className="sr-only">
@@ -192,10 +212,15 @@ export function SupportThreadView({
           maxLength={SUPPORT_MESSAGE_MAX}
           error={fieldError}
         />
+        <ScreenshotPicker draft={screenshots} />
         {error === null ? null : <Notice tone="error">{error}</Notice>}
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" disabled={busy !== null}>
-            {busy === 'reply' ? 'Sending…' : 'Send reply'}
+          <Button type="submit" disabled={busy !== null || screenshots.adding}>
+            {busy === 'reply'
+              ? 'Sending…'
+              : screenshots.adding
+                ? 'Adding screenshots…'
+                : 'Send reply'}
           </Button>
           {thread.status === 'solved' ? null : (
             <Button

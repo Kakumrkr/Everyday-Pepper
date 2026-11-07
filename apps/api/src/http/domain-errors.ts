@@ -63,6 +63,10 @@ import {
   ProposalNotPendingError,
   TaskAssigneeNotMemberError,
   SupportLimitReachedError,
+  SupportScreenshotNotFoundError,
+  SupportScreenshotRejectedError,
+  SupportScreenshotsNotAttachableError,
+  SupportScreenshotsUnavailableError,
   OperatorAccessRefusedError,
   SupportThreadNotFoundError,
   SupportNotRatableError,
@@ -87,6 +91,7 @@ import {
   HttpException,
   HttpStatus,
   NotFoundException,
+  ServiceUnavailableException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
@@ -151,6 +156,13 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [OperatorAccessRefusedError, ForbiddenException, 'forbidden'],
   [SupportLimitReachedError, TooManyRequestsException, 'support_limit_reached'],
   [SupportNotRatableError, ConflictException, 'support_not_ratable'],
+  [SupportScreenshotNotFoundError, NotFoundException, 'screenshot_not_found'],
+  [
+    SupportScreenshotsNotAttachableError,
+    UnprocessableEntityException,
+    'screenshots_not_attachable',
+  ],
+  [SupportScreenshotsUnavailableError, ServiceUnavailableException, 'screenshots_unavailable'],
   [SavedReplyNotFoundError, NotFoundException, 'saved_reply_not_found'],
   [SavedRepliesFullError, ConflictException, 'saved_replies_full'],
   [FeedItemNotFoundError, NotFoundException, 'feed_item_not_found'],
@@ -198,6 +210,17 @@ export class UnsupportedMediaTypeError extends HttpException {
  * A refused upload (ADR-0048): 413 over 10 MB, 415 not a JPEG, PNG or WebP (HEIC too), 422 a
  * photo that is too small, too many pixels or too long; the message says what to fix.
  */
+/** As `photoRejected`, for a support screenshot (S59.2.3, AC-X-28). */
+function screenshotRejected(error: SupportScreenshotRejectedError): HttpException {
+  if (error.reason === 'too_large') {
+    return new PayloadTooLargeError(apiError('screenshot_too_large'));
+  }
+  const body = { code: 'screenshot_rejected', message: error.message, reason: error.reason };
+  return ['unsupported_type', 'heic', 'unreadable'].includes(error.reason)
+    ? new UnsupportedMediaTypeError(body)
+    : new UnprocessableEntityException(body);
+}
+
 function photoRejected(error: ImageRejectedError): HttpException {
   if (error.reason === 'too_large') return new PayloadTooLargeError(apiError('photo_too_large'));
   const body = { code: 'photo_rejected', message: error.message, reason: error.reason };
@@ -266,6 +289,10 @@ export function toHttpError(error: unknown): unknown {
     return new ConflictException(body);
   }
   if (error instanceof ImageRejectedError) return photoRejected(error);
+  if (error instanceof SupportScreenshotRejectedError) return screenshotRejected(error);
+  if (error instanceof SupportLimitReachedError && error.limit === 'screenshots') {
+    return new TooManyRequestsException(apiError('screenshot_limit_reached'));
+  }
   const imported = importAnswer(error);
   if (imported !== undefined) return imported;
   if (error instanceof WrongVerificationCodeError) {

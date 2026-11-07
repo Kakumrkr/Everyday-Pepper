@@ -19,6 +19,35 @@ export const PHOTO_RULES: Readonly<
   gallery: { minShortSide: 600, widths: [320, 640, 1280] },
 };
 
+/** Any image Pepper keeps: a business photo, or a screenshot on a support request (ADR-0062). */
+export type ImageKind = PhotoKind | 'screenshot';
+
+/**
+ * A support screenshot's rules (ADR-0062 Part 3, AC-X-28): any size from a small dialog up,
+ * long phone screenshots (1:8), kept sharp enough to read text (2560 px, quality 90) with a
+ * 480 px thumbnail for the thread.
+ */
+export const SCREENSHOT_RULES = {
+  minShortSide: 16,
+  widths: [480, 2560],
+  maxAspectRatio: 8,
+  quality: 90,
+} as const;
+
+interface ImageRules {
+  minShortSide: number;
+  widths: readonly number[];
+  maxAspectRatio: number;
+  quality: number;
+  /** The word the refusals use. */
+  noun: 'photo' | 'screenshot';
+}
+
+function rulesFor(kind: ImageKind): ImageRules {
+  if (kind === 'screenshot') return { ...SCREENSHOT_RULES, noun: 'screenshot' };
+  return { ...PHOTO_RULES[kind], maxAspectRatio: MAX_ASPECT_RATIO, quality: 82, noun: 'photo' };
+}
+
 /** Why an upload was refused; the api turns each into words the owner can act on. */
 export type ImageRejection =
   | 'too_large'
@@ -72,51 +101,59 @@ export function variantWidths(width: number, targets: readonly number[]): number
 }
 
 /**
- * Checks an uploaded photo by what its bytes are (never its name or label) and remakes it
- * (ADR-0048, AC-W8-10): JPEG, PNG or WebP, at most 10 MB and 40 megapixels, at least the
- * kind's short side, at most 4:1; turned upright and re-encoded as WebP without metadata (no
- * location) at the kind's widths. Throws `ImageRejectedError`.
+ * Checks an uploaded image by what its bytes are (never its name or label) and remakes it
+ * (ADR-0048, AC-W8-10; screenshots ADR-0062, AC-X-28): JPEG, PNG or WebP, at most 10 MB and
+ * 40 megapixels, at least the kind's short side and at most its shape; turned upright and
+ * re-encoded as WebP without metadata (no location or device) at the kind's widths. Throws
+ * `ImageRejectedError`, whose message names the kind ("photo" or "screenshot").
  */
-export async function processImage(input: Uint8Array, kind: PhotoKind): Promise<ProcessedImage> {
+export async function processImage(input: Uint8Array, kind: ImageKind): Promise<ProcessedImage> {
+  const rules = rulesFor(kind);
+  const noun = rules.noun;
+  const unreadable = `That file is not a ${noun} we can read. Use a JPEG, PNG or WebP ${noun}.`;
   if (input.byteLength > MAX_PHOTO_BYTES) {
-    throw new ImageRejectedError('too_large', 'That photo is over 10 MB.');
+    throw new ImageRejectedError('too_large', `That ${noun} is over 10 MB.`);
   }
   let metadata: Metadata;
   try {
     // Reads the header only: the pixel count is checked before anything is decoded.
     metadata = await sharp(input, headerOptions).metadata();
   } catch {
-    throw new ImageRejectedError(
-      'unreadable',
-      'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.',
-    );
+    throw new ImageRejectedError('unreadable', unreadable);
   }
   if (metadata.format === 'heif') {
-    throw new ImageRejectedError('heic', 'HEIC photos are not supported yet. Save it as a JPEG.');
+    throw new ImageRejectedError(
+      'heic',
+      `HEIC ${noun}s are not supported yet. Save it as a JPEG${noun === 'screenshot' ? ' or PNG' : ''}.`,
+    );
   }
   if (!ACCEPTED.has(metadata.format)) {
-    throw new ImageRejectedError('unsupported_type', 'Use a JPEG, PNG or WebP photo.');
+    throw new ImageRejectedError('unsupported_type', `Use a JPEG, PNG or WebP ${noun}.`);
   }
   const rawWidth = metadata.width;
   const rawHeight = metadata.height;
   if (rawWidth * rawHeight > MAX_PHOTO_PIXELS) {
-    throw new ImageRejectedError('too_many_pixels', 'That photo has too many pixels (over 40 MP).');
+    throw new ImageRejectedError(
+      'too_many_pixels',
+      `That ${noun} has too many pixels (over 40 MP).`,
+    );
   }
   // EXIF orientations 5–8 turn the picture a quarter: its upright width is the stored height.
   const quarterTurn = (metadata.orientation ?? 1) >= 5;
   const width = quarterTurn ? rawHeight : rawWidth;
   const height = quarterTurn ? rawWidth : rawHeight;
-  const rules = PHOTO_RULES[kind];
   if (Math.min(width, height) < rules.minShortSide) {
     throw new ImageRejectedError(
       'too_small',
-      `That photo is too small. Use one at least ${String(rules.minShortSide)} px on its short side.`,
+      `That ${noun} is too small. Use one at least ${String(rules.minShortSide)} px on its short side.`,
     );
   }
-  if (Math.max(width, height) > MAX_ASPECT_RATIO * Math.min(width, height)) {
+  if (Math.max(width, height) > rules.maxAspectRatio * Math.min(width, height)) {
     throw new ImageRejectedError(
       'bad_shape',
-      'That photo is too long and thin. Crop it closer to a square.',
+      noun === 'photo'
+        ? 'That photo is too long and thin. Crop it closer to a square.'
+        : 'That screenshot is too long and thin. Crop it to the part that shows the problem.',
     );
   }
   try {
@@ -126,17 +163,14 @@ export async function processImage(input: Uint8Array, kind: PhotoKind): Promise<
         const { data, info } = await sharp(input, sharpOptions)
           .rotate()
           .resize({ width: target, withoutEnlargement: true })
-          .webp({ quality: 82 })
+          .webp({ quality: rules.quality })
           .toBuffer({ resolveWithObject: true });
         return { width: info.width, height: info.height, data };
       }),
     );
     return { width, height, variants };
   } catch {
-    throw new ImageRejectedError(
-      'unreadable',
-      'That file is not a photo we can read. Use a JPEG, PNG or WebP photo.',
-    );
+    throw new ImageRejectedError('unreadable', unreadable);
   }
 }
 

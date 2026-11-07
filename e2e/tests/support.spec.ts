@@ -1,4 +1,5 @@
 import { AxeBuilder } from '@axe-core/playwright';
+import { solidColorPhoto } from '@pepper/storage';
 import { expect, test, type Page } from '@playwright/test';
 import { hydrated, onboardOwner, ownClientAddress, unique } from './helpers.js';
 import { expectTapTargets } from './tap-targets.js';
@@ -134,4 +135,75 @@ test('support: a screen that breaks offers the request with its reference', asyn
   // From an error screen the form opens on "Something's not working".
   await page.goto('/support/new?from=%2Fcalendar&error=digest-123');
   await expect(page.getByRole('radio', { name: /Something’s not working/ })).toBeChecked();
+});
+
+test('support screenshots (AC-X-27/28): an owner attaches, removes one, sends, and sees them in the thread', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  await onboardOwner(page);
+  await page.goto('/support/new?from=%2Fcalendar');
+  const picker = page.getByTestId('screenshot-picker');
+  await expect(picker).toContainText('Crop out client names and numbers before you send.');
+  const input = page.getByTestId('screenshot-input');
+  await hydrated(page.getByRole('button', { name: 'Add a screenshot' }));
+  await input.setInputFiles([
+    {
+      name: 'calendar.png',
+      mimeType: 'image/png',
+      buffer: await solidColorPhoto(1170, 2532, 'png', { r: 244, g: 239, b: 232 }),
+    },
+    {
+      name: 'settings.png',
+      mimeType: 'image/png',
+      buffer: await solidColorPhoto(800, 600, 'png', { r: 120, g: 86, b: 60 }),
+    },
+    { name: 'clip.gif', mimeType: 'image/gif', buffer: Buffer.from('GIF89a') },
+  ]);
+  const states = page.getByTestId('screenshot-state');
+  await expect(states).toHaveText(['Added', 'Added', 'Not added'], { timeout: 20_000 });
+  await expect(picker).toContainText('Screenshot 3: Use a JPEG, PNG or WebP screenshot.');
+  await scanned(page);
+  await expectTapTargets(page, 'the screenshot picker');
+  // Removing one before sending: the failed one and the second go.
+  await page.getByRole('button', { name: 'Remove screenshot 3' }).click();
+  await page.getByRole('button', { name: 'Remove screenshot 2' }).click();
+  await expect(page.getByTestId('screenshot-draft')).toHaveCount(1);
+
+  await page.getByLabel('Tell us what happened').fill('The calendar is empty after I import.');
+  await page.getByRole('button', { name: 'Send to Pepper' }).click();
+  await expect(page.getByTestId('support-sent')).toContainText('We got it');
+  const reference = (await page.getByTestId('support-reference').textContent()) ?? '';
+  const email = await teamEmail(reference);
+  expect(email.Text).toContain('Screenshots: 1 — open the request in the console to see it.');
+
+  await page.getByRole('link', { name: 'See your request' }).click();
+  const shown = page.getByTestId('message-screenshots').getByRole('img');
+  await expect(shown).toHaveCount(1);
+  await expect(shown).toHaveAttribute('alt', 'Screenshot 1 of 1 from You, opens full size');
+  // The thumbnail is the api's WebP, never cached.
+  const thumb = await page.request.get((await shown.getAttribute('src')) ?? '');
+  expect(thumb.status()).toBe(200);
+  expect(thumb.headers()['content-type']).toBe('image/webp');
+  expect(thumb.headers()['cache-control']).toBe('private, no-store');
+  await expect
+    .poll(() => shown.evaluate((img) => (img as HTMLImageElement).naturalWidth), {
+      timeout: 15_000,
+    })
+    .toBeGreaterThan(0);
+
+  // A reply carries its own.
+  await page.getByTestId('screenshot-input').setInputFiles({
+    name: 'after.png',
+    mimeType: 'image/png',
+    buffer: await solidColorPhoto(640, 480, 'png'),
+  });
+  await expect(page.getByTestId('screenshot-state')).toHaveText(['Added'], { timeout: 20_000 });
+  await page.getByLabel('Your reply').fill('And this is after a reload.');
+  await page.getByRole('button', { name: 'Send reply' }).click();
+  await expect(page.getByTestId('message-screenshots')).toHaveCount(2);
+  await expect(page.getByTestId('screenshot-draft')).toHaveCount(0);
+
+  await page.getByRole('link', { name: 'Your requests' }).click();
+  await expect(page.getByTestId('support-row-screenshots')).toHaveText('· 2 screenshots');
 });

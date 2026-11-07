@@ -1,5 +1,8 @@
 import {
   PUBLIC_SUPPORT_PER_HOUR,
+  SUPPORT_SCREENSHOT_MAX_BYTES,
+  SupportScreenshotSchema,
+  type SupportScreenshot,
   PublicSupportInputSchema,
   SupportCreatedSchema,
   SupportRatingInputSchema,
@@ -16,6 +19,10 @@ import {
 } from '@pepper/contracts';
 import {
   countSupportUnread,
+  discardSupportScreenshot,
+  readSupportScreenshotImage,
+  uploadSupportScreenshot,
+  SupportScreenshotsUnavailableError,
   listSupportThreads,
   openSupportThread,
   rateSupportThread,
@@ -33,8 +40,12 @@ import { currentRequestContext, DATABASE, MAILER } from '@pepper/runtime';
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
+  Optional,
+  Query,
+  Res,
   Inject,
   Logger,
   Module,
@@ -47,11 +58,19 @@ import {
   type DynamicModule,
 } from '@nestjs/common';
 import { createHash } from 'node:crypto';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { z } from 'zod';
 import { CurrentTenant, TenantGuard } from '../auth/guards.js';
-import { answering } from '../http/domain-errors.js';
+import { answering, toHttpError } from '../http/domain-errors.js';
 import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.js';
+import { readUpload, SCREENSHOT_UPLOAD } from '../http/raw-body.js';
 import { parseBody } from '../http/zod-body.js';
+import { ScreenshotParamsSchema, ScreenshotQuerySchema } from './screenshot-params.js';
+import {
+  SCREENSHOT_STORE,
+  sendScreenshot,
+  type ScreenshotStoreOrNone,
+} from './screenshot-store.js';
 import { OperatorGuard, OpsController } from './ops.controller.js';
 
 // Pepper's own support (S59, PCR-010, AC-X-14…17). `/v1/support/*`: every member of the
@@ -77,6 +96,15 @@ const PUBLIC_BY_EMAIL: RateLimit = {
   windowSeconds: 3600,
 };
 
+// The domain's 20 a day per person is exact (AC-X-28); this stops a script between them.
+const SCREENSHOT_UPLOADS: RateLimit = { name: 'support-screenshot', max: 30, windowSeconds: 600 };
+// A thread shows a few thumbnails and their full images: generous for a person.
+const SCREENSHOT_READS: RateLimit = {
+  name: 'support-screenshot-read',
+  max: 300,
+  windowSeconds: 60,
+};
+
 const ThreadParamsSchema = z.object({ threadId: z.string().max(100) });
 
 type IncomingRequest = Parameters<typeof clientAddress>[0];
@@ -100,12 +128,80 @@ export class SupportController {
     @Inject(DATABASE) database: { db: Database },
     @Inject(SUPPORT_OPTIONS) private readonly options: SupportModuleOptions,
     private readonly limits: RateLimiter,
+    @Optional()
+    @Inject(SCREENSHOT_STORE)
+    private readonly screenshots: ScreenshotStoreOrNone = null,
   ) {
     this.db = database.db;
   }
 
   private domain(): SupportOptions {
     return this.options;
+  }
+
+  private screenshotOptions() {
+    return {
+      store: this.screenshots,
+      ...(this.options.clock !== undefined && { clock: this.options.clock }),
+    };
+  }
+
+  /**
+   * One screenshot for a request or reply (S59.2.3, AC-X-28), the image itself as the body:
+   * 201 its id and size, unsent until a message names it. 413 `screenshot_too_large`; 415/422
+   * `screenshot_rejected` with what to fix; 429 `screenshot_limit_reached` (20 a day) or
+   * `too_many_requests`; 503 `screenshots_unavailable`.
+   */
+  @Post('screenshots')
+  async upload(
+    @CurrentTenant() tenant: TenantContext,
+    @Req() request: IncomingMessage,
+  ): Promise<SupportScreenshot> {
+    // Before reading the body: without storage there is nowhere to put it.
+    if (this.screenshots === null) throw toHttpError(new SupportScreenshotsUnavailableError());
+    await this.limits.hit(SCREENSHOT_UPLOADS, tenant.userId);
+    const bytes = await readUpload(request, SUPPORT_SCREENSHOT_MAX_BYTES, SCREENSHOT_UPLOAD);
+    return SupportScreenshotSchema.parse(
+      await answering(() =>
+        uploadSupportScreenshot(this.db, actorOf(tenant), bytes, this.screenshotOptions()),
+      ),
+    );
+  }
+
+  /** Removes an unsent screenshot of the member's own before sending: 204; 404 otherwise. */
+  @Delete('screenshots/:screenshotId')
+  @HttpCode(204)
+  async discard(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<void> {
+    const { screenshotId } = parseBody(ScreenshotParamsSchema, params);
+    await answering(() =>
+      discardSupportScreenshot(this.db, actorOf(tenant), screenshotId, this.screenshotOptions()),
+    );
+  }
+
+  /**
+   * The image (`?size=thumb|full`, WebP) for a member who may read its thread, or its own
+   * unsent upload (AC-X-29); 404 `screenshot_not_found` for anything else. Never cached.
+   */
+  @Get('screenshots/:screenshotId')
+  async image(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Query() query: unknown,
+    @Res() response: ServerResponse,
+  ): Promise<void> {
+    const { screenshotId } = parseBody(ScreenshotParamsSchema, params);
+    const { size } = parseBody(ScreenshotQuerySchema, query);
+    await this.limits.hit(SCREENSHOT_READS, tenant.userId);
+    const image = await answering(() =>
+      readSupportScreenshotImage(
+        this.db,
+        actorOf(tenant),
+        screenshotId,
+        size,
+        this.screenshotOptions(),
+      ),
+    );
+    sendScreenshot(response, image);
   }
 
   /** "Your requests" and the unread count. */

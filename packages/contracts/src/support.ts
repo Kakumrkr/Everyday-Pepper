@@ -53,6 +53,40 @@ export const SUPPORT_MESSAGES_PER_DAY = 50;
 /** Public requests an hour, per address and per email (AC-X-17). */
 export const PUBLIC_SUPPORT_PER_HOUR = 3;
 
+/** Screenshots one message may carry (S59.2.3, AC-X-27). */
+export const SUPPORT_SCREENSHOTS_PER_MESSAGE = 3;
+/** Screenshots one person may upload in a day, removed ones included (AC-X-28). */
+export const SUPPORT_SCREENSHOTS_PER_DAY = 20;
+/** The largest screenshot upload, in bytes (10 MB, as photos). */
+export const SUPPORT_SCREENSHOT_MAX_BYTES = 10 * 1024 * 1024;
+/** An upload not sent within this many hours is deleted by the support job (AC-X-28). */
+export const SUPPORT_SCREENSHOT_UNSENT_HOURS = 24;
+
+export const SupportScreenshotIdSchema = z.uuid().brand<'SupportScreenshotId'>();
+export type SupportScreenshotId = z.infer<typeof SupportScreenshotIdSchema>;
+
+/** The two sizes a screenshot is served at: the thread's thumbnail and the full image. */
+export const SupportScreenshotSizeSchema = z.enum(['thumb', 'full']);
+export type SupportScreenshotSize = z.infer<typeof SupportScreenshotSizeSchema>;
+
+/**
+ * A stored screenshot (its upright size), served by `GET /v1/support/screenshots/:id` (members)
+ * or `GET /v1/ops/screenshots/:id` (operators), `?size=thumb|full`. Also the upload's answer.
+ */
+export const SupportScreenshotSchema = z.object({
+  id: SupportScreenshotIdSchema,
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+export type SupportScreenshot = z.infer<typeof SupportScreenshotSchema>;
+
+/** The screenshots a request or reply carries: the ids of the sender's own uploads. */
+const ScreenshotIdsSchema = z
+  .array(SupportScreenshotIdSchema)
+  .max(SUPPORT_SCREENSHOTS_PER_MESSAGE)
+  .refine((ids) => new Set(ids).size === ids.length, 'Each screenshot once')
+  .default([]);
+
 export const SupportMessageTextSchema = z
   .string()
   // Line endings as one kind; no control characters other than line breaks and tabs.
@@ -129,12 +163,15 @@ export const SupportThreadInputSchema = z
     kind: SupportKindSchema,
     message: SupportMessageTextSchema,
     context: SupportContextInputSchema.default({}),
+    screenshotIds: ScreenshotIdsSchema,
   })
   .strict();
 export type SupportThreadInput = z.input<typeof SupportThreadInputSchema>;
 
 /** `POST /v1/support/threads/:id/messages`. */
-export const SupportReplyInputSchema = z.object({ message: SupportMessageTextSchema }).strict();
+export const SupportReplyInputSchema = z
+  .object({ message: SupportMessageTextSchema, screenshotIds: ScreenshotIdsSchema })
+  .strict();
 export type SupportReplyInput = z.input<typeof SupportReplyInputSchema>;
 
 /** `PATCH /v1/support/threads/:id`: the requester (or an owner or manager) marks it solved. */
@@ -161,6 +198,8 @@ export const SupportMessageSchema = z.object({
   id: z.uuid(),
   author: SupportAuthorSchema,
   body: z.string(),
+  /** The screenshots sent with it (S59.2.3), in their order. */
+  screenshots: z.array(SupportScreenshotSchema),
   createdAt: UtcDateTimeSchema,
 });
 export type SupportMessage = z.infer<typeof SupportMessageSchema>;
@@ -176,6 +215,8 @@ export const SupportThreadSummarySchema = z.object({
   /** Who opened it, as the reader sees them. */
   openedBy: SupportAuthorSchema,
   unread: z.boolean(),
+  /** How many screenshots its messages carry (S59.2.3). */
+  screenshotCount: z.number().int().nonnegative(),
   createdAt: UtcDateTimeSchema,
   lastMessageAt: UtcDateTimeSchema,
 });
@@ -262,6 +303,8 @@ export const OperatorInboxItemSchema = z.discriminatedUnion('source', [
     waitingSince: UtcDateTimeSchema,
     /** The opener's "Did this help?" once solved (S59.2.2, AC-X-26). */
     rating: SupportRatingSchema.nullable(),
+    /** How many screenshots it carries (S59.2.3, AC-X-30): "2 screenshots" in the row. */
+    screenshotCount: z.number().int().nonnegative(),
   }),
   z.object({
     source: z.literal('public'),
@@ -301,6 +344,8 @@ export const OperatorMessageSchema = z.object({
     z.object({ kind: z.literal('pepper') }).strict(),
   ]),
   body: z.string(),
+  /** Its screenshots (S59.2.3); each image served is logged (`screenshot.read`, AC-X-30). */
+  screenshots: z.array(SupportScreenshotSchema),
   createdAt: UtcDateTimeSchema,
 });
 export type OperatorMessage = z.infer<typeof OperatorMessageSchema>;

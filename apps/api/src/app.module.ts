@@ -7,6 +7,7 @@ import { BookingEmailsModule } from './booking-emails/booking-emails.js';
 import { ChatModule } from './chat/chat.module.js';
 import { ClientsModule } from './clients/clients.module.js';
 import { DeletionModule } from './deletion/deletion.module.js';
+import { ScreenshotStoreModule } from './support/screenshot-store.js';
 import { ExportModule } from './export/export.module.js';
 import { ImportsModule } from './imports/imports.module.js';
 import { MemoryModule } from './memory/memory.module.js';
@@ -52,6 +53,7 @@ export class AppModule {
           secureCookies: config.auth.baseUrl.startsWith('https:'),
         }),
         PhotosModule.forRoot(config.storage),
+        ScreenshotStoreModule.forRoot(config.storage),
         UnsubscribeModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         SupportModule.forRoot({
           outboxKey: outboxKeyFrom(config.outboxSecret),

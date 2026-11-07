@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.2.2 done; next **S59.2.3** (screenshots on a request); S57 waits for the domain
+**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.2.3 done; next **S59.3** (email both ways); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,12 +10,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 (none)
 
 ## Last sessions
+- **S59.2.3 Phase 13 · Screenshots on a request (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 3", [PR #88](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/88)). Full entry in [session-log.md](session-log.md).
+  - **Built:** migration 0070 `support_screenshots` (forced RLS, sent rows immutable, operator reads logged per image); a `ScreenshotStorage` port in core + `createScreenshotStore`; upload/attach/serve/sweep/deletion/export; the picker (choose, paste, drop, 3, privacy line); thumbnails in both threads; "2 screenshots" in Your requests and the console inbox; AC-X-27…31.
+  - **Checks:** `pnpm check` green; affected integration 23/23; support+ops+screens 8/8; review 10 fixed, security none.
 - **S59.2.2 Phase 13 · Console, part 2 (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 2", [PR #87](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/87)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0069; saved replies at `/ops/replies` with `{first name}`; the `support` worker job (4 h reminder once a wait, auto-close after 7 quiet days with one email); "Did this help?" (Helpful/Not helpful); "Over 4 h: answer next" in the inbox; AC-X-23…26.
   - **Checks:** `pnpm check` green; affected integration 22/22 (db 793, core 226); ops+support 3/3, screens' support test 3/3; CI green on the first run.
-- **S59.2 Phase 13 · Operator console (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md), [PR #86](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/86)). Full entry in [session-log.md](session-log.md).
-  - **Built:** migration 0068 (grants, access log, notes, `operator_*` policies needing the access row in the same transaction), `operator` script, `/v1/ops/*` (grant + MFA), `/ops` inbox oldest first with the wait in words, replies, notes, every status, "Seen by Pepper"; AC-X-19…22.
-  - **Checks:** `pnpm check` green; affected integration 22/22 (db 782, core 216); ops 1/1, support+help 4/4, screens' support test 3/3.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.2.3 (user, 2026-11-07):** "go with your decisions… industry level" (3 a message, 10 MB, JPEG/PNG/WebP by content, 20 a day, upload then attach, 24 h sweep, images in the export, ADR-0062 Part 3). **Claude:** 2560 px, paste and drop, a crop-out line; a storage port for core's layer rule; the sweep's hour of margin. Full wording in [decisions.md](decisions.md).
 - **S59.2.2 (user, 2026-11-07):** at the brief "Preapproval with your recommendation" (D-1 screenshots → S59.2.3; D-2 platform saved replies at `/ops/replies`; D-3 auto-close what waits on the business, 7 days, one email; D-4 one 4 h reminder a wait; D-5 the opener rates, a reopen clears). **Claude:** a reopen starts a new wait; public sweep in definer functions; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.2 (user, 2026-11-07):** at the brief "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 grants by script; D-3 the access row in the same transaction; D-4 both logs; D-5 statuses; D-6 `/ops`). **Claude:** MFA for operators; no mail to typed addresses; notes operator-only, not exported; one "seen" an hour; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S59 (user, 2026-11-07):** S57 waits for the domain; build our own support system "production ready, like big companies", in the S59 series ([PCR-010](changes/PCR-010.md)). Full wording in [decisions.md](decisions.md).
@@ -90,11 +91,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.2.3 | Screenshots on a request: attached by the owner, private storage, seen in the console | 13 | Isolation + upload limit tests |
 | S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |

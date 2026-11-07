@@ -35,6 +35,17 @@ export function photoObjectKey(tenantId: string, photoId: string, width: number)
   return `tenants/${tenantId}/photos/${photoId}/${String(width)}.webp`;
 }
 
+/**
+ * Where one width of a support screenshot is kept (ADR-0062 Part 3):
+ * `tenants/<tenant>/support/<screenshot>/<width>.webp`, under the same rules as photos.
+ */
+export function screenshotObjectKey(tenantId: string, screenshotId: string, width: number): string {
+  if (!UUID.test(tenantId) || !UUID.test(screenshotId))
+    throw new Error('Invalid screenshot key ids');
+  if (!Number.isInteger(width) || width < 1 || width > 4096) throw new Error('Invalid width');
+  return `tenants/${tenantId}/support/${screenshotId}/${String(width)}.webp`;
+}
+
 /** An `ObjectStore` in memory, for unit tests and tools; never for the running app. */
 export class MemoryObjectStore implements ObjectStore {
   private readonly objects = new Map<string, StoredObject>();

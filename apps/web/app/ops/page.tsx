@@ -2,6 +2,7 @@ import { OperatorInboxSchema, type OperatorInboxView } from '@pepper/contracts';
 import { Badge, cx, EmptyState, FOCUS_RING, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { SUPPORT_KIND_LABEL } from '../../lib/support';
+import { screenshotCountLabel } from '../../lib/support-screenshots';
 import {
   OPS_PATHS,
   OPS_PUBLIC_STATUS,
@@ -97,6 +98,9 @@ export default async function OpsInboxPage({
             const note = overdueNote(view, item.waitingSince, now);
             const late = note !== null;
             const rating = item.source === 'thread' && item.rating !== null ? item.rating : null;
+            // S59.2.3's top-up: the team knows there is something to look at before opening it.
+            const shots =
+              item.source === 'thread' ? screenshotCountLabel(item.screenshotCount) : null;
             return (
               <ListRow
                 key={item.id}
@@ -123,6 +127,11 @@ export default async function OpsInboxPage({
                     {item.source === 'thread' ? (
                       <span>· {SUPPORT_KIND_LABEL[item.kind]}</span>
                     ) : null}
+                    {shots === null ? null : (
+                      <Badge tone="info">
+                        <span data-testid="ops-screenshots">{shots}</span>
+                      </Badge>
+                    )}
                     {view === 'waiting' ? null : <Badge tone={status.tone}>{status.label}</Badge>}
                     {rating === null ? null : (
                       <Badge tone={OPS_RATING[rating].tone}>

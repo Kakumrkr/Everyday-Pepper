@@ -64,6 +64,7 @@ import {
   listDueSupportThreads,
   markSupportThreadRead,
 } from './repositories/support.js';
+import { insertSupportScreenshot } from './repositories/support-screenshots.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './repositories/feed.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
@@ -122,8 +123,11 @@ interface TenantTable {
   outboxScan?: string;
   /** The `job_scan` (withJobScan) predicate, as Postgres prints it, if any. */
   jobScan?: string;
-  /** Has the `operator_read` policy (withOperator, S59.2, ADR-0062). */
-  operatorRead?: true;
+  /**
+   * Has the `operator_read` policy (withOperator, S59.2, ADR-0062): `true` for the plain one, or
+   * its predicate as Postgres prints it when it narrows further (screenshots: sent ones only).
+   */
+  operatorRead?: true | string;
   /** The services may only insert and read (no UPDATE or DELETE grant). */
   appendOnly?: true;
   /** The services may insert, read and update, but not delete (receipts, ADR-0028). */
@@ -648,6 +652,41 @@ const TENANT_TABLES: Record<string, TenantTable> = {
         cmd: 'ALL',
         qual: '(thread_id IN ( SELECT support_threads.id\n   FROM support_threads))',
         with_check: '(thread_id IN ( SELECT support_threads.id\n   FROM support_threads))',
+      },
+    ],
+  },
+  support_screenshots: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const id = newId();
+      await insertSupportScreenshot(tx, {
+        id,
+        uploadedBy: await insertUser(db),
+        width: 800,
+        height: 600,
+        widths: [480, 800],
+        bytes: 1024,
+        now: new Date(),
+      });
+      return id;
+    },
+    touch: 'discarded_at = discarded_at',
+    operatorRead:
+      '((( SELECT current_operator_id() AS current_operator_id) IS NOT NULL) AND (thread_id IS NOT NULL))',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('support'::text))",
+    memberScope: [
+      {
+        policyname: 'member_scope',
+        cmd: 'ALL',
+        qual: '\nCASE\n    WHEN (thread_id IS NULL) THEN ((current_user_id() IS NULL) OR (uploaded_by_user_id = current_user_id()))\n    ELSE (thread_id IN ( SELECT support_threads.id\n       FROM support_threads))\nEND',
+        with_check:
+          '\nCASE\n    WHEN (thread_id IS NULL) THEN ((current_user_id() IS NULL) OR (uploaded_by_user_id = current_user_id()))\n    ELSE (thread_id IN ( SELECT support_threads.id\n       FROM support_threads))\nEND',
+      },
+      {
+        policyname: 'member_scope_unsent_delete',
+        cmd: 'DELETE',
+        qual: '(thread_id IS NULL)',
+        with_check: null,
       },
     ],
   },
@@ -1219,7 +1258,7 @@ describe('catalog', () => {
                 permissive: 'PERMISSIVE',
                 cmd: 'SELECT',
                 roles: ['public'],
-                qual: OPERATOR_ACCESS,
+                qual: spec.operatorRead === true ? OPERATOR_ACCESS : spec.operatorRead,
                 with_check: null,
               },
             ]),

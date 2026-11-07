@@ -14,7 +14,9 @@ import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { fillSavedReply, OPS_RATING, OPS_THREAD_STATUS } from '../../../lib/ops';
 import { SUPPORT_KIND_LABEL, supportTime } from '../../../lib/support';
+import { opsScreenshotSrc } from '../../../lib/support-screenshots';
 import { Notice } from '../form-parts';
+import { MessageScreenshots } from '../support/message-screenshots';
 import { OpsNotes } from './ops-notes';
 
 const STATUSES: readonly { value: SupportStatus; label: string }[] = Object.entries(
@@ -187,6 +189,16 @@ export function OpsThreadView({
               >
                 {message.body}
               </p>
+              <MessageScreenshots
+                screenshots={message.screenshots}
+                from={
+                  message.author.kind === 'pepper'
+                    ? 'Pepper team'
+                    : (message.author.name ?? 'a former team member')
+                }
+                src={opsScreenshotSrc}
+                align={pepper ? 'end' : 'start'}
+              />
             </li>
           );
         })}

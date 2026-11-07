@@ -14,6 +14,7 @@ import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { SUPPORT_KINDS, SUPPORT_PATHS, supportContext } from '../../../lib/support';
 import { Notice } from '../form-parts';
+import { ScreenshotPicker, useScreenshotDraft } from './screenshot-picker';
 
 /**
  * "Tell us what went wrong" (S59, PCR-010, AC-X-14): what it is about, the message, and what is
@@ -40,6 +41,7 @@ export function SupportForm({
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [created, setCreated] = useState<SupportCreated | null>(null);
+  const screenshots = useScreenshotDraft();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,12 +54,21 @@ export function SupportForm({
     }
     setFieldError(undefined);
     setError(null);
+    if (screenshots.adding) {
+      setError('Wait a moment: your screenshots are still being added.');
+      return;
+    }
     setBusy(true);
     const context: SupportContextInput = supportContext(query, {
       width: window.innerWidth,
       height: window.innerHeight,
     });
-    const result = await sendJson('POST', '/v1/support/threads', { kind, message, context });
+    const result = await sendJson('POST', '/v1/support/threads', {
+      kind,
+      message,
+      context,
+      screenshotIds: screenshots.ids,
+    });
     setBusy(false);
     if (!result.ok) {
       setError(result.message);
@@ -68,6 +79,7 @@ export function SupportForm({
       setError('I sent it, but couldn’t read the answer. Check Your requests.');
       return;
     }
+    screenshots.reset();
     setCreated(parsed.data);
   }
 
@@ -108,7 +120,12 @@ export function SupportForm({
   }
 
   return (
-    <form noValidate onSubmit={(event) => void submit(event)} className="flex flex-col gap-6">
+    <form
+      noValidate
+      onSubmit={(event) => void submit(event)}
+      onPaste={screenshots.onPaste}
+      className="flex flex-col gap-6"
+    >
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
         <legend className="mb-2 p-0 type-subheading text-ink">What is it about?</legend>
         {SUPPORT_KINDS.map((option) => {
@@ -155,6 +172,7 @@ export function SupportForm({
         }
         error={fieldError}
       />
+      <ScreenshotPicker draft={screenshots} />
       <div className="flex flex-col gap-1 rounded-md bg-surface-2 px-4 py-3">
         <p className="m-0 type-label text-ink">We add, so you don’t have to type it</p>
         <p className="m-0 type-caption text-ink-2">
@@ -170,8 +188,8 @@ export function SupportForm({
       </div>
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={busy}>
-          {busy ? 'Sending…' : 'Send to Pepper'}
+        <Button type="submit" disabled={busy || screenshots.adding}>
+          {busy ? 'Sending…' : screenshots.adding ? 'Adding screenshots…' : 'Send to Pepper'}
         </Button>
         <Link
           href={SUPPORT_PATHS.list}

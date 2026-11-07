@@ -53,7 +53,15 @@ const THREAD = {
   business: 'Juniper',
   openedBy: { name: 'Jess', role: 'staff' },
   context: null,
-  messages: [{ id: ID, author: { kind: 'member', name: 'Jess' }, body: 'Help', createdAt: AT }],
+  messages: [
+    {
+      id: ID,
+      author: { kind: 'member', name: 'Jess' },
+      body: 'Help',
+      screenshots: [],
+      createdAt: AT,
+    },
+  ],
   notes: [],
   createdAt: AT,
   lastMessageAt: AT,
@@ -212,7 +220,7 @@ describe('the routes (AC-X-20/21)', () => {
       {},
       operator,
       ID,
-      { message: 'On it' },
+      { message: 'On it', screenshotIds: [] },
       OPTIONS,
     );
     expect((await send('post', `/v1/ops/threads/${ID}/notes`, { note: 'SMS off' })).status).toBe(

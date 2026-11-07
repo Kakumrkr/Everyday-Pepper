@@ -90,7 +90,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     ],
     waitlist: [],
     facts: [],
-    support: { threads: [], messages: [] },
+    support: { threads: [], messages: [], screenshots: [] },
     ...overrides,
   };
 }
@@ -168,9 +168,22 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               },
             ],
             messages: [
-              { threadId: thread, authorKind: 'member', body: 'How do I import?', createdAt: AT },
-              { threadId: thread, authorKind: 'pepper', body: 'Clients → Import.', createdAt: AT },
+              {
+                id: 'm1',
+                threadId: thread,
+                authorKind: 'member',
+                body: 'How do I import?',
+                createdAt: AT,
+              },
+              {
+                id: 'm2',
+                threadId: thread,
+                authorKind: 'pepper',
+                body: 'Clients → Import.',
+                createdAt: AT,
+              },
             ],
+            screenshots: [],
           },
         }),
         AT,
@@ -188,6 +201,49 @@ describe('buildBusinessExport (AC-W1-37)', () => {
         ],
       },
     ]);
+  });
+
+  it('puts each sent screenshot next to support.json, named on its message (AC-X-31)', () => {
+    const thread = '0190a000-0000-7000-8000-000000000901';
+    const shown = '0190a000-0000-7000-8000-000000000a01';
+    const gone = '0190a000-0000-7000-8000-000000000a02';
+    const image = Uint8Array.from([82, 73, 70, 70, 1, 2, 3]);
+    const built = buildBusinessExport(
+      data({
+        support: {
+          threads: [
+            {
+              id: thread,
+              reference: 'PEP-7K3Q9E',
+              kind: 'problem',
+              status: 'waiting_on_pepper',
+              createdAt: AT,
+            },
+          ],
+          messages: [
+            { id: 'm1', threadId: thread, authorKind: 'member', body: 'Look', createdAt: AT },
+          ],
+          screenshots: [
+            { id: shown, messageId: 'm1', widths: [480, 1170] },
+            { id: gone, messageId: 'm1', widths: [480] },
+          ],
+        },
+      }),
+      AT,
+      new Map([[shown, image]]),
+    );
+    const raw = unzipSync(built.bytes);
+    expect(raw[`support/screenshots/${shown}.webp`]).toEqual(image);
+    expect(raw[`support/screenshots/${gone}.webp`]).toBeUndefined();
+    const files = unzip(built.bytes);
+    const support = JSON.parse(files['support.json'] ?? '') as { messages: unknown[] }[];
+    expect(support[0]?.messages[0]).toEqual({
+      from: 'Your team',
+      text: 'Look',
+      at: AT.toISOString(),
+      screenshots: [`support/screenshots/${shown}.webp`],
+      screenshotsNotIncluded: 1,
+    });
   });
 
   it('writes clients.csv in Pepper’s columns', () => {
