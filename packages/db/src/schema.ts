@@ -2974,6 +2974,8 @@ export const publicSupportRequests = pgTable(
     body: text('body').notNull(),
     page: text('page'),
     topic: text('topic'),
+    /** How it came: the signed-out form, or an email to the team's address (S59.3.2, AC-X-41). */
+    channel: text('channel').notNull().default('form'),
     /** S59.2 (AC-X-21): open → answered (the team wrote back by email) → solved. */
     status: text('status').notNull().default('open'),
     statusChangedAt: timestamp('status_changed_at', { withTimezone: true }),
@@ -3012,6 +3014,7 @@ export const publicSupportRequests = pgTable(
       'public_support_requests_topic_length',
       sql`${table.topic} IS NULL OR length(${table.topic}) <= 80`,
     ),
+    check('public_support_requests_channel_known', sql`${table.channel} IN ('form', 'email')`),
   ],
 );
 /**
@@ -3046,6 +3049,21 @@ export const inboundEmails = pgTable(
     supportMessageId: uuid('support_message_id'),
     fromAddress: text('from_address'),
     heldText: text('held_text'),
+    /** A held new request's subject (S59.3.2), kept and emptied with its text. */
+    heldSubject: text('held_subject'),
+    /** The public request a stranger's email opened (S59.3.2, AC-X-41). */
+    publicRequestId: uuid('public_request_id').references(() => publicSupportRequests.id, {
+      onDelete: 'cascade',
+    }),
+    /** The team's note an accepted email from someone outside the business became. */
+    supportNoteId: uuid('support_note_id').references(() => supportNotes.id, {
+      onDelete: 'cascade',
+    }),
+    /** SHA-256 of the sender's lowercase address: the loop guard for new requests, no address. */
+    senderHash: text('sender_hash'),
+    /** The operator who accepted it from the held review (AC-X-44): their word stands for the check. */
+    acceptedBy: uuid('accepted_by'),
+    acceptedAt: timestamp('accepted_at', { withTimezone: true }),
     receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
     processedAt: timestamp('processed_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -3058,6 +3076,7 @@ export const inboundEmails = pgTable(
       .where(sql`${table.messageId} IS NOT NULL`),
     index('inbound_emails_due_idx').on(table.status, table.receivedAt),
     index('inbound_emails_thread_idx').on(table.tenantId, table.threadId, table.processedAt),
+    index('inbound_emails_sender_idx').on(table.senderHash, table.processedAt),
     foreignKey({
       name: 'inbound_emails_thread_fk',
       columns: [table.tenantId, table.threadId],
@@ -3076,22 +3095,88 @@ export const inboundEmails = pgTable(
       'inbound_emails_reason_length',
       sql`${table.reason} IS NULL OR ${table.reason} ~ '^[a-z_]{1,40}$'`,
     ),
+    // Landed: a message or the team's note in a business's thread, or a public request.
     check(
       'inbound_emails_landed',
-      sql`${table.status} <> 'landed' OR (${table.tenantId} IS NOT NULL AND ${table.threadId} IS NOT NULL AND ${table.supportMessageId} IS NOT NULL)`,
+      sql`${table.status} <> 'landed' OR (${table.tenantId} IS NOT NULL AND ${table.threadId} IS NOT NULL AND ((${table.supportMessageId} IS NULL) <> (${table.supportNoteId} IS NULL)) AND ${table.publicRequestId} IS NULL) OR (${table.publicRequestId} IS NOT NULL AND ${table.tenantId} IS NULL AND ${table.threadId} IS NULL)`,
     ),
+    // A sender, a text and a subject are kept only while held (a stranger's has no business).
     check(
       'inbound_emails_held_content',
-      sql`(${table.fromAddress} IS NULL AND ${table.heldText} IS NULL) OR (${table.status} = 'held' AND ${table.tenantId} IS NOT NULL)`,
+      sql`(${table.fromAddress} IS NULL AND ${table.heldText} IS NULL AND ${table.heldSubject} IS NULL) OR ${table.status} = 'held'`,
     ),
     check(
       'inbound_emails_held_size',
-      sql`(${table.fromAddress} IS NULL OR length(${table.fromAddress}) <= 254) AND (${table.heldText} IS NULL OR length(${table.heldText}) <= 4000)`,
+      sql`(${table.fromAddress} IS NULL OR length(${table.fromAddress}) <= 254) AND (${table.heldText} IS NULL OR length(${table.heldText}) <= 4000) AND (${table.heldSubject} IS NULL OR length(${table.heldSubject}) <= 200)`,
+    ),
+    check(
+      'inbound_emails_sender_hash',
+      sql`${table.senderHash} IS NULL OR ${table.senderHash} ~ '^[0-9a-f]{64}$'`,
+    ),
+    check(
+      'inbound_emails_accepted',
+      sql`(${table.acceptedBy} IS NULL) = (${table.acceptedAt} IS NULL)`,
     ),
     pgPolicy('inbound_mail', { for: 'all', using: inboundMail, withCheck: inboundMail }),
+    // The console's held review and counts (AC-X-44, AC-X-45), in a logged operator transaction.
+    pgPolicy('operator_access', { for: 'select', using: operatorAccess }),
+    pgPolicy('operator_review', {
+      for: 'update',
+      using: sql`${operatorAccess} AND status = 'held'`,
+      withCheck: operatorAccess,
+    }),
   ],
 );
 export type InboundEmailRow = typeof inboundEmails.$inferSelect;
+
+/**
+ * Delivery problems Resend reported for an address (S59.3.2, ADR-0063 Part 2, AC-X-42): one row
+ * per signed event. A hard bounce or a complaint stops support email to the address until an
+ * operator resumes it (`resumed_at`); a soft bounce is only counted. A platform row reached in
+ * the inbound context (the webhook) or a logged operator transaction; delivery asks
+ * `support_mail_stopped(address)`. Kept when businesses go: the address asked not to be mailed.
+ */
+export const emailSuppressions = pgTable(
+  'email_suppressions',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    provider: text('provider').notNull(),
+    eventId: text('event_id').notNull(),
+    address: text('address').notNull(),
+    kind: text('kind').notNull(),
+    occurredAt: timestamp('occurred_at', { withTimezone: true }).notNull(),
+    resumedAt: timestamp('resumed_at', { withTimezone: true }),
+    resumedBy: uuid('resumed_by'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('email_suppressions_event_unique').on(table.provider, table.eventId),
+    index('email_suppressions_address_idx').on(table.address, table.occurredAt),
+    index('email_suppressions_created_idx').on(table.createdAt),
+    check('email_suppressions_provider_known', sql`${table.provider} IN ('resend')`),
+    check(
+      'email_suppressions_kind_known',
+      sql`${table.kind} IN ('hard_bounce', 'soft_bounce', 'complaint')`,
+    ),
+    check(
+      'email_suppressions_address_format',
+      sql`length(${table.address}) BETWEEN 3 AND 254 AND ${table.address} = lower(${table.address}) AND position('@' in ${table.address}) > 1`,
+    ),
+    check('email_suppressions_event_length', sql`length(${table.eventId}) BETWEEN 1 AND 200`),
+    check(
+      'email_suppressions_resumed',
+      sql`(${table.resumedAt} IS NULL) = (${table.resumedBy} IS NULL) AND (${table.resumedAt} IS NULL OR ${table.kind} <> 'soft_bounce')`,
+    ),
+    pgPolicy('inbound_mail', { for: 'all', using: inboundMail, withCheck: inboundMail }),
+    pgPolicy('operator_access', { for: 'select', using: operatorAccess }),
+    pgPolicy('operator_resume', {
+      for: 'update',
+      using: operatorAccess,
+      withCheck: operatorAccess,
+    }),
+  ],
+);
+export type EmailSuppressionRow = typeof emailSuppressions.$inferSelect;
 
 export type SupportThreadRow = typeof supportThreads.$inferSelect;
 export type SupportMessageRow = typeof supportMessages.$inferSelect;
@@ -3129,7 +3214,7 @@ export const operatorAccessLog = pgTable(
     index('operator_access_log_created_idx').on(table.createdAt),
     check(
       'operator_access_log_action_known',
-      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write', 'screenshot.read')`,
+      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write', 'screenshot.read', 'held.read', 'held.accept', 'held.discard', 'mail.resume', 'inbound.counts')`,
     ),
   ],
 );

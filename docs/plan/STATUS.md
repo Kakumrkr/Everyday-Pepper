@@ -9,14 +9,14 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S59.3.2 · Email, part 2** (branch `claude/brave-noether-926iik`; ADR-0063 Part 2; AC-X-40…46). Decisions D-1…D-4 in decisions.md.
 - [x] 1 ACs, traceability, ADR Part 2 (docs)
-- [ ] 2 migration 0072 (`email_suppressions`, held rows without a tenant, member lookup, operator actions) + db repos + table lists
+- [x] 2 migration 0072 (`email_suppressions`, held rows without a tenant, member lookup, operator actions) + db repos + table lists
 - [ ] 3 contracts (bounce/complaint events, inbox `held`, held items, counts, suppression on thread/request)
 - [ ] 4 core: new requests by email (member / stranger / held), fixtures
 - [ ] 5 core: bounces/complaints → suppression; skip at delivery
 - [ ] 6 core+api: held Accept/Discard, Resume mail, counts — audited
 - [ ] 7 web: Held view, held count in the header (top-up), "Mail stopped"; gallery, ops.spec, screens
 - [ ] 8 close
-Next: task 2.
+Next: task 3 (contracts). db: 0072 adds `email_suppressions`, inbound columns (public_request_id, support_note_id, held_subject, sender_hash, accepted_by/at), `support_mail_stopped`, `support_inbound_member`; Accept = back to `received` with `accepted_by` (the worker lands it again).
 
 ## Last sessions
 - **S59.3 Phase 13 · Email both ways (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md), [PR #89](https://github.com/Kakumrkr/Everyday-Pepper/pull/89)). Full entry in [session-log.md](session-log.md).

@@ -624,7 +624,7 @@ export async function listSupportForExport(tx: TenantTx): Promise<{
  * caller draws another.
  */
 export async function insertPublicSupportRequest(
-  db: Database,
+  db: Database | TenantTx,
   input: {
     reference: string;
     email: string;
@@ -633,6 +633,8 @@ export async function insertPublicSupportRequest(
     page: string | null;
     topic: string | null;
     now: Date;
+    /** An email to the team's address (S59.3.2, AC-X-41); the form's otherwise. */
+    channel?: 'form' | 'email';
   },
 ): Promise<{ id: string } | null> {
   // No RETURNING and no ON CONFLICT: the form's role may insert a request but not read one
@@ -647,6 +649,7 @@ export async function insertPublicSupportRequest(
       body: input.body,
       page: input.page,
       topic: input.topic,
+      channel: input.channel ?? 'form',
       createdAt: input.now,
     });
   } catch (error) {

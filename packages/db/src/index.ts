@@ -31,6 +31,7 @@ export * from './repositories/reminders.js';
 export * from './repositories/support.js';
 export * from './repositories/support-screenshots.js';
 export * from './repositories/inbound-email.js';
+export * from './repositories/email-suppression.js';
 export * from './repositories/remembered-devices.js';
 export * from './repositories/sessions.js';
 export * from './repositories/tasks.js';
