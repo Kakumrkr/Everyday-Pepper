@@ -538,6 +538,7 @@ async function toOperatorThread(
           : { kind: 'member', name: message.authorName },
       body: message.body,
       screenshots: screenshots.get(message.id) ?? [],
+      channel: message.channel,
       createdAt: message.createdAt.toISOString(),
     })),
     notes: notes.map(toNote),

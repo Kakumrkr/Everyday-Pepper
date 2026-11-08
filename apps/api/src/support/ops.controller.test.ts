@@ -59,6 +59,7 @@ const THREAD = {
       author: { kind: 'member', name: 'Jess' },
       body: 'Help',
       screenshots: [],
+      channel: 'app',
       createdAt: AT,
     },
   ],

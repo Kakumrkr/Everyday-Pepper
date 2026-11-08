@@ -153,4 +153,26 @@ describe('loadApiConfig', () => {
     // Empty means unset, as for every variable.
     expect(loadApiConfig({ ...required, AI_SCRIPTED_PROVIDER: '' }).ai.scripted).toBe(false);
   });
+
+  it('has replies by email off until the domain and the webhook secret are set (S59.3)', () => {
+    expect(loadApiConfig(required).inbound).toEqual({ domain: null, webhookSecret: null });
+    const secret = `whsec_${Buffer.from('a-test-webhook-signing-key-32-bytes!').toString('base64')}`;
+    expect(
+      loadApiConfig({
+        ...required,
+        INBOUND_EMAIL_DOMAIN: 'Reply.Pepper.Example',
+        RESEND_WEBHOOK_SECRET: secret,
+      }).inbound,
+    ).toEqual({ domain: 'reply.pepper.example', webhookSecret: secret });
+    expect(() => loadApiConfig({ ...required, INBOUND_EMAIL_DOMAIN: 'not a domain' })).toThrow(
+      /^Invalid api environment: INBOUND_EMAIL_DOMAIN$/,
+    );
+    // 20 base64 characters are only 15 bytes: too short a key.
+    expect(() =>
+      loadApiConfig({ ...required, RESEND_WEBHOOK_SECRET: `whsec_${'A'.repeat(20)}` }),
+    ).toThrow(/^Invalid api environment: RESEND_WEBHOOK_SECRET$/);
+    expect(() => loadApiConfig({ ...required, RESEND_WEBHOOK_SECRET: 're_secret_value' })).toThrow(
+      /^Invalid api environment: RESEND_WEBHOOK_SECRET$/,
+    );
+  });
 });

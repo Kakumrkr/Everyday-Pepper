@@ -69,6 +69,8 @@ export interface SupportMessageRecord {
   /** The writer's display name; `null` for the team or a deleted account. */
   authorName: string | null;
   body: string;
+  /** How it came (S59.3): in the app, or a member's emailed reply. */
+  channel: 'app' | 'email';
   createdAt: Date;
 }
 
@@ -87,6 +89,10 @@ export async function insertSupportThread(
     context: Record<string, unknown>;
     body: string;
     now: Date;
+    /** `email`: a follow-up opened by an emailed reply (S59.3); default `app`. */
+    channel?: 'app' | 'email';
+    /** The solved request this one follows up (S59.3). */
+    followUpOf?: string;
   },
 ): Promise<{ id: string; messageId: string } | null> {
   const openedByUserId = UserIdSchema.parse(input.openedByUserId);
@@ -98,6 +104,7 @@ export async function insertSupportThread(
       status: 'waiting_on_pepper',
       openedByUserId,
       context: input.context,
+      followUpOf: input.followUpOf === undefined ? null : Id.parse(input.followUpOf),
       lastMessageAt: input.now,
       createdAt: input.now,
       updatedAt: input.now,
@@ -112,6 +119,7 @@ export async function insertSupportThread(
       authorKind: 'member',
       authorUserId: openedByUserId,
       body: input.body,
+      channel: input.channel ?? 'app',
       createdAt: input.now,
     })
     .returning({ id: supportMessages.id });
@@ -200,22 +208,53 @@ export async function findSupportThread(
   return row === undefined ? undefined : toThreadRecord(row);
 }
 
+/** The newest follow-up of thread `id` the transaction's member reaches (S59.3), if any. */
+export async function findSupportFollowUp(
+  tx: TenantTx,
+  id: string,
+): Promise<{ id: string } | undefined> {
+  const [row] = await tx
+    .select({ id: supportThreads.id })
+    .from(supportThreads)
+    .where(eq(supportThreads.followUpOf, Id.parse(id)))
+    .orderBy(desc(supportThreads.createdAt), desc(supportThreads.id))
+    .limit(1);
+  return row;
+}
+
 /** Locks a thread for a reply or a status change; `undefined` if it isn't reachable. */
 export async function lockSupportThread(
   tx: TenantTx,
   id: string,
-): Promise<{ id: string; status: SupportStatus; reference: string } | undefined> {
+): Promise<
+  | {
+      id: string;
+      status: SupportStatus;
+      reference: string;
+      kind: SupportKind;
+      solvedAt: Date | null;
+    }
+  | undefined
+> {
   const [row] = await tx
     .select({
       id: supportThreads.id,
       status: supportThreads.status,
       reference: supportThreads.reference,
+      kind: supportThreads.kind,
+      solvedAt: supportThreads.solvedAt,
     })
     .from(supportThreads)
     .where(eq(supportThreads.id, Id.parse(id)))
     .for('update')
     .limit(1);
-  return row === undefined ? undefined : { ...row, status: SupportStatusSchema.parse(row.status) };
+  return row === undefined
+    ? undefined
+    : {
+        ...row,
+        status: SupportStatusSchema.parse(row.status),
+        kind: SupportKindSchema.parse(row.kind),
+      };
 }
 
 /** A thread's messages, oldest first. */
@@ -230,6 +269,7 @@ export async function listSupportMessages(
       authorUserId: supportMessages.authorUserId,
       authorName: users.name,
       body: supportMessages.body,
+      channel: supportMessages.channel,
       createdAt: supportMessages.createdAt,
     })
     .from(supportMessages)
@@ -239,6 +279,7 @@ export async function listSupportMessages(
   return rows.map((row) => ({
     ...row,
     authorKind: row.authorKind === 'pepper' ? 'pepper' : 'member',
+    channel: row.channel === 'email' ? 'email' : 'app',
   }));
 }
 
@@ -254,6 +295,8 @@ export async function appendSupportMessage(
     body: string;
     status: SupportStatus;
     now: Date;
+    /** `email`: a member's emailed reply (S59.3); default `app`. */
+    channel?: 'app' | 'email';
   },
 ): Promise<{ id: string }> {
   const threadId = Id.parse(input.threadId);
@@ -264,6 +307,7 @@ export async function appendSupportMessage(
       authorKind: input.author.kind,
       authorUserId: input.author.kind === 'member' ? UserIdSchema.parse(input.author.userId) : null,
       body: input.body,
+      channel: input.channel ?? 'app',
       createdAt: input.now,
     })
     .returning({ id: supportMessages.id });
@@ -542,7 +586,14 @@ export async function countSupportWrites(
 /** The transaction business's threads and their messages, for its export (ADR-0053). */
 export async function listSupportForExport(tx: TenantTx): Promise<{
   threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
-  messages: { id: string; threadId: string; authorKind: string; body: string; createdAt: Date }[];
+  messages: {
+    id: string;
+    threadId: string;
+    authorKind: string;
+    body: string;
+    channel: string;
+    createdAt: Date;
+  }[];
 }> {
   const threads = await tx
     .select({
@@ -560,6 +611,7 @@ export async function listSupportForExport(tx: TenantTx): Promise<{
       threadId: supportMessages.threadId,
       authorKind: supportMessages.authorKind,
       body: supportMessages.body,
+      channel: supportMessages.channel,
       createdAt: supportMessages.createdAt,
     })
     .from(supportMessages)

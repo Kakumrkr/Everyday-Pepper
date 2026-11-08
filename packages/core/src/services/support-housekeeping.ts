@@ -22,7 +22,12 @@ import {
 import { systemClock, type Clock } from '../clock.js';
 import type { Mailer } from '../outbox.js';
 import { queueEmail } from './outbox.js';
-import { findSupportOpener, firstNameOf, SUPPORT_KIND_LABELS } from './support.js';
+import {
+  findSupportOpener,
+  firstNameOf,
+  SUPPORT_KIND_LABELS,
+  supportReplyRouting,
+} from './support.js';
 import { sweepUnsentSupportScreenshots, type ScreenshotStorage } from './support-screenshots.js';
 
 // The support job (S59.2.2, ADR-0062, AC-X-24/25), run by the worker every few minutes. It
@@ -37,6 +42,8 @@ export interface SupportHousekeepingOptions {
   outboxKey: Buffer;
   /** The team's address (`SUPPORT_EMAIL`); `null`: no reminders are sent. */
   supportEmail: string | null;
+  /** Where members' emailed replies come back (S59.3, ADR-0063); `null`/absent: none. */
+  inboundDomain?: string | null;
   /** The web app's origin, for the console's and the thread's links; `null`: no links. */
   baseUrl: string | null;
   /** Sends the public requests' reminders, which have no business's outbox; `null`: none. */
@@ -204,22 +211,27 @@ async function closeQuiet(
   if (opener === undefined) return;
   const firstName = firstNameOf(opener.name);
   const link = options.baseUrl === null ? null : `${options.baseUrl}/support/${thread.id}`;
+  const routing = supportReplyRouting(options, thread.reference);
+  const how =
+    routing.firstLines.length > 0 ? 'reply to this email or in the app' : 'reply in the app';
   await queueEmail(
     tx,
     {
       to: opener.email,
       subject: `We closed ${thread.reference}`,
       text: [
+        ...routing.firstLines,
         firstName === '' ? 'Hi,' : `Hi ${firstName},`,
         '',
         `We closed your request ${thread.reference} after ${String(SUPPORT_QUIET_DAYS)} quiet days.`,
         link === null
-          ? 'If it isn’t sorted, reply in the app and it opens again.'
-          : `If it isn’t sorted, reply in the app and it opens again: ${link}`,
+          ? `If it isn’t sorted, ${how} and it opens again.`
+          : `If it isn’t sorted, ${how} and it opens again: ${link}`,
         '',
         '— The Pepper team',
       ].join('\n'),
-      ...(options.supportEmail !== null && { replyTo: options.supportEmail }),
+      ...routing.headers,
+      autoSubmitted: true,
     },
     {
       key: options.outboxKey,

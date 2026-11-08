@@ -51,6 +51,8 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   business_photos: 'the images are the owner’s own uploads (a later export, ADR-0053)',
   import_batches: 'earlier imports’ working state',
   import_rows: 'earlier imports’ working state',
+  inbound_emails:
+    'emails at the inbound webhook (S59.3): delivery records; a landed reply is its support message',
   client_import_refs: 'other tools’ ids for imported clients',
   outbox_messages: 'emails waiting to go out',
   outbox_dispatch: 'email delivery state',
@@ -170,7 +172,15 @@ export interface BusinessExportData {
   /** Requests to the Pepper team (S59, AC-X-18) and their messages, the team's included. */
   support: {
     threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
-    messages: { id: string; threadId: string; authorKind: string; body: string; createdAt: Date }[];
+    messages: {
+      id: string;
+      threadId: string;
+      authorKind: string;
+      body: string;
+      /** `app` or `email` (S59.3). */
+      channel: string;
+      createdAt: Date;
+    }[];
     /** The screenshots sent with them (S59.2.3, AC-X-31): the images are read from storage. */
     screenshots: { id: string; messageId: string; widths: number[] }[];
   };

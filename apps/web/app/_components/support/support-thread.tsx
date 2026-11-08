@@ -15,6 +15,7 @@ import { formText } from '../../../lib/form';
 import { SUPPORT_KIND_LABEL, SUPPORT_STATUS, authorLabel, supportTime } from '../../../lib/support';
 import { screenshotSrc } from '../../../lib/support-screenshots';
 import { Notice } from '../form-parts';
+import { SupportMessageMeta } from './message-meta';
 import { MessageScreenshots } from './message-screenshots';
 import { ScreenshotPicker, useScreenshotDraft } from './screenshot-picker';
 
@@ -146,12 +147,11 @@ export function SupportThreadView({
               key={message.id}
               className={cx('flex flex-col gap-1', pepper ? 'items-start' : 'items-end')}
             >
-              <span className="type-caption text-ink-2">
-                <span className="font-semibold text-ink">{authorLabel(message.author)}</span> ·{' '}
-                <span className="tabular-nums">
-                  {supportTime(message.createdAt, timeZone, now)}
-                </span>
-              </span>
+              <SupportMessageMeta
+                who={authorLabel(message.author)}
+                when={supportTime(message.createdAt, timeZone, now)}
+                byEmail={message.channel === 'email'}
+              />
               <p
                 className={cx(
                   'm-0 max-w-11/12 rounded-lg px-4 py-3 type-body break-words whitespace-pre-wrap text-ink',

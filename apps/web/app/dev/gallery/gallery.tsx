@@ -40,6 +40,7 @@ import {
   type TypeToken,
 } from '@pepper/ui';
 import { useState, type ReactNode } from 'react';
+import { SupportMessageMeta } from '../../_components/support/message-meta';
 import {
   BARBERS,
   BRIEFING,
@@ -405,6 +406,22 @@ export function Gallery() {
               primary={<Button>Book</Button>}
             />
             <p className="m-0 type-caption text-ink-3">{SHOP.cancellation}</p>
+          </Section>
+
+          <Section id="support" title="Support: a reply by email">
+            {/* S59.3 (AC-X-39): the line both threads show above a member's emailed reply. */}
+            <div className="flex flex-col items-end gap-1">
+              <SupportMessageMeta who="You" when="Today, 10:04 AM" byEmail />
+              <p className="m-0 max-w-11/12 rounded-lg bg-brand-soft px-4 py-3 type-body break-words whitespace-pre-wrap text-ink">
+                Pulled down to refresh and the calendar shows my bookings again. Thanks!
+              </p>
+            </div>
+            <div className="flex flex-col items-start gap-1">
+              <SupportMessageMeta who="Pepper team" when="Today, 10:02 AM" byEmail={false} />
+              <p className="m-0 max-w-11/12 rounded-lg border border-line bg-surface px-4 py-3 type-body break-words whitespace-pre-wrap text-ink">
+                Pull down on the calendar to refresh it.
+              </p>
+            </div>
           </Section>
 
           <Section id="empty" title="Empty states">

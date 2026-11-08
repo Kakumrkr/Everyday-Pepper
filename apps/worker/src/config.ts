@@ -10,6 +10,7 @@ import {
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
 import { loadStorageConfig, type StorageConfig } from '@pepper/storage';
+import { InboundDomainSchema } from '@pepper/contracts';
 import { z } from 'zod';
 
 const JobsEnvSchema = z.object({
@@ -47,6 +48,25 @@ const JobsEnvSchema = z.object({
   SUPPORT_EMAIL: z.email().max(254).optional(),
   /** How often the support job runs (S59.2.2): reminders at 4 h, auto-close at 7 days. */
   SUPPORT_POLL_MS: z.coerce.number().int().min(10_000).max(3_600_000).default(300_000),
+  /** Replies by email (S59.3, ADR-0063): the signed addresses' domain, as the api's. */
+  INBOUND_EMAIL_DOMAIN: InboundDomainSchema.optional(),
+  /**
+   * The receiving server's authserv-id in `Authentication-Results` (S59.3), e.g.
+   * `amazonses.com`: only its verdict on a sender counts. Unset: every reply is held.
+   */
+  INBOUND_AUTHSERV_ID: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .regex(/^[a-z0-9.-]{3,200}$/)
+    .optional(),
+  /** Resend's API key, to fetch received emails (S59.3). A secret; never logged. */
+  RESEND_API_KEY: z
+    .string()
+    .regex(/^re_[A-Za-z0-9_]{8,200}$/, 'Use the re_… key Resend shows')
+    .optional(),
+  /** How often the inbound job looks for received emails (S59.3: a reply lands in a minute). */
+  INBOUND_POLL_MS: z.coerce.number().int().min(1000).max(300_000).default(15_000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -94,7 +114,24 @@ export interface WorkerConfig extends ServiceConfig {
   /** How often committed client imports are looked for (S48, ADR-0049). */
   importPollMs: number;
   /** The support job (S59.2.2): the team's address and the web origin for links. */
-  support: { supportEmail: string | null; baseUrl: string | null; pollMs: number };
+  support: {
+    supportEmail: string | null;
+    baseUrl: string | null;
+    pollMs: number;
+    /** `INBOUND_EMAIL_DOMAIN` (S59.3): the close email carries the signed reply address. */
+    inboundDomain: string | null;
+  };
+  /**
+   * The inbound job (S59.3, ADR-0063); `null` until `INBOUND_EMAIL_DOMAIN`, `RESEND_API_KEY` and
+   * `AUTH_BASE_URL` are all set (S57).
+   */
+  inbound: {
+    domain: string;
+    authservId: string | null;
+    resendApiKey: string;
+    baseUrl: string;
+    pollMs: number;
+  } | null;
 }
 
 /**
@@ -121,7 +158,20 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
       supportEmail: jobs.SUPPORT_EMAIL ?? null,
       baseUrl: jobs.AUTH_BASE_URL === undefined ? null : new URL(jobs.AUTH_BASE_URL).origin,
       pollMs: jobs.SUPPORT_POLL_MS,
+      inboundDomain: jobs.INBOUND_EMAIL_DOMAIN ?? null,
     },
+    inbound:
+      jobs.INBOUND_EMAIL_DOMAIN === undefined ||
+      jobs.RESEND_API_KEY === undefined ||
+      jobs.AUTH_BASE_URL === undefined
+        ? null
+        : {
+            domain: jobs.INBOUND_EMAIL_DOMAIN,
+            authservId: jobs.INBOUND_AUTHSERV_ID ?? null,
+            resendApiKey: jobs.RESEND_API_KEY,
+            baseUrl: new URL(jobs.AUTH_BASE_URL).origin,
+            pollMs: jobs.INBOUND_POLL_MS,
+          },
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
     waitlist:

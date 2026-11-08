@@ -194,12 +194,18 @@ export const SupportAuthorSchema = z.discriminatedUnion('kind', [
 ]);
 export type SupportAuthor = z.infer<typeof SupportAuthorSchema>;
 
+/** How a message came (S59.3): in the app, or a member's emailed reply. */
+export const SupportMessageChannelSchema = z.enum(['app', 'email']);
+export type SupportMessageChannel = z.infer<typeof SupportMessageChannelSchema>;
+
 export const SupportMessageSchema = z.object({
   id: z.uuid(),
   author: SupportAuthorSchema,
   body: z.string(),
   /** The screenshots sent with it (S59.2.3), in their order. */
   screenshots: z.array(SupportScreenshotSchema),
+  /** How it came (S59.3, AC-X-39): `email` is shown as "by email". */
+  channel: SupportMessageChannelSchema,
   createdAt: UtcDateTimeSchema,
 });
 export type SupportMessage = z.infer<typeof SupportMessageSchema>;
@@ -346,6 +352,8 @@ export const OperatorMessageSchema = z.object({
   body: z.string(),
   /** Its screenshots (S59.2.3); each image served is logged (`screenshot.read`, AC-X-30). */
   screenshots: z.array(SupportScreenshotSchema),
+  /** How it came (S59.3, AC-X-39). */
+  channel: SupportMessageChannelSchema,
   createdAt: UtcDateTimeSchema,
 });
 export type OperatorMessage = z.infer<typeof OperatorMessageSchema>;

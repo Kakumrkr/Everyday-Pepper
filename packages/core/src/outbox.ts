@@ -21,6 +21,11 @@ export interface EmailMessage {
   unsubscribeUrl?: string | undefined;
   /** Where a reply goes (`Reply-To`), when not to the sender (S59, support mail). */
   replyTo?: string | undefined;
+  /** `In-Reply-To` and `References` (S59.3, ADR-0063): the support request it belongs to. */
+  inReplyTo?: string | undefined;
+  references?: string[] | undefined;
+  /** `Auto-Submitted: auto-generated` (RFC 3834): sent by a job, so no one auto-answers it. */
+  autoSubmitted?: true | undefined;
   /**
    * A stable id for the email (the outbox message's), sent as its `Message-ID`, so a mail
    * server or provider that dedupes on it drops a resend after a crash.

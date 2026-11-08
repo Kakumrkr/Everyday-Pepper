@@ -104,6 +104,20 @@ const GLOBAL_TABLES: Record<string, string> = {
     'the team’s notes on a business’s or a public request (S59.2): forced RLS, operators only',
   support_saved_replies:
     'the team’s saved replies (S59.2.2, AC-X-23): platform data; forced RLS, operators only',
+  inbound_emails:
+    'emails at the inbound webhook (S59.3, ADR-0063): stored before any business is known; forced RLS, the inbound context only (below)',
+};
+
+/**
+ * Global tables that name a business once known (`tenant_id`, for its deletion), without a
+ * tenant policy: each has forced RLS and exactly the one policy listed (its predicate, as
+ * Postgres prints it), so no tenant transaction reaches them.
+ */
+const GLOBAL_TABLES_NAMING_A_BUSINESS: Record<string, { policy: string; qual: string }> = {
+  inbound_emails: {
+    policy: 'inbound_mail',
+    qual: "COALESCE((current_setting('app.inbound_mail'::text, true) = 'on'::text), false)",
+  },
 };
 
 interface TenantTable {
@@ -123,6 +137,11 @@ interface TenantTable {
   outboxScan?: string;
   /** The `job_scan` (withJobScan) predicate, as Postgres prints it, if any. */
   jobScan?: string;
+  /**
+   * A read for the table's owner only (`TO CURRENT_USER` at migration time), behind one definer
+   * function: `support_inbound_thread` (S59.3, ADR-0063) finds a thread by its reference.
+   */
+  ownerLookup?: string;
   /**
    * Has the `operator_read` policy (withOperator, S59.2, ADR-0062): `true` for the plain one, or
    * its predicate as Postgres prints it when it narrows further (screenshots: sent ones only).
@@ -626,6 +645,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     seed: async (tx) => (await seedSupportThread(tx)).threadId,
     touch: 'kind = kind',
     operatorRead: true,
+    ownerLookup: 'inbound_lookup',
     jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('support'::text))",
     memberScope: [
       {
@@ -1190,8 +1210,38 @@ describe('catalog', () => {
       `SELECT table_name AS name FROM information_schema.columns
         WHERE table_schema = 'public' AND column_name = 'tenant_id'`,
     );
-    for (const { name } of tables) expect(TENANT_TABLES).toHaveProperty(name);
+    for (const { name } of tables) {
+      if (name in GLOBAL_TABLES_NAMING_A_BUSINESS) continue;
+      expect(TENANT_TABLES).toHaveProperty(name);
+    }
   });
+
+  it.each(Object.entries(GLOBAL_TABLES_NAMING_A_BUSINESS))(
+    '%s has forced RLS and only its own context’s policy (no tenant reaches it)',
+    async (table, spec) => {
+      const [flags] = await asAdmin<{ enabled: boolean; forced: boolean }>(
+        `SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced
+           FROM pg_class WHERE oid = $1::regclass`,
+        [`public.${table}`],
+      );
+      expect(flags).toEqual({ enabled: true, forced: true });
+      const policies = await asAdmin(
+        `SELECT policyname, permissive, cmd, roles::text[] AS roles, qual, with_check
+           FROM pg_policies WHERE schemaname = 'public' AND tablename = $1 ORDER BY policyname`,
+        [table],
+      );
+      expect(policies).toEqual([
+        {
+          policyname: spec.policy,
+          permissive: 'PERMISSIVE',
+          cmd: 'ALL',
+          roles: ['public'],
+          qual: spec.qual,
+          with_check: spec.qual,
+        },
+      ]);
+    },
+  );
 
   it.each(Object.entries(TENANT_TABLES))(
     '%s has forced RLS, the tenant_isolation policy and only the policies listed',
@@ -1208,7 +1258,20 @@ describe('catalog', () => {
         [table],
       );
       const predicate = `(${spec.tenantColumn} = current_tenant_id())`;
+      const [owner] = await asAdmin<{ name: string }>('SELECT current_user AS name');
       const expected = [
+        ...(spec.ownerLookup === undefined
+          ? []
+          : [
+              {
+                policyname: spec.ownerLookup,
+                permissive: 'PERMISSIVE',
+                cmd: 'SELECT',
+                roles: [owner?.name],
+                qual: 'true',
+                with_check: null,
+              },
+            ]),
         ...(spec.inviteLookup === undefined
           ? []
           : [

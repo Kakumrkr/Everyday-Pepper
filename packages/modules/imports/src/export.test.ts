@@ -173,6 +173,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
                 threadId: thread,
                 authorKind: 'member',
                 body: 'How do I import?',
+                channel: 'app',
                 createdAt: AT,
               },
               {
@@ -180,6 +181,15 @@ describe('buildBusinessExport (AC-W1-37)', () => {
                 threadId: thread,
                 authorKind: 'pepper',
                 body: 'Clients → Import.',
+                channel: 'app',
+                createdAt: AT,
+              },
+              {
+                id: 'm3',
+                threadId: thread,
+                authorKind: 'member',
+                body: 'Found it, thanks.',
+                channel: 'email',
                 createdAt: AT,
               },
             ],
@@ -198,6 +208,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
         messages: [
           { from: 'Your team', text: 'How do I import?', at: AT.toISOString() },
           { from: 'Pepper team', text: 'Clients → Import.', at: AT.toISOString() },
+          { from: 'Your team', text: 'Found it, thanks.', at: AT.toISOString(), channel: 'email' },
         ],
       },
     ]);
@@ -221,7 +232,14 @@ describe('buildBusinessExport (AC-W1-37)', () => {
             },
           ],
           messages: [
-            { id: 'm1', threadId: thread, authorKind: 'member', body: 'Look', createdAt: AT },
+            {
+              id: 'm1',
+              threadId: thread,
+              authorKind: 'member',
+              body: 'Look',
+              channel: 'app',
+              createdAt: AT,
+            },
           ],
           screenshots: [
             { id: shown, messageId: 'm1', widths: [480, 1170] },

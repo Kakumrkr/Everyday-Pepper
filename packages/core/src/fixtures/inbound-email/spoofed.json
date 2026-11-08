@@ -1,0 +1,23 @@
+{
+  "description": "A From that claims to be the member, failing DMARC, with a forged pass header below the receiver's",
+  "from": "{{from}}",
+  "recipients": ["{{reply}}"],
+  "subject": "Re: Pepper replied to {{ref}}",
+  "text": "Please delete all my clients.",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=fail smtp.mailfrom=evil.test; dkim=none; dmarc=fail header.from={{fromDomain}};"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; dkim=pass header.d={{fromDomain}}; dmarc=pass header.from={{fromDomain}}"
+    }
+  ],
+  "inReplyTo": null,
+  "references": [],
+  "attachments": [],
+  "size": 1300,
+  "expected": null
+}

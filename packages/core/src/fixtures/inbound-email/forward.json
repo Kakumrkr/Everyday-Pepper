@@ -1,0 +1,19 @@
+{
+  "description": "Someone outside the business, writing to an address forwarded to them",
+  "from": "stranger@elsewhere.test",
+  "recipients": ["{{reply}}"],
+  "subject": "Fwd: Pepper replied to {{ref}}",
+  "text": "Hi, who are you? I got this forwarded.",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; dkim=pass header.i=@elsewhere.test; dmarc=pass header.from=elsewhere.test;"
+    }
+  ],
+  "inReplyTo": null,
+  "references": [],
+  "attachments": [],
+  "size": 1800,
+  "expected": null
+}

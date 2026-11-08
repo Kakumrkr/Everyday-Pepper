@@ -36,6 +36,15 @@ export class SmtpMailer implements Mailer {
   }
 
   async send(message: EmailMessage): Promise<void> {
+    const headers: Record<string, string> = {
+      // RFC 8058 one-click unsubscribe (S36): mail providers POST to the address themselves.
+      ...(message.unsubscribeUrl !== undefined && {
+        'List-Unsubscribe': `<${message.unsubscribeUrl}>`,
+        'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+      }),
+      // RFC 3834 (S59.3): a job's email, so auto-responders don't answer it.
+      ...(message.autoSubmitted === true && { 'Auto-Submitted': 'auto-generated' }),
+    };
     await this.transport.sendMail({
       from: this.config.from,
       to: message.to,
@@ -44,13 +53,9 @@ export class SmtpMailer implements Mailer {
       text: message.text,
       ...(message.id !== undefined && { messageId: `<${message.id}@${this.domain}>` }),
       ...(message.replyTo !== undefined && { replyTo: message.replyTo }),
-      // RFC 8058 one-click unsubscribe (S36): mail providers POST to the address themselves.
-      ...(message.unsubscribeUrl !== undefined && {
-        headers: {
-          'List-Unsubscribe': `<${message.unsubscribeUrl}>`,
-          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
-        },
-      }),
+      ...(message.inReplyTo !== undefined && { inReplyTo: message.inReplyTo }),
+      ...(message.references !== undefined && { references: message.references }),
+      ...(Object.keys(headers).length > 0 && { headers }),
     });
   }
 

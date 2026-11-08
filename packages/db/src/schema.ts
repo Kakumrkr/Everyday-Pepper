@@ -2741,10 +2741,16 @@ export const supportThreads = pgTable(
     ratedAt: timestamp('rated_at', { withTimezone: true }),
     /** When the team's address was reminded of its current wait (S59.2.2, AC-X-25). */
     overdueRemindedAt: timestamp('overdue_reminded_at', { withTimezone: true }),
+    /**
+     * The solved request an emailed reply followed up (S59.3, AC-X-37): later replies to the old
+     * request land here. No foreign key: it stays a plain id if the old one goes.
+     */
+    followUpOf: uuid('follow_up_of'),
     ...timestamps,
   },
   (table) => [
     unique('support_threads_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('support_threads_follow_up_idx').on(table.tenantId, table.followUpOf),
     index('support_threads_recent_idx').on(table.tenantId, table.lastMessageAt),
     index('support_threads_opened_by_idx').on(table.openedByUserId),
     check(
@@ -2803,9 +2809,15 @@ export const supportMessages = pgTable(
     authorKind: text('author_kind').notNull(),
     authorUserId: uuid('author_user_id').references(() => users.id, { onDelete: 'set null' }),
     body: text('body').notNull(),
+    /** How it came (S59.3, AC-X-39): `app`, or `email` (a member's emailed reply). */
+    channel: text('channel').notNull().default('app'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    check(
+      'support_messages_channel',
+      sql`${table.channel} = 'app' OR (${table.channel} = 'email' AND ${table.authorKind} = 'member')`,
+    ),
     index('support_messages_thread_idx').on(table.tenantId, table.threadId, table.createdAt),
     // The key a screenshot names its message by (S59.2.3): same business, same thread.
     unique('support_messages_tenant_thread_id_unique').on(table.tenantId, table.threadId, table.id),
@@ -3002,6 +3014,85 @@ export const publicSupportRequests = pgTable(
     ),
   ],
 );
+/**
+ * An email that reached the inbound webhook (S59.3, ADR-0063): stored at once (the provider's
+ * event and the email's `Message-ID` unique, so a retry or the same email twice is one row),
+ * then taken by the worker under a lease, fetched from the provider and matched. A platform
+ * row: forced RLS, reached only in a transaction that names the inbound context
+ * (`withInboundMail`, or `setTransactionInboundMail` inside a business's). Once matched it names
+ * the business and the thread, and goes with the business. `from_address` and `held_text` are
+ * kept only while held, 7 days at most; no other email content is stored.
+ */
+const inboundMail = sql`COALESCE(current_setting('app.inbound_mail', true) = 'on', false)`;
+
+export const inboundEmails = pgTable(
+  'inbound_emails',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    provider: text('provider').notNull(),
+    /** The webhook's event id (Svix `svix-id`). */
+    eventId: text('event_id').notNull(),
+    /** The provider's id of the email, to fetch it. */
+    providerEmailId: text('provider_email_id').notNull(),
+    /** The email's own `Message-ID`, when it had one. */
+    messageId: text('message_id'),
+    status: text('status').notNull().default('received'),
+    /** Why it was held, ignored, refused or failed (a short code, never email text). */
+    reason: text('reason'),
+    attempts: integer('attempts').notNull().default(0),
+    leaseUntil: timestamp('lease_until', { withTimezone: true }),
+    tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+    threadId: uuid('thread_id'),
+    supportMessageId: uuid('support_message_id'),
+    fromAddress: text('from_address'),
+    heldText: text('held_text'),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    processedAt: timestamp('processed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('inbound_emails_event_unique').on(table.provider, table.eventId),
+    unique('inbound_emails_provider_email_unique').on(table.provider, table.providerEmailId),
+    uniqueIndex('inbound_emails_message_id_unique')
+      .on(table.messageId)
+      .where(sql`${table.messageId} IS NOT NULL`),
+    index('inbound_emails_due_idx').on(table.status, table.receivedAt),
+    index('inbound_emails_thread_idx').on(table.tenantId, table.threadId, table.processedAt),
+    foreignKey({
+      name: 'inbound_emails_thread_fk',
+      columns: [table.tenantId, table.threadId],
+      foreignColumns: [supportThreads.tenantId, supportThreads.id],
+    }).onDelete('cascade'),
+    check('inbound_emails_provider_known', sql`${table.provider} IN ('resend')`),
+    check(
+      'inbound_emails_status_known',
+      sql`${table.status} IN ('received', 'landed', 'held', 'ignored', 'refused', 'failed')`,
+    ),
+    check(
+      'inbound_emails_ids_length',
+      sql`length(${table.eventId}) BETWEEN 1 AND 200 AND length(${table.providerEmailId}) BETWEEN 1 AND 200 AND (${table.messageId} IS NULL OR length(${table.messageId}) BETWEEN 3 AND 300)`,
+    ),
+    check(
+      'inbound_emails_reason_length',
+      sql`${table.reason} IS NULL OR ${table.reason} ~ '^[a-z_]{1,40}$'`,
+    ),
+    check(
+      'inbound_emails_landed',
+      sql`${table.status} <> 'landed' OR (${table.tenantId} IS NOT NULL AND ${table.threadId} IS NOT NULL AND ${table.supportMessageId} IS NOT NULL)`,
+    ),
+    check(
+      'inbound_emails_held_content',
+      sql`(${table.fromAddress} IS NULL AND ${table.heldText} IS NULL) OR (${table.status} = 'held' AND ${table.tenantId} IS NOT NULL)`,
+    ),
+    check(
+      'inbound_emails_held_size',
+      sql`(${table.fromAddress} IS NULL OR length(${table.fromAddress}) <= 254) AND (${table.heldText} IS NULL OR length(${table.heldText}) <= 4000)`,
+    ),
+    pgPolicy('inbound_mail', { for: 'all', using: inboundMail, withCheck: inboundMail }),
+  ],
+);
+export type InboundEmailRow = typeof inboundEmails.$inferSelect;
+
 export type SupportThreadRow = typeof supportThreads.$inferSelect;
 export type SupportMessageRow = typeof supportMessages.$inferSelect;
 

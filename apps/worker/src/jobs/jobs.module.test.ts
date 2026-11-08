@@ -19,6 +19,7 @@ const core = vi.hoisted(() => ({
   cleanUp: vi.fn(),
   sendDueTaskPushes: vi.fn(),
   runSupportHousekeeping: vi.fn(),
+  processInboundEmails: vi.fn(),
   runDueDeletions: vi.fn(),
   deleteAllSupportScreenshotImages: vi.fn(),
 }));
@@ -27,6 +28,7 @@ vi.mock('@pepper/core', async (original) => ({
   cleanUp: core.cleanUp,
   sendDueTaskPushes: core.sendDueTaskPushes,
   runSupportHousekeeping: core.runSupportHousekeeping,
+  processInboundEmails: core.processInboundEmails,
   runDueDeletions: core.runDueDeletions,
   deleteAllSupportScreenshotImages: core.deleteAllSupportScreenshotImages,
 }));
@@ -209,6 +211,7 @@ describe('JobsRunner', () => {
       outboxKey: OPTIONS.key,
       supportEmail: 'support@pepper.test',
       baseUrl: 'https://app.pepper.test',
+      inboundDomain: null,
       mailer,
       clock,
       store: null,
@@ -257,6 +260,54 @@ describe('JobsRunner', () => {
       DB.db,
       expect.objectContaining({ supportEmail: null, baseUrl: null, mailer: null }),
     );
+  });
+
+  it('runs the inbound email job only when configured, logging counts only (S59.3)', async () => {
+    expect(new JobsRunner(DB as never, OPTIONS).inbound).toBeNull();
+    core.processInboundEmails.mockResolvedValue({
+      landed: 2,
+      held: 1,
+      ignored: 0,
+      refused: 0,
+      failed: 0,
+      retried: 1,
+      emptied: 0,
+      errors: ['ResendInboundError'],
+    });
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const source = { fetch: vi.fn() };
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      support: { supportEmail: 'support@pepper.test', baseUrl: null, pollMs: 300_000 },
+      inbound: {
+        domain: 'reply.pepper.test',
+        authservId: 'amazonses.com',
+        source,
+        baseUrl: 'https://app.pepper.test',
+        release: '1.5.0',
+        pollMs: 15_000,
+      },
+    });
+    await runner.inbound?.runOnce();
+    expect(core.processInboundEmails).toHaveBeenCalledWith(DB.db, {
+      outboxKey: OPTIONS.key,
+      supportEmail: 'support@pepper.test',
+      baseUrl: 'https://app.pepper.test',
+      release: '1.5.0',
+      inboundDomain: 'reply.pepper.test',
+      authservId: 'amazonses.com',
+      source,
+      store: null,
+      clock,
+    });
+    expect(log).toHaveBeenCalledWith(
+      'Inbound email: 2 landed, 1 held, 0 ignored, 0 refused, 0 failed',
+    );
+    expect(warn).toHaveBeenCalledWith('Inbound email: 1 left for a retry (ResendInboundError)');
+    log.mockRestore();
+    warn.mockRestore();
+    await runner.onApplicationShutdown();
   });
 
   it('cleans up with the clock', async () => {

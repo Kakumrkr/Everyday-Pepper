@@ -59,6 +59,11 @@ import {
   SupportThreadNotFoundError,
 } from '../errors.js';
 import type { Mailer } from '../outbox.js';
+import {
+  supportReplyAddress,
+  supportReplyKeysFrom,
+  supportThreadRootId,
+} from '../support-reply-address.js';
 import { queueEmail } from './outbox.js';
 import { attachScreenshotsToMessage, screenshotsByMessage } from './support-screenshots.js';
 
@@ -78,7 +83,46 @@ export interface SupportOptions {
   baseUrl: string;
   /** The api's release, recorded with each request. */
   release: string;
+  /**
+   * Where members' emailed replies come back (`INBOUND_EMAIL_DOMAIN`, S59.3, ADR-0063); `null`
+   * or absent: their emails' `Reply-To` is the team's address.
+   */
+  inboundDomain?: string | null;
   clock?: Clock;
+}
+
+/** The first line of a member's email about a request: their reply is what they write above. */
+export const SUPPORT_REPLY_ABOVE = '— Reply above this line to answer —';
+
+/**
+ * How an email to a member about request `reference` routes their answer (AC-X-32): with an
+ * inbound domain, `Reply-To` the request's signed address, `In-Reply-To`/`References` its root
+ * id and the "Reply above this line" first line; otherwise `Reply-To` the team (if any).
+ */
+export function supportReplyRouting(
+  options: { outboxKey: Buffer; supportEmail: string | null; inboundDomain?: string | null },
+  reference: string,
+): {
+  headers: { replyTo?: string; inReplyTo?: string; references?: string[] };
+  firstLines: string[];
+} {
+  const domain = options.inboundDomain ?? null;
+  if (domain === null) {
+    return {
+      headers: options.supportEmail === null ? {} : { replyTo: options.supportEmail },
+      firstLines: [],
+    };
+  }
+  const keys = supportReplyKeysFrom(options.outboxKey);
+  const root = supportThreadRootId(keys, reference, domain);
+  return {
+    headers: {
+      replyTo: supportReplyAddress(keys, reference, domain),
+      inReplyTo: root,
+      references: [root],
+    },
+    firstLines: [SUPPORT_REPLY_ABOVE, ''],
+  };
 }
 
 /** What the server knows about the request it was sent with. */
@@ -89,7 +133,8 @@ export interface SupportRequestMeta {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const THREAD_LIST_LIMIT = 100;
 const REFERENCE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const REFERENCE_TRIES = 5;
+/** Tries for a free reference before giving up (a clash is one in a billion). */
+export const REFERENCE_TRIES = 5;
 
 /** A new reference: "PEP-" and 6 random characters of Crockford's base 32. */
 export function newSupportReference(): string {
@@ -411,23 +456,27 @@ export async function answerInThread(
   if (opener !== undefined) {
     const firstName = firstNameOf(opener.name);
     const link = `${options.baseUrl}/support/${id}`;
+    const routing = supportReplyRouting(options, thread.reference);
     await queueEmail(
       tx,
       {
         to: opener.email,
         subject: `Pepper replied to ${thread.reference}`,
         text: [
+          ...routing.firstLines,
           firstName === '' ? 'Hi,' : `Hi ${firstName},`,
           '',
           `The Pepper team answered your request ${thread.reference}:`,
           '',
           message,
           '',
-          `Read it and reply in the app: ${link}`,
+          routing.firstLines.length > 0
+            ? `Reply to this email, or read it and reply in the app: ${link}`
+            : `Read it and reply in the app: ${link}`,
           '',
           '— The Pepper team',
         ].join('\n'),
-        ...(options.supportEmail !== null && { replyTo: options.supportEmail }),
+        ...routing.headers,
       },
       { key: options.outboxKey, dedupeKey: `support.answered:${written.id}`, now },
     );
@@ -519,7 +568,8 @@ function parseThreadId(threadId: string): string {
   return parsed.data;
 }
 
-async function checkLimits(
+/** Holds the member's support writes and refuses one over the day's limits (AC-X-14; also the inbound job's). */
+export async function checkLimits(
   tx: TenantTx,
   userId: UserId,
   now: Date,
@@ -533,14 +583,15 @@ async function checkLimits(
   if (counts.messages >= SUPPORT_MESSAGES_PER_DAY) throw new SupportLimitReachedError('messages');
 }
 
-interface Requester {
+export interface Requester {
   name: string;
   email: string;
   businessName: string;
   role: string;
 }
 
-async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
+/** The member as the team's emails name them (also the inbound job's, S59.3). */
+export async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
   const tenant = await findCurrentTenant(tx);
   const membership = await findMembership(tx, userId);
   const member = (await listTenantMembers(tx)).find((row) => row.userId === userId);
@@ -555,8 +606,8 @@ async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
   };
 }
 
-/** The team's email about a request or a member's reply to it. */
-async function emailTeam(
+/** The team's email about a request or a member's reply to it (also the inbound job's). */
+export async function emailTeam(
   tx: TenantTx,
   options: SupportOptions,
   mail: {
@@ -571,6 +622,8 @@ async function emailTeam(
     dedupeKey: string;
     now: Date;
     first: boolean;
+    /** It came by email (S59.3): said in the email's first line. */
+    byEmail?: boolean;
   },
 ): Promise<void> {
   if (options.supportEmail === null) return;
@@ -597,7 +650,7 @@ async function emailTeam(
       replyTo: requester.email,
       subject,
       text: [
-        `${mail.reference} · ${label}${mail.first ? '' : ' · a new reply'}`,
+        `${mail.reference} · ${label}${mail.first ? '' : ' · a new reply'}${mail.byEmail === true ? ' · by email' : ''}`,
         `From: ${requester.name} <${requester.email}>, ${requester.role} at ${requester.businessName} — reply to this email to answer them.`,
         '',
         mail.message,
@@ -659,6 +712,7 @@ async function toThread(
       author: authorOf(message.authorKind, message.authorUserId, message.authorName, reader),
       body: message.body,
       screenshots: screenshots.get(message.id) ?? [],
+      channel: message.channel,
       createdAt: message.createdAt.toISOString(),
     })),
     replyTo: requester?.email ?? null,

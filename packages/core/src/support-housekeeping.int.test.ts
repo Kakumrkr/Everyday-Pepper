@@ -269,7 +269,14 @@ describe('auto-close after 7 quiet days (AC-X-24)', () => {
       mail.subject.startsWith(`We closed ${thread.reference}`),
     );
     expect(closed).toHaveLength(1);
-    expect(closed[0]).toMatchObject({ to: 'ana@juniper-hk.test', replyTo: 'support@pepper.test' });
+    expect(closed[0]).toMatchObject({
+      to: 'ana@juniper-hk.test',
+      replyTo: 'support@pepper.test',
+      autoSubmitted: true,
+    });
+    // Without an inbound domain, no threading headers and no "Reply above" line (AC-X-32).
+    expect(closed[0]?.inReplyTo).toBeUndefined();
+    expect(closed[0]?.text.startsWith('Hi ')).toBe(true);
     expect(closed[0]?.text).toContain('after 7 quiet days');
     expect(closed[0]?.text).toContain(`https://app.pepper.test/support/${thread.id}`);
     const audit = await withTenant(db, juniper, (tx) => listAuditEntries(tx, { limit: 100 }));

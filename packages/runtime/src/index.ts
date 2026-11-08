@@ -6,6 +6,7 @@ export * from './health.module.js';
 export * from './health.tokens.js';
 export * from './logger.js';
 export * from './mail.js';
+export * from './resend-inbound.js';
 export * from './redact.js';
 export * from './request-logging.js';
 export * from './service-app.js';

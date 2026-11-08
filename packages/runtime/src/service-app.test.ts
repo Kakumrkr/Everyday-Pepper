@@ -1,6 +1,14 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
-import { Controller, Get, Module, NotFoundException, type INestApplication } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Module,
+  NotFoundException,
+  Post,
+  Req,
+  type INestApplication,
+} from '@nestjs/common';
 import request from 'supertest';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createLogger } from './logger.js';
@@ -21,6 +29,11 @@ class DemoController {
   @Get('missing')
   missing(): never {
     throw new NotFoundException();
+  }
+
+  @Post('raw')
+  raw(@Req() request: { rawBody?: Buffer }): { bytes: number } {
+    return { bytes: request.rawBody?.byteLength ?? -1 };
   }
 
   @Get('crash')
@@ -59,6 +72,17 @@ afterEach(async () => {
 });
 
 describe('createServiceApp', () => {
+  it('keeps a JSON body’s exact bytes for signed webhooks (S59.3)', async () => {
+    const { server } = await start();
+    const body = '{"type":"email.received" }';
+    const answer = await request(server)
+      .post('/demo/raw')
+      .type('application/json')
+      .send(body)
+      .expect(201);
+    expect(answer.body).toEqual({ bytes: Buffer.byteLength(body) });
+  });
+
   it('serves with a request id, no X-Powered-By and a request log line', async () => {
     const { server, lines } = await start();
 

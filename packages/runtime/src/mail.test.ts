@@ -48,6 +48,34 @@ describe('SmtpMailer', () => {
     ]);
   });
 
+  it("threads support mail and marks a job's email auto-submitted (S59.3, AC-X-32)", async () => {
+    const sendMail = vi.fn(() => Promise.resolve({}));
+    const transport = { sendMail, close: vi.fn() } as unknown as Transporter;
+    const mailer = new SmtpMailer(
+      { smtpUrl: 'smtp://localhost:1025', from: 'P <p@pepper.test>' },
+      transport,
+    );
+    await mailer.send({
+      to: 'ana@example.test',
+      subject: 'S',
+      text: 'T',
+      replyTo: 'reply+pep-7k2m9q-1-abcdefghijklmnopqrst@reply.pepper.test',
+      inReplyTo: '<support.x@reply.pepper.test>',
+      references: ['<support.x@reply.pepper.test>'],
+      autoSubmitted: true,
+    });
+    expect((sendMail.mock.calls[0] as unknown[])[0]).toEqual({
+      from: 'P <p@pepper.test>',
+      to: 'ana@example.test',
+      subject: 'S',
+      text: 'T',
+      replyTo: 'reply+pep-7k2m9q-1-abcdefghijklmnopqrst@reply.pepper.test',
+      inReplyTo: '<support.x@reply.pepper.test>',
+      references: ['<support.x@reply.pepper.test>'],
+      headers: { 'Auto-Submitted': 'auto-generated' },
+    });
+  });
+
   it('sends commercial mail with RFC 8058 one-click unsubscribe headers, others without', async () => {
     const sendMail = vi.fn(() => Promise.resolve({}));
     const transport = { sendMail, close: vi.fn() } as unknown as Transporter;

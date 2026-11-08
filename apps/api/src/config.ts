@@ -10,6 +10,7 @@ import {
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
 import { loadStorageConfig, type StorageConfig } from '@pepper/storage';
+import { InboundDomainSchema } from '@pepper/contracts';
 import { z } from 'zod';
 
 const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -37,6 +38,22 @@ const SupportEnvSchema = z.object({
    * Unset: requests are kept for the console and nothing is emailed.
    */
   SUPPORT_EMAIL: z.email().max(254).optional(),
+  /**
+   * Where members' emailed replies come back (S59.3, ADR-0063), e.g. `reply.pepper.app`: the
+   * signed reply addresses' domain, whose MX points at Resend's inbound. Unset (until S57): no
+   * signed `Reply-To`, emails to members answer to `SUPPORT_EMAIL` as before.
+   */
+  INBOUND_EMAIL_DOMAIN: InboundDomainSchema.optional(),
+  /**
+   * The Resend webhook's signing secret (`whsec_…`, S59.3). Unset: `POST /v1/webhooks/resend`
+   * is 404. A secret; never logged.
+   */
+  RESEND_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^whsec_[A-Za-z0-9+/]{20,}={0,2}$/, 'Use the whsec_… secret Resend shows')
+    // The key itself: at least 16 bytes, as the webhook checks it (`svixKeyOf`).
+    .refine((value) => Buffer.from(value.slice(6), 'base64').length >= 16, 'Too short a key')
+    .optional(),
 });
 
 const AiEnvSchema = z.object({
@@ -90,6 +107,8 @@ export interface ApiConfig extends ServiceConfig {
   storage: StorageConfig | null;
   /** The team's support address (`SUPPORT_EMAIL`); `null`: requests are kept, not emailed. */
   supportEmail: string | null;
+  /** Replies by email (S59.3, ADR-0063): the signed addresses' domain and the webhook's secret. */
+  inbound: { domain: string | null; webhookSecret: string | null };
 }
 
 /**
@@ -109,7 +128,20 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     pushPublicKey: loadPushPublicKey('api', env),
     ai: loadAiConfig(env, present, service.environment),
     storage: loadStorageConfig('api', env),
-    supportEmail: loadEnv('api', SupportEnvSchema, present).SUPPORT_EMAIL ?? null,
+    ...loadSupport(present),
+  };
+}
+
+function loadSupport(
+  present: Record<string, string | undefined>,
+): Pick<ApiConfig, 'supportEmail' | 'inbound'> {
+  const support = loadEnv('api', SupportEnvSchema, present);
+  return {
+    supportEmail: support.SUPPORT_EMAIL ?? null,
+    inbound: {
+      domain: support.INBOUND_EMAIL_DOMAIN ?? null,
+      webhookSecret: support.RESEND_WEBHOOK_SECRET ?? null,
+    },
   };
 }
 

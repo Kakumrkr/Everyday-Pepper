@@ -96,6 +96,7 @@ describe('loadWorkerConfig', () => {
       supportEmail: null,
       baseUrl: null,
       pollMs: 300_000,
+      inboundDomain: null,
     });
     expect(
       loadWorkerConfig({
@@ -108,9 +109,38 @@ describe('loadWorkerConfig', () => {
       supportEmail: 'support@pepper.test',
       baseUrl: 'https://app.pepper.test',
       pollMs: 60_000,
+      inboundDomain: null,
     });
     expect(() => loadWorkerConfig({ ...required, SUPPORT_EMAIL: 'not an address' })).toThrow(
       /SUPPORT_EMAIL/,
+    );
+  });
+
+  it('runs the inbound email job only with its domain, Resend key and web origin (S59.3)', () => {
+    const inbound = {
+      INBOUND_EMAIL_DOMAIN: 'Reply.Pepper.Test',
+      RESEND_API_KEY: 're_test_key_123',
+      AUTH_BASE_URL: 'https://app.pepper.test/',
+    };
+    expect(loadWorkerConfig(required).inbound).toBeNull();
+    expect(
+      loadWorkerConfig({ ...required, ...inbound, RESEND_API_KEY: undefined }).inbound,
+    ).toBeNull();
+    expect(
+      loadWorkerConfig({ ...required, ...inbound, INBOUND_AUTHSERV_ID: 'AmazonSES.com' }),
+    ).toMatchObject({
+      inbound: {
+        domain: 'reply.pepper.test',
+        authservId: 'amazonses.com',
+        resendApiKey: 're_test_key_123',
+        baseUrl: 'https://app.pepper.test',
+        pollMs: 15_000,
+      },
+      support: { inboundDomain: 'reply.pepper.test' },
+    });
+    expect(loadWorkerConfig({ ...required, ...inbound }).inbound?.authservId).toBeNull();
+    expect(() => loadWorkerConfig({ ...required, RESEND_API_KEY: 'sk_live_x' })).toThrow(
+      /^Invalid worker environment: RESEND_API_KEY$/,
     );
   });
 

@@ -272,6 +272,8 @@ export function buildBusinessExport(
             from: message.authorKind === 'pepper' ? 'Pepper team' : 'Your team',
             text: message.body,
             at: at(message.createdAt),
+            // How it came (S59.3, AC-X-39): only an emailed reply says so.
+            ...(message.channel === 'email' && { channel: 'email' }),
             ...screenshotsOf(message.id),
           })),
         })),

@@ -636,7 +636,14 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       action: z.literal('support_thread.opened'),
       entity: entity('support_thread'),
       before: z.null(),
-      after: z.object({ kind: SupportKindSchema, status: SupportStatusSchema }).strict(),
+      // `channel: 'email'`: a follow-up an emailed reply opened (S59.3, AC-X-37).
+      after: z
+        .object({
+          kind: SupportKindSchema,
+          status: SupportStatusSchema,
+          channel: z.literal('email').optional(),
+        })
+        .strict(),
     })
     .strict(),
   // A reply by a member (`user`) or by the Pepper team (`system`), with the status it led to.
@@ -645,7 +652,10 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       action: z.literal('support_thread.replied'),
       entity: entity('support_thread'),
       before: z.object({ status: SupportStatusSchema }).strict(),
-      after: z.object({ status: SupportStatusSchema }).strict(),
+      // `channel: 'email'`: the member's emailed reply (S59.3, AC-X-34).
+      after: z
+        .object({ status: SupportStatusSchema, channel: z.literal('email').optional() })
+        .strict(),
     })
     .strict(),
   z

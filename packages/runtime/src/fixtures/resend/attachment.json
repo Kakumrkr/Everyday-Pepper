@@ -1,0 +1,11 @@
+{
+  "object": "attachment",
+  "id": "2a0c9ce0-3112-4728-976e-47ddcd16a318",
+  "filename": "Screenshot.png",
+  "content_type": "image/png",
+  "content_disposition": "inline",
+  "content_id": "ii_m3abc",
+  "download_url": "https://inbound-cdn.resend.com/4ef9a417/2a0c9ce0?signature=abc",
+  "expires_at": "2026-11-08T11:04:12.000Z",
+  "size": 4708
+}
