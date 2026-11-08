@@ -51,6 +51,8 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   business_photos: 'the images are the owner’s own uploads (a later export, ADR-0053)',
   import_batches: 'earlier imports’ working state',
   import_rows: 'earlier imports’ working state',
+  inbound_emails:
+    'emails at the inbound webhook (S59.3): delivery records; a landed reply is its support message',
   client_import_refs: 'other tools’ ids for imported clients',
   outbox_messages: 'emails waiting to go out',
   outbox_dispatch: 'email delivery state',
