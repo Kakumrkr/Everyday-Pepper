@@ -54,3 +54,17 @@ Since S59, Pepper's answers to a request reach the member by email, but a reply 
 - Resend's inbound API shape is coded from its documentation and kept behind the port and recorded fixtures; S57 confirms it with a live domain, and sets `INBOUND_AUTHSERV_ID` from what its receiving server writes.
 - Held mail has no review screen yet: S59.3.2 adds Accept/Discard in the console, new requests by email to the team's address, bounce and complaint handling, and inbound counts for S59.4's metrics.
 - Quote cutting is heuristic. Unknown layouts keep the full text, which is safer than losing words.
+
+## Built (S59.3)
+- **contracts:** `MessageIdHeaderSchema` and the threading fields of `OutboxEmailSchema`; `ResendWebhookEventSchema`, `InboundDomainSchema`; `SupportMessageChannelSchema` on members' and operators' messages; the audit's `channel: 'email'`.
+- **db:** migration 0071:
+  - `inbound_emails`: forced RLS, its only policy `inbound_mail`, no delete for the services;
+  - `support_messages.channel`;
+  - `support_threads.follow_up_of`, where later replies to an old request land;
+  - `support_inbound_thread`;
+  - `withInboundMail` and `setTransactionInboundMail`, and the inbound repository.
+- **core:** `support-reply-address.ts`, `inbound-email.ts` (the sender check reads only the receiver's topmost header, with quoted strings and comments dropped; a DMARC failure for the From domain decides), `email-text.ts` (linear HTML scan), and `services/inbound-email.ts`. Also `supportReplyRouting` in the support emails, and 8 client fixtures.
+- **runtime:** `ResendInboundSource`, which takes the last `<…>` of `From` and downloads only https links, capped at 12 MB; threading headers in `SmtpMailer`; `rawBody` in `createServiceApp`.
+- **api:** `InboundModule` (`POST /v1/webhooks/resend`); `INBOUND_EMAIL_DOMAIN`, `RESEND_WEBHOOK_SECRET`.
+- **worker:** `Inbound email job` (`INBOUND_POLL_MS`, 15 s); `RESEND_API_KEY`, `INBOUND_AUTHSERV_ID`.
+- **web:** `SupportMessageMeta` ("by email") in both threads, and the gallery's "Support" section.

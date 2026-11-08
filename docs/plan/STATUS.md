@@ -1,26 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-07 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.2.3 done; next **S59.3** (email both ways); S57 waits for the domain
+**Last updated:** 2026-11-08 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.3 done; next **S59.3.2** (email, part 2); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S59.3 Email both ways** (brief approved 2026-11-08: "Go a head with ur recommendation", after a revision to aim higher; ADR-0063, AC-X-32…39). Split: S59.3.2 takes new requests by email, bounces/complaints, the held-mail review and inbound counts.
-- [x] 1 ACs, traceability, ADR-0063
-- [x] 2 reply-address token · 3 outgoing headers + signed Reply-To · 4 migration 0071 (isolation 443/443) · 6 `processInboundEmails` with 8 fixtures (core int 24/24, support suites 38/38) · 7 images → screenshots
-- [x] 5 webhook `POST /v1/webhooks/resend` (Svix over `rawBody`, now on in `createServiceApp`) + `ResendInboundSource` (runtime) · 8 worker `Inbound email job` (15 s) and env
-- [x] 9 "by email" in both threads (`SupportMessageMeta`, shown in the gallery's new "Support" section for its baselines)
-- Next: `/session-close` (review, gallery + support/ops baselines, checks, PR).
+(none)
 
 ## Last sessions
+- **S59.3 Phase 13 · Email both ways (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md), [PR #89](https://github.com/Kakumrkr/Everyday-Pepper/pull/89)). Full entry in [session-log.md](session-log.md).
+  - **Built:** signed reply addresses + threading headers; migration 0071; the Svix-signed Resend webhook, the Resend adapter and the worker's inbound job; verified replies land as the member's (held, ignored or refused otherwise; the sender told what didn't go through); follow-ups after 30 days; emailed images as screenshots; "by email" in both threads; AC-X-32…39. Off until S57.
+  - **Checks:** `pnpm check` green; affected integration green (isolation 443/443); support+ops 5, screens 3, gallery 11; review 9 fixed, security none ≥ 8.
 - **S59.2.3 Phase 13 · Screenshots on a request (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 3", [PR #88](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/88)). Full entry in [session-log.md](session-log.md).
   - **Built:** migration 0070 `support_screenshots` (forced RLS, sent rows immutable, operator reads logged per image); a `ScreenshotStorage` port in core + `createScreenshotStore`; upload/attach/serve/sweep/deletion/export; the picker (choose, paste, drop, 3, privacy line); thumbnails in both threads; "2 screenshots" in Your requests and the console inbox; AC-X-27…31.
   - **Checks:** `pnpm check` green; affected integration 23/23; support+ops+screens 8/8; review 10 fixed, security none.
-- **S59.2.2 Phase 13 · Console, part 2 (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 2", [PR #87](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/87)). Full entry in [session-log.md](session-log.md).
-  - **Built:** migration 0069; saved replies at `/ops/replies` with `{first name}`; the `support` worker job (4 h reminder once a wait, auto-close after 7 quiet days with one email); "Did this help?" (Helpful/Not helpful); "Over 4 h: answer next" in the inbox; AC-X-23…26.
-  - **Checks:** `pnpm check` green; affected integration 22/22 (db 793, core 226); ops+support 3/3, screens' support test 3/3; CI green on the first run.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -37,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.3 (user, 2026-11-08):** "rethink with your decisions… world-class", then "Go a head with ur recommendation" (D-1 split → S59.3.2; D-2 members who may read, DMARC/DKIM, others held; D-3 webhook stores, worker fetches; D-4 limits and notes; D-6 ADR-0063). **Claude:** request-named versioned addresses; one transaction lands and records; follow-ups take later replies; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.2.3 (user, 2026-11-07):** "go with your decisions… industry level" (3 a message, 10 MB, JPEG/PNG/WebP by content, 20 a day, upload then attach, 24 h sweep, images in the export, ADR-0062 Part 3). **Claude:** 2560 px, paste and drop, a crop-out line; a storage port for core's layer rule; the sweep's hour of margin. Full wording in [decisions.md](decisions.md).
 - **S59.2.2 (user, 2026-11-07):** at the brief "Preapproval with your recommendation" (D-1 screenshots → S59.2.3; D-2 platform saved replies at `/ops/replies`; D-3 auto-close what waits on the business, 7 days, one email; D-4 one 4 h reminder a wait; D-5 the opener rates, a reopen clears). **Claude:** a reopen starts a new wait; public sweep in definer functions; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.2 (user, 2026-11-07):** at the brief "Preapproved with your recommendations" (D-1 split → S59.2.2; D-2 grants by script; D-3 the access row in the same transaction; D-4 both logs; D-5 statuses; D-6 `/ops`). **Claude:** MFA for operators; no mail to typed addresses; notes operator-only, not exported; one "seen" an hour; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
@@ -96,11 +92,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
 | S59.3.2 | New requests by email, bounces and complaints, held-mail review in the console, inbound counts (split at the S59.3 brief) | 13 | Each case has its fixture test |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
