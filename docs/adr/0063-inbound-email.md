@@ -22,7 +22,7 @@ Since S59, Pepper's answers to a request reach the member by email, but a reply 
 3. **The webhook only verifies, stores and queues.** `POST /v1/webhooks/resend` is off (404) until `RESEND_WEBHOOK_SECRET` is set.
    - It checks the Svix signature: HMAC-SHA256 of `id.timestamp.body` with the secret, compared in constant time, and a timestamp within 5 minutes.
    - It stores `email.received` events in `inbound_emails` (provider event id and `Message-ID` unique: a resend, or the same email twice, changes nothing) and answers 200. Other event types are acknowledged and not stored.
-   - The body is capped at 256 KB. Nothing from an email is logged.
+   - The body is capped by the api’s 100 KB JSON limit (413). Nothing from an email is logged.
    - The webhook carries no email text; the worker fetches the message from the provider (`InboundMailSource` port, a Resend adapter on its API, `RESEND_API_KEY`), so provider retries are harmless and the api holds no bodies.
 4. **The sender check.** A reply lands only when all of these hold:
    - its address (or `References`) carries a valid signature for an existing request;

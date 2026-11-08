@@ -10,8 +10,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S59.3 Email both ways** (brief approved 2026-11-08: "Go a head with ur recommendation", after a revision to aim higher; ADR-0063, AC-X-32…39). Split: S59.3.2 takes new requests by email, bounces/complaints, the held-mail review and inbound counts.
 - [x] 1 ACs, traceability, ADR-0063
 - [x] 2 reply-address token · 3 outgoing headers + signed Reply-To · 4 migration 0071 (isolation 443/443) · 6 `processInboundEmails` with 8 fixtures (core int 24/24, support suites 38/38) · 7 images → screenshots
-- [ ] 5 webhook (Svix, api) + Resend adapter (runtime) · 8 worker job · 9 "by email" in both threads (web)
-- Next: task 5.
+- [x] 5 webhook `POST /v1/webhooks/resend` (Svix over `rawBody`, now on in `createServiceApp`) + `ResendInboundSource` (runtime) · 8 worker `Inbound email job` (15 s) and env
+- [ ] 9 "by email" in both threads (web)
+- Next: task 9, then `/session-close`.
 
 ## Last sessions
 - **S59.2.3 Phase 13 · Screenshots on a request (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 3", [PR #88](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/88)). Full entry in [session-log.md](session-log.md).

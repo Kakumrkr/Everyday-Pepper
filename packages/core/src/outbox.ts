@@ -23,7 +23,7 @@ export interface EmailMessage {
   replyTo?: string | undefined;
   /** `In-Reply-To` and `References` (S59.3, ADR-0063): the support request it belongs to. */
   inReplyTo?: string | undefined;
-  references?: readonly string[] | undefined;
+  references?: string[] | undefined;
   /** `Auto-Submitted: auto-generated` (RFC 3834): sent by a job, so no one auto-answers it. */
   autoSubmitted?: true | undefined;
   /**

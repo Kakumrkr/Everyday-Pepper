@@ -54,7 +54,7 @@ export class SmtpMailer implements Mailer {
       ...(message.id !== undefined && { messageId: `<${message.id}@${this.domain}>` }),
       ...(message.replyTo !== undefined && { replyTo: message.replyTo }),
       ...(message.inReplyTo !== undefined && { inReplyTo: message.inReplyTo }),
-      ...(message.references !== undefined && { references: [...message.references] }),
+      ...(message.references !== undefined && { references: message.references }),
       ...(Object.keys(headers).length > 0 && { headers }),
     });
   }

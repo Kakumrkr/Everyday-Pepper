@@ -17,6 +17,7 @@ import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
+import { InboundModule } from './inbound/inbound.controller.js';
 import { SupportModule } from './support/support.controller.js';
 import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
@@ -60,7 +61,9 @@ export class AppModule {
           supportEmail: config.supportEmail,
           baseUrl: config.auth.baseUrl,
           release: config.release ?? 'unknown',
+          inboundDomain: config.inbound.domain,
         }),
+        InboundModule.forRoot({ webhookSecret: config.inbound.webhookSecret }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

@@ -170,7 +170,15 @@ export interface BusinessExportData {
   /** Requests to the Pepper team (S59, AC-X-18) and their messages, the team's included. */
   support: {
     threads: { id: string; reference: string; kind: string; status: string; createdAt: Date }[];
-    messages: { id: string; threadId: string; authorKind: string; body: string; createdAt: Date }[];
+    messages: {
+      id: string;
+      threadId: string;
+      authorKind: string;
+      body: string;
+      /** `app` or `email` (S59.3). */
+      channel: string;
+      createdAt: Date;
+    }[];
     /** The screenshots sent with them (S59.2.3, AC-X-31): the images are read from storage. */
     screenshots: { id: string; messageId: string; widths: number[] }[];
   };

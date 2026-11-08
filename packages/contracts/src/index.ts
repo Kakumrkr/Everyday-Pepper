@@ -27,6 +27,7 @@ export * from './push.js';
 export * from './rules.js';
 export * from './setup.js';
 export * from './support.js';
+export * from './inbound-email.js';
 export * from './templates.js';
 export * from './time.js';
 export * from './zone-names.js';

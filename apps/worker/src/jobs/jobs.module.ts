@@ -21,7 +21,9 @@ import {
   deleteAllSupportScreenshotImages,
   sendDueTaskPushes,
   systemClock,
+  processInboundEmails,
   type Clock,
+  type InboundMailSource,
   type Mailer,
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
@@ -70,7 +72,25 @@ export interface JobsOptions {
    * The support job (S59.2.2, ADR-0062): the same-day reminder to the team's address and the
    * 7-day auto-close. `supportEmail` `null`: nothing is reminded; `baseUrl` `null`: no links.
    */
-  support?: { supportEmail: string | null; baseUrl: string | null; pollMs: number };
+  support?: {
+    supportEmail: string | null;
+    baseUrl: string | null;
+    pollMs: number;
+    /** Where members' emailed replies come back (S59.3); the close email's `Reply-To`. */
+    inboundDomain?: string | null;
+  };
+  /**
+   * The inbound job (S59.3, ADR-0063): emailed replies fetched from the provider and landed in
+   * their threads, every `pollMs`; absent or `null`: off (until S57 sets it up).
+   */
+  inbound?: {
+    domain: string;
+    authservId: string | null;
+    source: InboundMailSource;
+    baseUrl: string;
+    release: string;
+    pollMs: number;
+  } | null;
   clock?: Clock;
 }
 
@@ -97,6 +117,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly insights: Periodic;
   readonly morning: Periodic;
   readonly support: Periodic;
+  readonly inbound: Periodic | null;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -194,6 +215,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
         const result = await runSupportHousekeeping(db, {
           outboxKey: options.key,
           supportEmail: support.supportEmail,
+          inboundDomain: support.inboundDomain ?? null,
           baseUrl: support.baseUrl,
           mailer,
           clock,
@@ -209,6 +231,39 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       },
       this.logger,
     );
+    const inbound = options.inbound ?? null;
+    this.inbound =
+      inbound === null
+        ? null
+        : new Periodic(
+            'Inbound email job',
+            inbound.pollMs,
+            async () => {
+              const result = await processInboundEmails(db, {
+                outboxKey: options.key,
+                supportEmail: support.supportEmail,
+                baseUrl: inbound.baseUrl,
+                release: inbound.release,
+                inboundDomain: inbound.domain,
+                authservId: inbound.authservId,
+                source: inbound.source,
+                store: screenshots,
+                clock,
+              });
+              // Counts only: never an address, a subject or a request.
+              const handled =
+                result.landed + result.held + result.ignored + result.refused + result.failed;
+              if (handled > 0) {
+                this.logger.log(
+                  `Inbound email: ${String(result.landed)} landed, ${String(result.held)} held, ${String(result.ignored)} ignored, ${String(result.refused)} refused, ${String(result.failed)} failed`,
+                );
+              }
+              if (result.retried > 0) {
+                this.logger.warn(`Inbound email: ${String(result.retried)} left for a retry`);
+              }
+            },
+            this.logger,
+          );
     const store = options.objectStore ?? null;
     this.deletions = new Periodic(
       'Deletion job',
@@ -254,6 +309,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     this.insights.start();
     this.morning.start();
     this.support.start();
+    this.inbound?.start();
     this.cleanup.start({ immediately: true });
   }
 
@@ -264,6 +320,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.insights.stop(),
       this.morning.stop(),
       this.support.stop(),
+      this.inbound?.stop(),
       this.cleanup.stop(),
       this.deletions.stop(),
     ]);
@@ -271,8 +328,8 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
 }
 
 /**
- * The reminder, due-task, insights, morning (drafts, briefing), support, clean-up and deletion
- * jobs. Needs `ConnectionsModule`; `MailModule` for the public requests' reminders.
+ * The reminder, due-task, insights, morning (drafts, briefing), support, inbound email, clean-up
+ * and deletion jobs. Needs `ConnectionsModule`; `MailModule` for the public requests' reminders.
  */
 @Module({})
 export class JobsModule {

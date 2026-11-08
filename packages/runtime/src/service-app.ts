@@ -43,6 +43,9 @@ export async function createServiceApp(
     logger: new PinoNestLogger(logger),
     // Throw instead of exiting on a wiring error, so the caller (or test) sees it.
     abortOnError: false,
+    // A JSON body's exact bytes beside the parsed one (`request.rawBody`), for webhooks whose
+    // signature covers them (Resend's inbound email, S59.3). Bodies stay under the 100 KB limit.
+    rawBody: true,
   });
   app.disable('x-powered-by');
   app.use(requestLogging(logger));

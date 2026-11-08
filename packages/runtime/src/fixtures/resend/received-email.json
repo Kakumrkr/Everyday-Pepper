@@ -1,0 +1,41 @@
+{
+  "object": "email",
+  "id": "4ef9a417-02e9-4d39-ad75-9611e0fcc33c",
+  "to": ["reply+pep-7k2m9q-1-abcdefghijklmnopqrst@reply.pepper.test"],
+  "from": "Ana Ruiz <Ana@Juniper.test>",
+  "created_at": "2026-11-08 10:04:12.000000+00",
+  "subject": "Re: Pepper replied to PEP-7K2M9Q",
+  "html": "<div dir=\"ltr\">Thanks, fixed!</div><div class=\"gmail_quote\">On Sun … wrote:</div>",
+  "text": "Thanks, fixed!\n\nOn Sun, Nov 8, 2026 at 10:02 AM Pepper <bookings@pepper.test> wrote:\n> Hi Ana\n",
+  "bcc": [],
+  "cc": ["Ben <ben@juniper.test>"],
+  "reply_to": [],
+  "message_id": "<CAG1abc@mail.gmail.com>",
+  "headers": {
+    "authentication-results": [
+      "amazonses.com; spf=pass smtp.mailfrom=juniper.test; dkim=pass header.i=@juniper.test; dmarc=pass header.from=juniper.test;",
+      "mx.google.com; dmarc=pass header.from=evil.test"
+    ],
+    "in-reply-to": "<support.pep-7k2m9q-1-abcdefghijklmnopqrst@reply.pepper.test>",
+    "references": "<0199f0a4-7c1e@pepper.test>\r\n <support.pep-7k2m9q-1-abcdefghijklmnopqrst@reply.pepper.test>",
+    "x-ses-spam-verdict": "PASS"
+  },
+  "attachments": [
+    {
+      "id": "2a0c9ce0-3112-4728-976e-47ddcd16a318",
+      "filename": "Screenshot.png",
+      "content_type": "image/png",
+      "content_disposition": "inline",
+      "content_id": "ii_m3abc",
+      "size": 4708
+    },
+    {
+      "id": "7b1d2e30-0000-4000-8000-000000000002",
+      "filename": "invoice.pdf",
+      "content_type": "application/pdf",
+      "content_disposition": "attachment",
+      "content_id": null,
+      "size": 4013
+    }
+  ]
+}

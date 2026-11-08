@@ -8,6 +8,8 @@ export interface SupportModuleOptions {
   supportEmail: string | null;
   baseUrl: string;
   release: string;
+  /** `INBOUND_EMAIL_DOMAIN` (S59.3): emails to members carry the signed reply address. */
+  inboundDomain?: string | null;
   clock?: Clock;
 }
 

@@ -69,6 +69,8 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   screenshots_not_attachable:
     'One of these screenshots can’t be sent any more: remove it and add it again',
   screenshots_unavailable: 'Screenshots can’t be added right now',
+  webhook_signature_invalid: 'The webhook signature is missing, wrong or too old',
+  webhook_not_found: 'No such webhook',
   screenshot_limit_reached: 'That’s 20 screenshots today: send what you have, or add more tomorrow',
   waitlist_offer_not_found: 'This offer link is not valid',
   waitlist_offer_used: 'This offer has already been claimed',
