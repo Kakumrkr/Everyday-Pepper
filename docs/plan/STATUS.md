@@ -14,9 +14,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 4 core: new requests by email (member / stranger / held), fixtures
 - [x] 5 core: bounces/complaints → suppression; skip at delivery
 - [x] 6 core+api: held Accept/Discard, Resume mail, counts — audited
-- [ ] 7 web: Held view, held count in the header (top-up), "Mail stopped"; gallery, ops.spec, screens
+- [x] 7 web: Held view, held count in the header (top-up), "Mail stopped"; gallery, ops.spec, screens
 - [ ] 8 close
-Next: task 7 (web: Held view, header count, "Mail stopped" + Resume; gallery, ops.spec, screens). API: GET /v1/ops/held, POST /v1/ops/held/:id {decision}, POST threads|requests/:id/resume-mail, GET /v1/ops/inbound/counts; inbox `held`. New requests go to `help@<inbound domain>`. db: 0072 adds `email_suppressions`, inbound columns (public_request_id, support_note_id, held_subject, sender_hash, accepted_by/at), `support_mail_stopped`, `support_inbound_member`; Accept = back to `received` with `accepted_by` (the worker lands it again).
+Next: task 8 (close: review, pnpm check, affected integration, ops.spec + gallery, walkthrough, PR).
 
 ## Last sessions
 - **S59.3 Phase 13 · Email both ways (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md), [PR #89](https://github.com/Kakumrkr/Everyday-Pepper/pull/89)). Full entry in [session-log.md](session-log.md).

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
   fillSavedReply,
+  heldLabel,
+  mailStoppedWords,
+  OPS_HELD_REASON,
   OPS_PATHS,
   overdueNote,
   opsAccessOf,
@@ -113,5 +116,28 @@ describe('fillSavedReply (S59.2.2, AC-X-23)', () => {
 
   it('has the saved replies’ page', () => {
     expect(OPS_PATHS.replies).toBe('/ops/replies');
+  });
+});
+
+describe('held mail and stopped mail (S59.3.2, AC-X-43/44/46)', () => {
+  it('counts held mail in the header, and says nothing for none', () => {
+    expect(heldLabel(0)).toBeNull();
+    expect(heldLabel(1)).toBe('1 held');
+    expect(heldLabel(12)).toBe('12 held');
+    expect(OPS_PATHS.held).toBe('/ops/held');
+  });
+
+  it('says why mail stopped, and since when', () => {
+    expect(mailStoppedWords({ reason: 'bounced', since: '2026-11-08T23:30:00.000Z' })).toBe(
+      'Mail stopped: their address bounced (Nov 8)',
+    );
+    expect(mailStoppedWords({ reason: 'complaint', since: '2026-11-09T01:00:00.000Z' })).toBe(
+      'Mail stopped: they marked our email as spam (Nov 9)',
+    );
+  });
+
+  it('words each held reason', () => {
+    expect(OPS_HELD_REASON.unverified_sender).toBe('Sender not verified');
+    expect(OPS_HELD_REASON.unknown_sender).toBe('Not from someone who may write there');
   });
 });
