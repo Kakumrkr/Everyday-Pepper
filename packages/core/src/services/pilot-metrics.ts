@@ -12,10 +12,15 @@ import type { AiMetrics, PlatformMetrics, SupportMetrics } from '@pepper/db';
 /**
  * What the chat's tokens cost, in US dollars a million (S59.4.2 D-3): the strong model's rate
  * (gpt-6.1-sol in `packages/ai/evals/prices.json`, checked 2026-10-23). Turns don't record
- * which model answered, so every turn is priced as the dearer one: the page's AI cost is an
- * upper bound. Re-check with the price table.
+ * which model answered, nor which input tokens were written to the prompt cache, so every
+ * turn is priced as the dearer model and every uncached token at the cache-write rate ($2.50,
+ * above input's $2): the page's AI cost is an upper bound. Re-check with the price table.
  */
-export const PILOT_AI_PRICE_PER_MILLION_USD = { input: 2, cachedInput: 0.1, output: 10 } as const;
+export const PILOT_AI_PRICE_PER_MILLION_USD = {
+  uncachedInput: 2.5,
+  cachedInput: 0.1,
+  output: 10,
+} as const;
 
 /** The chat's tokens in US cents at `PILOT_AI_PRICE_PER_MILLION_USD` (cached input included in input). */
 export function aiCostCents(tokens: {
@@ -26,7 +31,7 @@ export function aiCostCents(tokens: {
   const price = PILOT_AI_PRICE_PER_MILLION_USD;
   const uncached = Math.max(0, tokens.inputTokens - tokens.cachedInputTokens);
   const usd =
-    (uncached * price.input +
+    (uncached * price.uncachedInput +
       tokens.cachedInputTokens * price.cachedInput +
       tokens.outputTokens * price.output) /
     1_000_000;
@@ -189,11 +194,13 @@ function judgeAll(days: 7 | 30, counts: PeriodCounts): PilotMetric[] {
       share(ai.actionsUndoneWrong, ai.actionsExecuted),
       ai.actionsExecuted,
     ),
-    // Cents a business that used Pepper in the period, scaled to a 30-day month; one business is
-    // enough to show it, as for support requests.
+    // Whole cents (money is integer minor units) a business that used Pepper in the period,
+    // scaled to a 30-day month; one business is enough to show it, as for support requests.
     judgePilotMetric(
       'ai_cost',
-      ai.activeBusinesses === 0 ? null : (aiCostCents(ai) / ai.activeBusinesses) * (30 / days),
+      ai.activeBusinesses === 0
+        ? null
+        : Math.round((aiCostCents(ai) / ai.activeBusinesses) * (30 / days)),
       ai.activeBusinesses,
       { minimum: 1 },
     ),

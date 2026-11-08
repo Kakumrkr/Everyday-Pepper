@@ -22,7 +22,7 @@ let db: Database;
 let operator: UserId;
 const tenants: TenantId[] = [];
 
-// A Sunday, 07:00 in New York: the businesses' days end at their own midnight.
+// A Sunday, 07:00 in New York. A day is 24 hours counted back from now, not a calendar date.
 const NOW = new Date('2026-11-08T12:00:00Z');
 const DAY = 24 * 60;
 const minutes = (n: number) => new Date(NOW.getTime() - n * 60_000);
@@ -99,6 +99,7 @@ function proposal(
   tenant: string,
   values: {
     id?: string;
+    key?: string;
     status: 'pending' | 'approved' | 'rejected' | 'expired' | 'superseded';
     action?: string;
     requestedBy?: string | null;
@@ -119,7 +120,7 @@ function proposal(
       tenant,
       values.action ?? 'booking.move',
       `booking:${newId()}`,
-      `key-${newId()}`,
+      values.key ?? `key-${newId()}`,
       values.status,
       randomBytes(32).toString('hex'),
       values.requestedBy ?? null,
@@ -242,9 +243,9 @@ beforeAll(async () => {
     memberSince(c.id, days(3)),
     staffMember(a.id, staff, days(40)),
 
-    // Alpha's owner: active on 4 days of the week (Nov 8, 7, 6 and 5 in New York), by chat and
-    // by their own changes; a third entry on Nov 8 and the AI's entry for them on Nov 4 add no
-    // day. Active.
+    // Alpha's owner: active on 4 days of the week (0, 1, 2 and 3 days back), by chat and by
+    // their own changes; the edit below (day 0 again) and the AI's entry for them add no day.
+    // Active.
     turn(a.id, a.owner, minutes(60), [1000, 200, 100]),
     turn(a.id, a.owner, minutes(DAY + 60), [3000, 1000, 500]),
     audit(a.id, { kind: 'user', user: a.owner, action: 'booking.updated' }, minutes(2 * DAY + 60)),
@@ -256,9 +257,12 @@ beforeAll(async () => {
     ),
     // A staff member's turn: a chat turn, not an owner's day.
     turn(a.id, staff, minutes(30)),
-    // Bravo's owner: 2 days. Not active, but the business is.
+    // Bravo's owner: 4 calendar dates in New York (Nov 8 05:00, Nov 7 08:00, Nov 6, Nov 5) but
+    // 3 days (the first two are both within the last 24 hours). Not active; the business is.
     turn(b.id, b.owner, minutes(120), [500, 0, 50]),
+    audit(b.id, { kind: 'user', user: b.owner, action: 'client.updated' }, minutes(DAY - 60)),
     turn(b.id, b.owner, minutes(2 * DAY), [500, 0, 50]),
+    audit(b.id, { kind: 'user', user: b.owner, action: 'client.updated' }, minutes(3 * DAY)),
     // Before the period: nothing counted.
     turn(a.id, a.owner, days(8), [9000, 0, 900]),
     audit(a.id, { kind: 'user', user: a.owner, action: 'booking.updated' }, days(9)),
@@ -304,10 +308,25 @@ beforeAll(async () => {
       requestedBy: a.owner,
       createdAt: minutes(298),
     }),
-    proposal(a.id, { status: 'superseded', createdAt: minutes(410), decidedAt: minutes(400) }),
-    proposal(a.id, { status: 'pending', createdAt: minutes(400) }),
-    audit(a.id, { kind: 'user', user: a.owner, action: 'ai_proposal.created' }, minutes(400)),
-    audit(a.id, { kind: 'system', user: null, action: 'ai_proposal.created' }, minutes(500)),
+    ...((edited) => [
+      proposal(a.id, {
+        id: edited,
+        status: 'superseded',
+        createdAt: minutes(410),
+        decidedAt: minutes(400),
+      }),
+      proposal(a.id, { key: `${edited}.edit`, status: 'pending', createdAt: minutes(400) }),
+      audit(a.id, { kind: 'user', user: a.owner, action: 'ai_proposal.created' }, minutes(400)),
+    ])(newId()),
+    // A one-tap win-back draft the owner asked for: audited as theirs, but no edit.
+    proposal(a.id, {
+      key: 'win-back:draft-1',
+      status: 'pending',
+      action: 'message.client',
+      requestedBy: a.owner,
+      createdAt: minutes(450),
+    }),
+    audit(a.id, { kind: 'user', user: a.owner, action: 'ai_proposal.created' }, minutes(450)),
     proposal(a.id, {
       status: 'approved',
       requestedBy: a.owner,
@@ -315,8 +334,11 @@ beforeAll(async () => {
       createdAt: days(8),
       decidedAt: days(8),
     }),
-    // A feed card dismissed by itself (a card action), and one closed by p2's decline (not again).
+    // A feed card dismissed by itself (a card action), a group of two by "Dismiss all" (one
+    // action), and one closed by p2's decline (not again).
     dismissed(a.id, minutes(50)),
+    dismissed(a.id, minutes(45)),
+    dismissed(a.id, minutes(45)),
     dismissed(a.id, minutes(200), p2),
 
     // Executions: p1's, one undone as wrong, one undone as a change of mind (both card actions);
@@ -392,7 +414,7 @@ describe('AI and engagement metrics (S59.4.2, AC-X-50…53)', () => {
       ownerWeeks: 2,
       activeOwnerWeeks: 1,
       activeBusinesses: 2,
-      cardActions: 8,
+      cardActions: 9,
       chatTurns: 5,
       proposalsShown: 4,
       proposalsApproved: 1,

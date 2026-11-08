@@ -513,7 +513,7 @@ export function Gallery() {
                   m('ai_approval_rate', 84, 25, 'met', 92, 'better'),
                   m('ai_correction_rate', 7.4, 27, 'met', 11.1, 'better'),
                   m('undo_rate', 0, 40, 'met', 0, 'neutral'),
-                  m('ai_cost', 173.6, 4, 'met', 132, 'worse'),
+                  m('ai_cost', 174, 4, 'met', 132, 'worse'),
                   m('rebook_rate', 62.5, 8, 'tracked'),
                 ],
                 firstReply: {

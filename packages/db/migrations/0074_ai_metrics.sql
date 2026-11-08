@@ -5,14 +5,18 @@
 -- policies, with no member scope), named in every query, as the owner may bypass RLS.
 --
 -- Definitions (S59.4.2 D-2):
--- * An owner is active on a day (the business's own calendar day) with an audit entry they
---   made themselves or a chat turn. The period is cut into whole weeks ending at p_now (1 of 7
---   days, 4 of 30); an owner-week counts for an owner whose membership began before the week,
---   and is active with 4 or more active days.
+-- * The period is cut into whole weeks ending at p_now (1 of 7 days, 4 of 30), each of 7 days
+--   of 24 hours counted back from p_now (so a week is exactly 7 days, never parts of 8 dates).
+--   An owner is active on a day with an audit entry they made themselves (not the AI's for
+--   them) or a chat turn; an owner-week counts for an owner whose membership began before the
+--   week, and is active with 4 or more active days.
 -- * Card actions: a proposal approved or declined by a member, an edit of one, a feed card
---   dismissed (not one closed by its proposal), an action undone by a member.
+--   dismissed (not one closed by its proposal; "Dismiss all" closes a group at one moment and
+--   is one action), an action undone by a member.
 -- * Shown: proposals settled in the period as approved, declined or expired (superseded ones
---   were replaced, not shown to the end). Edited: a member's own replacement of a proposal.
+--   were replaced, not shown to the end). Edited: a member's own revision of a proposal (its
+--   replacement's key is the proposal's id + '.edit', ai-actions.ts; a one-tap draft a member
+--   asked for is audited as theirs too, so the audit can't tell them apart).
 --   Asked again: a declined proposal followed within 10 minutes by a new one for the same
 --   action, asked by the member who declined it.
 -- * Executed: actions the AI ran in the period; undone as wrong: those a member undid with the
@@ -30,7 +34,6 @@ DECLARE
   member text := current_setting('app.user_id', true);
   business uuid;
   ids uuid[];
-  zone text;
   weeks integer := floor(extract(epoch FROM p_now - p_since) / 604800)::integer;
   owner_weeks integer := 0;
   active_owner_weeks integer := 0;
@@ -60,10 +63,8 @@ BEGIN
   SELECT COALESCE(array_agg(DISTINCT mm.tenant_id), '{}') INTO ids FROM memberships mm;
   FOREACH business IN ARRAY ids LOOP
     PERFORM set_config('app.tenant_id', business::text, true);
-    SELECT t.time_zone INTO zone FROM tenants t WHERE t.id = business;
-
-    -- Every member's activity of the period (an audit entry they made, a chat turn), on the
-    -- business's own calendar. Inline, never a temp table: a session's temp schema is shared
+    -- Every member's activity of the period (an audit entry they made, a chat turn). Inline,
+    -- never a temp table: a session's temp schema is shared
     -- with the caller, who could have made one of the same name to read it back.
     WITH activity AS (
       SELECT l.actor_user_id AS user_id, l.created_at AS at
@@ -75,7 +76,7 @@ BEGIN
         FROM conversation_turns t
        WHERE t.tenant_id = business AND t.created_at >= p_since AND t.created_at < p_now
     ), weekly AS (
-      SELECT (SELECT count(DISTINCT (a.at AT TIME ZONE zone)::date) FROM activity a
+      SELECT (SELECT count(DISTINCT floor(extract(epoch FROM p_now - a.at) / 86400)) FROM activity a
                WHERE a.user_id = mm.user_id
                  AND a.at >= p_now - (k.week + 1) * interval '7 days'
                  AND a.at < p_now - k.week * interval '7 days') AS days
@@ -122,13 +123,13 @@ BEGIN
             AND q.created_at <= p.decided_at + interval '10 minutes');
     asked_again := asked_again + n;
 
-    SELECT count(*)::integer INTO n FROM audit_log l
-     WHERE l.tenant_id = business AND l.action = 'ai_proposal.created' AND l.actor_kind = 'user'
-       AND l.created_at >= p_since AND l.created_at < p_now;
+    SELECT count(*)::integer INTO n FROM ai_action_proposals p
+     WHERE p.tenant_id = business AND p.idempotency_key LIKE '%.edit'
+       AND p.created_at >= p_since AND p.created_at < p_now;
     edited := edited + n;
     card_actions := card_actions + n;
 
-    SELECT count(*)::integer INTO n FROM feed_items f
+    SELECT count(DISTINCT f.acted_at)::integer INTO n FROM feed_items f
      WHERE f.tenant_id = business AND f.status = 'dismissed' AND f.action_proposal_id IS NULL
        AND f.acted_at >= p_since AND f.acted_at < p_now;
     card_actions := card_actions + n;

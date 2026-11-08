@@ -108,7 +108,7 @@ describe('the pilot metrics page’s words (S59.4)', () => {
 
 describe('the pilot metrics page’s words, part 2 (S59.4.2)', () => {
   it('says the AI cost in dollars a month, and the part 2 targets as the scorecard does', () => {
-    expect(metricValueWords({ key: 'ai_cost', value: 173.6 })).toBe('$1.74 a month');
+    expect(metricValueWords({ key: 'ai_cost', value: 174 })).toBe('$1.74 a month');
     expect(metricValueWords({ key: 'ai_cost', value: 300 })).toBe('$3 a month');
     expect(targetWords('weekly_active_owners')).toBe('Target: at least 60%');
     expect(targetWords('cards_vs_chat')).toBe('Target: at least 70%');
@@ -143,12 +143,12 @@ describe('the change against the period before (S59.4.2 top-up)', () => {
       change: '1 h',
       against: 'vs the 30 days before',
     });
-    expect(metricTrend(metric('ai_cost', 150, 190.5, 'better'), 7)).toMatchObject({
+    expect(metricTrend(metric('ai_cost', 150, 191, 'better'), 7)).toMatchObject({
       direction: 'down',
       change: '$0.41',
     });
     expect(metricTrend(metric('support_requests', 0.3, 0.1, 'worse'), 7)).toMatchObject({
-      change: '0.2',
+      change: '0.2 a week',
     });
   });
 

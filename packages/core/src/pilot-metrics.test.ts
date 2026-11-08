@@ -57,7 +57,7 @@ const ai = {
   proposalsAskedAgain: 1,
   actionsExecuted: 50,
   actionsUndoneWrong: 0,
-  // $0.60 + $0.02 + $1.00 = $1.62 this week over 4 businesses: 40.5 cents a week, 173.6 a month.
+  // $0.75 + $0.02 + $1.00 = $1.77 this week over 4 businesses: 44.25 cents a week, 190 a month.
   inputTokens: 500_000,
   cachedInputTokens: 200_000,
   outputTokens: 100_000,
@@ -199,7 +199,7 @@ describe('buildPilotMetrics', () => {
       ai_approval_rate: entry('ai_approval_rate', 95, 20, 'missed'),
       ai_correction_rate: entry('ai_correction_rate', 13.6, 22, 'missed'),
       undo_rate: entry('undo_rate', 0, 50, 'met'),
-      ai_cost: entry('ai_cost', 173.6, 4, 'met'),
+      ai_cost: entry('ai_cost', 190, 4, 'met'),
       rebook_rate: entry('rebook_rate', 62.5, 8, 'tracked'),
     });
     expect(page.firstReply).toMatchObject({ medianMinutes: 95.6, slowestMinutes: 600 });
@@ -253,14 +253,15 @@ describe('the part 2 targets (S59.4.2)', () => {
     expect(judgePilotMetric('undo_rate', 1, 200).status).toBe('missed');
   });
 
-  it('prices the chat at the strong model, cached input at its own rate', () => {
-    expect(aiCostCents(ai)).toBeCloseTo(162, 6);
+  it('prices the chat high: the strong model, uncached input at the cache-write rate', () => {
+    expect(aiCostCents(ai)).toBeCloseTo(177, 6);
     expect(aiCostCents({ inputTokens: 0, cachedInputTokens: 0, outputTokens: 0 })).toBe(0);
   });
 
   it('scales AI cost to a month and shows none without an active business', () => {
     const month = buildPilotMetrics({ ...period, days: 30, platform, support, ai, inbound });
-    expect(month.metrics.find((m) => m.key === 'ai_cost')?.value).toBe(40.5);
+    // Whole cents: 44.25 is 44.
+    expect(month.metrics.find((m) => m.key === 'ai_cost')?.value).toBe(44);
     const idle = buildPilotMetrics({
       ...period,
       platform,

@@ -144,13 +144,13 @@ export function targetWords(key: PilotMetricKey): string {
   return `Target: ${bound}`;
 }
 
-/** The size of a change in a metric's unit: "4.2 pts", "12 min", "0.3", "$0.40". */
+/** The size of a change in a metric's unit: "4.2 pts", "12 min", "0.3 a week", "$0.40". */
 function changeWords(key: PilotMetricKey, change: number): string {
   const { unit } = PILOT_METRIC_TARGETS[key];
   if (unit === 'percent') return `${numberWords(change)} pts`;
   if (unit === 'minutes') return minutesWords(change);
   if (unit === 'cents') return formatMoney(Math.round(change));
-  return numberWords(change);
+  return `${numberWords(change)} a week`;
 }
 
 /**

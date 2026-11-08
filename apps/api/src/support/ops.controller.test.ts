@@ -133,7 +133,16 @@ const METRICS = {
   until: AT,
   businesses: 3,
   bookableBusinesses: 2,
-  metrics: [{ key: 'first_reply_time', value: 95, sample: 5, status: 'met' }],
+  metrics: [
+    {
+      key: 'first_reply_time',
+      value: 95,
+      sample: 5,
+      status: 'met',
+      previous: 120,
+      trend: 'better',
+    },
+  ],
   firstReply: {
     requests: 6,
     answered: 5,
