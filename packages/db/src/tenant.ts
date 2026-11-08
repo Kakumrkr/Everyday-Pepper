@@ -136,6 +136,29 @@ export async function withJobScan<T>(
   );
 }
 
+/**
+ * Runs `work` in a transaction in which `inbound_emails` rows are reachable (S59.3, ADR-0063):
+ * the webhook stores an email there, and the worker's inbound job takes and records them.
+ * Nothing else changes: other tables see no tenant (and so nothing tenant-owned).
+ */
+export async function withInboundMail<T>(
+  db: Database,
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    await setTransactionInboundMail(tx);
+    return work(tx);
+  });
+}
+
+/**
+ * Makes `inbound_emails` reachable in the open transaction too, for the inbound job's business
+ * transaction that lands a reply and records it together (so a retry can't land it twice).
+ */
+export async function setTransactionInboundMail(tx: TenantTx): Promise<void> {
+  await tx.execute(sql`SELECT set_config('app.inbound_mail', 'on', true)`);
+}
+
 /** What an operator transaction is for (S59.2, ADR-0062), as its access log row names it. */
 const OperatorActionSchema = z.enum([
   'inbox.read',

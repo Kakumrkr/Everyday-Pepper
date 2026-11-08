@@ -48,10 +48,13 @@ describe('SmtpMailer', () => {
     ]);
   });
 
-  it('threads support mail and marks a job\'s email auto-submitted (S59.3, AC-X-32)', async () => {
+  it("threads support mail and marks a job's email auto-submitted (S59.3, AC-X-32)", async () => {
     const sendMail = vi.fn(() => Promise.resolve({}));
     const transport = { sendMail, close: vi.fn() } as unknown as Transporter;
-    const mailer = new SmtpMailer({ smtpUrl: 'smtp://localhost:1025', from: 'P <p@pepper.test>' }, transport);
+    const mailer = new SmtpMailer(
+      { smtpUrl: 'smtp://localhost:1025', from: 'P <p@pepper.test>' },
+      transport,
+    );
     await mailer.send({
       to: 'ana@example.test',
       subject: 'S',

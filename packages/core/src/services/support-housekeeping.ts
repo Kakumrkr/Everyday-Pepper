@@ -212,7 +212,8 @@ async function closeQuiet(
   const firstName = firstNameOf(opener.name);
   const link = options.baseUrl === null ? null : `${options.baseUrl}/support/${thread.id}`;
   const routing = supportReplyRouting(options, thread.reference);
-  const how = routing.firstLines.length > 0 ? 'reply to this email or in the app' : 'reply in the app';
+  const how =
+    routing.firstLines.length > 0 ? 'reply to this email or in the app' : 'reply in the app';
   await queueEmail(
     tx,
     {
