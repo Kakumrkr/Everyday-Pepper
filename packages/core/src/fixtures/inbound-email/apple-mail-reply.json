@@ -1,0 +1,31 @@
+{
+  "description": "Apple Mail on iPhone: text with '>' quotes and 'Sent from my iPhone', reply to From (only References carries the request)",
+  "from": "{{from}}",
+  "recipients": ["support@pepper.test"],
+  "subject": "Re: Pepper replied to {{ref}}",
+  "text": "Perfect, thank you so much!\n\nSent from my iPhone\n\n> On 8 Nov 2026, at 10:02, Pepper <bookings@pepper.test> wrote:\n> \n> — Reply above this line to answer —\n> Hi Jess,\n",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=pass (spfCheck: domain of {{fromDomain}} designates 209.85.0.1 as permitted sender) smtp.mailfrom={{from}}; dkim=pass header.i=@{{fromDomain}}; dmarc=pass header.from={{fromDomain}};"
+    },
+    {
+      "name": "Received",
+      "value": "from mail-sor-f41.google.com by inbound-smtp.us-east-1.amazonaws.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mx.google.com; dmarc=pass header.from=evil.test"
+    },
+    {
+      "name": "Message-ID",
+      "value": "<A1B2C3@icloud.com>"
+    }
+  ],
+  "inReplyTo": "<0199f0a4-7c1e@pepper.test>",
+  "references": ["<0199f0a4-7c1e@pepper.test>", "{{root}}"],
+  "attachments": [],
+  "size": 2100,
+  "expected": "Perfect, thank you so much!"
+}

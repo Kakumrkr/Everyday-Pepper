@@ -1,0 +1,31 @@
+{
+  "description": "Outlook on the web: HTML only, the quote after its divRplyFwdMsg header block",
+  "from": "{{from}}",
+  "recipients": ["{{reply}}"],
+  "subject": "RE: Pepper replied to {{ref}}",
+  "text": null,
+  "html": "<html><head><style>p{margin:0}</style></head><body><div style=\"font-family:Calibri\">It still shows an empty day on Tuesdays &amp; Wednesdays.</div><div>Thanks,<br>Ben</div><hr style=\"display:inline-block;width:98%\"><div id=\"divRplyFwdMsg\" dir=\"ltr\"><b>From:</b> Pepper &lt;bookings@pepper.test&gt;<br><b>Sent:</b> Sunday, November 8, 2026 10:02 AM<br><b>To:</b> Ben<br><b>Subject:</b> Pepper replied to {{ref}}</div><div>— Reply above this line to answer —</div></body></html>",
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=pass (spfCheck: domain of {{fromDomain}} designates 209.85.0.1 as permitted sender) smtp.mailfrom={{from}}; dkim=pass header.i=@{{fromDomain}}; dmarc=pass header.from={{fromDomain}};"
+    },
+    {
+      "name": "Received",
+      "value": "from mail-sor-f41.google.com by inbound-smtp.us-east-1.amazonaws.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mx.google.com; dmarc=pass header.from=evil.test"
+    },
+    {
+      "name": "Message-ID",
+      "value": "<DM6PR01MB@outlook.com>"
+    }
+  ],
+  "inReplyTo": null,
+  "references": [],
+  "attachments": [],
+  "size": 6120,
+  "expected": "It still shows an empty day on Tuesdays & Wednesdays.\nThanks,\nBen"
+}

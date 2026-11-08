@@ -132,9 +132,9 @@ describe('inbound emails (S59.3, ADR-0063)', () => {
         claimInboundEmails(tx, { now, leaseMs: 60_000, limit: 10, maxAttempts: 5 }),
       );
     const [first, second] = await Promise.all([take(), take()]);
-    const taken = [...(first ?? []), ...(second ?? [])].map((row) => row.id).sort();
+    const taken = [...first, ...second].map((row) => row.id).sort();
     expect(taken).toEqual([a?.id, b?.id].sort());
-    expect([...(first ?? []), ...(second ?? [])].every((row) => row.attempts === 1)).toBe(true);
+    expect([...first, ...second].every((row) => row.attempts === 1)).toBe(true);
     // The lease ends: taken again, a second attempt.
     const later = await withInboundMail(db, (tx) =>
       claimInboundEmails(tx, {

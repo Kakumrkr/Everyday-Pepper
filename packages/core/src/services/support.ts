@@ -133,7 +133,8 @@ export interface SupportRequestMeta {
 const DAY_MS = 24 * 60 * 60 * 1000;
 const THREAD_LIST_LIMIT = 100;
 const REFERENCE_ALPHABET = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
-const REFERENCE_TRIES = 5;
+/** Tries for a free reference before giving up (a clash is one in a billion). */
+export const REFERENCE_TRIES = 5;
 
 /** A new reference: "PEP-" and 6 random characters of Crockford's base 32. */
 export function newSupportReference(): string {
@@ -567,7 +568,8 @@ function parseThreadId(threadId: string): string {
   return parsed.data;
 }
 
-async function checkLimits(
+/** Holds the member's support writes and refuses one over the day's limits (AC-X-14). */
+export async function checkLimits(
   tx: TenantTx,
   userId: UserId,
   now: Date,
@@ -581,14 +583,15 @@ async function checkLimits(
   if (counts.messages >= SUPPORT_MESSAGES_PER_DAY) throw new SupportLimitReachedError('messages');
 }
 
-interface Requester {
+export interface Requester {
   name: string;
   email: string;
   businessName: string;
   role: string;
 }
 
-async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
+/** The member as the team's emails name them (also the inbound job's, S59.3). */
+export async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
   const tenant = await findCurrentTenant(tx);
   const membership = await findMembership(tx, userId);
   const member = (await listTenantMembers(tx)).find((row) => row.userId === userId);
@@ -603,8 +606,8 @@ async function requesterOf(tx: TenantTx, userId: UserId): Promise<Requester> {
   };
 }
 
-/** The team's email about a request or a member's reply to it. */
-async function emailTeam(
+/** The team's email about a request or a member's reply to it (also the inbound job's). */
+export async function emailTeam(
   tx: TenantTx,
   options: SupportOptions,
   mail: {
@@ -619,6 +622,8 @@ async function emailTeam(
     dedupeKey: string;
     now: Date;
     first: boolean;
+    /** It came by email (S59.3): said in the email's first line. */
+    byEmail?: boolean;
   },
 ): Promise<void> {
   if (options.supportEmail === null) return;
@@ -645,7 +650,7 @@ async function emailTeam(
       replyTo: requester.email,
       subject,
       text: [
-        `${mail.reference} · ${label}${mail.first ? '' : ' · a new reply'}`,
+        `${mail.reference} · ${label}${mail.first ? '' : ' · a new reply'}${mail.byEmail === true ? ' · by email' : ''}`,
         `From: ${requester.name} <${requester.email}>, ${requester.role} at ${requester.businessName} — reply to this email to answer them.`,
         '',
         mail.message,
@@ -707,6 +712,7 @@ async function toThread(
       author: authorOf(message.authorKind, message.authorUserId, message.authorName, reader),
       body: message.body,
       screenshots: screenshots.get(message.id) ?? [],
+      channel: message.channel,
       createdAt: message.createdAt.toISOString(),
     })),
     replyTo: requester?.email ?? null,

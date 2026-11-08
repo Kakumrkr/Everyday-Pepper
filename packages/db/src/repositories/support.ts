@@ -209,18 +209,35 @@ export async function findSupportThread(
 export async function lockSupportThread(
   tx: TenantTx,
   id: string,
-): Promise<{ id: string; status: SupportStatus; reference: string } | undefined> {
+): Promise<
+  | {
+      id: string;
+      status: SupportStatus;
+      reference: string;
+      kind: SupportKind;
+      solvedAt: Date | null;
+    }
+  | undefined
+> {
   const [row] = await tx
     .select({
       id: supportThreads.id,
       status: supportThreads.status,
       reference: supportThreads.reference,
+      kind: supportThreads.kind,
+      solvedAt: supportThreads.solvedAt,
     })
     .from(supportThreads)
     .where(eq(supportThreads.id, Id.parse(id)))
     .for('update')
     .limit(1);
-  return row === undefined ? undefined : { ...row, status: SupportStatusSchema.parse(row.status) };
+  return row === undefined
+    ? undefined
+    : {
+        ...row,
+        status: SupportStatusSchema.parse(row.status),
+        kind: SupportKindSchema.parse(row.kind),
+      };
 }
 
 /** A thread's messages, oldest first. */

@@ -1,0 +1,35 @@
+{
+  "description": "An out-of-office answer (RFC 3834 Auto-Submitted)",
+  "from": "{{from}}",
+  "recipients": ["{{reply}}"],
+  "subject": "Automatic reply: Pepper replied to {{ref}}",
+  "text": "I'm away until Monday and will reply then.",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=pass (spfCheck: domain of {{fromDomain}} designates 209.85.0.1 as permitted sender) smtp.mailfrom={{from}}; dkim=pass header.i=@{{fromDomain}}; dmarc=pass header.from={{fromDomain}};"
+    },
+    {
+      "name": "Received",
+      "value": "from mail-sor-f41.google.com by inbound-smtp.us-east-1.amazonaws.com"
+    },
+    {
+      "name": "Authentication-Results",
+      "value": "mx.google.com; dmarc=pass header.from=evil.test"
+    },
+    {
+      "name": "Auto-Submitted",
+      "value": "auto-replied"
+    },
+    {
+      "name": "Message-ID",
+      "value": "<auto1@outlook.com>"
+    }
+  ],
+  "inReplyTo": "{{root}}",
+  "references": ["{{root}}"],
+  "attachments": [],
+  "size": 1500,
+  "expected": null
+}

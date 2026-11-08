@@ -150,9 +150,13 @@ export async function finishInboundEmail(
       status: outcome.status,
       reason: outcome.reason === undefined ? null : Reason.parse(outcome.reason),
       tenantId:
-        'tenantId' in outcome && outcome.tenantId != null ? Id.parse(outcome.tenantId) : null,
+        'tenantId' in outcome && typeof outcome.tenantId === 'string'
+          ? Id.parse(outcome.tenantId)
+          : null,
       threadId:
-        'threadId' in outcome && outcome.threadId != null ? Id.parse(outcome.threadId) : null,
+        'threadId' in outcome && typeof outcome.threadId === 'string'
+          ? Id.parse(outcome.threadId)
+          : null,
       supportMessageId: outcome.status === 'landed' ? Id.parse(outcome.supportMessageId) : null,
       fromAddress: held ? outcome.fromAddress.slice(0, 254) : null,
       heldText: held ? outcome.heldText.slice(0, 4000) : null,
