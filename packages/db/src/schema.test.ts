@@ -9,6 +9,8 @@ import {
   autonomySettings,
   bookingFunnelEvents,
   businessPhotos,
+  emailSuppressions,
+  inboundEmails,
   invites,
   memberships,
   memoryEpisodes,
@@ -43,6 +45,24 @@ function foreignKeys(table: PgTable) {
 }
 
 describe('schema foreign keys', () => {
+  it('lets an inbound email go with its business, thread, public request or note; delivery problems with nothing (S59.3, S59.3.2)', () => {
+    expect(foreignKeys(inboundEmails)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        {
+          from: ['tenant_id', 'thread_id'],
+          to: 'support_threads(tenant_id,id)',
+          onDelete: 'cascade',
+        },
+        { from: ['public_request_id'], to: 'public_support_requests(id)', onDelete: 'cascade' },
+        { from: ['support_note_id'], to: 'support_notes(id)', onDelete: 'cascade' },
+      ]),
+    );
+    expect(foreignKeys(inboundEmails)).toHaveLength(4);
+    // The address asked not to be mailed: kept when businesses and accounts go.
+    expect(foreignKeys(emailSuppressions)).toEqual([]);
+  });
+
   it('keeps the team’s notes and saved replies when an operator goes; grants go with them (S59.2, S59.2.2)', () => {
     expect(foreignKeys(platformOperators)).toEqual([
       { from: ['user_id'], to: 'users(id)', onDelete: 'cascade' },

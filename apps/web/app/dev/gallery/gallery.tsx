@@ -1,6 +1,11 @@
 'use client';
 
-import { EveningWrapSchema, WeekValueSchema } from '@pepper/contracts';
+import {
+  EveningWrapSchema,
+  OperatorHeldListSchema,
+  SupportMailStopSchema,
+  WeekValueSchema,
+} from '@pepper/contracts';
 import {
   Avatar,
   Badge,
@@ -41,6 +46,8 @@ import {
 } from '@pepper/ui';
 import { useState, type ReactNode } from 'react';
 import { SupportMessageMeta } from '../../_components/support/message-meta';
+import { OpsHeldList } from '../../_components/ops/ops-held';
+import { OpsMailStopped } from '../../_components/ops/ops-mail-stopped';
 import {
   BARBERS,
   BRIEFING,
@@ -422,6 +429,46 @@ export function Gallery() {
                 Pull down on the calendar to refresh it.
               </p>
             </div>
+          </Section>
+
+          <Section id="support-held" title="Support: held mail and stopped mail">
+            {/* S59.3.2 (AC-X-43/44): the console's held review and a requester whose mail stopped. */}
+            <OpsHeldList
+              initial={OperatorHeldListSchema.parse({
+                items: [
+                  {
+                    id: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190',
+                    reason: 'unverified_sender',
+                    kind: 'new_request',
+                    from: 'maya.salon.owner@example.com',
+                    subject: 'Can’t move a booking',
+                    text: 'When I drag Maria’s 3pm to 4pm nothing happens. <b>Help</b>',
+                    business: null,
+                    reference: null,
+                    heldSince: '2026-11-08T09:00:00.000Z',
+                  },
+                  {
+                    id: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708191',
+                    reason: 'unknown_sender',
+                    kind: 'reply',
+                    from: 'front.desk@juniper.example',
+                    subject: null,
+                    text: 'Forwarding for Jess: the calendar is still empty.',
+                    business: 'Juniper Hair Studio',
+                    reference: 'PEP-7K2M9Q',
+                    heldSince: '2026-11-08T11:00:00.000Z',
+                  },
+                ],
+              })}
+            />
+            <OpsMailStopped
+              stop={SupportMailStopSchema.parse({
+                reason: 'bounced',
+                since: '2026-11-08T10:00:00.000Z',
+              })}
+              busy={false}
+              onResume={() => undefined}
+            />
           </Section>
 
           <Section id="empty" title="Empty states">

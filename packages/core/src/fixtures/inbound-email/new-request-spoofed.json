@@ -1,0 +1,19 @@
+{
+  "description": "A new request whose From was forged: the receiver's DMARC failed for the From domain",
+  "from": "{{from}}",
+  "recipients": ["{{reply}}"],
+  "subject": "Can't move a booking",
+  "text": "Hi, when I drag Maria's 3pm to 4pm nothing happens.\n\nThanks,\nSam\n",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=fail smtp.mailfrom=evil.test; dkim=none; dmarc=fail header.from={{fromDomain}};"
+    }
+  ],
+  "inReplyTo": null,
+  "references": [],
+  "attachments": [],
+  "size": 2100,
+  "expected": "Can't move a booking\n\nHi, when I drag Maria's 3pm to 4pm nothing happens.\n\nThanks,\nSam"
+}

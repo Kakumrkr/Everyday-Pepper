@@ -319,6 +319,8 @@ export const OperatorInboxItemSchema = z.discriminatedUnion('source', [
     status: PublicSupportStatusSchema,
     preview: z.string(),
     waitingSince: UtcDateTimeSchema,
+    /** The signed-out form, or an email to the team's address (S59.3.2, AC-X-41). */
+    channel: z.enum(['form', 'email']),
   }),
 ]);
 export type OperatorInboxItem = z.infer<typeof OperatorInboxItemSchema>;
@@ -329,6 +331,8 @@ export const OperatorInboxSchema = z.object({
   items: z.array(OperatorInboxItemSchema),
   /** Requests waiting on Pepper, whatever the view. */
   waiting: z.number().int().nonnegative(),
+  /** Held emails waiting for a look (S59.3.2, AC-X-46): "2 held" in the header. */
+  held: z.number().int().nonnegative(),
 });
 export type OperatorInbox = z.infer<typeof OperatorInboxSchema>;
 
@@ -358,6 +362,16 @@ export const OperatorMessageSchema = z.object({
 });
 export type OperatorMessage = z.infer<typeof OperatorMessageSchema>;
 
+/**
+ * Support email to the requester is stopped (S59.3.2, AC-X-43): their address bounced for good or
+ * they marked it as spam. An operator can resume it.
+ */
+export const SupportMailStopSchema = z.object({
+  reason: z.enum(['bounced', 'complaint']),
+  since: UtcDateTimeSchema,
+});
+export type SupportMailStop = z.infer<typeof SupportMailStopSchema>;
+
 /** `GET /v1/ops/threads/:id`: a business's request, as the console opens it. */
 export const OperatorThreadSchema = z.object({
   id: SupportThreadIdSchema,
@@ -377,6 +391,8 @@ export const OperatorThreadSchema = z.object({
   solvedBy: SupportSolvedBySchema.nullable(),
   /** The opener's "Did this help?" (AC-X-26). */
   rating: SupportRatingSchema.nullable(),
+  /** Whether support email to the opener is stopped (AC-X-43). */
+  mailStopped: SupportMailStopSchema.nullable(),
 });
 export type OperatorThread = z.infer<typeof OperatorThreadSchema>;
 
@@ -392,6 +408,10 @@ export const OperatorPublicRequestSchema = z.object({
   topic: z.string().nullable(),
   notes: z.array(SupportNoteSchema),
   createdAt: UtcDateTimeSchema,
+  /** The signed-out form, or an email to the team's address (AC-X-41). */
+  channel: z.enum(['form', 'email']),
+  /** Whether support email to `email` is stopped (AC-X-43). */
+  mailStopped: SupportMailStopSchema.nullable(),
 });
 export type OperatorPublicRequest = z.infer<typeof OperatorPublicRequestSchema>;
 
@@ -406,6 +426,63 @@ export type OperatorThreadChange = z.input<typeof OperatorThreadChangeSchema>;
 /** `PATCH /v1/ops/requests/:id`: any status. */
 export const OperatorPublicChangeSchema = z.object({ status: PublicSupportStatusSchema }).strict();
 export type OperatorPublicChange = z.input<typeof OperatorPublicChangeSchema>;
+
+// Held mail and inbound counts (S59.3.2, ADR-0063 Part 2, AC-X-44/45).
+
+/** Why an email was held: its sender isn't one who may write there, or isn't verified. */
+export const HeldReasonSchema = z.enum(['unknown_sender', 'unverified_sender']);
+export type HeldReason = z.infer<typeof HeldReasonSchema>;
+
+export const HeldEmailIdSchema = z.uuid().toLowerCase();
+
+/** A held email in the console's "Held" view. Its text is shown as plain text, never rendered. */
+export const OperatorHeldItemSchema = z.object({
+  id: HeldEmailIdSchema,
+  reason: HeldReasonSchema,
+  /** A reply to a business's request, or a new request (a member's or a stranger's). */
+  kind: z.enum(['reply', 'new_request']),
+  from: z.string(),
+  subject: z.string().nullable(),
+  text: z.string(),
+  /** The business it would go to; `null` for a stranger's. */
+  business: z.string().nullable(),
+  /** The request it replies to. */
+  reference: SupportReferenceSchema.nullable(),
+  heldSince: UtcDateTimeSchema,
+});
+export type OperatorHeldItem = z.infer<typeof OperatorHeldItemSchema>;
+
+/** `GET /v1/ops/held`: held emails, the longest waiting first. */
+export const OperatorHeldListSchema = z.object({ items: z.array(OperatorHeldItemSchema) });
+export type OperatorHeldList = z.infer<typeof OperatorHeldListSchema>;
+
+/** `POST /v1/ops/held/:id`: Accept lands it as if its check had passed; Discard empties it. */
+export const OperatorHeldDecisionSchema = z
+  .object({ decision: z.enum(['accept', 'discard']) })
+  .strict();
+export type OperatorHeldDecision = z.input<typeof OperatorHeldDecisionSchema>;
+
+const InboundCountSchema = z.object({
+  status: z.enum(['received', 'landed', 'held', 'ignored', 'refused', 'failed']),
+  reason: z.string().nullable(),
+  count: z.number().int().nonnegative(),
+});
+
+const InboundPeriodSchema = z.object({
+  outcomes: z.array(InboundCountSchema),
+  problems: z.object({
+    hardBounces: z.number().int().nonnegative(),
+    softBounces: z.number().int().nonnegative(),
+    complaints: z.number().int().nonnegative(),
+  }),
+});
+
+/** `GET /v1/ops/inbound/counts`: the last 7 and 30 days, for S59.4's metrics page. */
+export const OperatorInboundCountsSchema = z.object({
+  last7Days: InboundPeriodSchema,
+  last30Days: InboundPeriodSchema,
+});
+export type OperatorInboundCounts = z.infer<typeof OperatorInboundCountsSchema>;
 
 /** `GET /v1/ops/me`: the console opens for an operator only. */
 export const OperatorMeSchema = z.object({ operator: z.literal(true), name: z.string() });

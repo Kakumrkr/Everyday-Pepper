@@ -624,7 +624,7 @@ export async function listSupportForExport(tx: TenantTx): Promise<{
  * caller draws another.
  */
 export async function insertPublicSupportRequest(
-  db: Database,
+  db: Database | TenantTx,
   input: {
     reference: string;
     email: string;
@@ -633,6 +633,8 @@ export async function insertPublicSupportRequest(
     page: string | null;
     topic: string | null;
     now: Date;
+    /** An email to the team's address (S59.3.2, AC-X-41); the form's otherwise. */
+    channel?: 'form' | 'email';
   },
 ): Promise<{ id: string } | null> {
   // No RETURNING and no ON CONFLICT: the form's role may insert a request but not read one
@@ -647,6 +649,7 @@ export async function insertPublicSupportRequest(
       body: input.body,
       page: input.page,
       topic: input.topic,
+      channel: input.channel ?? 'form',
       createdAt: input.now,
     });
   } catch (error) {
@@ -676,6 +679,8 @@ export interface OperatorInboxRow {
   rating: SupportRating | null;
   /** How many screenshots it carries (S59.2.3's top-up, AC-X-30); public requests have none. */
   screenshotCount: number;
+  /** A public request's way in: the form, or an email (S59.3.2); `null` for a thread. */
+  channel: 'form' | 'email' | null;
 }
 
 /**
@@ -726,6 +731,7 @@ export async function listOperatorThreads(
     lastMessageAt: new Date(row.last_message_at),
     rating: row.rating === null ? null : SupportRatingSchema.parse(row.rating),
     screenshotCount: row.screenshot_count,
+    channel: null,
   }));
 }
 
@@ -745,6 +751,7 @@ export async function listOperatorPublicRequests(
       preview: sql<string>`left(${publicSupportRequests.body}, ${sql.raw(String(PREVIEW_LENGTH))})`,
       createdAt: publicSupportRequests.createdAt,
       statusChangedAt: publicSupportRequests.statusChangedAt,
+      channel: publicSupportRequests.channel,
     })
     .from(publicSupportRequests)
     .where(inArray(publicSupportRequests.status, statuses))
@@ -766,6 +773,7 @@ export async function listOperatorPublicRequests(
     lastMessageAt: row.statusChangedAt ?? row.createdAt,
     rating: null,
     screenshotCount: 0,
+    channel: row.channel === 'email' ? ('email' as const) : ('form' as const),
   }));
 }
 
@@ -850,6 +858,7 @@ export interface PublicSupportRequestRecord {
   status: PublicSupportStatus;
   createdAt: Date;
   statusChangedAt: Date | null;
+  channel: 'form' | 'email';
 }
 
 /** One public request; `lock` holds it for a status change. */
@@ -870,6 +879,7 @@ export async function findPublicSupportRequest(
       status: publicSupportRequests.status,
       createdAt: publicSupportRequests.createdAt,
       statusChangedAt: publicSupportRequests.statusChangedAt,
+      channel: publicSupportRequests.channel,
     })
     .from(publicSupportRequests)
     .where(eq(publicSupportRequests.id, Id.parse(id)))
@@ -877,7 +887,25 @@ export async function findPublicSupportRequest(
   const [row] = options.lock === true ? await query.for('update') : await query;
   return row === undefined
     ? undefined
-    : { ...row, status: PublicSupportStatusSchema.parse(row.status) };
+    : {
+        ...row,
+        status: PublicSupportStatusSchema.parse(row.status),
+        channel: row.channel === 'email' ? 'email' : 'form',
+      };
+}
+
+/** A request opener's address (users are global), for whether mail to them is stopped. */
+export async function findSupportOpenerEmail(
+  tx: TenantTx,
+  userId: string | null,
+): Promise<string | null> {
+  if (userId === null) return null;
+  const [row] = await tx
+    .select({ email: users.email })
+    .from(users)
+    .where(eq(users.id, Id.parse(userId)))
+    .limit(1);
+  return row?.email ?? null;
 }
 
 export async function setPublicSupportRequestStatus(

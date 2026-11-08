@@ -27,6 +27,7 @@ import {
   type Database,
   type DueOutboxMessage,
   type TenantTx,
+  isSupportMailStopped,
 } from '@pepper/db';
 import type { Clock } from '../clock.js';
 import {
@@ -129,6 +130,17 @@ export interface DeliveryOptions {
 export const PUSH_TTL_SECONDS = 24 * 60 * 60;
 
 /**
+ * Support email to a requester (S59.3.2, AC-X-42): the team's answers, the quiet close and the
+ * notes about an emailed reply. These stop for an address that bounced for good or complained;
+ * the team's own copies (`support.opened`, `support.replied`, `support.overdue`) never do.
+ */
+const REQUESTER_SUPPORT_MAIL = ['support.answered:', 'support.closed:', 'support.inbound_note:'];
+
+export function isRequesterSupportMail(dedupeKey: string): boolean {
+  return REQUESTER_SUPPORT_MAIL.some((prefix) => dedupeKey.startsWith(prefix));
+}
+
+/**
  * Delivers one due message at most once: claims it (committed, so no other worker gets it
  * during the lease), opens and sends it, then marks it sent and meters the email in one
  * transaction. A failure schedules a retry or gives up (`failureOutcome`). `skipped`: the
@@ -159,6 +171,7 @@ export async function deliverOutboxMessage(
   if (claimed === undefined || claimed.payload === null) return 'skipped';
 
   let dropped = false;
+  let stopped = false;
   try {
     const opened: unknown = JSON.parse(
       openOutboxContent(options.key, id, claimed.payload).toString('utf8'),
@@ -171,7 +184,15 @@ export async function deliverOutboxMessage(
       await writer(db, tenantId, OutboxEpisodeSchema.parse(opened));
     } else {
       const content = OutboxEmailSchema.parse(opened);
-      await options.mailer.send({ ...content, id });
+      if (
+        isRequesterSupportMail(claimed.dedupeKey) &&
+        (await isSupportMailStopped(db, content.to))
+      ) {
+        // The address bounced for good or complained (S59.3.2, AC-X-42): kept as a record, never sent.
+        stopped = true;
+      } else {
+        await options.mailer.send({ ...content, id });
+      }
     }
   } catch (error) {
     const outcome = failureOutcome(error, claimed.attempts, options.clock.now());
@@ -187,6 +208,12 @@ export async function deliverOutboxMessage(
   if (dropped) {
     await withTenant(db, tenantId, (tx) =>
       markOutboxMessageFailed(tx, id, { errorName: 'PushSubscriptionGone', retryAt: null }),
+    );
+    return 'dropped';
+  }
+  if (stopped) {
+    await withTenant(db, tenantId, (tx) =>
+      markOutboxMessageFailed(tx, id, { errorName: 'SupportMailStopped', retryAt: null }),
     );
     return 'dropped';
   }

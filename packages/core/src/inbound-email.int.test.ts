@@ -1,16 +1,24 @@
 import { TenantIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import {
+  acceptHeldInboundEmail,
   addMembership,
   appendSupportMessage,
   createDatabase,
+  grantOperator,
   inboundEmails,
   insertSupportScreenshot,
   listAuditEntries,
   listDueOutboxMessages,
+  emailSuppressions,
   newId,
+  outboxMessages,
+  publicSupportRequests,
+  sessions,
   setSupportThreadStatus,
   supportThreads,
+  users,
   withMember,
+  withOperator,
   withTenant,
   type Database,
   type DatabaseHandle,
@@ -23,11 +31,14 @@ import { outboxKeyFrom, type EmailMessage, type Mailer } from './outbox.js';
 import { createBusiness } from './services/business.js';
 import {
   inboundNoteText,
+  newRequestNoteText,
   processInboundEmails,
+  recordEmailProblem,
   recordInboundEmail,
+  supportRequestAddress,
   type InboundEmailOptions,
 } from './services/inbound-email.js';
-import { deliverOutboxMessage } from './services/outbox.js';
+import { deliverOutboxMessage, isRequesterSupportMail, queueEmail } from './services/outbox.js';
 import type { ScreenshotStorage } from './services/support-screenshots.js';
 import {
   answerSupportThread,
@@ -694,5 +705,306 @@ describe('the job’s retries and housekeeping', () => {
       (candidate) => candidate.providerEmailId === providerEmailId,
     );
     expect(row).toMatchObject({ status: 'held', fromAddress: null, heldText: null });
+  });
+});
+
+describe('new requests by email to the team’s address (AC-X-40, AC-X-41)', () => {
+  const HELP = supportRequestAddress(DOMAIN);
+  let mailer: FakeMailer;
+  let mia: UserId;
+  let fig: TenantId;
+
+  beforeAll(async () => {
+    // Past the earlier tests' clocks (one moves 8 days on), so their emails aren't this hour's.
+    day += 30 * 24 * 60 * 60 * 1000;
+    mia = await insertUser(db, 'Mia Two', 'mia@two.test');
+    // Pepper signs in only verified addresses; the lookup finds no one else.
+    await admin.db.update(users).set({ emailVerified: true });
+    fig = TenantIdSchema.parse(
+      (await createBusiness(db, mia, { name: 'Fig & Co', slug: 'fig-two', timeZone: 'UTC' })).id,
+    );
+    await withTenant(db, tenant, (tx) => addMembership(tx, { userId: mia, role: 'staff' }));
+  });
+
+  beforeEach(() => {
+    mailer = new FakeMailer();
+    options = { ...options, mailer };
+  });
+
+  async function newRequest(from: string, name = 'new-request', to = HELP) {
+    return loadInboundFixture(name, { from, reply: to, root: '', ref: '' });
+  }
+
+  async function threadOf(id: string | null | undefined) {
+    return (await admin.db.select().from(supportThreads)).find((row) => row.id === id);
+  }
+
+  async function newestInbound() {
+    return (await admin.db.select().from(inboundEmails)).sort((a, b) => (a.id < b.id ? 1 : -1))[0];
+  }
+
+  it('opens a verified member’s request in their business, by email, and tells them its reference', async () => {
+    const { email, expected } = await newRequest('jess@juniper.test');
+    const { result } = await receive(email);
+    expect(result).toMatchObject({ landed: 1, held: 0, ignored: 0 });
+    const row = await newestInbound();
+    expect(row).toMatchObject({ status: 'landed', reason: 'new_request', tenantId: tenant });
+    const thread = await threadOf(row?.threadId);
+    expect(thread).toMatchObject({ tenantId: tenant, openedByUserId: jess, kind: 'question' });
+    const read = await readSupportThread(db, actor(jess, 'staff'), thread?.id ?? '');
+    expect(read.messages).toHaveLength(1);
+    expect(read.messages[0]).toMatchObject({
+      author: { kind: 'you' },
+      body: expected,
+      channel: 'email',
+    });
+    const mail = await deliverAll();
+    const team = mail.filter((m) => m.to === 'support@pepper.test');
+    expect(team).toHaveLength(1);
+    expect(team[0]?.text.split('\n')[0]).toContain('· by email');
+    const told = mail.filter((m) => m.to === 'jess@juniper.test');
+    expect(told).toHaveLength(1);
+    expect(told[0]?.subject).toBe(`We got your request ${thread?.reference ?? ''}`);
+    expect(told[0]?.replyTo).toBe(supportReplyAddress(replyKeys, thread?.reference ?? '', DOMAIN));
+    expect(told[0]?.text).not.toContain('businesses');
+    const audit = await withTenant(db, tenant, (tx) => listAuditEntries(tx, { limit: 200 }));
+    expect(
+      audit.find((e) => e.entity.id === thread?.id && e.action === 'support_thread.opened'),
+    ).toMatchObject({ actor: { kind: 'user', userId: jess }, after: { channel: 'email' } });
+  });
+
+  it('puts a member of several businesses’ request in the one they last chose, and says so', async () => {
+    const { email } = await newRequest('mia@two.test');
+    expect((await receive(email)).result.landed).toBe(1);
+    // No session yet: the first business they joined (their own Fig).
+    expect((await newestInbound())?.tenantId).toBe(fig);
+    const id = newId();
+    await admin.db.insert(sessions).values({
+      id,
+      userId: mia,
+      token: `t-${id}`,
+      expiresAt: new Date(Date.now() + 60_000),
+      activeTenantId: tenant,
+    });
+    clock.advanceBy(60_000);
+    expect((await receive(email)).result.landed).toBe(1);
+    expect((await newestInbound())?.tenantId).toBe(tenant);
+    const told = (await deliverAll()).filter((m) => m.to === 'mia@two.test');
+    expect(told.at(-1)?.text).toContain('for Juniper Hair Studio');
+    expect(told.at(-1)?.text).toContain('You’re in 2 businesses on Pepper');
+  });
+
+  it('makes a verified stranger’s email a public request, and tells the team and them', async () => {
+    const { email, expected } = await newRequest('locked@out.test');
+    expect((await receive(email)).result.landed).toBe(1);
+    const row = await newestInbound();
+    expect(row).toMatchObject({ status: 'landed', reason: 'public_request', tenantId: null });
+    const request = (await admin.db.select().from(publicSupportRequests)).find(
+      (candidate) => candidate.id === row?.publicRequestId,
+    );
+    expect(request).toMatchObject({ email: 'locked@out.test', body: expected, channel: 'email' });
+    expect(mailer.sent.map((m) => m.to).sort()).toEqual(['locked@out.test', 'support@pepper.test']);
+    expect(mailer.sent.find((m) => m.to === 'support@pepper.test')).toMatchObject({
+      replyTo: 'locked@out.test',
+      subject: `[${request?.reference ?? ''}] Signed-out request — by email`,
+    });
+    expect(mailer.sent.find((m) => m.to === 'locked@out.test')).toMatchObject({
+      replyTo: 'support@pepper.test',
+      autoSubmitted: true,
+    });
+  });
+
+  it('holds an unverified sender’s email, a stranger’s with no business, and tells no one', async () => {
+    const stranger = await newRequest('someone@else.test', 'new-request-spoofed');
+    expect((await receive(stranger.email)).result.held).toBe(1);
+    expect(await newestInbound()).toMatchObject({
+      status: 'held',
+      reason: 'unverified_sender',
+      tenantId: null,
+      threadId: null,
+      fromAddress: 'someone@else.test',
+      heldSubject: "Can't move a booking",
+    });
+    const member = await newRequest('ben@juniper.test', 'new-request-spoofed');
+    expect((await receive(member.email)).result.held).toBe(1);
+    expect(await newestInbound()).toMatchObject({
+      status: 'held',
+      tenantId: tenant,
+      threadId: null,
+    });
+    expect(mailer.sent).toEqual([]);
+    expect(await deliverAll()).toEqual([]);
+  });
+
+  it('lands nothing sent to another address of the inbound domain', async () => {
+    const { email } = await newRequest('jess@juniper.test', 'new-request', `hello@${DOMAIN}`);
+    expect((await receive(email)).result.ignored).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'no_request', tenant_id: null });
+  });
+
+  it('ignores more than 5 emails an hour from one sender', async () => {
+    const { email } = await newRequest('busy@sender.test');
+    for (let i = 0; i < 5; i += 1) {
+      expect((await receive(email)).result.landed).toBe(1);
+      clock.advanceBy(60_000);
+    }
+    expect((await receive(email)).result.ignored).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'loop' });
+  });
+
+  it('ignores a From no one can be found by', async () => {
+    const { email } = await newRequest('jess@juniper.test');
+    expect((await receive({ ...email, from: '' })).result.ignored).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'bad_sender' });
+  });
+
+  it('never lets forged or held mail, or replies, use up a real sender’s new requests', async () => {
+    const forged = await newRequest('ana@juniper.test', 'new-request-spoofed');
+    for (let i = 0; i < 6; i += 1) {
+      await receive(forged.email);
+      clock.advanceBy(1000);
+    }
+    expect(await lastInbound()).toMatchObject({ reason: 'loop' });
+    const thread = await request(ana, 'owner');
+    const reply = await fixture('gmail-reply', thread, 'ana@juniper.test');
+    for (let i = 0; i < 5; i += 1) {
+      expect((await receive(reply.email)).result.landed).toBe(1);
+      clock.advanceBy(1000);
+    }
+    const real = await newRequest('ana@juniper.test');
+    expect((await receive(real.email)).result.landed).toBe(1);
+    expect(await newestInbound()).toMatchObject({ reason: 'new_request' });
+  });
+
+  it('opens at most 5 public requests a day from one address, quietly', async () => {
+    const { email } = await newRequest('daily@stranger.test');
+    for (let i = 0; i < 5; i += 1) {
+      expect((await receive(email)).result.landed).toBe(1);
+      clock.advanceBy(2 * 60 * 60_000);
+    }
+    const sent = mailer.sent.length;
+    expect((await receive(email)).result.refused).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'limit' });
+    expect(mailer.sent).toHaveLength(sent);
+  });
+
+  it('opens an accepted email as if its check had passed (the operator’s word)', async () => {
+    const { email } = await newRequest('ben@juniper.test', 'new-request-spoofed');
+    const { providerEmailId } = await receive(email);
+    const row = (await admin.db.select().from(inboundEmails)).find(
+      (candidate) => candidate.providerEmailId === providerEmailId,
+    );
+    const id = row?.id ?? newId();
+    expect(
+      await grantOperator(database.migrationUrl, { email: 'ana@juniper.test', note: 'tests' }),
+    ).toBe('granted');
+    expect(
+      await withOperator(db, { operatorUserId: ana, action: 'held.accept', targetId: id }, (tx) =>
+        acceptHeldInboundEmail(tx, { id, operatorUserId: ana, now: clock.now() }),
+      ),
+    ).toBe(true);
+    expect((await processInboundEmails(db, options)).landed).toBe(1);
+    const after = (await admin.db.select().from(inboundEmails)).find((r) => r.id === id);
+    expect(after).toMatchObject({ status: 'landed', reason: 'new_request', tenantId: tenant });
+    expect((await threadOf(after?.threadId))?.openedByUserId).toBe(ben);
+  });
+
+  it('refuses a member’s new request over the day’s limit, and says so', async () => {
+    for (let i = 0; i < 5; i += 1) await request(jess);
+    await deliverAll();
+    const { email } = await newRequest('jess@juniper.test');
+    expect((await receive(email)).result.refused).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'limit', tenant_id: tenant });
+    const told = (await deliverAll()).filter((m) => m.to === 'jess@juniper.test');
+    expect(told).toHaveLength(1);
+    expect(told[0]?.text).toContain('you’ve opened as many as we take in a day');
+  });
+
+  it('words the note to a member of one business and of several', () => {
+    const one = newRequestNoteText(
+      { reference: 'PEP-7K2M9Q', business: 'Juniper', businesses: 1, cut: true },
+      'Jess',
+      'https://app/support/x',
+    );
+    expect(one.text).toContain('We opened PEP-7K2M9Q from your email. We’ll answer');
+    expect(one.text).toContain('so the end was cut');
+    const empty = newRequestNoteText(
+      { reference: null, business: 'Juniper', businesses: 3, empty: true },
+      '',
+      'https://app/support',
+    );
+    expect(empty.subject).toBe('About your email to Pepper');
+    expect(empty.text.startsWith('Hi,')).toBe(true);
+    expect(empty.text).not.toContain('3 businesses');
+  });
+});
+
+describe('bounces and complaints stop support email to an address (AC-X-42)', () => {
+  let bounceCounter = 0;
+  async function problem(
+    type: 'email.bounced' | 'email.complained',
+    recipients: string[],
+    bounceType: string | null = 'Permanent',
+    eventId?: string,
+  ) {
+    bounceCounter += 1;
+    return recordEmailProblem(db, {
+      provider: 'resend',
+      eventId: eventId ?? `msg_problem_${String(bounceCounter)}`,
+      type,
+      recipients,
+      bounceType,
+      occurredAt: clock.now(),
+    });
+  }
+
+  it('stops the team’s answers to a hard-bounced address, keeps a record, and still emails the team', async () => {
+    const thread = await request(ben);
+    await deliverAll();
+    expect(await problem('email.bounced', ['Ben Okafor <Ben@Juniper.test>'])).toBe(1);
+    await answerSupportThread(db, tenant, thread.id, { message: 'Try again now.' }, options);
+    expect((await deliverAll()).filter((m) => m.to === 'ben@juniper.test')).toEqual([]);
+    const dead = (await admin.db.select().from(outboxMessages)).filter(
+      (row) => row.lastError === 'SupportMailStopped',
+    );
+    expect(dead.length).toBeGreaterThan(0);
+    expect(dead.every((row) => row.status === 'dead')).toBe(true);
+    // The team's own copy of what Ben writes still goes.
+    await request(ben);
+    expect((await deliverAll()).some((m) => m.to === 'support@pepper.test')).toBe(true);
+  });
+
+  it('counts the same event once, stops a complaint, and only counts a soft bounce', async () => {
+    expect(await problem('email.complained', ['angry@client.test'], null, 'msg_same')).toBe(1);
+    expect(await problem('email.complained', ['angry@client.test'], null, 'msg_same')).toBe(0);
+    expect(await problem('email.bounced', ['full@mailbox.test'], 'Transient')).toBe(1);
+    expect(await problem('email.bounced', ['not an address'], 'Permanent')).toBe(0);
+    const kinds = (await admin.db.select().from(emailSuppressions)).map((row) => [
+      row.address,
+      row.kind,
+    ]);
+    expect(kinds).toContainEqual(['angry@client.test', 'complaint']);
+    expect(kinds).toContainEqual(['full@mailbox.test', 'soft_bounce']);
+  });
+
+  it('leaves booking and client email alone', async () => {
+    await problem('email.bounced', ['jess@juniper.test']);
+    await withTenant(db, tenant, (tx) =>
+      queueEmail(
+        tx,
+        { to: 'jess@juniper.test', subject: 'Your booking', text: 'See you at 3' },
+        { key, dedupeKey: `booking.confirmed:${newId()}`, now: clock.now() },
+      ),
+    );
+    expect((await deliverAll()).filter((m) => m.to === 'jess@juniper.test')).toHaveLength(1);
+  });
+
+  it('names which emails stop: the requester’s, never the team’s', () => {
+    expect(isRequesterSupportMail('support.answered:1')).toBe(true);
+    expect(isRequesterSupportMail('support.closed:1')).toBe(true);
+    expect(isRequesterSupportMail('support.inbound_note:1')).toBe(true);
+    expect(isRequesterSupportMail('support.opened:1')).toBe(false);
+    expect(isRequesterSupportMail('support.replied:1')).toBe(false);
+    expect(isRequesterSupportMail('booking.confirmed:1')).toBe(false);
   });
 });

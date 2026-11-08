@@ -24,6 +24,8 @@ import { expectTapTargets } from './tap-targets.js';
 // operator-support.int.test.ts; the database rules in db's operator.int.test.ts. S59.2.2
 // (AC-X-23/26): the reply starts from a saved reply, and the owner says whether it helped,
 // which the console shows; the job's rules are in core's support-housekeeping.int.test.ts.
+// S59.3.2 (AC-X-44/46): the Held view and the header's count (with mail held: the gallery, and
+// core's operator-support.int.test.ts for Accept, Discard and Resume).
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -95,6 +97,17 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
   const rows = await ops.getByTestId('ops-waited').count();
   expect(rows).toBeGreaterThanOrEqual(2);
   await scanned(ops, 'ops inbox');
+
+  // S59.3.2 (AC-X-44/46): held mail is the operator's alone; with none held, the header shows
+  // no count and the Held view says so.
+  expect((await page.request.get('/v1/ops/held')).status()).toBe(403);
+  expect((await page.request.get('/ops/held')).status()).toBe(404);
+  await expect(ops.getByTestId('ops-held-count')).toHaveCount(0);
+  await ops.goto('/ops/held');
+  await expect(ops.getByRole('heading', { name: 'Held mail', level: 1 })).toBeVisible();
+  await expect(ops.getByText('Nothing held')).toBeVisible();
+  await scanned(ops, 'ops held');
+  await ops.goto('/ops');
 
   // AC-X-21/22: open, note, reply, solve.
   await row.click();

@@ -277,18 +277,23 @@ describe('JobsRunner', () => {
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
     const source = { fetch: vi.fn() };
-    const runner = new JobsRunner(DB as never, {
-      ...OPTIONS,
-      support: { supportEmail: 'support@pepper.test', baseUrl: null, pollMs: 300_000 },
-      inbound: {
-        domain: 'reply.pepper.test',
-        authservId: 'amazonses.com',
-        source,
-        baseUrl: 'https://app.pepper.test',
-        release: '1.5.0',
-        pollMs: 15_000,
+    const mailer = { send: vi.fn(() => Promise.resolve()) };
+    const runner = new JobsRunner(
+      DB as never,
+      {
+        ...OPTIONS,
+        support: { supportEmail: 'support@pepper.test', baseUrl: null, pollMs: 300_000 },
+        inbound: {
+          domain: 'reply.pepper.test',
+          authservId: 'amazonses.com',
+          source,
+          baseUrl: 'https://app.pepper.test',
+          release: '1.5.0',
+          pollMs: 15_000,
+        },
       },
-    });
+      mailer,
+    );
     await runner.inbound?.runOnce();
     expect(core.processInboundEmails).toHaveBeenCalledWith(DB.db, {
       outboxKey: OPTIONS.key,
@@ -299,6 +304,8 @@ describe('JobsRunner', () => {
       authservId: 'amazonses.com',
       source,
       store: null,
+      // A stranger's request by email is sent to the team and its sender directly (S59.3.2).
+      mailer,
       clock,
     });
     expect(log).toHaveBeenCalledWith(

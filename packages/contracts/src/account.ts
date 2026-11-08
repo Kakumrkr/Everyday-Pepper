@@ -61,6 +61,8 @@ export const ApiErrorCodeSchema = z.enum([
   'support_not_ratable',
   'saved_reply_not_found',
   'saved_replies_full',
+  // Email, part 2 (S59.3.2).
+  'held_email_not_found',
   // Screenshots on a request (S59.2.3).
   'screenshot_not_found',
   'screenshot_rejected',

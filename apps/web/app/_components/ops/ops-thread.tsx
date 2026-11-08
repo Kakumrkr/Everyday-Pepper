@@ -18,6 +18,7 @@ import { opsScreenshotSrc } from '../../../lib/support-screenshots';
 import { Notice } from '../form-parts';
 import { SupportMessageMeta } from '../support/message-meta';
 import { MessageScreenshots } from '../support/message-screenshots';
+import { OpsMailStopped } from './ops-mail-stopped';
 import { OpsNotes } from './ops-notes';
 
 const STATUSES: readonly { value: SupportStatus; label: string }[] = Object.entries(
@@ -44,14 +45,14 @@ export function OpsThreadView({
   const ids = useId();
   const replyForm = useRef<HTMLFormElement>(null);
   const [thread, setThread] = useState(initial);
-  const [busy, setBusy] = useState<'reply' | 'note' | 'status' | null>(null);
+  const [busy, setBusy] = useState<'reply' | 'note' | 'status' | 'mail' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [fieldError, setFieldError] = useState<string | undefined>(undefined);
   const [now] = useState(() => Date.now());
   const status = OPS_THREAD_STATUS[thread.status];
 
   async function call(
-    kind: 'reply' | 'note' | 'status',
+    kind: 'reply' | 'note' | 'status' | 'mail',
     method: 'POST' | 'PATCH',
     path: string,
     body: object,
@@ -143,6 +144,17 @@ export function OpsThreadView({
           )}
         </p>
       </header>
+      {thread.mailStopped === null ? null : (
+        <OpsMailStopped
+          stop={thread.mailStopped}
+          busy={busy === 'mail'}
+          onResume={() => {
+            if (busy === null) {
+              void call('mail', 'POST', `/v1/ops/threads/${thread.id}/resume-mail`, {});
+            }
+          }}
+        />
+      )}
       {context === null ? null : (
         <details className="rounded-lg bg-surface-2 px-4 py-2">
           <summary className="min-h-11 cursor-pointer content-center type-label text-ink">

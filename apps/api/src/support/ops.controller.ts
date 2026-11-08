@@ -1,4 +1,7 @@
 import {
+  OperatorHeldDecisionSchema,
+  OperatorHeldListSchema,
+  OperatorInboundCountsSchema,
   OperatorInboxQuerySchema,
   OperatorInboxSchema,
   OperatorMeSchema,
@@ -12,6 +15,8 @@ import {
   SupportSavedReplyListSchema,
   SupportSavedReplySchema,
   UserIdSchema,
+  type OperatorHeldList,
+  type OperatorInboundCounts,
   type OperatorInbox,
   type OperatorMe,
   type OperatorPublicRequest,
@@ -21,9 +26,14 @@ import {
 } from '@pepper/contracts';
 import {
   addSavedReply,
+  decideHeldEmail,
   editSavedReply,
   isOperator,
+  listHeldEmails,
   listSavedReplies,
+  readInboundCounts,
+  resumePublicMail,
+  resumeThreadMail,
   noteOnPublicRequest,
   noteOnThread,
   readOperatorInbox,
@@ -306,6 +316,63 @@ export class OpsController {
       await answering(() =>
         setPublicStatusAsOperator(this.db, operatorOf(session), id, input, this.options),
       ),
+    );
+  }
+
+  /** Held mail, the longest waiting first (S59.3.2, AC-X-44). */
+  @Get('held')
+  async held(@CurrentSession() session: AuthSession): Promise<OperatorHeldList> {
+    return OperatorHeldListSchema.parse(
+      await answering(() => listHeldEmails(this.db, operatorOf(session))),
+    );
+  }
+
+  /** Accept or Discard; answers the held list. 404 `held_email_not_found` once reviewed. */
+  @Post('held/:id')
+  @HttpCode(200)
+  async decideHeld(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<OperatorHeldList> {
+    const { id } = parseBody(IdParamsSchema, params);
+    const input = parseBody(OperatorHeldDecisionSchema, body);
+    return OperatorHeldListSchema.parse(
+      await answering(() => decideHeldEmail(this.db, operatorOf(session), id, input, this.options)),
+    );
+  }
+
+  /** Support email to the opener goes out again (AC-X-43). */
+  @Post('threads/:id/resume-mail')
+  @HttpCode(200)
+  async resumeThread(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+  ): Promise<OperatorThread> {
+    const { id } = parseBody(IdParamsSchema, params);
+    return OperatorThreadSchema.parse(
+      await answering(() => resumeThreadMail(this.db, operatorOf(session), id, this.options)),
+    );
+  }
+
+  /** Support email to the sender goes out again (AC-X-43). */
+  @Post('requests/:id/resume-mail')
+  @HttpCode(200)
+  async resumeRequest(
+    @CurrentSession() session: AuthSession,
+    @Param() params: unknown,
+  ): Promise<OperatorPublicRequest> {
+    const { id } = parseBody(IdParamsSchema, params);
+    return OperatorPublicRequestSchema.parse(
+      await answering(() => resumePublicMail(this.db, operatorOf(session), id, this.options)),
+    );
+  }
+
+  /** Inbound email over the last 7 and 30 days (AC-X-45), for S59.4. */
+  @Get('inbound/counts')
+  async inboundCounts(@CurrentSession() session: AuthSession): Promise<OperatorInboundCounts> {
+    return OperatorInboundCountsSchema.parse(
+      await answering(() => readInboundCounts(this.db, operatorOf(session), this.options)),
     );
   }
 }

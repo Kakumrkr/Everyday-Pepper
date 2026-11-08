@@ -32,6 +32,8 @@ export interface ClaimedInboundEmail {
   messageId: string | null;
   attempts: number;
   receivedAt: Date;
+  /** The operator who accepted it from the held review (S59.3.2): their word stands for the check. */
+  acceptedBy: string | null;
 }
 
 /**
@@ -95,6 +97,7 @@ export async function claimInboundEmails(
       messageId: inboundEmails.messageId,
       attempts: inboundEmails.attempts,
       receivedAt: inboundEmails.receivedAt,
+      acceptedBy: inboundEmails.acceptedBy,
     });
   return rows
     .map((row) => ({ ...row, provider: 'resend' as const }))
@@ -115,51 +118,67 @@ export async function lockReceivedInboundEmail(
   return row;
 }
 
-/** Records what became of a taken email. Only a held one keeps its sender and text. */
+/** What became of a taken email (S59.3, S59.3.2). Only a held one keeps its sender and text. */
+export type InboundOutcome =
+  | {
+      status: 'landed';
+      tenantId: string;
+      threadId: string;
+      supportMessageId: string;
+      reason?: string;
+    }
+  | { status: 'landed'; tenantId: string; threadId: string; supportNoteId: string; reason: string }
+  | { status: 'landed'; publicRequestId: string; reason: string }
+  | {
+      status: 'held';
+      reason: string;
+      /** A stranger's new request has neither; a member's new request has no thread. */
+      tenantId: string | null;
+      threadId: string | null;
+      fromAddress: string;
+      heldText: string;
+      heldSubject?: string | null;
+    }
+  | {
+      status: 'ignored' | 'refused' | 'failed';
+      reason: string;
+      tenantId?: string | null;
+      threadId?: string | null;
+    };
+
+const SenderHash = z.string().regex(/^[0-9a-f]{64}$/);
+
+/** Records what became of a taken email; `senderHash`, when given, names its sender. */
 export async function finishInboundEmail(
   tx: TenantTx,
   id: string,
-  outcome:
-    | {
-        status: 'landed';
-        tenantId: string;
-        threadId: string;
-        supportMessageId: string;
-        reason?: string;
-      }
-    | {
-        status: 'held';
-        reason: string;
-        tenantId: string;
-        threadId: string;
-        fromAddress: string;
-        heldText: string;
-      }
-    | {
-        status: 'ignored' | 'refused' | 'failed';
-        reason: string;
-        tenantId?: string | null;
-        threadId?: string | null;
-      },
+  outcome: InboundOutcome,
   now: Date,
+  senderHash?: string | null,
 ): Promise<void> {
   const held = outcome.status === 'held';
+  const optionalId = (
+    key: 'tenantId' | 'threadId' | 'supportMessageId' | 'supportNoteId' | 'publicRequestId',
+  ): string | null => {
+    const value = (outcome as Partial<Record<typeof key, string | null>>)[key];
+    return typeof value === 'string' ? Id.parse(value) : null;
+  };
   await tx
     .update(inboundEmails)
     .set({
       status: outcome.status,
       reason: outcome.reason === undefined ? null : Reason.parse(outcome.reason),
-      tenantId:
-        'tenantId' in outcome && typeof outcome.tenantId === 'string'
-          ? Id.parse(outcome.tenantId)
-          : null,
-      threadId:
-        'threadId' in outcome && typeof outcome.threadId === 'string'
-          ? Id.parse(outcome.threadId)
-          : null,
-      supportMessageId: outcome.status === 'landed' ? Id.parse(outcome.supportMessageId) : null,
+      tenantId: optionalId('tenantId'),
+      threadId: optionalId('threadId'),
+      supportMessageId: optionalId('supportMessageId'),
+      supportNoteId: optionalId('supportNoteId'),
+      publicRequestId: optionalId('publicRequestId'),
       fromAddress: held ? outcome.fromAddress.slice(0, 254) : null,
       heldText: held ? outcome.heldText.slice(0, 4000) : null,
+      heldSubject: held && outcome.heldSubject ? outcome.heldSubject.slice(0, 200) : null,
+      ...(senderHash !== undefined && {
+        senderHash: senderHash === null ? null : SenderHash.parse(senderHash),
+      }),
       leaseUntil: null,
       processedAt: now,
     })
@@ -204,16 +223,81 @@ export async function countInboundLanded(
   return row?.count ?? 0;
 }
 
+/** Names a taken email's sender (SHA-256 of the address) once it is fetched: the loop guard's key. */
+export async function setInboundSender(
+  tx: TenantTx,
+  id: string,
+  senderHash: string,
+): Promise<void> {
+  await tx
+    .update(inboundEmails)
+    .set({ senderHash: SenderHash.parse(senderHash) })
+    .where(and(eq(inboundEmails.id, Id.parse(id)), eq(inboundEmails.status, 'received')));
+}
+
+/**
+ * What one sender's emails to the team's address became since `since` (S59.3.2's limits): new
+ * requests opened (a member's or a public one), or new requests held. Replies to a request
+ * never count, so a busy thread doesn't block a new request.
+ */
+export async function countInboundFromSender(
+  tx: TenantTx,
+  input: {
+    senderHash: string;
+    since: Date;
+    outcome: 'opened' | 'opened_public' | 'held';
+  },
+): Promise<number> {
+  const outcome =
+    input.outcome === 'held'
+      ? and(eq(inboundEmails.status, 'held'), isNull(inboundEmails.threadId))
+      : and(
+          eq(inboundEmails.status, 'landed'),
+          input.outcome === 'opened_public'
+            ? eq(inboundEmails.reason, 'public_request')
+            : inArray(inboundEmails.reason, ['new_request', 'public_request']),
+        );
+  const [row] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(inboundEmails)
+    .where(
+      and(
+        eq(inboundEmails.senderHash, SenderHash.parse(input.senderHash)),
+        outcome,
+        gt(inboundEmails.processedAt, input.since),
+      ),
+    );
+  return row?.count ?? 0;
+}
+
+/** Locks a held email for its review (two operators can't both accept it). */
+export async function lockHeldInboundEmail(
+  tx: TenantTx,
+  id: string,
+): Promise<typeof inboundEmails.$inferSelect | undefined> {
+  const [row] = await tx
+    .select()
+    .from(inboundEmails)
+    .where(and(eq(inboundEmails.id, Id.parse(id)), eq(inboundEmails.status, 'held')))
+    .for('update')
+    .limit(1);
+  return row;
+}
+
 /** Empties held emails older than `before` (sender and text); returns how many. */
 export async function emptyHeldInboundEmails(tx: TenantTx, before: Date): Promise<number> {
   const rows = await tx
     .update(inboundEmails)
-    .set({ fromAddress: null, heldText: null })
+    .set({ fromAddress: null, heldText: null, heldSubject: null })
     .where(
       and(
         eq(inboundEmails.status, 'held'),
         lt(inboundEmails.processedAt, before),
-        or(isNotNull(inboundEmails.fromAddress), isNotNull(inboundEmails.heldText)),
+        or(
+          isNotNull(inboundEmails.fromAddress),
+          isNotNull(inboundEmails.heldText),
+          isNotNull(inboundEmails.heldSubject),
+        ),
       ),
     )
     .returning({ id: inboundEmails.id });
@@ -247,4 +331,165 @@ export async function findSupportThreadForInbound(
   );
   const row = rows[0];
   return row === undefined ? undefined : { tenantId: row.tenant_id, threadId: row.thread_id };
+}
+
+// The console's held review and counts (S59.3.2, AC-X-44/45). These run in `withOperator`,
+// whose `operator_access`/`operator_review` policies show inbound rows and let a held one move.
+
+/** A held email in the console: who sent it, why it waits, its text. */
+export interface HeldInboundRow {
+  id: string;
+  reason: string;
+  tenantId: string | null;
+  threadId: string | null;
+  fromAddress: string;
+  subject: string | null;
+  text: string;
+  receivedAt: Date;
+  heldAt: Date;
+}
+
+/** Held emails that still have their contents, longest waiting first. */
+export async function listHeldInboundEmails(
+  tx: TenantTx,
+  input: { limit: number },
+): Promise<HeldInboundRow[]> {
+  const rows = await tx
+    .select({
+      id: inboundEmails.id,
+      reason: inboundEmails.reason,
+      tenantId: inboundEmails.tenantId,
+      threadId: inboundEmails.threadId,
+      fromAddress: inboundEmails.fromAddress,
+      subject: inboundEmails.heldSubject,
+      text: inboundEmails.heldText,
+      receivedAt: inboundEmails.receivedAt,
+      heldAt: inboundEmails.processedAt,
+    })
+    .from(inboundEmails)
+    .where(and(eq(inboundEmails.status, 'held'), isNotNull(inboundEmails.fromAddress)))
+    .orderBy(asc(inboundEmails.processedAt), asc(inboundEmails.id))
+    .limit(Math.min(Math.max(input.limit, 1), 200));
+  return rows.map((row) => ({
+    id: row.id,
+    reason: row.reason ?? 'held',
+    tenantId: row.tenantId,
+    threadId: row.threadId,
+    fromAddress: row.fromAddress ?? '',
+    subject: row.subject,
+    text: row.text ?? '',
+    receivedAt: row.receivedAt,
+    heldAt: row.heldAt ?? row.receivedAt,
+  }));
+}
+
+/** How many held emails still wait for a look (the inbox header, AC-X-46). */
+export async function countHeldInboundEmails(tx: TenantTx): Promise<number> {
+  const [row] = await tx
+    .select({ count: sql<number>`count(*)::int` })
+    .from(inboundEmails)
+    .where(and(eq(inboundEmails.status, 'held'), isNotNull(inboundEmails.fromAddress)));
+  return row?.count ?? 0;
+}
+
+/**
+ * Accept (AC-X-44): the held email goes back to the inbound job with the operator's word for its
+ * sender; it is fetched again and lands as if its check had passed. `false` when it is no longer
+ * held with its contents (already reviewed, or emptied after 7 days).
+ */
+export async function acceptHeldInboundEmail(
+  tx: TenantTx,
+  input: { id: string; operatorUserId: string; now: Date },
+): Promise<boolean> {
+  const rows = await tx
+    .update(inboundEmails)
+    .set({
+      status: 'received',
+      reason: null,
+      attempts: 0,
+      leaseUntil: null,
+      processedAt: null,
+      fromAddress: null,
+      heldText: null,
+      heldSubject: null,
+      acceptedBy: Id.parse(input.operatorUserId),
+      acceptedAt: input.now,
+    })
+    .where(
+      and(
+        eq(inboundEmails.id, Id.parse(input.id)),
+        eq(inboundEmails.status, 'held'),
+        isNotNull(inboundEmails.fromAddress),
+      ),
+    )
+    .returning({ id: inboundEmails.id });
+  return rows.length === 1;
+}
+
+/** Discard (AC-X-44): the held email is emptied and counted as discarded. */
+export async function discardHeldInboundEmail(
+  tx: TenantTx,
+  input: { id: string; now: Date },
+): Promise<boolean> {
+  const rows = await tx
+    .update(inboundEmails)
+    .set({
+      status: 'ignored',
+      reason: 'discarded',
+      fromAddress: null,
+      heldText: null,
+      heldSubject: null,
+      processedAt: input.now,
+    })
+    .where(
+      and(
+        eq(inboundEmails.id, Id.parse(input.id)),
+        eq(inboundEmails.status, 'held'),
+        isNotNull(inboundEmails.fromAddress),
+      ),
+    )
+    .returning({ id: inboundEmails.id });
+  return rows.length === 1;
+}
+
+/** Inbound emails received since `since`, by status and reason (AC-X-45). */
+export async function countInboundByOutcome(
+  tx: TenantTx,
+  since: Date,
+): Promise<{ status: InboundStatus; reason: string | null; count: number }[]> {
+  const rows = await tx
+    .select({
+      status: inboundEmails.status,
+      reason: inboundEmails.reason,
+      count: sql<number>`count(*)::int`,
+    })
+    .from(inboundEmails)
+    .where(gt(inboundEmails.receivedAt, since))
+    .groupBy(inboundEmails.status, inboundEmails.reason)
+    .orderBy(asc(inboundEmails.status), asc(inboundEmails.reason));
+  return rows.map((row) => ({
+    status: z.enum(INBOUND_STATUSES).parse(row.status),
+    reason: row.reason,
+    count: row.count,
+  }));
+}
+
+/**
+ * The member an email to the team's address came from (`support_inbound_member`, S59.3.2): the
+ * user, the business it goes to and how many businesses they belong to; `undefined` for no
+ * verified account with that address. Call only once the receiver's check passed or an
+ * operator accepted the email.
+ */
+export async function findSupportMemberForInbound(
+  db: Database | TenantTx,
+  email: string,
+): Promise<{ userId: string; tenantId: string; businesses: number } | undefined> {
+  const address = z.string().min(3).max(254).parse(email);
+  const { rows } = await db.execute<{ user_id: string; tenant_id: string; businesses: number }>(
+    sql`SELECT user_id, tenant_id, businesses FROM support_inbound_member(${address})`,
+  );
+  const row = rows[0];
+  return row === undefined
+    ? undefined
+    : { userId: row.user_id, tenantId: row.tenant_id, businesses: row.businesses };
 }

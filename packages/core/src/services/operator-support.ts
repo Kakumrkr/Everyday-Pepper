@@ -1,4 +1,9 @@
 import {
+  HeldEmailIdSchema,
+  HeldReasonSchema,
+  OperatorHeldDecisionSchema,
+  OperatorHeldListSchema,
+  OperatorInboundCountsSchema,
   OperatorInboxQuerySchema,
   OperatorInboxSchema,
   OperatorPublicChangeSchema,
@@ -9,6 +14,7 @@ import {
   SupportContextSchema,
   SupportNoteInputSchema,
   SupportReplyInputSchema,
+  SUPPORT_MESSAGE_MAX,
   SUPPORT_SAVED_REPLIES_MAX,
   SupportSavedReplyIdSchema,
   SupportSavedReplyInputSchema,
@@ -16,6 +22,9 @@ import {
   SupportSavedReplySchema,
   SupportScreenshotIdSchema,
   SupportThreadIdSchema,
+  type OperatorHeldDecision,
+  type OperatorHeldList,
+  type OperatorInboundCounts,
   type OperatorInbox,
   type OperatorInboxQuery,
   type OperatorInboxView,
@@ -36,8 +45,19 @@ import {
   type UserId,
 } from '@pepper/contracts';
 import {
+  acceptHeldInboundEmail,
   appendAuditEntry,
+  countEmailSuppressions,
+  countHeldInboundEmails,
+  countInboundByOutcome,
   countOperatorWaiting,
+  discardHeldInboundEmail,
+  lockHeldInboundEmail,
+  findSupportMailStops,
+  findSupportOpenerEmail,
+  finishInboundEmail,
+  listHeldInboundEmails,
+  resumeSupportMail,
   countSupportSavedReplies,
   deleteSupportSavedReply,
   insertSupportSavedReply,
@@ -72,6 +92,7 @@ import {
 } from '@pepper/db';
 import { systemClock, type Clock } from '../clock.js';
 import {
+  HeldEmailNotFoundError,
   OperatorAccessRefusedError,
   SavedRepliesFullError,
   SavedReplyNotFoundError,
@@ -181,6 +202,7 @@ export async function readOperatorInbox(
       view,
       items: rows.map((row) => toInboxItem(row, names)),
       waiting,
+      held: await countHeldInboundEmails(tx),
     });
   });
 }
@@ -204,7 +226,7 @@ function toInboxItem(row: OperatorInboxRow, names: Map<string, string>): Record<
     waitingSince: row.waitingSince.toISOString(),
   };
   if (row.source === 'public') {
-    return { ...base, source: 'public', status: row.status };
+    return { ...base, source: 'public', status: row.status, channel: row.channel ?? 'form' };
   }
   return {
     ...base,
@@ -546,7 +568,23 @@ async function toOperatorThread(
     lastMessageAt: thread.lastMessageAt.toISOString(),
     solvedBy: thread.solvedBy,
     rating: thread.rating,
+    mailStopped: await mailStopOf(tx, await findSupportOpenerEmail(tx, thread.openedByUserId)),
   });
+}
+
+/** Whether support email to `address` is stopped, as the console shows it (AC-X-43). */
+async function mailStopOf(
+  tx: TenantTx,
+  address: string | null,
+): Promise<{ reason: 'bounced' | 'complaint'; since: string } | null> {
+  if (address === null) return null;
+  const stop = (await findSupportMailStops(tx, [address])).get(address.toLowerCase());
+  return stop === undefined
+    ? null
+    : {
+        reason: stop.kind === 'complaint' ? 'complaint' : 'bounced',
+        since: stop.since.toISOString(),
+      };
 }
 
 async function toPublicRequest(tx: TenantTx, id: string): Promise<OperatorPublicRequest> {
@@ -564,6 +602,8 @@ async function toPublicRequest(tx: TenantTx, id: string): Promise<OperatorPublic
     topic: request.topic,
     notes: notes.map(toNote),
     createdAt: request.createdAt.toISOString(),
+    channel: request.channel,
+    mailStopped: await mailStopOf(tx, request.email),
   });
 }
 
@@ -586,4 +626,170 @@ function parsePublicId(requestId: string): string {
   const parsed = PublicSupportRequestIdSchema.safeParse(requestId);
   if (!parsed.success) throw new SupportThreadNotFoundError();
   return parsed.data;
+}
+
+// Held mail, stopped mail and inbound counts (S59.3.2, ADR-0063 Part 2, AC-X-43…45).
+
+const HELD_LIMIT = 200;
+const HELD_NOTE_HEADER = 'Email from';
+
+/**
+ * The console's "Held" view (AC-X-44): held emails that still have their contents, the longest
+ * waiting first, with the business they would go to and the request they reply to.
+ */
+export async function listHeldEmails(db: Database, operator: Operator): Promise<OperatorHeldList> {
+  return asOperator(db, operator, 'held.read', null, async (tx) => {
+    const rows = await listHeldInboundEmails(tx, { limit: HELD_LIMIT });
+    const names = await listOperatorBusinessNames(
+      tx,
+      rows.flatMap((row) => (row.tenantId === null ? [] : [row.tenantId])),
+    );
+    const items = [];
+    for (const row of rows) {
+      const thread = row.threadId === null ? undefined : await findOperatorThread(tx, row.threadId);
+      const reason = HeldReasonSchema.safeParse(row.reason);
+      items.push({
+        id: row.id,
+        reason: reason.success ? reason.data : 'unknown_sender',
+        kind: row.threadId === null ? 'new_request' : 'reply',
+        from: row.fromAddress,
+        subject: row.subject,
+        text: row.text,
+        business: row.tenantId === null ? null : (names.get(row.tenantId) ?? 'A business'),
+        reference: thread?.reference ?? null,
+        heldSince: row.heldAt.toISOString(),
+      });
+    }
+    return OperatorHeldListSchema.parse({ items });
+  });
+}
+
+/**
+ * Accept or Discard a held email (AC-X-44), in one logged transaction. Accept: a reply from
+ * someone outside the business becomes the team's note on its request (they can't write there
+ * as a member); anything else goes back to the inbound job with the operator's word for its
+ * sender, and lands as if its check had passed. Discard: emptied, counted as discarded.
+ * `HeldEmailNotFoundError` once it isn't held with its contents.
+ */
+export async function decideHeldEmail(
+  db: Database,
+  operator: Operator,
+  heldId: string,
+  input: OperatorHeldDecision,
+  options: { clock?: Clock } = {},
+): Promise<OperatorHeldList> {
+  const parsed = HeldEmailIdSchema.safeParse(heldId);
+  if (!parsed.success) throw new HeldEmailNotFoundError();
+  const id = parsed.data;
+  const { decision } = OperatorHeldDecisionSchema.parse(input);
+  const now = (options.clock ?? systemClock).now();
+  const action = decision === 'accept' ? 'held.accept' : 'held.discard';
+  await asOperator(db, operator, action, id, async (tx) => {
+    // Locked: two operators reviewing it at once can't both act on it.
+    const row = await lockHeldInboundEmail(tx, id);
+    if (row === undefined || row.fromAddress === null || row.heldText === null) {
+      throw new HeldEmailNotFoundError();
+    }
+    if (decision === 'discard') {
+      if (!(await discardHeldInboundEmail(tx, { id, now }))) throw new HeldEmailNotFoundError();
+      return;
+    }
+    if (row.reason === 'unknown_sender' && row.threadId !== null && row.tenantId !== null) {
+      await bindToThread(tx, row.threadId);
+      const header = `${HELD_NOTE_HEADER} ${row.fromAddress}, accepted from held mail:\n\n`;
+      const room = SUPPORT_MESSAGE_MAX - header.length;
+      const text =
+        row.heldText.length > room ? `${row.heldText.slice(0, room - 1)}…` : row.heldText;
+      const note = await insertSupportNote(tx, {
+        threadId: row.threadId,
+        authorUserId: operator.userId,
+        body: `${header}${text}`,
+        now,
+      });
+      await finishInboundEmail(
+        tx,
+        id,
+        {
+          status: 'landed',
+          tenantId: row.tenantId,
+          threadId: row.threadId,
+          supportNoteId: note.id,
+          reason: 'accepted_note',
+        },
+        now,
+      );
+      return;
+    }
+    if (!(await acceptHeldInboundEmail(tx, { id, operatorUserId: operator.userId, now }))) {
+      throw new HeldEmailNotFoundError();
+    }
+  });
+  return listHeldEmails(db, operator);
+}
+
+/** Resume support email to a business request's opener (AC-X-43). */
+export async function resumeThreadMail(
+  db: Database,
+  operator: Operator,
+  threadId: string,
+  options: { clock?: Clock } = {},
+): Promise<OperatorThread> {
+  const id = parseThreadId(threadId);
+  const now = (options.clock ?? systemClock).now();
+  return asOperator(db, operator, 'mail.resume', id, async (tx) => {
+    const thread = await bindToThread(tx, id);
+    const address = await findSupportOpenerEmail(tx, thread.openedByUserId);
+    if (address !== null) {
+      await resumeSupportMail(tx, { address, operatorUserId: operator.userId, now });
+    }
+    return toOperatorThread(tx, id, thread.tenantId);
+  });
+}
+
+/** Resume support email to a public request's sender (AC-X-43). */
+export async function resumePublicMail(
+  db: Database,
+  operator: Operator,
+  requestId: string,
+  options: { clock?: Clock } = {},
+): Promise<OperatorPublicRequest> {
+  const id = parsePublicId(requestId);
+  const now = (options.clock ?? systemClock).now();
+  return asOperator(db, operator, 'mail.resume', id, async (tx) => {
+    const request = await findPublicSupportRequest(tx, id);
+    if (request === undefined) throw new SupportThreadNotFoundError();
+    await resumeSupportMail(tx, {
+      address: request.email,
+      operatorUserId: operator.userId,
+      now,
+    });
+    return toPublicRequest(tx, id);
+  });
+}
+
+/** Inbound email over the last 7 and 30 days (AC-X-45), for S59.4's metrics page. */
+export async function readInboundCounts(
+  db: Database,
+  operator: Operator,
+  options: { clock?: Clock } = {},
+): Promise<OperatorInboundCounts> {
+  const now = (options.clock ?? systemClock).now();
+  return asOperator(db, operator, 'inbound.counts', null, async (tx) => {
+    const period = async (days: number) => {
+      const since = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      const problems = await countEmailSuppressions(tx, since);
+      return {
+        outcomes: await countInboundByOutcome(tx, since),
+        problems: {
+          hardBounces: problems.hard_bounce,
+          softBounces: problems.soft_bounce,
+          complaints: problems.complaint,
+        },
+      };
+    };
+    return OperatorInboundCountsSchema.parse({
+      last7Days: await period(7),
+      last30Days: await period(30),
+    });
+  });
 }

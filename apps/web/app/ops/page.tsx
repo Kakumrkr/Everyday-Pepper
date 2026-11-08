@@ -9,6 +9,7 @@ import {
   OPS_RATING,
   OPS_THREAD_STATUS,
   OPS_VIEWS,
+  heldLabel,
   opsView,
   overdueNote,
   waitingWords,
@@ -44,7 +45,25 @@ export default async function OpsInboxPage({
   return (
     <>
       <header className="flex flex-col gap-3">
-        <h1 className="m-0 type-display">Inbox</h1>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+          <h1 className="m-0 type-display">Inbox</h1>
+          {/* S59.3.2's top-up (AC-X-46): held mail never waits unseen. */}
+          {inbox === null || heldLabel(inbox.held) === null ? null : (
+            <Link
+              href={OPS_PATHS.held}
+              className={cx(
+                'inline-flex min-h-11 items-center gap-2 rounded-pill bg-warn-soft px-4 type-label text-warn no-underline hover:underline',
+                FOCUS_RING,
+              )}
+            >
+              <Icon name="alert" className="size-4" />
+              <span className="tabular-nums" data-testid="ops-held-count">
+                {heldLabel(inbox.held)}
+              </span>
+              <span className="sr-only">: review held mail</span>
+            </Link>
+          )}
+        </div>
         <nav aria-label="Requests">
           <ul className="m-0 flex list-none gap-1 overflow-x-auto rounded-pill bg-surface-2 p-1">
             {OPS_VIEWS.map((option) => {
@@ -122,7 +141,14 @@ export default async function OpsInboxPage({
                         <span data-testid="ops-overdue">{note}</span>
                       </Badge>
                     )}
-                    <span>· {item.source === 'thread' ? item.business : 'Signed-out'}</span>
+                    <span>
+                      ·{' '}
+                      {item.source === 'thread'
+                        ? item.business
+                        : item.channel === 'email'
+                          ? 'Signed-out, by email'
+                          : 'Signed-out'}
+                    </span>
                     <span className="tabular-nums">· {item.reference}</span>
                     {item.source === 'thread' ? (
                       <span>· {SUPPORT_KIND_LABEL[item.kind]}</span>

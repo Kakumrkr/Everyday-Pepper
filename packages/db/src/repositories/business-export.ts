@@ -52,7 +52,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   import_batches: 'earlier imports’ working state',
   import_rows: 'earlier imports’ working state',
   inbound_emails:
-    'emails at the inbound webhook (S59.3): delivery records; a landed reply is its support message',
+    'emails at the inbound webhook (S59.3, S59.3.2): delivery records; a landed email is its support message or request',
   client_import_refs: 'other tools’ ids for imported clients',
   outbox_messages: 'emails waiting to go out',
   outbox_dispatch: 'email delivery state',

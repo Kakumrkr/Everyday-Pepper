@@ -1,8 +1,10 @@
+import { createHash } from 'node:crypto';
 import {
   SUPPORT_MESSAGE_MAX,
   SUPPORT_SCREENSHOT_MAX_BYTES,
   SUPPORT_SCREENSHOTS_PER_DAY,
   SUPPORT_SCREENSHOTS_PER_MESSAGE,
+  SUPPORT_THREADS_PER_DAY,
   SupportContextSchema,
   TenantIdSchema,
   UserIdSchema,
@@ -13,16 +15,21 @@ import {
   appendSupportMessage,
   attachSupportScreenshots,
   claimInboundEmails,
+  countInboundFromSender,
   countInboundLanded,
   countSupportScreenshotUploads,
   emptyHeldInboundEmails,
   failInboundEmailsPastAttempts,
   findSupportFollowUp,
+  findSupportMemberForInbound,
   findSupportThread,
   findSupportThreadForInbound,
   finishInboundEmail,
   hasActivation,
+  insertEmailSuppression,
   insertInboundEmail,
+  insertPublicSupportRequest,
+  isSupportMailStopped,
   insertSupportScreenshot,
   insertSupportThread,
   isBusinessBookable,
@@ -31,6 +38,7 @@ import {
   lockSupportThread,
   markSupportThreadRead,
   newId,
+  setInboundSender,
   setTransactionInboundMail,
   setTransactionUser,
   withInboundMail,
@@ -41,7 +49,7 @@ import {
 } from '@pepper/db';
 import { systemClock } from '../clock.js';
 import { SupportLimitReachedError } from '../errors.js';
-import { errorNameOf } from '../outbox.js';
+import { errorNameOf, type Mailer } from '../outbox.js';
 import { replyTextOf } from '../email-text.js';
 import {
   INBOUND_EMAIL_MAX_BYTES,
@@ -49,6 +57,7 @@ import {
   isSpam,
   senderVerdict,
   type InboundAttachment,
+  type InboundEmail,
   type InboundMailSource,
 } from '../inbound-email.js';
 import { findSupportReference, supportReplyKeysFrom } from '../support-reply-address.js';
@@ -70,7 +79,9 @@ import {
 // (`recordInboundEmail`); the worker's job (`processInboundEmails`) fetches each email from the
 // provider and decides: landed in its thread as the member's, held for the team (an unknown or
 // unverified sender), ignored (auto-replies, spam, loops, no request named) or refused (too
-// big, over a limit, empty). A verified sender is told what didn't go through; nobody else ever
+// big, over a limit, empty). Mail to the team's address that names no request opens one
+// (S59.3.2): a member's in their business, anyone else's as a public request. An email an
+// operator accepted from the held review carries their word for its sender. A verified sender is told what didn't go through; nobody else ever
 // gets an email. No email content is logged; only a held one's sender and text are stored.
 
 export interface InboundEmailOptions extends SupportOptions {
@@ -83,6 +94,27 @@ export interface InboundEmailOptions extends SupportOptions {
   store: ScreenshotStorage | null;
   /** Emails taken in one pass (the rest wait for the next). */
   limit?: number;
+  /**
+   * Sends a stranger's request to the team and their reference to them (S59.3.2): there is no
+   * business, so no outbox. `null` or absent: the request is kept for the console only.
+   */
+  mailer?: Mailer | null;
+}
+
+/**
+ * The team's address for new requests by email (S59.3.2, ADR-0063 Part 2): `help@` the inbound
+ * domain. Mail there that names no request opens one; mail to any other address of the domain
+ * that names none lands nowhere (a forged or changed reply address).
+ */
+export const SUPPORT_REQUEST_LOCAL_PART = 'help';
+
+export function supportRequestAddress(inboundDomain: string): string {
+  return `${SUPPORT_REQUEST_LOCAL_PART}@${inboundDomain.toLowerCase()}`;
+}
+
+/** The loop guard's key for a sender: never the address itself. */
+function senderHashOf(address: string): string {
+  return createHash('sha256').update(address.trim().toLowerCase()).digest('hex');
 }
 
 export interface InboundEmailResult {
@@ -136,6 +168,57 @@ export async function recordInboundEmail(
       : null;
   const row = await withInboundMail(db, (tx) => insertInboundEmail(tx, { ...input, messageId }));
   return row !== undefined;
+}
+
+/**
+ * A delivery problem Resend reported (S59.3.2, AC-X-42): one row per recipient of the signed
+ * event. A permanent bounce or a complaint stops support email to the address; any other bounce
+ * is only counted. Returns how many were recorded (0 for the same event again).
+ */
+export async function recordEmailProblem(
+  db: Database,
+  input: {
+    provider: 'resend';
+    eventId: string;
+    type: 'email.bounced' | 'email.complained';
+    recipients: readonly string[];
+    bounceType: string | null;
+    occurredAt: Date;
+  },
+): Promise<number> {
+  const kind =
+    input.type === 'email.complained'
+      ? ('complaint' as const)
+      : input.bounceType?.toLowerCase() === 'permanent'
+        ? ('hard_bounce' as const)
+        : ('soft_bounce' as const);
+  const addresses = [
+    ...new Set(
+      input.recipients
+        .map((recipient) => /<([^<>\s]+@[^<>\s]+)>\s*$/.exec(recipient)?.[1] ?? recipient)
+        .map((address) => address.trim().toLowerCase())
+        .filter((address) => /^[^@\s]+@[^@\s]+$/.test(address) && address.length <= 254),
+    ),
+  ].slice(0, 50);
+  return withInboundMail(db, async (tx) => {
+    let recorded = 0;
+    for (const [index, address] of addresses.entries()) {
+      // One event names each recipient once: its id with the recipient's place.
+      const eventId = addresses.length === 1 ? input.eventId : `${input.eventId}:${String(index)}`;
+      if (
+        await insertEmailSuppression(tx, {
+          provider: input.provider,
+          eventId: eventId.slice(0, 200),
+          address,
+          kind,
+          occurredAt: input.occurredAt,
+        })
+      ) {
+        recorded += 1;
+      }
+    }
+    return recorded;
+  });
 }
 
 /** What a verified sender is told about their email (AC-X-36). */
@@ -296,15 +379,22 @@ async function processOne(
   }
   if (isAutoReply(email)) return finishUnmatched(db, row.id, 'ignored', 'auto_reply', now);
   if (isSpam(email)) return finishUnmatched(db, row.id, 'ignored', 'spam', now);
+  const senderHash = senderHashOf(email.from);
+  await withInboundMail(db, (tx) => setInboundSender(tx, row.id, senderHash));
+  const accepted = row.acceptedBy !== null;
   const reference = findSupportReference(
     supportReplyKeysFrom(options.outboxKey),
     options.inboundDomain,
     email,
   );
-  const found = reference === null ? undefined : await findSupportThreadForInbound(db, reference);
-  if (reference === null || found === undefined) {
+  if (reference === null) {
+    if (email.recipients.includes(supportRequestAddress(options.inboundDomain))) {
+      return openByEmail(db, row, email, { options, now, senderHash, accepted });
+    }
     return finishUnmatched(db, row.id, 'ignored', 'no_request', now);
   }
+  const found = await findSupportThreadForInbound(db, reference);
+  if (found === undefined) return finishUnmatched(db, row.id, 'ignored', 'no_request', now);
   const tenantId = TenantIdSchema.parse(found.tenantId);
   const { threadId } = found;
   const text = replyTextOf(email, SUPPORT_REPLY_ABOVE);
@@ -339,7 +429,10 @@ async function processOne(
     if ((await findSupportThread(tx, threadId, userId)) === undefined) {
       return hold('unknown_sender');
     }
-    if (senderVerdict(email, options.authservId) !== 'pass') return hold('unverified_sender');
+    // An operator's Accept stands for the receiver's check (AC-X-44), never for who may write.
+    if (!accepted && senderVerdict(email, options.authservId) !== 'pass') {
+      return hold('unverified_sender');
+    }
     const recent = await countInboundLanded(tx, {
       tenantId,
       threadId,
@@ -734,4 +827,427 @@ async function land(
     now,
   );
   return { outcome: 'landed', kept: kept.length };
+}
+
+/** A new request's first line from the email's subject (`null`: none worth keeping). */
+function subjectOf(subject: string): string | null {
+  const cleaned = subject
+    .replace(/[\r\n\t]+/g, ' ')
+    .replace(/^\s*((re|fw|fwd)\s*:\s*)+/i, '')
+    .trim()
+    .slice(0, 200);
+  return cleaned === '' ? null : cleaned;
+}
+
+/** A new request's message: its subject, then what was written, cut to a message's length. */
+function newRequestBody(subject: string | null, text: string): { body: string; cut: boolean } {
+  const words = [subject, text].filter((part) => part !== null && part !== '').join('\n\n');
+  const cut = words.length > SUPPORT_MESSAGE_MAX;
+  return { body: cut ? `${words.slice(0, SUPPORT_MESSAGE_MAX - 1).trimEnd()}…` : words, cut };
+}
+
+/**
+ * An email to the team's address that names no request (AC-X-40/41): the same checks as a reply
+ * (the receiver's verdict, unless an operator accepted it), a loop guard per sender (5 an hour),
+ * then a member's request in their business or a public request; an unverified sender's is held.
+ */
+async function openByEmail(
+  db: Database,
+  row: ClaimedInboundEmail,
+  email: InboundEmail,
+  context: { options: InboundEmailOptions; now: Date; senderHash: string; accepted: boolean },
+): Promise<Outcome> {
+  const { options, now, senderHash, accepted } = context;
+  // An address no one can be found by, or written back to: nothing to open.
+  if (email.from.length > 254 || !/^[^@\s<>]+@[^@\s<>]+$/.test(email.from)) {
+    return finishUnmatched(db, row.id, 'ignored', 'bad_sender', now);
+  }
+  const text = replyTextOf(email, SUPPORT_REPLY_ABOVE);
+  const subject = subjectOf(email.subject);
+  const verified = accepted || senderVerdict(email, options.authservId) === 'pass';
+  const member = await findSupportMemberForInbound(db, email.from);
+  const decision = await withInboundMail(db, async (tx) => {
+    if ((await lockReceivedInboundEmail(tx, row.id)) === undefined) return 'gone' as const;
+    if (!accepted) {
+      // A verified sender's requests opened, or an unverified one's held: a forged From fills
+      // only its own count, never the real sender's.
+      const recent = await countInboundFromSender(tx, {
+        senderHash,
+        since: new Date(now.getTime() - HOUR_MS),
+        outcome: verified ? 'opened' : 'held',
+      });
+      if (recent >= LOOP_LIMIT) {
+        await finishInboundEmail(tx, row.id, { status: 'ignored', reason: 'loop' }, now);
+        return 'ignored' as const;
+      }
+    }
+    if (!verified) {
+      await finishInboundEmail(
+        tx,
+        row.id,
+        {
+          status: 'held',
+          reason: 'unverified_sender',
+          tenantId: member?.tenantId ?? null,
+          threadId: null,
+          fromAddress: email.from,
+          heldText: text === '' ? '(no text)' : text,
+          heldSubject: subject,
+        },
+        now,
+      );
+      return 'held' as const;
+    }
+    return 'open' as const;
+  });
+  if (decision !== 'open') return decision;
+  if (member === undefined) {
+    return openPublicByEmail(db, row, email.from, { subject, text, options, now, senderHash });
+  }
+  const tenantId = TenantIdSchema.parse(member.tenantId);
+  const userId = UserIdSchema.parse(member.userId);
+  const uploaded = await withTenant(db, tenantId, async (tx) => {
+    await setTransactionUser(tx, userId);
+    return countSupportScreenshotUploads(tx, userId, new Date(now.getTime() - DAY_MS));
+  });
+  const room = Math.max(
+    0,
+    Math.min(SUPPORT_SCREENSHOTS_PER_MESSAGE, SUPPORT_SCREENSHOTS_PER_DAY - uploaded),
+  );
+  const images = await storeImages(email.attachments, room, tenantId, options.store);
+  try {
+    const landed = await withTenant(db, tenantId, async (tx) => {
+      await setTransactionInboundMail(tx);
+      await setTransactionUser(tx, userId);
+      if ((await lockReceivedInboundEmail(tx, row.id)) === undefined) {
+        return { outcome: 'gone' as const, kept: 0 };
+      }
+      return landNewRequest(tx, {
+        inboundId: row.id,
+        subject,
+        text,
+        images,
+        tenantId,
+        userId,
+        businesses: member.businesses,
+        options,
+        now,
+      });
+    });
+    const unused = images.stored.slice(landed.kept);
+    if (unused.length > 0) await deleteImages(options.store, tenantId, unused);
+    return landed.outcome;
+  } catch (error) {
+    await deleteImages(options.store, tenantId, images.stored);
+    throw error;
+  }
+}
+
+/** What a member who opened a request by email is told (AC-X-40, AC-X-36's words). */
+export function newRequestNoteText(
+  note: {
+    reference: string | null;
+    business: string;
+    businesses: number;
+    cut?: boolean;
+    skipped?: string[];
+    overLimit?: boolean;
+    empty?: boolean;
+  },
+  firstName: string,
+  link: string,
+): { subject: string; text: string } {
+  const lines: string[] = [];
+  if (note.overLimit === true) {
+    lines.push(
+      'Your email didn’t open a request: you’ve opened as many as we take in a day. Send it again tomorrow, or write in the app.',
+    );
+  } else if (note.empty === true) {
+    lines.push(
+      'Your email had no words or screenshots we could find, so it didn’t open a request. Write what’s going on and send it again.',
+    );
+  } else {
+    lines.push(
+      `We opened ${note.reference ?? 'a request'} from your email${note.businesses > 1 ? ` for ${note.business}` : ''}. We’ll answer in the app and by email; reply to this email to add to it.`,
+    );
+    if (note.businesses > 1) {
+      lines.push(
+        `You’re in ${String(note.businesses)} businesses on Pepper: it went to the one you last used. If it’s about another, say so in your reply.`,
+      );
+    }
+    if (note.cut === true) {
+      lines.push(
+        `It was longer than ${SUPPORT_MESSAGE_MAX.toLocaleString('en-US')} characters, so the end was cut. Send the rest in a reply.`,
+      );
+    }
+    if (note.skipped !== undefined && note.skipped.length > 0) {
+      const named = note.skipped.slice(0, NAMED_FILES);
+      const more = note.skipped.length - named.length;
+      lines.push(
+        `${note.skipped.length === 1 ? 'This file wasn’t' : 'These files weren’t'} added: ${named.join('; ')}${more > 0 ? `; and ${String(more)} more` : ''}.`,
+        `We take up to ${String(SUPPORT_SCREENSHOTS_PER_MESSAGE)} screenshots a message (JPEG, PNG or WebP, up to 10 MB). Add others in the app.`,
+      );
+    }
+  }
+  return {
+    subject:
+      note.reference === null
+        ? 'About your email to Pepper'
+        : `We got your request ${note.reference}`,
+    text: [
+      firstName === '' ? 'Hi,' : `Hi ${firstName},`,
+      '',
+      ...lines,
+      '',
+      note.reference === null ? `Your requests: ${link}` : `See the request: ${link}`,
+      '',
+      '— The Pepper team',
+    ].join('\n'),
+  };
+}
+
+/** Opens a verified member's request from their email (AC-X-40), as the app opens one. */
+async function landNewRequest(
+  tx: TenantTx,
+  input: {
+    inboundId: string;
+    subject: string | null;
+    text: string;
+    images: { stored: StoredImage[]; skipped: string[] };
+    tenantId: string;
+    userId: UserId;
+    businesses: number;
+    options: InboundEmailOptions;
+    now: Date;
+  },
+): Promise<{ outcome: Outcome; kept: number }> {
+  const { images, tenantId, userId, options, now } = input;
+  const requester = await requesterOf(tx, userId);
+  const firstName = firstNameOf(requester.name);
+  const tell = async (
+    body: Omit<Parameters<typeof newRequestNoteText>[0], 'business' | 'businesses'>,
+    about: { id: string; reference: string } | null,
+  ) => {
+    const words = newRequestNoteText(
+      { ...body, business: requester.businessName, businesses: input.businesses },
+      firstName,
+      about === null ? `${options.baseUrl}/support` : `${options.baseUrl}/support/${about.id}`,
+    );
+    await queueEmail(
+      tx,
+      {
+        to: requester.email,
+        ...words,
+        ...(about === null
+          ? options.supportEmail === null
+            ? {}
+            : { replyTo: options.supportEmail }
+          : supportReplyRouting(options, about.reference).headers),
+        autoSubmitted: true,
+      },
+      { key: options.outboxKey, dedupeKey: `support.inbound_note:${input.inboundId}`, now },
+    );
+  };
+  const refuse = async (reason: string, body: { overLimit?: true; empty?: true }) => {
+    await tell({ reference: null, ...body }, null);
+    await finishInboundEmail(tx, input.inboundId, { status: 'refused', reason, tenantId }, now);
+    return { outcome: 'refused' as const, kept: 0 };
+  };
+  try {
+    await checkLimits(tx, userId, now, 'thread');
+  } catch (error) {
+    if (!(error instanceof SupportLimitReachedError)) throw error;
+    return refuse('limit', { overLimit: true });
+  }
+  const uploaded = await countSupportScreenshotUploads(
+    tx,
+    userId,
+    new Date(now.getTime() - DAY_MS),
+  );
+  const room = Math.max(0, SUPPORT_SCREENSHOTS_PER_DAY - uploaded);
+  const kept = images.stored.slice(0, room);
+  const skipped = [
+    ...images.skipped,
+    ...images.stored.slice(room).map(() => 'an image (over the day’s screenshots)'),
+  ];
+  if (input.text === '' && kept.length === 0) return refuse('empty', { empty: true });
+  const { body, cut } = newRequestBody(
+    input.subject,
+    input.text === '' ? 'Sent screenshots by email.' : input.text,
+  );
+  const context = SupportContextSchema.parse({
+    appVersion: options.release,
+    userAgent: 'Email',
+    role: requester.role,
+    setup: {
+      bookable: await isBusinessBookable(tx),
+      firstBooking: await hasActivation(tx, 'first_booking'),
+    },
+  });
+  let created: { id: string; messageId: string; reference: string } | null = null;
+  for (let attempt = 0; attempt < REFERENCE_TRIES && created === null; attempt += 1) {
+    const reference = newSupportReference();
+    const row = await insertSupportThread(tx, {
+      reference,
+      kind: 'question',
+      openedByUserId: userId,
+      context,
+      body,
+      now,
+      channel: 'email',
+    });
+    if (row !== null) created = { ...row, reference };
+  }
+  if (created === null) throw new Error('No free support reference');
+  await appendAuditEntry(tx, {
+    actor: { kind: 'user', userId },
+    change: {
+      action: 'support_thread.opened',
+      entity: { type: 'support_thread', id: created.id },
+      before: null,
+      after: { kind: 'question', status: 'waiting_on_pepper', channel: 'email' },
+    },
+  });
+  for (const image of kept) {
+    await insertSupportScreenshot(tx, {
+      id: image.id,
+      uploadedBy: userId,
+      width: image.width,
+      height: image.height,
+      widths: image.widths,
+      bytes: image.bytes,
+      now,
+    });
+  }
+  if (kept.length > 0) {
+    await attachSupportScreenshots(tx, {
+      ids: kept.map((image) => image.id),
+      threadId: created.id,
+      messageId: created.messageId,
+      now,
+    });
+  }
+  await markSupportThreadRead(tx, created.id, userId, now);
+  await emailTeam(tx, options, {
+    threadId: created.id,
+    reference: created.reference,
+    kind: 'question',
+    message: body,
+    requester,
+    context,
+    screenshots: kept.length,
+    dedupeKey: `support.opened:${created.id}`,
+    now,
+    first: true,
+    byEmail: true,
+  });
+  await tell({ reference: created.reference, cut, skipped }, created);
+  await finishInboundEmail(
+    tx,
+    input.inboundId,
+    {
+      status: 'landed',
+      tenantId,
+      threadId: created.id,
+      supportMessageId: created.messageId,
+      reason: 'new_request',
+    },
+    now,
+  );
+  return { outcome: 'landed', kept: kept.length };
+}
+
+/**
+ * A verified stranger's email to the team's address (AC-X-41): a public request, as the
+ * signed-out form makes one, recorded with the inbound row in one transaction; then the team's
+ * address gets it and the sender their reference (best effort, as the form's email: there is
+ * no business, so no outbox). Screenshots aren't kept: a public request has no storage.
+ */
+async function openPublicByEmail(
+  db: Database,
+  row: ClaimedInboundEmail,
+  from: string,
+  input: {
+    subject: string | null;
+    text: string;
+    options: InboundEmailOptions;
+    now: Date;
+    senderHash: string;
+  },
+): Promise<Outcome> {
+  const { options, now } = input;
+  const { body } = newRequestBody(input.subject, input.text);
+  const created = await withInboundMail(db, async (tx) => {
+    if ((await lockReceivedInboundEmail(tx, row.id)) === undefined) return 'gone' as const;
+    if (body === '') {
+      await finishInboundEmail(tx, row.id, { status: 'refused', reason: 'empty' }, now);
+      return 'refused' as const;
+    }
+    // As many a day as a member may open (no account, so counted by address); told nothing.
+    const today = await countInboundFromSender(tx, {
+      senderHash: input.senderHash,
+      since: new Date(now.getTime() - DAY_MS),
+      outcome: 'opened_public',
+    });
+    if (today >= SUPPORT_THREADS_PER_DAY) {
+      await finishInboundEmail(tx, row.id, { status: 'refused', reason: 'limit' }, now);
+      return 'refused' as const;
+    }
+    const reference = newSupportReference();
+    // A taken reference fails the insert (and the transaction): the email is taken again with
+    // a new one at its next attempt (a clash is one in a billion).
+    const request = await insertPublicSupportRequest(tx, {
+      reference,
+      email: from,
+      name: null,
+      body,
+      page: null,
+      topic: null,
+      now,
+      channel: 'email',
+    });
+    if (request === null) throw new Error('No free support reference');
+    await finishInboundEmail(
+      tx,
+      row.id,
+      { status: 'landed', publicRequestId: request.id, reason: 'public_request' },
+      now,
+    );
+    return { reference };
+  });
+  if (typeof created === 'string') return created;
+  const mailer = options.mailer ?? null;
+  if (mailer !== null && options.supportEmail !== null) {
+    await mailer
+      .send({
+        to: options.supportEmail,
+        replyTo: from,
+        subject: `[${created.reference}] Signed-out request — by email`,
+        text: [
+          `${created.reference} · by email (not signed in)`,
+          `From: <${from}> — reply to this email to answer them.`,
+          '',
+          body,
+        ].join('\n'),
+      })
+      .catch(() => undefined);
+  }
+  if (mailer !== null && !(await isSupportMailStopped(db, from))) {
+    await mailer
+      .send({
+        to: from,
+        ...(options.supportEmail === null ? {} : { replyTo: options.supportEmail }),
+        subject: `We got your request ${created.reference}`,
+        text: [
+          'Hi,',
+          '',
+          `We got your email and opened ${created.reference}. We’ll answer by email, usually the same day; reply to this email to add to it.`,
+          '',
+          '— The Pepper team',
+        ].join('\n'),
+        autoSubmitted: true,
+      })
+      .catch(() => undefined);
+  }
+  return 'landed';
 }

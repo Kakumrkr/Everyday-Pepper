@@ -2,11 +2,13 @@ import {
   OperatorMeSchema,
   SAVED_REPLY_FIRST_NAME,
   SUPPORT_OVERDUE_HOURS,
+  type HeldReason,
   type OperatorInboxView,
   type OperatorMe,
   type PublicSupportStatus,
   type SupportRating,
   type SupportReference,
+  type SupportMailStop,
   type SupportStatus,
 } from '@pepper/contracts';
 import { errorCodeOf } from './client-api';
@@ -17,6 +19,7 @@ import { errorCodeOf } from './client-api';
 export const OPS_PATHS = {
   inbox: '/ops',
   replies: '/ops/replies',
+  held: '/ops/held',
   view: (view: OperatorInboxView) => (view === 'waiting' ? '/ops' : `/ops?view=${view}`),
   thread: (id: string) => `/ops/threads/${id}`,
   request: (id: string) => `/ops/requests/${id}`,
@@ -111,6 +114,32 @@ export function fillSavedReply(body: string, requesterName: string | null): stri
 export function replyByEmailHref(email: string, reference: SupportReference): string {
   const subject = encodeURIComponent(`Re: [${reference}] Your Pepper support request`);
   return `mailto:${encodeURIComponent(email).replace('%40', '@')}?subject=${subject}`;
+}
+
+/** The inbox header's count of held mail (S59.3.2's top-up, AC-X-46); `null` for none. */
+export function heldLabel(held: number): string | null {
+  return held > 0 ? `${String(held)} held` : null;
+}
+
+/** Why an email was held, in words the team can act on (AC-X-44). */
+export const OPS_HELD_REASON: Readonly<Record<HeldReason, string>> = {
+  unknown_sender: 'Not from someone who may write there',
+  unverified_sender: 'Sender not verified',
+};
+
+/** "Mail stopped" on a request (AC-X-43), in words: why, and since when (UTC date). */
+export function mailStoppedWords(stop: {
+  reason: SupportMailStop['reason'];
+  since: string;
+}): string {
+  const day = new Date(stop.since).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+  return stop.reason === 'complaint'
+    ? `Mail stopped: they marked our email as spam (${day})`
+    : `Mail stopped: their address bounced (${day})`;
 }
 
 /** What `/ops` may show the signed-in account (AC-X-19). */

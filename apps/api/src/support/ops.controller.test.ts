@@ -4,6 +4,7 @@ import { ApiErrorSchema, TenantIdSchema, UserIdSchema } from '@pepper/contracts'
 import {
   OperatorAccessRefusedError,
   SavedRepliesFullError,
+  HeldEmailNotFoundError,
   SavedReplyNotFoundError,
   SupportThreadNotFoundError,
 } from '@pepper/core';
@@ -37,6 +38,11 @@ const core = vi.hoisted(() => ({
   addSavedReply: vi.fn(),
   editSavedReply: vi.fn(),
   removeSavedReply: vi.fn(),
+  listHeldEmails: vi.fn(),
+  decideHeldEmail: vi.fn(),
+  resumeThreadMail: vi.fn(),
+  resumePublicMail: vi.fn(),
+  readInboundCounts: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({ ...(await original<typeof Core>()), ...core }));
 
@@ -68,6 +74,7 @@ const THREAD = {
   lastMessageAt: AT,
   solvedBy: null,
   rating: null,
+  mailStopped: null,
 };
 const PUBLIC = {
   id: ID,
@@ -80,6 +87,27 @@ const PUBLIC = {
   topic: null,
   notes: [],
   createdAt: AT,
+  channel: 'form',
+  mailStopped: null,
+};
+const HELD = {
+  items: [
+    {
+      id: ID,
+      reason: 'unverified_sender',
+      kind: 'new_request',
+      from: 'someone@else.test',
+      subject: 'Locked out',
+      text: 'Help',
+      business: null,
+      reference: null,
+      heldSince: AT,
+    },
+  ],
+};
+const PERIOD = {
+  outcomes: [{ status: 'held', reason: 'unverified_sender', count: 1 }],
+  problems: { hardBounces: 0, softBounces: 0, complaints: 1 },
 };
 
 const REPLY = { id: ID, title: 'Calendar', body: 'Hi {first name}', updatedAt: AT };
@@ -146,7 +174,12 @@ beforeEach(() => {
   vi.clearAllMocks();
   auth.session.user.twoFactorEnabled = true;
   core.isOperator.mockResolvedValue(true);
-  core.readOperatorInbox.mockResolvedValue({ view: 'waiting', items: [], waiting: 0 });
+  core.readOperatorInbox.mockResolvedValue({ view: 'waiting', items: [], waiting: 0, held: 2 });
+  core.listHeldEmails.mockResolvedValue(HELD);
+  core.decideHeldEmail.mockResolvedValue({ items: [] });
+  core.resumeThreadMail.mockResolvedValue(THREAD);
+  core.resumePublicMail.mockResolvedValue(PUBLIC);
+  core.readInboundCounts.mockResolvedValue({ last7Days: PERIOD, last30Days: PERIOD });
   core.readOperatorThread.mockResolvedValue(THREAD);
   core.replyAsOperator.mockResolvedValue({ ...THREAD, status: 'pepper_replied' });
   core.noteOnThread.mockResolvedValue(THREAD);
@@ -326,5 +359,64 @@ describe('saved replies (S59.2.2, AC-X-23)', () => {
       404,
       'saved_reply_not_found',
     ]);
+  });
+});
+
+describe('held mail, stopped mail and counts (S59.3.2, AC-X-43…46)', () => {
+  it('lists held mail, takes Accept or Discard, and gives the inbox’s held count', async () => {
+    expect((await get('/v1/ops/inbox')).body).toMatchObject({ held: 2 });
+    expect((await get('/v1/ops/held')).body).toEqual(HELD);
+    expect(core.listHeldEmails).toHaveBeenCalledWith({}, operator);
+    const accepted = await send('post', `/v1/ops/held/${ID}`, { decision: 'accept' });
+    expect([accepted.status, accepted.body]).toEqual([200, { items: [] }]);
+    expect(core.decideHeldEmail).toHaveBeenCalledWith(
+      {},
+      operator,
+      ID,
+      { decision: 'accept' },
+      OPTIONS,
+    );
+  });
+
+  it.each([[{ decision: 'land' }], [{ decision: 'accept', tenantId: TENANT }], [{}]])(
+    '400 for a decision %j',
+    async (body) => {
+      expect((await send('post', `/v1/ops/held/${ID}`, body)).status).toBe(400);
+      expect(core.decideHeldEmail).not.toHaveBeenCalled();
+    },
+  );
+
+  it('404 held_email_not_found once reviewed', async () => {
+    core.decideHeldEmail.mockRejectedValue(new HeldEmailNotFoundError());
+    const response = await send('post', `/v1/ops/held/${ID}`, { decision: 'discard' });
+    expect([response.status, ApiErrorSchema.parse(response.body).code]).toEqual([
+      404,
+      'held_email_not_found',
+    ]);
+  });
+
+  it('resumes mail on a thread and a public request, and reads the counts', async () => {
+    expect((await send('post', `/v1/ops/threads/${ID}/resume-mail`, {})).status).toBe(200);
+    expect(core.resumeThreadMail).toHaveBeenCalledWith({}, operator, ID, OPTIONS);
+    expect((await send('post', `/v1/ops/requests/${ID}/resume-mail`, {})).status).toBe(200);
+    expect(core.resumePublicMail).toHaveBeenCalledWith({}, operator, ID, OPTIONS);
+    expect((await get('/v1/ops/inbound/counts')).body).toEqual({
+      last7Days: PERIOD,
+      last30Days: PERIOD,
+    });
+  });
+
+  it('are refused to anyone but an operator, and a write needs the app’s origin', async () => {
+    core.isOperator.mockResolvedValue(false);
+    expect((await get('/v1/ops/held')).status).toBe(403);
+    expect((await get('/v1/ops/inbound/counts')).status).toBe(403);
+    core.isOperator.mockResolvedValue(true);
+    const foreign = await request(server)
+      .post(`/v1/ops/held/${ID}`)
+      .set('Cookie', 'signed-in')
+      .set('Origin', 'https://evil.test')
+      .send({ decision: 'accept' });
+    expect(foreign.status).toBe(403);
+    expect(core.decideHeldEmail).not.toHaveBeenCalled();
   });
 });

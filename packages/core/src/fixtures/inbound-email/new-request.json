@@ -1,0 +1,23 @@
+{
+  "description": "A new request written in Gmail to the team's address (help@ the inbound domain): no request named, the receiver's DMARC pass",
+  "from": "{{from}}",
+  "recipients": ["{{reply}}"],
+  "subject": "Can't move a booking",
+  "text": "Hi, when I drag Maria's 3pm to 4pm nothing happens.\n\nThanks,\nSam\n",
+  "html": null,
+  "headers": [
+    {
+      "name": "Authentication-Results",
+      "value": "amazonses.com; spf=pass smtp.mailfrom={{from}}; dkim=pass header.i=@{{fromDomain}}; dmarc=pass header.from={{fromDomain}};"
+    },
+    {
+      "name": "Message-ID",
+      "value": "<CAF-new@mail.gmail.com>"
+    }
+  ],
+  "inReplyTo": null,
+  "references": [],
+  "attachments": [],
+  "size": 2100,
+  "expected": "Can't move a booking\n\nHi, when I drag Maria's 3pm to 4pm nothing happens.\n\nThanks,\nSam"
+}

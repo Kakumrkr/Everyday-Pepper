@@ -11,6 +11,7 @@ import { sendJson } from '../../../lib/client-api';
 import { OPS_PUBLIC_STATUS, replyByEmailHref } from '../../../lib/ops';
 import { supportTime } from '../../../lib/support';
 import { Notice } from '../form-parts';
+import { OpsMailStopped } from './ops-mail-stopped';
 import { OpsNotes } from './ops-notes';
 
 const STATUSES: readonly { value: PublicSupportStatus; label: string }[] = Object.entries(
@@ -28,13 +29,13 @@ function isStatus(value: string): value is PublicSupportStatus {
  */
 export function OpsRequestView({ initial }: { initial: OperatorPublicRequest }) {
   const [request, setRequest] = useState(initial);
-  const [busy, setBusy] = useState<'note' | 'status' | null>(null);
+  const [busy, setBusy] = useState<'note' | 'status' | 'mail' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
   const status = OPS_PUBLIC_STATUS[request.status];
 
   async function call(
-    kind: 'note' | 'status',
+    kind: 'note' | 'status' | 'mail',
     method: 'POST' | 'PATCH',
     path: string,
     body: object,
@@ -68,8 +69,20 @@ export function OpsRequestView({ initial }: { initial: OperatorPublicRequest }) 
             <span className="break-all">{request.email}</span>
           </span>
           <span className="tabular-nums">· {supportTime(request.createdAt, 'UTC', now)} UTC</span>
+          {request.channel === 'email' ? <span>· by email</span> : null}
         </p>
       </header>
+      {request.mailStopped === null ? null : (
+        <OpsMailStopped
+          stop={request.mailStopped}
+          busy={busy === 'mail'}
+          onResume={() => {
+            if (busy === null) {
+              void call('mail', 'POST', `/v1/ops/requests/${request.id}/resume-mail`, {});
+            }
+          }}
+        />
+      )}
       <p className="m-0 rounded-lg border border-line bg-surface px-4 py-3 type-body break-words whitespace-pre-wrap text-ink">
         {request.body}
       </p>

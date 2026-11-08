@@ -105,19 +105,33 @@ const GLOBAL_TABLES: Record<string, string> = {
   support_saved_replies:
     'the team’s saved replies (S59.2.2, AC-X-23): platform data; forced RLS, operators only',
   inbound_emails:
-    'emails at the inbound webhook (S59.3, ADR-0063): stored before any business is known; forced RLS, the inbound context only (below)',
+    'emails at the inbound webhook (S59.3, ADR-0063): stored before any business is known; forced RLS, the inbound context and logged operators only (below)',
+  email_suppressions:
+    'delivery problems Resend reported for an address (S59.3.2, ADR-0063 Part 2): no business; forced RLS, the inbound context and logged operators only (`email-suppression.int.test.ts`)',
 };
 
 /**
  * Global tables that name a business once known (`tenant_id`, for its deletion), without a
- * tenant policy: each has forced RLS and exactly the one policy listed (its predicate, as
- * Postgres prints it), so no tenant transaction reaches them.
+ * tenant policy: each has forced RLS and exactly the policies listed (their predicates, as
+ * Postgres prints them): its own context's, and the logged operator's (S59.3.2's held review),
+ * so no tenant transaction reaches them.
  */
-const GLOBAL_TABLES_NAMING_A_BUSINESS: Record<string, { policy: string; qual: string }> = {
-  inbound_emails: {
-    policy: 'inbound_mail',
-    qual: "COALESCE((current_setting('app.inbound_mail'::text, true) = 'on'::text), false)",
-  },
+const INBOUND_MAIL =
+  "COALESCE((current_setting('app.inbound_mail'::text, true) = 'on'::text), false)";
+const GLOBAL_TABLES_NAMING_A_BUSINESS: Record<
+  string,
+  { policyname: string; cmd: string; qual: string; with_check: string | null }[]
+> = {
+  inbound_emails: [
+    { policyname: 'inbound_mail', cmd: 'ALL', qual: INBOUND_MAIL, with_check: INBOUND_MAIL },
+    { policyname: 'operator_access', cmd: 'SELECT', qual: OPERATOR_ACCESS, with_check: null },
+    {
+      policyname: 'operator_review',
+      cmd: 'UPDATE',
+      qual: `(${OPERATOR_ACCESS} AND (status = 'held'::text))`,
+      with_check: OPERATOR_ACCESS,
+    },
+  ],
 };
 
 interface TenantTable {
@@ -139,7 +153,8 @@ interface TenantTable {
   jobScan?: string;
   /**
    * A read for the table's owner only (`TO CURRENT_USER` at migration time), behind one definer
-   * function: `support_inbound_thread` (S59.3, ADR-0063) finds a thread by its reference.
+   * function: `support_inbound_thread` (S59.3, ADR-0063) finds a thread by its reference;
+   * `support_inbound_member` (S59.3.2) finds the business of an email's sender.
    */
   ownerLookup?: string;
   /**
@@ -210,6 +225,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       (await addMembership(tx, { userId: await insertUser(db), role: 'staff' })).id,
     touch: "role = 'manager'",
     memberRead: '((current_tenant_id() IS NULL) AND (user_id = current_user_id()))',
+    ownerLookup: 'inbound_member_lookup',
     memberScope: [
       {
         policyname: 'member_scope_delete',
@@ -1217,8 +1233,8 @@ describe('catalog', () => {
   });
 
   it.each(Object.entries(GLOBAL_TABLES_NAMING_A_BUSINESS))(
-    '%s has forced RLS and only its own context’s policy (no tenant reaches it)',
-    async (table, spec) => {
+    '%s has forced RLS and only its own context’s and the operator’s policies (no tenant reaches it)',
+    async (table, expected) => {
       const [flags] = await asAdmin<{ enabled: boolean; forced: boolean }>(
         `SELECT relrowsecurity AS enabled, relforcerowsecurity AS forced
            FROM pg_class WHERE oid = $1::regclass`,
@@ -1230,16 +1246,9 @@ describe('catalog', () => {
            FROM pg_policies WHERE schemaname = 'public' AND tablename = $1 ORDER BY policyname`,
         [table],
       );
-      expect(policies).toEqual([
-        {
-          policyname: spec.policy,
-          permissive: 'PERMISSIVE',
-          cmd: 'ALL',
-          roles: ['public'],
-          qual: spec.qual,
-          with_check: spec.qual,
-        },
-      ]);
+      expect(policies).toEqual(
+        expected.map((policy) => ({ ...policy, permissive: 'PERMISSIVE', roles: ['public'] })),
+      );
     },
   );
 
