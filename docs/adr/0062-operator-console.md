@@ -84,3 +84,11 @@ S59 gave every business support threads that only its own members can read. Some
 - api: `ScreenshotStoreModule`, `/v1/support/screenshots`, `/v1/ops/screenshots/:id`; worker: the sweep and the deletion hook; imports: images in the export.
 - web: the screenshot picker, `MessageScreenshots`, the counts.
 - Tests: `support-screenshots.int.test.ts` (db, core), `isolation.int.test.ts`, `screenshots.test.ts`/`images.test.ts` (storage), `screenshots.controller.test.ts`, `photos.int.test.ts`, `export.test.ts`, `jobs.module.test.ts`, `support.spec.ts`, `ops.spec.ts`, `screens.spec.ts`.
+
+## Part 4 (S59.4, preapproved at its brief: the pilot metrics page)
+
+- `/ops/metrics` (`GET /v1/ops/metrics?days=7|30`) reads in one `withOperator` transaction with the new action `metrics.read` (migration 0073 widens the access log's CHECK).
+- The numbers outside support come from one definer function, `operator_pilot_metrics(since, until)`. It refuses (42501) without `current_operator_id()`, reads each business as itself (its tenant policies, with `tenant_id` named in every query because the owner may bypass RLS), restores the transaction's settings, and returns counts and medians only: no client, booking, member or business row reaches an operator. Businesses are found through 0072's owner read of `memberships`; sign-ups are global.
+- Support's numbers (first-reply time, by email vs in the app) use the existing operator policies; inbound counts reuse `countInboundByOutcome` with the period's end.
+- A cancellation's time is its `booking.updated` audit entry (else the row's last change); waitlist conversion counts answered offers. Rates and medians from fewer than 5 cases say "Not enough yet" (D-3).
+- Later: the function loops over businesses (fine for the pilot's handful; one grouped query per table if hundreds). The AI and engagement metrics are S59.4.2.
