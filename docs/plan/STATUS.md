@@ -9,9 +9,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S59.4 · Pilot metrics page, first-reply time** (branch `claude/pilot-metrics-first-reply-wztdbc`). Brief approved: "Go ahead with your recommendations and complete successful" (D-1 split → S59.4.2 the AI and engagement metrics; D-2 aggregate-only definer function; D-3 7/30 days, a minimum of 5; D-4 median ≤ 4 h, same day).
 - [x] 1. AC-X-47…49, traceability, scorecard §3 "First-reply time", S59.4.2 row
-- [ ] 2. Migration 0073 (`metrics.read`, `operator_pilot_metrics`) + db `pilot-metrics.ts` + integration tests
-- [ ] 3. Contract, core `readPilotMetrics`, `GET /v1/ops/metrics`
-- [ ] 4. Web `/ops/metrics` + nav, ops.spec, screens baselines
+- [x] 2. Migration 0073 (`metrics.read`, `operator_pilot_metrics`) + db `pilot-metrics.ts` + integration tests (db 5/5)
+- [x] 3. Contract, core `readPilotMetrics`, `GET /v1/ops/metrics` (core unit 6, int 12; api 31)
+- [x] 4. Web `/ops/metrics` + Metrics in the nav, words (web 7), gallery section `ops-metrics`, ops.spec case; next: run ops.spec + gallery baselines
 - [ ] 5. Close
 
 ## Last sessions

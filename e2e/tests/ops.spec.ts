@@ -25,7 +25,8 @@ import { expectTapTargets } from './tap-targets.js';
 // (AC-X-23/26): the reply starts from a saved reply, and the owner says whether it helped,
 // which the console shows; the job's rules are in core's support-housekeeping.int.test.ts.
 // S59.3.2 (AC-X-44/46): the Held view and the header's count (with mail held: the gallery, and
-// core's operator-support.int.test.ts for Accept, Discard and Resume).
+// core's operator-support.int.test.ts for Accept, Discard and Resume). S59.4 (AC-X-47…49): the
+// pilot metrics page, operators only.
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -192,6 +193,49 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
   await expect(
     ops.getByRole('link', { name: /I can’t sign in at all/ }).filter({ hasText: publicReference }),
   ).toContainText(/ago|Just in/);
+  // S59.4 (AC-X-47…49): the pilot metrics, the operator's alone. This run's owners signed up and
+  // got bookable, and the team answered a request, so those numbers are there; every number on
+  // a seeded business is in db's pilot-metrics.int.test.ts.
+  expect((await page.request.get('/v1/ops/metrics')).status()).toBe(403);
+  expect((await page.request.get('/ops/metrics')).status()).toBe(404);
+  await ops.getByRole('link', { name: 'Metrics', exact: true }).click();
+  await expect(ops.getByRole('heading', { name: 'Pilot metrics', level: 1 })).toBeVisible();
+  await expect(ops.getByRole('link', { name: 'Last 7 days' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  for (const key of [
+    'onboarding_completion',
+    'time_to_bookable',
+    'time_to_first_booking',
+    'booking_completion',
+    'code_step_drop_off',
+    'no_show_rate',
+    'fill_rate',
+    'waitlist_conversion',
+    'support_requests',
+  ]) {
+    await expect(ops.getByTestId(`metric-${key}`), key).toHaveText(
+      /^(–|[\d.]+(%| min| h.*| d.*| s| a week))$/,
+    );
+  }
+  await expect(ops.getByTestId('metric-onboarding_completion')).toHaveText(/%$/);
+  await expect(ops.getByTestId('metric-support_requests')).toHaveText(/a week$/);
+  const firstReply = ops.getByRole('region', { name: 'First reply' });
+  await expect(firstReply.getByText('Median, from a request to our first reply')).toBeVisible();
+  await expect(firstReply.getByText(/^\d+ of \d+ answered$/)).toBeVisible();
+  await expect(firstReply.getByText('By email vs in the app')).toBeVisible();
+  await expect(
+    firstReply.getByText(/^(\d+ by email of \d+ \(\d+%\)|None yet)$/).first(),
+  ).toBeVisible();
+  await scanned(ops, 'ops metrics');
+  await ops.getByRole('link', { name: 'Last 30 days' }).click();
+  await expect(ops).toHaveURL(/\/ops\/metrics\?days=30$/);
+  await expect(ops.getByRole('link', { name: 'Last 30 days' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+
   // Leaves the team's list as it found it (saved replies are shared, at most 100).
   const removed = await ops.request.delete(`/v1/ops/replies/${await savedReplyId(ops, title)}`, {
     headers: { origin: new URL(baseURL ?? 'http://localhost:3000').origin },
