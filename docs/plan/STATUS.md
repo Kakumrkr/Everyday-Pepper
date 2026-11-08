@@ -7,7 +7,12 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.4 · Pilot metrics page, first-reply time** (branch `claude/pilot-metrics-first-reply-wztdbc`). Brief approved: "Go ahead with your recommendations and complete successful" (D-1 split → S59.4.2 the AI and engagement metrics; D-2 aggregate-only definer function; D-3 7/30 days, a minimum of 5; D-4 median ≤ 4 h, same day).
+- [x] 1. AC-X-47…49, traceability, scorecard §3 "First-reply time", S59.4.2 row
+- [ ] 2. Migration 0073 (`metrics.read`, `operator_pilot_metrics`) + db `pilot-metrics.ts` + integration tests
+- [ ] 3. Contract, core `readPilotMetrics`, `GET /v1/ops/metrics`
+- [ ] 4. Web `/ops/metrics` + nav, ops.spec, screens baselines
+- [ ] 5. Close
 
 ## Last sessions
 - **S59.3.2 Phase 13 · Email, part 2 (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md) Part 2, [PR #90](https://github.com/Kakumrkr/Everyday-Pepper/pull/90)). Full entry in [session-log.md](session-log.md).
@@ -98,6 +103,7 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, M1–M2 and P1 are done
 | # | Session target | Phase | Done when |
 |---|---|---|---|
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
+| S59.4.2 | Pilot metrics, part 2: weekly active owners, cards vs chat, AI approval/correction/undo, AI cost, rebook rate | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |

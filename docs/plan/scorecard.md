@@ -62,6 +62,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | Rebook rate | Clients rebooked within their interval | +10 points vs baseline |
 | Waitlist conversion | Offers claimed ÷ sent | ≥ 30% |
 | Support requests | Per active business per week | ≤ 1 after week 2 |
+| First-reply time | A business request's first message → the team's first reply (S59.4) | Median ≤ 4 h; every request the same day |
 | AI cost per business | OpenAI spend per active business per month | ≤ $3 |
 
 ## 4. Score history
