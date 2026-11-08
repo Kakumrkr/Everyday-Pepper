@@ -259,7 +259,10 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
                 );
               }
               if (result.retried > 0) {
-                this.logger.warn(`Inbound email: ${String(result.retried)} left for a retry`);
+                // Error names only (never a message, which may echo an address).
+                this.logger.warn(
+                  `Inbound email: ${String(result.retried)} left for a retry (${result.errors.join(', ')})`,
+                );
               }
             },
             this.logger,

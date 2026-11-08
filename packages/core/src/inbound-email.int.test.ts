@@ -529,6 +529,36 @@ describe('a reply to an old solved request opens a follow-up (AC-X-37)', () => {
   });
 });
 
+describe('later replies to an old request land in its follow-up (AC-X-37)', () => {
+  it('opens one follow-up, then lands there, with its routing in the note', async () => {
+    const thread = await request();
+    await withTenant(db, tenant, (tx) =>
+      setSupportThreadStatus(tx, thread.id, 'solved', clock.now(), { solvedBy: 'auto' }),
+    );
+    clock.advanceBy(31 * 24 * 60 * 60 * 1000);
+    const { email } = await fixture('gmail-reply', thread);
+    expect((await receive(email)).result.landed).toBe(1);
+    const note = (await deliverAll()).find((mail) => mail.to === 'jess@juniper.test');
+    const reference = /opened a new request: (PEP-[0-9A-Z]{6})/.exec(note?.text ?? '')?.[1] ?? '';
+    // The note answers to the new request, so a reply to it lands there.
+    expect(note?.replyTo).toBe(supportReplyAddress(replyKeys, reference, DOMAIN));
+    // More replies to the old request's email in the hour land in that follow-up (the one that
+    // opened it counts), the sixth is a loop; no other request is opened.
+    for (let i = 0; i < 4; i += 1) {
+      clock.advanceBy(60_000);
+      expect((await receive(email)).result.landed).toBe(1);
+    }
+    expect((await receive(email)).result.ignored).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'loop' });
+    const opened = (await admin.db.select().from(supportThreads)).filter(
+      (row) => row.followUpOf === thread.id,
+    );
+    expect(opened.map((row) => row.reference)).toEqual([reference]);
+    const read = await readSupportThread(db, actor(jess, 'staff'), opened[0]?.id ?? '');
+    expect(read.messages).toHaveLength(5);
+  });
+});
+
 describe('emailed images become screenshots (AC-X-38, the top-up)', () => {
   it('keeps the pasted and attached images, names the rest, drops signature icons', async () => {
     const thread = await request();
@@ -568,6 +598,43 @@ describe('emailed images become screenshots (AC-X-38, the top-up)', () => {
     expect(note?.text).toContain('calendar.png (over the limit)');
   });
 
+  it('leaves out a file that can’t be read, and lands the reply', async () => {
+    const thread = await request();
+    const { email } = await fixture('with-images', thread);
+    const broken = {
+      ...email,
+      attachments: email.attachments.map((attachment, index) =>
+        index === 0
+          ? { ...attachment, content: () => Promise.reject(new Error('link expired')) }
+          : attachment,
+      ),
+    };
+    expect((await receive(broken)).result.landed).toBe(1);
+    const message = (await readSupportThread(db, actor(jess, 'staff'), thread.id)).messages.at(-1);
+    expect(message?.screenshots).toHaveLength(1);
+    const note = (await deliverAll()).find((mail) => mail.to === 'jess@juniper.test');
+    expect(note?.text).toContain('Screenshot.png (couldn’t be read)');
+  });
+
+  it('takes back what it stored when the store fails, and retries', async () => {
+    const thread = await request();
+    const { email } = await fixture('with-images', thread);
+    let puts = 0;
+    const put = store.put.bind(store);
+    store.put = (tenantId, id, width, data) => {
+      puts += 1;
+      // The second image's first width fails.
+      return puts === 3 ? Promise.reject(new Error('store down')) : put(tenantId, id, width, data);
+    };
+    expect((await receive(email)).result.retried).toBe(1);
+    expect(store.images.size).toBe(0);
+    // The store back: the next attempt, after the lease, lands it with its images.
+    store.put = put;
+    clock.advanceBy(6 * 60_000);
+    expect((await processInboundEmails(db, options)).landed).toBe(1);
+    expect(store.images.size).toBe(4);
+  });
+
   it('names every image when screenshots are off', async () => {
     options = { ...options, store: null };
     const thread = await request();
@@ -604,6 +671,15 @@ describe('the job’s retries and housekeeping', () => {
       messageId: null,
       receivedAt: clock.now(),
     });
+    // Retried (the provider may not serve it yet), given up on the last attempt.
+    for (let attempt = 1; attempt < 5; attempt += 1) {
+      expect(await processInboundEmails(db, options)).toMatchObject({
+        retried: 1,
+        errors: ['InboundEmailNotFoundError'],
+      });
+      expect(await lastInbound()).toMatchObject({ status: 'received' });
+      clock.advanceBy(6 * 60_000);
+    }
     expect((await processInboundEmails(db, options)).failed).toBe(1);
     expect(await lastInbound()).toMatchObject({ status: 'failed', reason: 'not_found' });
   });

@@ -57,6 +57,10 @@ export class InboundController {
   ) {
     this.db = database.db;
     this.key = options.webhookSecret === null ? null : svixKeyOf(options.webhookSecret);
+    // A secret set but unusable must stop the process, never turn the route off quietly.
+    if (options.webhookSecret !== null && this.key === null) {
+      throw new Error('Invalid api environment: RESEND_WEBHOOK_SECRET');
+    }
   }
 
   /**

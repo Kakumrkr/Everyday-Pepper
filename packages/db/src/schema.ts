@@ -2741,10 +2741,16 @@ export const supportThreads = pgTable(
     ratedAt: timestamp('rated_at', { withTimezone: true }),
     /** When the team's address was reminded of its current wait (S59.2.2, AC-X-25). */
     overdueRemindedAt: timestamp('overdue_reminded_at', { withTimezone: true }),
+    /**
+     * The solved request an emailed reply followed up (S59.3, AC-X-37): later replies to the old
+     * request land here. No foreign key: it stays a plain id if the old one goes.
+     */
+    followUpOf: uuid('follow_up_of'),
     ...timestamps,
   },
   (table) => [
     unique('support_threads_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('support_threads_follow_up_idx').on(table.tenantId, table.followUpOf),
     index('support_threads_recent_idx').on(table.tenantId, table.lastMessageAt),
     index('support_threads_opened_by_idx').on(table.openedByUserId),
     check(

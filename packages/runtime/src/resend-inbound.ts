@@ -57,11 +57,16 @@ const AttachmentLinkSchema = z.object({
   size: z.number().int().nonnegative().nullish(),
 });
 
-/** The address of `Name <a@b>` or `a@b`, lowercased; `''` when there is none. */
+/**
+ * The address of `Name <a@b>` or `a@b`, lowercased; `''` when there is none. The address is
+ * the last `<…>` (a display name may hold anything, `"<owner@biz>" <evil@x>` included), else a
+ * bare address with nothing else around it.
+ */
 export function addressOf(value: string): string {
-  const angled = /<([^<>\s]+@[^<>\s]+)>/.exec(value)?.[1];
-  const bare = /([^\s<>",;]+@[^\s<>",;]+)/.exec(value)?.[1];
-  return (angled ?? bare ?? '').toLowerCase();
+  const angled = [...value.matchAll(/<([^<>\s"]+@[^<>\s"]+)>/g)].at(-1)?.[1];
+  if (angled !== undefined) return angled.toLowerCase();
+  const bare = /^\s*([^\s<>",;]+@[^\s<>",;]+)\s*$/.exec(value)?.[1];
+  return (bare ?? '').toLowerCase();
 }
 
 function addressesOf(value: z.infer<typeof AddressListSchema>): string[] {

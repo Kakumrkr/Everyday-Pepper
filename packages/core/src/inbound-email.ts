@@ -125,8 +125,9 @@ export function senderVerdict(
   for (const part of rest.map((item) => item.trim())) {
     const dmarc = /^dmarc=(\w+)/i.exec(part);
     if (dmarc?.[1]?.toLowerCase() === 'pass') {
+      // Only a pass for the From domain itself counts.
       const headerFrom = /header\.from=([^\s;]+)/i.exec(part)?.[1];
-      if (headerFrom === undefined || headerFrom.toLowerCase() === fromDomain) return 'pass';
+      if (headerFrom?.toLowerCase() === fromDomain) return 'pass';
     }
     const dkim = /^dkim=(\w+)/i.exec(part);
     if (dkim?.[1]?.toLowerCase() === 'pass') {

@@ -62,7 +62,7 @@ describe('the sender check (ADR-0063 §4)', () => {
       senderVerdict({ from, headers: [header('Authentication-Results', value)] }, SES);
     expect(verdict(`${SES}; dmarc=pass header.from=mail.juniper.test`)).toBe('pass');
     expect(verdict(`${SES}; dmarc=pass header.from=other.test`)).toBe('fail');
-    expect(verdict(`${SES}; dmarc=pass`)).toBe('pass');
+    expect(verdict(`${SES}; dmarc=pass`)).toBe('fail');
     expect(verdict(`${SES}; dkim=pass header.d=juniper.test`)).toBe('pass');
     expect(verdict(`${SES}; dkim=pass header.i=@mail.juniper.test`)).toBe('pass');
     expect(verdict(`${SES}; dkim=pass header.d=sendgrid.net`)).toBe('fail');

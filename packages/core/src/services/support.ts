@@ -568,7 +568,7 @@ function parseThreadId(threadId: string): string {
   return parsed.data;
 }
 
-/** Holds the member's support writes and refuses one over the day's limits (AC-X-14). */
+/** Holds the member's support writes and refuses one over the day's limits (AC-X-14; also the inbound job's). */
 export async function checkLimits(
   tx: TenantTx,
   userId: UserId,

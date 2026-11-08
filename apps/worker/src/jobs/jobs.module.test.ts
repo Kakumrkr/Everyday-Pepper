@@ -272,6 +272,7 @@ describe('JobsRunner', () => {
       failed: 0,
       retried: 1,
       emptied: 0,
+      errors: ['ResendInboundError'],
     });
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
@@ -303,7 +304,7 @@ describe('JobsRunner', () => {
     expect(log).toHaveBeenCalledWith(
       'Inbound email: 2 landed, 1 held, 0 ignored, 0 refused, 0 failed',
     );
-    expect(warn).toHaveBeenCalledWith('Inbound email: 1 left for a retry');
+    expect(warn).toHaveBeenCalledWith('Inbound email: 1 left for a retry (ResendInboundError)');
     log.mockRestore();
     warn.mockRestore();
     await runner.onApplicationShutdown();

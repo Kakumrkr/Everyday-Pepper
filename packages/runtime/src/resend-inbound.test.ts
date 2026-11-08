@@ -127,5 +127,9 @@ describe('ResendInboundSource', () => {
     expect(addressOf('"Ruiz, Ana" <Ana@Juniper.test>')).toBe('ana@juniper.test');
     expect(addressOf('ana@juniper.test')).toBe('ana@juniper.test');
     expect(addressOf('no address')).toBe('');
+    // A display name can't stand in for the address.
+    expect(addressOf('"<owner@biz.test>" <attacker@evil.test>')).toBe('attacker@evil.test');
+    expect(addressOf('owner@biz.test <attacker@evil.test>')).toBe('attacker@evil.test');
+    expect(addressOf('Owner owner@biz.test')).toBe('');
   });
 });

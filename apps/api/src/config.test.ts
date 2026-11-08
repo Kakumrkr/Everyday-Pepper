@@ -167,6 +167,10 @@ describe('loadApiConfig', () => {
     expect(() => loadApiConfig({ ...required, INBOUND_EMAIL_DOMAIN: 'not a domain' })).toThrow(
       /^Invalid api environment: INBOUND_EMAIL_DOMAIN$/,
     );
+    // 20 base64 characters are only 15 bytes: too short a key.
+    expect(() =>
+      loadApiConfig({ ...required, RESEND_WEBHOOK_SECRET: `whsec_${'A'.repeat(20)}` }),
+    ).toThrow(/^Invalid api environment: RESEND_WEBHOOK_SECRET$/);
     expect(() => loadApiConfig({ ...required, RESEND_WEBHOOK_SECRET: 're_secret_value' })).toThrow(
       /^Invalid api environment: RESEND_WEBHOOK_SECRET$/,
     );

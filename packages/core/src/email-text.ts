@@ -52,9 +52,11 @@ const HTML_QUOTE_MARKERS = [
 
 function cutAtQuote(html: string): string {
   const lower = html.toLowerCase();
+  // Only in the body: a style rule in the head may name the same classes.
+  const body = Math.max(0, lower.indexOf('<body'));
   let cut = html.length;
   for (const marker of HTML_QUOTE_MARKERS) {
-    const at = lower.indexOf(marker);
+    const at = lower.indexOf(marker, body);
     if (at < 0) continue;
     const tag = lower.lastIndexOf('<', at);
     if (tag >= 0 && tag < cut) cut = tag;

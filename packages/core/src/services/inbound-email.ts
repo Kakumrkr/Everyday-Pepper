@@ -1,10 +1,8 @@
 import {
   SUPPORT_MESSAGE_MAX,
-  SUPPORT_MESSAGES_PER_DAY,
   SUPPORT_SCREENSHOT_MAX_BYTES,
   SUPPORT_SCREENSHOTS_PER_DAY,
   SUPPORT_SCREENSHOTS_PER_MESSAGE,
-  SUPPORT_THREADS_PER_DAY,
   SupportContextSchema,
   TenantIdSchema,
   UserIdSchema,
@@ -17,9 +15,9 @@ import {
   claimInboundEmails,
   countInboundLanded,
   countSupportScreenshotUploads,
-  countSupportWrites,
   emptyHeldInboundEmails,
   failInboundEmailsPastAttempts,
+  findSupportFollowUp,
   findSupportThread,
   findSupportThreadForInbound,
   finishInboundEmail,
@@ -31,7 +29,6 @@ import {
   listTenantMembers,
   lockReceivedInboundEmail,
   lockSupportThread,
-  lockSupportWriter,
   markSupportThreadRead,
   newId,
   setTransactionInboundMail,
@@ -43,6 +40,8 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { systemClock } from '../clock.js';
+import { SupportLimitReachedError } from '../errors.js';
+import { errorNameOf } from '../outbox.js';
 import { replyTextOf } from '../email-text.js';
 import {
   INBOUND_EMAIL_MAX_BYTES,
@@ -56,12 +55,14 @@ import { findSupportReference, supportReplyKeysFrom } from '../support-reply-add
 import { queueEmail } from './outbox.js';
 import type { ScreenshotStorage } from './support-screenshots.js';
 import {
+  checkLimits,
   emailTeam,
   firstNameOf,
   newSupportReference,
   requesterOf,
   REFERENCE_TRIES,
   SUPPORT_REPLY_ABOVE,
+  supportReplyRouting,
   type SupportOptions,
 } from './support.js';
 
@@ -95,6 +96,13 @@ export interface InboundEmailResult {
   retried: number;
   /** Held emails emptied after 7 days. */
   emptied: number;
+  /** The names (never messages) of what made emails wait for a retry, for the job's log. */
+  errors: string[];
+}
+
+/** The provider doesn't have the email (yet): retried until the last attempt. */
+class InboundEmailNotFoundError extends Error {
+  override readonly name = 'InboundEmailNotFoundError';
 }
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -214,6 +222,7 @@ export async function processInboundEmails(
     failed: 0,
     retried: 0,
     emptied: 0,
+    errors: [],
   };
   const claimed = await withInboundMail(db, (tx) =>
     claimInboundEmails(tx, {
@@ -227,9 +236,11 @@ export async function processInboundEmails(
     try {
       const outcome = await processOne(db, row, options, clock.now());
       if (outcome !== 'gone') result[outcome] += 1;
-    } catch {
+    } catch (error) {
       // Left `received`: taken again when its lease ends, until its last attempt.
       result.retried += 1;
+      const name = errorNameOf(error);
+      if (!result.errors.includes(name)) result.errors.push(name);
     }
   }
   const now = clock.now();
@@ -274,7 +285,12 @@ async function processOne(
   now: Date,
 ): Promise<Outcome> {
   const email = await options.source.fetch(row.providerEmailId);
-  if (email === null) return finishUnmatched(db, row.id, 'failed', 'not_found', now);
+  if (email === null) {
+    // The provider may not serve an email the moment its webhook fires: retried like an error,
+    // given up only on the last attempt.
+    if (row.attempts < MAX_ATTEMPTS) throw new InboundEmailNotFoundError();
+    return finishUnmatched(db, row.id, 'failed', 'not_found', now);
+  }
   if (email.size !== null && email.size > INBOUND_EMAIL_MAX_BYTES) {
     return finishUnmatched(db, row.id, 'refused', 'too_large', now);
   }
@@ -416,66 +432,81 @@ async function storeImages(
 ): Promise<{ stored: StoredImage[]; skipped: string[] }> {
   const stored: StoredImage[] = [];
   const skipped: string[] = [];
-  for (const attachment of attachments) {
-    const type = (attachment.contentType ?? '').toLowerCase();
-    const looksLikeImage =
-      type.startsWith('image/') ||
-      /\.(png|jpe?g|webp|heic|heif|gif)$/i.test(attachment.filename ?? '');
-    if (!looksLikeImage) {
-      skipped.push(`${nameOf(attachment)} (not an image)`);
-      continue;
-    }
-    if (attachment.inline && attachment.size !== null && attachment.size < INLINE_ICON_BYTES)
-      continue;
-    if (store === null) {
-      skipped.push(`${nameOf(attachment)} (screenshots are off)`);
-      continue;
-    }
-    if (stored.length >= room) {
-      skipped.push(`${nameOf(attachment)} (over the limit)`);
-      continue;
-    }
-    if (attachment.size !== null && attachment.size > SUPPORT_SCREENSHOT_MAX_BYTES) {
-      skipped.push(`${nameOf(attachment)} (over 10 MB)`);
-      continue;
-    }
-    const bytes = await attachment.content();
-    if (attachment.inline && bytes.byteLength < INLINE_ICON_BYTES) continue;
-    if (bytes.byteLength > SUPPORT_SCREENSHOT_MAX_BYTES) {
-      skipped.push(`${nameOf(attachment)} (over 10 MB)`);
-      continue;
-    }
-    const image = await store.process(bytes);
-    if (image.kind === 'rejected') {
-      skipped.push(
-        `${nameOf(attachment)} (${image.reason === 'heic' ? 'HEIC: send it as JPEG' : 'not a JPEG, PNG or WebP image'})`,
-      );
-      continue;
-    }
-    const widest = image.variants.at(-1);
-    if (widest === undefined) continue;
-    const id = newId();
-    const widths = image.variants.map((variant) => variant.width);
-    try {
+  try {
+    for (const attachment of attachments) {
+      const type = (attachment.contentType ?? '').toLowerCase();
+      const looksLikeImage =
+        type.startsWith('image/') ||
+        /\.(png|jpe?g|webp|heic|heif|gif)$/i.test(attachment.filename ?? '');
+      if (!looksLikeImage) {
+        skipped.push(`${nameOf(attachment)} (not an image)`);
+        continue;
+      }
+      if (attachment.inline && attachment.size !== null && attachment.size < INLINE_ICON_BYTES) {
+        continue;
+      }
+      if (store === null) {
+        skipped.push(`${nameOf(attachment)} (screenshots are off)`);
+        continue;
+      }
+      if (stored.length >= room) {
+        skipped.push(`${nameOf(attachment)} (over the limit)`);
+        continue;
+      }
+      if (attachment.size !== null && attachment.size > SUPPORT_SCREENSHOT_MAX_BYTES) {
+        skipped.push(`${nameOf(attachment)} (over 10 MB)`);
+        continue;
+      }
+      // One file that can't be fetched or read is left out, never the whole reply.
+      const image = await readImage(attachment, store).catch(() => 'unreadable' as const);
+      if (image === 'icon') continue;
+      if (image === 'unreadable') {
+        skipped.push(`${nameOf(attachment)} (couldn’t be read)`);
+        continue;
+      }
+      if (image === 'too_large') {
+        skipped.push(`${nameOf(attachment)} (over 10 MB)`);
+        continue;
+      }
+      if (image.kind === 'rejected') {
+        skipped.push(
+          `${nameOf(attachment)} (${image.reason === 'heic' ? 'HEIC: send it as JPEG' : 'not a JPEG, PNG or WebP image'})`,
+        );
+        continue;
+      }
+      const widest = image.variants.at(-1);
+      if (widest === undefined) continue;
+      const id = newId();
+      const widths = image.variants.map((variant) => variant.width);
+      // Counted before the puts, so a failed put's widths are deleted with the rest below.
+      stored.push({
+        id,
+        width: image.width,
+        height: image.height,
+        widths,
+        bytes: widest.data.byteLength,
+      });
       await Promise.all(
         image.variants.map((variant) => store.put(tenantId, id, variant.width, variant.data)),
       );
-    } catch (error) {
-      await deleteImages(store, tenantId, [
-        ...stored,
-        { id, width: 0, height: 0, widths, bytes: 0 },
-      ]);
-      throw error;
     }
-    stored.push({
-      id,
-      width: image.width,
-      height: image.height,
-      widths,
-      bytes: widest.data.byteLength,
-    });
+  } catch (error) {
+    // The store failed: nothing points at what was put, so it goes now (the sweep can't find it).
+    await deleteImages(store, tenantId, stored);
+    throw error;
   }
   return { stored, skipped };
+}
+
+/** An attachment's bytes, checked by the screenshot port (or why not). */
+async function readImage(
+  attachment: InboundAttachment,
+  store: ScreenshotStorage,
+): Promise<'icon' | 'too_large' | Awaited<ReturnType<ScreenshotStorage['process']>>> {
+  const bytes = await attachment.content();
+  if (attachment.inline && bytes.byteLength < INLINE_ICON_BYTES) return 'icon';
+  if (bytes.byteLength > SUPPORT_SCREENSHOT_MAX_BYTES) return 'too_large';
+  return store.process(bytes);
 }
 
 /** Lands a verified reply (AC-X-34/36/37/38): the member's message, as in the app. */
@@ -492,8 +523,8 @@ async function land(
     now: Date;
   },
 ): Promise<{ outcome: Outcome; kept: number }> {
-  const { text, images, tenantId, threadId, userId, options, now } = input;
-  const thread = await lockSupportThread(tx, threadId);
+  const { text, images, tenantId, userId, options, now } = input;
+  let thread = await lockSupportThread(tx, input.threadId);
   if (thread === undefined) {
     await finishInboundEmail(
       tx,
@@ -505,16 +536,53 @@ async function land(
   }
   const requester = await requesterOf(tx, userId);
   const firstName = firstNameOf(requester.name);
-  const note = async (body: InboundNote, linkThread: string) => {
-    const words = inboundNoteText(body, firstName, `${options.baseUrl}/support/${linkThread}`);
+  // The note goes to the request it is about, routed like any email about it: a reply to the
+  // note lands there too.
+  const note = async (body: InboundNote, about: { id: string; reference: string }) => {
+    const words = inboundNoteText(body, firstName, `${options.baseUrl}/support/${about.id}`);
     await queueEmail(
       tx,
-      { to: requester.email, ...words, autoSubmitted: true },
+      {
+        to: requester.email,
+        ...words,
+        ...supportReplyRouting(options, about.reference).headers,
+        autoSubmitted: true,
+      },
       { key: options.outboxKey, dedupeKey: `support.inbound_note:${input.inboundId}`, now },
     );
   };
+  const isOld = (row: { status: string; solvedAt: Date | null }) =>
+    row.status === 'solved' &&
+    row.solvedAt !== null &&
+    row.solvedAt.getTime() < now.getTime() - REOPEN_DAYS * DAY_MS;
+
+  // A reply to a request solved long ago lands in the follow-up it already opened, while that
+  // one is still current; only then is a new follow-up opened (AC-X-37).
+  if (isOld(thread)) {
+    const existing = await findSupportFollowUp(tx, thread.id);
+    const next = existing === undefined ? undefined : await lockSupportThread(tx, existing.id);
+    if (next !== undefined && !isOld(next)) {
+      thread = next;
+      const recent = await countInboundLanded(tx, {
+        tenantId,
+        threadId: next.id,
+        since: new Date(now.getTime() - HOUR_MS),
+      });
+      if (recent >= LOOP_LIMIT) {
+        await finishInboundEmail(
+          tx,
+          input.inboundId,
+          { status: 'ignored', reason: 'loop', tenantId, threadId: next.id },
+          now,
+        );
+        return { outcome: 'ignored', kept: 0 };
+      }
+    }
+  }
+  const threadId = thread.id;
+  const followUp = isOld(thread);
   const refuse = async (reason: string, body: InboundNote) => {
-    await note(body, threadId);
+    await note(body, thread);
     await finishInboundEmail(
       tx,
       input.inboundId,
@@ -523,17 +591,10 @@ async function land(
     );
     return { outcome: 'refused' as const, kept: 0 };
   };
-
-  const followUp =
-    thread.status === 'solved' &&
-    thread.solvedAt !== null &&
-    thread.solvedAt.getTime() < now.getTime() - REOPEN_DAYS * DAY_MS;
-  await lockSupportWriter(tx, userId);
-  const counts = await countSupportWrites(tx, userId, new Date(now.getTime() - DAY_MS));
-  if (
-    counts.messages >= SUPPORT_MESSAGES_PER_DAY ||
-    (followUp && counts.threads >= SUPPORT_THREADS_PER_DAY)
-  ) {
+  try {
+    await checkLimits(tx, userId, now, followUp ? 'thread' : 'message');
+  } catch (error) {
+    if (!(error instanceof SupportLimitReachedError)) throw error;
     return refuse('limit', { reference: thread.reference, overLimit: true });
   }
   // The day's screenshots again, under the writer's lock: a reply sent at the same moment counts.
@@ -579,6 +640,7 @@ async function land(
         body,
         now,
         channel: 'email',
+        followUpOf: thread.id,
       });
       if (row !== null) created = { ...row, reference };
     }
@@ -656,7 +718,7 @@ async function land(
         skipped,
         ...(followUp && { followUp: target.reference }),
       },
-      target.threadId,
+      { id: target.threadId, reference: target.reference },
     );
   }
   await finishInboundEmail(

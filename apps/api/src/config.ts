@@ -51,6 +51,8 @@ const SupportEnvSchema = z.object({
   RESEND_WEBHOOK_SECRET: z
     .string()
     .regex(/^whsec_[A-Za-z0-9+/]{20,}={0,2}$/, 'Use the whsec_… secret Resend shows')
+    // The key itself: at least 16 bytes, as the webhook checks it (`svixKeyOf`).
+    .refine((value) => Buffer.from(value.slice(6), 'base64').length >= 16, 'Too short a key')
     .optional(),
 });
 

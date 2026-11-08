@@ -34,10 +34,10 @@ export const OutboxDedupeKeySchema = z
   .regex(/^[A-Za-z0-9.:_-]{1,200}$/, 'Use letters, digits and .:_- only');
 export type OutboxDedupeKey = z.infer<typeof OutboxDedupeKeySchema>;
 
-/** One plain-text email, as queued. Its content is stored encrypted and cleared once sent. */
 /** One message id as a header carries it: `<local@domain>`, no spaces or line breaks. */
-export const MessageIdHeaderSchema = z.string().regex(/^<[^<>\s@]{1,200}@[^<>\s@]{1,100}>$/);
+export const MessageIdHeaderSchema = z.string().regex(/^<[^<>\s@]{1,200}@[^<>\s@]{1,255}>$/);
 
+/** One plain-text email, as queued. Its content is stored encrypted and cleared once sent. */
 export const OutboxEmailSchema = z.object({
   to: z.email().max(254),
   // One line: a line break in a name must not start another header.

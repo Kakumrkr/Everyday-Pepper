@@ -91,6 +91,8 @@ export async function insertSupportThread(
     now: Date;
     /** `email`: a follow-up opened by an emailed reply (S59.3); default `app`. */
     channel?: 'app' | 'email';
+    /** The solved request this one follows up (S59.3). */
+    followUpOf?: string;
   },
 ): Promise<{ id: string; messageId: string } | null> {
   const openedByUserId = UserIdSchema.parse(input.openedByUserId);
@@ -102,6 +104,7 @@ export async function insertSupportThread(
       status: 'waiting_on_pepper',
       openedByUserId,
       context: input.context,
+      followUpOf: input.followUpOf === undefined ? null : Id.parse(input.followUpOf),
       lastMessageAt: input.now,
       createdAt: input.now,
       updatedAt: input.now,
@@ -203,6 +206,20 @@ export async function findSupportThread(
     .where(eq(supportThreads.id, Id.parse(id)))
     .limit(1);
   return row === undefined ? undefined : toThreadRecord(row);
+}
+
+/** The newest follow-up of thread `id` the transaction's member reaches (S59.3), if any. */
+export async function findSupportFollowUp(
+  tx: TenantTx,
+  id: string,
+): Promise<{ id: string } | undefined> {
+  const [row] = await tx
+    .select({ id: supportThreads.id })
+    .from(supportThreads)
+    .where(eq(supportThreads.followUpOf, Id.parse(id)))
+    .orderBy(desc(supportThreads.createdAt), desc(supportThreads.id))
+    .limit(1);
+  return row;
 }
 
 /** Locks a thread for a reply or a status change; `undefined` if it isn't reachable. */

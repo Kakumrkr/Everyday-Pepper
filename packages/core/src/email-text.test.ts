@@ -77,6 +77,14 @@ describe('the words of an emailed reply (AC-X-34)', () => {
     expect(htmlToText('<p>a</p><style>x')).toBe('a');
   });
 
+  it('looks for the quote in the body only, not in the head’s styles', () => {
+    expect(
+      htmlToText(
+        '<html><head><style>div.gmail_quote{color:gray} .yahoo_quoted{}</style></head><body><p>Still empty on Tuesdays</p><div class="gmail_quote">On … wrote:</div></body></html>',
+      ),
+    ).toBe('Still empty on Tuesdays');
+  });
+
   it('uses the HTML only when the text part is missing or blank', () => {
     expect(replyTextOf({ text: '  ', html: '<p>From HTML</p>' }, MARK)).toBe('From HTML');
     expect(replyTextOf({ text: null, html: null }, MARK)).toBe('');

@@ -29,11 +29,13 @@ CREATE TABLE "inbound_emails" (
 --> statement-breakpoint
 ALTER TABLE "inbound_emails" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
 ALTER TABLE "support_messages" ADD COLUMN "channel" text DEFAULT 'app' NOT NULL;--> statement-breakpoint
+ALTER TABLE "support_threads" ADD COLUMN "follow_up_of" uuid;--> statement-breakpoint
 ALTER TABLE "inbound_emails" ADD CONSTRAINT "inbound_emails_tenant_id_tenants_id_fk" FOREIGN KEY ("tenant_id") REFERENCES "public"."tenants"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "inbound_emails" ADD CONSTRAINT "inbound_emails_thread_fk" FOREIGN KEY ("tenant_id","thread_id") REFERENCES "public"."support_threads"("tenant_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "inbound_emails_message_id_unique" ON "inbound_emails" USING btree ("message_id") WHERE "inbound_emails"."message_id" IS NOT NULL;--> statement-breakpoint
 CREATE INDEX "inbound_emails_due_idx" ON "inbound_emails" USING btree ("status","received_at");--> statement-breakpoint
 CREATE INDEX "inbound_emails_thread_idx" ON "inbound_emails" USING btree ("tenant_id","thread_id","processed_at");--> statement-breakpoint
+CREATE INDEX "support_threads_follow_up_idx" ON "support_threads" USING btree ("tenant_id","follow_up_of");--> statement-breakpoint
 ALTER TABLE "support_messages" ADD CONSTRAINT "support_messages_channel" CHECK ("support_messages"."channel" = 'app' OR ("support_messages"."channel" = 'email' AND "support_messages"."author_kind" = 'member'));--> statement-breakpoint
 CREATE POLICY "inbound_mail" ON "inbound_emails" AS PERMISSIVE FOR ALL TO public USING (COALESCE(current_setting('app.inbound_mail', true) = 'on', false)) WITH CHECK (COALESCE(current_setting('app.inbound_mail', true) = 'on', false));--> statement-breakpoint
 -- Replies by email (S59.3, ADR-0063), beyond what drizzle-kit expresses. Inbound rows are
