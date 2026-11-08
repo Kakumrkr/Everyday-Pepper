@@ -20,6 +20,7 @@ export const OPS_PATHS = {
   inbox: '/ops',
   replies: '/ops/replies',
   held: '/ops/held',
+  metrics: (days: 7 | 30 = 7) => (days === 7 ? '/ops/metrics' : '/ops/metrics?days=30'),
   view: (view: OperatorInboxView) => (view === 'waiting' ? '/ops' : `/ops?view=${view}`),
   thread: (id: string) => `/ops/threads/${id}`,
   request: (id: string) => `/ops/requests/${id}`,

@@ -32,6 +32,7 @@ import {
   isOperator,
   listHeldEmails,
   readInboundCounts,
+  readPilotMetrics,
   resumePublicMail,
   resumeThreadMail,
   noteOnPublicRequest,
@@ -596,5 +597,27 @@ describe('held mail, stopped mail and counts in the console (AC-X-43…46)', () 
     );
     expect(counts.last30Days.problems).toEqual({ hardBounces: 1, softBounces: 0, complaints: 1 });
     expect(await accessLog()).toContainEqual({ action: 'inbound.counts', target: null });
+  });
+});
+
+describe('the pilot metrics page (S59.4, AC-X-47…49)', () => {
+  it('reads every business together behind one access log row; others are refused', async () => {
+    const before = (await accessLog()).filter((row) => row.action === 'metrics.read').length;
+    // Each case starts the clock at 09:00 again: the page is read a day after this suite's mail.
+    minutes(24 * 60);
+    const metrics = await readPilotMetrics(db, operator, { days: 30, clock });
+    expect(metrics.days).toBe(30);
+    expect(metrics.businesses).toBeGreaterThanOrEqual(2);
+    expect(metrics.metrics.map((metric) => metric.key)).toContain('first_reply_time');
+    // This suite's requests: some opened and answered in the app, the inbound ones by email.
+    expect(metrics.firstReply.requests).toBeGreaterThan(0);
+    expect(metrics.channels.requestsInApp).toBeGreaterThan(0);
+    expect(metrics.channels.inboundIgnored).toBeGreaterThan(0);
+    const after = (await accessLog()).filter((row) => row.action === 'metrics.read');
+    expect(after).toHaveLength(before + 1);
+    expect(after.at(-1)).toEqual({ action: 'metrics.read', target: null });
+    await expect(readPilotMetrics(db, notOperator, { days: 7, clock })).rejects.toBeInstanceOf(
+      OperatorAccessRefusedError,
+    );
   });
 });

@@ -2,6 +2,8 @@ import {
   OperatorHeldDecisionSchema,
   OperatorHeldListSchema,
   OperatorInboundCountsSchema,
+  PilotMetricsQuerySchema,
+  PilotMetricsSchema,
   OperatorInboxQuerySchema,
   OperatorInboxSchema,
   OperatorMeSchema,
@@ -18,6 +20,7 @@ import {
   type OperatorHeldList,
   type OperatorInboundCounts,
   type OperatorInbox,
+  type PilotMetrics,
   type OperatorMe,
   type OperatorPublicRequest,
   type OperatorThread,
@@ -32,6 +35,7 @@ import {
   listHeldEmails,
   listSavedReplies,
   readInboundCounts,
+  readPilotMetrics,
   resumePublicMail,
   resumeThreadMail,
   noteOnPublicRequest,
@@ -365,6 +369,27 @@ export class OpsController {
     const { id } = parseBody(IdParamsSchema, params);
     return OperatorPublicRequestSchema.parse(
       await answering(() => resumePublicMail(this.db, operatorOf(session), id, this.options)),
+    );
+  }
+
+  /**
+   * The pilot metrics page (S59.4, AC-X-47…49), `?days=7|30`: every business together, counts
+   * and medians only; each read writes a `metrics.read` row in the operator access log.
+   */
+  @Get('metrics')
+  async metrics(
+    @CurrentSession() session: AuthSession,
+    @Query() query: unknown,
+  ): Promise<PilotMetrics> {
+    const { days } = parseBody(PilotMetricsQuerySchema, query);
+    const clock = this.options.clock;
+    return PilotMetricsSchema.parse(
+      await answering(() =>
+        readPilotMetrics(this.db, operatorOf(session), {
+          days,
+          ...(clock === undefined ? {} : { clock }),
+        }),
+      ),
     );
   }
 

@@ -3,6 +3,7 @@
 import {
   EveningWrapSchema,
   OperatorHeldListSchema,
+  PilotMetricsSchema,
   SupportMailStopSchema,
   WeekValueSchema,
 } from '@pepper/contracts';
@@ -47,6 +48,7 @@ import {
 import { useState, type ReactNode } from 'react';
 import { SupportMessageMeta } from '../../_components/support/message-meta';
 import { OpsHeldList } from '../../_components/ops/ops-held';
+import { OpsMetrics } from '../../_components/ops/ops-metrics';
 import { OpsMailStopped } from '../../_components/ops/ops-mail-stopped';
 import {
   BARBERS,
@@ -468,6 +470,53 @@ export function Gallery() {
               })}
               busy={false}
               onResume={() => undefined}
+            />
+          </Section>
+
+          <Section id="ops-metrics" title="Support: pilot metrics">
+            {/* S59.4 (AC-X-47…49): each judgement once, first reply with email's share. */}
+            <OpsMetrics
+              metrics={PilotMetricsSchema.parse({
+                days: 7,
+                since: '2026-11-01T12:00:00.000Z',
+                until: '2026-11-08T12:00:00.000Z',
+                businesses: 4,
+                bookableBusinesses: 3,
+                metrics: [
+                  { key: 'onboarding_completion', value: 80, sample: 10, status: 'met' },
+                  { key: 'time_to_bookable', value: 9, sample: 8, status: 'met' },
+                  { key: 'time_to_first_booking', value: 22, sample: 5, status: 'missed' },
+                  { key: 'booking_completion', value: 65, sample: 20, status: 'met' },
+                  { key: 'code_step_drop_off', value: 20, sample: 15, status: 'missed' },
+                  { key: 'no_show_rate', value: 5, sample: 40, status: 'tracked' },
+                  { key: 'fill_rate', value: 33.3, sample: 6, status: 'tracked' },
+                  { key: 'waitlist_conversion', value: 50, sample: 4, status: 'not_enough' },
+                  { key: 'support_requests', value: 0.7, sample: 3, status: 'met' },
+                  { key: 'first_reply_time', value: 95.6, sample: 5, status: 'met' },
+                ],
+                firstReply: {
+                  requests: 6,
+                  answered: 5,
+                  answeredWithinDay: 5,
+                  waiting: 1,
+                  waitingOverDay: 0,
+                  medianMinutes: 95.6,
+                  slowestMinutes: 600,
+                  publicAnswered: 1,
+                  publicOpen: 1,
+                },
+                channels: {
+                  requestsInApp: 4,
+                  requestsByEmail: 2,
+                  publicByForm: 1,
+                  publicByEmail: 1,
+                  repliesInApp: 3,
+                  repliesByEmail: 1,
+                  inboundHeld: 1,
+                  inboundIgnored: 2,
+                  inboundRefused: 0,
+                },
+              })}
             />
           </Section>
 

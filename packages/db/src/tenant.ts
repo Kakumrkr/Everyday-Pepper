@@ -177,6 +177,7 @@ const OperatorActionSchema = z.enum([
   'held.discard',
   'mail.resume',
   'inbound.counts',
+  'metrics.read',
 ]);
 export type OperatorAction = z.infer<typeof OperatorActionSchema>;
 

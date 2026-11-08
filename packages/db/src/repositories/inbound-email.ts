@@ -1,4 +1,4 @@
-import { and, asc, eq, gt, inArray, isNotNull, lt, or, sql, isNull } from 'drizzle-orm';
+import { and, asc, eq, gt, gte, inArray, isNotNull, lt, lte, or, sql, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { inboundEmails } from '../schema.js';
@@ -452,10 +452,14 @@ export async function discardHeldInboundEmail(
   return rows.length === 1;
 }
 
-/** Inbound emails received since `since`, by status and reason (AC-X-45). */
+/**
+ * Inbound emails received since `since` (and up to `until`, the metrics page's period, S59.4),
+ * by status and reason (AC-X-45).
+ */
 export async function countInboundByOutcome(
   tx: TenantTx,
   since: Date,
+  until?: Date,
 ): Promise<{ status: InboundStatus; reason: string | null; count: number }[]> {
   const rows = await tx
     .select({
@@ -464,7 +468,11 @@ export async function countInboundByOutcome(
       count: sql<number>`count(*)::int`,
     })
     .from(inboundEmails)
-    .where(gt(inboundEmails.receivedAt, since))
+    .where(
+      until === undefined
+        ? gt(inboundEmails.receivedAt, since)
+        : and(gte(inboundEmails.receivedAt, since), lte(inboundEmails.receivedAt, until)),
+    )
     .groupBy(inboundEmails.status, inboundEmails.reason)
     .orderBy(asc(inboundEmails.status), asc(inboundEmails.reason));
   return rows.map((row) => ({

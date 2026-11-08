@@ -56,6 +56,15 @@ export default async function OpsLayout({ children }: { children: ReactNode }) {
         </Link>
         <nav aria-label="Console" className="flex min-w-0 items-center gap-3">
           <Link
+            href={OPS_PATHS.metrics()}
+            className={cx(
+              'inline-flex min-h-11 items-center type-label whitespace-nowrap text-brand underline-offset-4 hover:underline',
+              FOCUS_RING,
+            )}
+          >
+            Metrics
+          </Link>
+          <Link
             href={OPS_PATHS.replies}
             className={cx(
               'inline-flex min-h-11 items-center type-label whitespace-nowrap text-brand underline-offset-4 hover:underline',

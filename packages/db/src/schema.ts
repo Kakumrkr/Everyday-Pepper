@@ -3214,7 +3214,7 @@ export const operatorAccessLog = pgTable(
     index('operator_access_log_created_idx').on(table.createdAt),
     check(
       'operator_access_log_action_known',
-      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write', 'screenshot.read', 'held.read', 'held.accept', 'held.discard', 'mail.resume', 'inbound.counts')`,
+      sql`${table.action} IN ('inbox.read', 'thread.read', 'thread.reply', 'thread.note', 'thread.status', 'public.read', 'public.note', 'public.status', 'replies.read', 'replies.write', 'screenshot.read', 'held.read', 'held.accept', 'held.discard', 'mail.resume', 'inbound.counts', 'metrics.read')`,
     ),
   ],
 );

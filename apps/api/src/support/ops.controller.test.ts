@@ -43,6 +43,7 @@ const core = vi.hoisted(() => ({
   resumeThreadMail: vi.fn(),
   resumePublicMail: vi.fn(),
   readInboundCounts: vi.fn(),
+  readPilotMetrics: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({ ...(await original<typeof Core>()), ...core }));
 
@@ -126,6 +127,36 @@ class FakeAuth extends AuthService {
 }
 
 const auth = new FakeAuth();
+const METRICS = {
+  days: 7,
+  since: '2026-11-02T09:00:00.000Z',
+  until: AT,
+  businesses: 3,
+  bookableBusinesses: 2,
+  metrics: [{ key: 'first_reply_time', value: 95, sample: 5, status: 'met' }],
+  firstReply: {
+    requests: 6,
+    answered: 5,
+    answeredWithinDay: 5,
+    waiting: 1,
+    waitingOverDay: 0,
+    medianMinutes: 95,
+    slowestMinutes: 600,
+    publicAnswered: 1,
+    publicOpen: 0,
+  },
+  channels: {
+    requestsInApp: 4,
+    requestsByEmail: 2,
+    publicByForm: 1,
+    publicByEmail: 0,
+    repliesInApp: 3,
+    repliesByEmail: 1,
+    inboundHeld: 0,
+    inboundIgnored: 1,
+    inboundRefused: 0,
+  },
+};
 const OPTIONS = {
   outboxKey: Buffer.alloc(32, 1),
   supportEmail: 'support@pepper.test',
@@ -180,6 +211,7 @@ beforeEach(() => {
   core.resumeThreadMail.mockResolvedValue(THREAD);
   core.resumePublicMail.mockResolvedValue(PUBLIC);
   core.readInboundCounts.mockResolvedValue({ last7Days: PERIOD, last30Days: PERIOD });
+  core.readPilotMetrics.mockResolvedValue(METRICS);
   core.readOperatorThread.mockResolvedValue(THREAD);
   core.replyAsOperator.mockResolvedValue({ ...THREAD, status: 'pepper_replied' });
   core.noteOnThread.mockResolvedValue(THREAD);
@@ -404,6 +436,29 @@ describe('held mail, stopped mail and counts (S59.3.2, AC-X-43…46)', () => {
       last7Days: PERIOD,
       last30Days: PERIOD,
     });
+  });
+
+  it('reads the pilot metrics over 7 days by default, or 30; nothing else (S59.4)', async () => {
+    const week = await get('/v1/ops/metrics');
+    expect(week.status).toBe(200);
+    expect(week.body).toEqual(METRICS);
+    expect(core.readPilotMetrics).toHaveBeenCalledWith({}, operator, { days: 7 });
+    expect((await get('/v1/ops/metrics?days=30')).status).toBe(200);
+    expect(core.readPilotMetrics).toHaveBeenLastCalledWith({}, operator, { days: 30 });
+    const odd = await get('/v1/ops/metrics?days=14');
+    expect(odd.status).toBe(400);
+    expect((await get(`/v1/ops/metrics?days=7&tenantId=${TENANT}`)).status).toBe(400);
+    expect(core.readPilotMetrics).toHaveBeenCalledTimes(2);
+  });
+
+  it('refuses the pilot metrics to anyone but an operator with two-step verification', async () => {
+    core.isOperator.mockResolvedValue(false);
+    expect((await get('/v1/ops/metrics')).status).toBe(403);
+    core.isOperator.mockResolvedValue(true);
+    auth.session.user.twoFactorEnabled = false;
+    const response = await get('/v1/ops/metrics');
+    expect(ApiErrorSchema.parse(response.body).code).toBe('mfa_required');
+    expect(core.readPilotMetrics).not.toHaveBeenCalled();
   });
 
   it('are refused to anyone but an operator, and a write needs the app’s origin', async () => {

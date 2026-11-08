@@ -26,6 +26,7 @@ export * from './repositories/invites.js';
 export * from './repositories/memberships.js';
 export * from './repositories/memory.js';
 export * from './repositories/outbox.js';
+export * from './repositories/pilot-metrics.js';
 export * from './repositories/push-subscriptions.js';
 export * from './repositories/reminders.js';
 export * from './repositories/support.js';
