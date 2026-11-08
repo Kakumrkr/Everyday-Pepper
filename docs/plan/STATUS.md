@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.3 Email both ways** (brief approved 2026-11-08: "Go a head with ur recommendation", after a revision to aim higher; ADR-0063, AC-X-32…39). Split: S59.3.2 takes new requests by email, bounces/complaints, the held-mail review and inbound counts.
+- [x] 1 ACs, traceability, ADR-0063
+- [ ] 2 reply-address token (core) · 3 outgoing headers + signed Reply-To · 4 migration 0071 (`inbound_emails`, `support_messages.channel`, `support_inbound_thread`) · 5 webhook (Svix) · 6 `receiveSupportEmail` (fixtures) · 7 images → screenshots · 8 worker job · 9 "by email" in both threads
+- Next: task 2.
 
 ## Last sessions
 - **S59.2.3 Phase 13 · Screenshots on a request (2026-11-07)** ([ADR-0062](../adr/0062-operator-console.md) "Part 3", [PR #88](https://github.com/kakumaniramakrishnarao/Everyday-Pepper/pull/88)). Full entry in [session-log.md](session-log.md).
@@ -96,6 +99,7 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, M1–M2 and P1 are done (Phases 0–12:
 | # | Session target | Phase | Done when |
 |---|---|---|---|
 | S59.3 | Email both ways: Resend inbound, signed reply addresses, threading (live in S57) | 13 | Fixture replies land in their thread |
+| S59.3.2 | New requests by email, bounces and complaints, held-mail review in the console, inbound counts (split at the S59.3 brief) | 13 | Each case has its fixture test |
 | S59.4 | Pilot metrics page, first-reply time | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
