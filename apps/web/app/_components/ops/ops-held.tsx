@@ -4,7 +4,7 @@ import { OperatorHeldListSchema, type OperatorHeldList } from '@pepper/contracts
 import { Badge, Button, EmptyState } from '@pepper/ui';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
-import { OPS_HELD_REASON, OPS_PATHS, waitedFor } from '../../../lib/ops';
+import { OPS_HELD_REASON, OPS_PATHS, waitingWords } from '../../../lib/ops';
 import { kitLink } from '../kit-link';
 import { Notice } from '../form-parts';
 
@@ -68,7 +68,10 @@ export function OpsHeldList({ initial }: { initial: OperatorHeldList }) {
                 <p className="m-0 type-label break-all text-ink">{item.from}</p>
                 <p className="m-0 flex flex-wrap items-center gap-x-2 gap-y-1 type-caption text-ink-2">
                   <Badge tone="warn">{OPS_HELD_REASON[item.reason]}</Badge>
-                  <span className="tabular-nums">{waitedFor(item.heldSince, now)} ago</span>
+                  <span className="tabular-nums">
+                    {/* "3 h ago", or "Just in". */}
+                    {waitingWords('answered', item.heldSince, now)}
+                  </span>
                   <span>
                     ·{' '}
                     {item.kind === 'reply'
