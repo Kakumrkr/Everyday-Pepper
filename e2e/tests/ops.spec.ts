@@ -214,11 +214,21 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
     'fill_rate',
     'waitlist_conversion',
     'support_requests',
+    // S59.4.2 (AC-X-50…52): engagement, the AI's proposals and the rebook rate.
+    'weekly_active_owners',
+    'cards_vs_chat',
+    'ai_approval_rate',
+    'ai_correction_rate',
+    'undo_rate',
+    'rebook_rate',
   ]) {
     await expect(ops.getByTestId(`metric-${key}`), key).toHaveText(
       /^(–|[\d.]+(%| min| h.*| d.*| s| a week))$/,
     );
   }
+  await expect(ops.getByTestId('metric-ai_cost')).toHaveText(/^(–|\$[\d,.]+ a month)$/);
+  await expect(ops.getByRole('region', { name: 'Owners using Pepper' })).toBeVisible();
+  await expect(ops.getByRole('region', { name: 'The AI’s proposals' })).toBeVisible();
   await expect(ops.getByTestId('metric-onboarding_completion')).toHaveText(/%$/);
   await expect(ops.getByTestId('metric-support_requests')).toHaveText(/a week$/);
   const firstReply = ops.getByRole('region', { name: 'First reply' });
