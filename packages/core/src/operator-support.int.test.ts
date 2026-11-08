@@ -2,10 +2,16 @@ import { TenantIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import {
   addMembership,
   createDatabase,
+  finishInboundEmail,
   grantOperator,
+  inboundEmails,
+  insertEmailSuppression,
+  insertInboundEmail,
   listAuditEntries,
   listDueOutboxMessages,
   operatorAccessLog,
+  supportNotes,
+  withInboundMail,
   withTenant,
   type Database,
   type DatabaseHandle,
@@ -13,12 +19,21 @@ import {
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
-import { OperatorAccessRefusedError, SupportThreadNotFoundError } from './errors.js';
+import {
+  HeldEmailNotFoundError,
+  OperatorAccessRefusedError,
+  SupportThreadNotFoundError,
+} from './errors.js';
 import { outboxKeyFrom, type EmailMessage, type Mailer } from './outbox.js';
 import { createBusiness } from './services/business.js';
 import { deliverOutboxMessage } from './services/outbox.js';
 import {
+  decideHeldEmail,
   isOperator,
+  listHeldEmails,
+  readInboundCounts,
+  resumePublicMail,
+  resumeThreadMail,
   noteOnPublicRequest,
   noteOnThread,
   readOperatorInbox,
@@ -375,5 +390,211 @@ describe('a public request (AC-X-21)', () => {
       'public.status',
       'public.status',
     ]);
+  });
+});
+
+describe('held mail, stopped mail and counts in the console (AC-X-43…46)', () => {
+  let counter = 0;
+
+  /** A held email as the inbound job leaves one. */
+  async function held(input: {
+    reason: 'unknown_sender' | 'unverified_sender';
+    tenantId: string | null;
+    threadId: string | null;
+    from: string;
+    text: string;
+    subject?: string;
+  }): Promise<string> {
+    counter += 1;
+    const row = await withInboundMail(db, (tx) =>
+      insertInboundEmail(tx, {
+        provider: 'resend',
+        eventId: `held_${String(counter)}`,
+        providerEmailId: `held_email_${String(counter)}`,
+        messageId: null,
+        receivedAt: clock.now(),
+      }),
+    );
+    const id = row?.id ?? '';
+    await withInboundMail(db, (tx) =>
+      finishInboundEmail(
+        tx,
+        id,
+        {
+          status: 'held',
+          reason: input.reason,
+          tenantId: input.tenantId,
+          threadId: input.threadId,
+          fromAddress: input.from,
+          heldText: input.text,
+          heldSubject: input.subject ?? null,
+        },
+        clock.now(),
+      ),
+    );
+    minutes(1);
+    return id;
+  }
+
+  async function stop(address: string, kind: 'hard_bounce' | 'complaint') {
+    counter += 1;
+    await withInboundMail(db, (tx) =>
+      insertEmailSuppression(tx, {
+        provider: 'resend',
+        eventId: `stop_${String(counter)}`,
+        address,
+        kind,
+        occurredAt: clock.now(),
+      }),
+    );
+  }
+
+  it('lists held mail with the inbox’s count, accepts and discards each, all in the access log', async () => {
+    const opened = await openSupportThread(
+      db,
+      actor(jess, 'staff', juniper),
+      { kind: 'problem', message: 'Bookings vanished' },
+      meta,
+      options,
+    );
+    const thread = opened.id ?? '';
+    const before = (await readOperatorInbox(db, operator, {})).held;
+    const forward = await held({
+      reason: 'unknown_sender',
+      tenantId: juniper,
+      threadId: thread,
+      from: 'assistant@else.test',
+      text: 'Forwarding for Jess: <script>x</script>',
+    });
+    const stranger = await held({
+      reason: 'unverified_sender',
+      tenantId: null,
+      threadId: null,
+      from: 'someone@else.test',
+      text: 'Help',
+      subject: 'Locked out',
+    });
+    const member = await held({
+      reason: 'unverified_sender',
+      tenantId: fig,
+      threadId: null,
+      from: 'olga@fig-ops.test',
+      text: 'Is it down?',
+    });
+    expect((await readOperatorInbox(db, operator, {})).held).toBe(before + 3);
+    const list = await listHeldEmails(db, operator);
+    const byId = new Map(list.items.map((item) => [item.id, item]));
+    expect(byId.get(forward)).toMatchObject({
+      kind: 'reply',
+      reason: 'unknown_sender',
+      business: 'Juniper',
+      reference: opened.reference,
+      text: 'Forwarding for Jess: <script>x</script>',
+    });
+    expect(byId.get(stranger)).toMatchObject({
+      kind: 'new_request',
+      business: null,
+      reference: null,
+      subject: 'Locked out',
+    });
+    expect(byId.get(member)).toMatchObject({ kind: 'new_request', business: 'Fig Nails' });
+    const ids = list.items.map((item) => item.id);
+    expect(ids.indexOf(forward)).toBeLessThan(ids.indexOf(stranger));
+
+    // Someone outside the business: the team's note on its request, never a member's message.
+    await decideHeldEmail(db, operator, forward, { decision: 'accept' }, { clock });
+    const notes = (await admin.db.select().from(supportNotes)).filter((n) => n.threadId === thread);
+    expect(notes).toHaveLength(1);
+    expect(notes[0]?.body).toBe(
+      'Email from assistant@else.test, accepted from held mail:\n\nForwarding for Jess: <script>x</script>',
+    );
+    expect(
+      (await readSupportThread(db, actor(jess, 'staff', juniper), thread)).messages,
+    ).toHaveLength(1);
+    // Anything else goes back to the inbound job with the operator's word.
+    await decideHeldEmail(db, operator, member, { decision: 'accept' }, { clock });
+    const rows = await admin.db.select().from(inboundEmails);
+    expect(rows.find((r) => r.id === forward)).toMatchObject({
+      status: 'landed',
+      reason: 'accepted_note',
+      fromAddress: null,
+    });
+    expect(rows.find((r) => r.id === member)).toMatchObject({
+      status: 'received',
+      acceptedBy: operator.userId,
+    });
+    const after = await decideHeldEmail(db, operator, stranger, { decision: 'discard' }, { clock });
+    expect(after.items.map((item) => item.id)).not.toContain(stranger);
+    expect(
+      (await admin.db.select().from(inboundEmails)).find((r) => r.id === stranger),
+    ).toMatchObject({
+      status: 'ignored',
+      reason: 'discarded',
+      heldText: null,
+    });
+    // Reviewed once: a second look is "not found", and so is a made-up id.
+    await expect(
+      decideHeldEmail(db, operator, stranger, { decision: 'accept' }, { clock }),
+    ).rejects.toBeInstanceOf(HeldEmailNotFoundError);
+    await expect(
+      decideHeldEmail(db, operator, 'not-an-id', { decision: 'discard' }, { clock }),
+    ).rejects.toBeInstanceOf(HeldEmailNotFoundError);
+    await expect(listHeldEmails(db, notOperator)).rejects.toBeInstanceOf(
+      OperatorAccessRefusedError,
+    );
+    const log = (await accessLog()).filter((row) => row.action.startsWith('held.'));
+    expect(log).toEqual(
+      expect.arrayContaining([
+        { action: 'held.accept', target: forward },
+        { action: 'held.accept', target: member },
+        { action: 'held.discard', target: stranger },
+        { action: 'held.read', target: null },
+      ]),
+    );
+  });
+
+  it('says when mail to a requester is stopped, and resumes it in a logged transaction', async () => {
+    const opened = await openSupportThread(
+      db,
+      actor(jess, 'staff', juniper),
+      { kind: 'question', message: 'Can I export?' },
+      meta,
+      options,
+    );
+    const thread = opened.id ?? '';
+    expect((await readOperatorThread(db, operator, thread)).mailStopped).toBeNull();
+    await stop('jess@juniper-ops.test', 'hard_bounce');
+    expect((await readOperatorThread(db, operator, thread)).mailStopped).toMatchObject({
+      reason: 'bounced',
+    });
+    const resumed = await resumeThreadMail(db, operator, thread, { clock });
+    expect(resumed.mailStopped).toBeNull();
+    expect(await accessLog()).toContainEqual({ action: 'mail.resume', target: thread });
+
+    const submitted = await submitPublicSupportRequest(
+      db,
+      null,
+      { email: 'Spammy@Example.test', message: 'I can’t sign in' },
+      { ...options, userAgent: null },
+    );
+    const inbox = await readOperatorInbox(db, operator, {});
+    const row = inbox.items.find((item) => item.reference === submitted.reference);
+    expect(row).toMatchObject({ source: 'public', channel: 'form' });
+    await stop('spammy@example.test', 'complaint');
+    const request = await readPublicRequest(db, operator, row?.id ?? '');
+    expect(request).toMatchObject({ channel: 'form', mailStopped: { reason: 'complaint' } });
+    expect((await resumePublicMail(db, operator, row?.id ?? '', { clock })).mailStopped).toBeNull();
+  });
+
+  it('counts inbound mail and delivery problems over 7 and 30 days', async () => {
+    const counts = await readInboundCounts(db, operator, { clock });
+    expect(counts.last7Days.outcomes).toEqual(
+      expect.arrayContaining([
+        { status: 'ignored', reason: 'discarded', count: 1 },
+        { status: 'landed', reason: 'accepted_note', count: 1 },
+      ]),
+    );
+    expect(counts.last30Days.problems).toEqual({ hardBounces: 1, softBounces: 0, complaints: 1 });
+    expect(await accessLog()).toContainEqual({ action: 'inbound.counts', target: null });
   });
 });

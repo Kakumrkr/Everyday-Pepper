@@ -413,6 +413,14 @@ export class SupportNotRatableError extends Error {
   }
 }
 
+/** The email isn't held any more: reviewed already, or emptied after 7 days (S59.3.2, AC-X-44). */
+export class HeldEmailNotFoundError extends Error {
+  constructor() {
+    super('No such held email');
+    this.name = 'HeldEmailNotFoundError';
+  }
+}
+
 /** No such saved reply (S59.2.2, AC-X-23). */
 export class SavedReplyNotFoundError extends Error {
   constructor() {

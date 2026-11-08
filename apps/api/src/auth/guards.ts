@@ -63,6 +63,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   support_not_ratable: 'Only the person who asked can rate a request, once it’s solved',
   saved_reply_not_found: 'No such saved reply',
   saved_replies_full: 'That’s 100 saved replies: delete one you don’t use first',
+  held_email_not_found: 'That email is no longer held: someone reviewed it, or it was emptied after 7 days',
   screenshot_not_found: 'No such screenshot',
   screenshot_rejected: 'That file is not a screenshot we can use: use a JPEG, PNG or WebP',
   screenshot_too_large: 'That screenshot is over 10 MB',

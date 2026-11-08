@@ -433,9 +433,11 @@ export type OperatorPublicChange = z.input<typeof OperatorPublicChangeSchema>;
 export const HeldReasonSchema = z.enum(['unknown_sender', 'unverified_sender']);
 export type HeldReason = z.infer<typeof HeldReasonSchema>;
 
+export const HeldEmailIdSchema = z.uuid().toLowerCase();
+
 /** A held email in the console's "Held" view. Its text is shown as plain text, never rendered. */
 export const OperatorHeldItemSchema = z.object({
-  id: z.uuid(),
+  id: HeldEmailIdSchema,
   reason: HeldReasonSchema,
   /** A reply to a business's request, or a new request (a member's or a stranger's). */
   kind: z.enum(['reply', 'new_request']),
