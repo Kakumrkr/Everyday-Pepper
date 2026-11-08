@@ -108,14 +108,14 @@ describe('the pilot metrics page’s words (S59.4)', () => {
 
 describe('the pilot metrics page’s words, part 2 (S59.4.2)', () => {
   it('says the AI cost in dollars a month, and the part 2 targets as the scorecard does', () => {
-    expect(metricValueWords({ key: 'ai_cost', value: 174 })).toBe('$1.74 a month');
-    expect(metricValueWords({ key: 'ai_cost', value: 300 })).toBe('$3 a month');
+    expect(metricValueWords({ key: 'ai_cost', value: 174 })).toBe('$1.74');
+    expect(metricValueWords({ key: 'ai_cost', value: 300 })).toBe('$3');
     expect(targetWords('weekly_active_owners')).toBe('Target: at least 60%');
     expect(targetWords('cards_vs_chat')).toBe('Target: at least 70%');
     expect(targetWords('ai_approval_rate')).toBe('Target: 70–90%');
     expect(targetWords('ai_correction_rate')).toBe('Target: at most 10%');
     expect(targetWords('undo_rate')).toBe('Target: below 1%');
-    expect(targetWords('ai_cost')).toBe('Target: at most $3 a month, priced high');
+    expect(targetWords('ai_cost')).toBe('Target: at most $3, priced high');
     expect(targetWords('rebook_rate')).toBe('Target: 10 points above each owner’s own rate');
     expect(sampleWords('weekly_active_owners', 1)).toBe('from 1 owner-week');
     expect(sampleWords('rebook_rate', 8)).toBe('from 8 clients due');

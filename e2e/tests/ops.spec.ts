@@ -226,7 +226,7 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
       /^(–|[\d.]+(%| min| h.*| d.*| s| a week))$/,
     );
   }
-  await expect(ops.getByTestId('metric-ai_cost')).toHaveText(/^(–|\$[\d,.]+ a month)$/);
+  await expect(ops.getByTestId('metric-ai_cost')).toHaveText(/^(–|\$[\d,.]+)$/);
   await expect(ops.getByRole('region', { name: 'Owners using Pepper' })).toBeVisible();
   await expect(ops.getByRole('region', { name: 'The AI’s proposals' })).toBeVisible();
   await expect(ops.getByTestId('metric-onboarding_completion')).toHaveText(/%$/);

@@ -38,7 +38,7 @@ export const PILOT_METRIC_LABEL: Readonly<Record<PilotMetricKey, string>> = {
   ai_approval_rate: 'Proposals approved',
   ai_correction_rate: 'Proposals corrected',
   undo_rate: 'AI actions undone as wrong',
-  ai_cost: 'AI cost a business',
+  ai_cost: 'AI cost a business a month',
   rebook_rate: 'Clients rebooked in time',
 };
 
@@ -109,7 +109,7 @@ export function metricValueWords(metric: Pick<PilotMetric, 'key' | 'value'>): st
   const { unit } = PILOT_METRIC_TARGETS[metric.key];
   if (unit === 'percent') return `${numberWords(metric.value)}%`;
   if (unit === 'minutes') return minutesWords(metric.value);
-  if (unit === 'cents') return `${formatMoney(Math.round(metric.value))} a month`;
+  if (unit === 'cents') return formatMoney(Math.round(metric.value));
   return `${numberWords(metric.value)} a week`;
 }
 
