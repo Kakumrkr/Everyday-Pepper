@@ -41,9 +41,9 @@ beforeAll(async () => {
   db = database.app.db;
   operator = await insertUser(db, 'Opal Operator');
   const [row] = await db.select({ email: users.email }).from(users).where(eq(users.id, operator));
-  expect(await grantOperator(database.migrationUrl, { email: row?.email ?? '', note: 'tests' })).toBe(
-    'granted',
-  );
+  expect(
+    await grantOperator(database.migrationUrl, { email: row?.email ?? '', note: 'tests' }),
+  ).toBe('granted');
 });
 
 afterAll(async () => {

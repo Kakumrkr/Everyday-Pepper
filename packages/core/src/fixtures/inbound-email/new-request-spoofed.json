@@ -1,9 +1,7 @@
 {
   "description": "A new request whose From was forged: the receiver's DMARC failed for the From domain",
   "from": "{{from}}",
-  "recipients": [
-    "{{reply}}"
-  ],
+  "recipients": ["{{reply}}"],
   "subject": "Can't move a booking",
   "text": "Hi, when I drag Maria's 3pm to 4pm nothing happens.\n\nThanks,\nSam\n",
   "html": null,
