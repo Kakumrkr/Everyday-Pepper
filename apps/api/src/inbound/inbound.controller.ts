@@ -1,6 +1,6 @@
 import type { IncomingMessage } from 'node:http';
 import { ResendWebhookEventSchema, WebhookAckSchema, type WebhookAck } from '@pepper/contracts';
-import { recordInboundEmail, systemClock, type Clock } from '@pepper/core';
+import { recordEmailProblem, recordInboundEmail, systemClock, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
 import {
@@ -65,7 +65,7 @@ export class InboundController {
 
   /**
    * One webhook event: 200 `{ received: true }` (stored, already stored, or a type we don't
-   * store); 401 `webhook_signature_invalid`; 400 `validation_failed`; 404 while off; 413 over the
+   * store; a bounce or complaint is recorded, S59.3.2); 401 `webhook_signature_invalid`; 400 `validation_failed`; 404 while off; 413 over the
    * JSON limit.
    */
   @Post()
@@ -109,6 +109,18 @@ export class InboundController {
         providerEmailId: emailId,
         messageId: event.data.data.message_id ?? null,
         receivedAt: now,
+      });
+    } else if (event.data.type === 'email.bounced' || event.data.type === 'email.complained') {
+      // A support email couldn't be delivered, or was marked as spam (S59.3.2, AC-X-42).
+      const recipients = event.data.data.to ?? [];
+      if (recipients.length === 0) throw new BadRequestException(apiError('validation_failed'));
+      await recordEmailProblem(this.db, {
+        provider: 'resend',
+        eventId: header(request, 'svix-id') ?? '',
+        type: event.data.type,
+        recipients,
+        bounceType: event.data.data.bounce?.type ?? null,
+        occurredAt: now,
       });
     }
     return WebhookAckSchema.parse({ received: true });

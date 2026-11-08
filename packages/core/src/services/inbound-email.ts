@@ -25,6 +25,7 @@ import {
   findSupportThreadForInbound,
   finishInboundEmail,
   hasActivation,
+  insertEmailSuppression,
   insertInboundEmail,
   insertPublicSupportRequest,
   isSupportMailStopped,
@@ -166,6 +167,57 @@ export async function recordInboundEmail(
       : null;
   const row = await withInboundMail(db, (tx) => insertInboundEmail(tx, { ...input, messageId }));
   return row !== undefined;
+}
+
+/**
+ * A delivery problem Resend reported (S59.3.2, AC-X-42): one row per recipient of the signed
+ * event. A permanent bounce or a complaint stops support email to the address; any other bounce
+ * is only counted. Returns how many were recorded (0 for the same event again).
+ */
+export async function recordEmailProblem(
+  db: Database,
+  input: {
+    provider: 'resend';
+    eventId: string;
+    type: 'email.bounced' | 'email.complained';
+    recipients: readonly string[];
+    bounceType: string | null;
+    occurredAt: Date;
+  },
+): Promise<number> {
+  const kind =
+    input.type === 'email.complained'
+      ? ('complaint' as const)
+      : input.bounceType?.toLowerCase() === 'permanent'
+        ? ('hard_bounce' as const)
+        : ('soft_bounce' as const);
+  const addresses = [
+    ...new Set(
+      input.recipients
+        .map((recipient) => /<([^<>\s]+@[^<>\s]+)>\s*$/.exec(recipient)?.[1] ?? recipient)
+        .map((address) => address.trim().toLowerCase())
+        .filter((address) => /^[^@\s]+@[^@\s]+$/.test(address) && address.length <= 254),
+    ),
+  ].slice(0, 50);
+  return withInboundMail(db, async (tx) => {
+    let recorded = 0;
+    for (const [index, address] of addresses.entries()) {
+      // One event names each recipient once: its id with the recipient's place.
+      const eventId = addresses.length === 1 ? input.eventId : `${input.eventId}:${String(index)}`;
+      if (
+        await insertEmailSuppression(tx, {
+          provider: input.provider,
+          eventId: eventId.slice(0, 200),
+          address,
+          kind,
+          occurredAt: input.occurredAt,
+        })
+      ) {
+        recorded += 1;
+      }
+    }
+    return recorded;
+  });
 }
 
 /** What a verified sender is told about their email (AC-X-36). */

@@ -9,7 +9,9 @@ import {
   insertSupportScreenshot,
   listAuditEntries,
   listDueOutboxMessages,
+  emailSuppressions,
   newId,
+  outboxMessages,
   publicSupportRequests,
   sessions,
   setSupportThreadStatus,
@@ -31,11 +33,12 @@ import {
   inboundNoteText,
   newRequestNoteText,
   processInboundEmails,
+  recordEmailProblem,
   recordInboundEmail,
   supportRequestAddress,
   type InboundEmailOptions,
 } from './services/inbound-email.js';
-import { deliverOutboxMessage } from './services/outbox.js';
+import { deliverOutboxMessage, isRequesterSupportMail, queueEmail } from './services/outbox.js';
 import type { ScreenshotStorage } from './services/support-screenshots.js';
 import {
   answerSupportThread,
@@ -897,5 +900,75 @@ describe('new requests by email to the team’s address (AC-X-40, AC-X-41)', () 
     expect(empty.subject).toBe('About your email to Pepper');
     expect(empty.text.startsWith('Hi,')).toBe(true);
     expect(empty.text).not.toContain('3 businesses');
+  });
+});
+
+describe('bounces and complaints stop support email to an address (AC-X-42)', () => {
+  let bounceCounter = 0;
+  async function problem(
+    type: 'email.bounced' | 'email.complained',
+    recipients: string[],
+    bounceType: string | null = 'Permanent',
+    eventId?: string,
+  ) {
+    bounceCounter += 1;
+    return recordEmailProblem(db, {
+      provider: 'resend',
+      eventId: eventId ?? `msg_problem_${String(bounceCounter)}`,
+      type,
+      recipients,
+      bounceType,
+      occurredAt: clock.now(),
+    });
+  }
+
+  it('stops the team’s answers to a hard-bounced address, keeps a record, and still emails the team', async () => {
+    const thread = await request(ben);
+    await deliverAll();
+    expect(await problem('email.bounced', ['Ben Okafor <Ben@Juniper.test>'])).toBe(1);
+    await answerSupportThread(db, tenant, thread.id, { message: 'Try again now.' }, options);
+    expect((await deliverAll()).filter((m) => m.to === 'ben@juniper.test')).toEqual([]);
+    const dead = (await admin.db.select().from(outboxMessages)).filter(
+      (row) => row.lastError === 'SupportMailStopped',
+    );
+    expect(dead.length).toBeGreaterThan(0);
+    expect(dead.every((row) => row.status === 'dead')).toBe(true);
+    // The team's own copy of what Ben writes still goes.
+    await request(ben);
+    expect((await deliverAll()).some((m) => m.to === 'support@pepper.test')).toBe(true);
+  });
+
+  it('counts the same event once, stops a complaint, and only counts a soft bounce', async () => {
+    expect(await problem('email.complained', ['angry@client.test'], null, 'msg_same')).toBe(1);
+    expect(await problem('email.complained', ['angry@client.test'], null, 'msg_same')).toBe(0);
+    expect(await problem('email.bounced', ['full@mailbox.test'], 'Transient')).toBe(1);
+    expect(await problem('email.bounced', ['not an address'], 'Permanent')).toBe(0);
+    const kinds = (await admin.db.select().from(emailSuppressions)).map((row) => [
+      row.address,
+      row.kind,
+    ]);
+    expect(kinds).toContainEqual(['angry@client.test', 'complaint']);
+    expect(kinds).toContainEqual(['full@mailbox.test', 'soft_bounce']);
+  });
+
+  it('leaves booking and client email alone', async () => {
+    await problem('email.bounced', ['jess@juniper.test']);
+    await withTenant(db, tenant, (tx) =>
+      queueEmail(
+        tx,
+        { to: 'jess@juniper.test', subject: 'Your booking', text: 'See you at 3' },
+        { key, dedupeKey: `booking.confirmed:${newId()}`, now: clock.now() },
+      ),
+    );
+    expect((await deliverAll()).filter((m) => m.to === 'jess@juniper.test')).toHaveLength(1);
+  });
+
+  it('names which emails stop: the requester’s, never the team’s', () => {
+    expect(isRequesterSupportMail('support.answered:1')).toBe(true);
+    expect(isRequesterSupportMail('support.closed:1')).toBe(true);
+    expect(isRequesterSupportMail('support.inbound_note:1')).toBe(true);
+    expect(isRequesterSupportMail('support.opened:1')).toBe(false);
+    expect(isRequesterSupportMail('support.replied:1')).toBe(false);
+    expect(isRequesterSupportMail('booking.confirmed:1')).toBe(false);
   });
 });

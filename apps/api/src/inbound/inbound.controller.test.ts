@@ -14,13 +14,15 @@ import { RateLimiter } from '../http/rate-limit.js';
 import { InboundModule } from './inbound.controller.js';
 
 // The inbound webhook without a database (S59.3, AC-X-33): no session and no Origin; the Svix
-// signature over the raw bytes decides; only `email.received` is stored; off without a secret.
+// signature over the raw bytes decides; only `email.received` is stored, bounces and complaints
+// recorded (S59.3.2); off without a secret.
 // core's inbound-email.int.test.ts proves the storing and what follows.
 
-const core = vi.hoisted(() => ({ recordInboundEmail: vi.fn() }));
+const core = vi.hoisted(() => ({ recordInboundEmail: vi.fn(), recordEmailProblem: vi.fn() }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   recordInboundEmail: core.recordInboundEmail,
+  recordEmailProblem: core.recordEmailProblem,
 }));
 
 const ORIGIN = 'http://localhost:3000';
@@ -91,6 +93,7 @@ afterAll(async () => {
 beforeEach(() => {
   vi.clearAllMocks();
   core.recordInboundEmail.mockResolvedValue(true);
+  core.recordEmailProblem.mockResolvedValue(1);
 });
 
 describe('POST /v1/webhooks/resend (AC-X-33)', () => {
@@ -127,14 +130,64 @@ describe('POST /v1/webhooks/resend (AC-X-33)', () => {
   });
 
   it('acknowledges other event types without storing them', async () => {
-    const bounced = JSON.stringify({ type: 'email.bounced', data: { email_id: 'x' } });
+    const delivered = JSON.stringify({ type: 'email.delivered', data: { email_id: 'x' } });
     await request(server)
       .post('/v1/webhooks/resend')
-      .set(signed(bounced))
+      .set(signed(delivered))
       .type('application/json')
-      .send(bounced)
+      .send(delivered)
       .expect(200);
     expect(core.recordInboundEmail).not.toHaveBeenCalled();
+    expect(core.recordEmailProblem).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['email.bounced', { type: 'Permanent', subType: 'General' }, 'Permanent'],
+    ['email.complained', undefined, null],
+  ] as const)(
+    'records a signed %s event for its recipients (S59.3.2, AC-X-42)',
+    async (type, bounce, bounceType) => {
+      const body = JSON.stringify({
+        type,
+        data: { email_id: 'em_1', to: ['Ana <ana@juniper.test>'], ...(bounce && { bounce }) },
+      });
+      await request(server)
+        .post('/v1/webhooks/resend')
+        .set(signed(body, 'msg_bounce'))
+        .type('application/json')
+        .send(body)
+        .expect(200);
+      expect(core.recordEmailProblem).toHaveBeenCalledWith(
+        {},
+        {
+          provider: 'resend',
+          eventId: 'msg_bounce',
+          type,
+          recipients: ['Ana <ana@juniper.test>'],
+          bounceType,
+          occurredAt: NOW,
+        },
+      );
+      expect(core.recordInboundEmail).not.toHaveBeenCalled();
+    },
+  );
+
+  it('refuses a bounce that names no recipient, and an unsigned one', async () => {
+    const body = JSON.stringify({ type: 'email.bounced', data: { email_id: 'x' } });
+    await request(server)
+      .post('/v1/webhooks/resend')
+      .set(signed(body))
+      .type('application/json')
+      .send(body)
+      .expect(400);
+    const named = JSON.stringify({ type: 'email.complained', data: { to: ['a@b.test'] } });
+    await request(server)
+      .post('/v1/webhooks/resend')
+      .set(signed(named, 'msg_x', NOW, Buffer.from('another-key-of-thirty-two-bytes!!!')))
+      .type('application/json')
+      .send(named)
+      .expect(401);
+    expect(core.recordEmailProblem).not.toHaveBeenCalled();
   });
 
   it.each([
