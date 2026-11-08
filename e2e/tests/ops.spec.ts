@@ -229,6 +229,13 @@ test('the console (AC-X-19…22): an operator answers an owner and a signed-out 
     firstReply.getByText(/^(\d+ by email of \d+ \(\d+%\)|None yet)$/).first(),
   ).toBeVisible();
   await scanned(ops, 'ops metrics');
+  // Phone first (DESIGN D12): the header's three links and the page fit without sideways scroll.
+  const metricsWidth = await ops.evaluate(() => ({
+    page: document.documentElement.scrollWidth,
+    view: window.innerWidth,
+  }));
+  expect(metricsWidth.page, 'ops metrics scrolls sideways').toBeLessThanOrEqual(metricsWidth.view);
+  await ops.screenshot({ path: test.info().outputPath('ops-metrics-phone.png'), fullPage: true });
   await ops.getByRole('link', { name: 'Last 30 days' }).click();
   await expect(ops).toHaveURL(/\/ops\/metrics\?days=30$/);
   await expect(ops.getByRole('link', { name: 'Last 30 days' })).toHaveAttribute(
