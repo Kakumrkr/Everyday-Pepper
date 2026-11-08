@@ -63,6 +63,7 @@ const THREAD = {
       author: { kind: 'you' },
       body: 'How do I import?',
       screenshots: [],
+      channel: 'email',
       createdAt: AT,
     },
   ],
