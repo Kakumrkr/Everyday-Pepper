@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.4.2 · Pilot metrics, part 2** (brief approved 2026-11-08: "I'm leaving it up to you… keep in mind before you start work"; D-1 no split, D-2 definitions in migration 0074's header, D-3 chat tokens at the strong model's rate, D-4 rebook rate tracked, change vs the period before).
+- ✅ Task 1–4 (code): `operator_ai_metrics` (migration 0074, definer, inline CTEs), `readAiMetrics`, contracts (7 keys, `below`/`between`, cents, `previous`/`trend`), core (`aiCostCents`, `withTrend`, both periods under one `metrics.read`), kit `Trend`, web words, groups and gallery. db int 4/4, core int 12/12, unit green, typecheck 15/15, lint clean.
+- Next: AC-X-50…53 + traceability, ADR-0062 Part 4 addendum, dependency map; `ops.spec.ts` + gallery screenshots; then `/session-close`.
 
 ## Last sessions
 - **S59.4 Phase 13 · Pilot metrics page (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4, [PR #91](https://github.com/Kakumrkr/Everyday-Pepper/pull/91)). Full entry in [session-log.md](session-log.md).

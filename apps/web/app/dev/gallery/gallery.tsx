@@ -4,6 +4,7 @@ import {
   EveningWrapSchema,
   OperatorHeldListSchema,
   PilotMetricsSchema,
+  type PilotMetric,
   SupportMailStopSchema,
   WeekValueSchema,
 } from '@pepper/contracts';
@@ -103,6 +104,18 @@ function Section({ id, title, children }: { id: string; title: string; children:
 
 function Row({ children }: { children: ReactNode }) {
   return <div className="flex flex-wrap items-center gap-3">{children}</div>;
+}
+
+/** A gallery metric: its number, cases and judgement, and its change against the period before. */
+function m(
+  key: PilotMetric['key'],
+  value: number,
+  sample: number,
+  status: PilotMetric['status'],
+  previous: number | null = null,
+  trend: PilotMetric['trend'] = null,
+): PilotMetric {
+  return { key, value, sample, status, previous, trend };
 }
 
 export function Gallery() {
@@ -474,7 +487,8 @@ export function Gallery() {
           </Section>
 
           <Section id="ops-metrics" title="Support: pilot metrics">
-            {/* S59.4 (AC-X-47…49): each judgement once, first reply with email's share. */}
+            {/* S59.4 (AC-X-47…49): each judgement once, first reply with email's share; S59.4.2
+                (AC-X-50…53): the part 2 metrics and each kind of change. */}
             <OpsMetrics
               metrics={PilotMetricsSchema.parse({
                 days: 7,
@@ -483,16 +497,24 @@ export function Gallery() {
                 businesses: 4,
                 bookableBusinesses: 3,
                 metrics: [
-                  { key: 'onboarding_completion', value: 80, sample: 10, status: 'met' },
-                  { key: 'time_to_bookable', value: 9, sample: 8, status: 'met' },
-                  { key: 'time_to_first_booking', value: 22, sample: 5, status: 'missed' },
-                  { key: 'booking_completion', value: 65, sample: 20, status: 'met' },
-                  { key: 'code_step_drop_off', value: 20, sample: 15, status: 'missed' },
-                  { key: 'no_show_rate', value: 5, sample: 40, status: 'tracked' },
-                  { key: 'fill_rate', value: 33.3, sample: 6, status: 'tracked' },
-                  { key: 'waitlist_conversion', value: 50, sample: 4, status: 'not_enough' },
-                  { key: 'support_requests', value: 0.7, sample: 3, status: 'met' },
-                  { key: 'first_reply_time', value: 95.6, sample: 5, status: 'met' },
+                  // Each change once: better, worse, no change, and none (too few before).
+                  m('onboarding_completion', 80, 10, 'met', 70, 'better'),
+                  m('time_to_bookable', 9, 8, 'met', 8, 'worse'),
+                  m('time_to_first_booking', 22, 5, 'missed'),
+                  m('booking_completion', 65, 20, 'met', 65, 'neutral'),
+                  m('code_step_drop_off', 20, 15, 'missed', 12.5, 'worse'),
+                  m('no_show_rate', 5, 40, 'tracked', 7.5, 'better'),
+                  m('fill_rate', 33.3, 6, 'tracked'),
+                  m('waitlist_conversion', 50, 4, 'not_enough', 40),
+                  m('support_requests', 0.7, 3, 'met', 1, 'better'),
+                  m('first_reply_time', 95.6, 5, 'met', 130, 'better'),
+                  m('weekly_active_owners', 66.7, 12, 'met', 58.3, 'better'),
+                  m('cards_vs_chat', 72.4, 58, 'met', 75, 'worse'),
+                  m('ai_approval_rate', 84, 25, 'met', 92, 'better'),
+                  m('ai_correction_rate', 7.4, 27, 'met', 11.1, 'better'),
+                  m('undo_rate', 0, 40, 'met', 0, 'neutral'),
+                  m('ai_cost', 173.6, 4, 'met', 132, 'worse'),
+                  m('rebook_rate', 62.5, 8, 'tracked'),
                 ],
                 firstReply: {
                   requests: 6,

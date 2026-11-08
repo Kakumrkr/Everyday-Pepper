@@ -101,6 +101,8 @@ export {
   NavBadge,
   Receipt,
   Stat,
+  Trend,
+  type TrendTone,
   StepBar,
   StickyActionBar,
   TimeChip,

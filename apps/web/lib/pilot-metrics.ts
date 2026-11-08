@@ -1,13 +1,16 @@
 import {
   PILOT_METRIC_TARGETS,
+  type PilotMetricTarget,
   type PilotMetric,
   type PilotMetricKey,
   type PilotMetricStatus,
   type PilotMetrics,
 } from '@pepper/contracts';
+import { formatMoney, type TrendTone } from '@pepper/ui';
 
-// The pilot metrics page's words (S59.4, AC-X-47…49): each metric's name, number, target and
-// judgement, in the console's plain words. The api computes; these only say things.
+// The pilot metrics page's words (S59.4, S59.4.2, AC-X-47…53): each metric's name, number,
+// target, judgement and change against the period before, in the console's plain words. The
+// api computes; these only say things.
 
 export const PILOT_METRICS_PERIOD_LABEL: Readonly<Record<7 | 30, string>> = {
   7: 'Last 7 days',
@@ -30,6 +33,13 @@ export const PILOT_METRIC_LABEL: Readonly<Record<PilotMetricKey, string>> = {
   waitlist_conversion: 'Waitlist offers claimed',
   support_requests: 'Support requests',
   first_reply_time: 'First reply',
+  weekly_active_owners: 'Owners active 4+ days a week',
+  cards_vs_chat: 'Done from a card, not chat',
+  ai_approval_rate: 'Proposals approved',
+  ai_correction_rate: 'Proposals corrected',
+  undo_rate: 'AI actions undone as wrong',
+  ai_cost: 'AI cost a business',
+  rebook_rate: 'Clients rebooked in time',
 };
 
 /** What each metric's cases are, for "from 12 sign-ups". */
@@ -44,6 +54,13 @@ const SAMPLE_NOUN: Readonly<Record<PilotMetricKey, [string, string]>> = {
   waitlist_conversion: ['offer', 'offers'],
   support_requests: ['business', 'businesses'],
   first_reply_time: ['answered request', 'answered requests'],
+  weekly_active_owners: ['owner-week', 'owner-weeks'],
+  cards_vs_chat: ['action', 'actions'],
+  ai_approval_rate: ['proposal', 'proposals'],
+  ai_correction_rate: ['proposal', 'proposals'],
+  undo_rate: ['AI action', 'AI actions'],
+  ai_cost: ['active business', 'active businesses'],
+  rebook_rate: ['client due', 'clients due'],
 };
 
 /** The groups of the page, in order. */
@@ -53,7 +70,15 @@ export const PILOT_METRIC_GROUPS: readonly { title: string; keys: readonly Pilot
     keys: ['onboarding_completion', 'time_to_bookable', 'time_to_first_booking'],
   },
   { title: 'Booking page', keys: ['booking_completion', 'code_step_drop_off'] },
-  { title: 'Visits', keys: ['no_show_rate', 'fill_rate', 'waitlist_conversion'] },
+  { title: 'Owners using Pepper', keys: ['weekly_active_owners', 'cards_vs_chat'] },
+  {
+    title: 'The AI’s proposals',
+    keys: ['ai_approval_rate', 'ai_correction_rate', 'undo_rate', 'ai_cost'],
+  },
+  {
+    title: 'Visits',
+    keys: ['no_show_rate', 'fill_rate', 'waitlist_conversion', 'rebook_rate'],
+  },
   { title: 'Support', keys: ['support_requests'] },
 ];
 
@@ -84,22 +109,72 @@ export function metricValueWords(metric: Pick<PilotMetric, 'key' | 'value'>): st
   const { unit } = PILOT_METRIC_TARGETS[metric.key];
   if (unit === 'percent') return `${numberWords(metric.value)}%`;
   if (unit === 'minutes') return minutesWords(metric.value);
+  if (unit === 'cents') return `${formatMoney(Math.round(metric.value))} a month`;
   return `${numberWords(metric.value)} a week`;
 }
 
-/** The scorecard target in words ("Target at least 80%", "Median at most 10 min"). */
+function boundWords(target: PilotMetricTarget, key: PilotMetricKey): string {
+  const words = (value: number) => metricValueWords({ key, value });
+  switch (target.kind) {
+    case 'at_least':
+      return `at least ${words(target.value)}`;
+    case 'at_most':
+      return `at most ${words(target.value)}`;
+    case 'below':
+      return `below ${words(target.value)}`;
+    case 'between':
+      return `${numberWords(target.min)}–${words(target.max)}`;
+  }
+}
+
+/** The scorecard target in words ("Target: at least 80%", "Target: median at most 10 min"). */
 export function targetWords(key: PilotMetricKey): string {
   if (key === 'no_show_rate') return 'Target: below each owner’s own rate';
   if (key === 'fill_rate') return 'Target set after week 2';
+  if (key === 'rebook_rate') return 'Target: 10 points above each owner’s own rate';
   const { unit, target } = PILOT_METRIC_TARGETS[key];
   if (target === null) return 'Tracked';
-  const bound = target.kind === 'at_least' ? 'at least' : 'at most';
-  const value = metricValueWords({ key, value: target.value });
-  if (key === 'first_reply_time') return `Target: median ${bound} ${value}, all the same day`;
-  if (unit === 'minutes') return `Target: median ${bound} ${value}`;
-  if (unit === 'per_business_week')
-    return `Target: ${bound} ${String(target.value)} a business a week`;
-  return `Target: ${bound} ${value}`;
+  const bound = boundWords(target, key);
+  if (key === 'first_reply_time') return `Target: median ${bound}, all the same day`;
+  if (unit === 'minutes') return `Target: median ${bound}`;
+  if (unit === 'per_business_week' && target.kind === 'at_most')
+    return `Target: at most ${String(target.value)} a business a week`;
+  // The cost is an estimate: every chat turn priced at the strong model's rate.
+  if (unit === 'cents') return `Target: ${bound}, priced high`;
+  return `Target: ${bound}`;
+}
+
+/** The size of a change in a metric's unit: "4.2 pts", "12 min", "0.3", "$0.40". */
+function changeWords(key: PilotMetricKey, change: number): string {
+  const { unit } = PILOT_METRIC_TARGETS[key];
+  if (unit === 'percent') return `${numberWords(change)} pts`;
+  if (unit === 'minutes') return minutesWords(change);
+  if (unit === 'cents') return formatMoney(Math.round(change));
+  return numberWords(change);
+}
+
+/**
+ * A metric's change against the period before (S59.4.2 top-up), for the kit's `Trend`; `null`
+ * when either period has no number to compare.
+ */
+export function metricTrend(
+  metric: PilotMetric,
+  days: 7 | 30,
+): {
+  direction: 'up' | 'down' | 'none';
+  tone: TrendTone;
+  change: string;
+  against: string;
+} | null {
+  if (metric.trend === null || metric.value === null || metric.previous === null) return null;
+  // Both numbers are in tenths: rounding the difference keeps 0.1 + 0.2 from showing 0.30000004.
+  const difference = Math.round((metric.value - metric.previous) * 10) / 10;
+  return {
+    direction: difference > 0 ? 'up' : difference < 0 ? 'down' : 'none',
+    tone: difference === 0 ? 'neutral' : metric.trend,
+    change: changeWords(metric.key, Math.abs(difference)),
+    against: `vs the ${String(days)} days before`,
+  };
 }
 
 /** "from 12 sign-ups", "from 1 offer". */

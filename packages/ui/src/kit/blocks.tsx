@@ -157,6 +157,57 @@ export function Stat({
   );
 }
 
+/** Whether a change is for the better, the worse, or neither; the arrow shows which way it went. */
+export type TrendTone = 'better' | 'worse' | 'neutral';
+
+const TREND_TONES: Record<TrendTone, string> = {
+  better: 'text-ok',
+  worse: 'text-warn',
+  neutral: 'text-ink-2',
+};
+
+const TREND_WORDS: Record<TrendTone, string> = {
+  better: 'better',
+  worse: 'worse',
+  neutral: 'no better or worse',
+};
+
+/**
+ * A number's change against an earlier one: "▲ 4.2 pts", "▼ 12 min", "No change". The arrow
+ * says the direction, the color whether that is good (status colors, DESIGN.md §2), and the
+ * screen reader hears both in words ("Up 4.2 pts, better, vs the 7 days before"), never only
+ * the color or the arrow.
+ */
+export function Trend({
+  direction,
+  tone,
+  change,
+  against,
+  className,
+}: {
+  direction: 'up' | 'down' | 'none';
+  tone: TrendTone;
+  /** The size of the change in its unit ("4.2 pts", "$0.40"); ignored with no change. */
+  change: string;
+  /** What it is compared with ("vs the 7 days before"). */
+  against: string;
+  className?: string | undefined;
+}) {
+  const shown = direction === 'none' ? 'No change' : `${direction === 'up' ? '▲' : '▼'} ${change}`;
+  const spoken =
+    direction === 'none'
+      ? `No change ${against}`
+      : `${direction === 'up' ? 'Up' : 'Down'} ${change}, ${TREND_WORDS[tone]}, ${against}`;
+  return (
+    <span
+      className={cx('type-caption tabular-nums whitespace-nowrap', TREND_TONES[tone], className)}
+    >
+      <span aria-hidden="true">{shown}</span>
+      <span className="sr-only">{spoken}</span>
+    </span>
+  );
+}
+
 export type EmptyAction =
   | { label: string; href: string; renderLink?: KitLink | undefined }
   | { label: string; onClick: () => void };

@@ -16,6 +16,7 @@ import {
   StepBar,
   StickyActionBar,
   TimeChip,
+  Trend,
   type KitLink,
 } from './blocks.js';
 import { Button } from './button.js';
@@ -100,6 +101,29 @@ describe('Stat', () => {
     render(<Stat value="$430" label="Booked today" size="xl" />);
     expect(screen.getByText('$430').className).toContain('type-number-xl');
     expect(screen.getByText('$430').className).toContain('tabular-nums');
+  });
+});
+
+describe('Trend', () => {
+  it('shows the arrow and the change, and says both in words', async () => {
+    const { container } = render(
+      <Trend direction="up" tone="better" change="4.2 pts" against="vs the 7 days before" />,
+    );
+    expect(container.textContent).toContain('▲ 4.2 pts');
+    expect(screen.getByText('Up 4.2 pts, better, vs the 7 days before').className).toBe('sr-only');
+    expect(container.firstElementChild?.className).toContain('text-ok');
+    await expectAccessible(container);
+  });
+
+  it('marks a fall that is worse, and says "No change" without an arrow', () => {
+    const { container, rerender } = render(
+      <Trend direction="down" tone="worse" change="12 min" against="vs the 30 days before" />,
+    );
+    expect(container.textContent).toContain('▼ 12 min');
+    expect(container.firstElementChild?.className).toContain('text-warn');
+    rerender(<Trend direction="none" tone="neutral" change="0" against="vs the 7 days before" />);
+    expect(container.textContent).not.toMatch(/[▲▼]/);
+    expect(screen.getByText('No change vs the 7 days before').className).toBe('sr-only');
   });
 });
 

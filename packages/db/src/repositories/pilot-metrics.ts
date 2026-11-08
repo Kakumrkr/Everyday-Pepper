@@ -51,6 +51,46 @@ export async function readPlatformMetrics(
   return PlatformMetricsSchema.parse(rows[0]?.metrics);
 }
 
+const AiMetricsSchema = z.object({
+  ownerWeeks: Count,
+  activeOwnerWeeks: Count,
+  activeBusinesses: Count,
+  cardActions: Count,
+  chatTurns: Count,
+  proposalsShown: Count,
+  proposalsApproved: Count,
+  proposalsEdited: Count,
+  proposalsAskedAgain: Count,
+  actionsExecuted: Count,
+  actionsUndoneWrong: Count,
+  inputTokens: Count,
+  cachedInputTokens: Count,
+  outputTokens: Count,
+  rebookDue: Count,
+  rebooked: Count,
+});
+export type AiMetrics = z.infer<typeof AiMetricsSchema>;
+
+/**
+ * Every business's engagement, AI cards and rebooking from `since` to `until` (S59.4.2,
+ * AC-X-50…53), through the `operator_ai_metrics` definer function (migration 0074, which
+ * holds each count's definition): owner-weeks and the active ones (4 or more active days),
+ * businesses with any member activity, card actions and chat turns, proposals shown, approved,
+ * edited and asked again, actions executed and undone as wrong, the chat turns' tokens, and
+ * visits whose rebook interval ended and those rebooked by then.
+ */
+export async function readAiMetrics(
+  tx: TenantTx,
+  period: { since: Date; until: Date },
+): Promise<AiMetrics> {
+  const since = z.date().parse(period.since).toISOString();
+  const until = z.date().parse(period.until).toISOString();
+  const { rows } = await tx.execute<{ metrics: unknown }>(
+    sql`SELECT operator_ai_metrics(${since}::timestamptz, ${until}::timestamptz) AS metrics`,
+  );
+  return AiMetricsSchema.parse(rows[0]?.metrics);
+}
+
 const SupportMetricsSchema = z.object({
   requests: Count,
   answered: Count,

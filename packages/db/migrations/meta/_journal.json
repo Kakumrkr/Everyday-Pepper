@@ -519,6 +519,13 @@
       "when": 1794149149542,
       "tag": "0073_pilot_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 74,
+      "version": "7",
+      "when": 1794154575721,
+      "tag": "0074_ai_metrics",
+      "breakpoints": true
     }
   ]
 }

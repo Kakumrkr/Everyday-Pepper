@@ -608,7 +608,16 @@ describe('the pilot metrics page (S59.4, AC-X-47…49)', () => {
     const metrics = await readPilotMetrics(db, operator, { days: 30, clock });
     expect(metrics.days).toBe(30);
     expect(metrics.businesses).toBeGreaterThanOrEqual(2);
-    expect(metrics.metrics.map((metric) => metric.key)).toContain('first_reply_time');
+    expect(metrics.metrics.map((metric) => metric.key)).toEqual(
+      expect.arrayContaining([
+        'first_reply_time',
+        'weekly_active_owners',
+        'ai_cost',
+        'rebook_rate',
+      ]),
+    );
+    // Both periods (this one and the one before, S59.4.2) are read under the same row.
+    for (const metric of metrics.metrics) expect(metric).toHaveProperty('previous');
     // This suite's requests: some opened and answered in the app, the inbound ones by email.
     expect(metrics.firstReply.requests).toBeGreaterThan(0);
     expect(metrics.channels.requestsInApp).toBeGreaterThan(0);
