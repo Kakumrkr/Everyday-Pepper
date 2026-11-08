@@ -20,8 +20,8 @@ export default async function OpsHeldPage() {
       <header className="flex flex-col gap-2">
         <h1 className="m-0 type-display">Held mail</h1>
         <p className="m-0 type-body text-ink-2">
-          Emails we couldn’t check. Accept one you trust and it lands as if it had passed; Discard
-          the rest. Each is kept 7 days.
+          Emails we couldn’t check. Accept only one you know is from who it says: it lands as
+          theirs, as if it had passed. Discard the rest. Each is kept 7 days.
         </p>
       </header>
       {held === null ? (
