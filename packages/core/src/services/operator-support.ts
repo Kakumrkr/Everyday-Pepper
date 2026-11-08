@@ -51,6 +51,7 @@ import {
   countEmailSuppressions,
   countHeldInboundEmails,
   countInboundByOutcome,
+  readAiMetrics,
   readPlatformMetrics,
   readSupportMetrics,
   countOperatorWaiting,
@@ -772,8 +773,9 @@ export async function resumePublicMail(
 }
 
 /**
- * The pilot metrics page (S59.4, AC-X-47…49): every business together over the last `days`,
- * counts and medians only, behind one `metrics.read` access log row.
+ * The pilot metrics page (S59.4, S59.4.2, AC-X-47…53): every business together over the last
+ * `days`, and the same span before it for each metric's change, counts and medians only,
+ * behind one `metrics.read` access log row.
  */
 export async function readPilotMetrics(
   db: Database,
@@ -781,10 +783,17 @@ export async function readPilotMetrics(
   options: { days: 7 | 30; clock?: Clock },
 ): Promise<PilotMetrics> {
   const until = (options.clock ?? systemClock).now();
-  const since = new Date(until.getTime() - options.days * 24 * 60 * 60 * 1000);
+  const span = options.days * 24 * 60 * 60 * 1000;
+  const since = new Date(until.getTime() - span);
+  const earlier = { since: new Date(since.getTime() - span), until: since };
   return asOperator(db, operator, 'metrics.read', null, async (tx) => {
-    const platform = await readPlatformMetrics(tx, { since, until });
-    const support = await readSupportMetrics(tx, { since, until });
+    const counts = async (period: { since: Date; until: Date }) => ({
+      platform: await readPlatformMetrics(tx, period),
+      support: await readSupportMetrics(tx, period),
+      ai: await readAiMetrics(tx, period),
+    });
+    const current = await counts({ since, until });
+    const before = await counts(earlier);
     const outcomes = await countInboundByOutcome(tx, since, until);
     const inbound = (status: 'held' | 'ignored' | 'refused') =>
       outcomes.filter((row) => row.status === status).reduce((sum, row) => sum + row.count, 0);
@@ -792,8 +801,8 @@ export async function readPilotMetrics(
       days: options.days,
       since,
       until,
-      platform,
-      support,
+      ...current,
+      before,
       inbound: { held: inbound('held'), ignored: inbound('ignored'), refused: inbound('refused') },
     });
   });

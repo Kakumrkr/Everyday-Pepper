@@ -4,6 +4,7 @@ import {
   channelRows,
   emailShareWords,
   firstReplyRows,
+  metricTrend,
   metricValueWords,
   metricsDays,
   minutesWords,
@@ -102,5 +103,61 @@ describe('the pilot metrics page’s words (S59.4)', () => {
       { label: 'Waiting', value: '1 (1 over a day)' },
       { label: 'Signed out', value: '1 answered · 2 open' },
     ]);
+  });
+});
+
+describe('the pilot metrics page’s words, part 2 (S59.4.2)', () => {
+  it('says the AI cost in dollars a month, and the part 2 targets as the scorecard does', () => {
+    expect(metricValueWords({ key: 'ai_cost', value: 174 })).toBe('$1.74');
+    expect(metricValueWords({ key: 'ai_cost', value: 300 })).toBe('$3');
+    expect(targetWords('weekly_active_owners')).toBe('Target: at least 60%');
+    expect(targetWords('cards_vs_chat')).toBe('Target: at least 70%');
+    expect(targetWords('ai_approval_rate')).toBe('Target: 70–90%');
+    expect(targetWords('ai_correction_rate')).toBe('Target: at most 10%');
+    expect(targetWords('undo_rate')).toBe('Target: below 1%');
+    expect(targetWords('ai_cost')).toBe('Target: at most $3, priced high');
+    expect(targetWords('rebook_rate')).toBe('Target: 10 points above each owner’s own rate');
+    expect(sampleWords('weekly_active_owners', 1)).toBe('from 1 owner-week');
+    expect(sampleWords('rebook_rate', 8)).toBe('from 8 clients due');
+  });
+});
+
+describe('the change against the period before (S59.4.2 top-up)', () => {
+  const metric = (
+    key: Parameters<typeof metricTrend>[0]['key'],
+    value: number | null,
+    previous: number | null,
+    trend: 'better' | 'worse' | 'neutral' | null,
+  ) => ({ key, value, previous, trend, sample: 10, status: 'tracked' as const });
+
+  it('gives the arrow, the change in the metric’s unit and the tone', () => {
+    expect(metricTrend(metric('cards_vs_chat', 75, 60.8, 'better'), 7)).toEqual({
+      direction: 'up',
+      tone: 'better',
+      change: '14.2 pts',
+      against: 'vs the 7 days before',
+    });
+    expect(metricTrend(metric('first_reply_time', 120, 60, 'worse'), 30)).toEqual({
+      direction: 'up',
+      tone: 'worse',
+      change: '1 h',
+      against: 'vs the 30 days before',
+    });
+    expect(metricTrend(metric('ai_cost', 150, 191, 'better'), 7)).toMatchObject({
+      direction: 'down',
+      change: '$0.41',
+    });
+    expect(metricTrend(metric('support_requests', 0.3, 0.1, 'worse'), 7)).toMatchObject({
+      change: '0.2 a week',
+    });
+  });
+
+  it('says no change when the numbers are equal, and nothing without both', () => {
+    expect(metricTrend(metric('rebook_rate', 50, 50, 'neutral'), 7)).toMatchObject({
+      direction: 'none',
+      tone: 'neutral',
+    });
+    expect(metricTrend(metric('rebook_rate', 50, null, null), 7)).toBeNull();
+    expect(metricTrend(metric('rebook_rate', null, 50, null), 7)).toBeNull();
   });
 });

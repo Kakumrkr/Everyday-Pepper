@@ -1,8 +1,9 @@
 import type { PilotMetric, PilotMetrics } from '@pepper/contracts';
-import { Badge, DetailTable, List, ListRow, Stat } from '@pepper/ui';
+import { Badge, DetailTable, List, ListRow, Stat, Trend } from '@pepper/ui';
 import {
   channelRows,
   firstReplyRows,
+  metricTrend,
   metricValueWords,
   PILOT_METRIC_GROUPS,
   PILOT_METRIC_LABEL,
@@ -11,15 +12,23 @@ import {
   targetWords,
 } from '../../../lib/pilot-metrics';
 
-// The pilot metrics page's body (S59.4, AC-X-47…49): first-reply time with email's share beside
-// it, then each group of metrics against its target. Also in the gallery, with fixed numbers.
+// The pilot metrics page's body (S59.4, S59.4.2, AC-X-47…53): first-reply time with email's
+// share beside it, then each group of metrics against its target, each with its change against
+// the period before. Also in the gallery, with fixed numbers.
 
 function StatusBadge({ metric }: { metric: PilotMetric }) {
   const status = PILOT_METRIC_STATUS[metric.status];
   return <Badge tone={status.tone}>{status.label}</Badge>;
 }
 
-function MetricRow({ metric }: { metric: PilotMetric }) {
+/** ▲/▼ and the change since the period before (S59.4.2 top-up); nothing without both numbers. */
+function MetricTrend({ metric, days }: { metric: PilotMetric; days: 7 | 30 }) {
+  const trend = metricTrend(metric, days);
+  if (trend === null) return null;
+  return <Trend {...trend} />;
+}
+
+function MetricRow({ metric, days }: { metric: PilotMetric; days: 7 | 30 }) {
   return (
     <ListRow
       title={PILOT_METRIC_LABEL[metric.key]}
@@ -29,6 +38,7 @@ function MetricRow({ metric }: { metric: PilotMetric }) {
           <span className="type-title text-ink tabular-nums" data-testid={`metric-${metric.key}`}>
             {metricValueWords(metric)}
           </span>
+          <MetricTrend metric={metric} days={days} />
           <StatusBadge metric={metric} />
         </span>
       }
@@ -57,6 +67,7 @@ function FirstReply({ metrics }: { metrics: PilotMetrics }) {
         value={metricValueWords(metric)}
         label="Median, from a request to our first reply"
       />
+      <MetricTrend metric={metric} days={metrics.days} />
       <DetailTable rows={firstReplyRows(metrics.firstReply)} />
       {/* S59.3.2's carried top-up (AC-X-49): email's share is visible from the first day. */}
       <div className="flex flex-col gap-1">
@@ -79,14 +90,18 @@ export function OpsMetrics({ metrics }: { metrics: PilotMetrics }) {
           <List>
             {group.keys.map((key) => {
               const metric = byKey.get(key);
-              return metric === undefined ? null : <MetricRow key={key} metric={metric} />;
+              return metric === undefined ? null : (
+                <MetricRow key={key} metric={metric} days={metrics.days} />
+              );
             })}
           </List>
         </section>
       ))}
       <p className="m-0 type-caption text-ink-2">
         Times are from each sign-up, visit or request to the next step. A number from fewer than 5
-        cases says “Not enough yet”. Weekly active owners and the AI’s numbers come next.
+        cases says “Not enough yet”, and ▲/▼ compares it with the {metrics.days} days before. An
+        owner is active on a day they changed something or chatted; the AI’s cost prices every chat
+        turn at the stronger model’s rate.
       </p>
     </>
   );

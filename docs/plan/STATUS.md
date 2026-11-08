@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-08 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.4 done; next **S59.4.2** (pilot metrics, part 2); S57 waits for the domain
+**Last updated:** 2026-11-08 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.4.2 done; next **S59.5** (terms, privacy, AI disclosure); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,12 +10,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 (none)
 
 ## Last sessions
+- **S59.4.2 Phase 13 · Pilot metrics, part 2 (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4 addendum, [PR #92](https://github.com/Kakumrkr/Everyday-Pepper/pull/92)). Full entry in [session-log.md](session-log.md).
+  - **Built:** weekly active owners, cards vs chat, AI approval/correction/undo, AI cost a business a month (priced high) and the rebook rate on `/ops/metrics` (`operator_ai_metrics`, migration 0074); every metric's ▲/▼ against the period before (top-up, kit `Trend`); AC-X-50…53.
+  - **Checks:** `pnpm check` green; affected integration 22/22; ops 2, gallery 11, screens 30; review 7 of 7 fixed, security none ≥ 8.
 - **S59.4 Phase 13 · Pilot metrics page (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4, [PR #91](https://github.com/Kakumrkr/Everyday-Pepper/pull/91)). Full entry in [session-log.md](session-log.md).
   - **Built:** `/ops/metrics` for operators: first-reply time with by email vs in the app (top-up), onboarding, booking page, visits and support metrics against their targets, 7 or 30 days; `operator_pilot_metrics` (aggregate-only definer, migration 0073), `metrics.read` logged; AC-X-47…49. AI and engagement metrics → S59.4.2.
   - **Checks:** `pnpm check` green; affected integration green; ops 2, gallery 11, screens 30; review 8 of 9 fixed, security none ≥ 8.
-- **S59.3.2 Phase 13 · Email, part 2 (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md) Part 2, [PR #90](https://github.com/Kakumrkr/Everyday-Pepper/pull/90)). Full entry in [session-log.md](session-log.md).
-  - **Built:** new requests by email to `help@<inbound domain>` (a member's in their business, a verified stranger's as a public request, unverified held); bounces and complaints stop the requester's support mail; the console's Held view (Accept, Discard), "N held" in the inbox header (top-up), "Mail stopped" + Resume; inbound counts for S59.4; migration 0072; AC-X-40…46. Off until S57.
-  - **Checks:** `pnpm check` green; affected integration green (isolation 443/443); ops + gallery 13; review 7 of 10 fixed, security none ≥ 8.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.4.2 (user, 2026-11-08):** "I'm leaving up to you… keep in mind before you start work" (D-1 no split; D-2 the definitions; D-3 chat tokens at the strong model's rate; D-4 rebook rate tracked vs the period before). **Claude:** a second definer, no temp table; the change kept only from enough cases; kit `Trend`; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.4 (user, 2026-11-08):** "Go ahead with your recommendations and complete successful" (D-1 split → S59.4.2; D-2 aggregate-only definer; D-3 7/30 days, minimum 5; D-4 median ≤ 4 h, same day). **Claude:** support requests per business; cancellations timed by the audit log; answered offers; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.3.2 (user, 2026-11-08):** "Start with ur recommend" (D-1 latest chosen business; D-2 verified strangers → public request, else held; D-3 hard bounces/complaints stop support mail, Resume audited; D-4 one session). Full wording in [decisions.md](decisions.md).
 - **S59.3 (user, 2026-11-08):** "rethink with your decisions… world-class", then "Go a head with ur recommendation" (D-1 split → S59.3.2; D-2 members who may read, DMARC/DKIM, others held; D-3 webhook stores, worker fetches; D-4 limits and notes; D-6 ADR-0063). **Claude:** request-named versioned addresses; one transaction lands and records; follow-ups take later replies; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
@@ -94,11 +95,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.4.2 | Pilot metrics, part 2: weekly active owners, cards vs chat, AI approval/correction/undo, AI cost, rebook rate | 13 | Every metric has a number |
 | S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
