@@ -248,6 +248,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
                 authservId: inbound.authservId,
                 source: inbound.source,
                 store: screenshots,
+                mailer,
                 clock,
               });
               // Counts only: never an address, a subject or a request.

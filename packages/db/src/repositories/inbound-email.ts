@@ -148,7 +148,7 @@ export type InboundOutcome =
 
 const SenderHash = z.string().regex(/^[0-9a-f]{64}$/);
 
-/** Records what became of a taken email; `senderHash` names its sender for the loop guard. */
+/** Records what became of a taken email; `senderHash`, when given, names its sender. */
 export async function finishInboundEmail(
   tx: TenantTx,
   id: string,
@@ -176,8 +176,9 @@ export async function finishInboundEmail(
       fromAddress: held ? outcome.fromAddress.slice(0, 254) : null,
       heldText: held ? outcome.heldText.slice(0, 4000) : null,
       heldSubject: held && outcome.heldSubject ? outcome.heldSubject.slice(0, 200) : null,
-      senderHash:
-        senderHash === undefined || senderHash === null ? null : SenderHash.parse(senderHash),
+      ...(senderHash !== undefined && {
+        senderHash: senderHash === null ? null : SenderHash.parse(senderHash),
+      }),
       leaseUntil: null,
       processedAt: now,
     })
@@ -220,6 +221,18 @@ export async function countInboundLanded(
       ),
     );
   return row?.count ?? 0;
+}
+
+/** Names a taken email's sender (SHA-256 of the address) once it is fetched: the loop guard's key. */
+export async function setInboundSender(
+  tx: TenantTx,
+  id: string,
+  senderHash: string,
+): Promise<void> {
+  await tx
+    .update(inboundEmails)
+    .set({ senderHash: SenderHash.parse(senderHash) })
+    .where(and(eq(inboundEmails.id, Id.parse(id)), eq(inboundEmails.status, 'received')));
 }
 
 /**
