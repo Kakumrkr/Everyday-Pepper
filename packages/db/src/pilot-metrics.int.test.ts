@@ -175,6 +175,8 @@ beforeAll(async () => {
   await business('Charlie');
   const staff = newId();
   const refill = newId();
+  const edited = newId();
+  const other = newId();
   const claimed = newId();
   const t1 = newId();
   const t2 = newId();
@@ -212,6 +214,11 @@ beforeAll(async () => {
       funnel(b.id, visit, 'waitlisted', minutes(8)),
     ])(newId()),
     funnel(a.id, newId(), 'service', minutes(60 * 24 * 8)),
+    // Started in the period, booked after its end: a start, not (yet) a booking.
+    ...((visit) => [
+      funnel(b.id, visit, 'service', minutes(5)),
+      funnel(b.id, visit, 'done', ahead(5)),
+    ])(newId()),
 
     // Past visits: 3 kept and 1 no-show at Alpha, 1 no-show at Bravo; an imported no-show, a
     // cancelled past one, a future one and one before the period are left out.
@@ -253,9 +260,34 @@ beforeAll(async () => {
       updatedAt: minutes(90),
     }),
 
-    // Offers: Alpha 2 (1 claimed), Bravo 1 expired; one before the period.
+    // Cancelled 2 h ago by its audit entry, changed again since (updated_at 10 min ago), and
+    // refilled an hour ago: refilled, timed from the cancellation.
+    booking(a.id, {
+      id: edited,
+      staff: other,
+      startsAt: ahead(60 * 72),
+      status: 'cancelled',
+      updatedAt: minutes(10),
+    }),
+    [
+      `INSERT INTO audit_log (id, tenant_id, actor_kind, action, entity_type, entity_id, before,
+                              after, created_at)
+       VALUES ($1, $2, 'user', 'booking.updated', 'booking', $3, '{"status":"confirmed"}',
+               '{"status":"cancelled"}', $4)`,
+      [newId(), a.id, edited, minutes(120)],
+    ],
+    booking(a.id, {
+      staff: other,
+      startsAt: ahead(60 * 72 + 15),
+      status: 'confirmed',
+      createdAt: minutes(60),
+    }),
+
+    // Offers: Alpha 2 answered (1 claimed) and 1 still waiting (left out), Bravo 1 expired;
+    // one before the period.
     offer(a.id, 'claimed', minutes(55), claimed),
     offer(a.id, 'taken', minutes(54)),
+    offer(a.id, 'offered', minutes(52)),
     offer(b.id, 'expired', minutes(53)),
     offer(b.id, 'claimed', minutes(60 * 24 * 8), refill),
 
@@ -305,14 +337,14 @@ describe('platform metrics (S59.4, AC-X-47)', () => {
       reachedFirstBooking: 1,
       minutesToBookable: 10,
       minutesToFirstBooking: 20,
-      funnelStarts: 4,
+      funnelStarts: 5,
       funnelConfirmed: 1,
       funnelReachedCode: 3,
       funnelLeftAtCode: 1,
       pastBookings: 5,
       noShows: 2,
-      cancelledSlots: 3,
-      refilledSlots: 1,
+      cancelledSlots: 4,
+      refilledSlots: 2,
       offersSent: 3,
       offersClaimed: 1,
     });

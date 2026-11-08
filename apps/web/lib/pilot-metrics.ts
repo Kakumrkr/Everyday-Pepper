@@ -42,7 +42,7 @@ const SAMPLE_NOUN: Readonly<Record<PilotMetricKey, [string, string]>> = {
   no_show_rate: ['past visit', 'past visits'],
   fill_rate: ['cancelled slot', 'cancelled slots'],
   waitlist_conversion: ['offer', 'offers'],
-  support_requests: ['bookable business', 'bookable businesses'],
+  support_requests: ['business', 'businesses'],
   first_reply_time: ['answered request', 'answered requests'],
 };
 
@@ -57,9 +57,10 @@ export const PILOT_METRIC_GROUPS: readonly { title: string; keys: readonly Pilot
   { title: 'Support', keys: ['support_requests'] },
 ];
 
-/** Minutes in words: "45 s", "9 min", "1 h 36 min", "1 d 2 h". */
+/** Minutes in words: "45 s", "9 min", "1 h 36 min", "1 d 2 h" (each unit rolls over). */
 export function minutesWords(minutes: number): string {
-  if (minutes < 1) return `${String(Math.round(minutes * 60))} s`;
+  const seconds = Math.round(minutes * 60);
+  if (seconds < 60) return `${String(seconds)} s`;
   const whole = Math.round(minutes);
   if (whole < 60) return `${String(whole)} min`;
   if (whole < 24 * 60) {
@@ -67,8 +68,9 @@ export function minutesWords(minutes: number): string {
     const rest = whole % 60;
     return rest === 0 ? `${String(hours)} h` : `${String(hours)} h ${String(rest)} min`;
   }
-  const days = Math.floor(whole / (24 * 60));
-  const hours = Math.round((whole % (24 * 60)) / 60);
+  const totalHours = Math.round(whole / 60);
+  const days = Math.floor(totalHours / 24);
+  const hours = totalHours % 24;
   return hours === 0 ? `${String(days)} d` : `${String(days)} d ${String(hours)} h`;
 }
 

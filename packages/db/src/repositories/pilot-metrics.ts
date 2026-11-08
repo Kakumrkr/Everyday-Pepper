@@ -101,15 +101,17 @@ export async function readSupportMetrics(
   const until = z.date().parse(period.until).toISOString();
   const { rows } = await tx.execute(sql`
     WITH opened AS (
-      SELECT DISTINCT ON (m.thread_id) m.thread_id, m.created_at AS opened_at, m.channel
+      SELECT DISTINCT ON (m.thread_id) m.tenant_id, m.thread_id, m.created_at AS opened_at,
+             m.channel
         FROM support_messages m
-       WHERE m.author_kind = 'member'
+       WHERE m.author_kind = 'member' AND m.created_at <= ${until}::timestamptz
        ORDER BY m.thread_id, m.created_at, m.id
     ),
     requests AS (
       SELECT o.opened_at, o.channel,
              (SELECT min(p.created_at) FROM support_messages p
-               WHERE p.thread_id = o.thread_id AND p.author_kind = 'pepper'
+               WHERE p.tenant_id = o.tenant_id AND p.thread_id = o.thread_id
+                 AND p.author_kind = 'pepper'
                  AND p.created_at >= o.opened_at AND p.created_at <= ${until}::timestamptz)
                AS replied_at
         FROM opened o
@@ -118,7 +120,7 @@ export async function readSupportMetrics(
     replies AS (
       SELECT m.channel
         FROM support_messages m
-        JOIN opened o ON o.thread_id = m.thread_id
+        JOIN opened o ON o.tenant_id = m.tenant_id AND o.thread_id = m.thread_id
        WHERE m.author_kind = 'member' AND m.created_at > o.opened_at
          AND m.created_at >= ${since}::timestamptz AND m.created_at <= ${until}::timestamptz
     ),

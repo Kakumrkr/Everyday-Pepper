@@ -87,13 +87,12 @@ export function buildPilotMetrics(input: {
       share(platform.offersClaimed, platform.offersSent),
       platform.offersSent,
     ),
-    // A rate per business, not of cases: one bookable business is enough to show it.
+    // A rate per business (every business's requests over every business), not of cases: one
+    // business is enough to show it.
     judgePilotMetric(
       'support_requests',
-      platform.bookableBusinesses === 0
-        ? null
-        : support.requests / platform.bookableBusinesses / weeks,
-      platform.bookableBusinesses,
+      platform.businesses === 0 ? null : support.requests / platform.businesses / weeks,
+      platform.businesses,
       { minimum: 1 },
     ),
     // Met only when every request also had its first reply within a day (C14 "the same day").

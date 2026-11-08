@@ -51,9 +51,9 @@ BEGIN
     SELECT a.account_id INTO owner_of FROM activation_events a
      WHERE a.tenant_id = business AND a.kind = 'business_created';
     SELECT a.occurred_at INTO bookable_at FROM activation_events a
-     WHERE a.tenant_id = business AND a.kind = 'bookable';
+     WHERE a.tenant_id = business AND a.kind = 'bookable' AND a.occurred_at <= p_now;
     SELECT a.occurred_at INTO first_at FROM activation_events a
-     WHERE a.tenant_id = business AND a.kind = 'first_booking';
+     WHERE a.tenant_id = business AND a.kind = 'first_booking' AND a.occurred_at <= p_now;
     IF bookable_at IS NOT NULL THEN
       bookable_businesses := bookable_businesses + 1;
     END IF;
@@ -77,7 +77,7 @@ BEGIN
                bool_or(f.step = 'waitlisted') AS waitlisted,
                bool_or(f.step = 'verify') AS code
           FROM booking_funnel_events f
-         WHERE f.tenant_id = business
+         WHERE f.tenant_id = business AND f.occurred_at <= p_now
          GROUP BY f.visit_id
         HAVING min(f.occurred_at) >= p_since AND min(f.occurred_at) <= p_now
       ) v;
@@ -93,32 +93,45 @@ BEGIN
     past_bookings := past_bookings + n;
     no_shows := no_shows + m;
 
-    -- A slot cancelled ahead of its time (the cancellation is its last change), refilled when
-    -- another visit with the same staff member that overlaps it was booked after.
+    -- A slot cancelled ahead of its time, refilled when another visit with the same staff
+    -- member that overlaps it was booked after. The cancellation's time is its audit entry's
+    -- (a later change to the row moves updated_at), else the row's last change.
     SELECT count(*)::integer,
            count(*) FILTER (WHERE EXISTS (
              SELECT 1 FROM bookings r
-              WHERE r.tenant_id = business AND r.staff_member_id = b.staff_member_id AND r.id <> b.id
-                AND r.status <> 'cancelled' AND r.source <> 'import'
-                AND r.created_at >= b.updated_at
-                AND r.starts_at < b.ends_at AND r.ends_at > b.starts_at))::integer
+              WHERE r.tenant_id = business AND r.staff_member_id = c.staff_member_id
+                AND r.id <> c.id AND r.status <> 'cancelled' AND r.source <> 'import'
+                AND r.created_at >= c.cancelled_at AND r.created_at <= p_now
+                AND r.starts_at < c.ends_at AND r.ends_at > c.starts_at))::integer
       INTO n, m
-      FROM bookings b
-     WHERE b.tenant_id = business AND b.status = 'cancelled' AND b.source <> 'import'
-       AND b.updated_at >= p_since AND b.updated_at <= p_now AND b.starts_at > b.updated_at;
+      FROM (
+        SELECT b.id, b.staff_member_id, b.starts_at, b.ends_at,
+               COALESCE((
+                 SELECT min(l.created_at) FROM audit_log l
+                  WHERE l.tenant_id = business AND l.entity_type = 'booking'
+                    AND l.entity_id = b.id AND l.action = 'booking.updated'
+                    AND l.after ->> 'status' = 'cancelled'), b.updated_at) AS cancelled_at
+          FROM bookings b
+         WHERE b.tenant_id = business AND b.status = 'cancelled' AND b.source <> 'import'
+      ) c
+     WHERE c.cancelled_at >= p_since AND c.cancelled_at <= p_now
+       AND c.starts_at > c.cancelled_at;
     cancelled_slots := cancelled_slots + n;
     refilled_slots := refilled_slots + m;
 
+    -- Offers sent in the period and no longer waiting for an answer (claimed, taken by
+    -- another client, or expired).
     SELECT count(*)::integer, count(*) FILTER (WHERE o.status = 'claimed')::integer INTO n, m
       FROM waitlist_offers o
-     WHERE o.tenant_id = business AND o.created_at >= p_since AND o.created_at <= p_now;
+     WHERE o.tenant_id = business AND o.created_at >= p_since AND o.created_at <= p_now
+       AND o.status <> 'offered';
     offers_sent := offers_sent + n;
     offers_claimed := offers_claimed + m;
   END LOOP;
   PERFORM set_config('app.tenant_id', COALESCE(tenant, ''), true);
   PERFORM set_config('app.user_id', COALESCE(member, ''), true);
 
-  -- Each sign-up of the period with its first business's steps (an owner's earliest).
+  -- Each sign-up of the period with its owner's earliest steps in any business they created.
   SELECT count(*)::integer AS signups,
          count(*) FILTER (WHERE s.bookable_at IS NOT NULL)::integer AS reached_bookable,
          count(*) FILTER (WHERE s.first_at IS NOT NULL)::integer AS reached_first_booking,

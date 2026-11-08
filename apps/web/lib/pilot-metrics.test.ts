@@ -30,6 +30,8 @@ describe('the pilot metrics page’s words (S59.4)', () => {
     expect(minutesWords(95.6)).toBe('1 h 36 min');
     expect(minutesWords(26 * 60)).toBe('1 d 2 h');
     expect(minutesWords(48 * 60)).toBe('2 d');
+    expect(minutesWords(2850)).toBe('2 d');
+    expect(minutesWords(0.999)).toBe('1 min');
   });
 
   it('says each number in its unit, and none as a dash', () => {

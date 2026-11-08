@@ -785,7 +785,7 @@ export async function readPilotMetrics(
   return asOperator(db, operator, 'metrics.read', null, async (tx) => {
     const platform = await readPlatformMetrics(tx, { since, until });
     const support = await readSupportMetrics(tx, { since, until });
-    const outcomes = await countInboundByOutcome(tx, since);
+    const outcomes = await countInboundByOutcome(tx, since, until);
     const inbound = (status: 'held' | 'ignored' | 'refused') =>
       outcomes.filter((row) => row.status === status).reduce((sum, row) => sum + row.count, 0);
     return buildPilotMetrics({

@@ -96,7 +96,7 @@ describe('buildPilotMetrics', () => {
         sample: 4,
         status: 'not_enough',
       },
-      support_requests: { key: 'support_requests', value: 3, sample: 2, status: 'missed' },
+      support_requests: { key: 'support_requests', value: 1.5, sample: 4, status: 'missed' },
       first_reply_time: { key: 'first_reply_time', value: 95.6, sample: 5, status: 'met' },
     });
     expect(page.firstReply).toMatchObject({ medianMinutes: 95.6, slowestMinutes: 600 });
@@ -121,12 +121,12 @@ describe('buildPilotMetrics', () => {
     expect(waiting.metrics.find((m) => m.key === 'first_reply_time')?.status).toBe('missed');
   });
 
-  it('counts support requests a business a week over 30 days, none without a bookable business', () => {
+  it('counts support requests a business a week over 30 days, none without a business', () => {
     const month = buildPilotMetrics({ ...period, days: 30, platform, support, inbound });
-    expect(month.metrics.find((m) => m.key === 'support_requests')?.value).toBe(0.7);
+    expect(month.metrics.find((m) => m.key === 'support_requests')?.value).toBe(0.4);
     const none = buildPilotMetrics({
       ...period,
-      platform: { ...platform, bookableBusinesses: 0 },
+      platform: { ...platform, businesses: 0 },
       support,
       inbound,
     });
