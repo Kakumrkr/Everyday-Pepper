@@ -118,25 +118,62 @@ export function senderVerdict(
   if (authservId === null) return 'unknown';
   const top = headerValues(email, 'authentication-results')[0];
   if (top === undefined) return 'unknown';
-  const [server, ...rest] = top.split(';');
+  // Quoted strings and comments (RFC 8601) are dropped first: a value the server copied from the
+  // sender (an envelope address) can't then smuggle in a `;` and a result of its own.
+  const plain = withoutQuotesAndComments(top);
+  const [server, ...rest] = plain.split(';');
   const id = server?.trim().split(/\s+/)[0]?.toLowerCase();
   if (id !== authservId.toLowerCase()) return 'unknown';
   const fromDomain = domainOf(email.from);
+  let passed = false;
   for (const part of rest.map((item) => item.trim())) {
     const dmarc = /^dmarc=(\w+)/i.exec(part);
-    if (dmarc?.[1]?.toLowerCase() === 'pass') {
+    if (dmarc?.[1] !== undefined) {
+      const headerFrom = /header\.from=([^\s;]+)/i.exec(part)?.[1]?.toLowerCase();
+      // A DMARC failure for the From domain decides, whatever else passed.
+      if (
+        dmarc[1].toLowerCase() !== 'pass' &&
+        (headerFrom === undefined || headerFrom === fromDomain)
+      ) {
+        return 'fail';
+      }
       // Only a pass for the From domain itself counts.
-      const headerFrom = /header\.from=([^\s;]+)/i.exec(part)?.[1];
-      if (headerFrom?.toLowerCase() === fromDomain) return 'pass';
+      if (dmarc[1].toLowerCase() === 'pass' && headerFrom === fromDomain) passed = true;
     }
     const dkim = /^dkim=(\w+)/i.exec(part);
     if (dkim?.[1]?.toLowerCase() === 'pass') {
       const signer =
         /header\.d=([^\s;]+)/i.exec(part)?.[1] ?? /header\.i=@?([^\s;]+)/i.exec(part)?.[1];
-      if (signer !== undefined && aligned(signer.replace(/^.*@/, ''), fromDomain)) return 'pass';
+      if (signer !== undefined && aligned(signer.replace(/^.*@/, ''), fromDomain)) passed = true;
     }
   }
+  if (passed) return 'pass';
   return 'fail';
+}
+
+/** A header value without its `"…"` quoted strings and `(…)` comments (nested, escapes kept out). */
+function withoutQuotesAndComments(value: string): string {
+  let out = '';
+  let depth = 0;
+  let quoted = false;
+  for (let i = 0; i < value.length; i += 1) {
+    const char = value.charAt(i);
+    if (char === '\\' && (quoted || depth > 0)) {
+      i += 1;
+      continue;
+    }
+    if (quoted) {
+      if (char === '"') quoted = false;
+      continue;
+    }
+    if (char === '(') depth += 1;
+    else if (char === ')' && depth > 0) depth -= 1;
+    else if (depth === 0) {
+      if (char === '"') quoted = true;
+      else out += char;
+    }
+  }
+  return out;
 }
 
 /** Splits a `References` header into its ids, angle brackets included. */

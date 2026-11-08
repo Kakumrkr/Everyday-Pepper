@@ -68,6 +68,21 @@ describe('the sender check (ADR-0063 §4)', () => {
     expect(verdict(`${SES}; dkim=pass header.d=sendgrid.net`)).toBe('fail');
     expect(verdict(`${SES}; dkim=fail header.d=juniper.test; spf=pass`)).toBe('fail');
     expect(verdict(`AMAZONSES.COM; DMARC=PASS header.from=MAIL.JUNIPER.TEST`)).toBe('pass');
+    // A result smuggled in through a value the server copied from the sender counts for nothing,
+    // and a DMARC failure for the From domain decides.
+    expect(
+      verdict(
+        `${SES}; spf=pass smtp.mailfrom="a;dkim=pass header.d=mail.juniper.test b"@evil.test; dmarc=fail header.from=mail.juniper.test`,
+      ),
+    ).toBe('fail');
+    expect(
+      verdict(
+        `${SES}; spf=pass (sender "x;dkim=pass header.d=juniper.test") smtp.mailfrom=evil.test; dkim=none`,
+      ),
+    ).toBe('fail');
+    expect(
+      verdict(`${SES}; dkim=pass header.d=juniper.test; dmarc=fail header.from=mail.juniper.test`),
+    ).toBe('fail');
   });
 });
 
