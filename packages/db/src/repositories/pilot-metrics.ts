@@ -110,22 +110,22 @@ export async function readSupportMetrics(
       SELECT o.opened_at, o.channel,
              (SELECT min(p.created_at) FROM support_messages p
                WHERE p.thread_id = o.thread_id AND p.author_kind = 'pepper'
-                 AND p.created_at >= o.opened_at AND p.created_at < ${until}::timestamptz)
+                 AND p.created_at >= o.opened_at AND p.created_at <= ${until}::timestamptz)
                AS replied_at
         FROM opened o
-       WHERE o.opened_at >= ${since}::timestamptz AND o.opened_at < ${until}::timestamptz
+       WHERE o.opened_at >= ${since}::timestamptz AND o.opened_at <= ${until}::timestamptz
     ),
     replies AS (
       SELECT m.channel
         FROM support_messages m
         JOIN opened o ON o.thread_id = m.thread_id
        WHERE m.author_kind = 'member' AND m.created_at > o.opened_at
-         AND m.created_at >= ${since}::timestamptz AND m.created_at < ${until}::timestamptz
+         AND m.created_at >= ${since}::timestamptz AND m.created_at <= ${until}::timestamptz
     ),
     public_requests AS (
       SELECT r.channel, r.status
         FROM public_support_requests r
-       WHERE r.created_at >= ${since}::timestamptz AND r.created_at < ${until}::timestamptz
+       WHERE r.created_at >= ${since}::timestamptz AND r.created_at <= ${until}::timestamptz
     )
     SELECT
       (SELECT count(*) FROM requests)::int AS requests,

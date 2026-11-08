@@ -79,7 +79,7 @@ BEGIN
           FROM booking_funnel_events f
          WHERE f.tenant_id = business
          GROUP BY f.visit_id
-        HAVING min(f.occurred_at) >= p_since AND min(f.occurred_at) < p_now
+        HAVING min(f.occurred_at) >= p_since AND min(f.occurred_at) <= p_now
       ) v;
     funnel_starts := funnel_starts + visits.starts;
     funnel_confirmed := funnel_confirmed + visits.confirmed;
@@ -105,13 +105,13 @@ BEGIN
       INTO n, m
       FROM bookings b
      WHERE b.tenant_id = business AND b.status = 'cancelled' AND b.source <> 'import'
-       AND b.updated_at >= p_since AND b.updated_at < p_now AND b.starts_at > b.updated_at;
+       AND b.updated_at >= p_since AND b.updated_at <= p_now AND b.starts_at > b.updated_at;
     cancelled_slots := cancelled_slots + n;
     refilled_slots := refilled_slots + m;
 
     SELECT count(*)::integer, count(*) FILTER (WHERE o.status = 'claimed')::integer INTO n, m
       FROM waitlist_offers o
-     WHERE o.tenant_id = business AND o.created_at >= p_since AND o.created_at < p_now;
+     WHERE o.tenant_id = business AND o.created_at >= p_since AND o.created_at <= p_now;
     offers_sent := offers_sent + n;
     offers_claimed := offers_claimed + m;
   END LOOP;
@@ -136,7 +136,7 @@ BEGIN
              (SELECT min(x.first_at) FROM unnest(owners, first_ats) AS x(owner, first_at)
                WHERE x.owner = e.account_id) AS first_at
         FROM signup_events e
-       WHERE e.occurred_at >= p_since AND e.occurred_at < p_now
+       WHERE e.occurred_at >= p_since AND e.occurred_at <= p_now
     ) s;
 
   RETURN jsonb_build_object(

@@ -4,6 +4,7 @@ import {
   OperatorHeldDecisionSchema,
   OperatorHeldListSchema,
   OperatorInboundCountsSchema,
+  type PilotMetrics,
   OperatorInboxQuerySchema,
   OperatorInboxSchema,
   OperatorPublicChangeSchema,
@@ -50,6 +51,8 @@ import {
   countEmailSuppressions,
   countHeldInboundEmails,
   countInboundByOutcome,
+  readPlatformMetrics,
+  readSupportMetrics,
   countOperatorWaiting,
   discardHeldInboundEmail,
   lockHeldInboundEmail,
@@ -100,6 +103,7 @@ import {
   SupportScreenshotsNotAttachableError,
   SupportThreadNotFoundError,
 } from '../errors.js';
+import { buildPilotMetrics } from './pilot-metrics.js';
 import { answerInThread, type SupportOptions } from './support.js';
 import {
   imageOf,
@@ -764,6 +768,34 @@ export async function resumePublicMail(
       now,
     });
     return toPublicRequest(tx, id);
+  });
+}
+
+/**
+ * The pilot metrics page (S59.4, AC-X-47…49): every business together over the last `days`,
+ * counts and medians only, behind one `metrics.read` access log row.
+ */
+export async function readPilotMetrics(
+  db: Database,
+  operator: Operator,
+  options: { days: 7 | 30; clock?: Clock },
+): Promise<PilotMetrics> {
+  const until = (options.clock ?? systemClock).now();
+  const since = new Date(until.getTime() - options.days * 24 * 60 * 60 * 1000);
+  return asOperator(db, operator, 'metrics.read', null, async (tx) => {
+    const platform = await readPlatformMetrics(tx, { since, until });
+    const support = await readSupportMetrics(tx, { since, until });
+    const outcomes = await countInboundByOutcome(tx, since);
+    const inbound = (status: 'held' | 'ignored' | 'refused') =>
+      outcomes.filter((row) => row.status === status).reduce((sum, row) => sum + row.count, 0);
+    return buildPilotMetrics({
+      days: options.days,
+      since,
+      until,
+      platform,
+      support,
+      inbound: { held: inbound('held'), ignored: inbound('ignored'), refused: inbound('refused') },
+    });
   });
 }
 
