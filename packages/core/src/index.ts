@@ -6,6 +6,7 @@ export * from './fingerprint.js';
 export * from './health.js';
 export * from './invite-token.js';
 export * from './unsubscribe-token.js';
+export * from './support-reply-address.js';
 export * from './membership-rules.js';
 export * from './outbox.js';
 export * from './permissions.js';

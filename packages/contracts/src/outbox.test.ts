@@ -51,8 +51,24 @@ describe('outbox schemas', () => {
     { to: 'ana@example.com', subject: 'S', text: '' },
     { to: 'ana@example.com', subject: 'S'.repeat(301), text: 'T' },
     { to: 'ana@example.com', subject: 'S', text: 'T'.repeat(50_001) },
+    { to: 'ana@example.com', subject: 'S', text: 'T', inReplyTo: 'no-brackets@x.test' },
+    { to: 'ana@example.com', subject: 'S', text: 'T', inReplyTo: '<a@x.test>\r\nBcc: b@x.test' },
+    { to: 'ana@example.com', subject: 'S', text: 'T', references: [] },
+    { to: 'ana@example.com', subject: 'S', text: 'T', autoSubmitted: false },
   ])('rejects the email %#', (email) => {
     expect(OutboxEmailSchema.safeParse(email).success).toBe(false);
+  });
+
+  it('carries the threading headers of support mail (S59.3)', () => {
+    const email = OutboxEmailSchema.parse({
+      to: 'ana@example.com',
+      subject: 'S',
+      text: 'T',
+      inReplyTo: '<support.pep-7k2m9q@reply.example.com>',
+      references: ['<support.pep-7k2m9q@reply.example.com>'],
+      autoSubmitted: true,
+    });
+    expect(email.references).toEqual(['<support.pep-7k2m9q@reply.example.com>']);
   });
 
   it('backs off from 30 seconds, doubling, to at most an hour', () => {

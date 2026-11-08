@@ -35,6 +35,9 @@ export const OutboxDedupeKeySchema = z
 export type OutboxDedupeKey = z.infer<typeof OutboxDedupeKeySchema>;
 
 /** One plain-text email, as queued. Its content is stored encrypted and cleared once sent. */
+/** One message id as a header carries it: `<local@domain>`, no spaces or line breaks. */
+export const MessageIdHeaderSchema = z.string().regex(/^<[^<>\s@]{1,200}@[^<>\s@]{1,100}>$/);
+
 export const OutboxEmailSchema = z.object({
   to: z.email().max(254),
   // One line: a line break in a name must not start another header.
@@ -54,6 +57,12 @@ export const OutboxEmailSchema = z.object({
     .optional(),
   /** Where a reply goes, when not to the sender (S59: support mail, AC-X-14/16). */
   replyTo: z.email().max(254).optional(),
+  /** The message this one answers (`In-Reply-To`, S59.3: a support request's root id). */
+  inReplyTo: MessageIdHeaderSchema.optional(),
+  /** The conversation it belongs to (`References`, S59.3), oldest first. */
+  references: z.array(MessageIdHeaderSchema).min(1).max(10).optional(),
+  /** Sent by a job, not a person (`Auto-Submitted: auto-generated`, RFC 3834; S59.3). */
+  autoSubmitted: z.literal(true).optional(),
 });
 export type OutboxEmail = z.infer<typeof OutboxEmailSchema>;
 export type OutboxEmailInput = z.input<typeof OutboxEmailSchema>;

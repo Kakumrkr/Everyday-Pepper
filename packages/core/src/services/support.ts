@@ -59,6 +59,11 @@ import {
   SupportThreadNotFoundError,
 } from '../errors.js';
 import type { Mailer } from '../outbox.js';
+import {
+  supportReplyAddress,
+  supportReplyKeysFrom,
+  supportThreadRootId,
+} from '../support-reply-address.js';
 import { queueEmail } from './outbox.js';
 import { attachScreenshotsToMessage, screenshotsByMessage } from './support-screenshots.js';
 
@@ -78,7 +83,46 @@ export interface SupportOptions {
   baseUrl: string;
   /** The api's release, recorded with each request. */
   release: string;
+  /**
+   * Where members' emailed replies come back (`INBOUND_EMAIL_DOMAIN`, S59.3, ADR-0063); `null`
+   * or absent: their emails' `Reply-To` is the team's address.
+   */
+  inboundDomain?: string | null;
   clock?: Clock;
+}
+
+/** The first line of a member's email about a request: their reply is what they write above. */
+export const SUPPORT_REPLY_ABOVE = '— Reply above this line to answer —';
+
+/**
+ * How an email to a member about request `reference` routes their answer (AC-X-32): with an
+ * inbound domain, `Reply-To` the request's signed address, `In-Reply-To`/`References` its root
+ * id and the "Reply above this line" first line; otherwise `Reply-To` the team (if any).
+ */
+export function supportReplyRouting(
+  options: { outboxKey: Buffer; supportEmail: string | null; inboundDomain?: string | null },
+  reference: string,
+): {
+  headers: { replyTo?: string; inReplyTo?: string; references?: string[] };
+  firstLines: string[];
+} {
+  const domain = options.inboundDomain ?? null;
+  if (domain === null) {
+    return {
+      headers: options.supportEmail === null ? {} : { replyTo: options.supportEmail },
+      firstLines: [],
+    };
+  }
+  const keys = supportReplyKeysFrom(options.outboxKey);
+  const root = supportThreadRootId(keys, reference, domain);
+  return {
+    headers: {
+      replyTo: supportReplyAddress(keys, reference, domain),
+      inReplyTo: root,
+      references: [root],
+    },
+    firstLines: [SUPPORT_REPLY_ABOVE, ''],
+  };
 }
 
 /** What the server knows about the request it was sent with. */
@@ -411,23 +455,27 @@ export async function answerInThread(
   if (opener !== undefined) {
     const firstName = firstNameOf(opener.name);
     const link = `${options.baseUrl}/support/${id}`;
+    const routing = supportReplyRouting(options, thread.reference);
     await queueEmail(
       tx,
       {
         to: opener.email,
         subject: `Pepper replied to ${thread.reference}`,
         text: [
+          ...routing.firstLines,
           firstName === '' ? 'Hi,' : `Hi ${firstName},`,
           '',
           `The Pepper team answered your request ${thread.reference}:`,
           '',
           message,
           '',
-          `Read it and reply in the app: ${link}`,
+          routing.firstLines.length > 0
+            ? `Reply to this email, or read it and reply in the app: ${link}`
+            : `Read it and reply in the app: ${link}`,
           '',
           '— The Pepper team',
         ].join('\n'),
-        ...(options.supportEmail !== null && { replyTo: options.supportEmail }),
+        ...routing.headers,
       },
       { key: options.outboxKey, dedupeKey: `support.answered:${written.id}`, now },
     );
