@@ -236,36 +236,68 @@ export async function setInboundSender(
 }
 
 /**
- * Emails to the team's address from one sender since `since` that were taken further than the
- * first checks (the loop guard for new requests: 5 an hour, S59.3.2).
+ * What one sender's emails to the team's address became since `since` (S59.3.2's limits): new
+ * requests opened (a member's or a public one), or new requests held. Replies to a request
+ * never count, so a busy thread doesn't block a new request.
  */
 export async function countInboundFromSender(
   tx: TenantTx,
-  input: { senderHash: string; since: Date },
+  input: {
+    senderHash: string;
+    since: Date;
+    outcome: 'opened' | 'opened_public' | 'held';
+  },
 ): Promise<number> {
+  const outcome =
+    input.outcome === 'held'
+      ? and(eq(inboundEmails.status, 'held'), isNull(inboundEmails.threadId))
+      : and(
+          eq(inboundEmails.status, 'landed'),
+          input.outcome === 'opened_public'
+            ? eq(inboundEmails.reason, 'public_request')
+            : inArray(inboundEmails.reason, ['new_request', 'public_request']),
+        );
   const [row] = await tx
     .select({ count: sql<number>`count(*)::int` })
     .from(inboundEmails)
     .where(
       and(
         eq(inboundEmails.senderHash, SenderHash.parse(input.senderHash)),
-        inArray(inboundEmails.status, ['landed', 'held']),
+        outcome,
         gt(inboundEmails.processedAt, input.since),
       ),
     );
   return row?.count ?? 0;
 }
 
+/** Locks a held email for its review (two operators can't both accept it). */
+export async function lockHeldInboundEmail(
+  tx: TenantTx,
+  id: string,
+): Promise<typeof inboundEmails.$inferSelect | undefined> {
+  const [row] = await tx
+    .select()
+    .from(inboundEmails)
+    .where(and(eq(inboundEmails.id, Id.parse(id)), eq(inboundEmails.status, 'held')))
+    .for('update')
+    .limit(1);
+  return row;
+}
+
 /** Empties held emails older than `before` (sender and text); returns how many. */
 export async function emptyHeldInboundEmails(tx: TenantTx, before: Date): Promise<number> {
   const rows = await tx
     .update(inboundEmails)
-    .set({ fromAddress: null, heldText: null })
+    .set({ fromAddress: null, heldText: null, heldSubject: null })
     .where(
       and(
         eq(inboundEmails.status, 'held'),
         lt(inboundEmails.processedAt, before),
-        or(isNotNull(inboundEmails.fromAddress), isNotNull(inboundEmails.heldText)),
+        or(
+          isNotNull(inboundEmails.fromAddress),
+          isNotNull(inboundEmails.heldText),
+          isNotNull(inboundEmails.heldSubject),
+        ),
       ),
     )
     .returning({ id: inboundEmails.id });

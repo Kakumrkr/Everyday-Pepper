@@ -251,6 +251,7 @@ describe('inbound emails (S59.3, ADR-0063)', () => {
           threadId,
           fromAddress: 'someone@else.test',
           heldText: 'Forwarded to you',
+          heldSubject: 'Fwd: the calendar',
         },
         heldAt,
       ),
@@ -269,6 +270,7 @@ describe('inbound emails (S59.3, ADR-0063)', () => {
       status: 'held',
       fromAddress: null,
       heldText: null,
+      heldSubject: null,
     });
   });
 
@@ -406,20 +408,16 @@ describe('inbound emails, part 2 (S59.3.2, ADR-0063 Part 2)', () => {
     expect(sqlState(stray)).toBe('23514');
   });
 
-  it('counts a sender’s recent emails for the loop guard', async () => {
+  it('counts a sender’s held new requests, not their held replies, for the limits', async () => {
     const since = new Date(Date.now() - 60_000);
-    const before = await withInboundMail(db, (tx) =>
-      countInboundFromSender(tx, { senderHash: HASH, since }),
-    );
+    const count = (outcome: 'opened' | 'held', senderHash = HASH) =>
+      withInboundMail(db, (tx) => countInboundFromSender(tx, { senderHash, since, outcome }));
+    const before = await count('held');
     await held({ tenantId: null, threadId: null });
-    expect(
-      await withInboundMail(db, (tx) => countInboundFromSender(tx, { senderHash: HASH, since })),
-    ).toBe(before + 1);
-    expect(
-      await withInboundMail(db, (tx) =>
-        countInboundFromSender(tx, { senderHash: 'b'.repeat(64), since }),
-      ),
-    ).toBe(0);
+    await held({ tenantId: tenant, threadId });
+    expect(await count('held')).toBe(before + 1);
+    expect(await count('opened')).toBe(0);
+    expect(await count('held', 'b'.repeat(64))).toBe(0);
   });
 
   it('lets a logged operator list, count, accept and discard held mail, and nothing else', async () => {

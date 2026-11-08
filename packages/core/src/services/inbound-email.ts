@@ -4,6 +4,7 @@ import {
   SUPPORT_SCREENSHOT_MAX_BYTES,
   SUPPORT_SCREENSHOTS_PER_DAY,
   SUPPORT_SCREENSHOTS_PER_MESSAGE,
+  SUPPORT_THREADS_PER_DAY,
   SupportContextSchema,
   TenantIdSchema,
   UserIdSchema,
@@ -857,6 +858,10 @@ async function openByEmail(
   context: { options: InboundEmailOptions; now: Date; senderHash: string; accepted: boolean },
 ): Promise<Outcome> {
   const { options, now, senderHash, accepted } = context;
+  // An address no one can be found by, or written back to: nothing to open.
+  if (email.from.length > 254 || !/^[^@\s<>]+@[^@\s<>]+$/.test(email.from)) {
+    return finishUnmatched(db, row.id, 'ignored', 'bad_sender', now);
+  }
   const text = replyTextOf(email, SUPPORT_REPLY_ABOVE);
   const subject = subjectOf(email.subject);
   const verified = accepted || senderVerdict(email, options.authservId) === 'pass';
@@ -864,9 +869,12 @@ async function openByEmail(
   const decision = await withInboundMail(db, async (tx) => {
     if ((await lockReceivedInboundEmail(tx, row.id)) === undefined) return 'gone' as const;
     if (!accepted) {
+      // A verified sender's requests opened, or an unverified one's held: a forged From fills
+      // only its own count, never the real sender's.
       const recent = await countInboundFromSender(tx, {
         senderHash,
         since: new Date(now.getTime() - HOUR_MS),
+        outcome: verified ? 'opened' : 'held',
       });
       if (recent >= LOOP_LIMIT) {
         await finishInboundEmail(tx, row.id, { status: 'ignored', reason: 'loop' }, now);
@@ -894,7 +902,7 @@ async function openByEmail(
   });
   if (decision !== 'open') return decision;
   if (member === undefined) {
-    return openPublicByEmail(db, row, email.from, { subject, text, options, now });
+    return openPublicByEmail(db, row, email.from, { subject, text, options, now, senderHash });
   }
   const tenantId = TenantIdSchema.parse(member.tenantId);
   const userId = UserIdSchema.parse(member.userId);
@@ -1159,7 +1167,13 @@ async function openPublicByEmail(
   db: Database,
   row: ClaimedInboundEmail,
   from: string,
-  input: { subject: string | null; text: string; options: InboundEmailOptions; now: Date },
+  input: {
+    subject: string | null;
+    text: string;
+    options: InboundEmailOptions;
+    now: Date;
+    senderHash: string;
+  },
 ): Promise<Outcome> {
   const { options, now } = input;
   const { body } = newRequestBody(input.subject, input.text);
@@ -1167,6 +1181,16 @@ async function openPublicByEmail(
     if ((await lockReceivedInboundEmail(tx, row.id)) === undefined) return 'gone' as const;
     if (body === '') {
       await finishInboundEmail(tx, row.id, { status: 'refused', reason: 'empty' }, now);
+      return 'refused' as const;
+    }
+    // As many a day as a member may open (no account, so counted by address); told nothing.
+    const today = await countInboundFromSender(tx, {
+      senderHash: input.senderHash,
+      since: new Date(now.getTime() - DAY_MS),
+      outcome: 'opened_public',
+    });
+    if (today >= SUPPORT_THREADS_PER_DAY) {
+      await finishInboundEmail(tx, row.id, { status: 'refused', reason: 'limit' }, now);
       return 'refused' as const;
     }
     const reference = newSupportReference();

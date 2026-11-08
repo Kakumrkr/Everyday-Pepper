@@ -852,6 +852,42 @@ describe('new requests by email to the team’s address (AC-X-40, AC-X-41)', () 
     expect(await lastInbound()).toMatchObject({ reason: 'loop' });
   });
 
+  it('ignores a From no one can be found by', async () => {
+    const { email } = await newRequest('jess@juniper.test');
+    expect((await receive({ ...email, from: '' })).result.ignored).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'bad_sender' });
+  });
+
+  it('never lets forged or held mail, or replies, use up a real sender’s new requests', async () => {
+    const forged = await newRequest('ana@juniper.test', 'new-request-spoofed');
+    for (let i = 0; i < 6; i += 1) {
+      await receive(forged.email);
+      clock.advanceBy(1000);
+    }
+    expect(await lastInbound()).toMatchObject({ reason: 'loop' });
+    const thread = await request(ana, 'owner');
+    const reply = await fixture('gmail-reply', thread, 'ana@juniper.test');
+    for (let i = 0; i < 5; i += 1) {
+      expect((await receive(reply.email)).result.landed).toBe(1);
+      clock.advanceBy(1000);
+    }
+    const real = await newRequest('ana@juniper.test');
+    expect((await receive(real.email)).result.landed).toBe(1);
+    expect(await newestInbound()).toMatchObject({ reason: 'new_request' });
+  });
+
+  it('opens at most 5 public requests a day from one address, quietly', async () => {
+    const { email } = await newRequest('daily@stranger.test');
+    for (let i = 0; i < 5; i += 1) {
+      expect((await receive(email)).result.landed).toBe(1);
+      clock.advanceBy(2 * 60 * 60_000);
+    }
+    const sent = mailer.sent.length;
+    expect((await receive(email)).result.refused).toBe(1);
+    expect(await lastInbound()).toMatchObject({ reason: 'limit' });
+    expect(mailer.sent).toHaveLength(sent);
+  });
+
   it('opens an accepted email as if its check had passed (the operator’s word)', async () => {
     const { email } = await newRequest('ben@juniper.test', 'new-request-spoofed');
     const { providerEmailId } = await receive(email);

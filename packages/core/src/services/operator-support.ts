@@ -52,7 +52,7 @@ import {
   countInboundByOutcome,
   countOperatorWaiting,
   discardHeldInboundEmail,
-  findInboundEmail,
+  lockHeldInboundEmail,
   findSupportMailStops,
   findSupportOpenerEmail,
   finishInboundEmail,
@@ -685,8 +685,9 @@ export async function decideHeldEmail(
   const now = (options.clock ?? systemClock).now();
   const action = decision === 'accept' ? 'held.accept' : 'held.discard';
   await asOperator(db, operator, action, id, async (tx) => {
-    const row = await findInboundEmail(tx, id);
-    if (row?.status !== 'held' || row.fromAddress === null || row.heldText === null) {
+    // Locked: two operators reviewing it at once can't both act on it.
+    const row = await lockHeldInboundEmail(tx, id);
+    if (row === undefined || row.fromAddress === null || row.heldText === null) {
       throw new HeldEmailNotFoundError();
     }
     if (decision === 'discard') {

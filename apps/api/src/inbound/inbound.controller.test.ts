@@ -172,14 +172,14 @@ describe('POST /v1/webhooks/resend (AC-X-33)', () => {
     },
   );
 
-  it('refuses a bounce that names no recipient, and an unsigned one', async () => {
+  it('acknowledges a bounce that names no recipient, recording nothing; refuses an unsigned one', async () => {
     const body = JSON.stringify({ type: 'email.bounced', data: { email_id: 'x' } });
     await request(server)
       .post('/v1/webhooks/resend')
       .set(signed(body))
       .type('application/json')
       .send(body)
-      .expect(400);
+      .expect(200);
     const named = JSON.stringify({ type: 'email.complained', data: { to: ['a@b.test'] } });
     await request(server)
       .post('/v1/webhooks/resend')

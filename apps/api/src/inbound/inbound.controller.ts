@@ -112,16 +112,18 @@ export class InboundController {
       });
     } else if (event.data.type === 'email.bounced' || event.data.type === 'email.complained') {
       // A support email couldn't be delivered, or was marked as spam (S59.3.2, AC-X-42).
+      // Without recipients there is nothing to stop: acknowledged, so it isn't sent again.
       const recipients = event.data.data.to ?? [];
-      if (recipients.length === 0) throw new BadRequestException(apiError('validation_failed'));
-      await recordEmailProblem(this.db, {
-        provider: 'resend',
-        eventId: header(request, 'svix-id') ?? '',
-        type: event.data.type,
-        recipients,
-        bounceType: event.data.data.bounce?.type ?? null,
-        occurredAt: now,
-      });
+      if (recipients.length > 0) {
+        await recordEmailProblem(this.db, {
+          provider: 'resend',
+          eventId: header(request, 'svix-id') ?? '',
+          type: event.data.type,
+          recipients,
+          bounceType: event.data.data.bounce?.type ?? null,
+          occurredAt: now,
+        });
+      }
     }
     return WebhookAckSchema.parse({ received: true });
   }
