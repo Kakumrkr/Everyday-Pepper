@@ -7,7 +7,16 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.3.2 · Email, part 2** (branch `claude/brave-noether-926iik`; ADR-0063 Part 2; AC-X-40…46). Decisions D-1…D-4 in decisions.md.
+- [x] 1 ACs, traceability, ADR Part 2 (docs)
+- [ ] 2 migration 0072 (`email_suppressions`, held rows without a tenant, member lookup, operator actions) + db repos + table lists
+- [ ] 3 contracts (bounce/complaint events, inbox `held`, held items, counts, suppression on thread/request)
+- [ ] 4 core: new requests by email (member / stranger / held), fixtures
+- [ ] 5 core: bounces/complaints → suppression; skip at delivery
+- [ ] 6 core+api: held Accept/Discard, Resume mail, counts — audited
+- [ ] 7 web: Held view, held count in the header (top-up), "Mail stopped"; gallery, ops.spec, screens
+- [ ] 8 close
+Next: task 2.
 
 ## Last sessions
 - **S59.3 Phase 13 · Email both ways (2026-11-08)** ([ADR-0063](../adr/0063-inbound-email.md), [PR #89](https://github.com/Kakumrkr/Everyday-Pepper/pull/89)). Full entry in [session-log.md](session-log.md).
@@ -32,6 +41,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.3.2 (user, 2026-11-08):** "Start with ur recommend" (D-1 latest chosen business; D-2 verified strangers → public request, else held; D-3 hard bounces/complaints stop support mail, Resume audited; D-4 one session). Full wording in [decisions.md](decisions.md).
 - **S59.3 (user, 2026-11-08):** "rethink with your decisions… world-class", then "Go a head with ur recommendation" (D-1 split → S59.3.2; D-2 members who may read, DMARC/DKIM, others held; D-3 webhook stores, worker fetches; D-4 limits and notes; D-6 ADR-0063). **Claude:** request-named versioned addresses; one transaction lands and records; follow-ups take later replies; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.2.3 (user, 2026-11-07):** "go with your decisions… industry level" (3 a message, 10 MB, JPEG/PNG/WebP by content, 20 a day, upload then attach, 24 h sweep, images in the export, ADR-0062 Part 3). **Claude:** 2560 px, paste and drop, a crop-out line; a storage port for core's layer rule; the sweep's hour of margin. Full wording in [decisions.md](decisions.md).
 - **S59.2.2 (user, 2026-11-07):** at the brief "Preapproval with your recommendation" (D-1 screenshots → S59.2.3; D-2 platform saved replies at `/ops/replies`; D-3 auto-close what waits on the business, 7 days, one email; D-4 one 4 h reminder a wait; D-5 the opener rates, a reopen clears). **Claude:** a reopen starts a new wait; public sweep in definer functions; the review's 9 fixes. Full wording in [decisions.md](decisions.md).
