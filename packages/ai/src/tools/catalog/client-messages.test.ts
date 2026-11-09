@@ -1,4 +1,5 @@
 import type { BookingEmailDetails } from '@pepper/appointments';
+import { aiDisclosureLines } from '@pepper/contracts';
 import { DraftRefusedError } from '@pepper/core';
 import { describe, expect, it } from 'vitest';
 import {
@@ -90,8 +91,13 @@ describe('clientMessageEmail', () => {
     expect(email.text).toContain('Skin Fade with Dre, Wednesday, November 4 at 2:00 PM.');
   });
 
-  it("sends a note in the member's words, with the visit and the business", () => {
-    const email = clientMessageEmail(details, { kind: 'note', note: 'Bring your photos!' });
+  it("sends a note in the member's words, with the visit, the AI disclosure and the business (AC-X-55)", () => {
+    const disclosure = aiDisclosureLines('Fade Lab', 'https://app.example.com');
+    const email = clientMessageEmail(details, {
+      kind: 'note',
+      note: 'Bring your photos!',
+      disclosure,
+    });
     expect(email.subject).toBe('A note from Fade Lab');
     expect(email.text).toBe(
       [
@@ -101,8 +107,21 @@ describe('clientMessageEmail', () => {
         '',
         'About your skin fade, Wednesday, November 4 at 2:00 PM.',
         '',
+        'Written with help from Pepper, the AI assistant Fade Lab uses.',
+        'How Pepper works and what it does with your details: https://app.example.com/privacy#ai',
+        '',
         'Fade Lab',
       ].join('\n'),
     );
+  });
+
+  it('says nothing about the AI in its own words: the reminder and "running late" (AC-X-55)', () => {
+    for (const email of [
+      clientMessageEmail(details, { kind: 'reminder' }),
+      clientMessageEmail(details, { kind: 'running_late', minutes: 10, today: true }),
+    ]) {
+      expect(email.text).not.toContain('Pepper');
+      expect(email.text).not.toContain('/privacy');
+    }
   });
 });

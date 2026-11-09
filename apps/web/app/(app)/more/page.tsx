@@ -10,6 +10,7 @@ import {
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { HELP_PATH } from '../../../lib/help';
+import { PRIVACY_PATH } from '@pepper/contracts';
 import { newRequestHref, SUPPORT_PATHS } from '../../../lib/support';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
 import { kitLink } from '../../_components/kit-link';
@@ -97,6 +98,12 @@ export default async function MorePage() {
             href={HELP_PATH}
             renderLink={kitLink}
           />
+          <ListRow
+            title={<HelpTitle icon="lock">Privacy and terms</HelpTitle>}
+            meta="What Pepper keeps, what its AI does, and your rights"
+            href={PRIVACY_PATH}
+            renderLink={kitLink}
+          />
           {current === null ? null : (
             <>
               <ListRow
@@ -168,7 +175,13 @@ export default async function MorePage() {
   );
 }
 
-function HelpTitle({ icon, children }: { icon: 'help' | 'chat' | 'activity'; children: string }) {
+function HelpTitle({
+  icon,
+  children,
+}: {
+  icon: 'help' | 'chat' | 'activity' | 'lock';
+  children: string;
+}) {
   return (
     <span className="flex items-center gap-3">
       <Icon name={icon} className="shrink-0 text-brand" />

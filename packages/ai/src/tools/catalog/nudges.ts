@@ -1,5 +1,6 @@
 import { findAvailabilityIn } from '@pepper/appointments';
 import {
+  aiDisclosureLines,
   ClientIdSchema,
   DRAFT_LIMITS,
   NudgeDraftSchema,
@@ -30,6 +31,12 @@ import { directoryOf, domainOptions, serviceName, staffName, when } from './shar
 // client and their address, the time (still free when approved), the booking link, and the
 // footer with the business's name, mailing address and a one-click unsubscribe link. Its dial
 // action is `message.rebooking_nudge`; Undo takes the email back until it leaves.
+// Words the model wrote say so above the footer, with a link to the privacy policy's AI section
+// (S59.5, ADR-0064, AC-X-55); win-back's words are Pepper's fixed ones and don't.
+
+/** Who wrote a nudge's words: the model, or Pepper's fixed words. */
+export const NudgeWordsBySchema = z.enum(['ai', 'template']);
+export type NudgeWordsBy = z.infer<typeof NudgeWordsBySchema>;
 
 /** The words as stored with the proposal (checked again on every run). */
 const DraftWords = z.strictObject({
@@ -46,6 +53,12 @@ const NudgeArgs = z.strictObject({
   /** The client's last visit (UTC), for *Why?*. */
   lastVisitAt: UtcDateTimeSchema,
   draft: DraftWords,
+  /**
+   * Who wrote the words (S59.5): the model (the morning pass) or Pepper's fixed words (a
+   * win-back tap). Set by the domain, never a model (the tool is never offered to one). A card
+   * edit keeps it: the words still went through the AI ("written with help from").
+   */
+  wordsBy: NudgeWordsBySchema,
 });
 export type NudgeArgs = z.infer<typeof NudgeArgs>;
 
@@ -58,6 +71,8 @@ export function nudgeEmailText(parts: {
   businessName: string;
   mailingAddress: string;
   unsubscribeUrl: string;
+  /** The AI disclosure's lines (`aiDisclosureLines`), or none for Pepper's fixed words. */
+  disclosure: readonly string[];
 }): string {
   return [
     parts.draft.body,
@@ -65,6 +80,7 @@ export function nudgeEmailText(parts: {
     `${parts.staffName} has an opening ${parts.when}. Book it here:`,
     parts.bookingUrl,
     '',
+    ...(parts.disclosure.length === 0 ? [] : [...parts.disclosure, '']),
     '--',
     parts.businessName,
     parts.mailingAddress,
@@ -72,6 +88,15 @@ export function nudgeEmailText(parts: {
     `You get this email because you are a client of ${parts.businessName}.`,
     `Unsubscribe: ${parts.unsubscribeUrl}`,
   ].join('\n');
+}
+
+/** The disclosure a nudge carries (AC-X-55): the model's words say so, Pepper's fixed ones don't. */
+export function nudgeDisclosure(
+  wordsBy: NudgeWordsBy,
+  businessName: string,
+  baseUrl: string,
+): string[] {
+  return wordsBy === 'template' ? [] : aiDisclosureLines(businessName, baseUrl);
 }
 
 /** "on Tuesday, October 27 at 2:00 PM", in the business's time zone. */
@@ -115,7 +140,9 @@ export async function checkNoSensitiveValue(
 export const sendRebookingNudge: WriteTool = {
   kind: 'write',
   name: 'send_rebooking_nudge',
-  version: 1,
+  // 2 (S59.5): `wordsBy`, and the AI disclosure in the email; a proposal from before expires
+  // rather than sending an email its card didn't show.
+  version: 2,
   localTimes: false,
   tier: 'external_or_irreversible',
   guide: {
@@ -197,6 +224,7 @@ export const sendRebookingNudge: WriteTool = {
           businessName: tenant.name,
           mailingAddress: tenant.mailingAddress,
           unsubscribeUrl: `${baseUrl}/unsubscribe/${token}`,
+          disclosure: nudgeDisclosure(args.wordsBy, tenant.name, baseUrl),
         }),
         unsubscribeUrl: `${baseUrl}/v1/public/unsubscribe/${token}`,
       },

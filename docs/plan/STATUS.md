@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-08 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.4.2 done; next **S59.5** (terms, privacy, AI disclosure); S57 waits for the domain
+**Last updated:** 2026-11-09 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.5 done; next **S58a** (operate, local); S57 waits for the domain
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,12 +10,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 (none)
 
 ## Last sessions
+- **S59.5 Phase 13 · Terms, privacy, AI disclosure (2026-11-09)** ([ADR-0064](../adr/0064-legal-pages-and-ai-disclosure.md), [PR #93](https://github.com/Kakumrkr/Everyday-Pepper/pull/93)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `/terms` and `/privacy` from one typed source (`apps/web/lib/legal.ts`; draft banner, "On this page", anchors), linked from sign-up, help, the booking page and More; the AI line in AI-written client email (morning-pass nudges by `wordsBy`, chat notes), linking to `/privacy#ai` (top-up); tools at version 2; AC-X-54…56.
+  - **Checks:** `pnpm check` green; affected integration 22/22; legal 2, help/booking/auth 23, screens 30; review 9 of 10 fixed, security none ≥ 8.
 - **S59.4.2 Phase 13 · Pilot metrics, part 2 (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4 addendum, [PR #92](https://github.com/Kakumrkr/Everyday-Pepper/pull/92)). Full entry in [session-log.md](session-log.md).
   - **Built:** weekly active owners, cards vs chat, AI approval/correction/undo, AI cost a business a month (priced high) and the rebook rate on `/ops/metrics` (`operator_ai_metrics`, migration 0074); every metric's ▲/▼ against the period before (top-up, kit `Trend`); AC-X-50…53.
   - **Checks:** `pnpm check` green; affected integration 22/22; ops 2, gallery 11, screens 30; review 7 of 7 fixed, security none ≥ 8.
-- **S59.4 Phase 13 · Pilot metrics page (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4, [PR #91](https://github.com/Kakumrkr/Everyday-Pepper/pull/91)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `/ops/metrics` for operators: first-reply time with by email vs in the app (top-up), onboarding, booking page, visits and support metrics against their targets, 7 or 30 days; `operator_pilot_metrics` (aggregate-only definer, migration 0073), `metrics.read` logged; AC-X-47…49. AI and engagement metrics → S59.4.2.
-  - **Checks:** `pnpm check` green; affected integration green; ops 2, gallery 11, screens 30; review 8 of 9 fixed, security none ≥ 8.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S59.5 (user, 2026-11-09):** the line only on email whose words the AI wrote (nudges, notes; not review requests or win-back); the recommended wording; a link from the booking page; "world-class… improvise". **Claude:** policies as typed data (the one source), `wordsBy` set by the domain, tools at version 2, More → "Privacy and terms", one public frame. Full wording in [decisions.md](decisions.md).
 - **S59.4.2 (user, 2026-11-08):** "I'm leaving up to you… keep in mind before you start work" (D-1 no split; D-2 the definitions; D-3 chat tokens at the strong model's rate; D-4 rebook rate tracked vs the period before). **Claude:** a second definer, no temp table; the change kept only from enough cases; kit `Trend`; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.4 (user, 2026-11-08):** "Go ahead with your recommendations and complete successful" (D-1 split → S59.4.2; D-2 aggregate-only definer; D-3 7/30 days, minimum 5; D-4 median ≤ 4 h, same day). **Claude:** support requests per business; cancellations timed by the audit log; answered offers; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.3.2 (user, 2026-11-08):** "Start with ur recommend" (D-1 latest chosen business; D-2 verified strangers → public request, else held; D-3 hard bounces/complaints stop support mail, Resume audited; D-4 one session). Full wording in [decisions.md](decisions.md).
@@ -88,18 +89,17 @@ Older ones (S25–S33) are in [decisions.md](decisions.md).
 Raised by Claude at the brief of the session named.
 1. **During Phase 10 (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks; needed in S70).
 2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
-3. **By S57 (Phase 13, after S59–S59.5 and S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
+3. **By S57 (Phase 13, after S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
 5. **Before SMS and Stripe go live (Phases 14–15):** form the LLC, register 10DLC (4–8 weeks), open the Stripe account (test mode needs only a sign-up, from S65).
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S59.5 | Terms + privacy pages (memory), AI disclosure in emails | 13 | Pages live; disclosure tests |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |

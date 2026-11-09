@@ -6,6 +6,7 @@ import { flushSync } from 'react-dom';
 import { checkSignUp, confirmedUrl, ROUTES, withNext, type SignUpField } from '../../lib/account';
 import { sendJson } from '../../lib/client-api';
 import { formPassword, formText } from '../../lib/form';
+import { PRIVACY_PATH, TERMS_PATH } from '@pepper/contracts';
 import { AuthPage, TextLink } from './auth-page';
 import { CheckInbox } from './check-inbox';
 import { Notice } from './form-parts';
@@ -99,6 +100,17 @@ export function SignUpForm({ next = null }: { next?: string | null }) {
           minLength={10}
         />
         {error === null ? null : <Notice tone="error">{error}</Notice>}
+        <p className="m-0 type-caption text-ink-2">
+          By creating an account you agree to Pepper’s{' '}
+          <TextLink href={TERMS_PATH} newTab>
+            terms of service
+          </TextLink>{' '}
+          and{' '}
+          <TextLink href={PRIVACY_PATH} newTab>
+            privacy policy
+          </TextLink>
+          .
+        </p>
       </form>
       <p className="m-0 type-body text-ink-2">
         Already have an account? <TextLink href={withNext(ROUTES.signIn, next)}>Sign in</TextLink>

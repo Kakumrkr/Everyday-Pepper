@@ -98,6 +98,8 @@ export async function draftWinBack(
         // With its year when it was over a year ago (S55.2 top-up).
         lastVisit: visitDateWords(tenant.timeZone, lastVisitAt, now),
       }),
+      // Pepper's fixed words, no model: no AI disclosure (S59.5, AC-X-55).
+      wordsBy: 'template',
     };
     try {
       const proposal = await proposeForBusiness(

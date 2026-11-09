@@ -1,10 +1,12 @@
-# Legal drafts
+# Legal pages
 
-**Drafts written in S51 (2026-11-04), not legal advice.** They describe what Pepper does today, so that a lawyer can review them in S59 before the pilot (playbook Phase 13) and the public pages can be built from them. Nothing here is published yet.
+**The terms of service and the privacy policy live in [`apps/web/lib/legal.ts`](../../apps/web/lib/legal.ts)** since S59.5 ([ADR-0064](../adr/0064-legal-pages-and-ai-disclosure.md)), published at `/terms` and `/privacy` with a draft banner until the lawyer's review. That file is the one source: the S51 Markdown drafts that were here are replaced by it, so the lawyer reviews the live pages (or that file).
 
-- [Terms of service](terms.md): the agreement between Pepper and a business that uses it.
-- [Privacy policy](privacy.md): what Pepper collects about owners, staff and their clients, why, who else handles it, how long it is kept, and how to export or delete it.
+Keep the text in step with behaviour: a change to what Pepper collects, keeps, shares or sends changes `legal.ts` in the same PR (`legal.test.ts` checks the sections and the periods stated).
 
-Placeholders in square brackets (`[Company]`, `[contact email]`, `[address]`, `[state]`) wait for the company and domain (STATUS "Waiting on the user" 3 and 5). Keep both drafts in step with behaviour: a change to what is collected, kept, shared or sent changes these files in the same PR.
-
-Before they go live (S59): the lawyer's review; the final subprocessor list (SMS and payments arrive in Phases 14–15); US state privacy notices if a pilot business is in such a state (for example California); the AI disclosure shown in the app.
+Before they come into force:
+- The lawyer's review, and the dispute clause.
+- The company's legal name, address and governing state, once it is formed (STATUS "Waiting on the user" 3 and 5).
+- The backup retention period, set with the backups (S58a).
+- The final subprocessor list (SMS and payments arrive in Phases 14–15).
+- US state privacy notices if a pilot business is in such a state (for example California).

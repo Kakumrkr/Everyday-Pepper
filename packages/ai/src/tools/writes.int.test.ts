@@ -980,6 +980,10 @@ describe('send_client_message (AC-W2-5/6)', () => {
     const email = await emailText(w, sent.outboxMessageIds[0] ?? '');
     expect(email.subject).toBe('A note from Juniper Hair Studio');
     expect(email.text).toContain('Bring your inspiration photos!');
+    // Words through the chat: the email says the AI helped and links to its section (AC-X-55/56).
+    expect(email.text).toMatch(
+      /\nWritten with help from Pepper, the AI assistant Juniper Hair Studio uses\.\nHow Pepper works and what it does with your details: https?:\/\/\S+\/privacy#ai\n\nJuniper Hair Studio$/,
+    );
   });
 
   it('refuses a reminder once the visit started, a cancelled visit, a client without email and a colleague’s visit', async () => {
