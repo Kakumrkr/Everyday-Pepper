@@ -310,6 +310,10 @@ describe('AC-W4-2: approved, exactly one email per recipient', () => {
     expect(email?.text).toContain('Jess has an opening on Tuesday, November 3 at 9:00 AM');
     expect(email?.text).toMatch(new RegExp(`${BASE_URL}/book/eval-juniper-feed-`));
     expect(email?.text).toContain('Juniper Hair Studio\n12 Juniper Lane\nPortland, OR 97201');
+    // The model wrote the words: the email says so, linking to the AI section (AC-X-55/56).
+    expect(email?.text).toContain(
+      `\n\nWritten with help from Pepper, the AI assistant Juniper Hair Studio uses.\nHow Pepper works and what it does with your details: ${BASE_URL}/privacy#ai\n\n--\n`,
+    );
     expect(email?.text).toMatch(new RegExp(`Unsubscribe: ${BASE_URL}/unsubscribe/[A-Za-z0-9_-]+`));
     expect(email?.unsubscribeUrl).toMatch(new RegExp(`^${BASE_URL}/v1/public/unsubscribe/`));
 

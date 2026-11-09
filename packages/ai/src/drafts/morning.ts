@@ -238,6 +238,8 @@ export async function runMorningDraftsFor(
       startsAt: candidate.slot.startsAt,
       lastVisitAt: candidate.lastVisitAt,
       draft: written.draft,
+      // The model wrote these words: the email says so (S59.5, AC-X-55).
+      wordsBy: 'ai',
     };
     try {
       await withTenant(db, tenantId, async (tx) => {

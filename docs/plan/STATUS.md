@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+**S59.5 · Terms, privacy, AI disclosure** (branch `claude/s59.5-legal-ai-disclosure`; brief approved 2026-11-09; AC-X-54…56, ADR-0064).
+- Decisions (user, 2026-11-09): the line goes only on email whose words the AI wrote (morning-pass nudges, chat notes), not on Pepper's fixed words (review requests, win-back, booking emails); wording "Written with help from Pepper, the AI assistant {business} uses." + link to `/privacy#ai`; the booking page footer links the policies; the user asks for best-in-class quality and allows improvising.
+- Done: ACs + traceability; contracts `legal.ts` (paths, `ai` anchor, the sentence, `privacyAiUrl`); nudge `wordsBy` (`ai` | `template`, missing = AI) and the line in nudges and notes, with unit + integration tests.
+- Next: the policies as typed data (`apps/web/lib/legal.ts`, memory/support/operators/retention brought up to date), `/terms` + `/privacy` pages, links from sign-up, help, booking page; screens shots; ADR-0064; `docs/legal` pointing at the source.
 
 ## Last sessions
 - **S59.4.2 Phase 13 · Pilot metrics, part 2 (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4 addendum, [PR #92](https://github.com/Kakumrkr/Everyday-Pepper/pull/92)). Full entry in [session-log.md](session-log.md).

@@ -6,6 +6,7 @@ import {
   type BookingEmailDetails,
 } from '@pepper/appointments';
 import {
+  aiDisclosureLines,
   BookingIdSchema,
   looksLikeContact,
   looksLikeLink,
@@ -31,7 +32,9 @@ import { IdArg } from './shared.js';
 // the running-late words; a note is the member's, checked at every run (no link, no contact, no
 // sensitive remembered value). Transactional (about a booking), so no marketing footer and a
 // marketing opt-out doesn't stop it. Its dial action is `message.client` (asks by default);
-// Undo takes the email back until it leaves.
+// Undo takes the email back until it leaves. A note's words come through the chat, so the model
+// may have put them its own way: it says so above the business's name, with a link to the
+// privacy policy's AI section (S59.5, ADR-0064, AC-X-55); the domain's own words don't.
 
 /** A note is a text-length message, the card shows it whole. */
 export const CLIENT_NOTE_MAX = 200;
@@ -111,7 +114,12 @@ export function clientMessageEmail(
   message:
     | { kind: 'reminder' }
     | { kind: 'running_late'; minutes: number; today: boolean }
-    | { kind: 'note'; note: string },
+    | {
+        kind: 'note';
+        note: string;
+        /** The AI disclosure's lines (`aiDisclosureLines`). */
+        disclosure: readonly string[];
+      },
 ): EmailMessage {
   const firstName = clientFirstName(details.clientName) ?? 'there';
   const service = details.serviceName.toLowerCase();
@@ -142,6 +150,8 @@ export function clientMessageEmail(
       message.note,
       '',
       `About your ${service}, ${formatWhen(details.startsAt, details.timeZone)}.`,
+      '',
+      ...message.disclosure,
       '',
       details.businessName,
     ].join('\n'),
@@ -228,7 +238,11 @@ export const sendClientMessage: WriteTool = {
             today: start.date === localOf(scope.timeZone, scope.now).date,
           }
         : note !== null
-          ? { kind: 'note', note }
+          ? {
+              kind: 'note',
+              note,
+              disclosure: aiDisclosureLines(details.businessName, scope.deps.emails.baseUrl),
+            }
           : { kind: 'reminder' },
     );
     await scope.emailClient({

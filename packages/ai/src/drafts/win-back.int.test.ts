@@ -166,6 +166,9 @@ describe('AC-W4-7: one tap drafts a win-back email', () => {
     expect(emails[0]?.text).toContain("Hi Sara,\n\nIt's been a while since your last haircut");
     expect(emails[0]?.text).toMatch(/Jess has an opening on .+\. Book it here:/);
     expect(emails[0]?.text).toContain('Unsubscribe: https://app.pepper.test/unsubscribe/');
+    // Pepper's fixed words, no model: no AI disclosure (AC-X-55).
+    expect(emails[0]?.text).not.toContain('Written with help from Pepper');
+    expect(emails[0]?.text).not.toContain('/privacy');
   });
 
   it('refuses a client without an email, one who unsubscribed, one not due, and staff', async () => {
