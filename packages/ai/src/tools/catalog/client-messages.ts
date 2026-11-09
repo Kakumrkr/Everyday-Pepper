@@ -166,7 +166,9 @@ function wordsKey(text: string): string {
 export const sendClientMessage: WriteTool = {
   kind: 'write',
   name: 'send_client_message',
-  version: 1,
+  // 2 (S59.5): a note carries the AI disclosure; a proposal from before expires rather than
+  // sending an email its card didn't show.
+  version: 2,
   localTimes: false,
   tier: 'external_or_irreversible',
   guide: {

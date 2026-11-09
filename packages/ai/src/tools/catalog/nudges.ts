@@ -55,11 +55,10 @@ const NudgeArgs = z.strictObject({
   draft: DraftWords,
   /**
    * Who wrote the words (S59.5): the model (the morning pass) or Pepper's fixed words (a
-   * win-back tap). Set by the domain, never a model (the tool is never offered to one). A nudge
-   * proposed before S59.5 has none and counts as the model's: a missing line would mislead,
-   * an extra one can't.
+   * win-back tap). Set by the domain, never a model (the tool is never offered to one). A card
+   * edit keeps it: the words still went through the AI ("written with help from").
    */
-  wordsBy: NudgeWordsBySchema.optional(),
+  wordsBy: NudgeWordsBySchema,
 });
 export type NudgeArgs = z.infer<typeof NudgeArgs>;
 
@@ -91,12 +90,9 @@ export function nudgeEmailText(parts: {
   ].join('\n');
 }
 
-/**
- * The disclosure a nudge carries (AC-X-55): none for Pepper's fixed words; the model's words,
- * and a nudge stored before S59.5 without `wordsBy`, say so.
- */
+/** The disclosure a nudge carries (AC-X-55): the model's words say so, Pepper's fixed ones don't. */
 export function nudgeDisclosure(
-  wordsBy: NudgeWordsBy | undefined,
+  wordsBy: NudgeWordsBy,
   businessName: string,
   baseUrl: string,
 ): string[] {
@@ -144,7 +140,9 @@ export async function checkNoSensitiveValue(
 export const sendRebookingNudge: WriteTool = {
   kind: 'write',
   name: 'send_rebooking_nudge',
-  version: 1,
+  // 2 (S59.5): `wordsBy`, and the AI disclosure in the email; a proposal from before expires
+  // rather than sending an email its card didn't show.
+  version: 2,
   localTimes: false,
   tier: 'external_or_irreversible',
   guide: {

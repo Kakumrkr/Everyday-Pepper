@@ -43,11 +43,22 @@ export function TextLink({
   href,
   children,
   reload = false,
+  newTab = false,
 }: {
   href: string;
   children: ReactNode;
   reload?: boolean;
+  /** Opens in a new tab, so a half-filled form stays as it is (S59.5: the policies at sign-up). */
+  newTab?: boolean;
 }) {
+  if (newTab) {
+    return (
+      <a href={href} target="_blank" rel="noopener" className={TEXT_LINK}>
+        {children}
+        <span className="sr-only"> (opens in a new tab)</span>
+      </a>
+    );
+  }
   return reload ? (
     <a href={href} className={TEXT_LINK}>
       {children}

@@ -102,8 +102,14 @@ export function SignUpForm({ next = null }: { next?: string | null }) {
         {error === null ? null : <Notice tone="error">{error}</Notice>}
         <p className="m-0 type-caption text-ink-2">
           By creating an account you agree to Pepper’s{' '}
-          <TextLink href={TERMS_PATH}>terms of service</TextLink> and{' '}
-          <TextLink href={PRIVACY_PATH}>privacy policy</TextLink>.
+          <TextLink href={TERMS_PATH} newTab>
+            terms of service
+          </TextLink>{' '}
+          and{' '}
+          <TextLink href={PRIVACY_PATH} newTab>
+            privacy policy
+          </TextLink>
+          .
         </p>
       </form>
       <p className="m-0 type-body text-ink-2">

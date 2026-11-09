@@ -98,7 +98,7 @@ export const PRIVACY: LegalDocument = {
           'Clients, on the business’s behalf: name, email, phone, tags, birthday, appointments and visit history, waitlist requests, unsubscribe choices, and what the business has asked Pepper to remember about them. A client who books on the booking page also gives the code we email them. If they choose, their phone is remembered for 90 days so they can book again without a code.',
         ),
         p(
-          'Imports: when a business moves its clients from another app, Pepper keeps the rows it needs to show the preview and undo the import for 7 days, not the file itself.',
+          'Imports: when a business moves its clients from another app, Pepper keeps the rows it needs to show the preview (24 hours) and, once imported, to undo the import (7 days), never the file itself.',
         ),
         p(
           'Conversations with the assistant, and the requests and replies a business sends us for support, with any screenshots attached.',
@@ -132,7 +132,7 @@ export const PRIVACY: LegalDocument = {
           'It means the business used Pepper’s AI to put that email’s words together: either an invitation to come back, written from a few facts (your first name, the service, when you last visited and who usually looks after you), or a note the business asked it to send you. The business chose to send it, and any times and links in it come from the business’s own calendar, not from the AI. The AI never sees your email address or phone number.',
         ),
         list(
-          'Don’t want emails like it? Every one has an unsubscribe link at the bottom, and one tap stops them all from that business.',
+          'Don’t want invitations like it? Each has an unsubscribe link at the bottom, and one tap stops them all from that business. A note about your appointment comes straight from the business: reply to it, or ask them.',
           'Questions about what the business keeps about you? Ask the business, or write to us and we will pass your question on.',
         ),
         p(
@@ -206,7 +206,7 @@ export const PRIVACY: LegalDocument = {
           'Conversations with the assistant: 90 days after the last message. Their summaries: one year.',
           'Support requests and screenshots: while the business uses Pepper. Screenshots never sent: 24 hours.',
           'Sent emails’ delivery records: 30 days. Unconfirmed booking requests: 24 hours.',
-          'Import working rows: 7 days, while the import can be undone.',
+          'Import working rows: 24 hours for a preview not imported; 7 days for an import, while it can be undone.',
           'A remembered phone on the booking page: 90 days from its last use, or until the client taps “Forget this phone”.',
           'Backups: overwritten on a fixed schedule, stated here before this policy takes effect.',
         ),

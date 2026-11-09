@@ -15,11 +15,18 @@ async function expectAccessible(page: Page): Promise<void> {
 }
 
 test('the policies (AC-X-54): from sign-up, a draft, and each section a jump away', async ({
-  page,
+  page: signUp,
+  context,
 }) => {
   test.setTimeout(60_000);
-  await page.goto('/sign-up');
-  await page.getByRole('link', { name: 'privacy policy' }).click();
+  await signUp.goto('/sign-up');
+  await signUp.getByLabel('Your name').fill('Dana Reyes');
+  // A new tab: what the visitor typed in the form stays.
+  const [page] = await Promise.all([
+    context.waitForEvent('page'),
+    signUp.getByRole('link', { name: /^privacy policy/ }).click(),
+  ]);
+  await expect(signUp.getByLabel('Your name')).toHaveValue('Dana Reyes');
   await expect(page).toHaveURL(/\/privacy$/);
   await expect(page.getByRole('heading', { name: 'Privacy policy', level: 1 })).toBeVisible();
   await expect(page.getByTestId('legal-draft')).toContainText('isn’t in force yet');

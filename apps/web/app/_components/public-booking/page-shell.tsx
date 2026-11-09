@@ -1,10 +1,13 @@
 import { PRIVACY_PATH, TERMS_PATH, type PublicBusiness } from '@pepper/contracts';
-import { brandStyle, brandTokens, FOCUS_RING } from '@pepper/ui';
+import { brandStyle, brandTokens, cx, FOCUS_RING } from '@pepper/ui';
+import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { formatPhone } from '../../../lib/booking-profile';
 import { photoAlt, photoSrc, photoSrcSet } from '../../../lib/photos';
 import { initials } from '../../../lib/public-booking';
 import { PhotoImage } from '../photo-image';
+
+const SMALL_PRINT_LINK = cx('text-ink-2 underline underline-offset-2', FOCUS_RING);
 
 /**
  * The public pages' frame in the business's own color (PCR-001): its name on top, and Pepper
@@ -94,13 +97,13 @@ export function BookingPageShell({
       {children}
       <p className="m-0 border-t border-line pt-4 text-center type-caption text-ink-2">
         Booking by pepper · Your details stay with {business.name} ·{' '}
-        <a href={PRIVACY_PATH} className={`text-ink-2 underline underline-offset-2 ${FOCUS_RING}`}>
+        <Link href={PRIVACY_PATH} className={SMALL_PRINT_LINK}>
           Privacy
-        </a>{' '}
+        </Link>{' '}
         ·{' '}
-        <a href={TERMS_PATH} className={`text-ink-2 underline underline-offset-2 ${FOCUS_RING}`}>
+        <Link href={TERMS_PATH} className={SMALL_PRINT_LINK}>
           Terms
-        </a>
+        </Link>
       </p>
     </main>
   );

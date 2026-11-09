@@ -7,6 +7,7 @@ import {
   type LegalBlock,
   type LegalDocument,
 } from '../../../lib/legal';
+import { HELP_PATH } from '../../../lib/help';
 import { HelpBlockView } from '../help/help-block';
 import { PlainLink } from '../help/help-link';
 
@@ -90,7 +91,7 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
             {each.title}
           </PlainLink>
         ))}
-        <PlainLink href="/help">Help centre</PlainLink>
+        <PlainLink href={HELP_PATH}>Help centre</PlainLink>
       </nav>
     </>
   );

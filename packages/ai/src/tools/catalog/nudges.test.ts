@@ -52,9 +52,8 @@ describe('nudgeEmailText', () => {
 describe('who wrote the words', () => {
   const lines = aiDisclosureLines('Fade Lab', 'https://app.example.com');
 
-  it("discloses the model's words, and a nudge stored before anyone said who wrote them", () => {
+  it("discloses the model's words", () => {
     expect(nudgeDisclosure('ai', 'Fade Lab', 'https://app.example.com')).toEqual(lines);
-    expect(nudgeDisclosure(undefined, 'Fade Lab', 'https://app.example.com')).toEqual(lines);
   });
 
   it("leaves Pepper's fixed words alone", () => {
