@@ -41,10 +41,7 @@ test('the policies (AC-X-54): from sign-up, a draft, and each section a jump awa
   await expect(page).toHaveURL(/\/privacy#memory$/);
   await expect(page.getByRole('heading', { name: 'What Pepper remembers' })).toBeInViewport();
 
-  await page
-    .getByRole('navigation', { name: 'More' })
-    .getByRole('link', { name: 'Terms of service' })
-    .click();
+  await page.getByRole('contentinfo').getByRole('link', { name: 'Terms of service' }).click();
   await expect(page.getByRole('heading', { name: 'Terms of service', level: 1 })).toBeVisible();
   await expectAccessible(page);
   await expectTapTargets(page, 'the terms');

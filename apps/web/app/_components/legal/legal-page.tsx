@@ -1,15 +1,12 @@
 import { cx, FOCUS_RING, Icon } from '@pepper/ui';
 import Link from 'next/link';
 import {
-  LEGAL_DOCUMENTS,
   LEGAL_DRAFT_NOTICE,
   legalDate,
   type LegalBlock,
   type LegalDocument,
 } from '../../../lib/legal';
-import { HELP_PATH } from '../../../lib/help';
 import { HelpBlockView } from '../help/help-block';
-import { PlainLink } from '../help/help-link';
 
 /**
  * A policy page (S59.5, AC-X-54): the title, when it last changed, the draft banner until the
@@ -18,7 +15,6 @@ import { PlainLink } from '../help/help-link';
  * an email lands on the part that explains it (`/privacy#ai`, AC-X-56).
  */
 export function LegalPage({ document: doc }: { document: LegalDocument }) {
-  const other = LEGAL_DOCUMENTS.filter((each) => each.path !== doc.path);
   return (
     <>
       <header className="flex flex-col gap-2">
@@ -85,14 +81,6 @@ export function LegalPage({ document: doc }: { document: LegalDocument }) {
           ))}
         </section>
       ))}
-      <nav aria-label="More" className="flex flex-col gap-1 border-t border-line pt-4">
-        {other.map((each) => (
-          <PlainLink key={each.path} href={each.path}>
-            {each.title}
-          </PlainLink>
-        ))}
-        <PlainLink href={HELP_PATH}>Help centre</PlainLink>
-      </nav>
     </>
   );
 }
