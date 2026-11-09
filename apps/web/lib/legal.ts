@@ -35,7 +35,7 @@ export interface LegalDocument {
 
 /** Shown on both pages until the lawyer's review (playbook S59.5). */
 export const LEGAL_DRAFT_NOTICE =
-  'This is a draft. It describes how Pepper works today and is waiting for a lawyer’s review, so it isn’t in force yet. The company’s legal name, address and governing state are added before it is.';
+  'It describes how Pepper works today and waits for a lawyer’s review, so it isn’t in force yet. The company’s legal name, address and governing state are added before it is.';
 
 /** The date both texts last changed. */
 const UPDATED = '2026-11-09';
@@ -124,10 +124,12 @@ export const PRIVACY: LegalDocument = {
       id: PRIVACY_AI_SECTION,
       heading: 'Pepper, the AI assistant',
       blocks: [
-        p('If you got an email from a business that uses Pepper, it may end with this line:'),
+        p(
+          'If you got an email from a business that uses Pepper, it may carry this line, just above the business’s name:',
+        ),
         quote(DISCLOSURE_AS_QUOTED),
         p(
-          'It means the business used Pepper’s AI to write that email’s words. The business chose to send it, and the booking details and links in it come from the business’s own calendar, not from the AI. To write the words, the AI was given only your first name, the service, when you last visited and who usually looks after you. It never sees your email address or phone number.',
+          'It means the business used Pepper’s AI to put that email’s words together: either an invitation to come back, written from a few facts (your first name, the service, when you last visited and who usually looks after you), or a note the business asked it to send you. The business chose to send it, and any times and links in it come from the business’s own calendar, not from the AI. The AI never sees your email address or phone number.',
         ),
         list(
           'Don’t want emails like it? Every one has an unsubscribe link at the bottom, and one tap stops them all from that business.',
