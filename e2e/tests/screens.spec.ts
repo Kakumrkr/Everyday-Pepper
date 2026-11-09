@@ -1143,12 +1143,10 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('heading', { name: 'Pepper, the AI assistant' })).toBeInViewport();
     for (const scheme of SCHEMES) {
       await still(page, scheme);
-      await expect
-        .soft(page)
-        .toHaveScreenshot(`privacy-ai-${String(width)}-${scheme}.png`, {
-          ...SHOT,
-          fullPage: false,
-        });
+      await expect.soft(page).toHaveScreenshot(`privacy-ai-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        fullPage: false,
+      });
     }
     await page.emulateMedia({ colorScheme: 'light' });
 
