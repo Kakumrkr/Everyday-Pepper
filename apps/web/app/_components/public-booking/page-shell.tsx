@@ -1,4 +1,4 @@
-import type { PublicBusiness } from '@pepper/contracts';
+import { PRIVACY_PATH, TERMS_PATH, type PublicBusiness } from '@pepper/contracts';
 import { brandStyle, brandTokens, FOCUS_RING } from '@pepper/ui';
 import type { ReactNode } from 'react';
 import { formatPhone } from '../../../lib/booking-profile';
@@ -93,7 +93,14 @@ export function BookingPageShell({
       </header>
       {children}
       <p className="m-0 border-t border-line pt-4 text-center type-caption text-ink-2">
-        Booking by pepper · Your details stay with {business.name}
+        Booking by pepper · Your details stay with {business.name} ·{' '}
+        <a href={PRIVACY_PATH} className={`text-ink-2 underline underline-offset-2 ${FOCUS_RING}`}>
+          Privacy
+        </a>{' '}
+        ·{' '}
+        <a href={TERMS_PATH} className={`text-ink-2 underline underline-offset-2 ${FOCUS_RING}`}>
+          Terms
+        </a>
       </p>
     </main>
   );

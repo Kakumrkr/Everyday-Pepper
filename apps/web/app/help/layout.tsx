@@ -2,6 +2,7 @@ import { cx, FOCUS_RING, Logo } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { PRIVACY_PATH, TERMS_PATH } from '@pepper/contracts';
 import { HELP_PATH } from '../../lib/help';
 
 export const metadata: Metadata = { title: 'Help · Pepper' };
@@ -34,6 +35,26 @@ export default function HelpLayout({ children }: { children: ReactNode }) {
       <main className="mx-auto flex w-full min-w-0 max-w-2xl flex-col gap-6 px-5 pt-8 pb-16">
         {children}
       </main>
+      <footer className="mx-auto flex w-full max-w-2xl gap-4 border-t border-line px-5 pt-2 pb-8">
+        <Link
+          href={PRIVACY_PATH}
+          className={cx(
+            'inline-flex min-h-11 items-center type-caption text-ink-2 underline underline-offset-4',
+            FOCUS_RING,
+          )}
+        >
+          Privacy policy
+        </Link>
+        <Link
+          href={TERMS_PATH}
+          className={cx(
+            'inline-flex min-h-11 items-center type-caption text-ink-2 underline underline-offset-4',
+            FOCUS_RING,
+          )}
+        >
+          Terms of service
+        </Link>
+      </footer>
     </div>
   );
 }

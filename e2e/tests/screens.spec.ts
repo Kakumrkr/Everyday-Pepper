@@ -1131,6 +1131,27 @@ for (const width of WIDTHS) {
     await hydrated(page.getByRole('button', { name: 'Send to Pepper' }));
     await shots('help-contact');
 
+    // Signed out (S59.5, AC-X-54/56): the policies, and the privacy policy where the AI
+    // disclosure's link lands, highlighted (the screen, not the whole page).
+    await page.goto('/terms');
+    await expect(page.getByRole('heading', { name: 'Terms of service', level: 1 })).toBeVisible();
+    await shots('terms');
+    await page.goto('/privacy');
+    await expect(page.getByRole('heading', { name: 'Privacy policy', level: 1 })).toBeVisible();
+    await shots('privacy');
+    await page.goto('/privacy#ai');
+    await expect(page.getByRole('heading', { name: 'Pepper, the AI assistant' })).toBeInViewport();
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`privacy-ai-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          fullPage: false,
+        });
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+
     // Signed in (AC-X-14/15): no requests yet, the form, then a request's thread and the list.
     const owner = await onboardOwner(page, { business: 'Southside Cuts' });
     await page.goto('/support');
