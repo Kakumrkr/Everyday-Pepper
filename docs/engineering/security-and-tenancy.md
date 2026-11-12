@@ -26,7 +26,7 @@ Target: OWASP ASVS Level 2.
 - PII minimisation in LLM prompts; redacting logger; no PII in analytics events. The redacting logger (also used for Sentry) drops failed queries' bound values (`params`), Postgres's row `detail`, emails and phone numbers (North American formats and any E.164), S13.
 - OpenAI API data not used for training; evaluate zero-data-retention eligibility before pilot.
 - CCPA-aware: customer data export and deletion per tenant; business account export/delete.
-- Email: CAN-SPAM compliant footers and opt-out. SMS (V1.1): TCPA consent records, A2P 10DLC.
+- Email: CAN-SPAM compliant footers and opt-out. SMS (V1, S61, ADR-0065): a text only to a number with the business's TCPA consent record (when, how, which wording), never after a STOP (honoured in the webhook's own request, for every business), 8:00–20:00 in the business's zone; Twilio's webhook signature and account checked before anything is read; numbers and texts never logged. A2P 10DLC registration before going live (S64).
 - Terms of Service, Privacy Policy, DPA template, AI-use disclosure — required before pilot (needs company entity).
 
 ## Web security
