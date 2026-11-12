@@ -73,9 +73,55 @@ export function isGonePush(error: unknown): boolean {
   );
 }
 
-/** A channel that this worker has not configured (push without VAPID keys). */
+/** One text to one number (S61, ADR-0065), ready for the provider. */
+export interface SmsMessage {
+  /** E.164, `+1` (`SmsPhoneSchema`). */
+  to: string;
+  /** Normalised and within the segment limit (`SmsBodySchema`). */
+  body: string;
+  /** The outbox message's id. */
+  id: string;
+  /** Where the provider reports delivery (signed, ADR-0065 §6); absent: no reports. */
+  statusCallbackUrl?: string;
+}
+
+/** What the provider said when it accepted a text. */
+export interface SmsAccepted {
+  provider: 'twilio' | 'sandbox';
+  /** The provider's id for the text (Twilio's `SM…`). */
+  providerMessageId: string;
+  /** Segments it will bill (the provider's count, else Pepper's). */
+  segments: number;
+  /** Where the text stands as accepted (Twilio: `queued`; the sandbox: `delivered`). */
+  status: 'queued' | 'sent' | 'delivered';
+}
+
+/** Sends texts: Twilio's API, or the sandbox that never leaves the machine (ADR-0065 §1). */
+export interface SmsSender {
+  send(message: SmsMessage): Promise<SmsAccepted>;
+}
+
+/**
+ * The SMS provider refused a text. `permanent`: the recipient or the text can never be sent as
+ * it is (an invalid or unsubscribed number), so it is not retried. `code`: the provider's error
+ * code, never its message (which may echo the number).
+ */
+export class SmsRejectedError extends Error {
+  constructor(
+    readonly statusCode: number,
+    readonly code: number | null,
+    readonly permanent: boolean,
+  ) {
+    super(
+      `The SMS provider answered ${String(statusCode)}${code === null ? '' : ` (${String(code)})`}`,
+    );
+    this.name = 'SmsRejectedError';
+  }
+}
+
+/** A channel that this worker has not configured (push without VAPID keys, SMS off). */
 export class ChannelUnavailableError extends Error {
-  constructor(channel: 'push' | 'episode') {
+  constructor(channel: 'push' | 'episode' | 'sms') {
     super(`No ${channel} sender is configured`);
     this.name = 'ChannelUnavailableError';
   }
@@ -164,6 +210,12 @@ export function failureOutcome(error: unknown, attempts: number, now: Date): Fai
  * echo an address.
  */
 export function errorNameOf(error: unknown): string {
+  // The provider's code tells what went wrong (`SmsRejected-21211`); no number is in it.
+  if (error instanceof SmsRejectedError) {
+    return error.code === null
+      ? `SmsRejected-${String(error.statusCode)}`
+      : `SmsRejected-${String(error.code)}`;
+  }
   if (error instanceof Error) {
     const { code } = error as Error & { code?: unknown };
     return typeof code === 'string' && code !== '' ? code : error.name;
@@ -173,6 +225,7 @@ export function errorNameOf(error: unknown): string {
 
 function isPermanent(error: unknown): boolean {
   if (error instanceof OutboxContentError) return true;
+  if (error instanceof SmsRejectedError) return error.permanent;
   // A push refused for good (bad request, our keys, too large); 408 and 429 are worth a retry.
   if (error instanceof PushRejectedError) {
     const { statusCode } = error;

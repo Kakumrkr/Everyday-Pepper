@@ -10,6 +10,8 @@ import {
   smsKeywordReply,
   SmsPhoneSchema,
   smsSegments,
+  smsSendableAt,
+  smsStatusCallbackUrl,
   smsStatusMovesForward,
   TwilioInboundSmsSchema,
   type SmsDeliveryStatus,
@@ -201,5 +203,44 @@ describe('TwilioInboundSmsSchema', () => {
     });
     expect(parsed.Body).toBe('');
     expect(TwilioInboundSmsSchema.safeParse({ ...parsed, MessageSid: 'SM1' }).success).toBe(false);
+  });
+});
+
+describe('smsSendableAt (AC-X-60)', () => {
+  const NY = 'America/New_York';
+  const at = (iso: string) => new Date(iso).getTime();
+  const iso = (instant: number) => new Date(instant).toISOString();
+
+  it('lets a text go at once inside 8:00–20:00 there', () => {
+    expect(iso(smsSendableAt(NY, at('2026-11-12T13:00:00Z')))).toBe('2026-11-12T13:00:00.000Z'); // 8:00
+    expect(iso(smsSendableAt(NY, at('2026-11-13T00:59:59Z')))).toBe('2026-11-13T00:59:59.000Z'); // 19:59
+  });
+
+  it('holds an early one until 8:00 the same day, a late one until 8:00 the next', () => {
+    expect(iso(smsSendableAt(NY, at('2026-11-12T12:59:00Z')))).toBe('2026-11-12T13:00:00.000Z'); // 7:59
+    expect(iso(smsSendableAt(NY, at('2026-11-13T01:00:00Z')))).toBe('2026-11-13T13:00:00.000Z'); // 20:00
+    expect(iso(smsSendableAt(NY, at('2026-11-13T04:59:00Z')))).toBe('2026-11-13T13:00:00.000Z'); // 23:59
+    expect(iso(smsSendableAt(NY, at('2026-11-13T05:00:00Z')))).toBe('2026-11-13T13:00:00.000Z'); // 0:00
+  });
+
+  it('is 8:00 on the business’s clock on daylight-saving days', () => {
+    // Spring forward (Mar 8, 2026): 8:00 EDT is 12:00 UTC; the evening before was EST.
+    expect(iso(smsSendableAt(NY, at('2026-03-08T02:00:00Z')))).toBe('2026-03-08T12:00:00.000Z');
+    // Fall back (Nov 1, 2026): 8:00 EST is 13:00 UTC; the evening before was EDT.
+    expect(iso(smsSendableAt(NY, at('2026-11-01T01:30:00Z')))).toBe('2026-11-01T13:00:00.000Z');
+  });
+
+  it('follows the business’s own zone', () => {
+    // 7:00 in Los Angeles is 10:00 in New York.
+    expect(iso(smsSendableAt('America/Los_Angeles', at('2026-11-12T15:00:00Z')))).toBe(
+      '2026-11-12T16:00:00.000Z',
+    );
+    expect(iso(smsSendableAt(NY, at('2026-11-12T15:00:00Z')))).toBe('2026-11-12T15:00:00.000Z');
+  });
+
+  it('builds the signed status URL with the business and the message', () => {
+    expect(smsStatusCallbackUrl('https://app.example.com', 't-1', 'm-2')).toBe(
+      'https://app.example.com/v1/webhooks/sms/status?t=t-1&m=m-2',
+    );
   });
 });

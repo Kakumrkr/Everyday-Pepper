@@ -187,6 +187,31 @@ export async function markOutboxMessageFailed(
   return true;
 }
 
+/**
+ * Puts a claimed, pending message back until `availableAt` without counting the attempt its
+ * claim counted (S61, ADR-0065 §3: a text held by the quiet hours didn't fail). Returns whether
+ * the message was pending.
+ */
+export async function postponeOutboxMessage(
+  tx: TenantTx,
+  id: OutboxMessageId,
+  availableAt: Date,
+): Promise<boolean> {
+  const messageId = OutboxMessageIdSchema.parse(id);
+  const updated = await tx
+    .update(outboxMessages)
+    .set({
+      availableAt,
+      leaseUntil: null,
+      attempts: sql`GREATEST(${outboxMessages.attempts} - 1, 0)`,
+    })
+    .where(and(eq(outboxMessages.id, messageId), eq(outboxMessages.status, 'pending')))
+    .returning({ id: outboxMessages.id });
+  if (updated.length === 0) return false;
+  await setDispatchTime(tx, messageId, availableAt);
+  return true;
+}
+
 /** What became of messages an undo tried to take back (ADR-0028). */
 export interface OutboxCancellation {
   /** Taken back: they will never be sent. */

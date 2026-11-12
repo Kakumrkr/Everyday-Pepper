@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { fromZoned, toZoned } from './zoned-time.js';
 
 // The SMS channel (S61, ADR-0065): the rules every text follows, whoever sends it. A text goes
 // out through the outbox (`OutboxSmsSchema`), only to a number with the business's consent and
@@ -293,3 +294,29 @@ export const TwilioStatusCallbackSchema = z.object({
     .optional(),
 });
 export type TwilioStatusCallback = z.infer<typeof TwilioStatusCallbackSchema>;
+
+/**
+ * The first instant at or after `instant` when a text may go out in `timeZone` (AC-X-60): the
+ * instant itself inside the hours, else the next 8:00 there. 8:00 is never skipped or repeated
+ * by a daylight-saving change (those happen at night), so the answer is exact on those days too.
+ */
+export function smsSendableAt(timeZone: string, instant: number): number {
+  const start = SMS_QUIET_HOURS.startHour * 60;
+  const end = SMS_QUIET_HOURS.endHour * 60;
+  const local = toZoned(timeZone, instant);
+  if (local.minuteOfDay >= start && local.minuteOfDay < end) return instant;
+  const date = { year: local.year, month: local.month, day: local.day };
+  // Before 8:00: today's; from 20:00: tomorrow's (24 h of minutes on, `fromZoned` rolls over).
+  return fromZoned(timeZone, date, local.minuteOfDay < start ? start : start + 24 * 60);
+}
+
+/** The path of Twilio's status callback for one text (ADR-0065 §6), signed with its query. */
+export const SMS_STATUS_CALLBACK_PATH = '/v1/webhooks/sms/status';
+
+/** The status callback URL for a business's text: the business and the message in the query. */
+export function smsStatusCallbackUrl(baseUrl: string, tenantId: string, messageId: string): string {
+  const url = new URL(SMS_STATUS_CALLBACK_PATH, baseUrl);
+  url.searchParams.set('t', tenantId);
+  url.searchParams.set('m', messageId);
+  return url.toString();
+}
