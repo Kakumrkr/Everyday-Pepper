@@ -81,6 +81,9 @@ export type PublicBusiness = z.infer<typeof PublicBusinessSchema>;
 /** What a ticked SMS box with a number Pepper can't text is told, on the phone field (AC-X-64). */
 export const SMS_OPT_IN_PHONE_MESSAGE =
   'Texts go to US and Canadian numbers only. Use one, or untick the box.';
+/** What a ticked SMS box without a phone is told, on the phone field (AC-X-64). */
+export const SMS_OPT_IN_NO_PHONE_MESSAGE =
+  'Add your mobile number to get texts, or untick the box.';
 
 /**
  * `POST /v1/public/businesses/:slug/booking-requests`: the time the client picked and their
@@ -101,7 +104,10 @@ export const BookingRequestInputSchema = z
   })
   .strict()
   .superRefine((request, context) => {
-    if (request.smsConsent !== null && !SmsPhoneSchema.safeParse(request.phone ?? '').success) {
+    if (request.smsConsent === null) return;
+    if (request.phone === null) {
+      context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_NO_PHONE_MESSAGE });
+    } else if (!SmsPhoneSchema.safeParse(request.phone).success) {
       context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_PHONE_MESSAGE });
     }
   });

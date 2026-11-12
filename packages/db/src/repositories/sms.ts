@@ -115,6 +115,18 @@ export async function listSmsConsentsForClient(
     .limit(z.number().int().min(1).max(50).parse(limit));
 }
 
+/** The client's consents in force (one a number), the latest first (S61.2, AC-X-67). */
+export async function listActiveSmsConsentsForClient(
+  tx: TenantTx,
+  clientId: string,
+): Promise<SmsConsentRow[]> {
+  return tx
+    .select()
+    .from(smsConsents)
+    .where(and(eq(smsConsents.clientId, Id.parse(clientId)), isNull(smsConsents.revokedAt)))
+    .orderBy(desc(smsConsents.givenAt), desc(smsConsents.id));
+}
+
 /**
  * The names of the businesses a number has an active consent with, the latest first, two at
  * most (S61.2, AC-X-68): who a reply to Pepper's number names. Through `sms_consent_businesses`,

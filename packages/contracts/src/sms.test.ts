@@ -88,30 +88,59 @@ describe('GSM-7 text and segments (AC-X-63)', () => {
   });
 
   it('queues a text normalised, and refuses one over the segment limit or empty', () => {
-    const sms = OutboxSmsSchema.parse({ to: '+15551234567', body: '  It’s confirmed  ' });
-    expect(sms).toEqual({ to: '+15551234567', body: "It's confirmed" });
+    const sms = OutboxSmsSchema.parse({
+      to: '+15551234567',
+      body: '  It’s confirmed  ',
+      wordsBy: 'template',
+    });
+    expect(sms).toEqual({ to: '+15551234567', body: "It's confirmed", wordsBy: 'template' });
     expect(
-      OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'a'.repeat(153 * SMS_MAX_SEGMENTS) })
-        .success,
+      OutboxSmsSchema.safeParse({
+        to: '+15551234567',
+        wordsBy: 'template',
+        body: 'a'.repeat(153 * SMS_MAX_SEGMENTS),
+      }).success,
     ).toBe(true);
     expect(
       OutboxSmsSchema.safeParse({
         to: '+15551234567',
+        wordsBy: 'template',
         body: 'a'.repeat(153 * SMS_MAX_SEGMENTS + 1),
       }).success,
     ).toBe(false);
-    expect(OutboxSmsSchema.safeParse({ to: '+15551234567', body: ' ​ ' }).success).toBe(false);
+    expect(
+      OutboxSmsSchema.safeParse({ to: '+15551234567', wordsBy: 'template', body: ' ​ ' }).success,
+    ).toBe(false);
+  });
+
+  it('needs to know who wrote the words (S61.2, AC-X-69)', () => {
+    expect(OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'x' }).success).toBe(false);
   });
 
   it('keeps `urgent` to true or absent, and nothing else in the content', () => {
-    expect(OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'x', urgent: true }).success).toBe(
-      true,
-    );
     expect(
-      OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'x', urgent: false }).success,
+      OutboxSmsSchema.safeParse({
+        to: '+15551234567',
+        wordsBy: 'template',
+        body: 'x',
+        urgent: true,
+      }).success,
+    ).toBe(true);
+    expect(
+      OutboxSmsSchema.safeParse({
+        to: '+15551234567',
+        wordsBy: 'template',
+        body: 'x',
+        urgent: false,
+      }).success,
     ).toBe(false);
     expect(
-      OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'x', from: '+15550000000' }).success,
+      OutboxSmsSchema.safeParse({
+        to: '+15551234567',
+        wordsBy: 'template',
+        body: 'x',
+        from: '+15550000000',
+      }).success,
     ).toBe(false);
   });
 });
@@ -144,7 +173,9 @@ describe('the AI disclosure in texts (S61.2, AC-X-69)', () => {
 
   it('counts the line in the segments: AI words near the limit with it are refused', () => {
     const long = 'a'.repeat(153 * SMS_MAX_SEGMENTS - 10);
-    expect(OutboxSmsSchema.safeParse({ to: '+15551234567', body: long }).success).toBe(true);
+    expect(
+      OutboxSmsSchema.safeParse({ to: '+15551234567', wordsBy: 'template', body: long }).success,
+    ).toBe(true);
     expect(
       OutboxSmsSchema.safeParse({
         to: '+15551234567',
@@ -237,6 +268,20 @@ describe('the keyword replies and consent wording', () => {
     );
     expect(smsKeywordReply('help', url, [])).toMatch(/^Pepper: appointment texts from businesses/);
     expect(smsReplySender(['  ', 'Nails ’n’ More'])).toBe("Nails 'n' More via Pepper");
+    // A blank name is no name: the reply says who in general words.
+    expect(smsKeywordReply('help', url, ['  '])).toMatch(
+      /^Pepper: appointment texts from businesses/,
+    );
+  });
+
+  it('keeps a name’s other characters out, cutting by character, never inside an emoji', () => {
+    expect(smsReplySender(['Bella 💅 Nails'])).toBe('Bella Nails via Pepper');
+    const emoji = `${'a'.repeat(36)}💅💅💅💅💅`;
+    const sender = smsReplySender([emoji, 'Salão Bella']);
+    expect(sender).toBe(`${'a'.repeat(36)} and Salao Bella via Pepper`);
+    expect(
+      smsSegments(smsKeywordReply('help', 'https://app.example.com/help', [emoji])),
+    ).toMatchObject({ encoding: 'gsm7' });
   });
 
   it('keeps a reply naming two long names in GSM-7 and two segments', () => {

@@ -221,6 +221,8 @@ export default async function ClientPage({
         </p>
       ) : (
         <ClientTextsSection
+          // A refresh with other texts (a phone changed, a STOP) starts the section afresh.
+          key={JSON.stringify(texts)}
           clientId={id.data}
           clientName={client.name}
           initial={texts}

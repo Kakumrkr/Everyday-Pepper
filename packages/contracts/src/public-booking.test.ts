@@ -6,6 +6,7 @@ import {
   ManageTokenSchema,
   PublicBusinessSchema,
   PublicRescheduleInputSchema,
+  SMS_OPT_IN_NO_PHONE_MESSAGE,
   SMS_OPT_IN_PHONE_MESSAGE,
   VerificationCodeSchema,
 } from './public-booking.js';
@@ -51,8 +52,17 @@ describe('BookingRequestInputSchema', () => {
     expect(parsed).toMatchObject({ phone: '+15551234567', smsConsent: 'sms-consent-v1' });
   });
 
+  it('refuses a ticked SMS box without a phone, saying to add one', () => {
+    const result = BookingRequestInputSchema.safeParse({
+      ...REQUEST,
+      smsConsent: 'sms-consent-v1',
+    });
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ path: ['phone'], message: SMS_OPT_IN_NO_PHONE_MESSAGE }),
+    ]);
+  });
+
   it.each([
-    ['no phone', null],
     ['a UK phone', '+447700900123'],
     ['an area code starting with 1', '+11551234567'],
   ])('refuses a ticked SMS box with %s, on the phone field', (_label, phone) => {

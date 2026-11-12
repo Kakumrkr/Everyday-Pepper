@@ -1,12 +1,6 @@
 import type { ClientTexts } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import {
-  consentDayLabel,
-  consentHowLabel,
-  consentMomentLabel,
-  smsPhoneLabel,
-  textsSummary,
-} from './client-texts';
+import { consentDayLabel, consentHowLabel, consentMomentLabel, textsSummary } from './client-texts';
 
 // The profile's "Text messages" words (S61.2, AC-X-66).
 
@@ -81,9 +75,7 @@ describe('the record’s labels', () => {
     expect(consentDayLabel('America/Los_Angeles', CONSENT.givenAt)).toBe('Nov 12, 2026');
   });
 
-  it('says how and writes the number as people do', () => {
+  it('says how they said yes', () => {
     expect(consentHowLabel('booking_page')).toBe('Ticked the box on your booking page');
-    expect(smsPhoneLabel('+15552345678')).toBe('(555) 234-5678');
-    expect(smsPhoneLabel('+447700900123')).toBe('+447700900123');
   });
 });

@@ -35,6 +35,7 @@ import {
   insertSmsConsent,
   insertSmsKeywordEvent,
   isSmsOptedOut,
+  listActiveSmsConsentsForClient,
   listSmsConsentsForClient,
   newId,
   revokeSmsConsent,
@@ -174,13 +175,18 @@ export async function getClientTexts(
 ): Promise<ClientTexts> {
   requirePermission(actor, 'clients.read');
   const id = ClientIdSchema.parse(clientId);
-  return withMember(db, actor.context, (tx) => clientTextsIn(tx, actor, id));
+  return withMember(db, actor.context, async (tx) => {
+    const client = await findClient(tx, id);
+    if (client === undefined) throw new ClientNotFoundError();
+    return clientTextsIn(tx, actor, client);
+  });
 }
 
 /**
- * Stops a client's texts from the profile (S61.2, AC-X-67): their consent in force is revoked
+ * Stops a client's texts from the profile (S61.2, AC-X-67): their consents in force are revoked
  * (audited as the member), so no text goes to the number from the next delivery. Only the
- * client can turn texts back on (START, or the booking page's box). Answers the new status;
+ * client can turn texts back on, by ticking the booking page's box again (START only ends a
+ * STOP; it gives no consent). Answers the new status;
  * nothing in force: the status unchanged.
  */
 export async function stopClientTexts(
@@ -193,29 +199,50 @@ export async function stopClientTexts(
   const id = ClientIdSchema.parse(clientId);
   const now = new Date((options.clock ?? systemClock).now());
   return withMember(db, actor.context, async (tx) => {
-    if ((await findClient(tx, id)) === undefined) throw new ClientNotFoundError();
-    const [latest] = await listSmsConsentsForClient(tx, id, 1);
-    if (latest?.revokedAt === null) {
-      await revokeSmsConsentFor(tx, latest.phone, {
+    const client = await findClient(tx, id);
+    if (client === undefined) throw new ClientNotFoundError();
+    // Every number the client said yes on (they may have booked with two).
+    for (const consent of await listActiveSmsConsentsForClient(tx, id)) {
+      await revokeSmsConsentFor(tx, consent.phone, {
         actor: auditActorOf(actor),
         requestId: actor.requestId,
         now,
       });
     }
-    return clientTextsIn(tx, actor, id);
+    return clientTextsIn(tx, actor, client);
   });
 }
 
-async function clientTextsIn(tx: TenantTx, actor: Actor, id: ClientId): Promise<ClientTexts> {
-  const client = await findClient(tx, id);
-  if (client === undefined) throw new ClientNotFoundError();
-  const [latest] = await listSmsConsentsForClient(tx, id, 1);
+/**
+ * The client's texts, from their consents: on while any number they said yes on is in force and
+ * not opted out (that one shown); opted out when every such number replied STOP; else the latest
+ * record, stopped.
+ */
+async function clientTextsIn(
+  tx: TenantTx,
+  actor: Actor,
+  client: { id: string; phone: string | null },
+): Promise<ClientTexts> {
   const textable = SmsPhoneSchema.safeParse(client.phone ?? '').success;
+  const inForce = await listActiveSmsConsentsForClient(tx, client.id);
+  let latest = inForce[0];
+  let status: ClientTexts['status'] = 'stopped';
+  if (latest !== undefined) {
+    status = 'opted_out';
+    for (const consent of inForce) {
+      if (!(await isSmsOptedOut(tx, consent.phone))) {
+        latest = consent;
+        status = 'on';
+        break;
+      }
+    }
+  } else {
+    latest = (await listSmsConsentsForClient(tx, client.id, 1))[0];
+  }
   if (latest === undefined) {
     return ClientTextsSchema.parse({ status: 'never', textable, consent: null, canStop: false });
   }
   const active = latest.revokedAt === null;
-  const status = !active ? 'stopped' : (await isSmsOptedOut(tx, latest.phone)) ? 'opted_out' : 'on';
   return ClientTextsSchema.parse({
     status,
     textable,

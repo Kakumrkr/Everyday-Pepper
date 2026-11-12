@@ -119,7 +119,7 @@ describe('a STOP through the api (AC-X-59)', () => {
       );
       return queueSms(
         tx,
-        { to: PHONE, body: 'Fade Bros: see you at 4pm.', urgent: true },
+        { to: PHONE, body: 'Fade Bros: see you at 4pm.', urgent: true, wordsBy: 'template' },
         { key, dedupeKey: OutboxDedupeKeySchema.parse('test.sms:api'), now: new Date() },
       );
     });

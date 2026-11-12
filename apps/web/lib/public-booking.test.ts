@@ -1,8 +1,7 @@
-import { SMS_OPT_IN_PHONE_MESSAGE } from '@pepper/contracts';
+import { SMS_OPT_IN_NO_PHONE_MESSAGE, SMS_OPT_IN_PHONE_MESSAGE } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
   checkDetails,
-  SMS_OPT_IN_NO_PHONE,
   confirmProblem,
   firstFreeDay,
   initials,
@@ -130,7 +129,7 @@ describe('checkDetails', () => {
     });
     expect(checkDetails({ ...base, phone: '' })).toEqual({
       ok: false,
-      errors: { phone: SMS_OPT_IN_NO_PHONE },
+      errors: { phone: SMS_OPT_IN_NO_PHONE_MESSAGE },
     });
     expect(checkDetails({ ...base, phone: '+447700900123' })).toEqual({
       ok: false,

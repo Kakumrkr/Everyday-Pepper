@@ -4,18 +4,14 @@ import { ClientTextsSchema, type ClientTexts } from '@pepper/contracts';
 import { Badge, Button, buttonStyle, DetailTable, Sheet, SheetFooter } from '@pepper/ui';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
-import {
-  consentHowLabel,
-  consentMomentLabel,
-  smsPhoneLabel,
-  textsSummary,
-} from '../../../lib/client-texts';
+import { formatPhone } from '../../../lib/booking-profile';
+import { consentHowLabel, consentMomentLabel, textsSummary } from '../../../lib/client-texts';
 import { Notice } from '../form-parts';
 
 // A client's "Text messages" on their profile (S61.2, AC-X-66, AC-X-67): one line on where their
 // texts stand; one tap to the record of what they agreed to, the words exactly as shown, when
 // and how ("when did I say yes?"); and, for owners and managers, "Stop texts". There is no
-// "turn back on": only the client can, by replying START or ticking the box when they book.
+// "turn back on": only the client can, by ticking the box when they next book online.
 
 export function ClientTextsSection({
   clientName,
@@ -103,7 +99,7 @@ function AgreedSheet({
               { label: 'How', value: consentHowLabel(consent.source) },
               {
                 label: 'Number',
-                value: <span className="tabular-nums">{smsPhoneLabel(consent.phone)}</span>,
+                value: <span className="tabular-nums">{formatPhone(consent.phone)}</span>,
               },
               ...(consent.stoppedAt === null
                 ? []
@@ -171,8 +167,8 @@ function StopSheet({
       <div className="grid gap-4" data-testid="client-texts-stop">
         <p className="m-0 type-body text-ink">
           No more texts go to {clientName}, from the next one. I’ll email them their confirmations
-          and reminders instead. Only {clientName} can turn texts back on, by replying START or
-          ticking the box when they book online.
+          and reminders instead. Only {clientName} can turn texts back on, by ticking the box when
+          they next book online.
         </p>
         <SheetFooter>
           {error === null ? null : <Notice tone="error">{error}</Notice>}

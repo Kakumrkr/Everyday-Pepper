@@ -122,7 +122,7 @@ async function queue(
   const id = await withTenant(db, tenant, (tx) =>
     queueSms(
       tx,
-      { to, body, ...extra },
+      { to, body, wordsBy: 'template', ...extra },
       {
         key,
         dedupeKey: OutboxDedupeKeySchema.parse(`test.sms:${String(keys)}`),
@@ -464,6 +464,67 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
         (entry) => entry.action === 'sms.consent_revoked',
       ),
     ).toHaveLength(1);
+  });
+
+  it('counts a yes on any of the client’s numbers, and stops them all', async () => {
+    const t = await team();
+    const first = newPhone();
+    const second = newPhone();
+    const sam = await clientWith(t.tenantId, first, true);
+    clock.set('2026-11-12T17:30:00Z');
+    await withTenant(db, t.tenantId, (tx) =>
+      recordSmsConsent(
+        tx,
+        {
+          phone: second,
+          source: 'booking_page',
+          clientId: sam,
+          wordingVersion: 'sms-consent-v1',
+          givenAt: clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      ),
+    );
+    // A member stopped the newer number by hand earlier: the older yes still counts.
+    await withTenant(db, t.tenantId, (tx) =>
+      revokeSmsConsentFor(tx, second, { actor: { kind: 'system' }, now: clock.now() }),
+    );
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({
+      status: 'on',
+      consent: { phone: first },
+    });
+    await withTenant(db, t.tenantId, (tx) =>
+      recordSmsConsent(
+        tx,
+        {
+          phone: second,
+          source: 'booking_page',
+          clientId: sam,
+          wordingVersion: 'sms-consent-v1',
+          givenAt: clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      ),
+    );
+    // One number replied STOP: still on through the other, which is shown; both: opted out.
+    await inbound(second, 'STOP');
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({
+      status: 'on',
+      consent: { phone: first },
+    });
+    await inbound(first, 'STOP');
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({
+      status: 'opted_out',
+      consent: { phone: second },
+    });
+    expect(await stopClientTexts(db, t.owner, sam, { clock })).toMatchObject({
+      status: 'stopped',
+    });
+    for (const phone of [first, second]) {
+      expect(
+        await withTenant(db, t.tenantId, (tx) => findActiveSmsConsent(tx, phone)),
+      ).toBeUndefined();
+    }
   });
 
   it('shows staff only their own clients, and never lets them stop texts', async () => {

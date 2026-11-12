@@ -154,16 +154,17 @@ function endsWithAiDisclosure(body: string): boolean {
 /**
  * One text, as queued (ADR-0065 §2). Its content is sealed like an email's and cleared once
  * sent. `urgent`: about today's appointment (running late), so the quiet hours don't hold it;
- * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69): `ai`
- * when the AI wrote the words, which then must end with the disclosure (`smsWithAiDisclosure`,
- * counted in the segments); absent or `template` for Pepper's fixed words.
+ * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69), always
+ * said, so no caller can forget it: `ai` when the AI wrote the words, which then must end with
+ * the disclosure (`smsWithAiDisclosure`, counted in the segments); `template` for Pepper's fixed
+ * words. The link's host is the caller's (the app's base URL); only its path is checked here.
  */
 export const OutboxSmsSchema = z
   .object({
     to: SmsPhoneSchema,
     body: SmsBodySchema,
     urgent: z.literal(true).optional(),
-    wordsBy: z.enum(['ai', 'template']).optional(),
+    wordsBy: z.enum(['ai', 'template']),
   })
   .strict()
   .refine((sms) => sms.wordsBy !== 'ai' || endsWithAiDisclosure(sms.body), {
@@ -232,16 +233,38 @@ export const SMS_REPLY_NAME_MAX = 40;
  * sends them; "Pepper" alone when there are none.
  */
 export function smsReplySender(businesses: readonly string[]): string {
-  const names = businesses
-    .map((name) => normalizeSmsText(name.replace(/\s+/g, ' ').trim()))
+  const names = replyNames(businesses);
+  return names.length === 0 ? 'Pepper' : `${names.join(' and ')} via Pepper`;
+}
+
+const isGsm7 = (char: string): boolean => GSM7_BASIC.has(char) || GSM7_EXTENSION.has(char);
+
+/**
+ * The names a reply carries: in GSM-7 only (a letter outside it as its plain letter, "ã" as
+ * "a"; other characters dropped, so one emoji can't make the reply three times dearer), blank
+ * ones left out, cut by character.
+ */
+function replyNames(businesses: readonly string[]): string[] {
+  return businesses
+    .map((name) =>
+      [...normalizeSmsText(name.replace(/\s+/g, ' '))]
+        .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
+        .filter(isGsm7)
+        .join('')
+        .replace(/ {2,}/g, ' ')
+        .trim(),
+    )
     .filter((name) => name !== '')
     .slice(0, 2)
-    .map((name) =>
-      name.length > SMS_REPLY_NAME_MAX
-        ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
-        : name,
-    );
-  return names.length === 0 ? 'Pepper' : `${names.join(' and ')} via Pepper`;
+    .map((name) => {
+      const chars = [...name];
+      return chars.length > SMS_REPLY_NAME_MAX
+        ? `${chars
+            .slice(0, SMS_REPLY_NAME_MAX - 3)
+            .join('')
+            .trimEnd()}...`
+        : name;
+    });
 }
 
 /**
@@ -255,7 +278,7 @@ export function smsKeywordReply(
   businesses: readonly string[] = [],
 ): string {
   const sender = smsReplySender(businesses);
-  const named = businesses.length > 0;
+  const named = replyNames(businesses).length > 0;
   switch (keyword) {
     case 'stop':
       return named

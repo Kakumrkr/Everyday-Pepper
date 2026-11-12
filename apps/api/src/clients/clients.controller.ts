@@ -105,7 +105,7 @@ export class ClientsController {
 
   /**
    * Stops the client's texts (S61.2, AC-X-67): 200 the new status. Owners and managers only;
-   * only the client can turn them back on. 404 `client_not_found`.
+   * only the client can turn them back on, by ticking the booking page's box. 404 `client_not_found`.
    */
   @Post(':clientId/texts/stop')
   @HttpCode(200)

@@ -45,12 +45,6 @@ export function consentHowLabel(source: SmsConsentSource): string {
   return `Ticked the box ${HOW[source]}`;
 }
 
-/** A US or Canadian number as people write it: "(555) 234-5678". */
-export function smsPhoneLabel(phone: string): string {
-  const match = /^\+1(\d{3})(\d{3})(\d{4})$/.exec(phone);
-  return match === null ? phone : `(${match[1] ?? ''}) ${match[2] ?? ''}-${match[3] ?? ''}`;
-}
-
 export function textsSummary(
   texts: ClientTexts,
   name: string,
