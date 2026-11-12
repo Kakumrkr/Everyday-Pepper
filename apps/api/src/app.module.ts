@@ -45,6 +45,7 @@ export class AppModule {
         BookingEmailsModule.forRoot({
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),
+          texts: config.textsOn,
         }),
         PushModule.forRoot({
           publicKey: config.pushPublicKey,

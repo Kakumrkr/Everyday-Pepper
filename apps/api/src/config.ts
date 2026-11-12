@@ -115,6 +115,8 @@ export interface ApiConfig extends ServiceConfig {
    * unless `SMS_PROVIDER=twilio` (the routes are 404 then).
    */
   smsWebhook: { accountSid: string; authToken: string } | null;
+  /** Whether texts are sent (`SMS_PROVIDER` sandbox or twilio, S62): confirmation texts. */
+  textsOn: boolean;
 }
 
 /**
@@ -136,6 +138,7 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     storage: loadStorageConfig('api', env),
     ...loadSupport(present),
     smsWebhook: smsWebhookOf(loadSmsConfig('api', env)),
+    textsOn: loadSmsConfig('api', env) !== null,
   };
 }
 

@@ -43,6 +43,8 @@ export type BookingNotice =
       email: BookingEmailDetails;
       manageToken: ManageToken;
       change: BookingChange;
+      /** The client just said yes to texts on the booking page (S62: the opt-in text). */
+      newSmsConsent?: true;
     }
   | {
       kind: 'rescheduled';

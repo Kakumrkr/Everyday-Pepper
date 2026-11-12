@@ -38,6 +38,11 @@ export interface JobsOptions {
   key: Buffer;
   /** How often due reminders are queued (AC-W6-1: well under 5 minutes). */
   reminderPollMs: number;
+  /**
+   * Reminders by text and their links (S62): the web app's origin for the reschedule link
+   * (`null`: none), and whether this worker sends texts (`SMS_PROVIDER` set).
+   */
+  reminders?: { baseUrl: string | null; texts: boolean };
   /** How often the clean-up runs; it also runs at start-up. */
   cleanupIntervalMs: number;
   /**
@@ -129,7 +134,13 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     this.reminders = new Periodic(
       'Reminder job',
       options.reminderPollMs,
-      () => sendDueReminders(db, { key: options.key, clock }),
+      () =>
+        sendDueReminders(db, {
+          key: options.key,
+          clock,
+          baseUrl: options.reminders?.baseUrl ?? null,
+          texts: options.reminders?.texts ?? false,
+        }),
       this.logger,
     );
     this.dueTasks =

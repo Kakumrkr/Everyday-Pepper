@@ -443,6 +443,7 @@ export async function confirmBookingRequest(
         },
       });
       // The SMS box the client ticked (S61.2, AC-X-65): a consent only now, with the booking.
+      const newSmsConsent = request.smsConsentVersion !== null && request.phone !== null;
       if (request.smsConsentVersion !== null && request.phone !== null) {
         await recordSmsConsent(
           tx,
@@ -467,7 +468,13 @@ export async function confirmBookingRequest(
         email: request.email,
         clientName: client.name,
       };
-      await options.notify?.(tx, { kind: 'confirmed', email, manageToken, change: changeOf(row) });
+      await options.notify?.(tx, {
+        kind: 'confirmed',
+        email,
+        manageToken,
+        change: changeOf(row),
+        ...(newSmsConsent && { newSmsConsent: true as const }),
+      });
       // The code just proved the address: the browser may skip it next time (S47).
       // The browser's earlier device (another email, say) ends: its cookie is replaced (S47).
       const device =
