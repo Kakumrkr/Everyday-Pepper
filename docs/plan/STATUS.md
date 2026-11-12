@@ -9,12 +9,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S61 · SMS channel, backend** ([ADR-0065](../adr/0065-sms-channel.md), [PCR-011](changes/PCR-011.md); brief approved 2026-11-12: Twilio, S61/S61.2 split, fixtures + sandbox). Branch `claude/sharp-davinci-7stuat`. Check profile: backend/domain.
 1. [x] PCR-011, ADR-0065, AC-X-57…63 (acceptance, traceability), playbook, CHANGELOG 0.37.
-2. [ ] Contracts (`sms` type, content, keywords, wording, quiet hours, GSM-7 segments) + db (migration 0075: enum values, `sms_consents`, `sms_deliveries`, `sms_keyword_events`, `sms_opted_out()`, repos; isolation + export lists).
+2. [x] Contracts (`sms` type, content, keywords, wording, quiet hours, GSM-7 segments) + db (migration 0075: enum values, `sms_consents`, `sms_deliveries`, `sms_keyword_events`, `sms_opted_out()`, repos; isolation + export lists).
 3. [ ] Core: `SmsSender` port, `queueSms`, `smsPermission`, delivery gate (opt-out → consent → quiet hours postpone), consent and keyword services, status updates.
 4. [ ] Runtime: `TwilioSmsSender` (fixtures), `SandboxSmsSender`, `loadSmsConfig`; worker wiring.
 5. [ ] Api: `/v1/webhooks/sms` + `/status` (Twilio signature, account check, TwiML replies, dedupe).
 6. [ ] Docs in sync (jobs-messaging, security-and-tenancy), review, `/session-close`.
-Next: task 2. Open questions: none.
+Next: task 3 (core). Open questions: none. Note: export writes `text-consents.json` only when a business has consents (keeps More → Data unchanged).
 
 ## Last sessions
 - **S59.5 Phase 13 · Terms, privacy, AI disclosure (2026-11-09)** ([ADR-0064](../adr/0064-legal-pages-and-ai-disclosure.md), [PR #93](https://github.com/Kakumrkr/Everyday-Pepper/pull/93)). Full entry in [session-log.md](session-log.md).

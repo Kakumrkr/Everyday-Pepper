@@ -35,6 +35,7 @@ export * from './repositories/inbound-email.js';
 export * from './repositories/email-suppression.js';
 export * from './repositories/remembered-devices.js';
 export * from './repositories/sessions.js';
+export * from './repositories/sms.js';
 export * from './repositories/tasks.js';
 export * from './repositories/tenants.js';
 export * from './repositories/trust.js';

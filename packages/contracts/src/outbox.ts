@@ -10,10 +10,11 @@ export const OutboxMessageIdSchema = z.uuid().toLowerCase().brand<'OutboxMessage
 export type OutboxMessageId = z.infer<typeof OutboxMessageIdSchema>;
 
 /**
- * What a message does when delivered: an email, a push to one device (ADR-0026), or writing
- * the summary of a conversation that went quiet (`episode`, S31, ADR-0037). SMS later.
+ * What a message does when delivered: an email, a push to one device (ADR-0026), writing the
+ * summary of a conversation that went quiet (`episode`, S31, ADR-0037), or a text (`sms`, S61,
+ * ADR-0065; its content is `OutboxSmsSchema` in `sms.ts`).
  */
-export const OutboxMessageTypeSchema = z.enum(['email', 'push', 'episode']);
+export const OutboxMessageTypeSchema = z.enum(['email', 'push', 'episode', 'sms']);
 export type OutboxMessageType = z.infer<typeof OutboxMessageTypeSchema>;
 
 /**

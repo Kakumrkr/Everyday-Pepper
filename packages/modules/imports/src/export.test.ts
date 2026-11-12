@@ -91,6 +91,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     waitlist: [],
     facts: [],
     support: { threads: [], messages: [], screenshots: [] },
+    smsConsents: [],
     ...overrides,
   };
 }
@@ -141,6 +142,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
   it('zips every file, names it by the business and its day, and counts what it holds', () => {
     const built = buildBusinessExport(data(), AT);
     expect(built.fileName).toBe('pepper-export-fade-co-2099-03-10.zip');
+    // No consents: no text-consents.json (S61).
     expect(Object.keys(unzip(built.bytes))).toEqual(BUSINESS_EXPORT_FILES.map((f) => f.name));
     expect(built.counts).toEqual({
       clients: 1,
@@ -212,6 +214,50 @@ describe('buildBusinessExport (AC-W1-37)', () => {
         ],
       },
     ]);
+  });
+
+  it('writes text-consents.json with the words each consent was given to (S61, ADR-0065 §7)', () => {
+    const files = unzip(
+      buildBusinessExport(
+        data({
+          smsConsents: [
+            {
+              id: '0190a000-0000-7000-8000-000000000b01',
+              phone: '+15552340001',
+              source: 'booking_page',
+              clientId: CLIENT,
+              wordingVersion: 'sms-consent-v1',
+              givenAt: AT,
+              revokedAt: null,
+            },
+            {
+              id: '0190a000-0000-7000-8000-000000000b02',
+              phone: '+15552340002',
+              source: 'member_settings',
+              clientId: null,
+              wordingVersion: 'sms-consent-v0',
+              givenAt: AT,
+              revokedAt: AT,
+            },
+          ],
+        }),
+        AT,
+      ).bytes,
+    );
+    const consents = JSON.parse(files['text-consents.json'] ?? '') as Record<string, unknown>[];
+    expect(consents).toHaveLength(2);
+    expect(consents[0]).toMatchObject({
+      clientId: CLIENT,
+      phone: '+15552340001',
+      how: 'booking page',
+      givenAt: AT.toISOString(),
+      revokedAt: null,
+    });
+    expect(files['README.txt']).toContain('text-consents.json  Who agreed to your texts');
+    expect(String(consents[0]?.['words'])).toContain('reminders from ');
+    expect(String(consents[0]?.['words'])).not.toContain('{business}');
+    // A version this build doesn't know is named, not guessed.
+    expect(consents[1]).toMatchObject({ words: 'sms-consent-v0', revokedAt: AT.toISOString() });
   });
 
   it('puts each sent screenshot next to support.json, named on its message (AC-X-31)', () => {

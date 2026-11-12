@@ -447,7 +447,7 @@ export async function mergeClientRows(
  * Deletes a client (ADR-0051): `{ upcoming }` while they have upcoming visits (cancel those
  * first), `undefined` when they aren't there. Otherwise every episode naming them, their
  * notes (facts, and those about their visits), suggestions, waitlist entries and offers,
- * external ids, the booking page's remembered browsers and their import rows' details go;
+ * external ids, consents to texts, the booking page's remembered browsers and their import rows' details go;
  * their name, email and phone are scrubbed from stored chats; pending proposals about them
  * expire; and the row keeps only `DELETED_CLIENT_NAME`, for their past visits.
  */
@@ -482,6 +482,8 @@ export async function deleteClientRow(
   await tx.execute(sql`DELETE FROM waitlist_offers WHERE client_id = ${clientId}`);
   await tx.execute(sql`DELETE FROM waitlist_entries WHERE client_id = ${clientId}`);
   await tx.execute(sql`DELETE FROM client_import_refs WHERE client_id = ${clientId}`);
+  // Their consent to texts goes with their number (S61, ADR-0065 §7): nothing is texted to them.
+  await tx.execute(sql`DELETE FROM sms_consents WHERE client_id = ${clientId}`);
   // Their old emails' reschedule/cancel links stop working (ADR-0022).
   await tx.execute(
     sql`UPDATE bookings SET manage_token_hash = NULL WHERE client_id = ${clientId} AND manage_token_hash IS NOT NULL`,

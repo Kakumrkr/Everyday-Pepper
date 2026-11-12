@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 /**
- * What the platform meters per business (ADR-0013): AI tokens (Phase 6) and emails sent
- * (Phase 5). Pricing and plan limits are decided from this data later (open decision D7).
+ * What the platform meters per business (ADR-0013): AI tokens (Phase 6), emails sent (Phase 5)
+ * and text segments sent (S61, ADR-0065: carriers bill by segment). Pricing and plan limits are
+ * decided from this data later (open decision D7).
  */
-export const UsageMetricSchema = z.enum(['llm_tokens', 'emails_sent']);
+export const UsageMetricSchema = z.enum(['llm_tokens', 'emails_sent', 'sms_segments']);
 export type UsageMetric = z.infer<typeof UsageMetricSchema>;
 
 /** A metering period: a calendar month in UTC, written `YYYY-MM`. */

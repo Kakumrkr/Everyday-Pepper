@@ -4,6 +4,8 @@ import {
   MAX_IMPORT_ROWS,
   formatDate,
   localTimeLabel,
+  SmsConsentWordingVersionSchema,
+  smsConsentText,
   toZoned,
   type BusinessExportCounts,
 } from '@pepper/contracts';
@@ -14,6 +16,15 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 // The business export's files (S51, ADR-0053, AC-W1-37, AC-W1-38): what `readBusinessExport`
 // read, written as Pepper's own CSVs (the `pepper` preset reads them back) and JSON, and
 // zipped. Pure: the service reads, audits and hands the bytes to the api.
+
+/** Written only when the business has consent records (S61). */
+const SMS_CONSENTS_FILE = 'text-consents.json';
+
+/** The words a consent was given to, as shown; a version this build doesn't know, by its name. */
+function wordingOf(version: string, business: string): string {
+  const known = SmsConsentWordingVersionSchema.safeParse(version);
+  return known.success ? smsConsentText(known.data, business) : version;
+}
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -71,6 +82,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
       .map((name) => `${name}  More rows of the file before it (10,000 rows a file)`),
     ...(data.support.screenshots.length > 0
       ? ['support/screenshots/  The screenshots sent with your requests, named in support.json']
+      : []),
+    ...(data.smsConsents.length > 0
+      ? [`${SMS_CONSENTS_FILE}  Who agreed to your texts, when, how and the words they saw`]
       : []),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
@@ -280,6 +294,23 @@ export function buildBusinessExport(
       ),
     ],
   ];
+
+  // Consents to the business's texts (S61, ADR-0065 §7): its TCPA records, when it has any.
+  if (data.smsConsents.length > 0) {
+    jsonFiles.push([
+      SMS_CONSENTS_FILE,
+      json(
+        data.smsConsents.map((consent) => ({
+          clientId: consent.clientId,
+          phone: consent.phone,
+          how: consent.source === 'booking_page' ? 'booking page' : 'a team member, for themselves',
+          words: wordingOf(consent.wordingVersion, data.business.name),
+          givenAt: at(consent.givenAt),
+          revokedAt: consent.revokedAt === null ? null : at(consent.revokedAt),
+        })),
+      ),
+    ]);
+  }
 
   const files: Zippable = {};
   const add = (name: string, text: string) => {

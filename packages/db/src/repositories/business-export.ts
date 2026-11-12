@@ -14,6 +14,7 @@ import {
 } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 import { listSupportScreenshotsForExport } from './support-screenshots.js';
+import { listSmsConsentsForExport } from './sms.js';
 import { listSupportForExport } from './support.js';
 
 // A business's export (S51, ADR-0053, AC-W1-37): everything the owner can take with them, read
@@ -74,6 +75,8 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_messages: true,
   support_reads: 'when each member last opened a support request',
   support_screenshots: true,
+  sms_consents: true,
+  sms_deliveries: 'text delivery state',
 };
 
 /** What a business's export holds, as read. */
@@ -184,6 +187,16 @@ export interface BusinessExportData {
     /** The screenshots sent with them (S59.2.3, AC-X-31): the images are read from storage. */
     screenshots: { id: string; messageId: string; widths: number[] }[];
   };
+  /** Consents to the business's texts (S61, ADR-0065 §7): its TCPA records, revoked ones too. */
+  smsConsents: {
+    id: string;
+    phone: string;
+    source: string;
+    clientId: string | null;
+    wordingVersion: string;
+    givenAt: Date;
+    revokedAt: Date | null;
+  }[];
 }
 
 /**
@@ -354,5 +367,6 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
           : [{ id: row.id, messageId: row.messageId, widths: row.widths }],
       ),
     },
+    smsConsents: await listSmsConsentsForExport(tx),
   };
 }

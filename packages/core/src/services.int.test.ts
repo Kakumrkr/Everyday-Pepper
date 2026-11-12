@@ -440,10 +440,12 @@ describe('usage', () => {
     await expect(usageFor(db, team.tenantId, UsagePeriodSchema.parse('2026-10'))).resolves.toEqual({
       llm_tokens: 900,
       emails_sent: 0,
+      sms_segments: 0,
     });
     await expect(usageFor(db, team.tenantId, UsagePeriodSchema.parse('2026-11'))).resolves.toEqual({
       llm_tokens: 100,
       emails_sent: 1,
+      sms_segments: 0,
     });
   });
 });

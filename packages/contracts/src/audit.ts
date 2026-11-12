@@ -17,6 +17,7 @@ import {
 import { BusinessPhotoKindSchema } from './photos.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { RuleSchema } from './rules.js';
+import { SmsConsentSourceSchema, SmsConsentWordingVersionSchema } from './sms.js';
 import { SupportKindSchema, SupportRatingSchema, SupportStatusSchema } from './support.js';
 import { TaskSourceSchema, TaskStatusSchema } from './tasks.js';
 import {
@@ -380,6 +381,29 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('client'),
       before: z.object({ emailOptedOut: z.literal(false) }).strict(),
       after: z.object({ emailOptedOut: z.literal(true) }).strict(),
+    })
+    .strict(),
+  // An SMS consent recorded or revoked (S61, ADR-0065 §7): how and which wording, no number.
+  z
+    .object({
+      action: z.literal('sms.consent_given'),
+      entity: entity('sms_consent'),
+      before: z.null(),
+      after: z
+        .object({
+          source: SmsConsentSourceSchema,
+          wordingVersion: SmsConsentWordingVersionSchema,
+          clientId: ClientIdSchema.nullable(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('sms.consent_revoked'),
+      entity: entity('sms_consent'),
+      before: z.object({ active: z.literal(true) }).strict(),
+      after: z.object({ active: z.literal(false) }).strict(),
     })
     .strict(),
   z

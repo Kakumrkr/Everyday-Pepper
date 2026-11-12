@@ -152,6 +152,21 @@ export async function withInboundMail<T>(
 }
 
 /**
+ * Runs `work` in a transaction in which `sms_keyword_events` rows are reachable (S61, ADR-0065):
+ * the SMS webhook records STOP, START and HELP there, and delivery records a provider's opt-out.
+ * Nothing else changes: other tables see no tenant (and so nothing tenant-owned).
+ */
+export async function withSmsInbound<T>(
+  db: Database,
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    await tx.execute(sql`SELECT set_config('app.sms_inbound', 'on', true)`);
+    return work(tx);
+  });
+}
+
+/**
  * Makes `inbound_emails` reachable in the open transaction too, for the inbound job's business
  * transaction that lands a reply and records it together (so a retry can't land it twice).
  */

@@ -526,6 +526,13 @@
       "when": 1794154575721,
       "tag": "0074_ai_metrics",
       "breakpoints": true
+    },
+    {
+      "idx": 75,
+      "version": "7",
+      "when": 1794446104458,
+      "tag": "0075_sms_channel",
+      "breakpoints": true
     }
   ]
 }
