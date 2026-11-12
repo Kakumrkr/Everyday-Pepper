@@ -453,22 +453,29 @@ for (const width of WIDTHS) {
     await page.goto(`/clients/${ana?.id ?? ''}`);
     const texts = page.getByTestId('client-texts');
     await expect(texts.getByText(/^Said yes /)).toBeVisible();
-    await shots('client-texts', [
-      texts.getByText(/^Said yes /),
-      page.getByText(email),
-      page.getByTestId('upcoming-visits').locator('p').first(),
-    ]);
+    // The section and the sheet alone: the profile around them shows the test's unique email,
+    // whose length (and so its wrapping at 375 px) differs from run to run.
+    if (phone) await expectTapTargets(page, 'a profile with texts on');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect.soft(texts).toHaveScreenshot(`client-texts-${String(width)}-${scheme}.png`, {
+        animations: 'disabled',
+        maxDiffPixelRatio: SHOT.maxDiffPixelRatio,
+        mask: [texts.getByText(/^Said yes /)],
+      });
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
     await (await hydrated(texts.getByRole('button', { name: 'What they agreed to' }))).click();
-    const record = page.getByTestId('client-texts-record');
+    const record = page.getByRole('dialog', { name: 'What Ana Ruiz agreed to' });
     await expect(record.getByRole('blockquote')).toBeVisible();
     for (const scheme of SCHEMES) {
       await still(page, scheme);
       await expect
-        .soft(page)
+        .soft(record)
         .toHaveScreenshot(`client-texts-record-${String(width)}-${scheme}.png`, {
-          ...SHOT,
-          fullPage: false,
-          mask: [record.getByText(/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/), page.getByText(email)],
+          animations: 'disabled',
+          maxDiffPixelRatio: SHOT.maxDiffPixelRatio,
+          mask: [record.getByText(/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/)],
         });
     }
     await page.emulateMedia({ colorScheme: 'light' });
