@@ -108,9 +108,8 @@ describe('/v1/reminders/settings', () => {
 
   it.each<MembershipRole>(['owner', 'manager'])('a(n) %s changes them', async (r) => {
     role = r;
-    expect((await patch({ sameDayLeadHours: 3 }).expect(200)).body.settings).toMatchObject({
-      sameDayLeadHours: 3,
-    });
+    const body: unknown = (await patch({ sameDayLeadHours: 3 }).expect(200)).body;
+    expect(body).toMatchObject({ settings: { sameDayLeadHours: 3 } });
     expect(reminders.change).toHaveBeenCalledWith(context(), { sameDayLeadHours: 3 });
   });
 
