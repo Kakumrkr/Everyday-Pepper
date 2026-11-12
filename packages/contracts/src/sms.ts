@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
+import { BookingTextKindSchema } from './reminders.js';
 import { UtcDateTimeSchema } from './time.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
@@ -224,6 +225,28 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
   return null;
 }
 
+/**
+ * What a reply to Pepper's number asks for, beyond the keywords (S62, AC-X-74): `confirm` for
+ * "C" or "Confirm" ("C.", "c", "Confirmed", "confirm!" too), alone. An opt-out always wins: a
+ * keyword is read first, so CANCEL, STOP and the rest never confirm.
+ */
+export type SmsReply = SmsKeyword | 'confirm';
+
+const CONFIRM_WORDS = new Set(['c', 'confirm', 'confirmed']);
+
+/** A reply's meaning: a keyword (`classifySmsKeyword`) first, then "C" to confirm; else `null`. */
+export function classifySmsReply(body: string): SmsReply | null {
+  const keyword = classifySmsKeyword(body);
+  if (keyword !== null) return keyword;
+  const words = body
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word !== '');
+  return words.length === 1 && CONFIRM_WORDS.has(words[0] ?? '') ? 'confirm' : null;
+}
+
 /** The longest business name a reply carries before it is shortened (two fit in two segments). */
 export const SMS_REPLY_NAME_MAX = 40;
 
@@ -245,26 +268,28 @@ const isGsm7 = (char: string): boolean => GSM7_BASIC.has(char) || GSM7_EXTENSION
  * ones left out, cut by character.
  */
 function replyNames(businesses: readonly string[]): string[] {
-  return (
-    businesses
-      .map((name) =>
-        // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
-        Array.from(normalizeSmsText(name.replace(/\s+/g, ' ')))
-          .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
-          .filter(isGsm7)
-          .join('')
-          .replace(/ {2,}/g, ' ')
-          .trim(),
-      )
-      .filter((name) => name !== '')
-      .slice(0, 2)
-      // GSM-7 characters are one code unit each, so a plain cut never splits one.
-      .map((name) =>
-        name.length > SMS_REPLY_NAME_MAX
-          ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
-          : name,
-      )
-  );
+  return businesses
+    .map((name) => smsPlainText(name, Number.MAX_SAFE_INTEGER))
+    .filter((name) => name !== '')
+    .slice(0, 2)
+    .map((name) => smsPlainText(name, SMS_REPLY_NAME_MAX));
+}
+
+/**
+ * A name or other typed text as a text carries it (S62): on one line, in GSM-7 only (a letter
+ * outside it as its plain letter, "ã" as "a"; other characters dropped, so one emoji can't make
+ * a text three times dearer), cut at `max` characters with "...".
+ */
+export function smsPlainText(text: string, max: number): string {
+  // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
+  const plain = Array.from(normalizeSmsText(text.replace(/\s+/g, ' ')))
+    .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
+    .filter(isGsm7)
+    .join('')
+    .replace(/ {2,}/g, ' ')
+    .trim();
+  // GSM-7 characters are one code unit each, so a plain cut never splits one.
+  return plain.length > max ? `${plain.slice(0, Math.max(0, max - 3)).trimEnd()}...` : plain;
 }
 
 /**
@@ -327,9 +352,39 @@ export const ClientTextsStatusSchema = z.enum(['on', 'opted_out', 'stopped', 'ne
 export type ClientTextsStatus = z.infer<typeof ClientTextsStatusSchema>;
 
 /**
+ * Where the client's last text stands (S62 top-up, AC-X-76): `waiting` (queued, held for the
+ * quiet hours or about to go; `at` is when it may go), `sent` (the provider took it; no report
+ * yet), `delivered`, `not_delivered` (the carrier couldn't deliver it), `not_sent` (dropped at
+ * send time: `reason` says why).
+ */
+export const LastTextStateSchema = z.enum([
+  'waiting',
+  'sent',
+  'delivered',
+  'not_delivered',
+  'not_sent',
+]);
+export type LastTextState = z.infer<typeof LastTextStateSchema>;
+
+export const LastTextReasonSchema = z.enum(['opted_out', 'no_consent', 'not_textable', 'failed']);
+export type LastTextReason = z.infer<typeof LastTextReasonSchema>;
+
+export const LastTextSchema = z
+  .object({
+    kind: BookingTextKindSchema,
+    /** When it went; while `waiting`, when it may go. */
+    at: UtcDateTimeSchema,
+    state: LastTextStateSchema,
+    reason: LastTextReasonSchema.nullable(),
+  })
+  .strict();
+export type LastText = z.infer<typeof LastTextSchema>;
+
+/**
  * `GET /v1/clients/:clientId/texts` (and the answer of `POST …/texts/stop`): the status, the
  * client's latest consent with the words exactly as shown, whether their own phone can get texts
- * (`textable`: US or Canada) and whether this member may stop them (`canStop`).
+ * (`textable`: US or Canada), whether this member may stop them (`canStop`) and the last text
+ * the business sent them (`lastText`, S62; `null` for none).
  */
 export const ClientTextsSchema = z.object({
   status: ClientTextsStatusSchema,
@@ -345,6 +400,7 @@ export const ClientTextsSchema = z.object({
     })
     .nullable(),
   canStop: z.boolean(),
+  lastText: LastTextSchema.nullable(),
 });
 export type ClientTexts = z.infer<typeof ClientTextsSchema>;
 

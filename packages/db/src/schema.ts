@@ -10,6 +10,7 @@ import {
   integer,
   smallint,
   jsonb,
+  primaryKey,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -165,6 +166,14 @@ export const tenants = pgTable(
       .notNull()
       .default(
         sql`'{"suggestionsPaused": false, "disabledKinds": [], "answeredKinds": []}'::jsonb`,
+      ),
+    // Texts and reminders (S62, ADR-0065): whether clients get texts, the day-before reminder,
+    // the same-day text and its lead in hours. Validated by the reminder settings repository;
+    // owners and managers change it.
+    reminderSettings: jsonb('reminder_settings')
+      .notNull()
+      .default(
+        sql`'{"texts": true, "dayBefore": true, "sameDay": true, "sameDayLeadHours": 2}'::jsonb`,
       ),
     // The postal address commercial mail carries (S36, CAN-SPAM); NULL: no rebooking emails
     // are drafted. Owners and managers set it with the feed's switches.
@@ -792,6 +801,8 @@ export const bookings = pgTable(
     idempotencyKey: text('idempotency_key'),
     // SHA-256 of the client's reschedule/cancel link token (ADR-0022); booking page only.
     manageTokenHash: text('manage_token_hash'),
+    // When the client confirmed by text ("C" to a reminder, S62); NULL: not confirmed by them.
+    clientConfirmedAt: timestamp('client_confirmed_at', { withTimezone: true }),
     // Who made it; NULL for the booking page and once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
@@ -1295,9 +1306,9 @@ export const outboxDispatch = pgTable(
 );
 
 /**
- * The reminder email planned for a confirmed booking (W6, ADR-0025): one row per booking while
- * its reminder is still to be sent, with the booking's id, when the reminder is due and the
- * start it was planned for. The booking services keep it in step in the booking's own
+ * The reminders planned for a confirmed booking (W6, ADR-0025; S62 kinds): one row per booking
+ * and kind (`day_before`, by text or email; `same_day`, by text) while it is still to be sent,
+ * with the booking's id, when the reminder is due and the start it was planned for. The booking services keep it in step in the booking's own
  * transaction (planned, moved, removed on cancel); the worker's reminder job finds due rows
  * across businesses (`job_scan`, ids and times only) and, under each business's tenant, checks
  * the booking again before it queues the email and removes the row.
@@ -1306,12 +1317,15 @@ export const bookingReminders = pgTable(
   'booking_reminders',
   {
     // The booking's id.
-    id: uuid('id').primaryKey(),
+    id: uuid('id').notNull(),
+    kind: text('kind').notNull().default('day_before'),
     tenantId: uuid('tenant_id').notNull().default(currentTenantId),
     dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
     startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
   },
   (table) => [
+    primaryKey({ name: 'booking_reminders_pkey', columns: [table.id, table.kind] }),
+    check('booking_reminders_kind_known', sql`${table.kind} IN ('day_before', 'same_day')`),
     index('booking_reminders_due_at_idx').on(table.dueAt),
     check('booking_reminders_due_before_start', sql`${table.dueAt} < ${table.startsAt}`),
     foreignKey({
@@ -3289,6 +3303,83 @@ export const smsDeliveries = pgTable(
   ],
 );
 export type SmsDeliveryRow = typeof smsDeliveries.$inferSelect;
+
+/**
+ * What each text to a client was about (S62, ADR-0065): one row per queued text (the outbox
+ * message's id), its client and booking and its kind (`opt_in`, `confirmation`, `day_before`,
+ * `same_day`), with the start a reminder was for. It holds no number (the consent has it): the
+ * profile's last text reads it with the message's state, and "C" finds the booking a reminder
+ * was about. Removed with its message; not in the export (delivery state).
+ */
+export const bookingTexts = pgTable(
+  'booking_texts',
+  {
+    // The outbox message's id.
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    clientId: uuid('client_id').notNull(),
+    bookingId: uuid('booking_id').notNull(),
+    kind: text('kind').notNull(),
+    // The booking's start the text was about.
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('booking_texts_client_idx').on(table.tenantId, table.clientId, table.createdAt),
+    index('booking_texts_booking_idx').on(table.tenantId, table.bookingId),
+    check(
+      'booking_texts_kind_known',
+      sql`${table.kind} IN ('opt_in', 'confirmation', 'day_before', 'same_day')`,
+    ),
+    foreignKey({
+      name: 'booking_texts_message_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [outboxMessages.tenantId, outboxMessages.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'booking_texts_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'booking_texts_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type BookingTextRow = typeof bookingTexts.$inferSelect;
+
+/**
+ * More reschedule/cancel links of a booking (S62): one per reminder, so a reminder carries a
+ * working link although only hashes are stored (`bookings.manage_token_hash` is the
+ * confirmation's). The booking page's manage lookup takes either; like the confirmation's, a
+ * link only changes a booking that hasn't started, and the clean-up removes links of bookings
+ * that started more than 30 days ago.
+ */
+export const bookingManageLinks = pgTable(
+  'booking_manage_links',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    // SHA-256 (hex) of the link's token.
+    tokenHash: text('token_hash').notNull(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    bookingId: uuid('booking_id').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('booking_manage_links_token_hash_unique').on(table.tokenHash),
+    index('booking_manage_links_booking_idx').on(table.tenantId, table.bookingId),
+    check('booking_manage_links_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    foreignKey({
+      name: 'booking_manage_links_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
 
 /** The SMS webhook's context (S61, `withSmsInbound`): set for one transaction only. */
 const smsInbound = sql`COALESCE(current_setting('app.sms_inbound', true) = 'on', false)`;

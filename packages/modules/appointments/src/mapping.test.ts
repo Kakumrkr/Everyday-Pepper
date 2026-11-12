@@ -221,6 +221,7 @@ const bookingRow: BookingRow = {
   staffMemberId: STAFF,
   startsAt: new Date('2026-11-02T14:00:00.000Z'),
   endsAt: new Date('2026-11-02T15:00:00.000Z'),
+  clientConfirmedAt: null,
   bufferBeforeMinutes: 0,
   bufferAfterMinutes: 10,
   priceFromCents: 6500,
@@ -252,9 +253,15 @@ describe('bookings', () => {
       status: 'confirmed',
       source: 'team',
       overridden: false,
+      clientConfirmedAt: null,
       createdAt: '2026-10-17T12:00:00.000Z',
       updatedAt: '2026-10-17T12:05:00.000Z',
     });
+    // Confirmed by text (S62).
+    expect(
+      toBooking({ ...bookingRow, clientConfirmedAt: new Date('2026-11-01T15:00:00.000Z') })
+        .clientConfirmedAt,
+    ).toBe('2026-11-01T15:00:00.000Z');
   });
 
   it('audits ids, times and statuses only', () => {

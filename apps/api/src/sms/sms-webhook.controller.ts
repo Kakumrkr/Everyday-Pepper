@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { confirmBookingByText } from '@pepper/appointments';
 import {
+  classifySmsReply,
   OutboxMessageIdSchema,
   TenantIdSchema,
   TwilioInboundSmsSchema,
@@ -30,8 +32,9 @@ import { verifyTwilioSignature } from './twilio-signature.js';
 // Twilio's SMS webhooks (S61, ADR-0065 §5–6, AC-X-59, AC-X-61, AC-X-62): no session and no
 // Origin (Twilio calls them). The signature over the public URL and the exact form fields, and
 // the account, are checked before anything is read. A text to Pepper's number is handled in this
-// request: STOP is honoured before Twilio has its answer, and the reply goes back as TwiML. A
-// status callback moves the delivery the signed URL names. Off (404) unless SMS is on with
+// request: STOP is honoured before Twilio has its answer, and the reply goes back as TwiML; a
+// "C" confirms the booking a reminder was about (S62, AC-X-74). A status callback moves the
+// delivery the signed URL names. Off (404) unless SMS is on with
 // Twilio. Neither a number nor a text is logged.
 
 export interface SmsWebhookOptions {
@@ -82,7 +85,7 @@ export class SmsWebhookController {
   }
 
   /**
-   * A text to Pepper's number: 200 with TwiML (a reply to STOP, START or HELP, else none); 401
+   * A text to Pepper's number: 200 with TwiML (a reply to STOP, START, HELP or "C", else none); 401
    * `webhook_signature_invalid`; 400 `validation_failed`; 404 while off.
    */
   @Post()
@@ -97,6 +100,7 @@ export class SmsWebhookController {
     if (!parsed.success || parsed.data.AccountSid !== twilio.accountSid) {
       throw new BadRequestException(apiError('validation_failed'));
     }
+    const receivedAt = (this.options.clock ?? systemClock).now();
     const result = await handleInboundSms(
       this.db,
       {
@@ -104,13 +108,18 @@ export class SmsWebhookController {
         eventId: parsed.data.MessageSid,
         from: parsed.data.From,
         body: parsed.data.Body,
-        receivedAt: (this.options.clock ?? systemClock).now(),
+        receivedAt,
       },
       { helpUrl: new URL('/help', this.options.baseUrl).toString() },
     );
+    // A keyword (an opt-out first) always wins; only then is a "C" read.
+    const reply =
+      result.keyword === null && classifySmsReply(parsed.data.Body) === 'confirm'
+        ? (await confirmBookingByText(this.db, { from: parsed.data.From, receivedAt })).reply
+        : result.reply;
     // Only on success: an error stays JSON, like every other answer.
     response.setHeader('Content-Type', 'text/xml; charset=utf-8');
-    return twiml(result.reply);
+    return twiml(reply);
   }
 
   /**

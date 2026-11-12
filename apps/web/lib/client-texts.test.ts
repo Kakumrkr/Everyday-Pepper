@@ -19,6 +19,7 @@ const of = (texts: Partial<ClientTexts>): ClientTexts => ({
   textable: true,
   consent: CONSENT,
   canStop: true,
+  lastText: null,
   ...texts,
 });
 

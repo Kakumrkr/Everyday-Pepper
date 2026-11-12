@@ -15,17 +15,25 @@ import {
 import {
   createBusiness,
   createClient,
+  deliverOutboxMessage,
   ForbiddenError,
   listClients,
   ManualClock,
+  outboxKeyFrom,
   updateBookingPage,
   type Actor,
+  type SmsAccepted,
+  type SmsMessage,
+  type SmsSender,
 } from '@pepper/core';
 import {
   findActiveSmsConsent,
   findCurrentTenant,
+  findLastBookingText,
   listAuditEntries,
+  listDueOutboxMessages,
   listSmsConsentsForClient,
+  setReminderSettings,
   updateCurrentTenantMailingAddress,
   withPublicTenant,
   withTenant,
@@ -70,6 +78,7 @@ import {
 } from './services/remembered-devices.js';
 import { addToWaitlist, listWaitlist } from './services/waitlist.js';
 import type { BookingNotice, BookingNotify } from './services/notices.js';
+import { queueBookingText } from './services/booking-emails.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember, listStaff } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
@@ -609,6 +618,120 @@ describe('the SMS box (S61.2, AC-X-65)', () => {
     const other = await newPage();
     await book(p, { phone: PHONE, smsConsent: 'sms-consent-v1' });
     expect(await consentOf(other)).toBeUndefined();
+  });
+});
+
+describe('the opt-in and confirmation texts (S62, AC-X-73)', () => {
+  const OUTBOX_KEY = outboxKeyFrom('a-public-booking-text-outbox-secret-32+chars');
+  const BASE = 'https://app.example.com';
+
+  class RecordingSms implements SmsSender {
+    readonly sent: SmsMessage[] = [];
+    send(message: SmsMessage): Promise<SmsAccepted> {
+      this.sent.push(message);
+      return Promise.resolve({
+        provider: 'sandbox',
+        providerMessageId: `SB${randomUUID().replace(/-/g, '')}`,
+        segments: 1,
+        status: 'delivered',
+      });
+    }
+  }
+
+  /** Books on the page with the api's notify (email and text), then delivers this page's texts at 8:00. */
+  async function bookAndText(p: Page, extra: Partial<BookingRequestInput>, texts = true) {
+    const notify: BookingNotify = async (tx, notice) => {
+      await queueBookingText(tx, notice, {
+        baseUrl: BASE,
+        outboxKey: OUTBOX_KEY,
+        clock: p.clock,
+        texts,
+      });
+    };
+    const asked = await request(p, extra);
+    const confirmed = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code },
+      { codeKey: KEY, clock: p.clock, notify },
+    );
+    const sms = new RecordingSms();
+    // Booked at 07:00: the text waits for the quiet hours to end.
+    const at8 = new ManualClock(new Date(Date.parse(NOW) + 3_600_000));
+    for (const due of await listDueOutboxMessages(db, at8.now(), 1000)) {
+      if (due.tenantId === p.tenantId) {
+        await deliverOutboxMessage(db, due, {
+          key: OUTBOX_KEY,
+          mailer: { send: () => Promise.resolve() },
+          sms,
+          clock: at8,
+        });
+      }
+    }
+    return { confirmed, sms };
+  }
+
+  it('sends one opt-in text on a new consent, with the booking and its link', async () => {
+    const p = await newPage();
+    const { confirmed, sms } = await bookAndText(p, {
+      phone: '+15552347101',
+      smsConsent: 'sms-consent-v1',
+    });
+    expect(sms.sent).toHaveLength(1);
+    const [text] = sms.sent;
+    expect(text?.to).toBe('+15552347101');
+    expect(text?.body).toContain("via Pepper: You're booked:");
+    expect(text?.body).toContain(`/manage#${confirmed.manageToken}`);
+    expect(text?.body).toContain('Reply HELP for help, STOP to opt out.');
+    const [client] = await listClients(db, p.owner, {});
+    expect(
+      await withTenant(db, p.tenantId, (tx) => findLastBookingText(tx, String(client?.id))),
+    ).toMatchObject({ kind: 'opt_in', messageStatus: 'sent' });
+  });
+
+  it('sends a short confirmation when texts are already on, and nothing without a consent', async () => {
+    const p = await newPage();
+    await bookAndText(p, { phone: '+15552347102', smsConsent: 'sms-consent-v1' });
+    // The next booking, box unticked: their texts are on, so a confirmation.
+    const again = await bookAndText(p, { phone: '+15552347102', startsAt: tue('13:00') });
+    expect(again.sms.sent.map((m) => m.body)).toEqual([
+      expect.not.stringContaining('Msg frequency'),
+    ]);
+    expect(again.sms.sent[0]?.body).toContain("You're booked:");
+    // Another client, no box ticked: no text.
+    const none = await bookAndText(p, {
+      email: 'bo@example.test',
+      name: 'Bo Chen',
+      phone: '+15552347103',
+      startsAt: tue('14:00'),
+    });
+    expect(none.sms.sent).toEqual([]);
+  });
+
+  it('sends none when the deployment or the business has texts off', async () => {
+    const off = await newPage();
+    const deployment = await bookAndText(
+      off,
+      { phone: '+15552347104', smsConsent: 'sms-consent-v1' },
+      false,
+    );
+    expect(deployment.sms.sent).toEqual([]);
+    const p = await newPage();
+    await withTenant(db, p.tenantId, (tx) =>
+      setReminderSettings(tx, {
+        texts: false,
+        dayBefore: true,
+        sameDay: true,
+        sameDayLeadHours: 2,
+      }),
+    );
+    const business = await bookAndText(p, { phone: '+15552347105', smsConsent: 'sms-consent-v1' });
+    expect(business.sms.sent).toEqual([]);
+    // The consent is recorded all the same: the business may turn texts on later.
+    expect(
+      await withTenant(db, p.tenantId, (tx) => findActiveSmsConsent(tx, '+15552347105')),
+    ).toBeDefined();
   });
 });
 

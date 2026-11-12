@@ -1,7 +1,27 @@
-import { BookingIdSchema, OutboxDedupeKeySchema, TenantIdSchema } from '@pepper/contracts';
-import { queueEmail, type Clock } from '@pepper/core';
+import { createHash, randomBytes } from 'node:crypto';
 import {
+  BookingIdSchema,
+  ClientIdSchema,
+  ManageTokenSchema,
+  OutboxDedupeKeySchema,
+  reminderSettingsFrom,
+  smsSendableAt,
+  TenantIdSchema,
+  fromZoned,
+  toZoned,
+  type BookingId,
+  type ReminderKind,
+  type ReminderSettings,
+} from '@pepper/contracts';
+import { queueEmail, queueSms, smsPermission, type Clock } from '@pepper/core';
+import {
+  deleteBookingManageLink,
   findCurrentTenant,
+  hasReminderText,
+  insertBookingManageLink,
+  insertBookingText,
+  listActiveSmsConsentsForClient,
+  listBookings,
   listDueBookingReminders,
   lockBooking,
   planBookingReminder,
@@ -11,24 +31,81 @@ import {
   type BookingRow,
   type Database,
   type DueReminder,
+  type Tenant,
   type TenantTx,
 } from '@pepper/db';
-import { reminderEmail } from '../emails.js';
+import { manageUrl, reminderEmail } from '../emails.js';
+import { reminderText } from '../texts.js';
 import { emailDetailsOf } from './notices.js';
 
-// Booking reminders (W6, AC-W6-1, ADR-0025): every confirmed booking has a reminder email
-// planned for 24 hours before it starts. The booking services keep the plan in step inside the
-// booking's own transaction, so a cancelled booking never keeps one and a moved booking's
-// reminder moves with it. A booking made or moved less than 24 hours ahead gets none: its
-// confirmation has just been sent. The worker's reminder job sends what is due
-// (`sendDueReminders`): it checks the booking again under its lock and queues the email in the
-// outbox in the same transaction that takes the reminder, so each is queued at most once.
+// Booking reminders (W6, AC-W6-1, ADR-0025; S62 AC-X-70…72): every confirmed booking has its
+// reminders planned in the booking's own transaction, so a cancelled booking never keeps one
+// and a moved booking's reminders move with it. Two kinds: the day before (by text when the
+// client said yes and the business may text them, else by email) and the same day (by text
+// only), each at a time kept out of the night in the business's zone. A booking made under 24 h
+// ahead still gets the same-day text; one made under its lead gets none (its confirmation has
+// just been sent). The worker's reminder job sends what is due (`sendDueReminders`): it checks
+// the booking again under its lock and queues the text or email in the outbox in the same
+// transaction that takes the reminder, so each is queued at most once.
 
-/** How long before a booking's start its reminder is due. */
-export const REMINDER_LEAD_MS = 24 * 60 * 60_000;
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+
+/** How long before a booking's start its day-before reminder is due (before the hours). */
+export const REMINDER_LEAD_MS = 24 * HOUR_MS;
+/** A same-day text that would leave less than this before the start isn't sent. */
+export const SAME_DAY_MIN_NOTICE_MS = 30 * MINUTE_MS;
+/** The earliest a reminder is planned in the business's zone. */
+const MORNING_MINUTE = 8 * 60;
+/** From this minute on, a reminder is planned for `EVENING_MINUTE` instead. */
+const NIGHT_MINUTE = 20 * 60;
+const EVENING_MINUTE = 19 * 60 + 30;
+
+/** The planned instant moved out of the night: before 8:00 to 8:00, from 20:00 to 19:30. */
+function keptInHours(timeZone: string, instant: number): number {
+  const local = toZoned(timeZone, instant);
+  const date = { year: local.year, month: local.month, day: local.day };
+  if (local.minuteOfDay < MORNING_MINUTE) return fromZoned(timeZone, date, MORNING_MINUTE);
+  if (local.minuteOfDay >= NIGHT_MINUTE) return fromZoned(timeZone, date, EVENING_MINUTE);
+  return instant;
+}
+
+function sameLocalDay(timeZone: string, a: number, b: number): boolean {
+  const x = toZoned(timeZone, a);
+  const y = toZoned(timeZone, b);
+  return x.year === y.year && x.month === y.month && x.day === y.day;
+}
 
 /**
- * Plans, moves or removes the reminder of a booking just written (`row` as it is now), as of
+ * When a booking's reminder of `kind` is due (AC-X-70), or `null` when it has none: the day
+ * before at 24 h ahead, the same day at the business's lead (on the start's own day, at least 30
+ * minutes ahead), each kept out of the night; none when the business turned it off. The
+ * same-day one is a text, so it needs texts on too.
+ */
+export function reminderDueAt(
+  kind: ReminderKind,
+  startsAt: number,
+  timeZone: string,
+  settings: ReminderSettings,
+): number | null {
+  if (kind === 'day_before') {
+    return settings.dayBefore ? keptInHours(timeZone, startsAt - REMINDER_LEAD_MS) : null;
+  }
+  if (!settings.sameDay || !settings.texts) return null;
+  const due = keptInHours(timeZone, startsAt - settings.sameDayLeadHours * HOUR_MS);
+  if (!sameLocalDay(timeZone, due, startsAt)) return null;
+  return due <= startsAt - SAME_DAY_MIN_NOTICE_MS ? due : null;
+}
+
+const KINDS: readonly ReminderKind[] = ['day_before', 'same_day'];
+
+/** A business's reminder settings, each missing or unreadable field at its default. */
+export function reminderSettingsOf(tenant: Pick<Tenant, 'reminderSettings'>): ReminderSettings {
+  return reminderSettingsFrom(tenant.reminderSettings);
+}
+
+/**
+ * Plans, moves or removes the reminders of a booking just written (`row` as it is now), as of
  * `now` (ms). Call it in the transaction that wrote the booking.
  */
 export async function keepReminderInStep(
@@ -36,12 +113,78 @@ export async function keepReminderInStep(
   row: BookingRow,
   now: number,
 ): Promise<void> {
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) throw new Error('A booking is written in its business’s transaction');
+  await keepRemindersOf(tx, row, now, tenant.timeZone, reminderSettingsOf(tenant));
+}
+
+/**
+ * `keepDue`: a re-plan for a settings change leaves a reminder that is due but not yet taken
+ * (between the job's polls, or a backlog) for the job, which checks the settings again; a
+ * booking change replaces it, as it just told the client.
+ */
+async function keepRemindersOf(
+  tx: TenantTx,
+  row: BookingRow,
+  now: number,
+  timeZone: string,
+  settings: ReminderSettings,
+  options: { keepDue?: boolean } = {},
+): Promise<void> {
   const bookingId = BookingIdSchema.parse(row.id);
-  const dueAt = row.startsAt.getTime() - REMINDER_LEAD_MS;
-  if (row.status === 'confirmed' && dueAt > now) {
-    await planBookingReminder(tx, { bookingId, dueAt: new Date(dueAt), startsAt: row.startsAt });
-  } else {
-    await removeBookingReminder(tx, bookingId);
+  for (const kind of KINDS) {
+    const dueAt =
+      row.status === 'confirmed'
+        ? reminderDueAt(kind, row.startsAt.getTime(), timeZone, settings)
+        : null;
+    if (dueAt !== null && dueAt > now) {
+      await planBookingReminder(tx, {
+        bookingId,
+        kind,
+        dueAt: new Date(dueAt),
+        startsAt: row.startsAt,
+      });
+    } else if (dueAt === null || options.keepDue !== true) {
+      await removeBookingReminder(tx, bookingId, kind);
+    }
+  }
+}
+
+/** Upcoming bookings a settings change re-plans at a time. */
+const REPLAN_PAGE = 500;
+/** How far ahead a settings change re-plans: past any booking window a business can set. */
+const REPLAN_HORIZON_MS = 3 * 366 * 24 * HOUR_MS;
+
+/**
+ * Re-plans every upcoming confirmed booking's reminders with `settings` (a settings change,
+ * AC-X-75), in the change's transaction, a page at a time. Returns how many it re-planned.
+ */
+export async function replanUpcomingReminders(
+  tx: TenantTx,
+  timeZone: string,
+  settings: ReminderSettings,
+  now: number,
+): Promise<number> {
+  const to = new Date(now + REPLAN_HORIZON_MS);
+  const seen = new Set<string>();
+  let from = new Date(now);
+  for (;;) {
+    const page = await listBookings(tx, { from, to, status: 'confirmed', limit: REPLAN_PAGE });
+    for (const row of page) {
+      if (seen.has(row.id) || row.startsAt.getTime() <= now) continue;
+      seen.add(row.id);
+      await keepRemindersOf(tx, row, now, timeZone, settings, { keepDue: true });
+    }
+    const last = page.at(-1);
+    // The next page starts at the last start (rows there already seen are skipped).
+    if (
+      page.length < REPLAN_PAGE ||
+      last === undefined ||
+      last.startsAt.getTime() <= from.getTime()
+    ) {
+      return seen.size;
+    }
+    from = last.startsAt;
   }
 }
 
@@ -51,9 +194,13 @@ export const REMINDER_BATCH = 100;
 export const REMINDER_BATCHES_PER_PASS = 20;
 
 export interface ReminderOptions {
-  /** Seals the queued email (the outbox key, ADR-0024). */
+  /** Seals the queued email or text (the outbox key, ADR-0024). */
   key: Buffer;
   clock: Clock;
+  /** The web app's origin, for the reminder's reschedule/cancel link; none without it. */
+  baseUrl?: string | null;
+  /** Whether this deployment sends texts (`SMS_PROVIDER` set, ADR-0065); default no. */
+  texts?: boolean;
 }
 
 /** What handling one due reminder did. */
@@ -62,9 +209,10 @@ export type ReminderResult = 'queued' | 'skipped';
 /**
  * Handles one due reminder under its business's tenant: locks the booking (so a concurrent
  * cancellation or move either commits first and is seen, or waits), takes the reminder, and
- * queues the email when the booking is still confirmed at the planned start, has not started,
- * and its client has an email address. `skipped`: none of that (the reminder is gone either
- * way), or another worker took it first.
+ * queues it when the booking is still confirmed at the planned start, has not started, and the
+ * business still sends this kind (AC-X-71): by text to the number on the client's consent in
+ * force when the business may text it, else (the day-before one) by email to an address on
+ * file. `skipped`: none of that (the reminder is gone either way), or another worker took it.
  */
 export async function sendDueReminder(
   db: Database,
@@ -76,7 +224,7 @@ export async function sendDueReminder(
   return withTenant(db, TenantIdSchema.parse(due.tenantId), async (tx) => {
     // The booking first, then its reminder: the same order as every booking change.
     const booking = await lockBooking(tx, bookingId);
-    const reminder = await takeDueBookingReminder(tx, bookingId, now);
+    const reminder = await takeDueBookingReminder(tx, bookingId, due.kind, now);
     if (booking === undefined || reminder === undefined) return 'skipped';
     const startsAt = booking.startsAt.getTime();
     if (
@@ -88,23 +236,109 @@ export async function sendDueReminder(
     }
     const tenant = await findCurrentTenant(tx);
     if (tenant === undefined) return 'skipped';
+    const settings = reminderSettingsOf(tenant);
+    // Turned off since it was planned.
+    if (reminderDueAt(due.kind, startsAt, tenant.timeZone, settings) === null) return 'skipped';
     const details = await emailDetailsOf(tx, tenant, booking);
-    if (details.email === '') return 'skipped';
-    const queued = await queueEmail(tx, reminderEmail(details), {
+    const phone =
+      options.texts === true && settings.texts ? await textableNumber(tx, booking.clientId) : null;
+    if (phone === null && (due.kind === 'same_day' || details.email === '')) return 'skipped';
+    const link = await reminderLink(tx, tenant, booking, now, options.baseUrl ?? null);
+    if (phone !== null) {
+      const clientId = ClientIdSchema.parse(booking.clientId);
+      const sendable = smsSendableAt(tenant.timeZone, now.getTime());
+      const id = await queueSms(
+        tx,
+        {
+          to: phone,
+          body: reminderText({
+            kind: due.kind,
+            details,
+            link: link?.url ?? null,
+            askToConfirm: booking.clientConfirmedAt === null,
+            first: !(await hasReminderText(tx, clientId)),
+            today: sameLocalDay(tenant.timeZone, sendable, startsAt),
+          }),
+          wordsBy: 'template',
+        },
+        {
+          key: options.key,
+          // One text per booking, kind and start, even if a reminder were somehow planned twice.
+          dedupeKey: OutboxDedupeKeySchema.parse(
+            `booking.reminder.${due.kind}:${bookingId}:${String(startsAt)}`,
+          ),
+          now,
+        },
+      );
+      if (id === undefined) return dropLink(tx, link);
+      await insertBookingText(tx, {
+        id,
+        clientId,
+        bookingId,
+        kind: due.kind,
+        startsAt: booking.startsAt,
+        createdAt: now,
+      });
+      return 'queued';
+    }
+    const queued = await queueEmail(tx, reminderEmail(details, link?.url ?? null), {
       key: options.key,
       // One reminder per booking and start, even if a reminder were somehow planned twice.
       dedupeKey: OutboxDedupeKeySchema.parse(`booking.reminder:${bookingId}:${String(startsAt)}`),
       now,
     });
-    return queued === undefined ? 'skipped' : 'queued';
+    return queued === undefined ? dropLink(tx, link) : 'queued';
   });
+}
+
+/** A reminder that was queued already: the new link it would have carried goes (`skipped`). */
+async function dropLink(
+  tx: TenantTx,
+  link: { url: string; tokenHash: string } | null,
+): Promise<'skipped'> {
+  if (link !== null) await deleteBookingManageLink(tx, link.tokenHash);
+  return 'skipped';
+}
+
+/**
+ * The number on the client's consent in force that the business may text now (opted out or
+ * not textable ones skipped), the latest first; `null` for none. Reminders go there, not to
+ * `clients.phone`: the booking page's phone isn't verified (ADR-0065, S61.2).
+ */
+export async function textableNumber(tx: TenantTx, clientId: string): Promise<string | null> {
+  for (const consent of await listActiveSmsConsentsForClient(tx, clientId)) {
+    if ((await smsPermission(tx, consent.phone)) === 'allowed') return consent.phone;
+  }
+  return null;
+}
+
+/**
+ * A new reschedule/cancel link for the booking (AC-X-72), stored hashed; like the
+ * confirmation's, it changes the booking only before it starts. `null` without the app's address.
+ */
+async function reminderLink(
+  tx: TenantTx,
+  tenant: Tenant,
+  booking: BookingRow,
+  now: Date,
+  baseUrl: string | null,
+): Promise<{ url: string; tokenHash: string } | null> {
+  if (baseUrl === null) return null;
+  const token = ManageTokenSchema.parse(randomBytes(32).toString('base64url'));
+  const tokenHash = createHash('sha256').update(token).digest('hex');
+  await insertBookingManageLink(tx, {
+    bookingId: BookingIdSchema.parse(booking.id) satisfies BookingId,
+    tokenHash,
+    createdAt: now,
+  });
+  return { url: manageUrl(baseUrl, tenant.slug, token), tokenHash };
 }
 
 /**
  * One pass of the reminder job: handles the reminders due now, across businesses, the earliest
  * first, in batches until none is left (a backlog after downtime clears in one pass, up to
  * `REMINDER_BATCHES_PER_PASS` batches). Every reminder handled is removed, queued or skipped,
- * so the next batch lists new ones. Returns how many emails it queued and skipped.
+ * so the next batch lists new ones. Returns how many it queued and skipped.
  */
 export async function sendDueReminders(
   db: Database,

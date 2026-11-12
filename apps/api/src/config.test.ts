@@ -194,4 +194,10 @@ describe('loadApiConfig', () => {
       /^Invalid api environment: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER$/,
     );
   });
+
+  it('sends confirmation texts with the sandbox or Twilio, never when off (S62)', () => {
+    expect(loadApiConfig(required).textsOn).toBe(false);
+    expect(loadApiConfig({ ...required, SMS_PROVIDER: 'off' }).textsOn).toBe(false);
+    expect(loadApiConfig({ ...required, SMS_PROVIDER: 'sandbox' }).textsOn).toBe(true);
+  });
 });

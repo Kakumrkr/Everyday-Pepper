@@ -41,6 +41,7 @@ export class AppModule {
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),
           reminderPollMs: config.reminderPollMs,
+          reminders: { baseUrl: config.support.baseUrl, texts: config.sms !== null },
           cleanupIntervalMs: config.cleanupIntervalMs,
           insightsPollMs: config.insightsPollMs,
           morningPollMs: config.morningPollMs,

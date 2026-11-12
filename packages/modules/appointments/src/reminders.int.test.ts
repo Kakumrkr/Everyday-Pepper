@@ -484,7 +484,11 @@ describe('the reminder job (AC-W6-1)', () => {
   it('skips, and forgets, a reminder whose booking changed behind its back', async () => {
     const b = await newBusiness();
     const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
-    const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+    const reminder = {
+      bookingId: BookingIdSchema.parse(booking.id),
+      kind: 'day_before' as const,
+      tenantId: b.tenantId,
+    };
     // A reminder planned for another start (as if a move had not re-planned it).
     await withTenant(db, b.tenantId, (tx) =>
       planBookingReminder(tx, {
@@ -520,7 +524,11 @@ describe('the reminder job (AC-W6-1)', () => {
     const mailer = new RecordingMailer();
     const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), { clock: b.clock });
     b.clock.set(due(at(3, '10:00')));
-    const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+    const reminder = {
+      bookingId: BookingIdSchema.parse(booking.id),
+      kind: 'day_before' as const,
+      tenantId: b.tenantId,
+    };
     const results = await Promise.all(
       [1, 2, 3, 4].map(() => sendDueReminder(db, reminder, { key: OUTBOX_KEY, clock: b.clock })),
     );
@@ -563,7 +571,11 @@ describe('the reminder job (AC-W6-1)', () => {
         clock: b.clock,
       });
       b.clock.set(due(at(3, '10:00')));
-      const reminder = { bookingId: BookingIdSchema.parse(booking.id), tenantId: b.tenantId };
+      const reminder = {
+        bookingId: BookingIdSchema.parse(booking.id),
+        kind: 'day_before' as const,
+        tenantId: b.tenantId,
+      };
       const order: string[] = [];
       await Promise.all([
         sendDueReminder(db, reminder, { key: OUTBOX_KEY, clock: b.clock }).then((r) =>

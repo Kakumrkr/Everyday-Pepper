@@ -10,7 +10,7 @@ import {
   type StaffMemberId,
   type WaitlistEntryId,
 } from '@pepper/contracts';
-import { and, count, eq, gt, sql } from 'drizzle-orm';
+import { and, count, eq, gt, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   bookingVerifications,
@@ -137,16 +137,24 @@ export async function countBookingVerificationsExpiringAfter(
   return row?.value ?? 0;
 }
 
+/**
+ * The booking a link token's hash opens: its confirmation's (`manage_token_hash`), or a
+ * reminder's (S62, `booking_manage_links`).
+ */
+function opensBooking(tokenHash: string) {
+  const hash = HashSchema.parse(tokenHash);
+  return or(
+    eq(bookings.manageTokenHash, hash),
+    sql`${bookings.id} IN (SELECT booking_id FROM booking_manage_links WHERE token_hash = ${hash})`,
+  );
+}
+
 /** The booking whose link token has this hash, locked until the transaction ends. */
 export async function lockBookingByManageTokenHash(
   tx: TenantTx,
   tokenHash: string,
 ): Promise<BookingRow | undefined> {
-  const [row] = await tx
-    .select()
-    .from(bookings)
-    .where(eq(bookings.manageTokenHash, HashSchema.parse(tokenHash)))
-    .for('update');
+  const [row] = await tx.select().from(bookings).where(opensBooking(tokenHash)).for('update');
   return row;
 }
 
@@ -155,9 +163,6 @@ export async function findBookingByManageTokenHash(
   tx: TenantTx,
   tokenHash: string,
 ): Promise<BookingRow | undefined> {
-  const [row] = await tx
-    .select()
-    .from(bookings)
-    .where(eq(bookings.manageTokenHash, HashSchema.parse(tokenHash)));
+  const [row] = await tx.select().from(bookings).where(opensBooking(tokenHash));
   return row;
 }

@@ -17,6 +17,8 @@ import {
   type AuditActor,
   type ClientId,
   type ClientTexts,
+  type LastText,
+  type LastTextReason,
   type OutboxDedupeKey,
   type OutboxMessageId,
   type OutboxSmsInput,
@@ -31,6 +33,7 @@ import {
   findActiveSmsConsent,
   findClient,
   findCurrentTenant,
+  findLastBookingText,
   insertOutboxMessage,
   insertSmsConsent,
   insertSmsKeywordEvent,
@@ -44,6 +47,7 @@ import {
   withSmsInbound,
   withTenant,
   type Database,
+  type LastBookingText,
   type SmsProvider,
   type TenantTx,
 } from '@pepper/db';
@@ -239,8 +243,15 @@ async function clientTextsIn(
   } else {
     latest = (await listSmsConsentsForClient(tx, client.id, 1))[0];
   }
+  const lastText = lastTextOf(await findLastBookingText(tx, client.id));
   if (latest === undefined) {
-    return ClientTextsSchema.parse({ status: 'never', textable, consent: null, canStop: false });
+    return ClientTextsSchema.parse({
+      status: 'never',
+      textable,
+      consent: null,
+      canStop: false,
+      lastText,
+    });
   }
   const active = latest.revokedAt === null;
   return ClientTextsSchema.parse({
@@ -256,7 +267,48 @@ async function clientTextsIn(
         latest.revokedAt === null ? null : UtcDateTimeSchema.parse(latest.revokedAt.toISOString()),
     },
     canStop: active && can(actor.context, 'clients.manage'),
+    lastText,
   });
+}
+
+/** Why a text was dropped at send time (`deliverOutboxMessage`), as the profile says it. */
+const NOT_SENT_REASON: Record<string, LastTextReason> = {
+  SmsOptedOut: 'opted_out',
+  SmsNoConsent: 'no_consent',
+  SmsNotTextable: 'not_textable',
+};
+
+/**
+ * Where the client's last text stands (S62 top-up, AC-X-76), from its outbox message and the
+ * provider's delivery report: waiting (with when it may go), sent, delivered, not delivered, or
+ * not sent and why.
+ */
+export function lastTextOf(text: LastBookingText | undefined): LastText | null {
+  if (text === undefined) return null;
+  const at = (date: Date) => UtcDateTimeSchema.parse(date.toISOString());
+  switch (text.messageStatus) {
+    case 'pending':
+      return { kind: text.kind, at: at(text.availableAt), state: 'waiting', reason: null };
+    case 'sent': {
+      const sentAt = at(text.sentAt ?? text.availableAt);
+      const delivery = text.deliveryStatus;
+      if (delivery === 'delivered') {
+        return { kind: text.kind, at: sentAt, state: 'delivered', reason: null };
+      }
+      if (delivery === 'undelivered' || delivery === 'failed') {
+        return { kind: text.kind, at: sentAt, state: 'not_delivered', reason: null };
+      }
+      return { kind: text.kind, at: sentAt, state: 'sent', reason: null };
+    }
+    case 'dead':
+    case 'cancelled':
+      return {
+        kind: text.kind,
+        at: at(text.availableAt),
+        state: 'not_sent',
+        reason: NOT_SENT_REASON[text.lastError ?? ''] ?? 'failed',
+      };
+  }
 }
 
 async function auditRevoked(

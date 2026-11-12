@@ -408,6 +408,7 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
         stoppedAt: null,
       },
       canStop: true,
+      lastText: null,
     });
   });
 
@@ -420,6 +421,7 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
       textable: true,
       consent: null,
       canStop: false,
+      lastText: null,
     });
     expect(
       await getClientTexts(db, t.owner, await clientWith(t.tenantId, '+447700900123', false)),

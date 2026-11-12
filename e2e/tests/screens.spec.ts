@@ -96,6 +96,25 @@ async function fixUndoDay(page: Page): Promise<void> {
   });
 }
 
+/**
+ * A client's yes to texts at fixed dates for the shots (S62 CI): the real ones are the run's own,
+ * and their length ("8:05 AM" or "10:05 AM", "Nov 2" or "Nov 12") decides whether the masked line
+ * wraps, so the section's and the sheet's heights moved with the clock. The longest forms.
+ */
+async function fixConsentMoments(part: Locator): Promise<void> {
+  const fixed: [RegExp, string][] = [
+    [/^Said yes /, 'Said yes Nov 12, 2026 on your booking page.'],
+    [/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/, 'Wed, Nov 12, 2026, 10:08 AM'],
+  ];
+  for (const [pattern, text] of fixed) {
+    const element = part.getByText(pattern);
+    if ((await element.count()) === 0) continue;
+    await element.evaluate((node, value) => {
+      node.textContent = value;
+    }, text);
+  }
+}
+
 const SCHEMES = ['light', 'dark'] as const;
 const SHOT = { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.01 } as const;
 /**
@@ -456,6 +475,7 @@ for (const width of WIDTHS) {
     // The section and the sheet alone: the profile around them shows the test's unique email,
     // whose length (and so its wrapping at 375 px) differs from run to run.
     if (phone) await expectTapTargets(page, 'a profile with texts on');
+    await fixConsentMoments(texts);
     for (const scheme of SCHEMES) {
       await still(page, scheme);
       await expect.soft(texts).toHaveScreenshot(`client-texts-${String(width)}-${scheme}.png`, {
@@ -468,6 +488,7 @@ for (const width of WIDTHS) {
     await (await hydrated(texts.getByRole('button', { name: 'What they agreed to' }))).click();
     const record = page.getByRole('dialog', { name: 'What Ana Ruiz agreed to' });
     await expect(record.getByRole('blockquote')).toBeVisible();
+    await fixConsentMoments(record);
     for (const scheme of SCHEMES) {
       await still(page, scheme);
       await expect

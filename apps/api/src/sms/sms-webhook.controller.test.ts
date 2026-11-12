@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { ApiErrorSchema } from '@pepper/contracts';
+import type * as Appointments from '@pepper/appointments';
 import type * as Core from '@pepper/core';
 import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
@@ -23,6 +24,11 @@ vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   handleInboundSms: core.handleInboundSms,
   recordSmsStatus: core.recordSmsStatus,
+}));
+const appointments = vi.hoisted(() => ({ confirmBookingByText: vi.fn() }));
+vi.mock('@pepper/appointments', async (original) => ({
+  ...(await original<typeof Appointments>()),
+  confirmBookingByText: appointments.confirmBookingByText,
 }));
 
 const ORIGIN = 'http://localhost:3000';
@@ -107,6 +113,11 @@ beforeEach(() => {
   core.recordSmsStatus.mockReset();
   core.handleInboundSms.mockResolvedValue({ keyword: 'stop', reply: 'Pepper: You & "they" <ok>' });
   core.recordSmsStatus.mockResolvedValue('moved');
+  appointments.confirmBookingByText.mockReset();
+  appointments.confirmBookingByText.mockResolvedValue({
+    outcome: 'confirmed',
+    reply: "Juniper via Pepper: Thanks, you're confirmed",
+  });
 });
 
 describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
@@ -137,6 +148,31 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
     core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
     const body = form(inbound('Thanks!'));
     const response = await post(path, body, signature(path, body)).expect(200);
+    expect(response.text).toBe('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+  });
+
+  it('confirms by "C" in the request and replies with the time (S62, AC-X-74)', async () => {
+    core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+    const body = form(inbound('c.'));
+    const response = await post(path, body, signature(path, body)).expect(200);
+    expect(response.text).toBe(
+      '<?xml version="1.0" encoding="UTF-8"?><Response><Message>Juniper via Pepper: Thanks, you&apos;re confirmed</Message></Response>',
+    );
+    expect(appointments.confirmBookingByText).toHaveBeenCalledWith(
+      {},
+      { from: '+15552340001', receivedAt: NOW },
+    );
+  });
+
+  it('never confirms on a keyword, and answers no reply when the confirm has none', async () => {
+    const body = form(inbound('CANCEL'));
+    await post(path, body, signature(path, body)).expect(200);
+    expect(appointments.confirmBookingByText).not.toHaveBeenCalled();
+
+    core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+    appointments.confirmBookingByText.mockResolvedValue({ outcome: 'nothing', reply: null });
+    const c = form(inbound('Confirm'));
+    const response = await post(path, c, signature(path, c)).expect(200);
     expect(response.text).toBe('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
   });
 

@@ -132,10 +132,13 @@ export function cancelledEmail(details: BookingEmailDetails): EmailMessage {
 }
 
 /**
- * The reminder a day before (AC-W6-1). It carries no link: only the link's hash is stored, so
- * the client uses the one from their confirmation, or contacts the business.
+ * The reminder a day before (AC-W6-1), with a reschedule/cancel link of its own (S62,
+ * AC-X-72). Without the app's address (`link` null) it points to the confirmation's link.
  */
-export function reminderEmail(details: BookingEmailDetails): EmailMessage {
+export function reminderEmail(
+  details: BookingEmailDetails,
+  link: string | null = null,
+): EmailMessage {
   return {
     to: details.email,
     subject: `Reminder: your booking at ${details.businessName}`,
@@ -145,8 +148,15 @@ export function reminderEmail(details: BookingEmailDetails): EmailMessage {
       `This is a reminder of your booking at ${details.businessName}:`,
       `${what(details)}.`,
       '',
-      'To reschedule or cancel, use the link in your booking confirmation email, or contact',
-      `${details.businessName}.`,
+      ...(link === null
+        ? [
+            'To reschedule or cancel, use the link in your booking confirmation email, or contact',
+            `${details.businessName}.`,
+          ]
+        : [
+            'To reschedule or cancel, use this link (it is just for you, so keep it private):',
+            link,
+          ]),
     ].join('\n'),
   };
 }

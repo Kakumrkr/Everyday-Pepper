@@ -17,6 +17,7 @@ import { PublicBookingModule } from './public-booking/public-booking.module.js';
 import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
+import { RemindersModule } from './reminders/reminders.controller.js';
 import { InboundModule } from './inbound/inbound.controller.js';
 import { SmsWebhookModule } from './sms/sms-webhook.controller.js';
 import { SupportModule } from './support/support.controller.js';
@@ -40,11 +41,13 @@ export class AppModule {
         MemoryModule,
         TasksModule,
         FeedModule,
+        RemindersModule,
         AppointmentsModule,
         MailModule.forRoot(config.mail),
         BookingEmailsModule.forRoot({
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),
+          texts: config.textsOn,
         }),
         PushModule.forRoot({
           publicKey: config.pushPublicKey,

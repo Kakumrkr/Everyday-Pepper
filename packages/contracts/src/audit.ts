@@ -16,6 +16,7 @@ import {
 } from './tenancy.js';
 import { BusinessPhotoKindSchema } from './photos.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
+import { ReminderSettingsSchema } from './reminders.js';
 import { RuleSchema } from './rules.js';
 import { SmsConsentSourceSchema, SmsConsentWordingVersionSchema } from './sms.js';
 import { SupportKindSchema, SupportRatingSchema, SupportStatusSchema } from './support.js';
@@ -547,6 +548,24 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('business_photo'),
       before: z.object({ kind: BusinessPhotoKindSchema }).strict(),
       after: z.null(),
+    })
+    .strict(),
+  // A client confirmed their booking by text ("C" to a reminder, S62, AC-X-74).
+  z
+    .object({
+      action: z.literal('booking.client_confirmed'),
+      entity: entity('booking'),
+      before: z.object({ clientConfirmed: z.literal(false) }).strict(),
+      after: z.object({ clientConfirmed: z.literal(true) }).strict(),
+    })
+    .strict(),
+  // The business's texts and reminders (S62, AC-X-75).
+  z
+    .object({
+      action: z.literal('reminders.settings_updated'),
+      entity: entity('tenant'),
+      before: ReminderSettingsSchema,
+      after: ReminderSettingsSchema,
     })
     .strict(),
   // The operator feed's switches (ADR-0039).

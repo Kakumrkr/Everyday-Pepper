@@ -102,6 +102,23 @@ afterAll(async () => {
   await Promise.all([postgres.stop(), redis.stop(), mailpit.stop()]);
 });
 
+/**
+ * A zone where it is now between 10:00 and 18:00, so a reminder planned 24 hours ahead isn't
+ * moved out of the night (S62, AC-X-70) whenever the suite runs: `Etc/GMT-5` is UTC+5.
+ */
+function daytimeZone(): string {
+  const hour = new Date().getUTCHours();
+  for (let offset = -11; offset <= 12; offset += 1) {
+    const local = (hour + offset + 24) % 24;
+    if (local >= 10 && local < 18) {
+      return offset === 0
+        ? 'Etc/UTC'
+        : `Etc/GMT${offset > 0 ? '-' : '+'}${String(Math.abs(offset))}`;
+    }
+  }
+  return 'Etc/UTC';
+}
+
 describe('the reminder job (AC-W6-1)', () => {
   it('emails the reminder within 5 minutes of schedule, once; never for a cancelled booking', async () => {
     const [owner] = await db
@@ -112,7 +129,7 @@ describe('the reminder job (AC-W6-1)', () => {
     const tenant = await createBusiness(db, UserIdSchema.parse(owner.id), {
       name: 'Plum Salon',
       slug: 'plum-salon',
-      timeZone: 'America/Chicago',
+      timeZone: daytimeZone(),
     });
     const actor: Actor = {
       context: {
