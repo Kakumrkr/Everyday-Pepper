@@ -14,6 +14,7 @@ import {
   createBusiness,
   createClient,
   deliverOutboxMessage,
+  ForbiddenError,
   getClientTexts,
   ManualClock,
   outboxKeyFrom,
@@ -26,6 +27,7 @@ import {
   type SmsSender,
 } from '@pepper/core';
 import {
+  addMembership,
   findBookingReminder,
   findLastBookingText,
   insertSmsKeywordEvent,
@@ -42,6 +44,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { changeBooking, createBooking, listBookings } from './services/bookings.js';
 import { confirmBookingByText } from './services/confirm-by-text.js';
+import { getReminderSettings, updateReminderSettings } from './services/reminder-settings.js';
 import { NOTHING_TO_CONFIRM_REPLY } from './texts.js';
 import { replaceWorkingHours } from './services/hours.js';
 import { getManagedBooking, rescheduleManagedBooking } from './services/public-booking.js';
@@ -558,5 +561,73 @@ describe('"C" to confirm (AC-X-74)', () => {
         receivedAt: new Date(at(2, '14:05')),
       }),
     ).toEqual({ outcome: 'confirmed', reply: null });
+  });
+});
+
+describe('texts and reminders settings (AC-X-75)', () => {
+  it('answers the defaults, changes what a patch names, audited, and re-plans upcoming texts', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await book(b, at(3, '14:00'));
+    expect(await getReminderSettings(db, b.owner)).toEqual({
+      settings: { texts: true, dayBefore: true, sameDay: true, sameDayLeadHours: 2 },
+      canChange: true,
+    });
+    const changed = await updateReminderSettings(
+      db,
+      b.owner,
+      { sameDayLeadHours: 3 },
+      { clock: b.clock },
+    );
+    expect(changed.settings).toMatchObject({ sameDayLeadHours: 3, dayBefore: true });
+    expect(
+      await withTenant(db, b.tenantId, (tx) =>
+        findBookingReminder(tx, BookingIdSchema.parse(booking.id), 'same_day'),
+      ),
+    ).toMatchObject({ dueAt: new Date(at(3, '11:00')) });
+    const audit = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 5 }));
+    expect(audit[0]).toMatchObject({
+      action: 'reminders.settings_updated',
+      actor: { kind: 'user', userId: b.owner.context.userId },
+      before: { sameDayLeadHours: 2 },
+      after: { sameDayLeadHours: 3 },
+    });
+    // Turned off: the planned reminders go; on again: they come back.
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { dayBefore: false, sameDay: false },
+      { clock: b.clock },
+    );
+    expect(
+      await withTenant(db, b.tenantId, (tx) =>
+        listBookingReminders(tx, BookingIdSchema.parse(booking.id)),
+      ),
+    ).toEqual([]);
+    await updateReminderSettings(db, b.owner, { dayBefore: true }, { clock: b.clock });
+    expect(
+      (
+        await withTenant(db, b.tenantId, (tx) =>
+          listBookingReminders(tx, BookingIdSchema.parse(booking.id)),
+        )
+      ).map((r) => r.kind),
+    ).toEqual(['day_before']);
+    // The same settings again change nothing and audit nothing.
+    const before = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    await updateReminderSettings(db, b.owner, { dayBefore: true }, { clock: b.clock });
+    const after = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    expect(after).toHaveLength(before.length);
+  });
+
+  it('lets staff read but not change them', async () => {
+    const b = await newBusiness();
+    const staffId = await insertUser(db, 'Jess');
+    await withTenant(db, b.tenantId, (tx) => addMembership(tx, { userId: staffId, role: 'staff' }));
+    const staff: Actor = { context: { tenantId: b.tenantId, userId: staffId, role: 'staff' } };
+    expect((await getReminderSettings(db, staff)).canChange).toBe(false);
+    await expect(updateReminderSettings(db, staff, { texts: false })).rejects.toBeInstanceOf(
+      ForbiddenError,
+    );
+    expect((await getReminderSettings(db, b.owner)).settings.texts).toBe(true);
   });
 });

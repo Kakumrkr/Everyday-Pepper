@@ -11,6 +11,7 @@ export * from './services/activation.js';
 export * from './services/availability.js';
 export * from './services/booking-emails.js';
 export * from './services/confirm-by-text.js';
+export * from './services/reminder-settings.js';
 export * from './services/bookings.js';
 export * from './services/business-photos.js';
 export * from './services/hours.js';

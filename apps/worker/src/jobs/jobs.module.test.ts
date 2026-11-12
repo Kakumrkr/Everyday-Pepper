@@ -76,6 +76,22 @@ describe('JobsRunner', () => {
     expect(appointments.sendDueReminders).toHaveBeenCalledWith(DB.db, {
       key: OPTIONS.key,
       clock,
+      baseUrl: null,
+      texts: false,
+    });
+  });
+
+  it('sends reminders by text with their links when texts are on (S62)', async () => {
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      reminders: { baseUrl: 'https://app.example.com', texts: true },
+    });
+    await runner.reminders.runOnce();
+    expect(appointments.sendDueReminders).toHaveBeenCalledWith(DB.db, {
+      key: OPTIONS.key,
+      clock,
+      baseUrl: 'https://app.example.com',
+      texts: true,
     });
   });
 
