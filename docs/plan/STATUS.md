@@ -9,11 +9,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S61.2 SMS consent on screen** (brief approved 2026-11-12: "go with your recommendations… high standards… rethink, I'm okay with what you go with"). D-1 owner SMS settings → S62 (with its reminder settings); D-2 replies name up to two businesses with a consent for the number, latest first, else "Pepper"; D-3 owners/managers stop texts (`clients.manage`), no turn-on; D-4 no new ADR (ADR-0065 "Built"), one migration. ACs AC-X-64…69.
 - [x] 1 ACs in acceptance-criteria + traceability
-- [ ] 2 consent at booking (contract `smsOptIn`, migration, recorded at confirm)
-- [ ] 3 booking page box (+ journey, book-details screenshots)
-- [ ] 4 client texts API (GET/stop), 5 profile section (top-up: the words in one tap)
-- [ ] 6 replies name the business (definer function), 7 SMS AI disclosure
-- Next: task 2.
+- [x] 2 consent at booking (`smsConsent` wording version on the request, migration 0076, recorded at confirm) — db sms 13, isolation 459, appointments booking 49
+- [x] 3 booking page box (shown once a phone is typed; Terms/Privacy "texts" sections)
+- [x] 4 `/v1/clients/:id/texts` + `/texts/stop`, 5 profile section (the words in one tap, Stop texts) — core sms 22, api controller 32
+- [x] 6 replies name up to two businesses (`sms_consent_businesses`), 7 SMS AI disclosure (`wordsBy: 'ai'` needs the line)
+- Next: e2e journey (box → book → profile → words → stop) + screenshots (book-details, profile texts), then /session-close.
 
 ## Last sessions
 - **S61 Phase 14 · SMS channel, backend (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PCR-011](changes/PCR-011.md), [PR #94](https://github.com/Kakumrkr/Everyday-Pepper/pull/94)). Full entry in [session-log.md](session-log.md).
