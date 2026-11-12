@@ -1,5 +1,12 @@
 import type { BadgeTone } from '@pepper/ui';
-import type { ClientTexts, SmsConsentSource } from '@pepper/contracts';
+import { dateTimeLabel } from './booking';
+import type {
+  BookingTextKind,
+  ClientTexts,
+  LastText,
+  LastTextReason,
+  SmsConsentSource,
+} from '@pepper/contracts';
 
 // The words of a client's "Text messages" section (S61.2, AC-X-66, AC-X-67): where their texts
 // stand in one line, what to do next, and the record behind it ("when did they say yes?").
@@ -88,4 +95,42 @@ export function textsSummary(
 
 function onLine(consent: NonNullable<ClientTexts['consent']>, timeZone: string): string {
   return `Said yes ${consentDayLabel(timeZone, consent.givenAt)} ${HOW[consent.source]}.`;
+}
+
+const KIND: Record<BookingTextKind, string> = {
+  opt_in: 'the welcome text',
+  confirmation: 'a booking confirmation',
+  day_before: 'the reminder the day before',
+  same_day: 'the reminder on the day',
+};
+
+const NOT_SENT: Record<LastTextReason, string> = {
+  opted_out: 'they replied STOP',
+  no_consent: 'they hadn’t said yes to texts',
+  not_textable: 'their number can’t get texts',
+  failed: 'the text service failed',
+};
+
+/**
+ * The profile's last-text line (S62.2, AC-X-78): what it was, when it went (or will, after the
+ * quiet hours) and whether it arrived; `null` when the business never texted them.
+ */
+export function lastTextLine(last: LastText | null, timeZone: string): string | null {
+  if (last === null) return null;
+  const what = KIND[last.kind];
+  const when = dateTimeLabel(timeZone, last.at);
+  switch (last.state) {
+    case 'waiting':
+      return `Next text: ${what}, waiting to go ${when}.`;
+    case 'sent':
+      return `Last text: ${what}, sent ${when}. No delivery report yet.`;
+    case 'delivered':
+      return `Last text: ${what}, sent ${when}. Delivered.`;
+    case 'not_delivered':
+      return `Last text: ${what}, ${when}. Not delivered: their carrier turned it away.`;
+    case 'not_sent':
+      return last.reason === null
+        ? `Last text: ${what}, ${when}. Not sent.`
+        : `Last text: ${what}, ${when}. Not sent: ${NOT_SENT[last.reason]}.`;
+  }
 }

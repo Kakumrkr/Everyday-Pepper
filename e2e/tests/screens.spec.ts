@@ -105,6 +105,8 @@ async function fixConsentMoments(part: Locator): Promise<void> {
   const fixed: [RegExp, string][] = [
     [/^Said yes /, 'Said yes Nov 12, 2026 on your booking page.'],
     [/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/, 'Wed, Nov 12, 2026, 10:08 AM'],
+    // S62.2 (AC-X-78): the opt-in text's moment and state depend on the run's clock and worker.
+    [/^(Last|Next) text: /, 'Last text: the welcome text, sent Wed, Nov 12, 10:08 AM. Delivered.'],
   ];
   for (const [pattern, text] of fixed) {
     const element = part.getByText(pattern);
@@ -114,6 +116,11 @@ async function fixConsentMoments(part: Locator): Promise<void> {
     }, text);
   }
 }
+
+// CI splits the suite across machines (ci.yml): each test here is a long one of its own, so it
+// may go to any shard. Only there: one worker each, so two widths of a test that shares data
+// (the team's saved replies) never run side by side.
+if (process.env['CI']) test.describe.configure({ mode: 'parallel' });
 
 const SCHEMES = ['light', 'dark'] as const;
 const SHOT = { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.01 } as const;
@@ -472,6 +479,8 @@ for (const width of WIDTHS) {
     await page.goto(`/clients/${ana?.id ?? ''}`);
     const texts = page.getByTestId('client-texts');
     await expect(texts.getByText(/^Said yes /)).toBeVisible();
+    // S62.2 (AC-X-78): her opt-in text is queued with the booking, so the line is there.
+    await expect(texts.getByTestId('client-last-text')).toContainText('the welcome text');
     // The section and the sheet alone: the profile around them shows the test's unique email,
     // whose length (and so its wrapping at 375 px) differs from run to run.
     if (phone) await expectTapTargets(page, 'a profile with texts on');
@@ -573,6 +582,12 @@ for (const width of WIDTHS) {
         ...SHOT,
         mask: [page.getByText(/@example\.test$/)],
       });
+
+      // Texts and reminders (S62.2, AC-X-77): the switches, the same-day lead, the night rule.
+      await page.goto('/more/texts');
+      await hydrated(page.getByRole('switch', { name: 'On the day' }));
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`more-texts-${String(width)}-${scheme}.png`, SHOT);
 
       // Your data (S51, ADR-0053): what the export holds and its one action.
       await page.goto('/more/data');

@@ -1,6 +1,7 @@
 import type { Permission, StaffMember } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  confirmedByText,
   availabilityPath,
   bookableStaff,
   bookingAbilities,
@@ -234,5 +235,18 @@ describe('walk-ins (S50.2)', () => {
       path: '/v1/bookings/walk-in',
       body: { ...slot, client: walkIn },
     });
+  });
+});
+
+describe('confirmedByText (AC-X-79)', () => {
+  const at = '2026-11-10T20:10:00.000Z';
+  it('says when a booked visit was confirmed by text', () => {
+    expect(confirmedByText({ status: 'confirmed', clientConfirmedAt: at })).toBe(at);
+  });
+  it('is nothing before a C, or once the visit is no longer booked', () => {
+    expect(confirmedByText({ status: 'confirmed', clientConfirmedAt: null })).toBeNull();
+    expect(confirmedByText({ status: 'confirmed' })).toBeNull();
+    expect(confirmedByText({ status: 'completed', clientConfirmedAt: at })).toBeNull();
+    expect(confirmedByText({ status: 'cancelled', clientConfirmedAt: at })).toBeNull();
   });
 });

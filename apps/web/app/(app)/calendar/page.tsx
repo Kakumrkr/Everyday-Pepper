@@ -84,6 +84,7 @@ export default async function CalendarPage({
           ...visitClient(day.clientNames.get(booking.clientId), booking.clientId),
           status: booking.status,
           overridden: booking.overridden,
+          clientConfirmedAt: booking.clientConfirmedAt ?? null,
         })),
     };
   });

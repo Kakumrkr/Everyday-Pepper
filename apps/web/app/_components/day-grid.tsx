@@ -1,6 +1,6 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
-import { cx } from '@pepper/ui';
-import type { BookingSetup } from '../../lib/booking';
+import { cx, Icon } from '@pepper/ui';
+import { confirmedByText, type BookingSetup } from '../../lib/booking';
 import { hourLabel, layoutDay, staffTone, timeRange } from '../../lib/calendar';
 import { STAFF_TONE_CLASSES } from './staff-tone';
 import { BookingSheet } from './booking/booking-sheet';
@@ -18,6 +18,8 @@ export type CalendarEntry =
       clientId: string | null;
       status: BookingStatus;
       overridden: boolean;
+      /** When the client replied C to a reminder (S62); `null` until then, or once moved. */
+      clientConfirmedAt: string | null;
     }
   | { kind: 'busy'; startsAt: string; endsAt: string };
 
@@ -184,6 +186,7 @@ function Entry({
     );
   }
   const status = STATUS_LABELS[entry.status];
+  const confirmed = confirmedByText(entry) !== null;
   // From 45 minutes (66 px) the service gets a line of its own.
   const roomy = Date.parse(entry.endsAt) - Date.parse(entry.startsAt) >= 45 * 60_000;
   const className = cx(
@@ -194,7 +197,13 @@ function Entry({
   const style = position;
   const content = (
     <>
-      <span className="block truncate font-semibold">{entry.client}</span>
+      <span className="flex items-center gap-1 font-semibold">
+        <span className="truncate">{entry.client}</span>
+        {confirmed ? (
+          // A 30-minute block has room for two lines only: the tick shows it; the block's name says it.
+          <Icon name="check" className="size-3 shrink-0 text-ok" />
+        ) : null}
+      </span>
       {roomy ? (
         <>
           <span className="block truncate">{entry.service}</span>
@@ -207,6 +216,9 @@ function Entry({
         </span>
       )}
       {status === undefined ? null : <span className="block font-semibold">{status}</span>}
+      {confirmed ? (
+        <span className={roomy ? 'block truncate text-ok' : 'sr-only'}>Confirmed by text</span>
+      ) : null}
       {entry.overridden ? <span className="block text-warn">Outside the usual hours</span> : null}
     </>
   );

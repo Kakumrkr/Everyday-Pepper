@@ -1,6 +1,12 @@
 import type { ClientTexts } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { consentDayLabel, consentHowLabel, consentMomentLabel, textsSummary } from './client-texts';
+import {
+  consentDayLabel,
+  consentHowLabel,
+  consentMomentLabel,
+  lastTextLine,
+  textsSummary,
+} from './client-texts';
 
 // The profile's "Text messages" words (S61.2, AC-X-66).
 
@@ -78,5 +84,58 @@ describe('the record’s labels', () => {
 
   it('says how they said yes', () => {
     expect(consentHowLabel('booking_page')).toBe('Ticked the box on your booking page');
+  });
+});
+
+describe('lastTextLine (AC-X-78)', () => {
+  // 15:10 in New York on Tue Nov 10.
+  const at = '2026-11-10T20:10:00.000Z' as never;
+  const last = (patch: Partial<NonNullable<ClientTexts['lastText']>>) => ({
+    kind: 'day_before' as const,
+    at,
+    state: 'delivered' as const,
+    reason: null,
+    ...patch,
+  });
+
+  it('says nothing when the business never texted them', () => {
+    expect(lastTextLine(null, ZONE)).toBeNull();
+  });
+
+  it('says what went, when, in the business’s time zone, and that it arrived', () => {
+    expect(lastTextLine(last({}), ZONE)).toBe(
+      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 PM. Delivered.',
+    );
+  });
+
+  it('names each kind of text', () => {
+    expect(lastTextLine(last({ kind: 'opt_in' }), ZONE)).toContain('the welcome text');
+    expect(lastTextLine(last({ kind: 'confirmation' }), ZONE)).toContain('a booking confirmation');
+    expect(lastTextLine(last({ kind: 'same_day' }), ZONE)).toContain('the reminder on the day');
+  });
+
+  it('says when a held text will go', () => {
+    expect(lastTextLine(last({ state: 'waiting' }), ZONE)).toBe(
+      'Next text: the reminder the day before, waiting to go Tue, Nov 10, 3:10 PM.',
+    );
+  });
+
+  it('says sent with no report yet, and not delivered', () => {
+    expect(lastTextLine(last({ state: 'sent' }), ZONE)).toBe(
+      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 PM. No delivery report yet.',
+    );
+    expect(lastTextLine(last({ state: 'not_delivered' }), ZONE)).toContain(
+      'Not delivered: their carrier turned it away.',
+    );
+  });
+
+  it('says why a text was not sent', () => {
+    const notSent = (reason: NonNullable<ClientTexts['lastText']>['reason']) =>
+      lastTextLine(last({ state: 'not_sent', reason }), ZONE);
+    expect(notSent('opted_out')).toContain('Not sent: they replied STOP.');
+    expect(notSent('no_consent')).toContain('Not sent: they hadn’t said yes to texts.');
+    expect(notSent('not_textable')).toContain('Not sent: their number can’t get texts.');
+    expect(notSent('failed')).toContain('Not sent: the text service failed.');
+    expect(notSent(null)).toMatch(/PM\. Not sent\.$/);
   });
 });

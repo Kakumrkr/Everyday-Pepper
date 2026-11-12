@@ -16,6 +16,8 @@ export default defineConfig({
   snapshotPathTemplate: '{testDir}/__screenshots__/{testFilePath}/{arg}-{platform}{ext}',
   forbidOnly: Boolean(process.env['CI']),
   retries: 0,
+  // One browser per CI machine: the whole stack shares its two CPUs (ci.yml shards instead).
+  ...(process.env['CI'] ? { workers: 1 } : {}),
   reporter: process.env['CI'] ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: webUrl,
