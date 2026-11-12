@@ -12,6 +12,9 @@ import { expectTapTargets } from './tap-targets.js';
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
 async function checkScreen(page: Page, name: string, frame: 'app' | 'account' = 'app') {
+  // The screens refresh after an action (`router.refresh()`), and while the new payload renders
+  // the document can be briefly without its <title>: axe checks the settled screen (CI, S61.2).
+  await expect(page).toHaveTitle(/ · Pepper$/, { timeout: 15_000 });
   const axe = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(axe.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual(
     [],
