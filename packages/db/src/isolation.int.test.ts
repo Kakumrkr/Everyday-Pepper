@@ -39,6 +39,7 @@ import {
 import { recordActivation } from './repositories/activation.js';
 import { appendAuditEntry } from './repositories/audit.js';
 import { recordFunnelStep } from './repositories/booking-funnel.js';
+import { insertBookingManageLink, insertBookingText } from './repositories/booking-texts.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
@@ -387,6 +388,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     tenantColumn: 'tenant_id',
     seed: seedBooking,
     touch: "status = 'cancelled'",
+    // Which booking a client's "C" confirms (S62, `sms_confirm_target`).
+    ownerLookup: 'sms_confirm_lookup',
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],
@@ -748,6 +751,50 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'given_at = given_at',
     ownerLookup: 'sms_reply_lookup',
+  },
+  booking_texts: {
+    tenantColumn: 'tenant_id',
+    // What a text to a client was about (S62): one row per queued text.
+    seed: async (tx) => {
+      const bookingId = BookingIdSchema.parse(await seedBooking(tx));
+      const [booking] = await tx
+        .execute<{ client_id: string }>(sql`SELECT client_id FROM bookings WHERE id = ${bookingId}`)
+        .then((r) => r.rows);
+      const id = OutboxMessageIdSchema.parse(newId());
+      await insertOutboxMessage(tx, {
+        id,
+        type: 'sms',
+        dedupeKey: `isolation:${newId()}`,
+        payload: randomBytes(16),
+        availableAt: new Date(),
+      });
+      await insertBookingText(tx, {
+        id,
+        clientId: String(booking?.client_id),
+        bookingId,
+        kind: 'day_before',
+        startsAt: new Date('2026-10-20T14:00:00Z'),
+        createdAt: new Date(),
+      });
+      return id;
+    },
+    touch: 'kind = kind',
+    ownerLookup: 'sms_confirm_lookup',
+  },
+  booking_manage_links: {
+    tenantColumn: 'tenant_id',
+    // A reminder's reschedule/cancel link (S62), by its token's hash.
+    seed: async (tx) => {
+      const tokenHash = randomBytes(32).toString('hex');
+      await insertBookingManageLink(tx, {
+        bookingId: BookingIdSchema.parse(await seedBooking(tx)),
+        tokenHash,
+        expiresAt: new Date('2026-10-20T14:00:00Z'),
+        createdAt: new Date(),
+      });
+      return idWhere(tx, 'booking_manage_links', 'token_hash', tokenHash);
+    },
+    touch: 'expires_at = expires_at',
   },
   sms_deliveries: {
     tenantColumn: 'tenant_id',

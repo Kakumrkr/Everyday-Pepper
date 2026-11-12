@@ -137,6 +137,8 @@ export const BookingSchema = z.object({
   source: BookingOriginSchema,
   /** Booked outside hours or rules by an owner or manager. */
   overridden: z.boolean(),
+  /** When the client confirmed it by text ("C", S62); `null`: not by them. */
+  clientConfirmedAt: UtcDateTimeSchema.nullable().optional(),
   createdAt: UtcDateTimeSchema,
   updatedAt: UtcDateTimeSchema,
 });

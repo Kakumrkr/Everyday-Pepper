@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
+import { BookingTextKindSchema } from './reminders.js';
 import { UtcDateTimeSchema } from './time.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
@@ -224,6 +225,28 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
   return null;
 }
 
+/**
+ * What a reply to Pepper's number asks for, beyond the keywords (S62, AC-X-74): `confirm` for
+ * "C" or "Confirm" ("C.", "c", "Confirmed", "confirm!" too), alone. An opt-out always wins: a
+ * keyword is read first, so CANCEL, STOP and the rest never confirm.
+ */
+export type SmsReply = SmsKeyword | 'confirm';
+
+const CONFIRM_WORDS = new Set(['c', 'confirm', 'confirmed']);
+
+/** A reply's meaning: a keyword (`classifySmsKeyword`) first, then "C" to confirm; else `null`. */
+export function classifySmsReply(body: string): SmsReply | null {
+  const keyword = classifySmsKeyword(body);
+  if (keyword !== null) return keyword;
+  const words = body
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[^a-z\s]/g, ' ')
+    .split(/\s+/)
+    .filter((word) => word !== '');
+  return words.length === 1 && CONFIRM_WORDS.has(words[0] ?? '') ? 'confirm' : null;
+}
+
 /** The longest business name a reply carries before it is shortened (two fit in two segments). */
 export const SMS_REPLY_NAME_MAX = 40;
 
@@ -327,9 +350,39 @@ export const ClientTextsStatusSchema = z.enum(['on', 'opted_out', 'stopped', 'ne
 export type ClientTextsStatus = z.infer<typeof ClientTextsStatusSchema>;
 
 /**
+ * Where the client's last text stands (S62 top-up, AC-X-76): `waiting` (queued, held for the
+ * quiet hours or about to go; `at` is when it may go), `sent` (the provider took it; no report
+ * yet), `delivered`, `not_delivered` (the carrier couldn't deliver it), `not_sent` (dropped at
+ * send time: `reason` says why).
+ */
+export const LastTextStateSchema = z.enum([
+  'waiting',
+  'sent',
+  'delivered',
+  'not_delivered',
+  'not_sent',
+]);
+export type LastTextState = z.infer<typeof LastTextStateSchema>;
+
+export const LastTextReasonSchema = z.enum(['opted_out', 'no_consent', 'not_textable', 'failed']);
+export type LastTextReason = z.infer<typeof LastTextReasonSchema>;
+
+export const LastTextSchema = z
+  .object({
+    kind: BookingTextKindSchema,
+    /** When it went; while `waiting`, when it may go. */
+    at: UtcDateTimeSchema,
+    state: LastTextStateSchema,
+    reason: LastTextReasonSchema.nullable(),
+  })
+  .strict();
+export type LastText = z.infer<typeof LastTextSchema>;
+
+/**
  * `GET /v1/clients/:clientId/texts` (and the answer of `POST …/texts/stop`): the status, the
  * client's latest consent with the words exactly as shown, whether their own phone can get texts
- * (`textable`: US or Canada) and whether this member may stop them (`canStop`).
+ * (`textable`: US or Canada), whether this member may stop them (`canStop`) and the last text
+ * the business sent them (`lastText`, S62; `null` for none).
  */
 export const ClientTextsSchema = z.object({
   status: ClientTextsStatusSchema,
@@ -345,6 +398,7 @@ export const ClientTextsSchema = z.object({
     })
     .nullable(),
   canStop: z.boolean(),
+  lastText: LastTextSchema.nullable(),
 });
 export type ClientTexts = z.infer<typeof ClientTextsSchema>;
 

@@ -28,9 +28,12 @@ import {
 } from './repositories/outbox.js';
 import {
   findBookingReminder,
+  findReminderSettings,
+  listBookingReminders,
   listDueBookingReminders,
   planBookingReminder,
   removeBookingReminder,
+  setReminderSettings,
   takeDueBookingReminder,
 } from './repositories/reminders.js';
 import { createTenant } from './repositories/tenants.js';
@@ -160,18 +163,24 @@ describe('booking reminders', () => {
     expect(ids).toEqual(expect.arrayContaining([early, late]));
     expect(ids).not.toContain(notYet);
     expect(ids.indexOf(early)).toBeLessThan(ids.indexOf(late));
-    expect(due.find((d) => d.bookingId === late)).toEqual({ bookingId: late, tenantId: other });
+    expect(due.find((d) => d.bookingId === late)).toEqual({
+      bookingId: late,
+      kind: 'day_before',
+      tenantId: other,
+    });
     expect(await listDueBookingReminders(db, at(0), 1)).toHaveLength(1);
   });
 
   it('takes a due reminder once', async () => {
     const bookingId = await plannedBooking(tenant);
     expect(
-      await withTenant(db, tenant, (tx) => takeDueBookingReminder(tx, bookingId, at(-1))),
+      await withTenant(db, tenant, (tx) =>
+        takeDueBookingReminder(tx, bookingId, 'day_before', at(-1)),
+      ),
     ).toBeUndefined();
     const takes = await Promise.all(
       [1, 2, 3].map(() =>
-        withTenant(db, tenant, (tx) => takeDueBookingReminder(tx, bookingId, at(0))),
+        withTenant(db, tenant, (tx) => takeDueBookingReminder(tx, bookingId, 'day_before', at(0))),
       ),
     );
     expect(takes.filter((t) => t !== undefined)).toEqual([
@@ -179,10 +188,94 @@ describe('booking reminders', () => {
     ]);
   });
 
+  it('keeps one reminder per booking and kind, taken and removed by kind (S62)', async () => {
+    const bookingId = await plannedBooking(tenant);
+    const sameDue = new Date(START.getTime() - 2 * 3_600_000);
+    await withTenant(db, tenant, async (tx) => {
+      await planBookingReminder(tx, {
+        bookingId,
+        kind: 'same_day',
+        dueAt: sameDue,
+        startsAt: START,
+      });
+      // Re-planned, not duplicated.
+      await planBookingReminder(tx, {
+        bookingId,
+        kind: 'same_day',
+        dueAt: sameDue,
+        startsAt: START,
+      });
+    });
+    const kinds = await withTenant(db, tenant, (tx) => listBookingReminders(tx, bookingId));
+    expect(kinds.map((r) => r.kind)).toEqual(['day_before', 'same_day']);
+    const due = await listDueBookingReminders(db, sameDue, 1000);
+    expect(due.filter((d) => d.bookingId === bookingId).map((d) => d.kind)).toEqual([
+      'day_before',
+      'same_day',
+    ]);
+    expect(
+      await withTenant(db, tenant, (tx) =>
+        takeDueBookingReminder(tx, bookingId, 'same_day', sameDue),
+      ),
+    ).toEqual(expect.objectContaining({ kind: 'same_day' }));
+    expect(
+      await withTenant(db, tenant, (tx) => findBookingReminder(tx, bookingId, 'day_before')),
+    ).toBeDefined();
+    await withTenant(db, tenant, (tx) => removeBookingReminder(tx, bookingId, 'day_before'));
+    expect(await withTenant(db, tenant, (tx) => listBookingReminders(tx, bookingId))).toEqual([]);
+  });
+
+  it('refuses an unknown kind', async () => {
+    const bookingId = await plannedBooking(tenant);
+    const error = await withTenant(db, tenant, (tx) =>
+      tx.execute(
+        sql`INSERT INTO booking_reminders (id, kind, due_at, starts_at) VALUES (${bookingId}, 'weekly', ${DUE.toISOString()}::timestamptz, ${START.toISOString()}::timestamptz)`,
+      ),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('23514'); // check_violation
+  });
+
+  it('stores reminder settings per business, defaults for missing fields (S62)', async () => {
+    expect(await withTenant(db, tenant, (tx) => findReminderSettings(tx))).toEqual({
+      texts: true,
+      dayBefore: true,
+      sameDay: true,
+      sameDayLeadHours: 2,
+    });
+    await withTenant(db, tenant, (tx) =>
+      setReminderSettings(tx, {
+        texts: false,
+        dayBefore: true,
+        sameDay: false,
+        sameDayLeadHours: 3,
+      }),
+    );
+    expect(await withTenant(db, tenant, (tx) => findReminderSettings(tx))).toMatchObject({
+      texts: false,
+      sameDay: false,
+      sameDayLeadHours: 3,
+    });
+    // Another business keeps its own.
+    expect(await withTenant(db, other, (tx) => findReminderSettings(tx))).toMatchObject({
+      texts: true,
+    });
+    await withTenant(db, tenant, (tx) =>
+      tx.execute(sql`UPDATE tenants SET reminder_settings = '{"texts": false}'::jsonb`),
+    );
+    expect(await withTenant(db, tenant, (tx) => findReminderSettings(tx))).toEqual({
+      texts: false,
+      dayBefore: true,
+      sameDay: true,
+      sameDayLeadHours: 2,
+    });
+  });
+
   it("does not take another business's reminder", async () => {
     const bookingId = await plannedBooking(other);
     expect(
-      await withTenant(db, tenant, (tx) => takeDueBookingReminder(tx, bookingId, at(0))),
+      await withTenant(db, tenant, (tx) =>
+        takeDueBookingReminder(tx, bookingId, 'day_before', at(0)),
+      ),
     ).toBeUndefined();
     expect(await withTenant(db, other, (tx) => findBookingReminder(tx, bookingId))).toBeDefined();
   });

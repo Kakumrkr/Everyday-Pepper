@@ -152,6 +152,7 @@ export function toBooking(row: BookingRow): Booking {
     bufferAfterMinutes: row.bufferAfterMinutes,
     priceFromCents: row.priceFromCents,
     priceToCents: row.priceToCents,
+    clientConfirmedAt: row.clientConfirmedAt?.toISOString() ?? null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   });
