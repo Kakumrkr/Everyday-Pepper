@@ -1,0 +1,40 @@
+# ADR-0065: The SMS channel: Twilio behind a port, consent and opt-out decided by the domain
+
+- **Status:** Accepted. Approved by the user at the S61 brief on 2026-11-12 ("let's start with your recommendation"): Twilio, the S61/S61.2 split, recorded fixtures plus a local sandbox.
+- **Date:** 2026-11-12
+- **Builds on:** ADR-0003 and ADR-0024 (the transactional outbox), ADR-0026 (a second channel on the outbox), ADR-0040 §7 (opt-out), ADR-0063 §3 (a signed webhook that only records), [PCR-011](../plan/changes/PCR-011.md) (Phase 14 first, S61 split)
+
+## Context
+Owners expect booking reminders and confirmations by text; every competitor sends them, and a text is read when an email isn't. A text to a US mobile is regulated: the TCPA needs prior express consent for automated texts, the carriers' A2P 10DLC rules need opt-in proof and working STOP/HELP, the FCC's 2025 rule makes an opt-out by "any reasonable means" binding, and several states (Florida's being the strictest) limit the hours. Every text also costs money per segment, and one curly quote turns a 160-character GSM-7 text into a 70-character UCS-2 one, so the same message costs three times as much.
+
+Phase 14 is built in sandbox mode first (P1-5): live sending needs the LLC and 10DLC registration (S64).
+
+## Decision
+1. **Twilio behind a port.** Core holds the `SmsSender` port (`send({ to, body, id, statusCallbackUrl }) → { providerMessageId, segments }`). The Twilio adapter (`TwilioSmsSender`, runtime) posts form-encoded to `/2010-04-01/Accounts/{sid}/Messages.json` with Basic auth. It sends from a Messaging Service (`MG…`, preferred: a number pool, the 10DLC campaign and Twilio's opt-out list come with it) or from one number. Its answers are validated, and an error is classified by Twilio's code: 21610 (the recipient replied STOP to Twilio) and the other bad-recipient codes are permanent; 429, 5xx and network failures retry. The error's code is kept, never its message. Twilio has no idempotency key for messages, so the limit ADR-0024 names for email holds: a worker that dies after Twilio accepted a text but before it is marked sent sends it again after the lease. `SMS_PROVIDER` chooses `off` (the default; queued texts fail as an unconfigured channel, and S62's callers check first), `sandbox` (`SandboxSmsSender`: keeps the last 100 in memory, logs a masked line, never leaves the machine) or `twilio`. Twilio's own test credentials work with the `twilio` adapter. The adapter is coded from Twilio's documentation and tested on recorded fixtures in its documented shapes; S64 confirms it live.
+2. **SMS is an outbox channel.** The outbox gains the type `sms`, with content `{ to, body, urgent? }` sealed like email. `to` is a US or Canadian mobile in E.164 form (`+1`). `queueSms` runs in the business change's transaction like `queueEmail`. Its text is normalised to GSM-7 where a plain character means the same (curly quotes, dashes, the ellipsis, non-breaking spaces), counted in segments (160/153 GSM-7, 70/67 UCS-2) and refused above three. A sent text is metered as `sms_segments`.
+3. **The domain decides who may be texted, at send time.** Every delivery checks, in this order:
+   1. **Opt-out.** The number replied STOP and hasn't replied START since: the text is dropped (`SmsOptedOut`).
+   2. **Consent.** The business has an active consent record for the number: when, how (`booking_page`, `member_settings`) and which wording (`SMS_CONSENT_WORDING`, versioned and never edited in place). With none, or a revoked one, the text is dropped (`SmsNoConsent`).
+   3. **Quiet hours.** Outside 8:00–20:00 in the business's time zone, a text waits for the next 8:00, and the wait doesn't use one of its 8 attempts. `queueSms` already schedules into the window, and the delivery check catches a retry that crossed 20:00. `urgent` (a time-critical note about today's appointment, set by domain code only) skips the hours, never consent or opt-out.
+
+   Callers ask `smsPermission(tx, phone)` first, to fall back to email (S62). Delivery checks again, because a STOP can arrive between queueing and sending.
+4. **Opt-out is per number, for all of Pepper.** V1 sends every business's texts from Pepper's one sender, so a STOP to it means "no more texts from this number". `sms_keyword_events` is a platform table (forced RLS, no delete). It holds one row per signed keyword message (provider, the provider's message id unique, the phone in E.164, `stop`/`start`/`help`, when), plus `stop` rows that Twilio's 21610 answer reports. A number is opted out when its latest `stop`/`start` row is `stop`. Delivery asks `sms_opted_out(phone)`, a definer function that returns a boolean and nothing else. The rows outlive the businesses: the person asked not to be texted. Phone numbers are stored as they are, like `email_suppressions` addresses: an HMAC would break the list if the outbox secret were ever rotated.
+5. **Keywords are handled in the webhook's own request.** `POST /v1/webhooks/sms` (Twilio's incoming-message webhook) checks `X-Twilio-Signature` (HMAC-SHA1 over the public URL and the sorted form fields, compared in constant time) and the account id before anything is read. It then classifies the text:
+   - **STOP:** `STOP`, `STOPALL`, `UNSUBSCRIBE`, `CANCEL`, `END`, `QUIT`, `OPTOUT`, `OPT OUT`, `REVOKE`, alone or opening a short message ("Stop texting me"), any case, punctuation ignored;
+   - **START:** `START`, `UNSTOP`, `YES`;
+   - **HELP:** `HELP`, `INFO`.
+
+   The event is recorded and the reply goes back as TwiML in the same response. So a STOP is honoured before Twilio has its answer, and the next delivery is blocked. A replay (the same message id) changes nothing and gets no second reply. Any other text gets no reply and isn't stored: two-way texting is V1.1, and S62 adds "C" to confirm. `CANCEL` stays an opt-out word, so S62 must not use it for cancelling a booking, and S63's approve-by-text uses `Y`, never `YES`. Off (404) until `SMS_PROVIDER=twilio` with `TWILIO_AUTH_TOKEN`. Rate-limited like the Resend webhook. Neither the phone nor the text is logged.
+6. **Delivery status by a signed URL.** A text sent with a known `AUTH_BASE_URL` asks Twilio to call `POST /v1/webhooks/sms/status?t=<business>&m=<message>`. The signature covers the URL, so the business and the message can't be forged, and no lookup across businesses is needed. `sms_deliveries` (tenant) holds the provider's message id, the status and its error code. It is written when the text is marked sent, and moved by callbacks only forwards (queued → sending → sent → a final state), because callbacks arrive out of order. A 21610 in a callback also records a `stop` event.
+7. **Records.** `sms_consents` is tenant data, the business's TCPA proof. It is in the export, removed with the business, and audited as `sms.consent_given` and `sms.consent_revoked` (ids only). At most one consent per number is active.
+
+## Consequences
+- S62 (reminders, confirm by text), S63 (approve by text) and S64 (`send_client_message` over SMS) add callers only; the channel's rules are in one place and tested once.
+- A STOP is honoured immediately, and a text never goes to a number without the business's consent record, even if a caller forgets to ask.
+- One sender for every business keeps 10DLC to one brand and campaign (Pepper's, as the ISV, S64). The cost is that a STOP stops every business's texts to that person. HELP and the confirmations say "Pepper" until S61.2 names the business.
+- Before S64 goes live, the Messaging Service's own STOP/HELP auto-replies are configured so the person gets one confirmation, not two (STATUS "Waiting on the user" 5).
+
+## Not done
+- **S61.2:** the booking page's opt-in box (the wording in `SMS_CONSENT_WORDING`), SMS shown on the client's profile, the owner's settings, the business's name in replies, SMS's own AI disclosure.
+- Marketing texts (separate consent; not in V1). MMS. Numbers outside the US and Canada. A number per business.
+- How long consent records are kept after a business is deleted (the TCPA's four-year limit); for the lawyer's review with the privacy policy.
