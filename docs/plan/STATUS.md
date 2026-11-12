@@ -1,24 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-12 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S62.2** (S62 done)
+**Last updated:** 2026-11-12 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S63** (S62.2 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S62.2** (brief approved 2026-11-12): Texts and reminders on screen, plus a CI speed-up (user's choice: shard E2E ×3 + Docker layer cache, own commit in this PR; not recorded elsewhere at the user's request).
-- Tasks: 1 AC-X-77…79 · 2 `/more/texts` screen · 3 profile last-text line · 4 "Confirmed by text" on the sheet and the day card (top-up) · 5 settings journey + screenshots · 6 CI.
-- Done: 1 ACs · 2 `/more/texts` + More row · 3 last-text line · 4 "Confirmed by text" (sheet + day card; unit only: the sandbox webhook can't take a "C") · 5 `texts-settings.spec.ts` 2/2, baselines more, more-texts, client-texts. 6a CI: E2E on 3 shard runners (phone and desktop each split), gate job keeps the required name; jq verdict tested. Review fixes in (card name, Segmented disabled while saving, saved-but-unreadable answer, docs). Layer cache dropped (user: stay at 3 shards). Next: close (pnpm check, specs, walkthrough, PR).
+Nothing in progress: S62.2 closed ([PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)). Next: **S63** (first row of "Planned sessions").
 
 ## Last sessions
+- **S62.2 Phase 14 · Texts and reminders on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)). Full entry in [session-log.md](session-log.md).
+  - **Built:** More → "Texts and reminders" (owners and managers change, staff read); the profile's last-text line; "Confirmed by text" on the visit sheet and the day card (top-up). AC-X-77…79. CI: E2E on three runners at once behind the same required check.
+  - **Checks:** `pnpm check` green (1st run); web unit 490; e2e 7/7 + screens 30/30; review 8 of 9 fixed (the 9th, more billed minutes, the agreed tradeoff), security none ≥ 8.
 - **S62 Phase 14 · SMS reminders + confirm by text, backend (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md) "Built in S62", [PR #96](https://github.com/Kakumrkr/Everyday-Pepper/pull/96)). Full entry in [session-log.md](session-log.md).
   - **Built:** a day-before reminder (text to the consent's number, else email) and a same-day text 1–3 h ahead (also for bookings made under 24 h ahead), never planned for the night; a hashed move/cancel link in every reminder; "Reply STOP to opt out" on the first (top-up); the opt-in text on a new consent, a short confirmation text when texts are on; "C" to confirm through the webhook; `GET/PATCH /v1/reminders/settings`; the profile's `lastText` (top-up; its line on screen in S62.2). AC-X-70…76.
   - **Checks:** `pnpm check` green (2nd run); affected integration green (worker re-run after a night-clamp test fix); no screen changed; review 10 of 10 fixed, security none ≥ 8.
-- **S61.2 Phase 14 · SMS consent on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #95](https://github.com/Kakumrkr/Everyday-Pepper/pull/95)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the booking page's unticked SMS box (a consent only at confirmation, the words as shown); "Text messages" on the profile with "What they agreed to" in one tap (top-up) and Stop texts; replies naming the business; `wordsBy` required and the AI line on AI-written texts; text sections in the terms and privacy. AC-X-64…69.
-  - **Checks:** `pnpm check` green (3rd run); affected integration 22/22; booking 7, screens 30; review 10 of 10 fixed, security none ≥ 8.
-
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -101,11 +98,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S62.2 | "Texts and reminders" screen in More, the profile's last-text line, "Confirmed by text" on the visit (from S62) | 14 | Screens at 375 px light and dark; settings journey |
 | S63 | Approve by text (signed single-use codes) | 14 | Replay and spoof tests |
 | S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
