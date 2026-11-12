@@ -13,8 +13,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 3. [x] Core: `SmsSender` port, `queueSms`, `smsPermission`, delivery gate (opt-out → consent → quiet hours postpone), consent and keyword services, status updates.
 4. [x] Runtime: `TwilioSmsSender` (fixtures), `SandboxSmsSender`, `loadSmsConfig`; worker wiring.
 5. [x] Api: `/v1/webhooks/sms` + `/status` (Twilio signature, account check, TwiML replies, dedupe).
-6. [ ] Docs in sync (jobs-messaging, security-and-tenancy), review, `/session-close`.
-Next: task 6 (docs in sync, review, close). Found and fixed: the web forwarder dropped webhook signature headers (Twilio, and Resend's Svix for S57). Open questions: none. Note: export writes `text-consents.json` only when a business has consents (keeps More → Data unchanged).
+6. [x] Docs in sync (jobs-messaging, data-model, security-and-tenancy, testing-strategy, dependency-map, traceability AC-X-57…63).
+7. [x] `/code-review` (high): 10 findings, all fixed in `7b5a338` (texts cancelled with a deleting business; consent follows a merge; `shown_text` stored with each consent (migration 0075 regenerated); exact segment packing; ErrorCode 0; one Twilio env check; SMS-off and timeout docs).
+8. [ ] `/security-review`: was starting when paused (no findings yet, nothing changed by it). Re-run it first.
+9. [ ] `/session-close`: `pnpm check`; `TURBO_SCM_BASE=origin/main pnpm turbo run test:integration --affected`; no Playwright (no screen changed); walkthrough is the API flow (sandbox send → STOP → dropped); retro; PR; CI; close docs (session-log, decisions, Last sessions).
+Next: step 8. Already green at the last checkpoint: unit tests of contracts, runtime, imports, api, worker, web, core outbox; integration of db (sms, isolation, deletion, export, client-lifecycle), core (sms, outbox), worker outbox, api sms.
+Open questions: none. Notes: the web forwarder now passes webhook signature headers on `/v1/webhooks/*` (Twilio, and Resend's Svix, which S57 needed too). Top-up delivered: GSM-7 normalisation and segments (AC-X-63). Run prettier on drizzle's JSON right after `generate`.
 
 ## Last sessions
 - **S59.5 Phase 13 · Terms, privacy, AI disclosure (2026-11-09)** ([ADR-0064](../adr/0064-legal-pages-and-ai-disclosure.md), [PR #93](https://github.com/Kakumrkr/Everyday-Pepper/pull/93)). Full entry in [session-log.md](session-log.md).
