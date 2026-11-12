@@ -245,26 +245,26 @@ const isGsm7 = (char: string): boolean => GSM7_BASIC.has(char) || GSM7_EXTENSION
  * ones left out, cut by character.
  */
 function replyNames(businesses: readonly string[]): string[] {
-  return businesses
-    .map((name) =>
-      [...normalizeSmsText(name.replace(/\s+/g, ' '))]
-        .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
-        .filter(isGsm7)
-        .join('')
-        .replace(/ {2,}/g, ' ')
-        .trim(),
-    )
-    .filter((name) => name !== '')
-    .slice(0, 2)
-    .map((name) => {
-      const chars = [...name];
-      return chars.length > SMS_REPLY_NAME_MAX
-        ? `${chars
-            .slice(0, SMS_REPLY_NAME_MAX - 3)
-            .join('')
-            .trimEnd()}...`
-        : name;
-    });
+  return (
+    businesses
+      .map((name) =>
+        // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
+        Array.from(normalizeSmsText(name.replace(/\s+/g, ' ')))
+          .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
+          .filter(isGsm7)
+          .join('')
+          .replace(/ {2,}/g, ' ')
+          .trim(),
+      )
+      .filter((name) => name !== '')
+      .slice(0, 2)
+      // GSM-7 characters are one code unit each, so a plain cut never splits one.
+      .map((name) =>
+        name.length > SMS_REPLY_NAME_MAX
+          ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
+          : name,
+      )
+  );
 }
 
 /**
