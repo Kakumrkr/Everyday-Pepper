@@ -4,6 +4,11 @@ import {
   BookingConfirmResponseSchema,
   BookingRequestResponseSchema,
   DeviceForgetResponseSchema,
+  PRIVACY_PATH,
+  SMS_CONSENT_WORDING_CURRENT,
+  SMS_TERMS_SECTION,
+  smsConsentText,
+  TERMS_PATH,
   SlotUnavailableSchema,
   WaitlistConfirmResponseSchema,
   WrongCodeSchema,
@@ -35,6 +40,7 @@ import {
   type ReactNode,
   type SubmitEvent,
 } from 'react';
+import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
@@ -166,6 +172,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const formId = useId();
   // "Remember me on this phone" (S47, D-2: on by default); `withoutCode`: this booking used it.
   const [remember, setRemember] = useState(true);
+  // The SMS box (S61.2, AC-X-64): never ticked for the client, shown once a phone is typed.
+  const [smsOptIn, setSmsOptIn] = useState(false);
+  const [phoneTyped, setPhoneTyped] = useState(false);
   const [withoutCode, setWithoutCode] = useState(false);
   const [forgotten, setForgotten] = useState<'forgotten' | 'unknown' | null>(null);
   // A random id for this visit, linked to nothing (AC-W8-9).
@@ -207,6 +216,8 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               staffMemberId,
               startsAt: chosen.startsAt,
               ...who,
+              // The words this page showed, by version: what the consent record will quote.
+              smsConsent: smsOptIn && who.phone !== null ? SMS_CONSENT_WORDING_CURRENT : null,
             });
     if (answer === null) {
       setBusy(false);
@@ -250,6 +261,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       name: formText(form, 'name'),
       email: formText(form, 'email'),
       phone: formText(form, 'phone'),
+      smsOptIn: waitlistDay === null && smsOptIn,
     });
     if (!checked.ok) {
       flushSync(() => {
@@ -543,7 +555,39 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               autoComplete="tel"
               defaultValue={details?.phone ?? ''}
               error={fieldErrors.phone}
+              onChange={(event) => {
+                setPhoneTyped(event.target.value.trim() !== '');
+              }}
             />
+            {waitlistDay === null &&
+            (phoneTyped || smsOptIn || (details?.phone ?? null) !== null) ? (
+              <div className="flex flex-col" data-testid="sms-opt-in">
+                <Checkbox
+                  name="smsOptIn"
+                  label={smsConsentText(SMS_CONSENT_WORDING_CURRENT, business.name)}
+                  checked={smsOptIn}
+                  onChange={(event) => {
+                    setSmsOptIn(event.target.checked);
+                  }}
+                />
+                <p className="m-0 -mt-1 pl-9 type-caption text-ink-2">
+                  How texts work and what happens to your number:{' '}
+                  <Link
+                    href={`${TERMS_PATH}#${SMS_TERMS_SECTION}`}
+                    className={cx('text-ink-2 underline underline-offset-2', FOCUS_RING)}
+                  >
+                    Terms
+                  </Link>{' '}
+                  ·{' '}
+                  <Link
+                    href={`${PRIVACY_PATH}#${SMS_TERMS_SECTION}`}
+                    className={cx('text-ink-2 underline underline-offset-2', FOCUS_RING)}
+                  >
+                    Privacy
+                  </Link>
+                </p>
+              </div>
+            ) : null}
             {business.cancellationPolicy === null ? null : (
               <Policy text={business.cancellationPolicy} />
             )}

@@ -10,6 +10,7 @@ import {
   type ClientRecords,
   type ClientsPage,
   type ClientsResponse,
+  type ClientTexts,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
 import {
@@ -89,6 +90,32 @@ export class ClientsController {
   get(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<Client> {
     const { clientId } = parseBody(ClientParamsSchema, params);
     return answering(() => this.clients.get(tenant, clientId));
+  }
+
+  /**
+   * Where the client's texts stand, with the words they agreed to (S61.2, AC-X-66). 404
+   * `client_not_found` (also for staff asking about a client who is not theirs).
+   */
+  @Get(':clientId/texts')
+  @RequirePermission('clients.read')
+  texts(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<ClientTexts> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    return answering(() => this.clients.texts(tenant, clientId));
+  }
+
+  /**
+   * Stops the client's texts (S61.2, AC-X-67): 200 the new status. Owners and managers only;
+   * only the client can turn them back on. 404 `client_not_found`.
+   */
+  @Post(':clientId/texts/stop')
+  @HttpCode(200)
+  @RequirePermission('clients.manage')
+  stopTexts(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+  ): Promise<ClientTexts> {
+    const { clientId } = parseBody(ClientParamsSchema, params);
+    return answering(() => this.clients.stopTexts(tenant, clientId));
   }
 
   /** 201 the client; 409 `client_email_taken`. */

@@ -7,6 +7,7 @@ import {
   UserIdSchema,
   UtcDateTimeSchema,
   type Client,
+  type ClientTexts,
   type MembershipRole,
 } from '@pepper/contracts';
 import {
@@ -70,8 +71,23 @@ const clients = {
   ),
   merge: vi.fn((): Promise<Client> => Promise.resolve(CLIENT)),
   delete: vi.fn(() => Promise.resolve()),
+  texts: vi.fn((): Promise<ClientTexts> => Promise.resolve(TEXTS)),
+  stopTexts: vi.fn((): Promise<ClientTexts> => Promise.resolve(TEXTS)),
 };
 const OTHER_ID = ClientIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708191');
+const TEXTS: ClientTexts = {
+  status: 'stopped',
+  textable: true,
+  consent: {
+    phone: '+15552345678',
+    source: 'booking_page',
+    wordingVersion: 'sms-consent-v1',
+    words: 'Text me appointment confirmations and reminders from Juniper at this number.',
+    givenAt: AT,
+    stoppedAt: AT,
+  },
+  canStop: false,
+};
 
 @Global()
 @Module({ providers: [{ provide: DATABASE, useValue: { db: {} } }], exports: [DATABASE] })
@@ -320,5 +336,41 @@ describe('/v1/clients', () => {
   it('401 signed out', async () => {
     await request(server).get('/v1/clients').expect(401);
     await request(server).post('/v1/clients/lookup').set('origin', ORIGIN).expect(401);
+  });
+});
+
+describe('/v1/clients/:clientId/texts (S61.2, AC-X-66, AC-X-67)', () => {
+  const stop = (id: string) =>
+    request(server)
+      .post(`/v1/clients/${id}/texts/stop`)
+      .set('cookie', 'signed-in')
+      .set('origin', ORIGIN)
+      .send({});
+
+  it.each<MembershipRole>(['owner', 'manager', 'staff'])('a(n) %s reads them', async (r) => {
+    role = r;
+    expect((await get(`/v1/clients/${CLIENT_ID}/texts`).expect(200)).body).toEqual(TEXTS);
+    expect(clients.texts).toHaveBeenCalledWith(context(), CLIENT_ID);
+  });
+
+  it.each<MembershipRole>(['owner', 'manager'])('a(n) %s stops them', async (r) => {
+    role = r;
+    expect((await stop(CLIENT_ID).expect(200)).body).toEqual(TEXTS);
+    expect(clients.stopTexts).toHaveBeenCalledWith(context(), CLIENT_ID);
+  });
+
+  it('refuses staff stopping texts (403) before anything is asked', async () => {
+    role = 'staff';
+    await stop(CLIENT_ID).expect(403);
+    expect(clients.stopTexts).not.toHaveBeenCalled();
+  });
+
+  it('answers 404 for a client not found and 400 for an id that isn’t one', async () => {
+    clients.texts.mockRejectedValueOnce(new ClientNotFoundError());
+    expect(code((await get(`/v1/clients/${CLIENT_ID}/texts`).expect(404)).body)).toBe(
+      'client_not_found',
+    );
+    expect(code((await stop('maria').expect(400)).body)).toBe('validation_failed');
+    await request(server).get(`/v1/clients/${CLIENT_ID}/texts`).expect(401);
   });
 });

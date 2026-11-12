@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UtcDateTimeSchema } from './time.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
 // The SMS channel (S61, ADR-0065): the rules every text follows, whoever sends it. A text goes
@@ -191,18 +192,50 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
   return null;
 }
 
+/** The longest business name a reply carries before it is shortened (two fit in two segments). */
+export const SMS_REPLY_NAME_MAX = 40;
+
 /**
- * Pepper's answers to the keywords (ADR-0065 §5), from Pepper's one sender: "Pepper" until
- * S61.2 names the business. `helpUrl` is the help centre, absolute.
+ * Who a reply comes from (S61.2, AC-X-68): the businesses the number said yes to (at most two,
+ * the latest first; each shortened past `SMS_REPLY_NAME_MAX`), "via Pepper", whose one number
+ * sends them; "Pepper" alone when there are none.
  */
-export function smsKeywordReply(keyword: SmsKeyword, helpUrl: string): string {
+export function smsReplySender(businesses: readonly string[]): string {
+  const names = businesses
+    .map((name) => normalizeSmsText(name.replace(/\s+/g, ' ').trim()))
+    .filter((name) => name !== '')
+    .slice(0, 2)
+    .map((name) =>
+      name.length > SMS_REPLY_NAME_MAX
+        ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
+        : name,
+    );
+  return names.length === 0 ? 'Pepper' : `${names.join(' and ')} via Pepper`;
+}
+
+/**
+ * Pepper's answers to the keywords (ADR-0065 §5), from Pepper's one sender, naming the
+ * businesses the number said yes to (`smsReplySender`, S61.2). `helpUrl` is the help centre,
+ * absolute. A STOP stops every business's texts to the number, and says so.
+ */
+export function smsKeywordReply(
+  keyword: SmsKeyword,
+  helpUrl: string,
+  businesses: readonly string[] = [],
+): string {
+  const sender = smsReplySender(businesses);
+  const named = businesses.length > 0;
   switch (keyword) {
     case 'stop':
-      return "Pepper: You're unsubscribed and won't get more texts from this number. Reply START to resubscribe.";
+      return named
+        ? `${sender}: You're unsubscribed and won't get more texts from this number, from any business. Reply START to resubscribe.`
+        : `${sender}: You're unsubscribed and won't get more texts from this number. Reply START to resubscribe.`;
     case 'start':
-      return "Pepper: You're resubscribed to appointment texts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
+      return `${sender}: You're resubscribed to appointment texts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
     case 'help':
-      return `Pepper: appointment texts from businesses you book with. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`;
+      return named
+        ? `${sender}: appointment texts. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`
+        : `${sender}: appointment texts from businesses you book with. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`;
   }
 }
 
@@ -229,6 +262,37 @@ export function smsConsentText(version: SmsConsentWordingVersion, business: stri
   const name = business.trim();
   return SMS_CONSENT_WORDING[version].replace('{business}', () => name);
 }
+
+/**
+ * Where a client's texts stand, for their profile (S61.2, AC-X-66): `on` (a consent in force);
+ * `opted_out` (a consent, but the number replied STOP, for every business on Pepper);
+ * `stopped` (the latest consent was revoked: a member stopped them, or another client took the
+ * number); `never` (no consent on record).
+ */
+export const ClientTextsStatusSchema = z.enum(['on', 'opted_out', 'stopped', 'never']);
+export type ClientTextsStatus = z.infer<typeof ClientTextsStatusSchema>;
+
+/**
+ * `GET /v1/clients/:clientId/texts` (and the answer of `POST …/texts/stop`): the status, the
+ * client's latest consent with the words exactly as shown, whether their own phone can get texts
+ * (`textable`: US or Canada) and whether this member may stop them (`canStop`).
+ */
+export const ClientTextsSchema = z.object({
+  status: ClientTextsStatusSchema,
+  textable: z.boolean(),
+  consent: z
+    .object({
+      phone: SmsPhoneSchema,
+      source: SmsConsentSourceSchema,
+      wordingVersion: SmsConsentWordingVersionSchema,
+      words: z.string().min(1),
+      givenAt: UtcDateTimeSchema,
+      stoppedAt: UtcDateTimeSchema.nullable(),
+    })
+    .nullable(),
+  canStop: z.boolean(),
+});
+export type ClientTexts = z.infer<typeof ClientTextsSchema>;
 
 /**
  * Where a sent text stands, as Twilio reports it (AC-X-62). Callbacks arrive out of order, so a

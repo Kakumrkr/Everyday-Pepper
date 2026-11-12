@@ -8,6 +8,8 @@ import {
   smsConsentText,
   smsDeliveryStatusOf,
   smsKeywordReply,
+  smsReplySender,
+  SMS_REPLY_NAME_MAX,
   SmsPhoneSchema,
   smsSegments,
   smsSendableAt,
@@ -169,6 +171,32 @@ describe('the keyword replies and consent wording', () => {
     expect(smsKeywordReply('start', 'x')).toContain('STOP');
     for (const keyword of ['stop', 'start', 'help'] as const) {
       const reply = smsKeywordReply(keyword, 'https://app.example.com/help');
+      expect(smsSegments(reply)).toMatchObject({ encoding: 'gsm7' });
+      expect(smsSegments(reply).segments).toBeLessThanOrEqual(2);
+    }
+  });
+
+  it('names the businesses the number said yes to, the latest first, two at most (AC-X-68)', () => {
+    const url = 'https://app.example.com/help';
+    expect(smsKeywordReply('help', url, ['Fade Bros'])).toMatch(
+      /^Fade Bros via Pepper: appointment texts\. .*Reply STOP to opt out\. Help: https/,
+    );
+    expect(smsKeywordReply('stop', url, ['Fade Bros', 'Lash Lab', 'Third'])).toBe(
+      "Fade Bros and Lash Lab via Pepper: You're unsubscribed and won't get more texts from this number, from any business. Reply START to resubscribe.",
+    );
+    expect(smsKeywordReply('start', url, ['Fade Bros'])).toMatch(
+      /^Fade Bros via Pepper: You're resubscribed/,
+    );
+    expect(smsKeywordReply('help', url, [])).toMatch(/^Pepper: appointment texts from businesses/);
+    expect(smsReplySender(['  ', 'Nails ’n’ More'])).toBe("Nails 'n' More via Pepper");
+  });
+
+  it('keeps a reply naming two long names in GSM-7 and two segments', () => {
+    const long = 'The Very Long Name Of A Hair And Beauty Studio Downtown';
+    expect(smsReplySender([long])).toHaveLength(SMS_REPLY_NAME_MAX + ' via Pepper'.length);
+    expect(smsReplySender([long])).toMatch(/\.\.\. via Pepper$/);
+    for (const keyword of ['stop', 'start', 'help'] as const) {
+      const reply = smsKeywordReply(keyword, 'https://app.example.com/help', [long, long]);
       expect(smsSegments(reply)).toMatchObject({ encoding: 'gsm7' });
       expect(smsSegments(reply).segments).toBeLessThanOrEqual(2);
     }

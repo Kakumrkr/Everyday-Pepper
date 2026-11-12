@@ -6,6 +6,7 @@ import {
   type TenantId,
 } from '@pepper/contracts';
 import {
+  addMembership,
   createTenant,
   findActiveSmsConsent,
   findOutboxMessage,
@@ -17,7 +18,10 @@ import {
   type Database,
 } from '@pepper/db';
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
+import { ClientNotFoundError, ForbiddenError } from './errors.js';
+import { createBusiness } from './services/business.js';
 import {
   outboxKeyFrom,
   SmsRejectedError,
@@ -28,15 +32,17 @@ import {
 } from './outbox.js';
 import { deliverOutboxMessage } from './services/outbox.js';
 import {
+  getClientTexts,
   handleInboundSms,
   queueSms,
   recordSmsConsent,
   recordSmsStatus,
   revokeSmsConsentFor,
   smsPermission,
+  stopClientTexts,
 } from './services/sms.js';
 import { usageFor } from './services/usage.js';
-import { startTestDatabase, type TestDatabase } from './test-support.js';
+import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The SMS channel end to end at the service level (S61, ADR-0065, AC-X-57…63): a queued text is
 // sent once, only with the business's consent and without a STOP, inside the quiet hours; a
@@ -309,6 +315,8 @@ describe('STOP, START and HELP (AC-X-59)', () => {
     const stop = await inbound(phone, 'Stop texting me!', `SM${'1'.repeat(32)}`);
     expect(stop.keyword).toBe('stop');
     expect(stop.reply).toContain('Reply START to resubscribe');
+    // It names both businesses, the latest consent first (S61.2, AC-X-68).
+    expect(stop.reply).toMatch(/^Fade Bros and Plum Salon via Pepper: .*from any business\./);
     // No time passes: the STOP is honoured by the time the webhook answered.
     expect(await deliver(plum, forPlum)).toBe('dropped');
     expect(await deliver(fade, forFade)).toBe('dropped');
@@ -330,6 +338,7 @@ describe('STOP, START and HELP (AC-X-59)', () => {
 
     const help = await inbound(phone, 'HELP');
     expect(help.reply).toContain(HELP_URL);
+    expect(help.reply).toMatch(/^Plum Salon via Pepper: appointment texts\./);
     expect(await isSmsOptedOut(db, phone)).toBe(false);
     expect(await inbound(phone, 'Can I come at 3 instead?')).toEqual({
       keyword: null,
@@ -337,6 +346,140 @@ describe('STOP, START and HELP (AC-X-59)', () => {
     });
     // A keyword from a number Pepper never texts is neither stored nor answered.
     expect(await inbound('+442071234567', 'STOP')).toEqual({ keyword: 'stop', reply: null });
+  });
+});
+
+describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => {
+  let businesses = 0;
+
+  async function team() {
+    businesses += 1;
+    const owner = await insertUser(db, 'Ana');
+    const tenant = await createBusiness(db, owner, {
+      name: 'Juniper Hair',
+      slug: `juniper-sms-${String(businesses)}`,
+      timeZone: 'America/New_York',
+    });
+    const tenantId = TenantIdSchema.parse(tenant.id);
+    const staff = await insertUser(db, 'Jess');
+    await withTenant(db, tenantId, (tx) => addMembership(tx, { userId: staff, role: 'staff' }));
+    const as = (userId: string, role: 'owner' | 'staff'): Actor => ({
+      context: { tenantId, userId: userId as never, role },
+      requestId: 'req-texts',
+    });
+    return { tenantId, owner: as(owner, 'owner'), staff: as(staff, 'staff') };
+  }
+
+  async function clientWith(tenantId: TenantId, phone: string | null, consent: boolean) {
+    return withTenant(db, tenantId, async (tx) => {
+      const client = await insertClient(tx, { name: 'Sam', email: null, phone, source: 'team' });
+      if (consent && phone !== null) {
+        await recordSmsConsent(
+          tx,
+          {
+            phone,
+            source: 'booking_page',
+            clientId: client.id,
+            wordingVersion: 'sms-consent-v1',
+            givenAt: clock.now(),
+          },
+          { actor: { kind: 'system' } },
+        );
+      }
+      return client.id as never;
+    });
+  }
+
+  it('says texts are on, since when and how, with the words exactly as shown', async () => {
+    const t = await team();
+    const phone = newPhone();
+    const sam = await clientWith(t.tenantId, phone, true);
+    const texts = await getClientTexts(db, t.owner, sam);
+    expect(texts).toEqual({
+      status: 'on',
+      textable: true,
+      consent: {
+        phone,
+        source: 'booking_page',
+        wordingVersion: 'sms-consent-v1',
+        words:
+          'Text me appointment confirmations and reminders from Juniper Hair at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+        givenAt: '2026-11-12T17:00:00.000Z',
+        stoppedAt: null,
+      },
+      canStop: true,
+    });
+  });
+
+  it('says never asked, and whether their number can get texts', async () => {
+    const t = await team();
+    expect(
+      await getClientTexts(db, t.owner, await clientWith(t.tenantId, newPhone(), false)),
+    ).toEqual({
+      status: 'never',
+      textable: true,
+      consent: null,
+      canStop: false,
+    });
+    expect(
+      await getClientTexts(db, t.owner, await clientWith(t.tenantId, '+447700900123', false)),
+    ).toMatchObject({ status: 'never', textable: false });
+    expect(
+      await getClientTexts(db, t.owner, await clientWith(t.tenantId, null, false)),
+    ).toMatchObject({ status: 'never', textable: false });
+  });
+
+  it('says opted out after a STOP, and the owner may still stop them for good', async () => {
+    const t = await team();
+    const phone = newPhone();
+    const sam = await clientWith(t.tenantId, phone, true);
+    await inbound(phone, 'STOP');
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({
+      status: 'opted_out',
+      canStop: true,
+    });
+  });
+
+  it('stops texts as the member, audited, from the next delivery; asking again changes nothing', async () => {
+    const t = await team();
+    const phone = newPhone();
+    const sam = await clientWith(t.tenantId, phone, true);
+    const message = await queue(t.tenantId, phone);
+    clock.set('2026-11-12T18:00:00Z');
+    const stopped = await stopClientTexts(db, t.owner, sam, { clock });
+    expect(stopped).toMatchObject({
+      status: 'stopped',
+      canStop: false,
+      consent: { stoppedAt: '2026-11-12T18:00:00.000Z' },
+    });
+    expect(await deliver(t.tenantId, message)).toBe('dropped');
+    const audit = await withTenant(db, t.tenantId, (tx) => listAuditEntries(tx, { limit: 5 }));
+    expect(audit[0]).toMatchObject({
+      action: 'sms.consent_revoked',
+      actor: { kind: 'user', userId: t.owner.context.userId },
+    });
+    expect(await stopClientTexts(db, t.owner, sam, { clock })).toEqual(stopped);
+    expect(
+      (await withTenant(db, t.tenantId, (tx) => listAuditEntries(tx, { limit: 5 }))).filter(
+        (entry) => entry.action === 'sms.consent_revoked',
+      ),
+    ).toHaveLength(1);
+  });
+
+  it('shows staff only their own clients, and never lets them stop texts', async () => {
+    const t = await team();
+    const sam = await clientWith(t.tenantId, newPhone(), true);
+    await expect(getClientTexts(db, t.staff, sam)).rejects.toBeInstanceOf(ClientNotFoundError);
+    await expect(stopClientTexts(db, t.staff, sam)).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it('is the business’s own: another business can’t read or stop the client', async () => {
+    const t = await team();
+    const other = await team();
+    const sam = await clientWith(t.tenantId, newPhone(), true);
+    await expect(getClientTexts(db, other.owner, sam)).rejects.toBeInstanceOf(ClientNotFoundError);
+    await expect(stopClientTexts(db, other.owner, sam)).rejects.toBeInstanceOf(ClientNotFoundError);
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({ status: 'on' });
   });
 });
 

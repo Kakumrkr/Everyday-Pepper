@@ -1,4 +1,9 @@
-import { aiDisclosureSentence, PRIVACY_AI_SECTION, PRIVACY_PATH } from '@pepper/contracts';
+import {
+  aiDisclosureSentence,
+  PRIVACY_AI_SECTION,
+  PRIVACY_PATH,
+  SMS_TERMS_SECTION,
+} from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import { HELP_CONTACT_PATH, HELP_PATH } from './help';
 import {
@@ -102,5 +107,34 @@ describe('the AI section the emails link to (AC-X-56)', () => {
     expect(links).toContainEqual(
       expect.objectContaining({ kind: 'link', href: `${PRIVACY_PATH}#${PRIVACY_AI_SECTION}` }),
     );
+  });
+});
+
+describe('the text-message sections the SMS box links to (S61.2, AC-X-64)', () => {
+  const termsText = () => {
+    const found = TERMS.sections.find((each) => each.id === SMS_TERMS_SECTION);
+    if (found === undefined) throw new Error('no terms section for texts');
+    return textOf(found.blocks);
+  };
+
+  it('has the carriers’ required terms: who, how often, rates, STOP, HELP, carriers', () => {
+    const text = termsText();
+    for (const words of [
+      'Message frequency varies',
+      'Message and data rates may apply',
+      'STOP',
+      'HELP',
+      'Carriers are not liable',
+    ]) {
+      expect(text).toContain(words);
+    }
+  });
+
+  it('says in the privacy policy how the yes is kept and that the number is never shared for marketing', () => {
+    const texts = section(SMS_TERMS_SECTION).text;
+    expect(texts).toMatch(/never needed to book/);
+    expect(texts).toMatch(/exact words you agreed to/);
+    expect(texts).toMatch(/never shared with or sold to anyone for their own marketing/);
+    expect(section('sharing').text).toMatch(/Twilio/);
   });
 });

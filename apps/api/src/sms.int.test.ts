@@ -145,6 +145,8 @@ describe('a STOP through the api (AC-X-59)', () => {
       .expect(200);
     expect(response.headers['content-type']).toMatch(/^text\/xml/);
     expect(response.text).toContain('Reply START to resubscribe');
+    // The reply names the business the number said yes to (S61.2, AC-X-68).
+    expect(response.text).toContain('<Message>Fade Bros via Pepper: ');
     expect(await isSmsOptedOut(db, PHONE)).toBe(true);
 
     const sender = new RecordingSender();

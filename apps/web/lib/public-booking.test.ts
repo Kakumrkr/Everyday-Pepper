@@ -1,6 +1,8 @@
+import { SMS_OPT_IN_PHONE_MESSAGE } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
 import {
   checkDetails,
+  SMS_OPT_IN_NO_PHONE,
   confirmProblem,
   firstFreeDay,
   initials,
@@ -120,6 +122,24 @@ describe('the page data', () => {
 });
 
 describe('checkDetails', () => {
+  it('needs a number Pepper can text when the SMS box is ticked (AC-X-64)', () => {
+    const base = { name: 'Ana', email: 'ana@example.test', smsOptIn: true };
+    expect(checkDetails({ ...base, phone: '(555) 234-5678' })).toMatchObject({
+      ok: true,
+      details: { phone: '+15552345678' },
+    });
+    expect(checkDetails({ ...base, phone: '' })).toEqual({
+      ok: false,
+      errors: { phone: SMS_OPT_IN_NO_PHONE },
+    });
+    expect(checkDetails({ ...base, phone: '+447700900123' })).toEqual({
+      ok: false,
+      errors: { phone: SMS_OPT_IN_PHONE_MESSAGE },
+    });
+    // Unticked, any phone (or none) books as before.
+    expect(checkDetails({ ...base, smsOptIn: false, phone: '+447700900123' }).ok).toBe(true);
+  });
+
   it('trims, and turns a local US phone into E.164', () => {
     expect(
       checkDetails({ name: ' Ana Ruiz ', email: ' ana@example.test ', phone: '(555) 123-4567' }),

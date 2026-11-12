@@ -1,6 +1,7 @@
 import {
   aiDisclosureSentence,
   PRIVACY_AI_SECTION,
+  SMS_TERMS_SECTION,
   PRIVACY_PATH,
   TERMS_PATH,
 } from '@pepper/contracts';
@@ -38,7 +39,7 @@ export const LEGAL_DRAFT_NOTICE =
   'It describes how Pepper works today and waits for a lawyer’s review, so it isn’t in force yet. The company’s legal name, address and governing state are added before it is.';
 
 /** The date both texts last changed. */
-const UPDATED = '2026-11-09';
+const UPDATED = '2026-11-12';
 
 /** Where a person writes to us: the help centre's form, open without an account. */
 const CONTACT = { text: 'Write to us', href: HELP_CONTACT_PATH } as const;
@@ -145,6 +146,21 @@ export const PRIVACY: LegalDocument = {
       ],
     },
     {
+      id: SMS_TERMS_SECTION,
+      heading: 'Text messages',
+      blocks: [
+        p(
+          'A business can text you about your appointments (confirmations, reminders and changes) only if you said yes: by ticking the box when you booked online. It is never needed to book. We keep a record of that yes for the business: the number, when, how, and the exact words you agreed to.',
+        ),
+        list(
+          'Reply STOP to any text to stop them all, from every business that uses Pepper, at once. Reply START to get them again, HELP for help.',
+          'Message frequency varies with your appointments. Message and data rates may apply.',
+          'Texts go through our text message provider (Twilio), which receives your number and the message to deliver it.',
+          'Your mobile number and your yes are never shared with or sold to anyone for their own marketing.',
+        ),
+      ],
+    },
+    {
       id: 'memory',
       heading: 'What Pepper remembers',
       blocks: [
@@ -189,7 +205,8 @@ export const PRIVACY: LegalDocument = {
           'Email delivery: Resend (booking emails, reminders, account and support email).',
           'AI processing: OpenAI.',
           'Error and performance monitoring: Sentry and Grafana Cloud, without message content.',
-          'Later, only when a business turns them on: a text message provider, Stripe for deposits and card payments, Google for calendar sync.',
+          'Text messages: Twilio, for a client who said yes to texts.',
+          'Later, only when a business turns them on: Stripe for deposits and card payments, Google for calendar sync.',
         ),
         p(
           'Each receives only what it needs to do its job. We may disclose information if the law requires it, to protect someone’s safety, or as part of a sale or merger of Pepper, with this policy continuing to apply.',
@@ -342,6 +359,22 @@ export const TERMS: LegalDocument = {
         p(
           'Pepper sends booking confirmations, reminders and, when you choose, rebooking, review and other emails on your behalf and in your business’s name. Marketing emails carry your postal address and an unsubscribe link, and Pepper honours every unsubscribe. You remain the sender responsible for their content.',
         ),
+      ],
+    },
+    {
+      id: SMS_TERMS_SECTION,
+      heading: 'Text messages',
+      blocks: [
+        p(
+          'Appointment texts: a business that uses Pepper texts its clients who said yes (confirmations, reminders and changes to their appointments), from Pepper’s number in the business’s name.',
+        ),
+        list(
+          'Message frequency varies. Message and data rates may apply.',
+          'Reply STOP to stop all texts from Pepper’s number, START to get them again, HELP for help. You can also write to us.',
+          'Carriers are not liable for delayed or undelivered messages.',
+          'Businesses: text only clients who said yes, about their appointments; never remove or change the opt-out words; and stop texting anyone who asks you to.',
+        ),
+        link('How we handle your number', `${PRIVACY_PATH}#${SMS_TERMS_SECTION}`),
       ],
     },
     {
