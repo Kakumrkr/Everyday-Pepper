@@ -13,6 +13,7 @@ import {
   type EpisodeWriter,
   type Mailer,
   type Pusher,
+  type SmsSender,
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE, MAILER, raiseAlert } from '@pepper/runtime';
@@ -29,6 +30,10 @@ export interface OutboxOptions {
   pusher?: Pusher | null;
   /** Writes episodes (S31); `null` or absent: no OpenAI here, so the api queues none. */
   episodes?: EpisodeWriter | null;
+  /** Sends texts (S61, ADR-0065); `null` or absent: SMS is off, queued texts wait. */
+  sms?: SmsSender | null;
+  /** The web app's origin for Twilio's signed delivery reports; `null` or absent: none. */
+  smsStatusBaseUrl?: string | null;
   /** Deliveries in flight per worker process. */
   concurrency?: number;
   clock?: Clock;
@@ -77,6 +82,8 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
       mailer,
       pusher: this.options.pusher ?? null,
       episodes: this.options.episodes ?? null,
+      sms: this.options.sms ?? null,
+      smsStatusBaseUrl: this.options.smsStatusBaseUrl ?? null,
       clock: this.options.clock ?? systemClock,
     };
     this.worker = new Worker(

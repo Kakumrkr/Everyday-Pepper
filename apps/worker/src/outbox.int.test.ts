@@ -5,17 +5,19 @@ import {
   type OutboxMessageId,
   type TenantId,
 } from '@pepper/contracts';
-import { ManualClock, outboxKeyFrom, queueEmail } from '@pepper/core';
+import { ManualClock, outboxKeyFrom, queueEmail, queueSms, recordSmsConsent } from '@pepper/core';
 import {
   createTenant,
   findOutboxMessage,
+  findSmsDelivery,
+  insertClient,
   prepareDatabase,
   withTenant,
   type Database,
   type DatabaseHandle,
   type OutboxMessageRow,
 } from '@pepper/db';
-import { ConnectionsModule, DATABASE, MailModule } from '@pepper/runtime';
+import { ConnectionsModule, DATABASE, MailModule, SandboxSmsSender } from '@pepper/runtime';
 import {
   postgresUrlAs,
   startMailpit,
@@ -47,6 +49,7 @@ let app: INestApplicationContext;
 let db: Database;
 let tenant: TenantId;
 let keys = 0;
+const sandbox = new SandboxSmsSender();
 
 interface MailpitMessage {
   ID: string;
@@ -112,7 +115,7 @@ beforeAll(async () => {
     imports: [
       ConnectionsModule.forRoot({ databaseUrl, redisUrl: redis.url }),
       MailModule.forRoot({ smtpUrl: mailpit.smtpUrl, from: 'Plum Salon <hello@plum.example>' }),
-      OutboxModule.forRoot({ redisUrl: redis.url, key, pollMs: 100, clock }),
+      OutboxModule.forRoot({ redisUrl: redis.url, key, pollMs: 100, clock, sms: sandbox }),
     ],
   }).compile();
   app = await moduleRef.init();
@@ -198,5 +201,47 @@ describe('outbox delivery (AC-W4-2)', () => {
     clock.advanceBy(86_400_000);
     await new Promise((resolve) => setTimeout(resolve, 500));
     expect(await inbox('ana.refused@example.test')).toEqual([]);
+  });
+});
+
+describe('texts through the outbox (S61, AC-X-57)', () => {
+  it('sends a queued text once through the relay and the sandbox, and records its delivery', async () => {
+    const phone = '+15552347777';
+    const id = await withTenant(db, tenant, async (tx) => {
+      const client = await insertClient(tx, {
+        name: 'Sam',
+        email: null,
+        phone,
+        source: 'booking_page',
+      });
+      await recordSmsConsent(
+        tx,
+        {
+          phone,
+          source: 'booking_page',
+          clientId: client.id,
+          wordingVersion: 'sms-consent-v1',
+          givenAt: clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      );
+      return queueSms(
+        tx,
+        { to: phone, body: 'Plum Salon: you’re booked for Tue 2:30pm.' },
+        { key, dedupeKey: OutboxDedupeKeySchema.parse('test.sms:worker'), now: clock.now() },
+      );
+    });
+    if (id === undefined) throw new Error('not queued');
+    await eventually(
+      () => stored(id),
+      (row) => row?.status === 'sent',
+    );
+    expect(sandbox.sent.filter((text) => text.id === id)).toEqual([
+      expect.objectContaining({ to: phone, body: "Plum Salon: you're booked for Tue 2:30pm." }),
+    ]);
+    expect(await withTenant(db, tenant, (tx) => findSmsDelivery(tx, id))).toMatchObject({
+      provider: 'sandbox',
+      status: 'delivered',
+    });
   });
 });

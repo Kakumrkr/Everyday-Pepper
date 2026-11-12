@@ -11,3 +11,4 @@ export * from './redact.js';
 export * from './request-logging.js';
 export * from './service-app.js';
 export * from './telemetry.js';
+export * from './sms.js';
