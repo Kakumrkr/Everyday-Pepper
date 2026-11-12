@@ -8,12 +8,14 @@ CREATE TABLE "sms_consents" (
 	"client_id" uuid,
 	"user_id" uuid,
 	"wording_version" text NOT NULL,
+	"shown_text" text NOT NULL,
 	"given_at" timestamp with time zone NOT NULL,
 	"revoked_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "sms_consents_phone_format" CHECK ("sms_consents"."phone" ~ '^[+]1[2-9][0-9]{9}$'),
 	CONSTRAINT "sms_consents_source_subject" CHECK (("sms_consents"."source" = 'booking_page' AND "sms_consents"."client_id" IS NOT NULL AND "sms_consents"."user_id" IS NULL) OR ("sms_consents"."source" = 'member_settings' AND "sms_consents"."user_id" IS NOT NULL AND "sms_consents"."client_id" IS NULL)),
 	CONSTRAINT "sms_consents_wording_format" CHECK ("sms_consents"."wording_version" ~ '^sms-consent-v[0-9]{1,3}$'),
+	CONSTRAINT "sms_consents_shown_text_length" CHECK (length("sms_consents"."shown_text") BETWEEN 20 AND 600),
 	CONSTRAINT "sms_consents_revoked_after_given" CHECK ("sms_consents"."revoked_at" IS NULL OR "sms_consents"."revoked_at" >= "sms_consents"."given_at")
 );
 --> statement-breakpoint

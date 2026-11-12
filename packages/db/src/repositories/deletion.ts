@@ -66,11 +66,11 @@ export async function cancelCurrentTenantDeletion(tx: TenantTx): Promise<boolean
 }
 
 /**
- * Takes back every email of the transaction's business that is waiting to go out and that no
- * worker is sending at `now` (content cleared, status `cancelled`): a business being deleted
- * sends its clients nothing more. Returns how many.
+ * Takes back every email and text of the transaction's business that is waiting to go out and
+ * that no worker is sending at `now` (content cleared, status `cancelled`): a business being
+ * deleted sends its clients nothing more (ADR-0054; texts since S61). Returns how many.
  */
-export async function cancelPendingOutboxEmails(
+export async function cancelPendingEmailsAndTexts(
   tx: TenantTx,
   now: Date,
   options: { id?: string } = {},
@@ -81,7 +81,8 @@ export async function cancelPendingOutboxEmails(
     .where(
       and(
         options.id === undefined ? undefined : eq(outboxMessages.id, z.uuid().parse(options.id)),
-        eq(outboxMessages.type, 'email'),
+        // Texts too (S61, ADR-0065): a business being deleted sends its clients nothing more.
+        inArray(outboxMessages.type, ['email', 'sms']),
         eq(outboxMessages.status, 'pending'),
         or(isNull(outboxMessages.leaseUntil), lte(outboxMessages.leaseUntil, now)),
       ),

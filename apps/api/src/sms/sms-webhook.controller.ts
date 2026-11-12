@@ -140,7 +140,7 @@ export class SmsWebhookController {
       messageId: messageId.data,
       providerMessageId: parsed.data.MessageSid,
       status: parsed.data.MessageStatus,
-      errorCode: parsed.data.ErrorCode === undefined ? null : Number(parsed.data.ErrorCode),
+      errorCode: parsed.data.ErrorCode,
     });
     return WebhookAckSchema.parse({ received: true });
   }

@@ -5,6 +5,7 @@ import {
   OutboxMessageIdSchema,
   OutboxSmsSchema,
   smsDeliveryStatusOf,
+  smsConsentText,
   smsKeywordReply,
   SmsPhoneSchema,
   smsSendableAt,
@@ -97,15 +98,20 @@ export interface SmsConsentInput {
 
 /**
  * Records a consent in the open transaction of a business (ADR-0065 §7, AC-X-58), replacing the
- * number's earlier one, and audits it (how and which wording; never the number). Returns the
- * consent's id.
+ * number's earlier one, with the words as shown (the business's name as it is now), and audits it
+ * (how and which wording; never the number). Returns the consent's id.
  */
 export async function recordSmsConsent(
   tx: TenantTx,
   input: SmsConsentInput,
   audit: { actor: AuditActor; requestId?: string | undefined },
 ): Promise<string> {
-  const { id, replaced } = await insertSmsConsent(tx, input);
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) throw new Error('A consent is recorded in a business’s transaction');
+  const { id, replaced } = await insertSmsConsent(tx, {
+    ...input,
+    shownText: smsConsentText(input.wordingVersion, tenant.name),
+  });
   if (replaced !== null) await auditRevoked(tx, replaced, audit);
   await appendAuditEntry(tx, {
     actor: audit.actor,

@@ -13,7 +13,7 @@ import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Database } from './client.js';
 import { newId } from './ids.js';
-import { deleteClientRow, insertClient } from './repositories/clients.js';
+import { deleteClientRow, insertClient, mergeClientRows } from './repositories/clients.js';
 import { insertOutboxMessage } from './repositories/outbox.js';
 import {
   advanceSmsDelivery,
@@ -32,6 +32,8 @@ import { addMembership } from './repositories/memberships.js';
 import { withMember, withSmsInbound, withTenant } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
+/** The words as shown, as core records them (`smsConsentText`). */
+const SHOWN = 'Text me appointment confirmations and reminders from A at this number.';
 let database: TestDatabase;
 let db: Database;
 let tenantA: TenantId;
@@ -83,6 +85,7 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'booking_page',
         clientId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: T0,
       }),
     );
@@ -94,6 +97,7 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'booking_page',
         clientId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: later,
       }),
     );
@@ -127,6 +131,7 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'booking_page',
         userId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: T0,
       }),
     ).catch((error: unknown) => error);
@@ -137,6 +142,7 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'member_settings',
         userId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: T0,
       }),
     ).catch((error: unknown) => error);
@@ -148,9 +154,33 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'member_settings',
         userId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: T0,
       }),
     );
+  });
+
+  it('follows a client merged into another (ADR-0051), still active', async () => {
+    const phone = '+15552340005';
+    const merged = await client(tenantA, phone);
+    const kept = await client(tenantA, '+15552340006');
+    const { id } = await withTenant(db, tenantA, (tx) =>
+      insertSmsConsent(tx, {
+        phone,
+        source: 'booking_page',
+        clientId: merged,
+        wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
+        givenAt: T0,
+      }),
+    );
+    const owner = await insertUser(db, 'Mia Merger');
+    await withTenant(db, tenantA, (tx) => addMembership(tx, { userId: owner, role: 'owner' }));
+    await withMember(db, { tenantId: tenantA, userId: owner }, (tx) =>
+      mergeClientRows(tx, kept, merged, new Date()),
+    );
+    const active = await withTenant(db, tenantA, (tx) => findActiveSmsConsent(tx, phone));
+    expect(active).toMatchObject({ id, clientId: kept, revokedAt: null });
   });
 
   it('goes with a client who is forgotten (ADR-0051)', async () => {
@@ -162,6 +192,7 @@ describe('SMS consents (AC-X-58)', () => {
         source: 'booking_page',
         clientId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: T0,
       }),
     );

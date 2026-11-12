@@ -14,7 +14,7 @@ import {
   appendAuditEntry,
   cancelAccountDeletion as cancelAccountDeletionRow,
   cancelCurrentTenantDeletion,
-  cancelPendingOutboxEmails,
+  cancelPendingEmailsAndTexts,
   countOwners,
   deleteAccountIfDue,
   deleteCurrentTenantIfDue,
@@ -95,7 +95,7 @@ export async function scheduleBusinessDeletion(
         },
         requestId: actor.requestId,
       });
-      await cancelPendingOutboxEmails(tx, now);
+      await cancelPendingEmailsAndTexts(tx, now);
     }
     return statusOf(result.dueAt);
   });

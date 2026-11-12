@@ -397,6 +397,8 @@ export async function mergeClientRows(
   await tx.execute(
     sql`UPDATE client_import_refs SET client_id = ${keep} WHERE client_id = ${other}`,
   );
+  // Their consent to texts stays the business's record (S61, ADR-0065 §7): it follows them.
+  await tx.execute(sql`UPDATE sms_consents SET client_id = ${keep} WHERE client_id = ${other}`);
   // An import's Undo no longer removes either: the client kept now holds both's history.
   await tx.execute(sql`
     UPDATE import_rows SET client_id = ${keep}, created_client = false

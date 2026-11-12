@@ -201,7 +201,7 @@ describe('loadSmsConfig', () => {
 
   it('stops the process for Twilio without its keys, or with malformed ones, naming no value', () => {
     expect(() => loadSmsConfig('worker', { SMS_PROVIDER: 'twilio' })).toThrow(
-      'Invalid worker environment: SMS_PROVIDER',
+      /^Invalid worker environment: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER$/,
     );
     expect(() => loadSmsConfig('worker', { ...twilio, TWILIO_AUTH_TOKEN: 'short' })).toThrow(
       'Invalid worker environment: TWILIO_AUTH_TOKEN',

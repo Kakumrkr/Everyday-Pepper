@@ -38,7 +38,9 @@ describe('loadWorkerConfig', () => {
     expect(
       loadWorkerConfig({ ...twilio, AUTH_BASE_URL: 'https://app.example.com/' }).smsStatusBaseUrl,
     ).toBe('https://app.example.com');
-    expect(() => loadWorkerConfig({ ...required, SMS_PROVIDER: 'twilio' })).toThrow('SMS_PROVIDER');
+    expect(() => loadWorkerConfig({ ...required, SMS_PROVIDER: 'twilio' })).toThrow(
+      'TWILIO_ACCOUNT_SID',
+    );
   });
 
   it('requires DATABASE_URL and REDIS_URL', () => {

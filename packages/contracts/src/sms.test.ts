@@ -14,6 +14,7 @@ import {
   smsStatusCallbackUrl,
   smsStatusMovesForward,
   TwilioInboundSmsSchema,
+  TwilioStatusCallbackSchema,
   type SmsDeliveryStatus,
 } from './sms.js';
 
@@ -58,6 +59,21 @@ describe('GSM-7 text and segments (AC-X-63)', () => {
   it('counts an extension character as two septets', () => {
     expect(smsSegments('€'.repeat(80))).toEqual({ encoding: 'gsm7', units: 160, segments: 1 });
     expect(smsSegments(`${'€'.repeat(80)}a`).segments).toBe(2);
+  });
+
+  it('never splits a character between parts', () => {
+    // 152 + the euro's 2 septets doesn't fit 153: the euro starts the second part.
+    expect(smsSegments(`${'a'.repeat(152)}€${'a'.repeat(152)}`)).toEqual({
+      encoding: 'gsm7',
+      units: 306,
+      segments: 3,
+    });
+    // The same for an emoji's two units in UCS-2.
+    expect(smsSegments(`${'✂'.repeat(66)}💈${'✂'.repeat(66)}`)).toEqual({
+      encoding: 'ucs2',
+      units: 134,
+      segments: 3,
+    });
   });
 
   it('counts UCS-2 at 70 alone and 67 a part, an emoji as two units', () => {
@@ -165,6 +181,10 @@ describe('the keyword replies and consent wording', () => {
     expect(text).toContain('Msg & data rates may apply');
     expect(text).toContain('Not required to book');
     expect(Object.keys(SMS_CONSENT_WORDING)).toEqual(['sms-consent-v1']);
+    // `$` in a name is the name's own, never a replacement pattern.
+    expect(smsConsentText('sms-consent-v1', "Nails $$ More $& $'")).toContain(
+      "from Nails $$ More $& $' at this number",
+    );
   });
 });
 
@@ -189,6 +209,25 @@ describe('delivery status (AC-X-62)', () => {
     for (const [current, next, expected] of moves) {
       expect(smsStatusMovesForward(current, next)).toBe(expected);
     }
+  });
+});
+
+describe('TwilioStatusCallbackSchema', () => {
+  const report = {
+    MessageSid: `SM${'a'.repeat(32)}`,
+    AccountSid: `AC${'b'.repeat(32)}`,
+    MessageStatus: 'delivered',
+  };
+
+  it('reads the error code as a number, and none or 0 as no error', () => {
+    expect(TwilioStatusCallbackSchema.parse({ ...report, ErrorCode: '30003' }).ErrorCode).toBe(
+      30003,
+    );
+    expect(TwilioStatusCallbackSchema.parse({ ...report, ErrorCode: '0' }).ErrorCode).toBeNull();
+    expect(TwilioStatusCallbackSchema.parse(report).ErrorCode).toBeNull();
+    expect(TwilioStatusCallbackSchema.safeParse({ ...report, ErrorCode: '1e3' }).success).toBe(
+      false,
+    );
   });
 });
 

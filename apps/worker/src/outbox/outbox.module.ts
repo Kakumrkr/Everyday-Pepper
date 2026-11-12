@@ -30,7 +30,7 @@ export interface OutboxOptions {
   pusher?: Pusher | null;
   /** Writes episodes (S31); `null` or absent: no OpenAI here, so the api queues none. */
   episodes?: EpisodeWriter | null;
-  /** Sends texts (S61, ADR-0065); `null` or absent: SMS is off, queued texts wait. */
+  /** Sends texts (S61, ADR-0065); `null` or absent: SMS is off, a queued text retries, then gives up. */
   sms?: SmsSender | null;
   /** The web app's origin for Twilio's signed delivery reports; `null` or absent: none. */
   smsStatusBaseUrl?: string | null;

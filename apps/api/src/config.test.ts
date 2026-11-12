@@ -191,7 +191,7 @@ describe('loadApiConfig', () => {
       }).smsWebhook,
     ).toEqual({ accountSid: account, authToken: token });
     expect(() => loadApiConfig({ ...required, SMS_PROVIDER: 'twilio' })).toThrow(
-      /^Invalid api environment: SMS_PROVIDER$/,
+      /^Invalid api environment: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER$/,
     );
   });
 });

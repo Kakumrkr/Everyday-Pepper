@@ -32,6 +32,8 @@ export interface NewSmsConsent {
   /** The member, for texts to themselves (`member_settings`). */
   userId?: string | null;
   wordingVersion: SmsConsentWordingVersion;
+  /** The words as shown (`smsConsentText`), the business's name in them. */
+  shownText: string;
   givenAt: Date;
 }
 
@@ -55,6 +57,7 @@ export async function insertSmsConsent(
         input.clientId === undefined || input.clientId === null ? null : Id.parse(input.clientId),
       userId: input.userId === undefined || input.userId === null ? null : Id.parse(input.userId),
       wordingVersion: SmsConsentWordingVersionSchema.parse(input.wordingVersion),
+      shownText: z.string().min(20).max(600).parse(input.shownText),
       givenAt: input.givenAt,
     })
     .returning({ id: smsConsents.id });
@@ -103,6 +106,7 @@ export async function listSmsConsentsForExport(tx: TenantTx): Promise<
     source: string;
     clientId: string | null;
     wordingVersion: string;
+    shownText: string;
     givenAt: Date;
     revokedAt: Date | null;
   }[]
@@ -114,6 +118,7 @@ export async function listSmsConsentsForExport(tx: TenantTx): Promise<
       source: smsConsents.source,
       clientId: smsConsents.clientId,
       wordingVersion: smsConsents.wordingVersion,
+      shownText: smsConsents.shownText,
       givenAt: smsConsents.givenAt,
       revokedAt: smsConsents.revokedAt,
     })

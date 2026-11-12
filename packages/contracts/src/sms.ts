@@ -23,16 +23,16 @@ const GSM7_BASIC = new Set(
 );
 const GSM7_EXTENSION = new Set('^{}\\[~]|€\f');
 
-/**
- * Characters that look the same as a GSM-7 one (S61 top-up, AC-X-63): typed by phones and word
- * processors, or written by the AI. Left alone, one of them makes the whole text UCS-2, which
- * fits 70 characters a segment instead of 160.
- */
 /** A regular expression matching any one of the characters with these code points. */
 function anyOf(...codePoints: number[]): RegExp {
   return new RegExp(codePoints.map((code) => String.fromCodePoint(code)).join('|'), 'g');
 }
 
+/**
+ * Characters that look the same as a GSM-7 one (S61 top-up, AC-X-63): typed by phones and word
+ * processors, or written by the AI. Left alone, one of them makes the whole text UCS-2, which
+ * fits 70 characters a segment instead of 160.
+ */
 const PLAIN_FORMS: readonly [RegExp, string][] = [
   // Curly and prime single quotes, the grave and acute accents alone.
   [anyOf(0x2018, 0x2019, 0x201a, 0x201b, 0x2032, 0x60, 0xb4), "'"],
@@ -66,29 +66,47 @@ export interface SmsSegments {
 }
 
 /**
- * How a text is encoded and how many segments it takes: 160 GSM-7 septets alone, 153 a part
- * when split; 70 UTF-16 units alone, 67 a part (an emoji is two units), as carriers bill it.
+ * How a text is encoded and how many segments it takes, as carriers bill it: 160 GSM-7 septets
+ * alone, 153 a part when split; 70 UTF-16 units alone, 67 a part. A character is never split
+ * between parts (an extension character's two septets, an emoji's two units), so a part may hold
+ * one fewer.
  */
 export function smsSegments(text: string): SmsSegments {
-  let septets = 0;
-  let gsm = true;
-  for (const char of text) {
-    if (GSM7_BASIC.has(char)) septets += 1;
-    else if (GSM7_EXTENSION.has(char)) septets += 2;
-    else {
-      gsm = false;
-      break;
+  // Code points, as carriers count them (not graphemes: a carrier may split a ZWJ emoji).
+  const chars = Array.from(text);
+  const septets: number[] = [];
+  for (const char of chars) {
+    if (GSM7_BASIC.has(char)) septets.push(1);
+    else if (GSM7_EXTENSION.has(char)) septets.push(2);
+    else break;
+  }
+  if (septets.length === chars.length) return packed('gsm7', septets, 160, 153);
+  return packed(
+    'ucs2',
+    chars.map((char) => char.length),
+    70,
+    67,
+  );
+}
+
+function packed(
+  encoding: SmsSegments['encoding'],
+  costs: readonly number[],
+  alone: number,
+  part: number,
+): SmsSegments {
+  const units = costs.reduce((sum, cost) => sum + cost, 0);
+  if (units <= alone) return { encoding, units, segments: 1 };
+  let segments = 1;
+  let used = 0;
+  for (const cost of costs) {
+    if (used + cost > part) {
+      segments += 1;
+      used = 0;
     }
+    used += cost;
   }
-  if (gsm) {
-    return {
-      encoding: 'gsm7',
-      units: septets,
-      segments: septets <= 160 ? 1 : Math.ceil(septets / 153),
-    };
-  }
-  const units = text.length;
-  return { encoding: 'ucs2', units, segments: units <= 70 ? 1 : Math.ceil(units / 67) };
+  return { encoding, units, segments };
 }
 
 /** The most segments one text may take: a reminder with its link fits in two. */
@@ -207,7 +225,9 @@ export const SMS_CONSENT_WORDING_CURRENT: SmsConsentWordingVersion = 'sms-consen
 
 /** The consent wording with the business's name in it. */
 export function smsConsentText(version: SmsConsentWordingVersion, business: string): string {
-  return SMS_CONSENT_WORDING[version].replace('{business}', business.trim());
+  // A function, so `$` in a name ("Nails $$ More") is never read as a replacement pattern.
+  const name = business.trim();
+  return SMS_CONSENT_WORDING[version].replace('{business}', () => name);
 }
 
 /**
@@ -264,9 +284,8 @@ export function smsDeliveryStatusOf(twilioStatus: string): SmsDeliveryStatus | n
 /** Twilio's error for a recipient who replied STOP to it: the number is opted out (AC-X-59). */
 export const TWILIO_UNSUBSCRIBED_RECIPIENT = 21610;
 
-const TwilioSid = (prefix: string) => z.string().regex(new RegExp(`^${prefix}[0-9a-fA-F]{32}$`));
 /** A Twilio account id (`AC` and 32 hex digits). */
-export const TwilioAccountSidSchema = TwilioSid('AC');
+export const TwilioAccountSidSchema = z.string().regex(/^AC[0-9a-fA-F]{32}$/);
 /** A Twilio message id (`SM` or `MM`, and 32 hex digits). */
 export const TwilioMessageSidSchema = z.string().regex(/^(SM|MM)[0-9a-fA-F]{32}$/);
 
@@ -288,10 +307,12 @@ export const TwilioStatusCallbackSchema = z.object({
   MessageSid: TwilioMessageSidSchema,
   AccountSid: TwilioAccountSidSchema,
   MessageStatus: z.string().max(30),
+  // A number, or `null` without one (Twilio may send none, or `0`, for no error).
   ErrorCode: z
     .string()
     .regex(/^\d{1,6}$/)
-    .optional(),
+    .optional()
+    .transform((value) => (value === undefined || Number(value) === 0 ? null : Number(value))),
 });
 export type TwilioStatusCallback = z.infer<typeof TwilioStatusCallbackSchema>;
 

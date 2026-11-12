@@ -4,8 +4,6 @@ import {
   MAX_IMPORT_ROWS,
   formatDate,
   localTimeLabel,
-  SmsConsentWordingVersionSchema,
-  smsConsentText,
   toZoned,
   type BusinessExportCounts,
 } from '@pepper/contracts';
@@ -19,12 +17,6 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 
 /** Written only when the business has consent records (S61). */
 const SMS_CONSENTS_FILE = 'text-consents.json';
-
-/** The words a consent was given to, as shown; a version this build doesn't know, by its name. */
-function wordingOf(version: string, business: string): string {
-  const known = SmsConsentWordingVersionSchema.safeParse(version);
-  return known.success ? smsConsentText(known.data, business) : version;
-}
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -304,7 +296,8 @@ export function buildBusinessExport(
           clientId: consent.clientId,
           phone: consent.phone,
           how: consent.source === 'booking_page' ? 'booking page' : 'a team member, for themselves',
-          words: wordingOf(consent.wordingVersion, data.business.name),
+          words: consent.shownText,
+          wordingVersion: consent.wordingVersion,
           givenAt: at(consent.givenAt),
           revokedAt: consent.revokedAt === null ? null : at(consent.revokedAt),
         })),

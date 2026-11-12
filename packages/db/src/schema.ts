@@ -3186,8 +3186,8 @@ function smsPhone(column: SQLWrapper): SQL {
 /**
  * A person's consent to the business's texts (S61, ADR-0065 §3, §7): the business's TCPA record of
  * when, how (`booking_page`: a client ticked the box; `member_settings`: a member, for texts to
- * themselves) and which wording (`SMS_CONSENT_WORDING`, never edited in place). At most one is
- * active a number; a new one replaces it, a revoked one stays as the record. Delivery checks it at
+ * themselves) and which wording (`SMS_CONSENT_WORDING`, never edited in place), with the words
+ * as shown (the business's name in them, as it was then). At most one is active a number; a new one replaces it, a revoked one stays as the record. Delivery checks it at
  * send time. In the export; removed with the business, and with a client who is forgotten.
  */
 export const smsConsents = pgTable(
@@ -3203,6 +3203,8 @@ export const smsConsents = pgTable(
     clientId: uuid('client_id'),
     userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
     wordingVersion: text('wording_version').notNull(),
+    // The words as shown, the business's name in them: what the person agreed to, even after a rename.
+    shownText: text('shown_text').notNull(),
     givenAt: timestamp('given_at', { withTimezone: true }).notNull(),
     revokedAt: timestamp('revoked_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
@@ -3226,6 +3228,7 @@ export const smsConsents = pgTable(
       'sms_consents_wording_format',
       sql`${table.wordingVersion} ~ '^sms-consent-v[0-9]{1,3}$'`,
     ),
+    check('sms_consents_shown_text_length', sql`length(${table.shownText}) BETWEEN 20 AND 600`),
     check(
       'sms_consents_revoked_after_given',
       sql`${table.revokedAt} IS NULL OR ${table.revokedAt} >= ${table.givenAt}`,

@@ -7,6 +7,7 @@ import {
 } from '@pepper/contracts';
 import {
   createTenant,
+  findActiveSmsConsent,
   findOutboxMessage,
   findSmsDelivery,
   insertClient,
@@ -279,6 +280,15 @@ describe('consent (AC-X-58)', () => {
       'sms.consent_given',
     ]);
     expect(JSON.stringify(entries)).not.toContain(phone);
+  });
+
+  it('keeps the words as shown, with the business’s name then (ADR-0065 §7)', async () => {
+    const phone = newPhone();
+    await consentFor(fade, phone);
+    const consent = await withTenant(db, fade, (tx) => findActiveSmsConsent(tx, phone));
+    expect(consent?.shownText).toBe(
+      'Text me appointment confirmations and reminders from Fade Bros at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+    );
   });
 
   it('says a number Pepper can’t text is not textable', async () => {

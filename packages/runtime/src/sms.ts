@@ -27,8 +27,8 @@ const ErrorSchema = z.object({ code: z.number().int().min(1).max(999_999) });
 /**
  * Whether Twilio refused the text for good: a bad request about this text (400: an invalid or
  * unsubscribed number, a body it won't send) or a resource it doesn't have (404). Throttling
- * (429), its own trouble (5xx) and our credentials (401, 403: the alert after the last attempt
- * says so, and texts wait instead of being lost) are tried again.
+ * (429), its own trouble (5xx) and our credentials (401, 403) are tried again with backoff, for
+ * about two hours: a passing problem loses no text, and the alert after the last attempt says so.
  */
 function isPermanent(status: number): boolean {
   return status === 400 || status === 404;

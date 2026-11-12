@@ -194,6 +194,8 @@ export interface BusinessExportData {
     source: string;
     clientId: string | null;
     wordingVersion: string;
+    /** The words as shown when it was given. */
+    shownText: string;
     givenAt: Date;
     revokedAt: Date | null;
   }[];

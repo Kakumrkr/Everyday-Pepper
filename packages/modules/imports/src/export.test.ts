@@ -227,6 +227,9 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               source: 'booking_page',
               clientId: CLIENT,
               wordingVersion: 'sms-consent-v1',
+              // As shown then, before the business was renamed.
+              shownText:
+                'Text me appointment confirmations and reminders from Plum Salon at this number.',
               givenAt: AT,
               revokedAt: null,
             },
@@ -235,7 +238,8 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               phone: '+15552340002',
               source: 'member_settings',
               clientId: null,
-              wordingVersion: 'sms-consent-v0',
+              wordingVersion: 'sms-consent-v1',
+              shownText: 'Text me reminders from Plum Salon at this number, for a member.',
               givenAt: AT,
               revokedAt: AT,
             },
@@ -254,10 +258,15 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       revokedAt: null,
     });
     expect(files['README.txt']).toContain('text-consents.json  Who agreed to your texts');
-    expect(String(consents[0]?.['words'])).toContain('reminders from ');
-    expect(String(consents[0]?.['words'])).not.toContain('{business}');
-    // A version this build doesn't know is named, not guessed.
-    expect(consents[1]).toMatchObject({ words: 'sms-consent-v0', revokedAt: AT.toISOString() });
+    // The words as shown, whatever the business is called now.
+    expect(consents[0]).toMatchObject({
+      words: 'Text me appointment confirmations and reminders from Plum Salon at this number.',
+      wordingVersion: 'sms-consent-v1',
+    });
+    expect(consents[1]).toMatchObject({
+      how: 'a team member, for themselves',
+      revokedAt: AT.toISOString(),
+    });
   });
 
   it('puts each sent screenshot next to support.json, named on its message (AC-X-31)', () => {

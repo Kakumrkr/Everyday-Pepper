@@ -199,6 +199,15 @@ describe('POST /v1/webhooks/sms/status (AC-X-62)', () => {
     );
   });
 
+  it('records a report with ErrorCode 0 as no error', async () => {
+    const body = report({ MessageStatus: 'delivered', ErrorCode: '0' });
+    await post(path, body, signature(path, body)).expect(200);
+    expect(core.recordSmsStatus).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({ errorCode: null }),
+    );
+  });
+
   it('refuses a query changed after signing, or one that names no business', async () => {
     const body = report();
     const otherTenant = `/v1/webhooks/sms/status?t=0199f4b2-7c1e-7a00-8000-0000000000ff&m=${MESSAGE}`;

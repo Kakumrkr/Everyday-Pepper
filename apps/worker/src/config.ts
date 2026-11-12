@@ -84,7 +84,10 @@ export interface WorkerConfig extends ServiceConfig {
   storage: StorageConfig | null;
   /** `null`: no VAPID keys, so pushes are not sent (the api then queues none, ADR-0026). */
   push: PushConfig | null;
-  /** Texts (S61, ADR-0065): Twilio or the sandbox; `null` with SMS off (queued texts wait). */
+  /**
+   * Texts (S61, ADR-0065): Twilio or the sandbox; `null` with SMS off, so a queued text retries
+   * and then gives up with an alert, as a push does without VAPID keys (callers check first).
+   */
   sms: SmsConfig | null;
   /**
    * The web app's origin (`AUTH_BASE_URL`), where Twilio reports each text's delivery; `null`

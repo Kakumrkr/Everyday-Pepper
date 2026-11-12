@@ -201,68 +201,53 @@ export function loadPushPublicKey(service: NestServiceName, env: NodeJS.ProcessE
   return loadEnv(service, PushPublicKeyEnvSchema, present).VAPID_PUBLIC_KEY ?? null;
 }
 
-const SmsEnvSchema = z
-  .object({
-    /**
-     * Where texts go (S61, ADR-0065 §1): `off` (the default: SMS isn't offered and queued texts
-     * wait), `sandbox` (kept in the worker's memory and logged masked; nothing leaves the
-     * machine), or `twilio`.
-     */
-    SMS_PROVIDER: z.enum(['off', 'sandbox', 'twilio']).default('off'),
-    /** The Twilio account (`AC` and 32 hex digits). */
-    TWILIO_ACCOUNT_SID: z
-      .string()
-      .regex(/^AC[0-9a-fA-F]{32}$/, 'Use the AC… account SID Twilio shows')
-      .optional(),
-    /** Its auth token: signs the API calls and Twilio's webhooks. A secret; never logged. */
-    TWILIO_AUTH_TOKEN: z
-      .string()
-      .regex(/^[0-9a-fA-F]{32}$/, 'Use the 32-character auth token Twilio shows')
-      .optional(),
-    /** What texts are sent from: a Messaging Service (`MG…`, preferred) or a `+1` number. */
-    TWILIO_SENDER: z
-      .string()
-      .regex(
-        /^(MG[0-9a-fA-F]{32}|\+1[2-9]\d{9})$/,
-        'Use an MG… Messaging Service SID or a +1 number',
-      )
-      .optional(),
-  })
-  .refine(
-    (env) =>
-      env.SMS_PROVIDER !== 'twilio' ||
-      (env.TWILIO_ACCOUNT_SID !== undefined &&
-        env.TWILIO_AUTH_TOKEN !== undefined &&
-        env.TWILIO_SENDER !== undefined),
-    {
-      message: 'SMS_PROVIDER=twilio needs TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_SENDER',
-      path: ['SMS_PROVIDER'],
-    },
-  );
+const TWILIO_ACCOUNT_SID = z
+  .string()
+  .regex(/^AC[0-9a-fA-F]{32}$/, 'Use the AC… account SID Twilio shows');
+const TWILIO_AUTH_TOKEN = z
+  .string()
+  .regex(/^[0-9a-fA-F]{32}$/, 'Use the 32-character auth token Twilio shows');
+const TWILIO_SENDER = z
+  .string()
+  .regex(/^(MG[0-9a-fA-F]{32}|\+1[2-9]\d{9})$/, 'Use an MG… Messaging Service SID or a +1 number');
+
+const SmsEnvSchema = z.object({
+  /**
+   * Where texts go (S61, ADR-0065 §1): `off` (the default: SMS isn't offered; a text queued
+   * anyway retries, then gives up with an alert), `sandbox` (kept in the worker's memory and
+   * logged masked; nothing leaves the machine), or `twilio`.
+   */
+  SMS_PROVIDER: z.enum(['off', 'sandbox', 'twilio']).default('off'),
+});
+
+/** With `SMS_PROVIDER=twilio`, every one is required. */
+const TwilioEnvSchema = z.object({
+  /** The Twilio account (`AC` and 32 hex digits). */
+  TWILIO_ACCOUNT_SID,
+  /** Its auth token: signs the API calls and Twilio's webhooks. A secret; never logged. */
+  TWILIO_AUTH_TOKEN,
+  /** What texts are sent from: a Messaging Service (`MG…`, preferred) or a `+1` number. */
+  TWILIO_SENDER,
+});
 
 export type SmsConfig =
   | { provider: 'sandbox' }
   | { provider: 'twilio'; accountSid: string; authToken: string; sender: string };
 
-/** Reads the SMS settings; `null` when SMS is off. Never log it: it carries the auth token. */
+/**
+ * Reads the SMS settings; `null` when SMS is off. With Twilio, a missing or malformed key stops
+ * the process naming it. Never log the result: it carries the auth token.
+ */
 export function loadSmsConfig(service: NestServiceName, env: NodeJS.ProcessEnv): SmsConfig | null {
   const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
-  const sms = loadEnv(service, SmsEnvSchema, present);
-  if (sms.SMS_PROVIDER === 'off') return null;
-  if (sms.SMS_PROVIDER === 'sandbox') return { provider: 'sandbox' };
-  const { TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER } = sms;
-  // Checked by the refinement above; repeated for the type.
-  if (
-    TWILIO_ACCOUNT_SID === undefined ||
-    TWILIO_AUTH_TOKEN === undefined ||
-    TWILIO_SENDER === undefined
-  ) {
-    throw new Error(`Invalid ${service} environment: SMS_PROVIDER`);
-  }
+  const { SMS_PROVIDER } = loadEnv(service, SmsEnvSchema, present);
+  if (SMS_PROVIDER === 'off') return null;
+  if (SMS_PROVIDER === 'sandbox') return { provider: 'sandbox' };
+  const twilio = loadEnv(service, TwilioEnvSchema, present);
   return {
     provider: 'twilio',
-    accountSid: TWILIO_ACCOUNT_SID,
-    authToken: TWILIO_AUTH_TOKEN,
-    sender: TWILIO_SENDER,
+    accountSid: twilio.TWILIO_ACCOUNT_SID,
+    authToken: twilio.TWILIO_AUTH_TOKEN,
+    sender: twilio.TWILIO_SENDER,
   };
 }

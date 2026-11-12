@@ -739,6 +739,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
         source: 'booking_page',
         clientId,
         wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
         givenAt: new Date(),
       });
       return id;
@@ -1209,6 +1210,8 @@ async function idWhere(tx: TenantTx, table: string, column: string, value: strin
   return String(rows[0]?.id);
 }
 
+/** The words as shown, as core records them (`smsConsentText`). */
+const SHOWN = 'Text me appointment confirmations and reminders from A at this number.';
 let database: TestDatabase;
 let db: Database;
 let tenantA: TenantId;

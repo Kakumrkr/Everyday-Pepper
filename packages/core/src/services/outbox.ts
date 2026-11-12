@@ -18,7 +18,7 @@ import {
 } from '@pepper/contracts';
 import {
   addUsage,
-  cancelPendingOutboxEmails,
+  cancelPendingEmailsAndTexts,
   claimOutboxMessage,
   findCurrentTenant,
   findCurrentTenantDeletion,
@@ -184,10 +184,10 @@ export async function deliverOutboxMessage(
   const claimedAt = options.clock.now();
   const leaseUntil = new Date(claimedAt.getTime() + (options.leaseMs ?? OUTBOX_LEASE_MS));
   const claimed = await withTenant(db, tenantId, async (tx) => {
-    // A business being deleted sends no more email (S51.2, ADR-0054): it is taken back.
+    // A business being deleted sends no more email or texts (S51.2, ADR-0054; S61): taken back.
     if (
       (await findCurrentTenantDeletion(tx)) !== null &&
-      (await cancelPendingOutboxEmails(tx, claimedAt, { id })) > 0
+      (await cancelPendingEmailsAndTexts(tx, claimedAt, { id })) > 0
     ) {
       return 'cancelled' as const;
     }
@@ -265,16 +265,18 @@ export async function deliverOutboxMessage(
     }
     if (text?.kind === 'sent') {
       const { accepted } = text;
+      // Kept in range, so nothing after the provider accepted the text can fail and resend it.
+      const segments = Math.min(10, Math.max(1, Math.round(accepted.segments) || 1));
       await insertSmsDelivery(tx, {
         id,
         provider: accepted.provider,
         providerMessageId: accepted.providerMessageId,
-        segments: accepted.segments,
+        segments,
         status: accepted.status,
       });
       await addUsage(tx, {
         metric: 'sms_segments',
-        amount: accepted.segments,
+        amount: segments,
         period: usagePeriodOf(sentAt),
       });
     }
