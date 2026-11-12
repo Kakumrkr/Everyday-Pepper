@@ -11,7 +11,7 @@ How to run the monorepo locally and how work reaches `main`. Keep this file in s
 | Command | What it does |
 |---|---|
 | `pnpm install` | Install all workspace dependencies |
-| `pnpm check` | Everything CI runs: format check → lint → typecheck → tests with coverage gate → build |
+| `pnpm check` | Everything CI's check job runs: format check and lint beside one Turborepo run of typecheck, tests with the coverage gate and build (`scripts/check.mjs`); prettier, ESLint and Turborepo cache their results, so a second run in the same session checks only what changed |
 | `pnpm lint` / `pnpm lint:fix` | ESLint over the whole repo (zero warnings allowed) |
 | `pnpm format` / `pnpm format:check` | Prettier |
 | `pnpm typecheck` | `tsc` per package (Turborepo) |
