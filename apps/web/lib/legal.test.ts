@@ -2,6 +2,7 @@ import {
   aiDisclosureSentence,
   PRIVACY_AI_SECTION,
   PRIVACY_PATH,
+  SMS_AI_DISCLOSURE_LEAD,
   SMS_TERMS_SECTION,
 } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
@@ -100,6 +101,8 @@ describe('the AI section the emails link to (AC-X-56)', () => {
     expect(ai.blocks[1]).toEqual({ kind: 'quote', text: aiDisclosureSentence('[the business]') });
     expect(ai.text).toMatch(/never sees your email address or phone number/);
     expect(ai.text).toMatch(/unsubscribe/);
+    // Texts carry their own line (S61.2, AC-X-69), quoted as they read.
+    expect(ai.text).toContain(`its last line starts “${SMS_AI_DISCLOSURE_LEAD}”`);
   });
 
   it('is linked from the terms', () => {

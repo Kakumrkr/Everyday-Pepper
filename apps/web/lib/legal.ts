@@ -1,6 +1,7 @@
 import {
   aiDisclosureSentence,
   PRIVACY_AI_SECTION,
+  SMS_AI_DISCLOSURE_LEAD,
   SMS_TERMS_SECTION,
   PRIVACY_PATH,
   TERMS_PATH,
@@ -131,6 +132,9 @@ export const PRIVACY: LegalDocument = {
         quote(DISCLOSURE_AS_QUOTED),
         p(
           'It means the business used Pepper’s AI to put that email’s words together: either an invitation to come back, written from a few facts (your first name, the service, when you last visited and who usually looks after you), or a note the business asked it to send you. The business chose to send it, and any times and links in it come from the business’s own calendar, not from the AI. The AI never sees your email address or phone number.',
+        ),
+        p(
+          `A text whose words the AI wrote says so too: its last line starts “${SMS_AI_DISCLOSURE_LEAD}” and links here.`,
         ),
         list(
           'Don’t want invitations like it? Each has an unsubscribe link at the bottom, and one tap stops them all from that business. A note about your appointment comes straight from the business: reply to it, or ask them.',
@@ -337,7 +341,7 @@ export const TERMS: LegalDocument = {
         list(
           'Pepper’s assistant uses an AI model to suggest and prepare work. It can be wrong. You choose what it may do without asking you; anything that reaches a client asks first unless you choose otherwise.',
           'Every action it takes is recorded with its reason, and most can be undone. You are responsible for the messages and bookings you approve or allow it to make.',
-          'An email to a client whose words the AI wrote says so in one line, with a link to how Pepper works. You agree not to remove or hide it.',
+          'An email or text to a client whose words the AI wrote says so in one line, with a link to how Pepper works. You agree not to remove or hide it.',
           'Don’t use the assistant for medical, legal or financial advice, or to send anything unlawful.',
         ),
         link('How the assistant handles information', `${PRIVACY_PATH}#${PRIVACY_AI_SECTION}`),

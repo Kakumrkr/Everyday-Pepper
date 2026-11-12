@@ -3,6 +3,7 @@ import {
   ClientIdSchema,
   MemoryFactsResponseSchema,
   ClientSchema,
+  ClientTextsSchema,
   ServicesResponseSchema,
   StaffResponseSchema,
   type Booking,
@@ -25,6 +26,7 @@ import { localDateIn, splitVisits, visitRanges } from '../../../../lib/setup';
 import { NewBooking } from '../../../_components/booking/new-booking';
 import { ClientActions } from '../../../_components/clients/client-actions';
 import { ClientEditor } from '../../../_components/clients/client-editor';
+import { ClientTextsSection } from '../../../_components/clients/client-texts';
 import { ClientMemory } from '../../../_components/memory/client-memory';
 import { currentAccount, currentBusiness, currentJson } from '../../../_server/account';
 
@@ -42,7 +44,8 @@ const SOURCES: Record<RecordSource, string> = {
  * A client's profile (S16): how to reach them, what Pepper knows about them and their visit
  * notes (S32), their coming and recent visits (62 days each way), Book, and, for owners and
  * managers, editing their details (tags and birthday too, S50, AC-W1-32) and, at the foot,
- * merging and deleting them (ADR-0051, AC-W1-30, AC-W1-31). `?book=1` opens Book at once,
+ * merging and deleting them (ADR-0051, AC-W1-30, AC-W1-31); where their texts stand, with the
+ * words they agreed to (S61.2, AC-X-66). `?book=1` opens Book at once,
  * with `service` and `staff` chosen when bookable ("Book again", AC-W1-33). Staff reach only their own clients and see only their own
  * visits with them (AC-W9-1, decided by the api). On the kit (S42): initials and the name as
  * the title, then quiet sections of hairline rows; the empty ones say what to do next.
@@ -72,7 +75,7 @@ export default async function ClientPage({
       BookingsResponseSchema,
     );
   const readsNotes = current.permissions.includes('client_notes.read');
-  const [client, past, upcoming, services, staff, memory] = await Promise.all([
+  const [client, past, upcoming, services, staff, memory, texts] = await Promise.all([
     currentJson(`/v1/clients/${id.data}`, ClientSchema),
     bookingsOf(ranges.past),
     bookingsOf(ranges.upcoming),
@@ -84,6 +87,7 @@ export default async function ClientPage({
           MemoryFactsResponseSchema,
         )
       : Promise.resolve(null),
+    currentJson(`/v1/clients/${id.data}/texts`, ClientTextsSchema),
   ]);
   // Unknown, another business's, or (staff) not theirs: the api answers 404 alike.
   if (client === null) notFound();
@@ -210,6 +214,20 @@ export default async function ClientPage({
           </div>
         )}
       </section>
+
+      {texts === null ? (
+        <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
+          I couldn’t check {client.name}’s texts. Try again in a moment.
+        </p>
+      ) : (
+        <ClientTextsSection
+          clientId={id.data}
+          clientName={client.name}
+          initial={texts}
+          timeZone={timeZone}
+          hasPhone={client.phone !== null}
+        />
+      )}
 
       {!readsNotes ? null : memory === null ? (
         <p role="alert" className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">

@@ -3,6 +3,9 @@ import {
   classifySmsKeyword,
   normalizeSmsText,
   OutboxSmsSchema,
+  SMS_AI_DISCLOSURE_LEAD,
+  smsAiDisclosure,
+  smsWithAiDisclosure,
   SMS_CONSENT_WORDING,
   SMS_MAX_SEGMENTS,
   smsConsentText,
@@ -110,6 +113,51 @@ describe('GSM-7 text and segments (AC-X-63)', () => {
     expect(
       OutboxSmsSchema.safeParse({ to: '+15551234567', body: 'x', from: '+15550000000' }).success,
     ).toBe(false);
+  });
+});
+
+describe('the AI disclosure in texts (S61.2, AC-X-69)', () => {
+  const BASE = 'https://app.example.com/';
+  const words = 'Hi Sam, it has been 6 weeks since your cut with Jess. Want me to find you a time?';
+
+  it('ends a text in the AI’s words with the line and the privacy policy’s AI section', () => {
+    const body = smsWithAiDisclosure(`${words}  `, BASE);
+    expect(body).toBe(`${words}\nWritten with AI help: https://app.example.com/privacy#ai`);
+    expect(smsAiDisclosure(BASE)).toMatch(new RegExp(`^${SMS_AI_DISCLOSURE_LEAD} https://`));
+    const sms = OutboxSmsSchema.parse({ to: '+15551234567', body, wordsBy: 'ai' });
+    expect(sms.body).toBe(body);
+    expect(smsSegments(body)).toMatchObject({ encoding: 'gsm7', segments: 1 });
+  });
+
+  it('refuses a text in the AI’s words without the line, or with it anywhere but last', () => {
+    const line = smsAiDisclosure(BASE);
+    for (const body of [
+      words,
+      `${line}\n${words}`,
+      `${words}\nWritten with AI help: http://x/privacy#ai`,
+    ]) {
+      const result = OutboxSmsSchema.safeParse({ to: '+15551234567', body, wordsBy: 'ai' });
+      expect(result.success).toBe(false);
+      expect(result.error?.issues[0]?.path).toEqual(['body']);
+    }
+  });
+
+  it('counts the line in the segments: AI words near the limit with it are refused', () => {
+    const long = 'a'.repeat(153 * SMS_MAX_SEGMENTS - 10);
+    expect(OutboxSmsSchema.safeParse({ to: '+15551234567', body: long }).success).toBe(true);
+    expect(
+      OutboxSmsSchema.safeParse({
+        to: '+15551234567',
+        body: smsWithAiDisclosure(long, BASE),
+        wordsBy: 'ai',
+      }).success,
+    ).toBe(false);
+  });
+
+  it('carries no line in Pepper’s fixed words', () => {
+    expect(
+      OutboxSmsSchema.parse({ to: '+15551234567', body: 'See you at 4pm.', wordsBy: 'template' }),
+    ).toEqual({ to: '+15551234567', body: 'See you at 4pm.', wordsBy: 'template' });
   });
 });
 

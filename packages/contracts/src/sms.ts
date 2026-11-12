@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
 import { UtcDateTimeSchema } from './time.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
@@ -127,18 +128,48 @@ export const SmsBodySchema = z
       }),
   );
 
+/** How a text whose words the AI wrote says so (S61.2, AC-X-69): it starts its last line. */
+export const SMS_AI_DISCLOSURE_LEAD = 'Written with AI help:';
+
+/** The disclosure's line: the lead and the privacy policy's AI section, absolute. */
+export function smsAiDisclosure(baseUrl: string): string {
+  return `${SMS_AI_DISCLOSURE_LEAD} ${privacyAiUrl(baseUrl)}`;
+}
+
+/** A text in the AI's words with its disclosure as the last line (ADR-0064 for texts). */
+export function smsWithAiDisclosure(body: string, baseUrl: string): string {
+  return `${body.trimEnd()}\n${smsAiDisclosure(baseUrl)}`;
+}
+
+/** Whether a text's last line is the disclosure, linking to the AI section. */
+function endsWithAiDisclosure(body: string): boolean {
+  const last = body.trimEnd().split('\n').at(-1) ?? '';
+  return (
+    last.startsWith(`${SMS_AI_DISCLOSURE_LEAD} `) &&
+    /^https:\/\/\S+$/.test(last.slice(SMS_AI_DISCLOSURE_LEAD.length + 1)) &&
+    last.endsWith(`${PRIVACY_PATH}#${PRIVACY_AI_SECTION}`)
+  );
+}
+
 /**
  * One text, as queued (ADR-0065 §2). Its content is sealed like an email's and cleared once
  * sent. `urgent`: about today's appointment (running late), so the quiet hours don't hold it;
- * set by domain code only, never from a model's arguments.
+ * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69): `ai`
+ * when the AI wrote the words, which then must end with the disclosure (`smsWithAiDisclosure`,
+ * counted in the segments); absent or `template` for Pepper's fixed words.
  */
 export const OutboxSmsSchema = z
   .object({
     to: SmsPhoneSchema,
     body: SmsBodySchema,
     urgent: z.literal(true).optional(),
+    wordsBy: z.enum(['ai', 'template']).optional(),
   })
-  .strict();
+  .strict()
+  .refine((sms) => sms.wordsBy !== 'ai' || endsWithAiDisclosure(sms.body), {
+    path: ['body'],
+    message: 'A text in the AI’s words ends with its disclosure (smsWithAiDisclosure)',
+  });
 export type OutboxSms = z.infer<typeof OutboxSmsSchema>;
 export type OutboxSmsInput = z.input<typeof OutboxSmsSchema>;
 
