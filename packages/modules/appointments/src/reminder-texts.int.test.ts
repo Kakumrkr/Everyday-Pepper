@@ -29,6 +29,7 @@ import {
   findBookingReminder,
   findLastBookingText,
   insertSmsKeywordEvent,
+  listAuditEntries,
   listBookingReminders,
   listDueOutboxMessages,
   newId,
@@ -39,7 +40,9 @@ import {
   type Database,
 } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { changeBooking, createBooking } from './services/bookings.js';
+import { changeBooking, createBooking, listBookings } from './services/bookings.js';
+import { confirmBookingByText } from './services/confirm-by-text.js';
+import { NOTHING_TO_CONFIRM_REPLY } from './texts.js';
 import { replaceWorkingHours } from './services/hours.js';
 import { getManagedBooking, rescheduleManagedBooking } from './services/public-booking.js';
 import { sendDueReminder, sendDueReminders } from './services/reminders.js';
@@ -429,5 +432,131 @@ describe('reminder texts', () => {
       // Written out, never "tomorrow": it went the next morning.
       expect.stringContaining('Reminder: Haircut with Jess on Tue, Nov 3 at 2:00 PM.'),
     ]);
+  });
+});
+
+describe('"C" to confirm (AC-X-74)', () => {
+  /** Maria booked on Tuesday 14:00, her day-before reminder texted on Monday 14:00. */
+  async function reminded(b: Business): Promise<Booking> {
+    await consent(b);
+    const booking = await book(b, at(3, '14:00'));
+    await runAt(b, at(2, '14:00'));
+    expect(b.sms.sent).toHaveLength(1);
+    return booking;
+  }
+
+  it('confirms the reminded booking once, audited, and answers with its time', async () => {
+    const b = await newBusiness();
+    const booking = await reminded(b);
+    const from = consentPhone(b);
+    const first = await confirmBookingByText(db, { from, receivedAt: new Date(at(2, '14:05')) });
+    expect(first).toEqual({
+      outcome: 'confirmed',
+      reply:
+        "Juniper Hair Studio via Pepper: Thanks, you're confirmed for Haircut with Jess on Tue, Nov 3 at 2:00 PM. See you then!",
+    });
+    const [row] = await listBookings(db, b.owner, { from: at(3, '00:00'), to: at(4, '00:00') });
+    expect(row).toMatchObject({ id: booking.id, clientConfirmedAt: at(2, '14:05') });
+    const audit = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 5 }));
+    expect(audit[0]).toMatchObject({
+      action: 'booking.client_confirmed',
+      actor: { kind: 'system' },
+      entity: { type: 'booking', id: booking.id },
+    });
+    expect(JSON.stringify(audit[0])).not.toContain(from);
+    // A second "C" (or Twilio's replay) changes nothing more.
+    const again = await confirmBookingByText(db, { from, receivedAt: new Date(at(2, '15:00')) });
+    expect(again.outcome).toBe('already');
+    expect(again.reply).toContain("You're already confirmed");
+    const audits = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 10 }));
+    expect(audits.filter((e) => e.action === 'booking.client_confirmed')).toHaveLength(1);
+    // The same-day text stops asking.
+    await runAt(b, at(3, '12:00'));
+    expect(b.sms.sent[1]?.body).toContain('See you today at 2:00 PM');
+    expect(b.sms.sent[1]?.body).not.toContain('Reply C');
+  });
+
+  it('answers that there is nothing to confirm: no reminder, a cancelled or a started booking', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    await book(b, at(3, '14:00'));
+    // No reminder has gone yet.
+    expect(
+      await confirmBookingByText(db, {
+        from: consentPhone(b),
+        receivedAt: new Date(at(2, '09:00')),
+      }),
+    ).toEqual({ outcome: 'nothing', reply: NOTHING_TO_CONFIRM_REPLY });
+
+    const c = await newBusiness();
+    const booking = await reminded(c);
+    await changeBooking(db, c.owner, booking.id, { status: 'cancelled' }, { clock: c.clock });
+    expect(
+      (
+        await confirmBookingByText(db, {
+          from: consentPhone(c),
+          receivedAt: new Date(at(2, '15:00')),
+        })
+      ).outcome,
+    ).toBe('nothing');
+
+    const d = await newBusiness();
+    await reminded(d);
+    expect(
+      (
+        await confirmBookingByText(db, {
+          from: consentPhone(d),
+          receivedAt: new Date(at(3, '14:30')),
+        })
+      ).outcome,
+    ).toBe('nothing');
+    expect(
+      await confirmBookingByText(db, { from: 'not a number', receivedAt: new Date() }),
+    ).toEqual({ outcome: 'nothing', reply: null });
+  });
+
+  it('confirms the soonest of two businesses’ reminded bookings on the number', async () => {
+    const a = await newBusiness();
+    const later = await newBusiness();
+    const phone = consentPhone(a);
+    await consent(a, phone);
+    await consent(later, phone);
+    const soon = await book(a, at(3, '14:00'));
+    await book(later, at(3, '16:00'));
+    await runAt(a, at(2, '14:00'));
+    await runAt(later, at(2, '16:00'));
+    const result = await confirmBookingByText(db, {
+      from: phone,
+      receivedAt: new Date(at(2, '16:05')),
+    });
+    expect(result.outcome).toBe('confirmed');
+    const [row] = await listBookings(db, a.owner, { from: at(3, '00:00'), to: at(4, '00:00') });
+    expect(row).toMatchObject({ id: soon.id, clientConfirmedAt: at(2, '16:05') });
+    const [other] = await listBookings(db, later.owner, {
+      from: at(3, '00:00'),
+      to: at(4, '00:00'),
+    });
+    expect(other?.clientConfirmedAt).toBeNull();
+  });
+
+  it('confirms after a STOP but sends no reply', async () => {
+    const b = await newBusiness();
+    await reminded(b);
+    await withSmsInbound(db, (tx) =>
+      insertSmsKeywordEvent(tx, {
+        provider: 'sandbox',
+        eventId: `stop-${newId()}`,
+        phone: consentPhone(b),
+        keyword: 'stop',
+        origin: 'keyword',
+        receivedAt: new Date(at(2, '14:01')),
+      }),
+    );
+    expect(
+      await confirmBookingByText(db, {
+        from: consentPhone(b),
+        receivedAt: new Date(at(2, '14:05')),
+      }),
+    ).toEqual({ outcome: 'confirmed', reply: null });
   });
 });
