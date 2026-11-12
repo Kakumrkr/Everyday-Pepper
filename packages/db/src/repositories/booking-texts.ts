@@ -9,7 +9,7 @@ import {
   type SmsDeliveryStatus,
   type TenantId,
 } from '@pepper/contracts';
-import { and, desc, eq, inArray, isNull, lt, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import {
@@ -119,48 +119,48 @@ export async function findLastBookingText(
   };
 }
 
-/** Stores another reschedule/cancel link of a booking (its token's hash), until `expiresAt`. */
+/** Stores another reschedule/cancel link of a booking (its token's hash). */
 export async function insertBookingManageLink(
   tx: TenantTx,
-  input: { bookingId: BookingId; tokenHash: string; expiresAt: Date; createdAt: Date },
+  input: { bookingId: BookingId; tokenHash: string; createdAt: Date },
 ): Promise<void> {
   await tx.insert(bookingManageLinks).values({
     tokenHash: HashSchema.parse(input.tokenHash),
     bookingId: BookingIdSchema.parse(input.bookingId),
-    expiresAt: input.expiresAt,
     createdAt: input.createdAt,
   });
 }
 
-/**
- * The id of the booking a reminder's link (its token's hash) opens, while the link hasn't
- * expired at `now`.
- */
+/** The id of the booking a reminder's link (its token's hash) opens. */
 export async function findBookingIdByManageLink(
   tx: TenantTx,
   tokenHash: string,
-  now: Date,
 ): Promise<BookingId | undefined> {
   const hash = HashSchema.safeParse(tokenHash);
   if (!hash.success) return undefined;
   const [row] = await tx
     .select({ bookingId: bookingManageLinks.bookingId })
     .from(bookingManageLinks)
-    .where(
-      and(
-        eq(bookingManageLinks.tokenHash, hash.data),
-        sql`${bookingManageLinks.expiresAt} > ${now}`,
-      ),
-    );
+    .where(eq(bookingManageLinks.tokenHash, hash.data));
   return row === undefined ? undefined : BookingIdSchema.parse(row.bookingId);
 }
 
-/** Removes the business's expired reminder links (the clean-up). Returns how many. */
-export async function deleteExpiredBookingManageLinks(tx: TenantTx, now: Date): Promise<number> {
+/**
+ * Removes up to `limit` of the business's reminder links of bookings that started before
+ * `before` (the clean-up passes 30 days ago). Returns how many.
+ */
+export async function deleteOldBookingManageLinks(
+  tx: TenantTx,
+  before: Date,
+  limit: number,
+): Promise<number> {
+  const max = z.number().int().min(1).max(10_000).parse(limit);
   const rows = await tx
     .delete(bookingManageLinks)
-    .where(lt(bookingManageLinks.expiresAt, now))
-    .returning({ hash: bookingManageLinks.tokenHash });
+    .where(
+      sql`${bookingManageLinks.id} IN (SELECT l.id FROM booking_manage_links l JOIN bookings b ON b.tenant_id = l.tenant_id AND b.id = l.booking_id WHERE b.starts_at < ${before} LIMIT ${max})`,
+    )
+    .returning({ id: bookingManageLinks.id });
   return rows.length;
 }
 

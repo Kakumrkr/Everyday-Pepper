@@ -18,7 +18,7 @@ import type { Database } from './client.js';
 import { newId } from './ids.js';
 import { insertService, insertStaffMember } from './repositories/appointments.js';
 import {
-  deleteExpiredBookingManageLinks,
+  deleteOldBookingManageLinks,
   findBookingIdByManageLink,
   findLastBookingText,
   hasReminderText,
@@ -262,43 +262,53 @@ describe('booking texts', () => {
 describe('reminder links', () => {
   const hashOf = (token: string) => createHash('sha256').update(token).digest('hex');
 
-  it('opens the booking through the manage lookup until it expires', async () => {
+  it('opens the booking through the manage lookup, its own business only', async () => {
     const token = randomBytes(32).toString('base64url');
-    const expired = randomBytes(32).toString('base64url');
     const bookingId = await withTenant(db, tenantA, async (tx) => {
       const client = await seedClient(tx);
       const booking = await seedBooking(tx, client, new Date(Date.now() + 48 * HOUR));
       await insertBookingManageLink(tx, {
         bookingId: booking,
         tokenHash: hashOf(token),
-        expiresAt: new Date(Date.now() + 48 * HOUR),
         createdAt: new Date(),
-      });
-      await insertBookingManageLink(tx, {
-        bookingId: booking,
-        tokenHash: hashOf(expired),
-        expiresAt: new Date(Date.now() - 1000),
-        createdAt: new Date(Date.now() - HOUR),
       });
       return booking;
     });
     await withTenant(db, tenantA, async (tx) => {
       expect((await findBookingByManageTokenHash(tx, hashOf(token)))?.id).toBe(bookingId);
       expect((await lockBookingByManageTokenHash(tx, hashOf(token)))?.id).toBe(bookingId);
-      expect(await findBookingIdByManageLink(tx, hashOf(token), new Date())).toBe(bookingId);
-      expect(await findBookingByManageTokenHash(tx, hashOf(expired))).toBeUndefined();
-      expect(await findBookingIdByManageLink(tx, 'not-a-hash', new Date())).toBeUndefined();
+      expect(await findBookingIdByManageLink(tx, hashOf(token))).toBe(bookingId);
+      expect(await findBookingIdByManageLink(tx, 'not-a-hash')).toBeUndefined();
     });
-    // Only the business's own links open its bookings.
     expect(
       await withTenant(db, tenantB, (tx) => findBookingByManageTokenHash(tx, hashOf(token))),
     ).toBeUndefined();
-    expect(
-      await withTenant(db, tenantA, (tx) => deleteExpiredBookingManageLinks(tx, new Date())),
-    ).toBeGreaterThanOrEqual(1);
+  });
+
+  it('cleans up the links of bookings that started before the cut-off', async () => {
+    const old = randomBytes(32).toString('base64url');
+    const upcoming = randomBytes(32).toString('base64url');
     await withTenant(db, tenantA, async (tx) => {
-      expect(await findBookingIdByManageLink(tx, hashOf(expired), new Date(0))).toBeUndefined();
-      expect(await findBookingIdByManageLink(tx, hashOf(token), new Date())).toBe(bookingId);
+      const client = await seedClient(tx);
+      for (const [token, startsAt] of [
+        [old, new Date(Date.now() - 40 * 24 * HOUR)],
+        [upcoming, new Date(Date.now() + 48 * HOUR)],
+      ] as const) {
+        await insertBookingManageLink(tx, {
+          bookingId: await seedBooking(tx, client, startsAt),
+          tokenHash: hashOf(token),
+          createdAt: new Date(),
+        });
+      }
+    });
+    expect(
+      await withTenant(db, tenantA, (tx) =>
+        deleteOldBookingManageLinks(tx, new Date(Date.now() - 30 * 24 * HOUR), 100),
+      ),
+    ).toBe(1);
+    await withTenant(db, tenantA, async (tx) => {
+      expect(await findBookingIdByManageLink(tx, hashOf(old))).toBeUndefined();
+      expect(await findBookingIdByManageLink(tx, hashOf(upcoming))).toBeDefined();
     });
   });
 });

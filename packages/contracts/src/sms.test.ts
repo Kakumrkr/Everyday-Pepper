@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   classifySmsKeyword,
+  classifySmsReply,
   normalizeSmsText,
   OutboxSmsSchema,
   SMS_AI_DISCLOSURE_LEAD,
@@ -11,6 +12,7 @@ import {
   smsConsentText,
   smsDeliveryStatusOf,
   smsKeywordReply,
+  smsPlainText,
   smsReplySender,
   SMS_REPLY_NAME_MAX,
   SmsPhoneSchema,
@@ -401,6 +403,35 @@ describe('smsSendableAt (AC-X-60)', () => {
   it('builds the signed status URL with the business and the message', () => {
     expect(smsStatusCallbackUrl('https://app.example.com', 't-1', 'm-2')).toBe(
       'https://app.example.com/v1/webhooks/sms/status?t=t-1&m=m-2',
+    );
+  });
+});
+
+describe('classifySmsReply (S62, AC-X-74)', () => {
+  it('reads "C" and "Confirm" alone, any case, punctuation ignored', () => {
+    for (const body of ['C', 'c', ' c. ', 'C!', 'Confirm', 'CONFIRMED', 'confirm 👍']) {
+      expect(classifySmsReply(body)).toBe('confirm');
+    }
+  });
+
+  it('lets an opt-out or another keyword win, and confirms nothing else', () => {
+    expect(classifySmsReply('CANCEL')).toBe('stop');
+    expect(classifySmsReply('Stop')).toBe('stop');
+    expect(classifySmsReply('help')).toBe('help');
+    expect(classifySmsReply('YES')).toBe('start');
+    for (const body of ['C you then', 'cc', 'I confirm my 3pm', 'Y', 'ok', '', 'c c']) {
+      expect(classifySmsReply(body)).toBeNull();
+    }
+  });
+});
+
+describe('smsPlainText (S62)', () => {
+  it('keeps text in GSM-7 on one line and cuts it', () => {
+    expect(smsPlainText('  Lash\n  Lift ✨ & Tint  ', 40)).toBe('Lash Lift & Tint');
+    expect(smsPlainText('São Ménage', 40)).toBe('Sao Ménage');
+    expect(smsPlainText('A'.repeat(50), 20)).toBe(`${'A'.repeat(17)}...`);
+    expect(smsSegments(smsPlainText('😀'.repeat(30) + 'Nails', 40))).toEqual(
+      expect.objectContaining({ encoding: 'gsm7' }),
     );
   });
 });

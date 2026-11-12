@@ -87,6 +87,7 @@ const TEXTS: ClientTexts = {
     stoppedAt: AT,
   },
   canStop: false,
+  lastText: null,
 };
 
 @Global()

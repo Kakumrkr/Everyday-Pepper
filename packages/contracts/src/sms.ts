@@ -268,26 +268,28 @@ const isGsm7 = (char: string): boolean => GSM7_BASIC.has(char) || GSM7_EXTENSION
  * ones left out, cut by character.
  */
 function replyNames(businesses: readonly string[]): string[] {
-  return (
-    businesses
-      .map((name) =>
-        // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
-        Array.from(normalizeSmsText(name.replace(/\s+/g, ' ')))
-          .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
-          .filter(isGsm7)
-          .join('')
-          .replace(/ {2,}/g, ' ')
-          .trim(),
-      )
-      .filter((name) => name !== '')
-      .slice(0, 2)
-      // GSM-7 characters are one code unit each, so a plain cut never splits one.
-      .map((name) =>
-        name.length > SMS_REPLY_NAME_MAX
-          ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
-          : name,
-      )
-  );
+  return businesses
+    .map((name) => smsPlainText(name, Number.MAX_SAFE_INTEGER))
+    .filter((name) => name !== '')
+    .slice(0, 2)
+    .map((name) => smsPlainText(name, SMS_REPLY_NAME_MAX));
+}
+
+/**
+ * A name or other typed text as a text carries it (S62): on one line, in GSM-7 only (a letter
+ * outside it as its plain letter, "ã" as "a"; other characters dropped, so one emoji can't make
+ * a text three times dearer), cut at `max` characters with "...".
+ */
+export function smsPlainText(text: string, max: number): string {
+  // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
+  const plain = Array.from(normalizeSmsText(text.replace(/\s+/g, ' ')))
+    .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
+    .filter(isGsm7)
+    .join('')
+    .replace(/ {2,}/g, ' ')
+    .trim();
+  // GSM-7 characters are one code unit each, so a plain cut never splits one.
+  return plain.length > max ? `${plain.slice(0, Math.max(0, max - 3)).trimEnd()}...` : plain;
 }
 
 /**

@@ -3,7 +3,6 @@ CREATE TABLE "booking_manage_links" (
 	"token_hash" text NOT NULL,
 	"tenant_id" uuid DEFAULT current_tenant_id() NOT NULL,
 	"booking_id" uuid NOT NULL,
-	"expires_at" timestamp with time zone NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "booking_manage_links_token_hash_format" CHECK ("booking_manage_links"."token_hash" ~ '^[0-9a-f]{64}$')
 );
@@ -32,12 +31,11 @@ ALTER TABLE "booking_texts" ADD CONSTRAINT "booking_texts_booking_fk" FOREIGN KE
 ALTER TABLE "booking_texts" ADD CONSTRAINT "booking_texts_client_fk" FOREIGN KEY ("tenant_id","client_id") REFERENCES "public"."clients"("tenant_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "booking_manage_links_token_hash_unique" ON "booking_manage_links" USING btree ("token_hash");--> statement-breakpoint
 CREATE INDEX "booking_manage_links_booking_idx" ON "booking_manage_links" USING btree ("tenant_id","booking_id");--> statement-breakpoint
-CREATE INDEX "booking_manage_links_expires_at_idx" ON "booking_manage_links" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "booking_texts_client_idx" ON "booking_texts" USING btree ("tenant_id","client_id","created_at");--> statement-breakpoint
 CREATE INDEX "booking_texts_booking_idx" ON "booking_texts" USING btree ("tenant_id","booking_id");--> statement-breakpoint
 ALTER TABLE "booking_reminders" ADD CONSTRAINT "booking_reminders_kind_known" CHECK ("booking_reminders"."kind" IN ('day_before', 'same_day'));--> statement-breakpoint
 CREATE POLICY "tenant_isolation" ON "booking_manage_links" AS PERMISSIVE FOR ALL TO public USING (tenant_id = current_tenant_id()) WITH CHECK (tenant_id = current_tenant_id());--> statement-breakpoint
-CREATE POLICY "tenant_isolation" ON "booking_texts" AS PERMISSIVE FOR ALL TO public USING (tenant_id = current_tenant_id()) WITH CHECK (tenant_id = current_tenant_id());;--> statement-breakpoint
+CREATE POLICY "tenant_isolation" ON "booking_texts" AS PERMISSIVE FOR ALL TO public USING (tenant_id = current_tenant_id()) WITH CHECK (tenant_id = current_tenant_id());--> statement-breakpoint
 -- SMS reminders and confirm by text (S62, ADR-0065), beyond what drizzle-kit expresses. RLS
 -- applies to the table owner too, as for every tenant-owned table (ADR-0010).
 ALTER TABLE "booking_texts" FORCE ROW LEVEL SECURITY;

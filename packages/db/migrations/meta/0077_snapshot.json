@@ -1,5 +1,5 @@
 {
-  "id": "3b298011-cc0e-4f16-a705-c7796478722c",
+  "id": "59aa4e1c-2b63-4ae4-8c14-bee20c365805",
   "prevId": "337f4cac-ccea-4c01-873d-b099fd9b5cd5",
   "version": "7",
   "dialect": "postgresql",
@@ -1479,12 +1479,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -1520,21 +1514,6 @@
             },
             {
               "expression": "booking_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "booking_manage_links_expires_at_idx": {
-          "name": "booking_manage_links_expires_at_idx",
-          "columns": [
-            {
-              "expression": "expires_at",
               "isExpression": false,
               "asc": true,
               "nulls": "last"

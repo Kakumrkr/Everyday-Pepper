@@ -789,12 +789,11 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       await insertBookingManageLink(tx, {
         bookingId: BookingIdSchema.parse(await seedBooking(tx)),
         tokenHash,
-        expiresAt: new Date('2026-10-20T14:00:00Z'),
         createdAt: new Date(),
       });
       return idWhere(tx, 'booking_manage_links', 'token_hash', tokenHash);
     },
-    touch: 'expires_at = expires_at',
+    touch: 'created_at = created_at',
   },
   sms_deliveries: {
     tenantColumn: 'tenant_id',

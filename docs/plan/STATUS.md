@@ -10,8 +10,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S62 · SMS reminders + confirm by text (backend; screens → S62.2).** User at the brief: "good with your recommendations… revise and improvise… start the session and complete successfully" (D-1 split: S62 backend, S62.2 the settings screen + the profile's last-text line; D-2 day-before + same-day 2 h; D-3 a hashed manage link per reminder; D-4 `tenants.reminder_settings`, ADR-0065 S62 section). AC-X-70…76.
 Plan (Claude, improvised): reminder times kept out of 20:00–8:00 when planned (dates, never "today/tomorrow"); the opt-in text carries the booking; a short confirmation text when texts are already on; the email reminder gains the link too; "C" handled in appointments (core stays L1), via a definer `sms_confirm_target` answering ids only; `booking_texts` (no phone) records what went to whom.
 - [x] 1. ACs + traceability.
-- [ ] 2. Migration 0077 (reminder kinds, settings, client_confirmed_at, booking_texts, booking_manage_links, sms_confirm_target) + db repos.
-- [ ] 3. Timing (`reminderDueAt`, plans per kind). 4. Sending (text/email, link, STOP on first). 5. Opt-in/confirmation text. 6. "C". 7. Settings + last-text API. 8. ADR-0065 + dependency map.
+- [x] 2. Migration 0077 + db repos (link has no expiry: the start bounds changes, like the confirmation's; the clean-up drops links 30 days after the start). db 497 integration green incl. isolation.
+- [x] 3–4. `reminderDueAt` (kept out of 20:00–8:00), two kinds, text to the consent's number else email, the reminder's own link (email too), STOP line on the first; opt-in text cut to fit 3 segments (staff dropped). appointments 32 integration + 177 unit green; core `lastTextOf` + the profile's `lastText`.
+- [ ] 5. Opt-in/confirmation text (notify path, api `BookingEmails`, `texts` option in api/worker config). 6. "C" (appointments `confirmByText` + webhook). 7. Settings API. 8. ADR-0065 + dependency map.
 
 ## Last sessions
 - **S61.2 Phase 14 · SMS consent on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #95](https://github.com/Kakumrkr/Everyday-Pepper/pull/95)). Full entry in [session-log.md](session-log.md).

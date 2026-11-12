@@ -1,6 +1,7 @@
 import {
   clearExpiredMemoryPreviousValues,
   deleteExpiredBookingVerifications,
+  deleteOldBookingManageLinks,
   deleteFinishedOutboxMessages,
   deleteOldMemoryEpisodes,
   deleteStaleProposedMemoryFacts,
@@ -21,10 +22,13 @@ import { deleteIdleConversationsIn } from './conversations.js';
 // deletes conversations with the AI 90 days after their last message (ADR-0030). From Phase 7
 // (ADR-0034) it clears memory facts' replaced values once their Undo window ends and deletes
 // episodes after a year; from S30 (ADR-0035) it deletes the AI's proposed saves whose proposal
-// is over; from S37 (ADR-0041) it closes waitlist offers past their time.
+// is over; from S37 (ADR-0041) it closes waitlist offers past their time; from S62 it removes
+// reminders' reschedule links of bookings that started more than 30 days ago.
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
+/** How long after its booking starts a reminder's reschedule link is kept (S62). */
+export const REMINDER_LINK_RETENTION_MS = 30 * 24 * 60 * 60_000;
 /** How long a sent or given-up outbox message (content already cleared) is kept. */
 export const OUTBOX_RETENTION_MS = 30 * 24 * 60 * 60_000;
 
@@ -44,6 +48,7 @@ export interface CleanupResult {
   memoryEpisodes: number;
   memoryProposedFacts: number;
   waitlistOffers: number;
+  reminderLinks: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -51,6 +56,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
   const now = options.clock.now().getTime();
   const requestsBefore = new Date(now - BOOKING_REQUEST_RETENTION_MS);
   const outboxBefore = new Date(now - OUTBOX_RETENTION_MS);
+  const linksBefore = new Date(now - REMINDER_LINK_RETENTION_MS);
   const result: CleanupResult = {
     businesses: 0,
     bookingRequests: 0,
@@ -61,6 +67,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     memoryEpisodes: 0,
     memoryProposedFacts: 0,
     waitlistOffers: 0,
+    reminderLinks: 0,
   };
   const episodesBefore = new Date(now - MEMORY_LIMITS.episodeRetentionDays * 86_400_000);
   // A proposal waits at most a day; its proposed fact goes the day after (S30).
@@ -102,6 +109,9 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
         tenantId,
         (tx) => expireWaitlistOffers(tx, new Date(now), EXPIRE_BATCH),
         EXPIRE_BATCH,
+      );
+      result.reminderLinks += await inBatches(db, tenantId, (tx) =>
+        deleteOldBookingManageLinks(tx, linksBefore, DELETE_BATCH),
       );
     }
     result.businesses += page.length;

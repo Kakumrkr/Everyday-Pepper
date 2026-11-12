@@ -139,13 +139,13 @@ export async function countBookingVerificationsExpiringAfter(
 
 /**
  * The booking a link token's hash opens: its confirmation's (`manage_token_hash`), or a
- * reminder's while it hasn't expired (S62, `booking_manage_links`).
+ * reminder's (S62, `booking_manage_links`).
  */
 function opensBooking(tokenHash: string) {
   const hash = HashSchema.parse(tokenHash);
   return or(
     eq(bookings.manageTokenHash, hash),
-    sql`${bookings.id} IN (SELECT booking_id FROM booking_manage_links WHERE token_hash = ${hash} AND expires_at > now())`,
+    sql`${bookings.id} IN (SELECT booking_id FROM booking_manage_links WHERE token_hash = ${hash})`,
   );
 }
 

@@ -52,9 +52,7 @@ export async function removeBookingReminder(
   await tx
     .delete(bookingReminders)
     .where(
-      kind === undefined
-        ? id
-        : and(id, eq(bookingReminders.kind, ReminderKindSchema.parse(kind))),
+      kind === undefined ? id : and(id, eq(bookingReminders.kind, ReminderKindSchema.parse(kind))),
     );
 }
 
@@ -162,10 +160,7 @@ export async function findReminderSettings(tx: TenantTx): Promise<ReminderSettin
 }
 
 /** Stores the transaction's business's reminder settings, every field. */
-export async function setReminderSettings(
-  tx: TenantTx,
-  settings: ReminderSettings,
-): Promise<void> {
+export async function setReminderSettings(tx: TenantTx, settings: ReminderSettings): Promise<void> {
   await tx
     .update(tenants)
     .set({ reminderSettings: ReminderSettingsSchema.parse(settings) })

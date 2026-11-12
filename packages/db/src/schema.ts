@@ -3354,8 +3354,9 @@ export type BookingTextRow = typeof bookingTexts.$inferSelect;
 /**
  * More reschedule/cancel links of a booking (S62): one per reminder, so a reminder carries a
  * working link although only hashes are stored (`bookings.manage_token_hash` is the
- * confirmation's). The booking page's manage lookup takes either; a link here ends at its
- * `expires_at` (the reminded start), and any link only changes a booking that hasn't started.
+ * confirmation's). The booking page's manage lookup takes either; like the confirmation's, a
+ * link only changes a booking that hasn't started, and the clean-up removes links of bookings
+ * that started more than 30 days ago.
  */
 export const bookingManageLinks = pgTable(
   'booking_manage_links',
@@ -3365,13 +3366,11 @@ export const bookingManageLinks = pgTable(
     tokenHash: text('token_hash').notNull(),
     tenantId: uuid('tenant_id').notNull().default(currentTenantId),
     bookingId: uuid('booking_id').notNull(),
-    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     uniqueIndex('booking_manage_links_token_hash_unique').on(table.tokenHash),
     index('booking_manage_links_booking_idx').on(table.tenantId, table.bookingId),
-    index('booking_manage_links_expires_at_idx').on(table.expiresAt),
     check('booking_manage_links_token_hash_format', sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
     foreignKey({
       name: 'booking_manage_links_booking_fk',
