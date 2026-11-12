@@ -12,6 +12,37 @@ describe('loadWorkerConfig', () => {
     expect(loadWorkerConfig(required)).toMatchObject({ service: 'worker', port: 4100 });
   });
 
+  it('turns texts on with SMS_PROVIDER, and asks Twilio for reports only with the web origin (S61)', () => {
+    expect(loadWorkerConfig(required)).toMatchObject({ sms: null, smsStatusBaseUrl: null });
+    expect(
+      loadWorkerConfig({
+        ...required,
+        SMS_PROVIDER: 'sandbox',
+        AUTH_BASE_URL: 'https://app.example.com',
+      }),
+    ).toMatchObject({
+      sms: { provider: 'sandbox' },
+      smsStatusBaseUrl: null,
+    });
+    const twilio = {
+      ...required,
+      SMS_PROVIDER: 'twilio',
+      TWILIO_ACCOUNT_SID: `AC${'0'.repeat(32)}`,
+      TWILIO_AUTH_TOKEN: 'f'.repeat(32),
+      TWILIO_SENDER: `MG${'1'.repeat(32)}`,
+    };
+    expect(loadWorkerConfig(twilio)).toMatchObject({
+      sms: { provider: 'twilio' },
+      smsStatusBaseUrl: null,
+    });
+    expect(
+      loadWorkerConfig({ ...twilio, AUTH_BASE_URL: 'https://app.example.com/' }).smsStatusBaseUrl,
+    ).toBe('https://app.example.com');
+    expect(() => loadWorkerConfig({ ...required, SMS_PROVIDER: 'twilio' })).toThrow(
+      'TWILIO_ACCOUNT_SID',
+    );
+  });
+
   it('requires DATABASE_URL and REDIS_URL', () => {
     expect(() => loadWorkerConfig({ OUTBOX_SECRET: required.OUTBOX_SECRET })).toThrow(
       'Invalid worker environment: DATABASE_URL, REDIS_URL',

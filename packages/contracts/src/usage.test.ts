@@ -3,7 +3,7 @@ import { UsageAmountSchema, UsageMetricSchema, UsagePeriodSchema } from './usage
 
 describe('usage schemas', () => {
   it('knows the metered metrics', () => {
-    expect(UsageMetricSchema.options).toEqual(['llm_tokens', 'emails_sent']);
+    expect(UsageMetricSchema.options).toEqual(['llm_tokens', 'emails_sent', 'sms_segments']);
   });
 
   it.each(['2026-01', '2026-12'])('accepts the period %s', (period) => {

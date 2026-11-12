@@ -18,6 +18,7 @@ import { UnsubscribeModule } from './unsubscribe/unsubscribe.controller.js';
 import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
 import { InboundModule } from './inbound/inbound.controller.js';
+import { SmsWebhookModule } from './sms/sms-webhook.controller.js';
 import { SupportModule } from './support/support.controller.js';
 import { TasksModule } from './tasks/tasks.module.js';
 import { TeamModule } from './team/team.module.js';
@@ -64,6 +65,7 @@ export class AppModule {
           inboundDomain: config.inbound.domain,
         }),
         InboundModule.forRoot({ webhookSecret: config.inbound.webhookSecret }),
+        SmsWebhookModule.forRoot({ twilio: config.smsWebhook, baseUrl: config.auth.baseUrl }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

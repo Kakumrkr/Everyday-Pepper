@@ -116,7 +116,7 @@ Goal: Pepper fills the chair and proves it in dollars, with the owner tapping in
 | S56a.2 | **AI-suggested import mapping ("a")** (done S56a.2) | For columns S48's smart mapping misses: column names and masked samples only go to the model, the owner confirms each suggestion; its eval cases on scripted cassettes. Merges S56a's branch first. Built ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md)): `suggest_mapping` on the routine model, checked by the domain; "Use it" on the columns step; the preview's left-out line; the `import_mapping` set (7 cases); AC-W1-46…48. | Every eval set green on the scripted cassettes |
 | S56b | **Record ("b") + phase gate** — Rec (done S56b: $0.81, Phase 12 gate met, scorecard §8) | Merge S56a, probe the changed sets, record once, pass^3 on the gated sets; `KNOWN_REAL_MODEL_MISSES` empty (the two waitlist cases included). Phase cap $3.00. | Every gate met; the scorecard targets met |
 
-### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md))
+### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md); S58a–S60 after Phase 14 by [PCR-011](changes/PCR-011.md))
 Goal: a real business can run its week on Pepper safely, and nothing breaks unseen. Exit: every category ≥ 8, except staff experience (7) and market competitiveness (6), which reach 8 in Phases 16 and 15.
 
 | # | Target | Built | Done when |
@@ -137,12 +137,13 @@ Goal: a real business can run its week on Pepper safely, and nothing breaks unse
 
 **🚦 Private pilot:** 3–5 owners from the target segment, email only, free for 60 days, a 15-minute setup call and a weekly check-in. The pilot measures §6.
 
-### Phase 14 · SMS (S61–S64)
+### Phase 14 · SMS (S61, S61.2, S62–S64; before the rest of Phase 13 by [PCR-011](changes/PCR-011.md))
 Goal: reminders and confirmations by text, and the owner can approve by text. Exit: market competitiveness 7.
 
 | # | Target | Built | Done when |
 |---|---|---|---|
-| S61 | **SMS channel** | A provider adapter (Twilio-class; ADR), consent capture on the booking page (TCPA wording), STOP/HELP, quiet hours, SMS as an outbox channel, sandbox mode. | Contract tests against the provider's sandbox; STOP honoured in < 1 minute |
+| S61 | **SMS channel, backend** (split at the brief, [PCR-011](changes/PCR-011.md): the screens are S61.2) | A provider adapter (Twilio; [ADR-0065](../adr/0065-sms-channel.md)) and a local sandbox, SMS as an outbox channel, consent records, STOP/START/HELP in the signed webhook's own request, quiet hours, delivery status, GSM-7 text and segments (top-up). AC-X-57…63. | Contract tests on the provider's documented shapes; STOP blocks the next send in the same request |
+| S61.2 | **SMS consent on screen** | The booking page's opt-in box (TCPA wording, unticked, never needed to book), SMS on the client's profile, the owner's SMS settings, the business's name in HELP, SMS's own AI disclosure. | Screens at 375 px light and dark; the opt-in journey records consent |
 | S62 | **SMS reminders + confirm by text** | 24 h and same-day reminders (bookings made under 24 h ahead get one too), "C" to confirm, a reschedule link, owner settings. | Reminder timing and idempotency tests (as AC-W6-1 and AC-W4-2) |
 | S63 | **Approve by text** | Pepper texts the owner a card summary ("Tue 2pm opened. Offer to Audy, Marco, Sam? Reply Y"); single-use signed codes, an expiry, sender verification, no personal data beyond first names. | A reply only approves the exact card shown; replay and spoof tests |
 | S64 | **SMS live + gate** | Live once 10DLC registration is approved (needs the LLC); `send_client_message` over SMS. Phase gate. If 10DLC isn't approved yet, everything stays in sandbox and this session is the gate only. | Scorecard target met |

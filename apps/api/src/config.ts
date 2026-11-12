@@ -5,6 +5,7 @@ import {
   loadOutboxSecret,
   loadPushPublicKey,
   loadServiceConfig,
+  loadSmsConfig,
   type MailConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
@@ -109,6 +110,11 @@ export interface ApiConfig extends ServiceConfig {
   supportEmail: string | null;
   /** Replies by email (S59.3, ADR-0063): the signed addresses' domain and the webhook's secret. */
   inbound: { domain: string | null; webhookSecret: string | null };
+  /**
+   * Twilio's SMS webhooks (S61, ADR-0065): the account and auth token that sign them; `null`
+   * unless `SMS_PROVIDER=twilio` (the routes are 404 then).
+   */
+  smsWebhook: { accountSid: string; authToken: string } | null;
 }
 
 /**
@@ -129,7 +135,13 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     ai: loadAiConfig(env, present, service.environment),
     storage: loadStorageConfig('api', env),
     ...loadSupport(present),
+    smsWebhook: smsWebhookOf(loadSmsConfig('api', env)),
   };
+}
+
+function smsWebhookOf(sms: ReturnType<typeof loadSmsConfig>): ApiConfig['smsWebhook'] {
+  if (sms?.provider !== 'twilio') return null;
+  return { accountSid: sms.accountSid, authToken: sms.authToken };
 }
 
 function loadSupport(

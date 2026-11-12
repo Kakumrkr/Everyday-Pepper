@@ -175,4 +175,23 @@ describe('loadApiConfig', () => {
       /^Invalid api environment: RESEND_WEBHOOK_SECRET$/,
     );
   });
+
+  it('turns the SMS webhooks on only with Twilio (S61, ADR-0065)', () => {
+    expect(loadApiConfig(required).smsWebhook).toBeNull();
+    expect(loadApiConfig({ ...required, SMS_PROVIDER: 'sandbox' }).smsWebhook).toBeNull();
+    const account = `AC${'0'.repeat(32)}`;
+    const token = 'f'.repeat(32);
+    expect(
+      loadApiConfig({
+        ...required,
+        SMS_PROVIDER: 'twilio',
+        TWILIO_ACCOUNT_SID: account,
+        TWILIO_AUTH_TOKEN: token,
+        TWILIO_SENDER: '+15557654321',
+      }).smsWebhook,
+    ).toEqual({ accountSid: account, authToken: token });
+    expect(() => loadApiConfig({ ...required, SMS_PROVIDER: 'twilio' })).toThrow(
+      /^Invalid api environment: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, TWILIO_SENDER$/,
+    );
+  });
 });

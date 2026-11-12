@@ -26,6 +26,7 @@ export * from './public-booking.js';
 export * from './push.js';
 export * from './rules.js';
 export * from './setup.js';
+export * from './sms.js';
 export * from './pilot-metrics.js';
 export * from './support.js';
 export * from './inbound-email.js';

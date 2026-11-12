@@ -4,9 +4,11 @@ import {
   loadOutboxSecret,
   loadPushConfig,
   loadServiceConfig,
+  loadSmsConfig,
   type MailConfig,
   type PushConfig,
   type ServiceConfig,
+  type SmsConfig,
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
 import { loadStorageConfig, type StorageConfig } from '@pepper/storage';
@@ -82,6 +84,16 @@ export interface WorkerConfig extends ServiceConfig {
   storage: StorageConfig | null;
   /** `null`: no VAPID keys, so pushes are not sent (the api then queues none, ADR-0026). */
   push: PushConfig | null;
+  /**
+   * Texts (S61, ADR-0065): Twilio or the sandbox; `null` with SMS off, so a queued text retries
+   * and then gives up with an alert, as a push does without VAPID keys (callers check first).
+   */
+  sms: SmsConfig | null;
+  /**
+   * The web app's origin (`AUTH_BASE_URL`), where Twilio reports each text's delivery; `null`
+   * without it, or without Twilio (the sandbox reports nothing).
+   */
+  smsStatusBaseUrl: string | null;
   /** Opens the messages the api sealed (ADR-0024); the same as the api's. */
   outboxSecret: string;
   outboxPollMs: number;
@@ -142,11 +154,17 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
   const service = loadServiceConfig('worker', env, { port: 4100 });
   const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
   const jobs = loadEnv('worker', JobsEnvSchema, present);
+  const sms = loadSmsConfig('worker', env);
   return {
     ...service,
     mail: loadMailConfig('worker', env),
     storage: loadStorageConfig('worker', env),
     push: loadPushConfig('worker', env),
+    sms,
+    smsStatusBaseUrl:
+      sms?.provider === 'twilio' && jobs.AUTH_BASE_URL !== undefined
+        ? new URL(jobs.AUTH_BASE_URL).origin
+        : null,
     outboxSecret: loadOutboxSecret('worker', env),
     outboxPollMs: jobs.OUTBOX_POLL_MS,
     reminderPollMs: jobs.REMINDER_POLL_MS,

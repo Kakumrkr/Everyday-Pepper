@@ -19,6 +19,18 @@ const REQUEST_HEADERS = [
   'x-request-id',
 ] as const;
 
+/**
+ * The providers' webhook signatures, passed on for `/v1/webhooks/*` only: Resend's Svix headers
+ * (S59.3, ADR-0063) and Twilio's (S61, ADR-0065). The api checks them; dropped, every call
+ * would be refused.
+ */
+const WEBHOOK_HEADERS = [
+  'svix-id',
+  'svix-timestamp',
+  'svix-signature',
+  'x-twilio-signature',
+] as const;
+
 /** Response headers passed back to the browser. */
 const RESPONSE_HEADERS = [
   'cache-control',
@@ -80,7 +92,8 @@ export async function forwardToApi(request: Request, options: ForwardOptions): P
   const target = new URL(incoming.pathname + incoming.search, apiBaseUrl);
 
   const headers = new Headers();
-  for (const name of REQUEST_HEADERS) {
+  const webhook = incoming.pathname.startsWith('/v1/webhooks/');
+  for (const name of [...REQUEST_HEADERS, ...(webhook ? WEBHOOK_HEADERS : [])]) {
     const value = request.headers.get(name);
     if (value !== null) headers.set(name, value);
   }

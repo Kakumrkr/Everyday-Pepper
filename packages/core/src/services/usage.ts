@@ -40,7 +40,7 @@ export async function usageFor(
   period: UsagePeriod,
 ): Promise<Record<UsageMetric, number>> {
   const rows = await withTenant(db, TenantIdSchema.parse(tenantId), (tx) => listUsage(tx, period));
-  const totals: Record<UsageMetric, number> = { llm_tokens: 0, emails_sent: 0 };
+  const totals: Record<UsageMetric, number> = { llm_tokens: 0, emails_sent: 0, sms_segments: 0 };
   for (const { metric, amount } of rows) totals[metric] = amount;
   return totals;
 }

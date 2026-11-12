@@ -12,6 +12,9 @@ import {
   withTenant,
   withJobScan,
   withUser,
+  withInboundMail,
+  withSmsInbound,
+  setTransactionInboundMail,
 } from './tenant.js';
 
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
@@ -162,6 +165,38 @@ describe('setTransactionTenant / setTransactionUser', () => {
     await expect(setTransactionTenant(open, 'nope' as TenantId)).rejects.toThrow();
     await expect(setTransactionUser(open, 'nope' as UserId)).rejects.toThrow();
     expect(executed).toEqual([]);
+  });
+});
+
+describe('withInboundMail / withSmsInbound / setTransactionInboundMail', () => {
+  it.each([
+    ['withInboundMail', withInboundMail, "SELECT set_config('app.inbound_mail', 'on', true)"],
+    ['withSmsInbound', withSmsInbound, "SELECT set_config('app.sms_inbound', 'on', true)"],
+  ] as const)(
+    '%s opens its platform table transaction-locally before the work, and nothing else',
+    async (_name, open, expected) => {
+      const { db, tx, executed, transaction } = fakeDb();
+      const result = await open(db, (given) => {
+        expect(given).toBe(tx);
+        expect(executed).toHaveLength(1);
+        return Promise.resolve('done');
+      });
+      expect(result).toBe('done');
+      // Read-write: the webhook records there.
+      expect(transaction).toHaveBeenCalledWith(expect.any(Function));
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- asserted length 1 above
+      expect(new PgDialect().sqlToQuery(executed[0]!)).toMatchObject({ sql: expected, params: [] });
+    },
+  );
+
+  it('setTransactionInboundMail opens inbound mail in the open transaction', async () => {
+    const { tx, executed } = fakeDb();
+    await setTransactionInboundMail(
+      tx as unknown as Parameters<typeof setTransactionInboundMail>[0],
+    );
+    expect(executed.map((query) => new PgDialect().sqlToQuery(query).sql)).toEqual([
+      "SELECT set_config('app.inbound_mail', 'on', true)",
+    ]);
   });
 });
 

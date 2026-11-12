@@ -65,6 +65,7 @@ import {
   markSupportThreadRead,
 } from './repositories/support.js';
 import { insertSupportScreenshot } from './repositories/support-screenshots.js';
+import { insertSmsConsent, insertSmsDelivery } from './repositories/sms.js';
 import { insertTask, listDueTasks } from './repositories/tasks.js';
 import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './repositories/feed.js';
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
@@ -106,6 +107,8 @@ const GLOBAL_TABLES: Record<string, string> = {
     'the team’s saved replies (S59.2.2, AC-X-23): platform data; forced RLS, operators only',
   inbound_emails:
     'emails at the inbound webhook (S59.3, ADR-0063): stored before any business is known; forced RLS, the inbound context and logged operators only (below)',
+  sms_keyword_events:
+    'STOP, START and HELP sent to Pepper’s number (S61, ADR-0065): no business; forced RLS, the SMS context and logged operators only (`sms.int.test.ts`)',
   email_suppressions:
     'delivery problems Resend reported for an address (S59.3.2, ADR-0063 Part 2): no business; forced RLS, the inbound context and logged operators only (`email-suppression.int.test.ts`)',
 };
@@ -726,6 +729,45 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       },
     ],
   },
+  sms_consents: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const clientId = await seedClient(tx);
+      const digits = String(Math.floor(Math.random() * 1e9)).padStart(9, '0');
+      const { id } = await insertSmsConsent(tx, {
+        phone: `+12${digits}`,
+        source: 'booking_page',
+        clientId,
+        wordingVersion: 'sms-consent-v1',
+        shownText: SHOWN,
+        givenAt: new Date(),
+      });
+      return id;
+    },
+    touch: 'given_at = given_at',
+  },
+  sms_deliveries: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const row = await insertOutboxMessage(tx, {
+        id: OutboxMessageIdSchema.parse(newId()),
+        type: 'email',
+        dedupeKey: `isolation:${newId()}`,
+        payload: randomBytes(16),
+        availableAt: new Date(),
+      });
+      const id = String(row?.id);
+      await insertSmsDelivery(tx, {
+        id,
+        provider: 'sandbox',
+        providerMessageId: `SB${newId().replace(/-/g, '')}`,
+        segments: 1,
+        status: 'sent',
+      });
+      return id;
+    },
+    touch: 'status = status',
+  },
   support_reads: {
     tenantColumn: 'tenant_id',
     seed: async (tx) => {
@@ -1168,6 +1210,8 @@ async function idWhere(tx: TenantTx, table: string, column: string, value: strin
   return String(rows[0]?.id);
 }
 
+/** The words as shown, as core records them (`smsConsentText`). */
+const SHOWN = 'Text me appointment confirmations and reminders from A at this number.';
 let database: TestDatabase;
 let db: Database;
 let tenantA: TenantId;

@@ -391,7 +391,7 @@ export const auditLog = pgTable(
   ],
 );
 
-export const usageMetric = pgEnum('usage_metric', ['llm_tokens', 'emails_sent']);
+export const usageMetric = pgEnum('usage_metric', ['llm_tokens', 'emails_sent', 'sms_segments']);
 
 /** How much of each metered thing a business used per UTC month (ADR-0013). */
 export const usageMeters = pgTable(
@@ -1200,7 +1200,7 @@ export const businessPhotos = pgTable(
   ],
 );
 
-export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push', 'episode']);
+export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push', 'episode', 'sms']);
 export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead', 'cancelled']);
 
 /**
@@ -3177,6 +3177,148 @@ export const emailSuppressions = pgTable(
   ],
 );
 export type EmailSuppressionRow = typeof emailSuppressions.$inferSelect;
+
+/** Postgres's check that a column holds a number Pepper can text (`SmsPhoneSchema`). */
+function smsPhone(column: SQLWrapper): SQL {
+  return sql`${column} ~ '^[+]1[2-9][0-9]{9}$'`;
+}
+
+/**
+ * A person's consent to the business's texts (S61, ADR-0065 §3, §7): the business's TCPA record of
+ * when, how (`booking_page`: a client ticked the box; `member_settings`: a member, for texts to
+ * themselves) and which wording (`SMS_CONSENT_WORDING`, never edited in place), with the words
+ * as shown (the business's name in them, as it was then). At most one is active a number; a new one replaces it, a revoked one stays as the record. Delivery checks it at
+ * send time. In the export; removed with the business, and with a client who is forgotten.
+ */
+export const smsConsents = pgTable(
+  'sms_consents',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    phone: text('phone').notNull(),
+    source: text('source').notNull(),
+    clientId: uuid('client_id'),
+    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    wordingVersion: text('wording_version').notNull(),
+    // The words as shown, the business's name in them: what the person agreed to, even after a rename.
+    shownText: text('shown_text').notNull(),
+    givenAt: timestamp('given_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('sms_consents_active_unique')
+      .on(table.tenantId, table.phone)
+      .where(sql`${table.revokedAt} IS NULL`),
+    index('sms_consents_client_idx').on(table.tenantId, table.clientId),
+    foreignKey({
+      name: 'sms_consents_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    check('sms_consents_phone_format', smsPhone(table.phone)),
+    check(
+      'sms_consents_source_subject',
+      sql`(${table.source} = 'booking_page' AND ${table.clientId} IS NOT NULL AND ${table.userId} IS NULL) OR (${table.source} = 'member_settings' AND ${table.userId} IS NOT NULL AND ${table.clientId} IS NULL)`,
+    ),
+    check(
+      'sms_consents_wording_format',
+      sql`${table.wordingVersion} ~ '^sms-consent-v[0-9]{1,3}$'`,
+    ),
+    check('sms_consents_shown_text_length', sql`length(${table.shownText}) BETWEEN 20 AND 600`),
+    check(
+      'sms_consents_revoked_after_given',
+      sql`${table.revokedAt} IS NULL OR ${table.revokedAt} >= ${table.givenAt}`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type SmsConsentRow = typeof smsConsents.$inferSelect;
+
+/**
+ * A sent text's delivery (S61, ADR-0065 §6, AC-X-62): the provider's id for it, its segments and
+ * where it stands. Written with the outbox message marked sent; moved by the provider's signed
+ * status callbacks, only forwards. Delivery state, not in the export.
+ */
+export const smsDeliveries = pgTable(
+  'sms_deliveries',
+  {
+    // The outbox message's id.
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    provider: text('provider').notNull(),
+    providerMessageId: text('provider_message_id').notNull(),
+    segments: smallint('segments').notNull(),
+    status: text('status').notNull(),
+    errorCode: integer('error_code'),
+    ...timestamps,
+  },
+  (table) => [
+    unique('sms_deliveries_provider_message_unique').on(table.provider, table.providerMessageId),
+    foreignKey({
+      name: 'sms_deliveries_message_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [outboxMessages.tenantId, outboxMessages.id],
+    }).onDelete('cascade'),
+    check('sms_deliveries_provider_known', sql`${table.provider} IN ('twilio', 'sandbox')`),
+    check(
+      'sms_deliveries_provider_message_format',
+      sql`${table.providerMessageId} ~ '^[A-Za-z0-9_-]{1,64}$'`,
+    ),
+    check('sms_deliveries_segments_range', sql`${table.segments} BETWEEN 1 AND 10`),
+    check(
+      'sms_deliveries_status_known',
+      sql`${table.status} IN ('queued', 'sending', 'sent', 'delivered', 'undelivered', 'failed')`,
+    ),
+    check('sms_deliveries_error_code_range', sql`${table.errorCode} BETWEEN 1 AND 999999`),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type SmsDeliveryRow = typeof smsDeliveries.$inferSelect;
+
+/** The SMS webhook's context (S61, `withSmsInbound`): set for one transaction only. */
+const smsInbound = sql`COALESCE(current_setting('app.sms_inbound', true) = 'on', false)`;
+
+/**
+ * STOP, START and HELP sent to Pepper's number (S61, ADR-0065 §4, AC-X-59): one row per signed
+ * keyword message (the provider's id unique, so a replay changes nothing), and `stop` rows for a
+ * provider's "unsubscribed recipient" answer. A number is opted out when its latest `stop` or
+ * `start` is `stop`; delivery asks `sms_opted_out(phone)`. A platform row, reached in the SMS
+ * context or a logged operator transaction; kept when businesses go, as the person asked.
+ */
+export const smsKeywordEvents = pgTable(
+  'sms_keyword_events',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    provider: text('provider').notNull(),
+    // A keyword message's id, or `<outbox message id>:21610` for a provider's answer.
+    eventId: text('event_id').notNull(),
+    phone: text('phone').notNull(),
+    keyword: text('keyword').notNull(),
+    // `keyword`: the person texted it; `provider`: the provider reported the opt-out.
+    origin: text('origin').notNull(),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('sms_keyword_events_event_unique').on(table.provider, table.eventId),
+    index('sms_keyword_events_phone_idx').on(table.phone, table.receivedAt),
+    check('sms_keyword_events_provider_known', sql`${table.provider} IN ('twilio', 'sandbox')`),
+    check('sms_keyword_events_event_format', sql`${table.eventId} ~ '^[A-Za-z0-9:_-]{1,100}$'`),
+    check('sms_keyword_events_phone_format', smsPhone(table.phone)),
+    check('sms_keyword_events_keyword_known', sql`${table.keyword} IN ('stop', 'start', 'help')`),
+    check(
+      'sms_keyword_events_origin_known',
+      sql`${table.origin} IN ('keyword', 'provider') AND (${table.origin} = 'keyword' OR ${table.keyword} = 'stop')`,
+    ),
+    pgPolicy('sms_inbound', { for: 'all', using: smsInbound, withCheck: smsInbound }),
+    pgPolicy('operator_access', { for: 'select', using: operatorAccess }),
+  ],
+);
+export type SmsKeywordEventRow = typeof smsKeywordEvents.$inferSelect;
 
 export type SupportThreadRow = typeof supportThreads.$inferSelect;
 export type SupportMessageRow = typeof supportMessages.$inferSelect;

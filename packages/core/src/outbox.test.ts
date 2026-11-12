@@ -11,6 +11,7 @@ import {
   OutboxContentError,
   PushRejectedError,
   sealOutboxContent,
+  SmsRejectedError,
 } from './outbox.js';
 
 const ID = OutboxMessageIdSchema.parse('0199f4b2-7c1e-7a00-8000-000000000001');
@@ -104,6 +105,35 @@ describe('failureOutcome', () => {
     expect(errorNameOf(Object.assign(new Error('x'), { code: '' }))).toBe('Error');
     expect(errorNameOf('a string')).toBe('UnknownError');
     expect(failureOutcome('a string', 1, now).kind).toBe('retry');
+  });
+});
+
+describe('SMS failures (S61, ADR-0065 §1)', () => {
+  const now = new Date('2026-11-12T15:00:00Z');
+
+  it('gives up at once on a recipient refused for good, retries one refused for now', () => {
+    expect(failureOutcome(new SmsRejectedError(400, 21211, true), 1, now)).toEqual({
+      kind: 'dead',
+      errorName: 'SmsRejected-21211',
+    });
+    expect(failureOutcome(new SmsRejectedError(429, 20429, false), 1, now)).toMatchObject({
+      kind: 'retry',
+      errorName: 'SmsRejected-20429',
+    });
+    expect(failureOutcome(new SmsRejectedError(503, null, false), 1, now)).toMatchObject({
+      kind: 'retry',
+      errorName: 'SmsRejected-503',
+    });
+  });
+
+  it('never puts a number in the message or the error name', () => {
+    const error = new SmsRejectedError(400, 21211, true);
+    expect(error.message).toBe('The SMS provider answered 400 (21211)');
+    expect(errorNameOf(error)).toMatch(/^[A-Za-z0-9.:_-]+$/);
+  });
+
+  it('names SMS among the channels a worker may not have', () => {
+    expect(new ChannelUnavailableError('sms').message).toBe('No sms sender is configured');
   });
 });
 

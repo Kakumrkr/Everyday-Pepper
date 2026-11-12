@@ -4,6 +4,10 @@ import {
   OutboxEpisodeSchema,
   OutboxMessageIdSchema,
   OutboxPushSchema,
+  OutboxSmsSchema,
+  smsSendableAt,
+  smsStatusCallbackUrl,
+  TWILIO_UNSUBSCRIBED_RECIPIENT,
   TenantIdSchema,
   type OutboxDedupeKey,
   type OutboxEpisode,
@@ -14,9 +18,12 @@ import {
 } from '@pepper/contracts';
 import {
   addUsage,
-  cancelPendingOutboxEmails,
+  cancelPendingEmailsAndTexts,
   claimOutboxMessage,
+  findCurrentTenant,
   findCurrentTenantDeletion,
+  insertSmsDelivery,
+  postponeOutboxMessage,
   deletePushSubscription,
   findPushSubscription,
   insertOutboxMessage,
@@ -36,9 +43,13 @@ import {
   isGonePush,
   openOutboxContent,
   sealOutboxContent,
+  SmsRejectedError,
   type Mailer,
   type Pusher,
+  type SmsAccepted,
+  type SmsSender,
 } from '../outbox.js';
+import { recordProviderOptOut, smsPermission } from './sms.js';
 import { usagePeriodOf } from '../usage-period.js';
 
 // The transactional outbox (ADR-0003, ADR-0024): `queueEmail` and `queuePush` (ADR-0026) run
@@ -96,7 +107,12 @@ export async function queuePush(
  * off, or the push service no longer knows it); nothing is wrong, so nothing is alerted.
  */
 /** `cancelled`: an email of a business being deleted, taken back unsent (ADR-0054). */
-export type DeliveryResult = 'sent' | 'retry' | 'dead' | 'skipped' | 'dropped' | 'cancelled';
+/**
+ * `postponed`: a text held by the quiet hours until the next 8:00 (S61, AC-X-60), its attempt
+ * given back.
+ */
+export type DeliveryResult =
+  'sent' | 'retry' | 'dead' | 'skipped' | 'dropped' | 'cancelled' | 'postponed';
 
 /**
  * Writes the episode an outbox message names (S31, ADR-0037): `@pepper/ai`'s writer, given by
@@ -122,6 +138,16 @@ export interface DeliveryOptions {
    * that means the api and the worker are configured differently.
    */
   pusher?: Pusher | null;
+  /**
+   * Sends texts (S61, ADR-0065); `null` or absent: SMS is off, so a queued text fails (and
+   * retries, then gives up with an alert): callers check SMS is on before they queue one.
+   */
+  sms?: SmsSender | null;
+  /**
+   * The web app's origin (`AUTH_BASE_URL`), for the texts' signed status callback URL; `null` or
+   * absent: no delivery reports are asked for.
+   */
+  smsStatusBaseUrl?: string | null;
   clock: Clock;
   leaseMs?: number;
 }
@@ -158,10 +184,10 @@ export async function deliverOutboxMessage(
   const claimedAt = options.clock.now();
   const leaseUntil = new Date(claimedAt.getTime() + (options.leaseMs ?? OUTBOX_LEASE_MS));
   const claimed = await withTenant(db, tenantId, async (tx) => {
-    // A business being deleted sends no more email (S51.2, ADR-0054): it is taken back.
+    // A business being deleted sends no more email or texts (S51.2, ADR-0054; S61): taken back.
     if (
       (await findCurrentTenantDeletion(tx)) !== null &&
-      (await cancelPendingOutboxEmails(tx, claimedAt, { id })) > 0
+      (await cancelPendingEmailsAndTexts(tx, claimedAt, { id })) > 0
     ) {
       return 'cancelled' as const;
     }
@@ -172,12 +198,15 @@ export async function deliverOutboxMessage(
 
   let dropped = false;
   let stopped = false;
+  let text: SmsOutcome | undefined;
   try {
     const opened: unknown = JSON.parse(
       openOutboxContent(options.key, id, claimed.payload).toString('utf8'),
     );
     if (claimed.type === 'push') {
       dropped = !(await sendPush(db, tenantId, opened, options));
+    } else if (claimed.type === 'sms') {
+      text = await sendSms(db, tenantId, id, opened, options);
     } else if (claimed.type === 'episode') {
       const writer = options.episodes ?? null;
       if (writer === null) throw new ChannelUnavailableError('episode');
@@ -211,6 +240,17 @@ export async function deliverOutboxMessage(
     );
     return 'dropped';
   }
+  if (text?.kind === 'postponed') {
+    await withTenant(db, tenantId, (tx) => postponeOutboxMessage(tx, id, text.until));
+    return 'postponed';
+  }
+  if (text?.kind === 'dropped') {
+    // Kept as a record of why, never sent (AC-X-58, AC-X-59): nothing to alert.
+    await withTenant(db, tenantId, (tx) =>
+      markOutboxMessageFailed(tx, id, { errorName: text.reason, retryAt: null }),
+    );
+    return 'dropped';
+  }
   if (stopped) {
     await withTenant(db, tenantId, (tx) =>
       markOutboxMessageFailed(tx, id, { errorName: 'SupportMailStopped', retryAt: null }),
@@ -219,11 +259,86 @@ export async function deliverOutboxMessage(
   }
   const sentAt = options.clock.now();
   await withTenant(db, tenantId, async (tx) => {
-    if ((await markOutboxMessageSent(tx, id, sentAt)) && claimed.type === 'email') {
+    if (!(await markOutboxMessageSent(tx, id, sentAt))) return;
+    if (claimed.type === 'email') {
       await addUsage(tx, { metric: 'emails_sent', amount: 1, period: usagePeriodOf(sentAt) });
+    }
+    if (text?.kind === 'sent') {
+      const { accepted } = text;
+      // Kept in range, so nothing after the provider accepted the text can fail and resend it.
+      const segments = Math.min(10, Math.max(1, Math.round(accepted.segments) || 1));
+      await insertSmsDelivery(tx, {
+        id,
+        provider: accepted.provider,
+        providerMessageId: accepted.providerMessageId,
+        segments,
+        status: accepted.status,
+      });
+      await addUsage(tx, {
+        metric: 'sms_segments',
+        amount: segments,
+        period: usagePeriodOf(sentAt),
+      });
     }
   });
   return 'sent';
+}
+
+/** What a text's delivery did: sent, held for the quiet hours, or dropped with its reason. */
+type SmsOutcome =
+  | { kind: 'sent'; accepted: SmsAccepted }
+  | { kind: 'postponed'; until: Date }
+  | { kind: 'dropped'; reason: 'SmsOptedOut' | 'SmsNoConsent' | 'SmsNotTextable' };
+
+const DROP_REASON = {
+  opted_out: 'SmsOptedOut',
+  no_consent: 'SmsNoConsent',
+  not_textable: 'SmsNotTextable',
+} as const;
+
+/**
+ * Sends one queued text after the domain's checks at send time (ADR-0065 §3): opted out or
+ * without the business's consent, it is dropped; outside the quiet hours (unless urgent), held
+ * until the next 8:00 in the business's zone. Twilio's "unsubscribed recipient" answer records the
+ * opt-out and drops it. Other failures throw, for `failureOutcome`.
+ */
+async function sendSms(
+  db: Database,
+  tenantId: TenantId,
+  id: OutboxMessageId,
+  opened: unknown,
+  options: DeliveryOptions,
+): Promise<SmsOutcome> {
+  const sms = OutboxSmsSchema.parse(opened);
+  const sender = options.sms ?? null;
+  if (sender === null) throw new ChannelUnavailableError('sms');
+  const now = options.clock.now();
+  const gate = await withTenant(db, tenantId, async (tx): Promise<SmsOutcome | null> => {
+    const permission = await smsPermission(tx, sms.to);
+    if (permission !== 'allowed') return { kind: 'dropped', reason: DROP_REASON[permission] };
+    if (sms.urgent === true) return null;
+    const tenant = await findCurrentTenant(tx);
+    if (tenant === undefined) throw new Error('The business is not visible to its transaction');
+    const sendable = smsSendableAt(tenant.timeZone, now.getTime());
+    return sendable > now.getTime() ? { kind: 'postponed', until: new Date(sendable) } : null;
+  });
+  if (gate !== null) return gate;
+  const base = options.smsStatusBaseUrl ?? null;
+  try {
+    const accepted = await sender.send({
+      to: sms.to,
+      body: sms.body,
+      id,
+      ...(base !== null && { statusCallbackUrl: smsStatusCallbackUrl(base, tenantId, id) }),
+    });
+    return { kind: 'sent', accepted };
+  } catch (error) {
+    if (!(error instanceof SmsRejectedError && error.code === TWILIO_UNSUBSCRIBED_RECIPIENT)) {
+      throw error;
+    }
+    await recordProviderOptOut(db, { provider: 'twilio', messageId: id, phone: sms.to, at: now });
+    return { kind: 'dropped', reason: 'SmsOptedOut' };
+  }
 }
 
 /**

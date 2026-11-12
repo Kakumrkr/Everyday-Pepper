@@ -625,7 +625,12 @@ describe('tidying (D-5)', () => {
     const business = await newBusiness();
     const staged = await stageImport(db, business.owner, fixture('booksy.csv'));
     const done = await importFile(business, fixture('vagaro.csv'));
-    const later = new ManualClock(new Date(START.getTime() + 8 * 24 * 60 * 60_000));
+    // Staged batches are dated by the database's own clock (the real now), finished ones by the
+    // business's clock (START): 8 days after the later of the two passes both windows, whatever
+    // today's date is (a fixed START alone went stale once the calendar passed it).
+    const later = new ManualClock(
+      new Date(Math.max(Date.now(), START.getTime()) + 8 * 24 * 60 * 60_000),
+    );
     await tidyImports(db, later, 500);
     await expect(getImport(db, business.owner, staged.batch.id)).rejects.toBeInstanceOf(
       ImportNotFoundError,

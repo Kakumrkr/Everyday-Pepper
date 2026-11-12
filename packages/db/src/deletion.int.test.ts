@@ -19,7 +19,7 @@ import { insertClient } from './repositories/clients.js';
 import {
   cancelAccountDeletion,
   cancelCurrentTenantDeletion,
-  cancelPendingOutboxEmails,
+  cancelPendingEmailsAndTexts,
   deleteAccountIfDue,
   deleteCurrentTenantIfDue,
   deleteInvitesTo,
@@ -195,18 +195,30 @@ describe('business deletion (AC-W1-40, AC-W1-41)', () => {
     expect(await withTenant(db, tenantId, cancelCurrentTenantDeletion)).toBe(false);
   });
 
-  it('takes back the emails waiting to go out', async () => {
+  it('takes back the emails and texts waiting to go out (texts since S61)', async () => {
     const { tenantId } = await business('Quiet');
-    const cancelled = await withTenant(db, tenantId, (tx) =>
-      cancelPendingOutboxEmails(tx, new Date()),
+    await withTenant(db, tenantId, (tx) =>
+      insertOutboxMessage(tx, {
+        id: OutboxMessageIdSchema.parse(newId()),
+        type: 'sms',
+        dedupeKey: 'deletion-test.sms',
+        payload: Buffer.from('sealed'),
+        availableAt: new Date(),
+      }),
     );
-    expect(cancelled).toBe(1);
+    const cancelled = await withTenant(db, tenantId, (tx) =>
+      cancelPendingEmailsAndTexts(tx, new Date()),
+    );
+    expect(cancelled).toBe(2);
     const left = await withTenant(db, tenantId, (tx) =>
       tx
         .select({ status: outboxMessages.status, payload: outboxMessages.payload })
         .from(outboxMessages),
     );
-    expect(left).toEqual([{ status: 'cancelled', payload: null }]);
+    expect(left).toEqual([
+      { status: 'cancelled', payload: null },
+      { status: 'cancelled', payload: null },
+    ]);
   });
 
   it('refuses to delete a business that is not due, even in the database', async () => {

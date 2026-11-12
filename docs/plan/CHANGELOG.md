@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.37 — 2026-11-12
+- At the S61 brief (user): **Phase 14 (SMS) before the rest of Phase 13** ([PCR-011](changes/PCR-011.md)). S58a, S57, S58b and S60 wait for the domain; S61–S64 come first, built in sandbox until 10DLC. S61 splits into S61 (the channel's backend, [ADR-0065](../adr/0065-sms-channel.md), Twilio behind a port) and S61.2 (consent on screen). AC-X-57…63.
+
+  **Compatibility:** an additive enum value, tables and routes, off by default; no tool, prompt or event change; $0 of the AI budget.
+
 ## 0.36 — 2026-11-07
 - At the S59 brief (user): **our own support system, before deploy** ([PCR-010](changes/PCR-010.md)). S57 waits for the domain the user hasn't bought; S59 becomes five sessions: S59 help centre and support threads (owner side), S59.2 operator console (ADR-0062), S59.3 email both ways (Resend inbound, live in S57), S59.4 pilot metrics, S59.5 terms, privacy and the AI disclosure. S58 splits into S58a (local) and S58b (on the VPS). Order: S59–S59.5, S58a, S57, S58b, S60. AC-X-13…18.
 

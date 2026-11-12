@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-09 · **Plan version:** 0.36 ([PCR-010](changes/PCR-010.md)) · **Current phase:** 13 — Pilot readiness (Phase 12 gate met in S56b) → S59.5 done; next **S58a** (operate, local); S57 waits for the domain
+**Last updated:** 2026-11-12 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S61.2** (S61 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-(none)
+Nothing in progress.
 
 ## Last sessions
+- **S61 Phase 14 · SMS channel, backend (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PCR-011](changes/PCR-011.md), [PR #94](https://github.com/Kakumrkr/Everyday-Pepper/pull/94)). Full entry in [session-log.md](session-log.md).
+  - **Built:** Twilio behind an `SmsSender` port plus a sandbox; `sms` as an outbox channel (GSM-7 text, ≤ 3 segments, metered); consent records with the words as shown; STOP/START/HELP in the signed webhook's own request (opt-out for all of Pepper); quiet hours 8–20 without using an attempt; delivery status by a signed URL; the web forwarder now passes webhook signatures (Twilio, and Resend's for S57). AC-X-57…63.
+  - **Checks:** `pnpm check` green on the 2nd run (db function coverage 79.7%: helper tests added); affected integration 22/22 (an imports test gone stale by date fixed); no screen changed; review 10 of 10 fixed, security none ≥ 8.
 - **S59.5 Phase 13 · Terms, privacy, AI disclosure (2026-11-09)** ([ADR-0064](../adr/0064-legal-pages-and-ai-disclosure.md), [PR #93](https://github.com/Kakumrkr/Everyday-Pepper/pull/93)). Full entry in [session-log.md](session-log.md).
   - **Built:** `/terms` and `/privacy` from one typed source (`apps/web/lib/legal.ts`; draft banner, "On this page", anchors), linked from sign-up, help, the booking page and More; the AI line in AI-written client email (morning-pass nudges by `wordsBy`, chat notes), linking to `/privacy#ai` (top-up); tools at version 2; AC-X-54…56.
   - **Checks:** `pnpm check` green; affected integration 22/22; legal 2, help/booking/auth 23, screens 30; review 9 of 10 fixed, security none ≥ 8.
-- **S59.4.2 Phase 13 · Pilot metrics, part 2 (2026-11-08)** ([ADR-0062](../adr/0062-operator-console.md) Part 4 addendum, [PR #92](https://github.com/Kakumrkr/Everyday-Pepper/pull/92)). Full entry in [session-log.md](session-log.md).
-  - **Built:** weekly active owners, cards vs chat, AI approval/correction/undo, AI cost a business a month (priced high) and the rebook rate on `/ops/metrics` (`operator_ai_metrics`, migration 0074); every metric's ▲/▼ against the period before (top-up, kit `Trend`); AC-X-50…53.
-  - **Checks:** `pnpm check` green; affected integration 22/22; ops 2, gallery 11, screens 30; review 7 of 7 fixed, security none ≥ 8.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 
 ## Recent decisions
 Older ones (S25–S33) are in [decisions.md](decisions.md).
+- **S61 (user, 2026-11-12):** Phase 14 before the rest of Phase 13 (no domain yet, [PCR-011](changes/PCR-011.md)); at the brief "let's start with your recommendation… clean implementation" (Twilio; S61 split → S61.2 screens; fixtures + local sandbox, no Twilio account yet). **Claude:** opt-out per number for all of Pepper; CANCEL stays an opt-out (S63 uses Y); the words as shown kept with each consent; the review's 10 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.5 (user, 2026-11-09):** the line only on email whose words the AI wrote (nudges, notes; not review requests or win-back); the recommended wording; a link from the booking page; "world-class… improvise". **Claude:** policies as typed data (the one source), `wordsBy` set by the domain, tools at version 2, More → "Privacy and terms", one public frame. Full wording in [decisions.md](decisions.md).
 - **S59.4.2 (user, 2026-11-08):** "I'm leaving up to you… keep in mind before you start work" (D-1 no split; D-2 the definitions; D-3 chat tokens at the strong model's rate; D-4 rebook rate tracked vs the period before). **Claude:** a second definer, no temp table; the change kept only from enough cases; kit `Trend`; the review's 7 fixes. Full wording in [decisions.md](decisions.md).
 - **S59.4 (user, 2026-11-08):** "Go ahead with your recommendations and complete successful" (D-1 split → S59.4.2; D-2 aggregate-only definer; D-3 7/30 days, minimum 5; D-4 median ≤ 4 h, same day). **Claude:** support requests per business; cancellations timed by the audit log; answered offers; the review's 8 fixes. Full wording in [decisions.md](decisions.md).
@@ -96,18 +97,18 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
+| S61.2 | SMS consent on screen: booking-page opt-in, client profile, owner settings, HELP names the business | 14 | Screens 375 px light/dark; opt-in journey |
+| S62 | SMS reminders (incl. < 24 h bookings), confirm by text | 14 | Timing + idempotency tests |
+| S63 | Approve by text (signed single-use codes) | 14 | Replay and spoof tests |
+| S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
 | S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
-| S61 | SMS channel: adapter, consent, STOP/HELP, quiet hours, sandbox | 14 | Contract tests; STOP < 1 min |
-| S62 | SMS reminders (incl. < 24 h bookings), confirm by text | 14 | Timing + idempotency tests |
-| S63 | Approve by text (signed single-use codes) | 14 | Replay and spoof tests |
-| S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S65 | Stripe Connect Express onboarding, idempotent webhooks | 15 | Webhook replay/signature tests |
 | S66 | Deposits + card on file, Stripe-hosted fields, refunds | 15 | Test-mode pay/cancel/refund journeys |
 | S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |

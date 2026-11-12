@@ -15,6 +15,9 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 // read, written as Pepper's own CSVs (the `pepper` preset reads them back) and JSON, and
 // zipped. Pure: the service reads, audits and hands the bytes to the api.
 
+/** Written only when the business has consent records (S61). */
+const SMS_CONSENTS_FILE = 'text-consents.json';
+
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
  * (`=`, `+`, `-`, `@`, a tab or a carriage return first) gets a leading `'`, except a plain
@@ -71,6 +74,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
       .map((name) => `${name}  More rows of the file before it (10,000 rows a file)`),
     ...(data.support.screenshots.length > 0
       ? ['support/screenshots/  The screenshots sent with your requests, named in support.json']
+      : []),
+    ...(data.smsConsents.length > 0
+      ? [`${SMS_CONSENTS_FILE}  Who agreed to your texts, when, how and the words they saw`]
       : []),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
@@ -280,6 +286,24 @@ export function buildBusinessExport(
       ),
     ],
   ];
+
+  // Consents to the business's texts (S61, ADR-0065 §7): its TCPA records, when it has any.
+  if (data.smsConsents.length > 0) {
+    jsonFiles.push([
+      SMS_CONSENTS_FILE,
+      json(
+        data.smsConsents.map((consent) => ({
+          clientId: consent.clientId,
+          phone: consent.phone,
+          how: consent.source === 'booking_page' ? 'booking page' : 'a team member, for themselves',
+          words: consent.shownText,
+          wordingVersion: consent.wordingVersion,
+          givenAt: at(consent.givenAt),
+          revokedAt: consent.revokedAt === null ? null : at(consent.revokedAt),
+        })),
+      ),
+    ]);
+  }
 
   const files: Zippable = {};
   const add = (name: string, text: string) => {
