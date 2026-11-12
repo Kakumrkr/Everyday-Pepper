@@ -78,7 +78,7 @@ jobs:
             if docs_only "$since"; then
               verdict="$(gh api "repos/$GITHUB_REPOSITORY/commits/$BEFORE/check-runs?per_page=100" \
                 --jq '[.check_runs[]
-                  | select(.name | test("^(Lint, typecheck, test, build|Integration|E2E)"))]
+                  | select(.name | test("^(Lint, typecheck, test, build|Integration \\(.*\\)|E2E smoke \\(Docker Compose\\))$"))]
                   | group_by(.name) | map(max_by(.started_at))
                   | if length == 4 and all(.conclusion == "success" or .conclusion == "skipped")
                     then "passed" else "no" end' 2>/dev/null || echo no)"
@@ -188,14 +188,22 @@ jobs:
           AFFECTED: ${{ needs.changes.outputs.all != 'true' && '--affected' || '' }}
         run: pnpm turbo run test:integration $AFFECTED --filter=@pepper/ai
 
-  e2e:
-    name: E2E smoke (Docker Compose)
+  # The browser journeys take ~19 minutes on one 2-CPU runner (one worker: the stack shares the
+  # CPUs), so they run on three runners at once, each with its own stack. Each shard takes a third
+  # of the phone project and a third of the desktop project (split apart, as the desktop specs
+  # come last and are the long ones; screens.spec.ts splits by test in CI).
+  e2e-shard:
+    name: E2E shard ${{ matrix.shard }}/3
     needs: changes
     if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
     runs-on: ubuntu-latest
-    # Flows run on the phone project; the desktop project runs the specs that set widths or check
-    # the desktop layout (e2e/playwright.config.ts). Plus ~5 min to build the stack.
-    timeout-minutes: 35
+    # ~5 min to build the stack, ~6–7 min of journeys.
+    timeout-minutes: 25
+    strategy:
+      # Every shard runs to the end, so one red run shows every failure.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -225,8 +233,21 @@ jobs:
           # The component gallery, for its screenshot tests (S40, e2e/tests/gallery.spec.ts).
           PEPPER_GALLERY: '1'
 
-      - name: Smoke test
-        run: pnpm test:e2e
+      - name: Build the test helpers' packages
+        run: pnpm turbo run build --filter=@pepper/e2e^... --output-logs=errors-only
+
+      # Both projects run even when the first fails; the step fails if either did.
+      - name: Journeys (this shard)
+        env:
+          SHARD: ${{ matrix.shard }}/3
+        run: |
+          status=0
+          for project in mobile desktop; do
+            PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report/$project" \
+              pnpm --filter @pepper/e2e exec playwright test \
+              --project="$project" --shard="$SHARD" --output="test-results/$project" || status=1
+          done
+          exit "$status"
 
       - name: Stack logs
         if: failure() || cancelled()
@@ -236,7 +257,7 @@ jobs:
         if: failure() || cancelled()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: playwright-report
+          name: playwright-report-${{ matrix.shard }}
           path: |
             e2e/playwright-report
             e2e/test-results
@@ -245,3 +266,19 @@ jobs:
       - name: Stop the stack
         if: always()
         run: docker compose down --volumes
+
+  # The one check branch protection requires (and the docs-only skip reads): green only when
+  # every shard is, skipped (counted as passed) when the shards were skipped for docs.
+  e2e:
+    name: E2E smoke (Docker Compose)
+    needs: [changes, e2e-shard]
+    if: ${{ !cancelled() && needs.changes.outputs.code != 'false' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every shard passed
+        env:
+          SHARDS: ${{ needs.e2e-shard.result }}
+        run: |
+          echo "Shards: $SHARDS"
+          [ "$SHARDS" = 'success' ]

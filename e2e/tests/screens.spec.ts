@@ -117,6 +117,11 @@ async function fixConsentMoments(part: Locator): Promise<void> {
   }
 }
 
+// CI splits the suite across machines (ci.yml): each test here is a long one of its own, so it
+// may go to any shard. Only there: one worker each, so two widths of a test that shares data
+// (the team's saved replies) never run side by side.
+if (process.env['CI']) test.describe.configure({ mode: 'parallel' });
+
 const SCHEMES = ['light', 'dark'] as const;
 const SHOT = { fullPage: true, animations: 'disabled', maxDiffPixelRatio: 0.01 } as const;
 /**

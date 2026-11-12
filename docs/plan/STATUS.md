@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S62.2** (brief approved 2026-11-12): Texts and reminders on screen, plus a CI speed-up (user's choice: shard E2E ×3 + Docker layer cache, own commit in this PR; not recorded elsewhere at the user's request).
 - Tasks: 1 AC-X-77…79 · 2 `/more/texts` screen · 3 profile last-text line · 4 "Confirmed by text" on the sheet and the day card (top-up) · 5 settings journey + screenshots · 6 CI.
-- Done: 1 ACs · 2 `/more/texts` + More row · 3 last-text line · 4 "Confirmed by text" (sheet + day card; unit only: the sandbox webhook can't take a "C") · 5 `texts-settings.spec.ts` 2/2, baselines more, more-texts, client-texts. Next: 6 (CI: shard E2E ×3; the layer cache needs new third-party actions, ask the user).
+- Done: 1 ACs · 2 `/more/texts` + More row · 3 last-text line · 4 "Confirmed by text" (sheet + day card; unit only: the sandbox webhook can't take a "C") · 5 `texts-settings.spec.ts` 2/2, baselines more, more-texts, client-texts. 6a CI: E2E on 3 shard runners (phone and desktop each split), gate job keeps the required name; jq verdict tested. Next: 6b layer cache (asked the user), then close.
 
 ## Last sessions
 - **S62 Phase 14 · SMS reminders + confirm by text, backend (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md) "Built in S62", [PR #96](https://github.com/Kakumrkr/Everyday-Pepper/pull/96)). Full entry in [session-log.md](session-log.md).
