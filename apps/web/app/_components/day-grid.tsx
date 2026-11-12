@@ -200,7 +200,7 @@ function Entry({
       <span className="flex items-center gap-1 font-semibold">
         <span className="truncate">{entry.client}</span>
         {confirmed ? (
-          // A 30-minute block has room for two lines only: the tick says it; the words are read.
+          // A 30-minute block has room for two lines only: the tick shows it; the block's name says it.
           <Icon name="check" className="size-3 shrink-0 text-ok" />
         ) : null}
       </span>

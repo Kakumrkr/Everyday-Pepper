@@ -50,14 +50,14 @@ export default async function MorePage() {
       ? await currentJson('/v1/feed', FeedResponseSchema)
       : null;
   // A business or an account being deleted says so here (S51.2, ADR-0054).
-  // Texts and reminders (S62.2): whoever reads the calendar sees what clients get.
+  // Texts and reminders (S62.2): whoever reads the calendar sees what clients get; read beside
+  // the rest, so the row's line costs no extra wait.
+  const readsCalendar = current?.permissions.includes('calendar.read') === true;
   const [businessDeletion, accountDeletion, support, reminders] = await Promise.all([
     current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
     currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
     current === null ? null : currentSupportUnread(),
-    current?.permissions.includes('calendar.read') === true
-      ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema)
-      : null,
+    readsCalendar ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema) : null,
   ]);
   const unread = support ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
@@ -137,7 +137,7 @@ export default async function MorePage() {
           )}
         </List>
       </section>
-      {current?.permissions.includes('calendar.read') === true ? (
+      {readsCalendar ? (
         <section aria-labelledby="more-clients">
           <h2 id="more-clients" className="m-0 mb-1 type-heading">
             Your clients

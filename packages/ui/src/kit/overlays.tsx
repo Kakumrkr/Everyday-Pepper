@@ -212,17 +212,21 @@ export function Segmented({
   options,
   value,
   onValueChange,
+  disabled = false,
 }: {
   label: string;
   options: readonly SegmentOption[];
   value: string;
   onValueChange: (value: string) => void;
+  /** While a change is saving: every option shown, none taken. */
+  disabled?: boolean;
 }) {
   return (
     <ToggleGroup.Root
       type="single"
       aria-label={label}
       value={value}
+      disabled={disabled}
       // Pressing the chosen option again would clear it; a segmented control always has one.
       onValueChange={(next) => {
         if (next !== '') onValueChange(next);
@@ -237,6 +241,7 @@ export function Segmented({
             'min-h-11 flex-1 rounded-pill bg-transparent px-4 py-0 type-label whitespace-nowrap text-ink-2',
             'transition motion-base ease-standard hover:text-ink',
             'data-[state=on]:bg-surface data-[state=on]:text-ink data-[state=on]:shadow-raised',
+            'disabled:cursor-not-allowed disabled:opacity-60',
             FOCUS_RING,
           )}
         >

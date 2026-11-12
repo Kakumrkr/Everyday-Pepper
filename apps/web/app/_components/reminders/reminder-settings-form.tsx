@@ -47,15 +47,16 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
     setBusy(true);
     const answer = await sendJson('PATCH', REMINDER_SETTINGS_PATH, patch);
     setBusy(false);
-    const parsed = answer.ok ? ReminderSettingsViewSchema.safeParse(answer.data) : null;
-    if (parsed?.success === true) {
-      setSettings(parsed.data.settings);
-      const text = savedNote(patch, parsed.data.settings);
+    if (answer.ok) {
+      // Saved: the api's answer when it reads, else the change as sent (the api took it).
+      const parsed = ReminderSettingsViewSchema.safeParse(answer.data);
+      const saved = parsed.success ? parsed.data.settings : withPatch(before, patch);
+      setSettings(saved);
+      const text = savedNote(patch, saved);
       setNote((last) => ({ id: (last?.id ?? 0) + 1, text, tone: 'note' }));
     } else {
       setSettings(before);
-      const text = answer.ok ? 'Something went wrong. Nothing changed.' : answer.message;
-      setNote((last) => ({ id: (last?.id ?? 0) + 1, text, tone: 'error' }));
+      setNote((last) => ({ id: (last?.id ?? 0) + 1, text: answer.message, tone: 'error' }));
     }
   }
 
@@ -114,9 +115,10 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
                       label: leadLabel(hours),
                     }))}
                     value={String(settings.sameDayLeadHours)}
+                    disabled={busy}
                     onValueChange={(value) => {
                       const hours = SAME_DAY_LEADS.find((lead) => String(lead) === value);
-                      if (hours !== undefined && !busy) void change({ sameDayLeadHours: hours });
+                      if (hours !== undefined) void change({ sameDayLeadHours: hours });
                     }}
                   />
                 </div>

@@ -85,7 +85,7 @@ export function BookingSheet({
         <button
           type="button"
           data-testid="booking-block"
-          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}`}
+          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}${confirmedByText(booking) === null ? '' : ', confirmed by text'}`}
           className={cx(className, 'cursor-pointer text-left font-normal')}
           style={style}
         >
