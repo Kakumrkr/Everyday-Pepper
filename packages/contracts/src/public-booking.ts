@@ -5,6 +5,7 @@ import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
 import { ClientEmailSchema, PhoneSchema } from './clients.js';
 import { LocalDateSchema } from './rules.js';
+import { SmsConsentWordingVersionSchema, SmsPhoneSchema } from './sms.js';
 import { BrandColorSchema, TenantSlugSchema, TimeZoneSchema } from './tenancy.js';
 import { UtcDateTimeSchema } from './time.js';
 
@@ -77,10 +78,19 @@ export const PublicBusinessSchema = z
   .extend(BusinessProfileSchema.shape);
 export type PublicBusiness = z.infer<typeof PublicBusinessSchema>;
 
+/** What a ticked SMS box with a number Pepper can't text is told, on the phone field (AC-X-64). */
+export const SMS_OPT_IN_PHONE_MESSAGE =
+  'Texts go to US and Canadian numbers only. Use one, or untick the box.';
+/** What a ticked SMS box without a phone is told, on the phone field (AC-X-64). */
+export const SMS_OPT_IN_NO_PHONE_MESSAGE =
+  'Add your mobile number to get texts, or untick the box.';
+
 /**
  * `POST /v1/public/businesses/:slug/booking-requests`: the time the client picked and their
  * details. No staff member: anyone who offers the service. The time is not held; it is
- * checked when asking and again when the code is confirmed.
+ * checked when asking and again when the code is confirmed. `smsConsent` (S61.2, AC-X-64):
+ * the wording version of the SMS box the client ticked (the page names the words it showed),
+ * `null` when unticked; it needs a number Pepper can text, and is recorded only on confirmation.
  */
 export const BookingRequestInputSchema = z
   .object({
@@ -90,8 +100,17 @@ export const BookingRequestInputSchema = z
     name: z.string().trim().min(1).max(120),
     email: z.string().trim().max(254).pipe(ClientEmailSchema),
     phone: PhoneSchema.nullable().default(null),
+    smsConsent: SmsConsentWordingVersionSchema.nullable().default(null),
   })
-  .strict();
+  .strict()
+  .superRefine((request, context) => {
+    if (request.smsConsent === null) return;
+    if (request.phone === null) {
+      context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_NO_PHONE_MESSAGE });
+    } else if (!SmsPhoneSchema.safeParse(request.phone).success) {
+      context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_PHONE_MESSAGE });
+    }
+  });
 export type BookingRequestInput = z.input<typeof BookingRequestInputSchema>;
 export type BookingRequest = z.output<typeof BookingRequestInputSchema>;
 

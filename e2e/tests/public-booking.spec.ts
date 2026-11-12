@@ -1,5 +1,6 @@
 import {
   BookingsResponseSchema,
+  ClientsPageSchema,
   CurrentBusinessResponseSchema,
   ServiceSchema,
   StaffMemberSchema,
@@ -165,6 +166,83 @@ test('a client books on the page in the business’s color, confirms the emailed
   );
   expect((await bookings())[0]?.status).toBe('cancelled');
   await expect(emailTo(email, 'is cancelled')).resolves.toContain('Hi Ana');
+});
+
+test('AC-X-64…67: a client says yes to texts while booking, and the owner sees the exact words, then stops them', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(150_000);
+  await onboardOwner(page, { business: 'Southside Cuts' });
+  const slug = await salon(page);
+
+  const client = await anotherPerson(browser, baseURL);
+  const email = `${unique('texts')}@example.test`;
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await pickTime(client, 1);
+  await expect(client.getByRole('heading', { name: 'Your details' })).toBeVisible();
+
+  // No phone, no box: it appears with the number, never ticked for the client.
+  const box = client.getByRole('checkbox', { name: /^Text me appointment confirmations/ });
+  await expect(box).toHaveCount(0);
+  await client.getByLabel('Full name').fill('Ana Ruiz');
+  await client.getByLabel('Email').fill(email);
+  await client.getByLabel('Phone (optional)').fill('+44 7700 900123');
+  await expect(box).not.toBeChecked();
+  await expect(box).toHaveAccessibleName(
+    'Text me appointment confirmations and reminders from Southside Cuts at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+  );
+  await expect(
+    client.getByTestId('sms-opt-in').getByRole('link', { name: 'Terms' }),
+  ).toHaveAttribute('href', '/terms#texts');
+  // Ticked with a number outside the US and Canada: told on the field what to do.
+  await box.check();
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByLabel('Phone (optional)')).toHaveAccessibleDescription(
+    'Texts go to US and Canadian numbers only. Use one, or untick the box.',
+  );
+  await client.getByLabel('Phone (optional)').fill('(555) 234-5678');
+  await client.getByRole('button', { name: 'Send my code' }).click();
+
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  await client.getByLabel('Code').fill(code);
+  await client.getByRole('button', { name: 'Confirm booking' }).click();
+  await expect(client.getByRole('heading', { name: /You’re booked, Ana/ })).toBeVisible();
+
+  // The owner: on the profile, since when and how, and the words exactly as shown.
+  const found = ClientsPageSchema.parse(
+    await (await page.request.get('/v1/clients?search=Ana')).json(),
+  );
+  const ana = found.clients.find((each) => each.email === email);
+  expect(ana).toBeDefined();
+  await page.goto(`/clients/${ana?.id ?? ''}`);
+  const texts = page.getByTestId('client-texts');
+  await expect(
+    texts.getByText(/^Said yes [A-Z][a-z]{2} \d{1,2}, \d{4} on your booking page\.$/),
+  ).toBeVisible();
+  await expect(texts.getByText('On', { exact: true })).toBeVisible();
+  await (await hydrated(texts.getByRole('button', { name: 'What they agreed to' }))).click();
+  const record = page.getByRole('dialog', { name: 'What Ana Ruiz agreed to' });
+  await expect(record.getByRole('blockquote')).toHaveText(
+    'Text me appointment confirmations and reminders from Southside Cuts at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+  );
+  await expect(record.getByText('Ticked the box on your booking page')).toBeVisible();
+  await expect(record.getByText('(555) 234-5678')).toBeVisible();
+  await page.keyboard.press('Escape');
+
+  // Stop texts: asked once, then off; only the client can turn them back on.
+  await texts.getByRole('button', { name: 'Stop texts' }).click();
+  const confirm = page.getByRole('dialog', { name: 'Stop texts to Ana Ruiz?' });
+  await expect(confirm.getByText(/Only Ana Ruiz can turn texts back on/)).toBeVisible();
+  await confirm.getByRole('button', { name: 'Stop texts' }).click();
+  await expect(texts.getByText(/^Texts stopped [A-Z][a-z]{2} \d{1,2}, \d{4}\.$/)).toBeVisible();
+  await expect(texts.getByRole('button', { name: 'Stop texts' })).toHaveCount(0);
+  await expect(texts.getByRole('button', { name: /turn.*on/i })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByTestId('client-texts').getByText('Off', { exact: true })).toBeVisible();
 });
 
 test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered phone books again without a code, and each step is counted with nothing personal', async ({

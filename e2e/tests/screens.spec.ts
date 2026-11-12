@@ -3,6 +3,7 @@ import {
   SupportScreenshotSchema,
   SupportSavedReplyListSchema,
   ClientSchema,
+  ClientsPageSchema,
   CurrentBusinessResponseSchema,
   ServiceSchema,
   ServicesResponseSchema,
@@ -415,6 +416,10 @@ for (const width of WIDTHS) {
     const email = `${unique('ana')}@example.test`;
     await page.getByLabel('Full name').fill('Ana Ruiz');
     await page.getByLabel('Email').fill(email);
+    // S61.2 (AC-X-64): with a phone, the SMS box, unticked until the client ticks it.
+    await page.getByLabel('Phone (optional)').fill('(555) 234-5678');
+    await page.getByRole('checkbox', { name: /^Text me appointment/ }).check();
+    await shots('book-details-sms', [page.getByText(DATED), page.getByText(email)]);
     await page.getByRole('button', { name: 'Send my code' }).click();
     await expect(page.getByRole('heading', { name: 'Check your email' })).toBeVisible();
     if (phone) await expectStickyAtTheBottom(page, 'Confirm booking');
@@ -440,6 +445,41 @@ for (const width of WIDTHS) {
       page.getByText('This unsubscribe link isn’t valid.', { exact: false }),
     ).toBeVisible();
     await shots('unsubscribe-invalid');
+
+    // S61.2 (AC-X-66): Ana's profile with her yes to texts, and the words she agreed to.
+    const ana = ClientsPageSchema.parse(
+      await (await page.request.get('/v1/clients?search=Ana')).json(),
+    ).clients.find((each) => each.email === email);
+    await page.goto(`/clients/${ana?.id ?? ''}`);
+    const texts = page.getByTestId('client-texts');
+    await expect(texts.getByText(/^Said yes /)).toBeVisible();
+    // The section and the sheet alone: the profile around them shows the test's unique email,
+    // whose length (and so its wrapping at 375 px) differs from run to run.
+    if (phone) await expectTapTargets(page, 'a profile with texts on');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect.soft(texts).toHaveScreenshot(`client-texts-${String(width)}-${scheme}.png`, {
+        animations: 'disabled',
+        maxDiffPixelRatio: SHOT.maxDiffPixelRatio,
+        mask: [texts.getByText(/^Said yes /)],
+      });
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+    await (await hydrated(texts.getByRole('button', { name: 'What they agreed to' }))).click();
+    const record = page.getByRole('dialog', { name: 'What Ana Ruiz agreed to' });
+    await expect(record.getByRole('blockquote')).toBeVisible();
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect
+        .soft(record)
+        .toHaveScreenshot(`client-texts-record-${String(width)}-${scheme}.png`, {
+          animations: 'disabled',
+          maxDiffPixelRatio: SHOT.maxDiffPixelRatio,
+          mask: [record.getByText(/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/)],
+        });
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+    await page.keyboard.press('Escape');
 
     // S47.2 (AC-W8-12): the page with its logo, cover and three photos of the work.
     const origin = new URL(page.url()).origin;

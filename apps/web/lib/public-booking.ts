@@ -5,6 +5,9 @@ import {
   OfferTokenSchema,
   parseDate,
   PhoneSchema,
+  SMS_OPT_IN_NO_PHONE_MESSAGE,
+  SMS_OPT_IN_PHONE_MESSAGE,
+  SmsPhoneSchema,
   type BookingFunnelStep,
   type CivilDate,
   type PublicOffer,
@@ -200,8 +203,16 @@ export type DetailsCheck =
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-/** Checks the details form; US phone numbers may be typed locally. */
-export function checkDetails(form: { name: string; email: string; phone: string }): DetailsCheck {
+/**
+ * Checks the details form; US phone numbers may be typed locally. `smsOptIn` (S61.2): the SMS
+ * box is ticked, so the phone must be one Pepper can text (US or Canada), as the API checks too.
+ */
+export function checkDetails(form: {
+  name: string;
+  email: string;
+  phone: string;
+  smsOptIn?: boolean;
+}): DetailsCheck {
   const name = form.name.trim();
   const email = form.email.trim();
   const phoneText = form.phone.trim();
@@ -215,6 +226,9 @@ export function checkDetails(form: { name: string; email: string; phone: string 
   }
   if (phone !== null && !PhoneSchema.safeParse(phone).success) {
     errors.phone = 'Enter a phone number like (555) 123-4567, or leave it empty.';
+  } else if (form.smsOptIn === true) {
+    if (phone === null) errors.phone = SMS_OPT_IN_NO_PHONE_MESSAGE;
+    else if (!SmsPhoneSchema.safeParse(phone).success) errors.phone = SMS_OPT_IN_PHONE_MESSAGE;
   }
   return Object.keys(errors).length > 0
     ? { ok: false, errors }

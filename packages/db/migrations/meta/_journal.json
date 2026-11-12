@@ -533,6 +533,13 @@
       "when": 1794448288677,
       "tag": "0075_sms_channel",
       "breakpoints": true
+    },
+    {
+      "idx": 76,
+      "version": "7",
+      "when": 1794452968224,
+      "tag": "0076_sms_consent_on_screen",
+      "breakpoints": true
     }
   ]
 }

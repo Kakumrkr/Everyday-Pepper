@@ -1,6 +1,8 @@
 import {
   aiDisclosureSentence,
   PRIVACY_AI_SECTION,
+  SMS_AI_DISCLOSURE_LEAD,
+  SMS_TERMS_SECTION,
   PRIVACY_PATH,
   TERMS_PATH,
 } from '@pepper/contracts';
@@ -38,7 +40,7 @@ export const LEGAL_DRAFT_NOTICE =
   'It describes how Pepper works today and waits for a lawyer’s review, so it isn’t in force yet. The company’s legal name, address and governing state are added before it is.';
 
 /** The date both texts last changed. */
-const UPDATED = '2026-11-09';
+const UPDATED = '2026-11-12';
 
 /** Where a person writes to us: the help centre's form, open without an account. */
 const CONTACT = { text: 'Write to us', href: HELP_CONTACT_PATH } as const;
@@ -131,6 +133,9 @@ export const PRIVACY: LegalDocument = {
         p(
           'It means the business used Pepper’s AI to put that email’s words together: either an invitation to come back, written from a few facts (your first name, the service, when you last visited and who usually looks after you), or a note the business asked it to send you. The business chose to send it, and any times and links in it come from the business’s own calendar, not from the AI. The AI never sees your email address or phone number.',
         ),
+        p(
+          `A text whose words the AI wrote says so too: its last line starts “${SMS_AI_DISCLOSURE_LEAD}” and links here.`,
+        ),
         list(
           'Don’t want invitations like it? Each has an unsubscribe link at the bottom, and one tap stops them all from that business. A note about your appointment comes straight from the business: reply to it, or ask them.',
           'Questions about what the business keeps about you? Ask the business, or write to us and we will pass your question on.',
@@ -142,6 +147,21 @@ export const PRIVACY: LegalDocument = {
           'The assistant never reads or changes the database itself. Everything it does goes through the same checks as the app’s screens, follows the business’s settings for what it may do without asking, is recorded with its reason, and can be undone where possible. When a business imports a file, the AI may be shown the column names and a masked sample of each column to suggest which is which.',
         ),
         p('Development and testing use made-up data only.'),
+      ],
+    },
+    {
+      id: SMS_TERMS_SECTION,
+      heading: 'Text messages',
+      blocks: [
+        p(
+          'A business can text you about your appointments (confirmations, reminders and changes) only if you said yes: by ticking the box when you booked online. It is never needed to book. We keep a record of that yes for the business: the number, when, how, and the exact words you agreed to.',
+        ),
+        list(
+          'Reply STOP to any text to stop them all, from every business that uses Pepper, at once. Reply START to get them again, HELP for help.',
+          'Message frequency varies with your appointments. Message and data rates may apply.',
+          'Texts go through our text message provider (Twilio), which receives your number and the message to deliver it.',
+          'Your mobile number and your yes are never shared with or sold to anyone for their own marketing.',
+        ),
       ],
     },
     {
@@ -189,7 +209,8 @@ export const PRIVACY: LegalDocument = {
           'Email delivery: Resend (booking emails, reminders, account and support email).',
           'AI processing: OpenAI.',
           'Error and performance monitoring: Sentry and Grafana Cloud, without message content.',
-          'Later, only when a business turns them on: a text message provider, Stripe for deposits and card payments, Google for calendar sync.',
+          'Text messages: Twilio, for a client who said yes to texts.',
+          'Later, only when a business turns them on: Stripe for deposits and card payments, Google for calendar sync.',
         ),
         p(
           'Each receives only what it needs to do its job. We may disclose information if the law requires it, to protect someone’s safety, or as part of a sale or merger of Pepper, with this policy continuing to apply.',
@@ -320,7 +341,7 @@ export const TERMS: LegalDocument = {
         list(
           'Pepper’s assistant uses an AI model to suggest and prepare work. It can be wrong. You choose what it may do without asking you; anything that reaches a client asks first unless you choose otherwise.',
           'Every action it takes is recorded with its reason, and most can be undone. You are responsible for the messages and bookings you approve or allow it to make.',
-          'An email to a client whose words the AI wrote says so in one line, with a link to how Pepper works. You agree not to remove or hide it.',
+          'An email or text to a client whose words the AI wrote says so in one line, with a link to how Pepper works. You agree not to remove or hide it.',
           'Don’t use the assistant for medical, legal or financial advice, or to send anything unlawful.',
         ),
         link('How the assistant handles information', `${PRIVACY_PATH}#${PRIVACY_AI_SECTION}`),
@@ -342,6 +363,22 @@ export const TERMS: LegalDocument = {
         p(
           'Pepper sends booking confirmations, reminders and, when you choose, rebooking, review and other emails on your behalf and in your business’s name. Marketing emails carry your postal address and an unsubscribe link, and Pepper honours every unsubscribe. You remain the sender responsible for their content.',
         ),
+      ],
+    },
+    {
+      id: SMS_TERMS_SECTION,
+      heading: 'Text messages',
+      blocks: [
+        p(
+          'Appointment texts: a business that uses Pepper texts its clients who said yes (confirmations, reminders and changes to their appointments), from Pepper’s number in the business’s name.',
+        ),
+        list(
+          'Message frequency varies. Message and data rates may apply.',
+          'Reply STOP to stop all texts from Pepper’s number, START to get them again, HELP for help. You can also write to us.',
+          'Carriers are not liable for delayed or undelivered messages.',
+          'Businesses: text only clients who said yes, about their appointments; never remove or change the opt-out words; and stop texting anyone who asks you to.',
+        ),
+        link('How we handle your number', `${PRIVACY_PATH}#${SMS_TERMS_SECTION}`),
       ],
     },
     {

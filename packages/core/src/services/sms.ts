@@ -1,6 +1,10 @@
 import {
   classifySmsKeyword,
   ClientIdSchema,
+  ClientTextsSchema,
+  SmsConsentSourceSchema,
+  SmsConsentWordingVersionSchema,
+  UtcDateTimeSchema,
   OutboxDedupeKeySchema,
   OutboxMessageIdSchema,
   OutboxSmsSchema,
@@ -11,6 +15,8 @@ import {
   smsSendableAt,
   TenantIdSchema,
   type AuditActor,
+  type ClientId,
+  type ClientTexts,
   type OutboxDedupeKey,
   type OutboxMessageId,
   type OutboxSmsInput,
@@ -23,20 +29,29 @@ import {
   advanceSmsDelivery,
   appendAuditEntry,
   findActiveSmsConsent,
+  findClient,
   findCurrentTenant,
   insertOutboxMessage,
   insertSmsConsent,
   insertSmsKeywordEvent,
   isSmsOptedOut,
+  listActiveSmsConsentsForClient,
+  listSmsConsentsForClient,
   newId,
   revokeSmsConsent,
+  smsConsentBusinesses,
+  withMember,
   withSmsInbound,
   withTenant,
   type Database,
   type SmsProvider,
   type TenantTx,
 } from '@pepper/db';
+import { auditActorOf, requirePermission, type Actor } from '../actor.js';
+import { systemClock, type Clock } from '../clock.js';
+import { ClientNotFoundError } from '../errors.js';
 import { sealOutboxContent } from '../outbox.js';
+import { can } from '../permissions.js';
 
 // The SMS channel's rules (S61, ADR-0065): who may be texted, when, and what a reply asks for.
 // Callers queue with `queueSms` inside their change's transaction; delivery
@@ -149,6 +164,101 @@ export async function revokeSmsConsentFor(
   return true;
 }
 
+/**
+ * Where a client's texts stand, for their profile (S61.2, AC-X-66): their latest consent, with
+ * the words exactly as shown. Staff see only their own clients (`ClientNotFoundError`).
+ */
+export async function getClientTexts(
+  db: Database,
+  actor: Actor,
+  clientId: ClientId,
+): Promise<ClientTexts> {
+  requirePermission(actor, 'clients.read');
+  const id = ClientIdSchema.parse(clientId);
+  return withMember(db, actor.context, async (tx) => {
+    const client = await findClient(tx, id);
+    if (client === undefined) throw new ClientNotFoundError();
+    return clientTextsIn(tx, actor, client);
+  });
+}
+
+/**
+ * Stops a client's texts from the profile (S61.2, AC-X-67): their consents in force are revoked
+ * (audited as the member), so no text goes to the number from the next delivery. Only the
+ * client can turn texts back on, by ticking the booking page's box again (START only ends a
+ * STOP; it gives no consent). Answers the new status;
+ * nothing in force: the status unchanged.
+ */
+export async function stopClientTexts(
+  db: Database,
+  actor: Actor,
+  clientId: ClientId,
+  options: { clock?: Clock } = {},
+): Promise<ClientTexts> {
+  requirePermission(actor, 'clients.manage');
+  const id = ClientIdSchema.parse(clientId);
+  const now = new Date((options.clock ?? systemClock).now());
+  return withMember(db, actor.context, async (tx) => {
+    const client = await findClient(tx, id);
+    if (client === undefined) throw new ClientNotFoundError();
+    // Every number the client said yes on (they may have booked with two).
+    for (const consent of await listActiveSmsConsentsForClient(tx, id)) {
+      await revokeSmsConsentFor(tx, consent.phone, {
+        actor: auditActorOf(actor),
+        requestId: actor.requestId,
+        now,
+      });
+    }
+    return clientTextsIn(tx, actor, client);
+  });
+}
+
+/**
+ * The client's texts, from their consents: on while any number they said yes on is in force and
+ * not opted out (that one shown); opted out when every such number replied STOP; else the latest
+ * record, stopped.
+ */
+async function clientTextsIn(
+  tx: TenantTx,
+  actor: Actor,
+  client: { id: string; phone: string | null },
+): Promise<ClientTexts> {
+  const textable = SmsPhoneSchema.safeParse(client.phone ?? '').success;
+  const inForce = await listActiveSmsConsentsForClient(tx, client.id);
+  let latest = inForce[0];
+  let status: ClientTexts['status'] = 'stopped';
+  if (latest !== undefined) {
+    status = 'opted_out';
+    for (const consent of inForce) {
+      if (!(await isSmsOptedOut(tx, consent.phone))) {
+        latest = consent;
+        status = 'on';
+        break;
+      }
+    }
+  } else {
+    latest = (await listSmsConsentsForClient(tx, client.id, 1))[0];
+  }
+  if (latest === undefined) {
+    return ClientTextsSchema.parse({ status: 'never', textable, consent: null, canStop: false });
+  }
+  const active = latest.revokedAt === null;
+  return ClientTextsSchema.parse({
+    status,
+    textable,
+    consent: {
+      phone: latest.phone,
+      source: SmsConsentSourceSchema.parse(latest.source),
+      wordingVersion: SmsConsentWordingVersionSchema.parse(latest.wordingVersion),
+      words: latest.shownText,
+      givenAt: UtcDateTimeSchema.parse(latest.givenAt.toISOString()),
+      stoppedAt:
+        latest.revokedAt === null ? null : UtcDateTimeSchema.parse(latest.revokedAt.toISOString()),
+    },
+    canStop: active && can(actor.context, 'clients.manage'),
+  });
+}
+
 async function auditRevoked(
   tx: TenantTx,
   id: string,
@@ -187,6 +297,7 @@ export interface InboundSmsResult {
  * Handles a text to Pepper's number in the webhook's own request (ADR-0065 §5, AC-X-59): STOP,
  * START or HELP is recorded once and answered; anything else is neither stored nor answered (two-way
  * texting is V1.1). After this returns for a STOP, the next delivery to the number is dropped.
+ * The reply names the businesses the number said yes to (S61.2).
  */
 export async function handleInboundSms(
   db: Database,
@@ -196,17 +307,22 @@ export async function handleInboundSms(
   const keyword = classifySmsKeyword(sms.body);
   const from = SmsPhoneSchema.safeParse(sms.from);
   if (keyword === null || !from.success) return { keyword, reply: null };
-  const recorded = await withSmsInbound(db, (tx) =>
-    insertSmsKeywordEvent(tx, {
+  const businesses = await withSmsInbound(db, async (tx) => {
+    const recorded = await insertSmsKeywordEvent(tx, {
       provider: sms.provider,
       eventId: sms.eventId,
       phone: from.data,
       keyword,
       origin: 'keyword',
       receivedAt: sms.receivedAt,
-    }),
-  );
-  return { keyword, reply: recorded ? smsKeywordReply(keyword, options.helpUrl) : null };
+    });
+    // The reply names who texts this number (S61.2, AC-X-68): names only, never a client.
+    return recorded ? smsConsentBusinesses(tx, from.data) : null;
+  });
+  return {
+    keyword,
+    reply: businesses === null ? null : smsKeywordReply(keyword, options.helpUrl, businesses),
+  };
 }
 
 /**

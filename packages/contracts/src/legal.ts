@@ -9,6 +9,12 @@ export const PRIVACY_PATH = '/privacy';
 /** The privacy policy's "Pepper, the AI assistant" section: its `id` and the emails' `#…`. */
 export const PRIVACY_AI_SECTION = 'ai';
 
+/**
+ * The text-message sections of both pages (S61.2): what the booking page's SMS box links to,
+ * the carriers' required terms (who texts, how often, rates, STOP, HELP) and privacy.
+ */
+export const SMS_TERMS_SECTION = 'texts';
+
 /** The one sentence an email whose words the AI wrote carries above its footer (AC-X-55). */
 export function aiDisclosureSentence(businessName: string): string {
   return `Written with help from Pepper, the AI assistant ${businessName} uses.`;

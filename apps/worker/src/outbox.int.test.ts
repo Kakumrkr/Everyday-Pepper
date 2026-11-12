@@ -227,7 +227,7 @@ describe('texts through the outbox (S61, AC-X-57)', () => {
       );
       return queueSms(
         tx,
-        { to: phone, body: 'Plum Salon: you’re booked for Tue 2:30pm.' },
+        { to: phone, body: 'Plum Salon: you’re booked for Tue 2:30pm.', wordsBy: 'template' },
         { key, dedupeKey: OutboxDedupeKeySchema.parse('test.sms:worker'), now: clock.now() },
       );
     });

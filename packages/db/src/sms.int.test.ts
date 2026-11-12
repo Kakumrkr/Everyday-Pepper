@@ -23,10 +23,13 @@ import {
   insertSmsDelivery,
   insertSmsKeywordEvent,
   isSmsOptedOut,
+  listSmsConsentsForClient,
   listSmsConsentsForExport,
   revokeSmsConsent,
+  smsConsentBusinesses,
 } from './repositories/sms.js';
 import { createTenant } from './repositories/tenants.js';
+import { scheduleCurrentTenantDeletion } from './repositories/deletion.js';
 import { smsConsents, smsKeywordEvents } from './schema.js';
 import { addMembership } from './repositories/memberships.js';
 import { withMember, withSmsInbound, withTenant } from './tenant.js';
@@ -203,6 +206,84 @@ describe('SMS consents (AC-X-58)', () => {
     );
     expect(result).toMatchObject({ deleted: true });
     expect(await withTenant(db, tenantA, (tx) => findActiveSmsConsent(tx, phone))).toBeUndefined();
+  });
+});
+
+describe('SMS consents by client and the names a reply gives (S61.2)', () => {
+  const consent = (clientId: ClientId, phone: string, givenAt: Date) => ({
+    phone,
+    source: 'booking_page' as const,
+    clientId,
+    wordingVersion: 'sms-consent-v1' as const,
+    shownText: SHOWN,
+    givenAt,
+  });
+
+  it('lists a client’s consents the latest first, the business’s own only (AC-X-66)', async () => {
+    const phone = '+15552340101';
+    const sam = await client(tenantA, phone);
+    await withTenant(db, tenantA, async (tx) => {
+      await insertSmsConsent(tx, consent(sam, phone, T0));
+      await revokeSmsConsent(tx, phone, new Date(T0.getTime() + 60_000));
+      await insertSmsConsent(tx, consent(sam, phone, new Date(T0.getTime() + 120_000)));
+    });
+    const rows = await withTenant(db, tenantA, (tx) => listSmsConsentsForClient(tx, sam));
+    expect(rows.map((row) => [row.givenAt.toISOString(), row.revokedAt === null])).toEqual([
+      [new Date(T0.getTime() + 120_000).toISOString(), true],
+      [T0.toISOString(), false],
+    ]);
+    expect(await withTenant(db, tenantB, (tx) => listSmsConsentsForClient(tx, sam))).toEqual([]);
+  });
+
+  it('names the businesses with an active consent for the number, the latest first, two at most (AC-X-68)', async () => {
+    const phone = '+15552340102';
+    const business = async (name: string, slug: string) =>
+      TenantIdSchema.parse((await createTenant(db, { name, slug, timeZone: 'America/Denver' })).id);
+    const tenantC = await business('C & Co', 'sms-c');
+    const tenantD = await business('D', 'sms-d');
+    const tenantE = await business('E', 'sms-e');
+    expect(await smsConsentBusinesses(db, phone)).toEqual([]);
+    const given = [
+      [tenantA, 0],
+      [tenantC, 1],
+      [tenantE, 2],
+    ] as const;
+    for (const [tenant, minutes] of given) {
+      const id = await client(tenant, phone);
+      await withTenant(db, tenant, (tx) =>
+        insertSmsConsent(tx, consent(id, phone, new Date(T0.getTime() + minutes * 60_000))),
+      );
+    }
+    // Asked with no business, in a business's transaction or the SMS context: names only.
+    expect(await smsConsentBusinesses(db, phone)).toEqual(['E', 'C & Co']);
+    expect(await withTenant(db, tenantD, (tx) => smsConsentBusinesses(tx, phone))).toEqual([
+      'E',
+      'C & Co',
+    ]);
+    expect(await withSmsInbound(db, (tx) => smsConsentBusinesses(tx, phone))).toEqual([
+      'E',
+      'C & Co',
+    ]);
+    // A revoked consent and a business being deleted are left out.
+    await withTenant(db, tenantC, (tx) => revokeSmsConsent(tx, phone, new Date()));
+    await withTenant(db, tenantE, (tx) =>
+      scheduleCurrentTenantDeletion(tx, new Date(Date.now() + 30 * 86_400_000)),
+    );
+    expect(await smsConsentBusinesses(db, phone)).toEqual(['A']);
+    // Another number has none.
+    expect(await withTenant(db, tenantD, (tx) => smsConsentBusinesses(tx, '+15552340199'))).toEqual(
+      [],
+    );
+    expect(await smsConsentBusinesses(db, '+447700900123')).toEqual([]);
+  });
+
+  it('lets the app role run the function but not read the tables through it', async () => {
+    await expect(
+      db.execute(sql`SELECT phone FROM sms_consents WHERE phone = '+15552340102'`),
+    ).resolves.toMatchObject({ rows: [] });
+    await expect(
+      db.execute(sql`SELECT * FROM sms_consent_businesses('+15552340102')`),
+    ).resolves.toMatchObject({ fields: [expect.objectContaining({ name: 'name' })] });
   });
 });
 

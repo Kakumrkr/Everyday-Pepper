@@ -221,6 +221,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       '((current_tenant_id() IS NULL) AND (id IN ( SELECT memberships.tenant_id\n   FROM memberships\n  WHERE (memberships.user_id = current_user_id()))))',
     publicLookup: '((current_tenant_id() IS NULL) AND (slug = current_public_slug()))',
     jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('cleanup'::text))",
+    // The names a reply to Pepper's number gives (S61.2, `sms_consent_businesses`).
+    ownerLookup: 'sms_reply_lookup',
   },
   memberships: {
     tenantColumn: 'tenant_id',
@@ -745,6 +747,7 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       return id;
     },
     touch: 'given_at = given_at',
+    ownerLookup: 'sms_reply_lookup',
   },
   sms_deliveries: {
     tenantColumn: 'tenant_id',
@@ -1410,7 +1413,8 @@ describe('catalog', () => {
           qual: predicate,
           with_check: predicate,
         },
-      ];
+      ].sort((a, b) => (a.policyname < b.policyname ? -1 : 1));
+      // In the catalog's order: by name.
       expect(policies).toEqual(expected);
     },
   );

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
+import { UtcDateTimeSchema } from './time.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
 // The SMS channel (S61, ADR-0065): the rules every text follows, whoever sends it. A text goes
@@ -126,18 +128,49 @@ export const SmsBodySchema = z
       }),
   );
 
+/** How a text whose words the AI wrote says so (S61.2, AC-X-69): it starts its last line. */
+export const SMS_AI_DISCLOSURE_LEAD = 'Written with AI help:';
+
+/** The disclosure's line: the lead and the privacy policy's AI section, absolute. */
+export function smsAiDisclosure(baseUrl: string): string {
+  return `${SMS_AI_DISCLOSURE_LEAD} ${privacyAiUrl(baseUrl)}`;
+}
+
+/** A text in the AI's words with its disclosure as the last line (ADR-0064 for texts). */
+export function smsWithAiDisclosure(body: string, baseUrl: string): string {
+  return `${body.trimEnd()}\n${smsAiDisclosure(baseUrl)}`;
+}
+
+/** Whether a text's last line is the disclosure, linking to the AI section. */
+function endsWithAiDisclosure(body: string): boolean {
+  const last = body.trimEnd().split('\n').at(-1) ?? '';
+  return (
+    last.startsWith(`${SMS_AI_DISCLOSURE_LEAD} `) &&
+    /^https:\/\/\S+$/.test(last.slice(SMS_AI_DISCLOSURE_LEAD.length + 1)) &&
+    last.endsWith(`${PRIVACY_PATH}#${PRIVACY_AI_SECTION}`)
+  );
+}
+
 /**
  * One text, as queued (ADR-0065 §2). Its content is sealed like an email's and cleared once
  * sent. `urgent`: about today's appointment (running late), so the quiet hours don't hold it;
- * set by domain code only, never from a model's arguments.
+ * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69), always
+ * said, so no caller can forget it: `ai` when the AI wrote the words, which then must end with
+ * the disclosure (`smsWithAiDisclosure`, counted in the segments); `template` for Pepper's fixed
+ * words. The link's host is the caller's (the app's base URL); only its path is checked here.
  */
 export const OutboxSmsSchema = z
   .object({
     to: SmsPhoneSchema,
     body: SmsBodySchema,
     urgent: z.literal(true).optional(),
+    wordsBy: z.enum(['ai', 'template']),
   })
-  .strict();
+  .strict()
+  .refine((sms) => sms.wordsBy !== 'ai' || endsWithAiDisclosure(sms.body), {
+    path: ['body'],
+    message: 'A text in the AI’s words ends with its disclosure (smsWithAiDisclosure)',
+  });
 export type OutboxSms = z.infer<typeof OutboxSmsSchema>;
 export type OutboxSmsInput = z.input<typeof OutboxSmsSchema>;
 
@@ -191,18 +224,72 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
   return null;
 }
 
+/** The longest business name a reply carries before it is shortened (two fit in two segments). */
+export const SMS_REPLY_NAME_MAX = 40;
+
 /**
- * Pepper's answers to the keywords (ADR-0065 §5), from Pepper's one sender: "Pepper" until
- * S61.2 names the business. `helpUrl` is the help centre, absolute.
+ * Who a reply comes from (S61.2, AC-X-68): the businesses the number said yes to (at most two,
+ * the latest first; each shortened past `SMS_REPLY_NAME_MAX`), "via Pepper", whose one number
+ * sends them; "Pepper" alone when there are none.
  */
-export function smsKeywordReply(keyword: SmsKeyword, helpUrl: string): string {
+export function smsReplySender(businesses: readonly string[]): string {
+  const names = replyNames(businesses);
+  return names.length === 0 ? 'Pepper' : `${names.join(' and ')} via Pepper`;
+}
+
+const isGsm7 = (char: string): boolean => GSM7_BASIC.has(char) || GSM7_EXTENSION.has(char);
+
+/**
+ * The names a reply carries: in GSM-7 only (a letter outside it as its plain letter, "ã" as
+ * "a"; other characters dropped, so one emoji can't make the reply three times dearer), blank
+ * ones left out, cut by character.
+ */
+function replyNames(businesses: readonly string[]): string[] {
+  return (
+    businesses
+      .map((name) =>
+        // By code point: every character outside GSM-7 (an emoji's parts too) is dropped below.
+        Array.from(normalizeSmsText(name.replace(/\s+/g, ' ')))
+          .map((char) => (isGsm7(char) ? char : (char.normalize('NFD')[0] ?? '')))
+          .filter(isGsm7)
+          .join('')
+          .replace(/ {2,}/g, ' ')
+          .trim(),
+      )
+      .filter((name) => name !== '')
+      .slice(0, 2)
+      // GSM-7 characters are one code unit each, so a plain cut never splits one.
+      .map((name) =>
+        name.length > SMS_REPLY_NAME_MAX
+          ? `${name.slice(0, SMS_REPLY_NAME_MAX - 3).trimEnd()}...`
+          : name,
+      )
+  );
+}
+
+/**
+ * Pepper's answers to the keywords (ADR-0065 §5), from Pepper's one sender, naming the
+ * businesses the number said yes to (`smsReplySender`, S61.2). `helpUrl` is the help centre,
+ * absolute. A STOP stops every business's texts to the number, and says so.
+ */
+export function smsKeywordReply(
+  keyword: SmsKeyword,
+  helpUrl: string,
+  businesses: readonly string[] = [],
+): string {
+  const sender = smsReplySender(businesses);
+  const named = replyNames(businesses).length > 0;
   switch (keyword) {
     case 'stop':
-      return "Pepper: You're unsubscribed and won't get more texts from this number. Reply START to resubscribe.";
+      return named
+        ? `${sender}: You're unsubscribed and won't get more texts from this number, from any business. Reply START to resubscribe.`
+        : `${sender}: You're unsubscribed and won't get more texts from this number. Reply START to resubscribe.`;
     case 'start':
-      return "Pepper: You're resubscribed to appointment texts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.";
+      return `${sender}: You're resubscribed to appointment texts. Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.`;
     case 'help':
-      return `Pepper: appointment texts from businesses you book with. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`;
+      return named
+        ? `${sender}: appointment texts. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`
+        : `${sender}: appointment texts from businesses you book with. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out. Help: ${helpUrl}`;
   }
 }
 
@@ -229,6 +316,37 @@ export function smsConsentText(version: SmsConsentWordingVersion, business: stri
   const name = business.trim();
   return SMS_CONSENT_WORDING[version].replace('{business}', () => name);
 }
+
+/**
+ * Where a client's texts stand, for their profile (S61.2, AC-X-66): `on` (a consent in force);
+ * `opted_out` (a consent, but the number replied STOP, for every business on Pepper);
+ * `stopped` (the latest consent was revoked: a member stopped them, or another client took the
+ * number); `never` (no consent on record).
+ */
+export const ClientTextsStatusSchema = z.enum(['on', 'opted_out', 'stopped', 'never']);
+export type ClientTextsStatus = z.infer<typeof ClientTextsStatusSchema>;
+
+/**
+ * `GET /v1/clients/:clientId/texts` (and the answer of `POST …/texts/stop`): the status, the
+ * client's latest consent with the words exactly as shown, whether their own phone can get texts
+ * (`textable`: US or Canada) and whether this member may stop them (`canStop`).
+ */
+export const ClientTextsSchema = z.object({
+  status: ClientTextsStatusSchema,
+  textable: z.boolean(),
+  consent: z
+    .object({
+      phone: SmsPhoneSchema,
+      source: SmsConsentSourceSchema,
+      wordingVersion: SmsConsentWordingVersionSchema,
+      words: z.string().min(1),
+      givenAt: UtcDateTimeSchema,
+      stoppedAt: UtcDateTimeSchema.nullable(),
+    })
+    .nullable(),
+  canStop: z.boolean(),
+});
+export type ClientTexts = z.infer<typeof ClientTextsSchema>;
 
 /**
  * Where a sent text stands, as Twilio reports it (AC-X-62). Callbacks arrive out of order, so a

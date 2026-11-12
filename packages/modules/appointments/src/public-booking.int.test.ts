@@ -22,8 +22,10 @@ import {
   type Actor,
 } from '@pepper/core';
 import {
+  findActiveSmsConsent,
   findCurrentTenant,
   listAuditEntries,
+  listSmsConsentsForClient,
   updateCurrentTenantMailingAddress,
   withPublicTenant,
   withTenant,
@@ -535,6 +537,78 @@ describe('confirmBookingRequest', () => {
     expect(refused?.reason).toBeInstanceOf(SlotUnavailableError);
     expect((refused?.reason as SlotUnavailableError).alternatives).toHaveLength(3);
     expect(await bookingsOf(p)).toHaveLength(1);
+  });
+});
+
+describe('the SMS box (S61.2, AC-X-65)', () => {
+  const PHONE = '+15552347001';
+  const consentOf = (p: Page, phone = PHONE) =>
+    withTenant(db, p.tenantId, (tx) => findActiveSmsConsent(tx, phone));
+
+  it('records nothing when asked, and the consent with the booking when confirmed', async () => {
+    const p = await newPage();
+    const asked = await request(p, { phone: PHONE, smsConsent: 'sms-consent-v1' });
+    expect(await consentOf(p)).toBeUndefined();
+    await confirm(p, asked.requestId, asked.code);
+    const [client] = await listClients(db, p.owner, {});
+    const consent = await consentOf(p);
+    expect(consent).toMatchObject({
+      phone: PHONE,
+      source: 'booking_page',
+      clientId: client?.id,
+      userId: null,
+      wordingVersion: 'sms-consent-v1',
+      givenAt: new Date(NOW),
+      revokedAt: null,
+    });
+    // The words as shown, the business's name in them.
+    expect(consent?.shownText).toMatch(/^Text me appointment confirmations and reminders from /);
+    expect(consent?.shownText).toContain('Not required to book.');
+    const audit = await auditOf(p.tenantId);
+    expect(audit[0]).toMatchObject({
+      action: 'sms.consent_given',
+      actor: { kind: 'system', userId: null },
+    });
+    expect(JSON.stringify(audit[0])).not.toContain(PHONE);
+  });
+
+  it('records nothing with the box unticked, or for a request never confirmed', async () => {
+    const p = await newPage();
+    await book(p, { phone: PHONE });
+    await request(p, {
+      phone: '+15552347002',
+      smsConsent: 'sms-consent-v1',
+      startsAt: tue('12:00'),
+    });
+    expect(await consentOf(p)).toBeUndefined();
+    expect(await consentOf(p, '+15552347002')).toBeUndefined();
+    expect((await auditOf(p.tenantId)).map((e) => e.action)).not.toContain('sms.consent_given');
+  });
+
+  it('records nothing when the time was taken and no alternative was confirmed', async () => {
+    const p = await newPage();
+    const asked = await request(p, { phone: PHONE, smsConsent: 'sms-consent-v1' });
+    await book(p, { email: 'other@example.test' });
+    await expect(confirm(p, asked.requestId, asked.code)).rejects.toThrow();
+    expect(await consentOf(p)).toBeUndefined();
+  });
+
+  it('replaces the number’s earlier consent on the next ticked booking, keeping it as the record', async () => {
+    const p = await newPage();
+    await book(p, { phone: PHONE, smsConsent: 'sms-consent-v1' });
+    await book(p, { phone: PHONE, smsConsent: 'sms-consent-v1', startsAt: tue('13:00') });
+    const [client] = await listClients(db, p.owner, {});
+    const rows = await withTenant(db, p.tenantId, (tx) =>
+      listSmsConsentsForClient(tx, String(client?.id)),
+    );
+    expect(rows.map((row) => row.revokedAt === null)).toEqual([true, false]);
+  });
+
+  it('is the business’s own: another business has no consent for the number', async () => {
+    const p = await newPage();
+    const other = await newPage();
+    await book(p, { phone: PHONE, smsConsent: 'sms-consent-v1' });
+    expect(await consentOf(other)).toBeUndefined();
   });
 });
 

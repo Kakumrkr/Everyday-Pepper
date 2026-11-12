@@ -8,6 +8,7 @@ import type {
   ClientRecords,
   ClientsPage,
   ClientsQuery,
+  ClientTexts,
 } from '@pepper/contracts';
 import {
   clientNames,
@@ -15,9 +16,11 @@ import {
   deleteClient,
   getClient,
   getClientRecords,
+  getClientTexts,
   listClientsPage,
   lookUpClients,
   mergeClients,
+  stopClientTexts,
   updateClient,
   type Actor,
   type TenantContext,
@@ -68,6 +71,14 @@ export class ClientsService {
 
   merge(tenant: TenantContext, id: ClientId, merge: ClientMerge): Promise<Client> {
     return mergeClients(this.db, actorOf(tenant), id, merge);
+  }
+
+  texts(tenant: TenantContext, id: ClientId): Promise<ClientTexts> {
+    return getClientTexts(this.db, actorOf(tenant), id);
+  }
+
+  stopTexts(tenant: TenantContext, id: ClientId): Promise<ClientTexts> {
+    return stopClientTexts(this.db, actorOf(tenant), id);
   }
 
   delete(tenant: TenantContext, id: ClientId): Promise<void> {

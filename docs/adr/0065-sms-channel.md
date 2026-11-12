@@ -31,10 +31,17 @@ Phase 14 is built in sandbox mode first (P1-5): live sending needs the LLC and 1
 ## Consequences
 - S62 (reminders, confirm by text), S63 (approve by text) and S64 (`send_client_message` over SMS) add callers only; the channel's rules are in one place and tested once.
 - A STOP is honoured immediately, and a text never goes to a number without the business's consent record, even if a caller forgets to ask.
-- One sender for every business keeps 10DLC to one brand and campaign (Pepper's, as the ISV, S64). The cost is that a STOP stops every business's texts to that person. HELP and the confirmations say "Pepper" until S61.2 names the business.
+- One sender for every business keeps 10DLC to one brand and campaign (Pepper's, as the ISV, S64). The cost is that a STOP stops every business's texts to that person. Since S61.2 the replies name the businesses the number said yes to (below).
 - Before S64 goes live, the Messaging Service's own STOP/HELP auto-replies are configured so the person gets one confirmation, not two (STATUS "Waiting on the user" 5).
 
+## Built in S61.2 (consent on screen)
+- **The booking page's box** (AC-X-64, AC-X-65): unticked, shown under the phone field once a number is typed, the current wording with the business's name, linked to the "Text messages" sections of the terms and privacy pages (carriers' terms; the number never shared for marketing). The request carries the wording version shown (`smsConsent`); a ticked box needs a US or Canadian number. The version waits on the booking request (`booking_verifications.sms_consent_version`, migration 0076) and becomes a consent only when the booking is confirmed, in its transaction, for the number typed and the client booked.
+- **The profile** (AC-X-66, AC-X-67): `GET /v1/clients/:id/texts` answers on / opted out / stopped / never, from every consent of the client in force (on while any number is in force and not opted out), with the words as shown; `POST …/texts/stop` (owners and managers) revokes them all, audited as the member. No "turn back on": only the client can, by ticking the box again. START ends a STOP but gives no consent.
+- **Replies name the business** (AC-X-68): `sms_consent_businesses(phone)`, a definer function answering at most two names (the latest consent first; revoked consents and businesses being deleted left out) and nothing else, read in the webhook's request. "{names} via Pepper:"; a name in GSM-7 only, cut at 40 characters, so a reply stays in two GSM-7 segments.
+- **SMS's AI disclosure** (AC-X-69, ADR-0064 for texts): every queued text says who wrote its words (`wordsBy`, required); `ai` text must end with "Written with AI help: {app}/privacy#ai" (`smsWithAiDisclosure`), counted in the segments.
+- **For S62:** the phone on the booking page is not verified (only the email is), so S62 sends an opt-in confirmation text on each new consent (who, how often, STOP/HELP: the carriers' recommended first message), and reminders go to the number on the client's consent in force, not `clients.phone` (a returning client keeps the business's details).
+
 ## Not done
-- **S61.2:** the booking page's opt-in box (the wording in `SMS_CONSENT_WORDING`), SMS shown on the client's profile, the owner's settings, the business's name in replies, SMS's own AI disclosure.
+- The owner's SMS settings move to S62, with its reminder settings (S61.2 D-1).
 - Marketing texts (separate consent; not in V1). MMS. Numbers outside the US and Canada. A number per business.
 - How long consent records are kept after a business is deleted (the TCPA's four-year limit); for the lawyer's review with the privacy policy.

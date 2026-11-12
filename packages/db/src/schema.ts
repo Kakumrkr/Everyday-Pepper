@@ -1036,9 +1036,16 @@ export const bookingVerifications = pgTable(
     bookingId: uuid('booking_id'),
     purpose: text('purpose').notNull().default('booking'),
     waitlistEntryId: uuid('waitlist_entry_id'),
+    // The SMS box the client ticked (S61.2, AC-X-65): its wording version, recorded as a consent
+    // only when the booking is confirmed. NULL: unticked.
+    smsConsentVersion: text('sms_consent_version'),
     ...timestamps,
   },
   (table) => [
+    check(
+      'booking_verifications_sms_consent',
+      sql`${table.smsConsentVersion} IS NULL OR (${table.smsConsentVersion} ~ '^sms-consent-v[0-9]{1,3}$' AND ${table.purpose} = 'booking' AND ${table.phone} ~ '^[+]1[2-9][0-9]{9}$')`,
+    ),
     index('booking_verifications_email_idx').on(table.tenantId, table.email, table.expiresAt),
     index('booking_verifications_waitlist_entry_idx').on(table.tenantId, table.waitlistEntryId),
     check('booking_verifications_purpose_known', sql`${table.purpose} IN ('booking', 'waitlist')`),
@@ -3214,6 +3221,10 @@ export const smsConsents = pgTable(
       .on(table.tenantId, table.phone)
       .where(sql`${table.revokedAt} IS NULL`),
     index('sms_consents_client_idx').on(table.tenantId, table.clientId),
+    // The businesses a reply's number has said yes to (S61.2, `sms_consent_businesses`).
+    index('sms_consents_phone_active_idx')
+      .on(table.phone, table.givenAt)
+      .where(sql`${table.revokedAt} IS NULL`),
     foreignKey({
       name: 'sms_consents_client_fk',
       columns: [table.tenantId, table.clientId],

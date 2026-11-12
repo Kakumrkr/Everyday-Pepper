@@ -215,13 +215,34 @@ describe('the public booking page api (no session)', () => {
     expect(BookingRequestResponseSchema.parse(response.body).requestId).toBe(REQUEST_ID);
     expect(service.request).toHaveBeenCalledWith(
       'juniper',
-      { ...ASK, email: 'ana@example.test', phone: null },
+      { ...ASK, email: 'ana@example.test', phone: null, smsConsent: null },
       undefined,
     );
     expect(hits).toEqual([
       { limit: 'request-ip', key: '203.0.113.7' },
       { limit: 'request-biz', key: 'juniper' },
     ]);
+  });
+
+  it('passes a ticked SMS box on, and refuses one with a number Pepper can’t text (AC-X-64)', async () => {
+    await post('/booking-requests', {
+      ...ASK,
+      phone: '+15552345678',
+      smsConsent: 'sms-consent-v1',
+    }).expect(201);
+    expect(service.request).toHaveBeenCalledWith(
+      'juniper',
+      expect.objectContaining({ phone: '+15552345678', smsConsent: 'sms-consent-v1' }),
+      undefined,
+    );
+    service.request.mockClear();
+    const refused = await post('/booking-requests', {
+      ...ASK,
+      phone: '+447700900123',
+      smsConsent: 'sms-consent-v1',
+    }).expect(400);
+    expect(refused.body).toMatchObject({ code: 'validation_failed' });
+    expect(service.request).not.toHaveBeenCalled();
   });
 
   it('refuses a request body with a tenant id, naming the field only', async () => {
