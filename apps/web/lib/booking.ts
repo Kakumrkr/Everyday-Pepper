@@ -123,6 +123,17 @@ export function localParts(timeZone: string, instant: string): { date: string; t
 }
 
 /** A booking's status in words. */
+/**
+ * When the client confirmed the visit by replying C to a reminder (S62, AC-X-79), while it is
+ * still booked; `null` otherwise. Moving a booking clears it on the api until they confirm again.
+ */
+export function confirmedByText(booking: {
+  status: BookingStatus;
+  clientConfirmedAt?: string | null | undefined;
+}): string | null {
+  return booking.status === 'confirmed' ? (booking.clientConfirmedAt ?? null) : null;
+}
+
 export const STATUS_LABELS: Record<BookingStatus, string> = {
   confirmed: 'Booked',
   completed: 'Done',

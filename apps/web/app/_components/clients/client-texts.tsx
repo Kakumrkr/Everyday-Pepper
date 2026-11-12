@@ -5,7 +5,12 @@ import { Badge, Button, buttonStyle, DetailTable, Sheet, SheetFooter } from '@pe
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formatPhone } from '../../../lib/booking-profile';
-import { consentHowLabel, consentMomentLabel, textsSummary } from '../../../lib/client-texts';
+import {
+  consentHowLabel,
+  consentMomentLabel,
+  lastTextLine,
+  textsSummary,
+} from '../../../lib/client-texts';
 import { Notice } from '../form-parts';
 
 // A client's "Text messages" on their profile (S61.2, AC-X-66, AC-X-67): one line on where their
@@ -28,6 +33,7 @@ export function ClientTextsSection({
 }) {
   const [texts, setTexts] = useState(initial);
   const summary = textsSummary(texts, clientName, { timeZone, hasPhone });
+  const last = lastTextLine(texts.lastText, timeZone);
   return (
     <section aria-labelledby="client-texts" className="flex flex-col gap-3">
       <h2 id="client-texts" className="m-0 type-heading">
@@ -41,6 +47,11 @@ export function ClientTextsSection({
           </Badge>
         </div>
         <p className="m-0 type-caption text-ink-2">{summary.next}</p>
+        {last === null ? null : (
+          <p className="m-0 type-caption text-ink" data-testid="client-last-text">
+            {last}
+          </p>
+        )}
         {texts.consent === null && !texts.canStop ? null : (
           <div className="flex flex-wrap gap-2">
             {texts.consent === null ? null : (

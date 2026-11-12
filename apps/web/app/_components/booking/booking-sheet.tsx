@@ -13,6 +13,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import {
   bookableStaff,
   bookingActions,
+  confirmedByText,
   dateTimeLabel,
   localParts,
   STATUS_LABELS,
@@ -41,6 +42,8 @@ export interface BookingSummary {
   endsAt: string;
   status: BookingStatus;
   overridden: boolean;
+  /** When the client replied C to a reminder (S62); `null` until then, or once moved. */
+  clientConfirmedAt: string | null;
 }
 
 /**
@@ -138,6 +141,7 @@ function BookingDetails({
     setError(alternatives === null ? (answer.ok ? 'Something went wrong.' : answer.message) : null);
   }
 
+  const confirmedAt = confirmedByText(booking);
   const summary = (
     <DetailTable
       rows={[
@@ -169,6 +173,18 @@ function BookingDetails({
           label: 'Status',
           value: <span data-testid="booking-status">{STATUS_LABELS[booking.status]}</span>,
         },
+        ...(confirmedAt === null
+          ? []
+          : [
+              {
+                label: 'Reply',
+                value: (
+                  <span className="text-ok" data-testid="booking-confirmed-by-text">
+                    Confirmed by text, {dateTimeLabel(timeZone, confirmedAt)}
+                  </span>
+                ),
+              },
+            ]),
         ...(booking.overridden
           ? [
               {

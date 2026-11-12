@@ -1,4 +1,8 @@
-import { DeletionStatusSchema, FeedResponseSchema } from '@pepper/contracts';
+import {
+  DeletionStatusSchema,
+  FeedResponseSchema,
+  ReminderSettingsViewSchema,
+} from '@pepper/contracts';
 import { Badge, buttonStyle, Icon, List, ListRow } from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
@@ -10,6 +14,7 @@ import {
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { HELP_PATH } from '../../../lib/help';
+import { REMINDER_SETTINGS_PATH, remindersSummary } from '../../../lib/reminder-settings';
 import { PRIVACY_PATH } from '@pepper/contracts';
 import { newRequestHref, SUPPORT_PATHS } from '../../../lib/support';
 import { BusinessSwitcher, SignOutButton } from '../../_components/account-actions';
@@ -45,10 +50,14 @@ export default async function MorePage() {
       ? await currentJson('/v1/feed', FeedResponseSchema)
       : null;
   // A business or an account being deleted says so here (S51.2, ADR-0054).
-  const [businessDeletion, accountDeletion, support] = await Promise.all([
+  // Texts and reminders (S62.2): whoever reads the calendar sees what clients get.
+  const [businessDeletion, accountDeletion, support, reminders] = await Promise.all([
     current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
     currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
     current === null ? null : currentSupportUnread(),
+    current?.permissions.includes('calendar.read') === true
+      ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema)
+      : null,
   ]);
   const unread = support ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
@@ -128,6 +137,25 @@ export default async function MorePage() {
           )}
         </List>
       </section>
+      {current?.permissions.includes('calendar.read') === true ? (
+        <section aria-labelledby="more-clients">
+          <h2 id="more-clients" className="m-0 mb-1 type-heading">
+            Your clients
+          </h2>
+          <List>
+            <ListRow
+              title={<HelpTitle icon="chat">Texts and reminders</HelpTitle>}
+              meta={
+                reminders === null
+                  ? 'What clients get before a visit'
+                  : remindersSummary(reminders.settings)
+              }
+              href={ROUTES.textsAndReminders}
+              renderLink={kitLink}
+            />
+          </List>
+        </section>
+      ) : null}
       {current === null ? null : <NotificationsCard />}
       {feed?.canChangeSettings === true ? (
         <section aria-labelledby="rebooking-heading" className="flex flex-col gap-3">
