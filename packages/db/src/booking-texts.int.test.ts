@@ -31,7 +31,13 @@ import {
   findBookingByManageTokenHash,
   lockBookingByManageTokenHash,
 } from './repositories/booking-verifications.js';
-import { insertBooking, setBookingStatus } from './repositories/bookings.js';
+import {
+  findBooking,
+  insertBooking,
+  moveBooking,
+  setBookingManageTokenHash,
+  setBookingStatus,
+} from './repositories/bookings.js';
 import { insertClient } from './repositories/clients.js';
 import { scheduleCurrentTenantDeletion } from './repositories/deletion.js';
 import {
@@ -403,5 +409,63 @@ describe('confirm by text (AC-X-74)', () => {
     expect(
       await withTenant(db, tenantB, (tx) => markBookingClientConfirmed(tx, bookingId, now)),
     ).toBeUndefined();
+  });
+});
+
+describe('review fixes (S62)', () => {
+  it('prefers a booking the client hasn’t confirmed yet', async () => {
+    const number = phone();
+    const now = new Date();
+    const soon = await remindedBooking(tenantA, number, new Date(now.getTime() + 10 * HOUR), now);
+    const { bookingId: later } = await withTenant(db, tenantA, async (tx) => {
+      const bookingId = await seedBooking(tx, soon.clientId, new Date(now.getTime() + 30 * HOUR));
+      await seedText(tx, {
+        clientId: soon.clientId,
+        bookingId,
+        kind: 'day_before',
+        startsAt: new Date(now.getTime() + 30 * HOUR),
+        at: now,
+      });
+      return { bookingId };
+    });
+    expect((await smsConfirmTarget(db, number, now))?.bookingId).toBe(soon.bookingId);
+    await withTenant(db, tenantA, (tx) => markBookingClientConfirmed(tx, soon.bookingId, now));
+    expect((await smsConfirmTarget(db, number, now))?.bookingId).toBe(later);
+  });
+
+  it('a new confirmation link ends the reminders’ links; a move clears the "C"', async () => {
+    const hashOf = (token: string) => createHash('sha256').update(token).digest('hex');
+    const token = randomBytes(32).toString('base64url');
+    const start = new Date(Date.now() + 48 * HOUR);
+    const bookingId = await withTenant(db, tenantA, async (tx) => {
+      const booking = await seedBooking(tx, await seedClient(tx), start);
+      await insertBookingManageLink(tx, {
+        bookingId: booking,
+        tokenHash: hashOf(token),
+        createdAt: new Date(),
+      });
+      await markBookingClientConfirmed(tx, booking, new Date());
+      return booking;
+    });
+    await withTenant(db, tenantA, async (tx) => {
+      await setBookingManageTokenHash(tx, bookingId, hashOf('new'));
+      expect(await findBookingIdByManageLink(tx, hashOf(token))).toBeUndefined();
+      const row = await findBooking(tx, bookingId);
+      // Same start (another staff member): the "C" stays.
+      const same = await moveBooking(tx, bookingId, {
+        staffMemberId: StaffMemberIdSchema.parse(String(row?.staffMemberId)),
+        startsAt: start,
+        endsAt: new Date(start.getTime() + 45 * 60_000),
+        overridden: false,
+      });
+      expect(same?.clientConfirmedAt).not.toBeNull();
+      const moved = await moveBooking(tx, bookingId, {
+        staffMemberId: StaffMemberIdSchema.parse(String(row?.staffMemberId)),
+        startsAt: new Date(start.getTime() + HOUR),
+        endsAt: new Date(start.getTime() + HOUR + 45 * 60_000),
+        overridden: false,
+      });
+      expect(moved?.clientConfirmedAt).toBeNull();
+    });
   });
 });

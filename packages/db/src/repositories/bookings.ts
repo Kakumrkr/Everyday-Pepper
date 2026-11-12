@@ -22,6 +22,7 @@ import {
   isUniqueViolation,
 } from '../errors.js';
 import {
+  bookingManageLinks,
   bookingOccupancy,
   bookings,
   waitlistEntries,
@@ -142,6 +143,8 @@ export async function moveBooking(
         startsAt: move.startsAt,
         endsAt: move.endsAt,
         overridden: move.overridden,
+        // A client's "C" was for the time they were reminded of (S62): a new time clears it.
+        clientConfirmedAt: sql`CASE WHEN ${bookings.startsAt} = ${move.startsAt} THEN ${bookings.clientConfirmedAt} ELSE NULL END`,
       })
       .where(eq(bookings.id, Id.parse(id)))
       .returning();
@@ -166,14 +169,16 @@ export async function setBookingStatus(
 }
 
 /**
- * Replaces a booking's reschedule/cancel link (ADR-0025): the old link stops working. `hash` is
- * the SHA-256 (hex) of the new token, which only the client's email carries.
+ * Replaces a booking's reschedule/cancel link (ADR-0025): the old link stops working, and so do
+ * the links its reminders carried (S62). `hash` is the SHA-256 (hex) of the new token, which
+ * only the client's email carries.
  */
 export async function setBookingManageTokenHash(
   tx: TenantTx,
   id: BookingId,
   hash: string,
 ): Promise<BookingRow | undefined> {
+  await tx.delete(bookingManageLinks).where(eq(bookingManageLinks.bookingId, Id.parse(id)));
   const [row] = await tx
     .update(bookings)
     .set({ manageTokenHash: TokenHashSchema.parse(hash) })

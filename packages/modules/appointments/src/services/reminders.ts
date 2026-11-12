@@ -4,7 +4,7 @@ import {
   ClientIdSchema,
   ManageTokenSchema,
   OutboxDedupeKeySchema,
-  ReminderSettingsSchema,
+  reminderSettingsFrom,
   smsSendableAt,
   TenantIdSchema,
   fromZoned,
@@ -15,6 +15,7 @@ import {
 } from '@pepper/contracts';
 import { queueEmail, queueSms, smsPermission, type Clock } from '@pepper/core';
 import {
+  deleteBookingManageLink,
   findCurrentTenant,
   hasReminderText,
   insertBookingManageLink,
@@ -100,8 +101,7 @@ const KINDS: readonly ReminderKind[] = ['day_before', 'same_day'];
 
 /** A business's reminder settings, each missing or unreadable field at its default. */
 export function reminderSettingsOf(tenant: Pick<Tenant, 'reminderSettings'>): ReminderSettings {
-  const parsed = ReminderSettingsSchema.safeParse(tenant.reminderSettings);
-  return parsed.success ? parsed.data : ReminderSettingsSchema.parse({});
+  return reminderSettingsFrom(tenant.reminderSettings);
 }
 
 /**
@@ -118,12 +118,18 @@ export async function keepReminderInStep(
   await keepRemindersOf(tx, row, now, tenant.timeZone, reminderSettingsOf(tenant));
 }
 
+/**
+ * `keepDue`: a re-plan for a settings change leaves a reminder that is due but not yet taken
+ * (between the job's polls, or a backlog) for the job, which checks the settings again; a
+ * booking change replaces it, as it just told the client.
+ */
 async function keepRemindersOf(
   tx: TenantTx,
   row: BookingRow,
   now: number,
   timeZone: string,
   settings: ReminderSettings,
+  options: { keepDue?: boolean } = {},
 ): Promise<void> {
   const bookingId = BookingIdSchema.parse(row.id);
   for (const kind of KINDS) {
@@ -138,20 +144,20 @@ async function keepRemindersOf(
         dueAt: new Date(dueAt),
         startsAt: row.startsAt,
       });
-    } else {
+    } else if (dueAt === null || options.keepDue !== true) {
       await removeBookingReminder(tx, bookingId, kind);
     }
   }
 }
 
-/** The most upcoming bookings one settings change re-plans. */
-export const REPLAN_LIMIT = 5000;
-/** How far ahead a settings change re-plans. */
-const REPLAN_HORIZON_MS = 400 * 24 * HOUR_MS;
+/** Upcoming bookings a settings change re-plans at a time. */
+const REPLAN_PAGE = 500;
+/** How far ahead a settings change re-plans: past any booking window a business can set. */
+const REPLAN_HORIZON_MS = 3 * 366 * 24 * HOUR_MS;
 
 /**
  * Re-plans every upcoming confirmed booking's reminders with `settings` (a settings change,
- * AC-X-75), in the change's transaction. Returns how many bookings it looked at.
+ * AC-X-75), in the change's transaction, a page at a time. Returns how many it re-planned.
  */
 export async function replanUpcomingReminders(
   tx: TenantTx,
@@ -159,16 +165,27 @@ export async function replanUpcomingReminders(
   settings: ReminderSettings,
   now: number,
 ): Promise<number> {
-  const upcoming = await listBookings(tx, {
-    from: new Date(now),
-    to: new Date(now + REPLAN_HORIZON_MS),
-    status: 'confirmed',
-    limit: REPLAN_LIMIT,
-  });
-  for (const row of upcoming) {
-    if (row.startsAt.getTime() > now) await keepRemindersOf(tx, row, now, timeZone, settings);
+  const to = new Date(now + REPLAN_HORIZON_MS);
+  const seen = new Set<string>();
+  let from = new Date(now);
+  for (;;) {
+    const page = await listBookings(tx, { from, to, status: 'confirmed', limit: REPLAN_PAGE });
+    for (const row of page) {
+      if (seen.has(row.id) || row.startsAt.getTime() <= now) continue;
+      seen.add(row.id);
+      await keepRemindersOf(tx, row, now, timeZone, settings, { keepDue: true });
+    }
+    const last = page.at(-1);
+    // The next page starts at the last start (rows there already seen are skipped).
+    if (
+      page.length < REPLAN_PAGE ||
+      last === undefined ||
+      last.startsAt.getTime() <= from.getTime()
+    ) {
+      return seen.size;
+    }
+    from = last.startsAt;
   }
-  return upcoming.length;
 }
 
 /** Reminders the job lists at a time. */
@@ -237,7 +254,7 @@ export async function sendDueReminder(
           body: reminderText({
             kind: due.kind,
             details,
-            link,
+            link: link?.url ?? null,
             askToConfirm: booking.clientConfirmedAt === null,
             first: !(await hasReminderText(tx, clientId)),
             today: sameLocalDay(tenant.timeZone, sendable, startsAt),
@@ -253,7 +270,7 @@ export async function sendDueReminder(
           now,
         },
       );
-      if (id === undefined) return 'skipped';
+      if (id === undefined) return dropLink(tx, link);
       await insertBookingText(tx, {
         id,
         clientId,
@@ -264,14 +281,23 @@ export async function sendDueReminder(
       });
       return 'queued';
     }
-    const queued = await queueEmail(tx, reminderEmail(details, link), {
+    const queued = await queueEmail(tx, reminderEmail(details, link?.url ?? null), {
       key: options.key,
       // One reminder per booking and start, even if a reminder were somehow planned twice.
       dedupeKey: OutboxDedupeKeySchema.parse(`booking.reminder:${bookingId}:${String(startsAt)}`),
       now,
     });
-    return queued === undefined ? 'skipped' : 'queued';
+    return queued === undefined ? dropLink(tx, link) : 'queued';
   });
+}
+
+/** A reminder that was queued already: the new link it would have carried goes (`skipped`). */
+async function dropLink(
+  tx: TenantTx,
+  link: { url: string; tokenHash: string } | null,
+): Promise<'skipped'> {
+  if (link !== null) await deleteBookingManageLink(tx, link.tokenHash);
+  return 'skipped';
 }
 
 /**
@@ -296,15 +322,16 @@ async function reminderLink(
   booking: BookingRow,
   now: Date,
   baseUrl: string | null,
-): Promise<string | null> {
+): Promise<{ url: string; tokenHash: string } | null> {
   if (baseUrl === null) return null;
   const token = ManageTokenSchema.parse(randomBytes(32).toString('base64url'));
+  const tokenHash = createHash('sha256').update(token).digest('hex');
   await insertBookingManageLink(tx, {
     bookingId: BookingIdSchema.parse(booking.id) satisfies BookingId,
-    tokenHash: createHash('sha256').update(token).digest('hex'),
+    tokenHash,
     createdAt: now,
   });
-  return manageUrl(baseUrl, tenant.slug, token);
+  return { url: manageUrl(baseUrl, tenant.slug, token), tokenHash };
 }
 
 /**

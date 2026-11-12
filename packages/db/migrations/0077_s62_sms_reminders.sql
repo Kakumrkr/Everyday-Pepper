@@ -48,7 +48,8 @@ REVOKE TRUNCATE ON "booking_texts", "booking_manage_links" FROM pepper_app;
 -- so a definer function answers which booking it confirms (ids only, never a name, a time or a
 -- client): the soonest upcoming confirmed booking whose reminder went, in the 48 hours before
 -- `p_at`, to a client whose consent in force is for this number, at the start it was reminded
--- for. A business being deleted is left out (its texts stopped when deletion was asked).
+-- for; one the client hasn't confirmed yet first, so a "C" to a second reminder reaches it. A
+-- business being deleted is left out (its texts stopped when deletion was asked).
 CREATE POLICY "sms_confirm_lookup" ON "booking_texts" AS PERMISSIVE FOR SELECT TO CURRENT_USER
   USING (true);
 --> statement-breakpoint
@@ -75,7 +76,7 @@ CREATE FUNCTION sms_confirm_target(p_phone text, p_at timestamptz)
        AND b.starts_at = bt.starts_at
        AND b.starts_at > p_at
        AND t.deletion_due_at IS NULL
-     ORDER BY b.starts_at ASC, b.id ASC
+     ORDER BY (b.client_confirmed_at IS NOT NULL) ASC, b.starts_at ASC, b.id ASC
      LIMIT 1
   $$;
 --> statement-breakpoint

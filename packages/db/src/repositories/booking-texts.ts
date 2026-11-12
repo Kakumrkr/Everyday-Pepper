@@ -131,6 +131,22 @@ export async function insertBookingManageLink(
   });
 }
 
+/** How many reminder links of a booking are stored. */
+export async function countBookingManageLinks(tx: TenantTx, bookingId: BookingId): Promise<number> {
+  const rows = await tx
+    .select({ id: bookingManageLinks.id })
+    .from(bookingManageLinks)
+    .where(eq(bookingManageLinks.bookingId, BookingIdSchema.parse(bookingId)));
+  return rows.length;
+}
+
+/** Removes one reminder link (one that was never sent). */
+export async function deleteBookingManageLink(tx: TenantTx, tokenHash: string): Promise<void> {
+  await tx
+    .delete(bookingManageLinks)
+    .where(eq(bookingManageLinks.tokenHash, HashSchema.parse(tokenHash)));
+}
+
 /** The id of the booking a reminder's link (its token's hash) opens. */
 export async function findBookingIdByManageLink(
   tx: TenantTx,
@@ -185,6 +201,31 @@ export async function smsConfirmTarget(
     tenantId: TenantIdSchema.parse(row.tenant_id),
     bookingId: BookingIdSchema.parse(row.booking_id),
   };
+}
+
+/**
+ * Whether a reminder text went about the booking at `startsAt` in the 48 hours before `at`
+ * (the lookup's condition, checked again under the booking's lock, AC-X-74).
+ */
+export async function hasRecentReminderText(
+  tx: TenantTx,
+  input: { bookingId: BookingId; startsAt: Date; at: Date },
+): Promise<boolean> {
+  const since = new Date(input.at.getTime() - 48 * 3_600_000);
+  const [row] = await tx
+    .select({ id: bookingTexts.id })
+    .from(bookingTexts)
+    .where(
+      and(
+        eq(bookingTexts.bookingId, BookingIdSchema.parse(input.bookingId)),
+        inArray(bookingTexts.kind, ['day_before', 'same_day']),
+        eq(bookingTexts.startsAt, input.startsAt),
+        sql`${bookingTexts.createdAt} > ${since}`,
+        sql`${bookingTexts.createdAt} <= ${input.at}`,
+      ),
+    )
+    .limit(1);
+  return row !== undefined;
 }
 
 /**

@@ -137,14 +137,16 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     ai: loadAiConfig(env, present, service.environment),
     storage: loadStorageConfig('api', env),
     ...loadSupport(present),
-    smsWebhook: smsWebhookOf(loadSmsConfig('api', env)),
-    textsOn: loadSmsConfig('api', env) !== null,
+    ...smsOf(loadSmsConfig('api', env)),
   };
 }
 
-function smsWebhookOf(sms: ReturnType<typeof loadSmsConfig>): ApiConfig['smsWebhook'] {
-  if (sms?.provider !== 'twilio') return null;
-  return { accountSid: sms.accountSid, authToken: sms.authToken };
+function smsOf(sms: ReturnType<typeof loadSmsConfig>): Pick<ApiConfig, 'smsWebhook' | 'textsOn'> {
+  return {
+    smsWebhook:
+      sms?.provider === 'twilio' ? { accountSid: sms.accountSid, authToken: sms.authToken } : null,
+    textsOn: sms !== null,
+  };
 }
 
 function loadSupport(

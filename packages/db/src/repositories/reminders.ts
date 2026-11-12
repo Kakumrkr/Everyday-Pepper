@@ -2,6 +2,7 @@ import {
   BookingIdSchema,
   ReminderKindSchema,
   ReminderSettingsSchema,
+  reminderSettingsFrom,
   TenantIdSchema,
   type BookingId,
   type ReminderKind,
@@ -155,8 +156,7 @@ export async function findReminderSettings(tx: TenantTx): Promise<ReminderSettin
     .select({ settings: tenants.reminderSettings })
     .from(tenants)
     .where(eq(tenants.id, sql`current_tenant_id()`));
-  const parsed = ReminderSettingsSchema.safeParse(row?.settings ?? {});
-  return parsed.success ? parsed.data : ReminderSettingsSchema.parse({});
+  return reminderSettingsFrom(row?.settings);
 }
 
 /** Stores the transaction's business's reminder settings, every field. */

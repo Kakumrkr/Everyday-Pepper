@@ -28,6 +28,7 @@ import {
 } from '@pepper/core';
 import {
   addMembership,
+  countBookingManageLinks,
   findBookingReminder,
   findLastBookingText,
   insertSmsKeywordEvent,
@@ -42,6 +43,7 @@ import {
   type Database,
 } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { BookingNotFoundError } from './errors.js';
 import { changeBooking, createBooking, listBookings } from './services/bookings.js';
 import { confirmBookingByText } from './services/confirm-by-text.js';
 import { getReminderSettings, updateReminderSettings } from './services/reminder-settings.js';
@@ -629,5 +631,93 @@ describe('texts and reminders settings (AC-X-75)', () => {
       ForbiddenError,
     );
     expect((await getReminderSettings(db, b.owner)).settings.texts).toBe(true);
+  });
+});
+
+describe('review fixes (S62)', () => {
+  const linksOf = (b: Business, bookingId: string) =>
+    withTenant(db, b.tenantId, (tx) =>
+      countBookingManageLinks(tx, BookingIdSchema.parse(bookingId)),
+    );
+
+  it('a team move ends the reminder’s link, and clears the client’s "C"', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await book(b, at(3, '14:00'));
+    await runAt(b, at(2, '14:00'));
+    const token = ManageTokenSchema.parse(tokenIn(b.sms.sent[0]?.body ?? ''));
+    await confirmBookingByText(db, { from: consentPhone(b), receivedAt: new Date(at(2, '14:05')) });
+    await changeBooking(
+      db,
+      b.owner,
+      booking.id,
+      { startsAt: at(3, '17:00') },
+      { clock: b.clock, notify: () => Promise.resolve() },
+    );
+    await expect(getManagedBooking(db, b.slug, token, { clock: b.clock })).rejects.toBeInstanceOf(
+      BookingNotFoundError,
+    );
+    const [row] = await listBookings(db, b.owner, { from: at(3, '00:00'), to: at(4, '00:00') });
+    expect(row?.clientConfirmedAt).toBeNull();
+    // A "C" now finds nothing: the reminder was about 2:00 PM.
+    expect(
+      (
+        await confirmBookingByText(db, {
+          from: consentPhone(b),
+          receivedAt: new Date(at(2, '15:00')),
+        })
+      ).outcome,
+    ).toBe('nothing');
+  });
+
+  it('a "C" reaches the second reminded booking once the first is confirmed', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const first = await book(b, at(3, '14:00'));
+    const second = await book(b, at(3, '16:00'));
+    await runAt(b, at(2, '14:00'));
+    await confirmBookingByText(db, { from: consentPhone(b), receivedAt: new Date(at(2, '14:05')) });
+    await runAt(b, at(2, '16:00'));
+    await confirmBookingByText(db, { from: consentPhone(b), receivedAt: new Date(at(2, '16:05')) });
+    const rows = await listBookings(db, b.owner, { from: at(3, '00:00'), to: at(4, '00:00') });
+    expect(rows.map((r) => [r.id, r.clientConfirmedAt])).toEqual([
+      [first.id, at(2, '14:05')],
+      [second.id, at(2, '16:05')],
+    ]);
+  });
+
+  it('a settings change keeps a reminder that is due but not yet sent', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await book(b, at(3, '14:00'));
+    // The job hasn't run since Monday 14:00 fell due.
+    b.clock.set(new Date(at(2, '14:03')));
+    await updateReminderSettings(db, b.owner, { sameDayLeadHours: 1 }, { clock: b.clock });
+    expect(
+      await withTenant(db, b.tenantId, (tx) =>
+        findBookingReminder(tx, BookingIdSchema.parse(booking.id), 'day_before'),
+      ),
+    ).toBeDefined();
+    await runAt(b, at(2, '14:04'));
+    expect(b.sms.sent.map((m) => m.body)).toEqual([expect.stringContaining('Reminder: Haircut')]);
+  });
+
+  it('keeps no link for a reminder that was queued already', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await book(b, at(3, '14:00'));
+    await runAt(b, at(2, '14:00'));
+    expect(await linksOf(b, booking.id)).toBe(1);
+    // Planned again for the same start: the text is deduped, and so is its new link.
+    await withTenant(db, b.tenantId, (tx) =>
+      planBookingReminder(tx, {
+        bookingId: BookingIdSchema.parse(booking.id),
+        dueAt: new Date(at(2, '14:10')),
+        startsAt: new Date(at(3, '14:00')),
+      }),
+    );
+    await runAt(b, at(2, '14:10'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect(await linksOf(b, booking.id)).toBe(1);
   });
 });

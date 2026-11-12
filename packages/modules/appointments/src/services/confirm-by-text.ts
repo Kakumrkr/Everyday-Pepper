@@ -2,6 +2,7 @@ import { BookingIdSchema, SmsPhoneSchema } from '@pepper/contracts';
 import {
   appendAuditEntry,
   findCurrentTenant,
+  hasRecentReminderText,
   isSmsOptedOut,
   lockBooking,
   markBookingClientConfirmed,
@@ -40,12 +41,17 @@ export async function confirmBookingByText(
     const bookingId = BookingIdSchema.parse(target.bookingId);
     const booking = await lockBooking(tx, bookingId);
     const tenant = await findCurrentTenant(tx);
-    // Changed between the lookup and the lock (cancelled, or started).
+    // Changed between the lookup and the lock (cancelled, started or moved off the reminded time).
     if (
       booking === undefined ||
       tenant === undefined ||
       booking.status !== 'confirmed' ||
-      booking.startsAt.getTime() <= input.receivedAt.getTime()
+      booking.startsAt.getTime() <= input.receivedAt.getTime() ||
+      !(await hasRecentReminderText(tx, {
+        bookingId,
+        startsAt: booking.startsAt,
+        at: input.receivedAt,
+      }))
     ) {
       return answer({ outcome: 'nothing', reply: NOTHING_TO_CONFIRM_REPLY });
     }

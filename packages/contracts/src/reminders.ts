@@ -26,6 +26,12 @@ export type ReminderSettings = z.infer<typeof ReminderSettingsSchema>;
 /** The defaults: everything on, the same-day text 2 hours ahead. */
 export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = ReminderSettingsSchema.parse({});
 
+/** Stored settings as read: each missing field at its default, the defaults when unreadable. */
+export function reminderSettingsFrom(stored: unknown): ReminderSettings {
+  const parsed = ReminderSettingsSchema.safeParse(stored ?? {});
+  return parsed.success ? parsed.data : DEFAULT_REMINDER_SETTINGS;
+}
+
 /** `PATCH /v1/reminders/settings`: any of the fields, at least one. */
 export const ReminderSettingsPatchSchema = z
   .object({
