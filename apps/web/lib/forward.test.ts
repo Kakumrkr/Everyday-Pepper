@@ -52,6 +52,42 @@ describe('forwardToApi', () => {
     expect(call?.init.redirect).toBe('manual');
   });
 
+  it('passes the webhook signatures on to /v1/webhooks/* only, and the form as it came (S61)', async () => {
+    const signed = {
+      'content-type': 'application/x-www-form-urlencoded',
+      'x-twilio-signature': 'c2lnbmVk',
+      'svix-id': 'msg_1',
+      'svix-timestamp': '1762966800',
+      'svix-signature': 'v1,c2lnbmVk',
+    };
+    const form = 'Body=STOP&From=%2B15552340001';
+    const hook = upstream(new Response('<Response></Response>'));
+    await forwardToApi(
+      new Request('http://localhost:3000/v1/webhooks/sms', {
+        method: 'POST',
+        headers: signed,
+        body: form,
+      }),
+      { apiBaseUrl: API, fetch: hook.fetch },
+    );
+    const sent = new Headers(hook.calls[0]?.init.headers);
+    for (const [name, value] of Object.entries(signed)) expect(sent.get(name)).toBe(value);
+    expect(new TextDecoder().decode(hook.calls[0]?.init.body as ArrayBuffer)).toBe(form);
+
+    const other = upstream(new Response('{}'));
+    await forwardToApi(
+      new Request('http://localhost:3000/v1/clients', {
+        method: 'POST',
+        headers: signed,
+        body: '{}',
+      }),
+      { apiBaseUrl: API, fetch: other.fetch },
+    );
+    const plain = new Headers(other.calls[0]?.init.headers);
+    expect(plain.get('x-twilio-signature')).toBeNull();
+    expect(plain.get('svix-signature')).toBeNull();
+  });
+
   it('sends no body for GET', async () => {
     const { fetch, calls } = upstream(new Response('{}'));
     await forwardToApi(new Request('http://localhost:3000/v1/me'), { apiBaseUrl: API, fetch });
