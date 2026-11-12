@@ -12,7 +12,9 @@ Plan (Claude, improvised): reminder times kept out of 20:00–8:00 when planned 
 - [x] 1. ACs + traceability.
 - [x] 2. Migration 0077 + db repos (link has no expiry: the start bounds changes, like the confirmation's; the clean-up drops links 30 days after the start). db 497 integration green incl. isolation.
 - [x] 3–4. `reminderDueAt` (kept out of 20:00–8:00), two kinds, text to the consent's number else email, the reminder's own link (email too), STOP line on the first; opt-in text cut to fit 3 segments (staff dropped). appointments 32 integration + 177 unit green; core `lastTextOf` + the profile's `lastText`.
-- [ ] 5. Opt-in/confirmation text (notify path, api `BookingEmails`, `texts` option in api/worker config). 6. "C" (appointments `confirmByText` + webhook). 7. Settings API. 8. ADR-0065 + dependency map.
+- [x] 5. Opt-in text on a new consent, a short confirmation when texts are on (api notify, `textsOn`); public-booking 52 green.
+- [x] 6. "C": `confirmBookingByText` + webhook (opt-out wins; after a STOP no reply). 7. `GET/PATCH /v1/reminders/settings` (re-plans). 8. ADR-0065 "Built in S62", dependency map, `.env.example`.
+- Next: `/session-close` (review, security review, tier 3: `pnpm check`, affected integration; no screen changed, so no Playwright), then S62.2.
 
 ## Last sessions
 - **S61.2 Phase 14 · SMS consent on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #95](https://github.com/Kakumrkr/Everyday-Pepper/pull/95)). Full entry in [session-log.md](session-log.md).
