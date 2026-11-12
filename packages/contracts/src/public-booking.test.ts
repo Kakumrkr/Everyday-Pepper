@@ -6,6 +6,7 @@ import {
   ManageTokenSchema,
   PublicBusinessSchema,
   PublicRescheduleInputSchema,
+  SMS_OPT_IN_PHONE_MESSAGE,
   VerificationCodeSchema,
 } from './public-booking.js';
 
@@ -28,6 +29,7 @@ describe('BookingRequestInputSchema', () => {
       name: 'Ana Ruiz',
       email: 'ana@example.test',
       phone: null,
+      smsConsent: null,
     });
   });
 
@@ -40,8 +42,41 @@ describe('BookingRequestInputSchema', () => {
     expect(parsed).toMatchObject({ staffMemberId: STAFF, phone: '+15551234567' });
   });
 
+  it('keeps a ticked SMS box with a number Pepper can text (AC-X-64)', () => {
+    const parsed = BookingRequestInputSchema.parse({
+      ...REQUEST,
+      phone: '+15551234567',
+      smsConsent: 'sms-consent-v1',
+    });
+    expect(parsed).toMatchObject({ phone: '+15551234567', smsConsent: 'sms-consent-v1' });
+  });
+
+  it.each([
+    ['no phone', null],
+    ['a UK phone', '+447700900123'],
+    ['an area code starting with 1', '+11551234567'],
+  ])('refuses a ticked SMS box with %s, on the phone field', (_label, phone) => {
+    const result = BookingRequestInputSchema.safeParse({
+      ...REQUEST,
+      phone,
+      smsConsent: 'sms-consent-v1',
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues).toEqual([
+      expect.objectContaining({ path: ['phone'], message: SMS_OPT_IN_PHONE_MESSAGE }),
+    ]);
+  });
+
+  it('keeps a UK phone with the box unticked', () => {
+    expect(
+      BookingRequestInputSchema.parse({ ...REQUEST, phone: '+447700900123' }).smsConsent,
+    ).toBeNull();
+  });
+
   it.each([
     ['a blank name', { name: '  ' }],
+    ['an unknown SMS wording', { phone: '+15551234567', smsConsent: 'sms-consent-v9' }],
+    ['an SMS box as a boolean', { phone: '+15551234567', smsConsent: true }],
     ['a long name', { name: 'a'.repeat(121) }],
     ['no email', { email: '' }],
     ['a bad email', { email: 'ana@' }],

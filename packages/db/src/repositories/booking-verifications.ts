@@ -2,6 +2,8 @@ import {
   BookingRequestIdSchema,
   ClientEmailSchema,
   PhoneSchema,
+  SmsConsentWordingVersionSchema,
+  type SmsConsentWordingVersion,
   type BookingId,
   type BookingRequestId,
   type ServiceId,
@@ -36,6 +38,8 @@ export interface NewBookingVerification {
   expiresAt: Date;
   /** `waitlist` (S38a): the code adds the client to the waitlist for that local day. */
   purpose?: 'booking' | 'waitlist';
+  /** The SMS box the client ticked (S61.2): its wording, recorded as a consent on confirmation. */
+  smsConsentVersion?: SmsConsentWordingVersion | null;
 }
 
 export async function insertBookingVerification(
@@ -54,6 +58,10 @@ export async function insertBookingVerification(
       codeHash: HashSchema.parse(input.codeHash),
       expiresAt: input.expiresAt,
       purpose: z.enum(['booking', 'waitlist']).parse(input.purpose ?? 'booking'),
+      smsConsentVersion:
+        input.smsConsentVersion === undefined || input.smsConsentVersion === null
+          ? null
+          : SmsConsentWordingVersionSchema.parse(input.smsConsentVersion),
     })
     .returning();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row

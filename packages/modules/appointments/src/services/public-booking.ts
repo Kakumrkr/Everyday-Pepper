@@ -5,6 +5,7 @@ import {
   BookingIdSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
+  SmsConsentWordingVersionSchema,
   ClientContactSchema,
   ClientEmailSchema,
   ClientIdSchema,
@@ -47,7 +48,7 @@ import {
   type WaitlistRequestInput,
   type WaitlistWindow,
 } from '@pepper/contracts';
-import { systemClock, type Clock } from '@pepper/core';
+import { recordSmsConsent, systemClock, type Clock } from '@pepper/core';
 import {
   addVerificationAttempt,
   appendAuditEntry,
@@ -328,6 +329,7 @@ export async function requestBooking(
         phone: request.phone,
         codeHash: codeHash(options.codeKey, request.email, code),
         expiresAt,
+        smsConsentVersion: request.smsConsent,
       });
       const remembered = await recognizeDeviceIn(
         tx,
@@ -440,6 +442,20 @@ export async function confirmBookingRequest(
           after: bookingAuditValues(row),
         },
       });
+      // The SMS box the client ticked (S61.2, AC-X-65): a consent only now, with the booking.
+      if (request.smsConsentVersion !== null && request.phone !== null) {
+        await recordSmsConsent(
+          tx,
+          {
+            phone: request.phone,
+            source: 'booking_page',
+            clientId: client.id,
+            wordingVersion: SmsConsentWordingVersionSchema.parse(request.smsConsentVersion),
+            givenAt: new Date(now),
+          },
+          { actor: { kind: 'system' } },
+        );
+      }
       const booking = await toPublicBooking(tx, row, now);
       const email: BookingEmailDetails = {
         businessName: tenant.name,

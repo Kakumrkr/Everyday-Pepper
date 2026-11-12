@@ -10,7 +10,7 @@ import {
   type SmsDeliveryStatus,
   type SmsKeyword,
 } from '@pepper/contracts';
-import { and, asc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { smsConsents, smsDeliveries, smsKeywordEvents, type SmsConsentRow } from '../schema.js';
@@ -96,6 +96,40 @@ export async function findActiveSmsConsent(
     .from(smsConsents)
     .where(and(eq(smsConsents.phone, parsed.data), isNull(smsConsents.revokedAt)));
   return row;
+}
+
+/**
+ * The client's consent records in the business, the latest first (S61.2, AC-X-66): what the
+ * profile shows. A member's scope (staff: their own clients) is the caller's to check.
+ */
+export async function listSmsConsentsForClient(
+  tx: TenantTx,
+  clientId: string,
+  limit = 5,
+): Promise<SmsConsentRow[]> {
+  return tx
+    .select()
+    .from(smsConsents)
+    .where(eq(smsConsents.clientId, Id.parse(clientId)))
+    .orderBy(desc(smsConsents.givenAt), desc(smsConsents.id))
+    .limit(z.number().int().min(1).max(50).parse(limit));
+}
+
+/**
+ * The names of the businesses a number has an active consent with, the latest first, two at
+ * most (S61.2, AC-X-68): who a reply to Pepper's number names. Through `sms_consent_businesses`,
+ * which answers names only, in any transaction.
+ */
+export async function smsConsentBusinesses(
+  db: Database | TenantTx,
+  phone: string,
+): Promise<string[]> {
+  const parsed = SmsPhoneSchema.safeParse(phone);
+  if (!parsed.success) return [];
+  const { rows } = await db.execute<{ name: string }>(
+    sql`SELECT name FROM sms_consent_businesses(${parsed.data})`,
+  );
+  return rows.map((row) => row.name);
 }
 
 /** Every consent record of the business, oldest first, for its export (ADR-0053). */
