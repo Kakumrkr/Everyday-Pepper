@@ -47,12 +47,14 @@ export async function insertSmsConsent(
   input: NewSmsConsent,
 ): Promise<{ id: string; replaced: string | null }> {
   const phone = SmsPhoneSchema.parse(input.phone);
-  const revoked = await revokeActive(tx, phone, input.givenAt);
+  const source = SmsConsentSourceSchema.parse(input.source);
+  // Only the same source's (S63): a client's consent and a member's own stand side by side.
+  const revoked = await revokeActive(tx, phone, source, input.givenAt);
   const [row] = await tx
     .insert(smsConsents)
     .values({
       phone,
-      source: SmsConsentSourceSchema.parse(input.source),
+      source,
       clientId:
         input.clientId === undefined || input.clientId === null ? null : Id.parse(input.clientId),
       userId: input.userId === undefined || input.userId === null ? null : Id.parse(input.userId),
@@ -65,26 +67,45 @@ export async function insertSmsConsent(
   return { id: row.id, replaced: revoked[0] ?? null };
 }
 
-/** Revokes the number's active consent in the business; its id, or `null` when none was. */
+/**
+ * Revokes the number's active consent of one source in the business (a client's, or a member's
+ * own: S63); its id, or `null` when none was.
+ */
 export async function revokeSmsConsent(
   tx: TenantTx,
   phone: string,
+  source: SmsConsentSource,
   now: Date,
 ): Promise<string | null> {
-  return (await revokeActive(tx, SmsPhoneSchema.parse(phone), now))[0] ?? null;
+  return (
+    (
+      await revokeActive(tx, SmsPhoneSchema.parse(phone), SmsConsentSourceSchema.parse(source), now)
+    )[0] ?? null
+  );
 }
 
-async function revokeActive(tx: TenantTx, phone: string, at: Date): Promise<string[]> {
+async function revokeActive(
+  tx: TenantTx,
+  phone: string,
+  source: SmsConsentSource,
+  at: Date,
+): Promise<string[]> {
   // `GREATEST`: a consent given "later" by a clock that ran ahead still revokes cleanly.
   const rows = await tx
     .update(smsConsents)
     .set({ revokedAt: sql`GREATEST(${at.toISOString()}::timestamptz, ${smsConsents.givenAt})` })
-    .where(and(eq(smsConsents.phone, phone), isNull(smsConsents.revokedAt)))
+    .where(
+      and(
+        eq(smsConsents.phone, phone),
+        eq(smsConsents.source, source),
+        isNull(smsConsents.revokedAt),
+      ),
+    )
     .returning({ id: smsConsents.id });
   return rows.map((row) => row.id);
 }
 
-/** The number's active consent in the business. */
+/** The number's active consent in the business (any source: either lets the business text it). */
 export async function findActiveSmsConsent(
   tx: TenantTx,
   phone: string,

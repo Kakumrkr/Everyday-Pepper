@@ -39,6 +39,7 @@ import {
 import { recordActivation } from './repositories/activation.js';
 import { appendAuditEntry } from './repositories/audit.js';
 import { recordFunnelStep } from './repositories/booking-funnel.js';
+import { insertApprovalText } from './repositories/approval-texts.js';
 import { insertBookingManageLink, insertBookingText } from './repositories/booking-texts.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBusinessPhoto } from './repositories/business-photos.js';
@@ -95,6 +96,7 @@ const GLOBAL_TABLES: Record<string, string> = {
   accounts: 'sign-in methods (password hash) of a global user',
   verifications: 'short-lived Better Auth tokens, keyed by identifier, not by tenant',
   two_factors: 'TOTP secret and backup codes of a global user',
+  user_phones: 'a global user’s own checked mobile number (S63, ADR-0066), keyed by the user',
   signup_events:
     'an account’s sign-up (S45, ADR-0046), before any business; its id and the time only',
   public_support_requests:
@@ -780,6 +782,34 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'kind = kind',
     ownerLookup: 'sms_confirm_lookup',
+  },
+  approval_texts: {
+    tenantColumn: 'tenant_id',
+    // A card sent to a member by text for their OK (S63): one row per queued text.
+    seed: async (tx) => {
+      const proposal = await seedProposal(tx);
+      const id = OutboxMessageIdSchema.parse(newId());
+      await insertOutboxMessage(tx, {
+        id,
+        type: 'sms',
+        dedupeKey: `isolation:${newId()}`,
+        payload: randomBytes(16),
+        availableAt: new Date(),
+      });
+      await insertApprovalText(tx, {
+        id,
+        proposalId: proposal.id,
+        userId: await insertUser(db),
+        phone: '+15552345678',
+        fingerprint: 'a'.repeat(64),
+        codeHash: randomBytes(32).toString('hex'),
+        expiresAt: new Date(Date.now() + 3_600_000),
+        createdAt: new Date(),
+      });
+      return id;
+    },
+    touch: 'used_at = used_at',
+    ownerLookup: 'sms_approval_lookup',
   },
   booking_manage_links: {
     tenantColumn: 'tenant_id',

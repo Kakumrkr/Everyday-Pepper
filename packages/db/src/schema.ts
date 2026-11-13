@@ -321,6 +321,43 @@ export const twoFactors = pgTable(
   (table) => [index('two_factors_user_id_idx').on(table.userId)],
 );
 
+/**
+ * A person's own mobile number (S63, ADR-0066 §1): global like `users` (one person, every
+ * business they work in), kept apart from Better Auth's tables so no session answer ever carries
+ * it. `phone` is set only once a texted code proved it; `check_*` is the one code in flight (its
+ * HMAC bound to the number, never the code), replaced by a new request. Removed with the user.
+ */
+export const userPhones = pgTable(
+  'user_phones',
+  {
+    userId: uuid('user_id')
+      .primaryKey()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    phone: text('phone'),
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
+    checkPhone: text('check_phone'),
+    checkHash: text('check_hash'),
+    checkExpiresAt: timestamp('check_expires_at', { withTimezone: true }),
+    checkAttempts: smallint('check_attempts').notNull().default(0),
+    ...timestamps,
+  },
+  (table) => [
+    check('user_phones_phone_format', smsPhone(table.phone)),
+    check('user_phones_check_phone_format', smsPhone(table.checkPhone)),
+    check(
+      'user_phones_verified_with_phone',
+      sql`(${table.phone} IS NULL) = (${table.verifiedAt} IS NULL)`,
+    ),
+    check(
+      'user_phones_check_complete',
+      sql`(${table.checkPhone} IS NULL) = (${table.checkHash} IS NULL) AND (${table.checkHash} IS NULL) = (${table.checkExpiresAt} IS NULL)`,
+    ),
+    check('user_phones_check_hash_format', sql`${table.checkHash} ~ '^[0-9a-f]{64}$'`),
+    check('user_phones_check_attempts_range', sql`${table.checkAttempts} BETWEEN 0 AND 10`),
+  ],
+);
+export type UserPhoneRow = typeof userPhones.$inferSelect;
+
 /** A user's role in a tenant. */
 export const memberships = pgTable(
   'memberships',
@@ -334,6 +371,8 @@ export const memberships = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
     role: membershipRole('role').notNull(),
+    // "Text me cards" (S63, ADR-0066 §2): this member gets cards that wait for an OK by text.
+    cardTexts: boolean('card_texts').notNull().default(false),
     ...timestamps,
   },
   (table) => [
@@ -3208,7 +3247,7 @@ function smsPhone(column: SQLWrapper): SQL {
  * A person's consent to the business's texts (S61, ADR-0065 §3, §7): the business's TCPA record of
  * when, how (`booking_page`: a client ticked the box; `member_settings`: a member, for texts to
  * themselves) and which wording (`SMS_CONSENT_WORDING`, never edited in place), with the words
- * as shown (the business's name in them, as it was then). At most one is active a number; a new one replaces it, a revoked one stays as the record. Delivery checks it at
+ * as shown (the business's name in them, as it was then). At most one is active a number and source (S63); a new one replaces it, a revoked one stays as the record. Delivery checks it at
  * send time. In the export; removed with the business, and with a client who is forgotten.
  */
 export const smsConsents = pgTable(
@@ -3231,8 +3270,9 @@ export const smsConsents = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
+    // One in force a number and source (S63): an owner who also books keeps both.
     uniqueIndex('sms_consents_active_unique')
-      .on(table.tenantId, table.phone)
+      .on(table.tenantId, table.phone, table.source)
       .where(sql`${table.revokedAt} IS NULL`),
     index('sms_consents_client_idx').on(table.tenantId, table.clientId),
     // The businesses a reply's number has said yes to (S61.2, `sms_consent_businesses`).
@@ -3350,6 +3390,54 @@ export const bookingTexts = pgTable(
   ],
 );
 export type BookingTextRow = typeof bookingTexts.$inferSelect;
+
+/**
+ * A card sent to a member by text for their OK (S63, ADR-0066 §3): one row per queued text (the
+ * outbox message's id), its proposal, member and number, the proposal's fingerprint when the
+ * text was written (a reply approves only what the text showed), the code's HMAC bound to the
+ * number, when it expires and when it was used (once). Removed with its message or proposal;
+ * not in the export (delivery state).
+ */
+export const approvalTexts = pgTable(
+  'approval_texts',
+  {
+    id: uuid('id').primaryKey(),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    proposalId: uuid('proposal_id').notNull(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    phone: text('phone').notNull(),
+    fingerprint: text('fingerprint').notNull(),
+    codeHash: text('code_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    usedAt: timestamp('used_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // A reply's lookup: the codes sent to a number.
+    index('approval_texts_phone_idx').on(table.phone, table.expiresAt),
+    index('approval_texts_proposal_idx').on(table.tenantId, table.proposalId),
+    check('approval_texts_phone_format', smsPhone(table.phone)),
+    check('approval_texts_code_hash_format', sql`${table.codeHash} ~ '^[0-9a-f]{64}$'`),
+    check(
+      'approval_texts_used_after_created',
+      sql`${table.usedAt} IS NULL OR ${table.usedAt} >= ${table.createdAt}`,
+    ),
+    foreignKey({
+      name: 'approval_texts_message_fk',
+      columns: [table.tenantId, table.id],
+      foreignColumns: [outboxMessages.tenantId, outboxMessages.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'approval_texts_proposal_fk',
+      columns: [table.tenantId, table.proposalId],
+      foreignColumns: [aiActionProposals.tenantId, aiActionProposals.id],
+    }).onDelete('cascade'),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type ApprovalTextRow = typeof approvalTexts.$inferSelect;
 
 /**
  * More reschedule/cancel links of a booking (S62): one per reminder, so a reminder carries a

@@ -121,9 +121,9 @@ describe('SMS consents (AC-X-58)', () => {
 
   it('revokes the active one, and says when there was none', async () => {
     const now = new Date(T0.getTime() + 120_000);
-    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, now))).not.toBeNull();
+    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now))).not.toBeNull();
     expect(await withTenant(db, tenantA, (tx) => findActiveSmsConsent(tx, PHONE))).toBeUndefined();
-    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, now))).toBeNull();
+    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now))).toBeNull();
   });
 
   it('refuses a consent without its subject, or with a number Pepper can’t text', async () => {
@@ -224,7 +224,7 @@ describe('SMS consents by client and the names a reply gives (S61.2)', () => {
     const sam = await client(tenantA, phone);
     await withTenant(db, tenantA, async (tx) => {
       await insertSmsConsent(tx, consent(sam, phone, T0));
-      await revokeSmsConsent(tx, phone, new Date(T0.getTime() + 60_000));
+      await revokeSmsConsent(tx, phone, 'booking_page', new Date(T0.getTime() + 60_000));
       await insertSmsConsent(tx, consent(sam, phone, new Date(T0.getTime() + 120_000)));
     });
     const rows = await withTenant(db, tenantA, (tx) => listSmsConsentsForClient(tx, sam));
@@ -265,7 +265,7 @@ describe('SMS consents by client and the names a reply gives (S61.2)', () => {
       'C & Co',
     ]);
     // A revoked consent and a business being deleted are left out.
-    await withTenant(db, tenantC, (tx) => revokeSmsConsent(tx, phone, new Date()));
+    await withTenant(db, tenantC, (tx) => revokeSmsConsent(tx, phone, 'booking_page', new Date()));
     await withTenant(db, tenantE, (tx) =>
       scheduleCurrentTenantDeletion(tx, new Date(Date.now() + 30 * 86_400_000)),
     );

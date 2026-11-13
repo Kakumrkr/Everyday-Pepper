@@ -30,6 +30,8 @@ export * from './repositories/pilot-metrics.js';
 export * from './repositories/push-subscriptions.js';
 export * from './repositories/reminders.js';
 export * from './repositories/booking-texts.js';
+export * from './repositories/approval-texts.js';
+export * from './repositories/user-phones.js';
 export * from './repositories/support.js';
 export * from './repositories/support-screenshots.js';
 export * from './repositories/inbound-email.js';

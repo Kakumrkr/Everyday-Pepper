@@ -547,6 +547,13 @@
       "when": 1794489197483,
       "tag": "0077_s62_sms_reminders",
       "breakpoints": true
+    },
+    {
+      "idx": 78,
+      "version": "7",
+      "when": 1794529339416,
+      "tag": "0078_s63_approve_by_text",
+      "breakpoints": true
     }
   ]
 }
