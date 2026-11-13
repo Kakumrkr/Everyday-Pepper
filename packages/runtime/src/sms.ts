@@ -112,7 +112,16 @@ const SANDBOX_KEEP = 100;
 export class SandboxSmsSender implements SmsSender {
   private readonly kept: SandboxText[] = [];
 
-  constructor(private readonly log: (line: string) => void = () => undefined) {}
+  constructor(
+    private readonly log: (line: string) => void = () => undefined,
+    /** Where tests read what was sent (S63, `SandboxTextLog`); none: memory only. */
+    private readonly textLog: SandboxTextLog | null = null,
+  ) {}
+
+  /** The same sender, also writing what it sends to `textLog` (the worker's, at start-up). */
+  withTextLog(textLog: SandboxTextLog): SandboxSmsSender {
+    return new SandboxSmsSender(this.log, textLog);
+  }
 
   /** The texts kept, oldest first. */
   get sent(): readonly SandboxText[] {
@@ -125,12 +134,55 @@ export class SandboxSmsSender implements SmsSender {
     this.kept.push({ ...message, providerMessageId, segments });
     if (this.kept.length > SANDBOX_KEEP) this.kept.shift();
     this.log(`SMS sandbox: ${String(segments)} segment(s) to ${maskPhone(message.to)}`);
-    return Promise.resolve({
+    const accepted: SmsAccepted = {
       provider: 'sandbox',
       providerMessageId,
       segments,
       status: 'delivered',
-    });
+    };
+    if (this.textLog === null) return Promise.resolve(accepted);
+    return this.textLog
+      .record({ to: message.to, body: message.body, sentAt: new Date().toISOString() })
+      .then(() => accepted);
+  }
+}
+
+/** One text the sandbox sent, as tests read it (S63, AC-X-87). */
+export const SandboxSentTextSchema = z
+  .object({ to: z.string(), body: z.string(), sentAt: z.iso.datetime() })
+  .strict();
+export type SandboxSentText = z.infer<typeof SandboxSentTextSchema>;
+
+const SANDBOX_LOG_KEY = 'pepper:sms-sandbox:sent';
+const SANDBOX_LOG_TTL_SECONDS = 24 * 60 * 60;
+
+/**
+ * The sandbox's sent texts in Redis (S63, ADR-0066 §5), shared by the worker that sends them
+ * and the api's `/v1/dev/sms/sent` that tests read: the newest 100, kept a day. Only ever used
+ * with `SMS_PROVIDER=sandbox` where tests run (CI, or a development machine).
+ */
+export class SandboxTextLog {
+  constructor(
+    private readonly redis: {
+      lpush(key: string, value: string): Promise<unknown>;
+      ltrim(key: string, start: number, stop: number): Promise<unknown>;
+      expire(key: string, seconds: number): Promise<unknown>;
+      lrange(key: string, start: number, stop: number): Promise<string[]>;
+    },
+  ) {}
+
+  async record(text: SandboxSentText): Promise<void> {
+    await this.redis.lpush(SANDBOX_LOG_KEY, JSON.stringify(SandboxSentTextSchema.parse(text)));
+    await this.redis.ltrim(SANDBOX_LOG_KEY, 0, SANDBOX_KEEP - 1);
+    await this.redis.expire(SANDBOX_LOG_KEY, SANDBOX_LOG_TTL_SECONDS);
+  }
+
+  /** The texts sent to `to`, the newest first. */
+  async sentTo(to: string): Promise<SandboxSentText[]> {
+    const rows = await this.redis.lrange(SANDBOX_LOG_KEY, 0, SANDBOX_KEEP - 1);
+    return rows
+      .map((row) => SandboxSentTextSchema.safeParse(JSON.parse(row)))
+      .flatMap((parsed) => (parsed.success && parsed.data.to === to ? [parsed.data] : []));
   }
 }
 
@@ -145,9 +197,10 @@ export function maskPhone(phone: string): string {
 export function smsSenderFor(
   config: SmsConfig | null,
   log?: (line: string) => void,
+  sandboxLog: SandboxTextLog | null = null,
 ): SmsSender | null {
   if (config === null) return null;
-  if (config.provider === 'sandbox') return new SandboxSmsSender(log);
+  if (config.provider === 'sandbox') return new SandboxSmsSender(log, sandboxLog);
   return new TwilioSmsSender({
     accountSid: config.accountSid,
     authToken: config.authToken,

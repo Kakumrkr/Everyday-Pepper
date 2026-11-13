@@ -1,8 +1,10 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { ApiErrorSchema } from '@pepper/contracts';
+import { ForbiddenError, ProposalNotPendingError } from '@pepper/core';
 import type * as Appointments from '@pepper/appointments';
 import type * as Core from '@pepper/core';
+import type * as Db from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
 import { Global, Module, type INestApplication } from '@nestjs/common';
 import { APP_GUARD, Reflector } from '@nestjs/core';
@@ -10,7 +12,9 @@ import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SameOriginGuard } from '../auth/guards.js';
+import { AiActionsService } from '../chat/ai-actions.service.js';
 import { RateLimiter } from '../http/rate-limit.js';
+import { APPROVAL_REPLIES } from './sms-inbound.service.js';
 import { SmsWebhookModule } from './sms-webhook.controller.js';
 import { twilioSignatureOf } from './twilio-signature.js';
 
@@ -19,11 +23,21 @@ import { twilioSignatureOf } from './twilio-signature.js';
 // keyword's reply is TwiML; a status names its business and message in the signed query; off
 // without Twilio. core's sms.int.test.ts proves what the calls do.
 
-const core = vi.hoisted(() => ({ handleInboundSms: vi.fn(), recordSmsStatus: vi.fn() }));
+const core = vi.hoisted(() => ({
+  handleInboundSms: vi.fn(),
+  recordSmsStatus: vi.fn(),
+  claimApprovalText: vi.fn(),
+}));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   handleInboundSms: core.handleInboundSms,
   recordSmsStatus: core.recordSmsStatus,
+  claimApprovalText: core.claimApprovalText,
+}));
+const db = vi.hoisted(() => ({ isSmsOptedOut: vi.fn() }));
+vi.mock('@pepper/db', async (original) => ({
+  ...(await original<typeof Db>()),
+  isSmsOptedOut: db.isSmsOptedOut,
 }));
 const appointments = vi.hoisted(() => ({ confirmBookingByText: vi.fn() }));
 vi.mock('@pepper/appointments', async (original) => ({
@@ -43,13 +57,28 @@ const MESSAGE = '0199f4b2-7c1e-7a00-8000-0000000000b2';
 @Module({ providers: [{ provide: DATABASE, useValue: { db: {} } }], exports: [DATABASE] })
 class FakeConnectionsModule {}
 
-const limits = { hit: vi.fn(() => Promise.resolve()) };
+const limits = { hit: vi.fn(() => Promise.resolve()), spent: vi.fn(() => Promise.resolve(false)) };
+const approvals = { approve: vi.fn() };
+
+@Global()
+@Module({
+  providers: [{ provide: AiActionsService, useValue: approvals }],
+  exports: [AiActionsService],
+})
+class FakeChatModule {}
 
 async function start(twilio: { accountSid: string; authToken: string } | null) {
   const moduleRef = await Test.createTestingModule({
     imports: [
       FakeConnectionsModule,
-      SmsWebhookModule.forRoot({ twilio, baseUrl: BASE, clock: { now: () => NOW } }),
+      FakeChatModule,
+      SmsWebhookModule.forRoot({
+        twilio,
+        baseUrl: BASE,
+        outboxKey: Buffer.alloc(32, 7),
+        sandbox: false,
+        clock: { now: () => NOW },
+      }),
     ],
     providers: [
       {
@@ -113,6 +142,13 @@ beforeEach(() => {
   core.recordSmsStatus.mockReset();
   core.handleInboundSms.mockResolvedValue({ keyword: 'stop', reply: 'Pepper: You & "they" <ok>' });
   core.recordSmsStatus.mockResolvedValue('moved');
+  core.claimApprovalText.mockReset();
+  approvals.approve.mockReset();
+  limits.hit.mockClear();
+  limits.spent.mockReset();
+  limits.spent.mockResolvedValue(false);
+  db.isSmsOptedOut.mockReset();
+  db.isSmsOptedOut.mockResolvedValue(false);
   appointments.confirmBookingByText.mockReset();
   appointments.confirmBookingByText.mockResolvedValue({
     outcome: 'confirmed',
@@ -174,6 +210,84 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
     const c = form(inbound('Confirm'));
     const response = await post(path, c, signature(path, c)).expect(200);
     expect(response.text).toBe('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+  });
+
+  describe('"Y" and a code (S63, AC-X-83…86)', () => {
+    const CLAIMED = {
+      kind: 'claimed',
+      tenantId: TENANT,
+      context: { tenantId: TENANT, userId: MESSAGE, role: 'owner' },
+      proposalId: MESSAGE,
+      fingerprint: 'f'.repeat(64),
+    };
+    const reply = async (text: string) => {
+      core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+      const body = form(inbound(text));
+      const response = await post(path, body, signature(path, body)).expect(200);
+      return /<Message>(.*)<\/Message>/.exec(response.text)?.[1]?.replace(/&apos;/g, "'") ?? null;
+    };
+
+    it('claims the code from this number, then approves as its member with what the text showed', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      approvals.approve.mockResolvedValue({ kind: 'executed' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.done);
+      expect(core.claimApprovalText).toHaveBeenCalledWith(
+        {},
+        { from: '+15552340001', code: '4821', receivedAt: NOW },
+        { codeKey: expect.any(Buffer) as Buffer },
+      );
+      expect(approvals.approve).toHaveBeenCalledWith(CLAIMED.context, MESSAGE, 'f'.repeat(64));
+      expect(appointments.confirmBookingByText).not.toHaveBeenCalled();
+    });
+
+    it('answers a changed, refused, expired or handled card without running it', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      for (const [result, words] of [
+        [{ kind: 'stale' }, APPROVAL_REPLIES.changed],
+        [{ kind: 'refused' }, APPROVAL_REPLIES.refused],
+        [{ kind: 'expired' }, APPROVAL_REPLIES.expired],
+      ] as const) {
+        approvals.approve.mockResolvedValueOnce(result);
+        expect(await reply('y4821')).toBe(words);
+      }
+      approvals.approve.mockRejectedValueOnce(new ProposalNotPendingError('approved'));
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.handled);
+      approvals.approve.mockRejectedValueOnce(new ForbiddenError());
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.miss);
+    });
+
+    it('answers a replay "already done" and a spoof one miss answer, counted per number', async () => {
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'used' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.used);
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'expired' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.expired);
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'miss' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.miss);
+      expect(limits.hit).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'sms-approval-miss', max: 5 }),
+        expect.stringMatching(/^[0-9a-f]{64}$/),
+      );
+      expect(approvals.approve).not.toHaveBeenCalled();
+    });
+
+    it('stops looking after 5 misses an hour, and answers nothing after a STOP', async () => {
+      limits.spent.mockResolvedValueOnce(true);
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.miss);
+      expect(core.claimApprovalText).not.toHaveBeenCalled();
+      db.isSmsOptedOut.mockResolvedValue(true);
+      expect(await reply('Y 4821')).toBeNull();
+      expect(await reply('Y')).toBeNull();
+      expect(core.claimApprovalText).not.toHaveBeenCalled();
+    });
+
+    it('tells a bare "Y" how to reply, and leaves YES a keyword', async () => {
+      expect(await reply('Y')).toBe(APPROVAL_REPLIES.withoutCode);
+      core.handleInboundSms.mockResolvedValue({ keyword: 'start', reply: 'Pepper: resubscribed' });
+      const body = form(inbound('YES'));
+      const response = await post(path, body, signature(path, body)).expect(200);
+      expect(response.text).toContain('Pepper: resubscribed');
+      expect(core.claimApprovalText).not.toHaveBeenCalled();
+    });
   });
 
   it('refuses a missing, wrong or tampered signature, before anything is read', async () => {

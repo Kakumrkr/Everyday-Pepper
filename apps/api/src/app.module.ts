@@ -69,7 +69,12 @@ export class AppModule {
           inboundDomain: config.inbound.domain,
         }),
         InboundModule.forRoot({ webhookSecret: config.inbound.webhookSecret }),
-        SmsWebhookModule.forRoot({ twilio: config.smsWebhook, baseUrl: config.auth.baseUrl }),
+        SmsWebhookModule.forRoot({
+          twilio: config.smsWebhook,
+          baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+          sandbox: config.smsSandbox,
+        }),
         MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ChatModule.forRoot({
           openai: config.ai.openai,

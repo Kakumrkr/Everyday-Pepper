@@ -37,6 +37,7 @@ export class AppModule {
             smsLogger.log(line);
           }),
           smsStatusBaseUrl: config.smsStatusBaseUrl,
+          sandboxTextLog: config.smsSandboxLog,
         }),
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),

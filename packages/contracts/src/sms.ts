@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
 import { BookingTextKindSchema } from './reminders.js';
 import { UtcDateTimeSchema } from './time.js';
+import { normalizePhone } from './clients.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
 // The SMS channel (S61, ADR-0065): the rules every text follows, whoever sends it. A text goes
@@ -555,9 +556,7 @@ export const StartPhoneCheckRequestSchema = z.object({ phone: z.string().max(40)
 export type StartPhoneCheckRequest = z.infer<typeof StartPhoneCheckRequestSchema>;
 
 /** `POST /v1/me/phone`'s answer: until when the code works. */
-export const StartPhoneCheckResponseSchema = z
-  .object({ expiresAt: UtcDateTimeSchema })
-  .strict();
+export const StartPhoneCheckResponseSchema = z.object({ expiresAt: UtcDateTimeSchema }).strict();
 export type StartPhoneCheckResponse = z.infer<typeof StartPhoneCheckResponseSchema>;
 
 /** `POST /v1/me/phone/verify`: the code from the text. */
@@ -581,3 +580,28 @@ export type MemberTexts = z.infer<typeof MemberTextsSchema>;
 /** `PATCH /v1/me/texts`. */
 export const UpdateMemberTextsRequestSchema = z.object({ cardTexts: z.boolean() }).strict();
 export type UpdateMemberTextsRequest = z.infer<typeof UpdateMemberTextsRequestSchema>;
+
+/** `POST /v1/dev/sms/inbound` (S63, AC-X-87): a text to Pepper's number, in the sandbox only. */
+export const SandboxInboundSmsRequestSchema = z
+  .object({ from: z.string().max(40), body: z.string().max(1600) })
+  .strict();
+export type SandboxInboundSmsRequest = z.infer<typeof SandboxInboundSmsRequestSchema>;
+
+/** Its answer: the reply Pepper sends back (`null`: none), as Twilio's TwiML would carry it. */
+export const SandboxInboundSmsResponseSchema = z.object({ reply: z.string().nullable() }).strict();
+export type SandboxInboundSmsResponse = z.infer<typeof SandboxInboundSmsResponseSchema>;
+
+/** `GET /v1/dev/sms/sent?to=`: the texts the sandbox sent to a number, the newest first. */
+export const SandboxSentSmsResponseSchema = z
+  .object({
+    texts: z.array(
+      z.object({ to: z.string(), body: z.string(), sentAt: UtcDateTimeSchema }).strict(),
+    ),
+  })
+  .strict();
+export type SandboxSentSmsResponse = z.infer<typeof SandboxSentSmsResponseSchema>;
+
+/** `GET /v1/dev/sms/sent`'s query: the number, in any common form. */
+export const SandboxSentSmsQuerySchema = z
+  .object({ to: z.string().max(40).transform(normalizePhone).pipe(SmsPhoneSchema) })
+  .strict();
