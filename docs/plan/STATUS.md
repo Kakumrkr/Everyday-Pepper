@@ -7,7 +7,13 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S62.2 closed ([PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)). Next: **S63** (first row of "Planned sessions").
+**S63 Approve by text, backend** (brief approved 2026-11-13: "Go ahead with your recommendations and complete the session"; D-1 split → S63.2 the screens and journeys; D-2 "Y 4821", a code per text; D-3 waitlist offers only; D-4 the phone on the user, the switch per membership, owners/managers; D-5 ADR-0066). Tasks:
+1. AC-X-80…87 + ADR-0066 — next
+2. Schema/migration: users phone, `member_phone_checks`, `approval_texts`, `sms_approval_target`
+3. Phone check (core + `/v1/me/phone`)
+4. Approval texts queued with the waitlist offer card
+5. "Y <code>" in the webhook → `approveToolProposal`; replay/spoof tests
+6. Top-up: sandbox inbound/outbound dev routes; "C" and "Y" end to end
 
 ## Last sessions
 - **S62.2 Phase 14 · Texts and reminders on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)). Full entry in [session-log.md](session-log.md).
