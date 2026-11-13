@@ -2,7 +2,13 @@ import { readFile } from 'node:fs/promises';
 import { SmsRejectedError } from '@pepper/core';
 import { describe, expect, it } from 'vitest';
 import { loadSmsConfig } from './config.js';
-import { maskPhone, SandboxSmsSender, smsSenderFor, TwilioSmsSender } from './sms.js';
+import {
+  maskPhone,
+  SandboxSmsSender,
+  SandboxTextLog,
+  smsSenderFor,
+  TwilioSmsSender,
+} from './sms.js';
 
 // Twilio's Messages API as its documentation shows it (S61, ADR-0065 §1, AC-X-57), replayed from
 // fixtures (src/fixtures/twilio) through a fetch in memory: no network.
@@ -169,6 +175,59 @@ describe('SandboxSmsSender', () => {
 
   it('masks short values whole', () => {
     expect(maskPhone('+1')).toBe('••••');
+  });
+});
+
+/** Redis's lists as `SandboxTextLog` uses them. */
+class FakeLists {
+  readonly lists = new Map<string, string[]>();
+  readonly expiries = new Map<string, number>();
+  lpush(key: string, value: string) {
+    this.lists.set(key, [value, ...(this.lists.get(key) ?? [])]);
+    return Promise.resolve(this.lists.get(key)?.length);
+  }
+  ltrim(key: string, start: number, stop: number) {
+    this.lists.set(key, (this.lists.get(key) ?? []).slice(start, stop + 1));
+    return Promise.resolve('OK');
+  }
+  expire(key: string, seconds: number) {
+    this.expiries.set(key, seconds);
+    return Promise.resolve(1);
+  }
+  lrange(key: string, start: number, stop: number) {
+    return Promise.resolve((this.lists.get(key) ?? []).slice(start, stop + 1));
+  }
+}
+
+describe('SandboxTextLog (S63, AC-X-87)', () => {
+  it('records what the sandbox sends, reads it back by number newest first, for a day, 100 at most', async () => {
+    const redis = new FakeLists();
+    const log = new SandboxTextLog(redis);
+    const sandbox = new SandboxSmsSender(() => undefined, log);
+    await sandbox.send({ ...message, body: 'first' });
+    await sandbox.send({ ...message, to: '+15550000002', body: 'elsewhere' });
+    await sandbox.send({ ...message, body: 'second' });
+    const mine = await log.sentTo(message.to);
+    expect(mine.map((text) => text.body)).toEqual(['second', 'first']);
+    expect(mine[0]?.sentAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect([...redis.expiries.values()]).toEqual([86_400]);
+    const latest = mine[0];
+    if (latest === undefined) throw new Error('nothing recorded');
+    for (let i = 0; i < 105; i += 1) await log.record({ ...latest, body: String(i) });
+    expect([...redis.lists.values()][0]).toHaveLength(100);
+  });
+
+  it('skips an entry that isn’t a text, and the same sender without the log keeps memory only', async () => {
+    const redis = new FakeLists();
+    const log = new SandboxTextLog(redis);
+    await log.record({ to: message.to, body: 'kept', sentAt: new Date().toISOString() });
+    const key = [...redis.lists.keys()][0] ?? '';
+    redis.lists.set(key, ['not json', '{"to":1}', ...(redis.lists.get(key) ?? [])]);
+    expect((await log.sentTo(message.to)).map((text) => text.body)).toEqual(['kept']);
+    const plain = new SandboxSmsSender();
+    await plain.send(message);
+    expect(plain.sent).toHaveLength(1);
+    expect(smsSenderFor({ provider: 'sandbox' }, undefined, log)).toBeInstanceOf(SandboxSmsSender);
   });
 });
 

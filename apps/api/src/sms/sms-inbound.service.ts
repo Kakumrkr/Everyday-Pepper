@@ -87,7 +87,11 @@ export class SmsInboundService {
         return this.approve(text.from, approvalCodeOf(text.body) ?? '', receivedAt);
       case 'approve_without_code':
         return (await this.optedOut(text.from)) ? null : APPROVAL_REPLIES.withoutCode;
-      default:
+      // The keywords were answered above; anything else gets what `handleInboundSms` said.
+      case 'help':
+      case 'start':
+      case 'stop':
+      case null:
         return result.reply;
     }
   }

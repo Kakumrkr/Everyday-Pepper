@@ -181,8 +181,16 @@ export class SandboxTextLog {
   async sentTo(to: string): Promise<SandboxSentText[]> {
     const rows = await this.redis.lrange(SANDBOX_LOG_KEY, 0, SANDBOX_KEEP - 1);
     return rows
-      .map((row) => SandboxSentTextSchema.safeParse(JSON.parse(row)))
+      .map((row) => SandboxSentTextSchema.safeParse(parsedJson(row)))
       .flatMap((parsed) => (parsed.success && parsed.data.to === to ? [parsed.data] : []));
+  }
+}
+
+function parsedJson(row: string): unknown {
+  try {
+    return JSON.parse(row);
+  } catch {
+    return null;
   }
 }
 

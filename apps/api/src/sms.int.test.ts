@@ -190,3 +190,10 @@ describe('a STOP through the api (AC-X-59)', () => {
     expect(await isSmsOptedOut(db, '+15552345555')).toBe(false);
   });
 });
+
+describe('the sandbox text path (AC-X-87)', () => {
+  it('doesn’t exist with a real provider', async () => {
+    await request(server).post('/v1/dev/sms/inbound').send({ from: PHONE, body: 'C' }).expect(404);
+    await request(server).get('/v1/dev/sms/sent').query({ to: PHONE }).expect(404);
+  });
+});

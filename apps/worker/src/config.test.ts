@@ -43,6 +43,20 @@ describe('loadWorkerConfig', () => {
     );
   });
 
+  it('writes what the sandbox sends where tests read it, only where tests run (S63, AC-X-87)', () => {
+    const sandbox = { ...required, SMS_PROVIDER: 'sandbox' };
+    expect(loadWorkerConfig(sandbox).smsSandboxLog).toBe(true);
+    expect(
+      loadWorkerConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'ci', NODE_ENV: 'production' })
+        .smsSandboxLog,
+    ).toBe(true);
+    expect(loadWorkerConfig({ ...sandbox, NODE_ENV: 'production' }).smsSandboxLog).toBe(false);
+    expect(loadWorkerConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'pilot' }).smsSandboxLog).toBe(
+      false,
+    );
+    expect(loadWorkerConfig(required).smsSandboxLog).toBe(false);
+  });
+
   it('requires DATABASE_URL and REDIS_URL', () => {
     expect(() => loadWorkerConfig({ OUTBOX_SECRET: required.OUTBOX_SECRET })).toThrow(
       'Invalid worker environment: DATABASE_URL, REDIS_URL',
