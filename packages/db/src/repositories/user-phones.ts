@@ -2,7 +2,7 @@ import { SmsPhoneSchema, UserIdSchema, type UserId } from '@pepper/contracts';
 import { eq, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
-import { userPhones, type UserPhoneRow } from '../schema.js';
+import { userPhones, users, type UserPhoneRow } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 
 // A person's own mobile number (S63, ADR-0066 §1). Global like `users`: no RLS, keyed by the
@@ -80,4 +80,18 @@ export async function setVerifiedUserPhone(
       checkAttempts: 0,
     })
     .where(eq(userPhones.userId, UserIdSchema.parse(userId)));
+}
+
+/** Whether the user has a second factor and isn't being deleted (a text approval's sign-in check). */
+export async function findUserSignInState(
+  db: Database | TenantTx,
+  userId: UserId,
+): Promise<{ twoFactorEnabled: boolean; beingDeleted: boolean } | undefined> {
+  const [row] = await db
+    .select({ twoFactorEnabled: users.twoFactorEnabled, deletionDueAt: users.deletionDueAt })
+    .from(users)
+    .where(eq(users.id, UserIdSchema.parse(userId)));
+  return row === undefined
+    ? undefined
+    : { twoFactorEnabled: row.twoFactorEnabled, beingDeleted: row.deletionDueAt !== null };
 }

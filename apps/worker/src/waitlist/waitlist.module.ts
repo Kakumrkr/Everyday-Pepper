@@ -25,6 +25,8 @@ export interface WaitlistOptions {
   baseUrl: string;
   /** How often the relay looks for freed times (a few seconds: AC-W5-1 allows 2 minutes). */
   pollMs: number;
+  /** Whether this deployment sends texts: the owner's card by text (S63). */
+  texts?: boolean;
   concurrency?: number;
   clock?: Clock;
 }
@@ -68,6 +70,7 @@ export class WaitlistRunner implements OnApplicationBootstrap, OnApplicationShut
       autonomyOf: (id: TemplateId | null) => (id === null ? {} : getTemplate(id).defaultAutonomy),
       templateRuleDefaults,
       emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.key },
+      texts: this.options.texts === true,
     };
     this.worker = new Worker(
       WAITLIST_QUEUE,

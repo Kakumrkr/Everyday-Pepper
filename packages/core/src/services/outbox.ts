@@ -315,7 +315,10 @@ async function sendSms(
   const now = options.clock.now();
   const gate = await withTenant(db, tenantId, async (tx): Promise<SmsOutcome | null> => {
     const permission = await smsPermission(tx, sms.to);
-    if (permission !== 'allowed') return { kind: 'dropped', reason: DROP_REASON[permission] };
+    // The one text the person just asked for (a code, S63) needs no standing consent.
+    const allowed =
+      permission === 'allowed' || (permission === 'no_consent' && sms.requested === true);
+    if (!allowed) return { kind: 'dropped', reason: DROP_REASON[permission] };
     if (sms.urgent === true) return null;
     const tenant = await findCurrentTenant(tx);
     if (tenant === undefined) throw new Error('The business is not visible to its transaction');

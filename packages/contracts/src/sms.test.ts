@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   classifySmsKeyword,
+  approvalCodeOf,
   classifySmsReply,
   normalizeSmsText,
   OutboxSmsSchema,
@@ -303,7 +304,11 @@ describe('the keyword replies and consent wording', () => {
     expect(text).toMatch(/STOP.*HELP/);
     expect(text).toContain('Msg & data rates may apply');
     expect(text).toContain('Not required to book');
-    expect(Object.keys(SMS_CONSENT_WORDING)).toEqual(['sms-consent-v1']);
+    expect(Object.keys(SMS_CONSENT_WORDING)).toEqual(['sms-consent-v1', 'sms-consent-v2']);
+    // A member's own cards (S63): what, how often, rates, STOP and HELP, the business named.
+    const member = smsConsentText('sms-consent-v2', 'Fade Bros');
+    expect(member).toContain('cards that need my OK from Fade Bros at this number');
+    expect(member).toMatch(/Msg frequency varies.*Msg & data rates may apply.*STOP.*HELP/);
     // `$` in a name is the name's own, never a replacement pattern.
     expect(smsConsentText('sms-consent-v1', "Nails $$ More $& $'")).toContain(
       "from Nails $$ More $& $' at this number",
@@ -419,9 +424,45 @@ describe('classifySmsReply (S62, AC-X-74)', () => {
     expect(classifySmsReply('Stop')).toBe('stop');
     expect(classifySmsReply('help')).toBe('help');
     expect(classifySmsReply('YES')).toBe('start');
-    for (const body of ['C you then', 'cc', 'I confirm my 3pm', 'Y', 'ok', '', 'c c']) {
+    for (const body of ['C you then', 'cc', 'I confirm my 3pm', 'ok', '', 'c c']) {
       expect(classifySmsReply(body)).toBeNull();
     }
+  });
+});
+
+describe('approval replies (S63, AC-X-86)', () => {
+  it('reads "Y" and a four-digit code, any case and light punctuation', () => {
+    for (const [body, code] of [
+      ['Y 4821', '4821'],
+      ['y4821', '4821'],
+      [' Yes 0042 ', '0042'],
+      ['Y: 4821.', '4821'],
+      ['y-4821!', '4821'],
+      ['Ｙ　４８２１', '4821'],
+    ] as const) {
+      expect(approvalCodeOf(body)).toBe(code);
+      expect(classifySmsReply(body)).toBe('approve');
+      // Never a START, even with "Yes" in it.
+      expect(classifySmsKeyword(body)).toBeNull();
+    }
+  });
+
+  it('keeps YES a START and answers a bare "Y" with how to reply', () => {
+    expect(classifySmsReply('YES')).toBe('start');
+    expect(classifySmsReply('Y')).toBe('approve_without_code');
+    expect(classifySmsReply('y.')).toBe('approve_without_code');
+    for (const body of [
+      'Y 482',
+      'Y 48210',
+      'Y 4821 please',
+      'STOP 4821',
+      'Y 4821 4821',
+      'Maybe 4821',
+    ]) {
+      expect(approvalCodeOf(body)).toBeNull();
+      expect(classifySmsReply(body)).not.toBe('approve');
+    }
+    expect(classifySmsReply('STOP 4821')).toBe('stop');
   });
 });
 

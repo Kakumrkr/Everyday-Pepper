@@ -9,9 +9,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S63 Approve by text, backend** (brief approved 2026-11-13: "Go ahead with your recommendations and complete the session"; D-1 split → S63.2 the screens and journeys; D-2 "Y 4821", a code per text; D-3 waitlist offers only; D-4 the phone on the user, the switch per membership, owners/managers; D-5 ADR-0066). Tasks:
 1. AC-X-80…87 + ADR-0066 — done
-2. Schema/migration 0078: `user_phones`, `memberships.card_texts`, `approval_texts`, `sms_approval_target`, consents unique per source — done (db int 515 green); hand SQL re-applied by scratchpad script m0078.sh — next: 3
-3. Phone check (core + `/v1/me/phone`)
-4. Approval texts queued with the waitlist offer card
+2. Schema/migration 0078: `user_phones`, `memberships.card_texts`, `approval_texts`, `sms_approval_target`, consents unique per source — done (db int 515 green)
+3. Phone check: core `member-texts.ts` (`requested` texts skip consent, `sms-consent-v2`), `/v1/me/phone`, `/v1/me/phone/verify`, `GET/PATCH /v1/me/texts` (not on `/v1/reminders/settings`: the switch is the member's own) — done (core int green)
+4. Approval texts: core `approval-texts.ts` (`queueApprovalTexts`, `claimApprovalText`), ai `waitlistOfferSummary`, the matcher queues them when `texts` (worker passes `config.sms !== null`) — done (ai matcher int 8/8, core 7/7) — next: 5
 5. "Y <code>" in the webhook → `approveToolProposal`; replay/spoof tests
 6. Top-up: sandbox inbound/outbound dev routes; "C" and "Y" end to end
 

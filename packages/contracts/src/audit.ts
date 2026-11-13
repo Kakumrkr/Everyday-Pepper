@@ -399,6 +399,16 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
         .strict(),
     })
     .strict(),
+  // A card's code used by a reply from the member's number (S63, ADR-0066 §4): which card, no
+  // number, no code.
+  z
+    .object({
+      action: z.literal('sms.approval_reply'),
+      entity: entity('approval_text'),
+      before: z.object({ used: z.literal(false) }).strict(),
+      after: z.object({ used: z.literal(true), proposalId: z.uuid() }).strict(),
+    })
+    .strict(),
   z
     .object({
       action: z.literal('sms.consent_revoked'),

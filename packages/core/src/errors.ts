@@ -436,3 +436,25 @@ export class SavedRepliesFullError extends Error {
     this.name = 'SavedRepliesFullError';
   }
 }
+
+/**
+ * A member's number couldn't be checked (S63, AC-X-80): `not_textable` (not a US or Canadian
+ * mobile), `opted_out` (the number replied STOP: START first), `no_check` (no code in flight or
+ * it expired), `too_many_tries`, `wrong_code`.
+ */
+export class PhoneCheckError extends Error {
+  constructor(
+    readonly reason: 'not_textable' | 'opted_out' | 'no_check' | 'too_many_tries' | 'wrong_code',
+  ) {
+    super(`Phone check failed: ${reason}`);
+    this.name = 'PhoneCheckError';
+  }
+}
+
+/** "Text me cards" needs a checked number first (S63, AC-X-81). */
+export class PhoneNotCheckedError extends Error {
+  constructor() {
+    super('No checked phone number');
+    this.name = 'PhoneNotCheckedError';
+  }
+}

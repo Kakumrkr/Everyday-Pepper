@@ -132,6 +132,13 @@ export const ApiErrorCodeSchema = z.enum([
   'wrong_password',
   'account_owns_business',
   'account_being_deleted',
+  // A member's own number and cards by text (S63, ADR-0066).
+  'phone_not_textable',
+  'phone_opted_out',
+  'phone_check_expired',
+  'phone_check_locked',
+  'phone_check_wrong_code',
+  'phone_not_checked',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

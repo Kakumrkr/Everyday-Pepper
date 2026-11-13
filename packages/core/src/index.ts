@@ -29,6 +29,8 @@ export * from './services/unsubscribe.js';
 export * from './services/memory.js';
 export * from './services/outbox.js';
 export * from './services/sms.js';
+export * from './services/member-texts.js';
+export * from './services/approval-texts.js';
 export * from './services/push.js';
 export * from './services/support.js';
 export * from './services/support-screenshots.js';

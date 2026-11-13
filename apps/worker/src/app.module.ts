@@ -70,6 +70,7 @@ export class AppModule {
                 key: outboxKeyFrom(config.outboxSecret),
                 baseUrl: config.waitlist.baseUrl,
                 pollMs: config.waitlist.pollMs,
+                texts: config.sms !== null,
               }),
             ]),
       ],

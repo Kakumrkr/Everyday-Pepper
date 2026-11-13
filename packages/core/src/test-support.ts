@@ -111,3 +111,12 @@ export async function loadInboundFixture(
     },
   };
 }
+
+/** Sets whether a user has a second factor (Better Auth sets it in the app). */
+export async function setTwoFactor(db: Database, userId: UserId, on: boolean): Promise<void> {
+  // Test-only, from validated values: a uuid and a boolean.
+  const id = UserIdSchema.parse(userId);
+  await db.execute(
+    `UPDATE users SET two_factor_enabled = ${on ? 'true' : 'false'} WHERE id = '${id}'`,
+  );
+}

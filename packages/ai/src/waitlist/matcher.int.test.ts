@@ -14,6 +14,7 @@ import {
   OfferTokenSchema,
   OutboxEmailSchema,
   OutboxMessageIdSchema,
+  OutboxSmsSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantSlugSchema,
@@ -22,9 +23,14 @@ import {
 } from '@pepper/contracts';
 import {
   changeAutonomy,
+  claimApprovalText,
   listPendingProposals,
   listRecentActions,
   openOutboxContent,
+  setMemberCardTexts,
+  smsCodeKeyFrom,
+  startMemberPhoneCheck,
+  verifyMemberPhone,
   type Actor,
 } from '@pepper/core';
 import {
@@ -37,6 +43,7 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
+import { sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedEvalWorld, type EvalWorld } from '../evals/world.js';
 import { approveToolProposal, undoToolAction } from '../tools/registry.js';
@@ -330,6 +337,117 @@ describe('AC-W5-1: a cancelled time is offered to the best matches', () => {
     );
     expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('no_match');
     expect(await offerProposals(w, w.actorFor('owner'))).toEqual([]);
+  });
+});
+
+describe('S63: the offer waiting for an OK, by text (AC-X-82, AC-X-83)', () => {
+  const codeKey = smsCodeKeyFrom(OUTBOX_KEY);
+
+  /** The member's number checked, a second factor, and "Text me cards" on if `on`. */
+  async function texting(w: EvalWorld, role: MembershipRole, phone: string, on: boolean) {
+    const actor = w.actorFor(role);
+    const coded = { codeKey, outboxKey: OUTBOX_KEY, clock: w.clock, drawCode: () => '246810' };
+    await startMemberPhoneCheck(db, actor, phone, coded);
+    await verifyMemberPhone(db, actor, '246810', coded);
+    await db.execute(
+      sql`UPDATE users SET two_factor_enabled = true WHERE id = ${actor.context.userId}`,
+    );
+    if (on) await setMemberCardTexts(db, actor, true, { clock: w.clock });
+    return actor;
+  }
+
+  async function texts(w: EvalWorld) {
+    const due = (
+      await listDueOutboxMessages(db, new Date(w.clock.now().getTime() + 24 * 3_600_000), 100)
+    ).filter((m) => m.tenantId === w.tenantId);
+    const sent = [];
+    for (const message of due) {
+      const row = await withTenant(db, w.tenantId, (tx) =>
+        findOutboxMessage(tx, OutboxMessageIdSchema.parse(message.messageId)),
+      );
+      if (row?.type !== 'sms' || row.payload === null || row.status !== 'pending') continue;
+      sent.push(
+        OutboxSmsSchema.parse(
+          JSON.parse(
+            openOutboxContent(OUTBOX_KEY, message.messageId, row.payload).toString('utf8'),
+          ),
+        ),
+      );
+    }
+    // Only the cards (the phone checks' codes are the members' own).
+    return sent.filter((text) => text.body.includes('Reply Y'));
+  }
+
+  it('texts the owner who asked, first names only; their "Y" and code approve that card', async () => {
+    const w = await world();
+    const owner = await texting(w, 'owner', '+15557770101', true);
+    // A manager with a checked number who didn't turn it on gets nothing.
+    await texting(w, 'manager', '+15557770102', false);
+    await cancelWithTwoWaiting(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'proposed',
+    );
+    const [proposal] = await offerProposals(w, owner);
+    if (proposal === undefined) throw new Error('no proposal');
+
+    const [text, ...others] = await texts(w);
+    expect(others).toEqual([]);
+    expect(text?.to).toBe('+15557770101');
+    // Held for the quiet hours (07:00 in New York): the code works 2 hours from 08:00.
+    expect(text?.body).toMatch(
+      /^Pepper: Tue 3pm opened with Jess\. Offer it to Ana and Sara\? Reply Y \d{4} by 10:00am\.$/,
+    );
+    const code = /Reply Y (\d{4})/.exec(text?.body ?? '')?.[1] ?? '';
+
+    // Another number with the right code, and the right number with another code: misses.
+    const at = w.clock.now();
+    expect(
+      await claimApprovalText(db, { from: '+15557770102', code, receivedAt: at }, { codeKey }),
+    ).toEqual({ kind: 'miss' });
+    const wrong = code === '0000' ? '0001' : '0000';
+    expect(
+      await claimApprovalText(
+        db,
+        { from: '+15557770101', code: wrong, receivedAt: at },
+        { codeKey },
+      ),
+    ).toEqual({ kind: 'miss' });
+
+    const claim = await claimApprovalText(
+      db,
+      { from: '+15557770101', code, receivedAt: at },
+      { codeKey },
+    );
+    expect(claim).toMatchObject({
+      kind: 'claimed',
+      tenantId: w.tenantId,
+      context: { tenantId: w.tenantId, userId: owner.context.userId, role: 'owner' },
+      proposalId: proposal.id,
+      fingerprint: proposal.fingerprint,
+    });
+    if (claim.kind !== 'claimed') throw new Error('not claimed');
+    const approved = await approveToolProposal(
+      { ...depsAs(w, 'owner'), actor: { context: claim.context } },
+      claim.proposalId,
+      claim.fingerprint,
+    );
+    expect(approved.kind).toBe('executed');
+    expect((await offerEmails(w)).map((e) => e.to).sort()).toEqual([
+      'ana@example.test',
+      'sara@example.test',
+    ]);
+    // Once.
+    expect(
+      await claimApprovalText(db, { from: '+15557770101', code, receivedAt: at }, { codeKey }),
+    ).toEqual({ kind: 'used' });
+  });
+
+  it('texts nothing when the deployment sends no texts', async () => {
+    const w = await world();
+    await texting(w, 'owner', '+15557770103', true);
+    await cancelWithTwoWaiting(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('proposed');
+    expect(await texts(w)).toEqual([]);
   });
 });
 

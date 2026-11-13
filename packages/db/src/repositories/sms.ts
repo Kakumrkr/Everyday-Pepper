@@ -119,6 +119,28 @@ export async function findActiveSmsConsent(
   return row;
 }
 
+/** The member's own active consent for the number in the business (S63: "Text me cards"). */
+export async function findActiveMemberSmsConsent(
+  tx: TenantTx,
+  phone: string,
+  userId: string,
+): Promise<SmsConsentRow | undefined> {
+  const parsed = SmsPhoneSchema.safeParse(phone);
+  if (!parsed.success) return undefined;
+  const [row] = await tx
+    .select()
+    .from(smsConsents)
+    .where(
+      and(
+        eq(smsConsents.phone, parsed.data),
+        eq(smsConsents.source, 'member_settings'),
+        eq(smsConsents.userId, z.uuid().parse(userId)),
+        isNull(smsConsents.revokedAt),
+      ),
+    );
+  return row;
+}
+
 /**
  * The client's consent records in the business, the latest first (S61.2, AC-X-66): what the
  * profile shows. A member's scope (staff: their own clients) is the caller's to check.

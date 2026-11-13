@@ -15,7 +15,14 @@ import {
   type TenantId,
   type TrustJson,
 } from '@pepper/contracts';
-import { actForBusiness, type Actor, type Clock } from '@pepper/core';
+import {
+  actForBusiness,
+  queueApprovalTexts,
+  smsCodeKeyFrom,
+  type Actor,
+  type Clock,
+} from '@pepper/core';
+import { waitlistOfferSummary } from './approval-summary.js';
 import {
   claimWaitlistMatch,
   expireWaitlistOffers,
@@ -57,6 +64,11 @@ export interface MatcherOptions {
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** For the offer emails (claim links, sealed in the outbox). */
   emails: { baseUrl: string; outboxKey: Buffer };
+  /**
+   * Whether this deployment sends texts (S63): an offer waiting for an OK is also texted to the
+   * owners and managers who asked for cards by text. Default no.
+   */
+  texts?: boolean;
 }
 
 export type MatchResult = WaitlistMatchOutcome | 'skipped' | 'retry';
@@ -204,7 +216,15 @@ async function matchIn(
       },
       { clock: options.clock, templateDefaults: options.autonomyOf(templateId) },
     );
-    return result.kind === 'executed' ? 'offered' : 'proposed';
+    if (result.kind === 'executed') return 'offered';
+    if (options.texts === true) {
+      await queueApprovalTexts(tx, result.proposal, waitlistOfferSummary(result.proposal), {
+        codeKey: smsCodeKeyFrom(options.emails.outboxKey),
+        outboxKey: options.emails.outboxKey,
+        now,
+      });
+    }
+    return 'proposed';
   } catch (error) {
     // Booked meanwhile, or every candidate gone since the ranking.
     if (error instanceof SlotUnavailableError) return 'no_match';
