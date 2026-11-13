@@ -79,6 +79,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   sms_deliveries: 'text delivery state',
   booking_texts: 'text delivery state',
   booking_manage_links: 'reschedule links in reminders (hashes only)',
+  approval_texts: 'cards texted to members for an OK (code hashes only)',
 };
 
 /** What a business's export holds, as read. */

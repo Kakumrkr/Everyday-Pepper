@@ -236,6 +236,10 @@ describe('who gets cards by text (AC-X-81, AC-X-82)', () => {
       UserId,
     ];
     const numbers = new Map(people.map((user) => [user, phone()]));
+    // A reply approves only with a second factor (as a session would).
+    for (const user of people) {
+      await db.execute(sql`UPDATE users SET two_factor_enabled = true WHERE id = ${user}`);
+    }
     for (const user of [owner, manager, staff, noConsent]) {
       const number = numbers.get(user) ?? '';
       await startUserPhoneCheck(db, {
@@ -274,6 +278,9 @@ describe('who gets cards by text (AC-X-81, AC-X-82)', () => {
     expect(await withTenant(db, tenant, (tx) => listCardTextRecipients(tx))).toEqual([
       { userId: owner, phone: numbers.get(owner) },
     ]);
+    // Without a second factor: no texts.
+    await db.execute(sql`UPDATE users SET two_factor_enabled = false WHERE id = ${owner}`);
+    expect(await withTenant(db, tenant, (tx) => listCardTextRecipients(tx))).toEqual([]);
     // Another business sees none of them.
     expect(await withTenant(db, tenantB, (tx) => listCardTextRecipients(tx))).toEqual([]);
   });
