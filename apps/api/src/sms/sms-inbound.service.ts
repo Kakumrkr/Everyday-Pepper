@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHmac } from 'node:crypto';
 import { confirmBookingByText } from '@pepper/appointments';
 import { approvalCodeOf, classifySmsReply } from '@pepper/contracts';
 import {
@@ -11,9 +11,9 @@ import {
   systemClock,
   type Clock,
 } from '@pepper/core';
-import { isSmsOptedOut, type Database, type SmsProvider } from '@pepper/db';
+import { isMemberPhone, isSmsOptedOut, type Database, type SmsProvider } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { AiActionsService } from '../chat/ai-actions.service.js';
 import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 
@@ -60,6 +60,7 @@ export const APPROVAL_REPLIES = {
 export class SmsInboundService {
   private readonly db: Database;
   private readonly codeKey: Buffer;
+  private readonly logger = new Logger(SmsInboundService.name);
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -86,7 +87,10 @@ export class SmsInboundService {
       case 'approve':
         return this.approve(text.from, approvalCodeOf(text.body) ?? '', receivedAt);
       case 'approve_without_code':
-        return (await this.optedOut(text.from)) ? null : APPROVAL_REPLIES.withoutCode;
+        // Only to a member's checked number: a client's "Y" to a reminder gets no reply, as before.
+        return (await isMemberPhone(this.db, text.from)) && !(await this.optedOut(text.from))
+          ? APPROVAL_REPLIES.withoutCode
+          : null;
       // The keywords were answered above; anything else gets what `handleInboundSms` said.
       case 'help':
       case 'start':
@@ -103,7 +107,10 @@ export class SmsInboundService {
    */
   private async approve(from: string, code: string, receivedAt: Date): Promise<string | null> {
     if (await this.optedOut(from)) return null;
-    const counter = createHash('sha256').update(from).digest('hex');
+    // Keyed by an HMAC, so the counters in Redis never reveal a number.
+    const counter = createHmac('sha256', this.codeKey)
+      .update(`approval-miss\n${from}`)
+      .digest('hex');
     if (await this.limits.spent(MISSES, counter)) return APPROVAL_REPLIES.miss;
     const claim = await claimApprovalText(
       this.db,
@@ -142,7 +149,12 @@ export class SmsInboundService {
       if (error instanceof ForbiddenError || error instanceof ProposalNotFoundError) {
         return APPROVAL_REPLIES.miss;
       }
-      throw error;
+      // The code is spent: a 500 would have Twilio retry it into "already done". Say it didn't,
+      // and report the failure (its kind only: never the number or the text).
+      this.logger.error(
+        `An approval by text failed: ${error instanceof Error ? error.name : 'unknown'}`,
+      );
+      return APPROVAL_REPLIES.refused;
     }
   }
 

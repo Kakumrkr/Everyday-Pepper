@@ -175,6 +175,15 @@ describe('queueApprovalTexts (AC-X-82)', () => {
     expect(await queue(b, card)).toBe(0);
   });
 
+  it('texts no one whose reply couldn’t approve: a member without a second factor', async () => {
+    const b = await business('2026-11-13T17:00:00Z');
+    const owner = await b.join('owner');
+    await setTwoFactor(db, owner.actor.context.userId, false);
+    expect(
+      await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR))),
+    ).toBe(0);
+  });
+
   it('holds a card for the quiet hours, and skips one that would expire first', async () => {
     // 21:30 in Chicago: the text can go at 8:00 tomorrow.
     const b = await business('2026-11-14T03:30:00Z');

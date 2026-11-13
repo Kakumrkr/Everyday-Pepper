@@ -21,6 +21,18 @@ export async function findUserPhone(
   return row;
 }
 
+/** Whether the number is some member's checked one (S63: who a bare "Y" is answered for). */
+export async function isMemberPhone(db: Database | TenantTx, phone: string): Promise<boolean> {
+  const parsed = SmsPhoneSchema.safeParse(phone);
+  if (!parsed.success) return false;
+  const [row] = await db
+    .select({ userId: userPhones.userId })
+    .from(userPhones)
+    .where(eq(userPhones.phone, parsed.data))
+    .limit(1);
+  return row !== undefined;
+}
+
 /** The user's row, locked (`FOR UPDATE`): two checks at once count their tries once each. */
 export async function lockUserPhone(
   db: Database | TenantTx,

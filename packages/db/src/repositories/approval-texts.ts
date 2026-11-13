@@ -7,6 +7,7 @@ import {
   memberships,
   smsConsents,
   userPhones,
+  users,
   type ApprovalTextRow,
 } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
@@ -108,6 +109,8 @@ export async function listCardTextRecipients(tx: TenantTx): Promise<CardTextReci
     .select({ userId: memberships.userId, phone: userPhones.phone })
     .from(memberships)
     .innerJoin(userPhones, eq(userPhones.userId, memberships.userId))
+    // A reply approves only with a second factor (as a session would): none, no texts.
+    .innerJoin(users, and(eq(users.id, memberships.userId), eq(users.twoFactorEnabled, true)))
     .innerJoin(
       smsConsents,
       and(

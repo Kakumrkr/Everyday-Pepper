@@ -34,10 +34,11 @@ vi.mock('@pepper/core', async (original) => ({
   recordSmsStatus: core.recordSmsStatus,
   claimApprovalText: core.claimApprovalText,
 }));
-const db = vi.hoisted(() => ({ isSmsOptedOut: vi.fn() }));
+const db = vi.hoisted(() => ({ isSmsOptedOut: vi.fn(), isMemberPhone: vi.fn() }));
 vi.mock('@pepper/db', async (original) => ({
   ...(await original<typeof Db>()),
   isSmsOptedOut: db.isSmsOptedOut,
+  isMemberPhone: db.isMemberPhone,
 }));
 const appointments = vi.hoisted(() => ({ confirmBookingByText: vi.fn() }));
 vi.mock('@pepper/appointments', async (original) => ({
@@ -149,6 +150,8 @@ beforeEach(() => {
   limits.spent.mockResolvedValue(false);
   db.isSmsOptedOut.mockReset();
   db.isSmsOptedOut.mockResolvedValue(false);
+  db.isMemberPhone.mockReset();
+  db.isMemberPhone.mockResolvedValue(true);
   appointments.confirmBookingByText.mockReset();
   appointments.confirmBookingByText.mockResolvedValue({
     outcome: 'confirmed',
@@ -254,6 +257,10 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
       expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.handled);
       approvals.approve.mockRejectedValueOnce(new ForbiddenError());
       expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.miss);
+      // Anything else: the code is spent, so it says it didn't (never a 500 that Twilio retries
+      // into "already done").
+      approvals.approve.mockRejectedValueOnce(new Error('connection reset'));
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.refused);
     });
 
     it('answers a replay "already done" and a spoof one miss answer, counted per number', async () => {
@@ -282,6 +289,9 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
 
     it('tells a bare "Y" how to reply, and leaves YES a keyword', async () => {
       expect(await reply('Y')).toBe(APPROVAL_REPLIES.withoutCode);
+      // A client's "Y" to a reminder: no reply, as before S63.
+      db.isMemberPhone.mockResolvedValueOnce(false);
+      expect(await reply('Y')).toBeNull();
       core.handleInboundSms.mockResolvedValue({ keyword: 'start', reply: 'Pepper: resubscribed' });
       const body = form(inbound('YES'));
       const response = await post(path, body, signature(path, body)).expect(200);

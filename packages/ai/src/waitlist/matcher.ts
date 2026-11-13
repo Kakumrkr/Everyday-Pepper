@@ -218,11 +218,26 @@ async function matchIn(
     );
     if (result.kind === 'executed') return 'offered';
     if (options.texts === true) {
-      await queueApprovalTexts(tx, result.proposal, waitlistOfferSummary(result.proposal), {
-        codeKey: smsCodeKeyFrom(options.emails.outboxKey),
-        outboxKey: options.emails.outboxKey,
-        now,
-      });
+      // In a savepoint: a text that can't be queued never costs the offer, which waits in Pepper.
+      await tx
+        .transaction((savepoint) =>
+          queueApprovalTexts(savepoint, result.proposal, waitlistOfferSummary(result.proposal), {
+            codeKey: smsCodeKeyFrom(options.emails.outboxKey),
+            outboxKey: options.emails.outboxKey,
+            now,
+          }),
+        )
+        .catch((error: unknown) => {
+          // Reported (the kind only), never thrown: the offer stands without its texts.
+          trace
+            .getTracer('pepper.waitlist')
+            .startSpan('waitlist.approval_texts', {
+              attributes: { 'error.type': error instanceof Error ? error.name : 'unknown' },
+            })
+            .setStatus({ code: SpanStatusCode.ERROR })
+            .end();
+          return 0;
+        });
     }
     return 'proposed';
   } catch (error) {
