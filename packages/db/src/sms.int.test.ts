@@ -121,9 +121,13 @@ describe('SMS consents (AC-X-58)', () => {
 
   it('revokes the active one, and says when there was none', async () => {
     const now = new Date(T0.getTime() + 120_000);
-    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now))).not.toBeNull();
+    expect(
+      await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now)),
+    ).not.toBeNull();
     expect(await withTenant(db, tenantA, (tx) => findActiveSmsConsent(tx, PHONE))).toBeUndefined();
-    expect(await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now))).toBeNull();
+    expect(
+      await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, PHONE, 'booking_page', now)),
+    ).toBeNull();
   });
 
   it('refuses a consent without its subject, or with a number Pepper can’t text', async () => {

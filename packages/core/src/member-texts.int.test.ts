@@ -1,9 +1,4 @@
-import {
-  ClientIdSchema,
-  TenantIdSchema,
-  type TenantId,
-  type UserId,
-} from '@pepper/contracts';
+import { ClientIdSchema, TenantIdSchema, type TenantId, type UserId } from '@pepper/contracts';
 import {
   addMembership,
   createTenant,

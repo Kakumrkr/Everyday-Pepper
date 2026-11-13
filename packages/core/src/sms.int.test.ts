@@ -276,7 +276,10 @@ describe('consent (AC-X-58)', () => {
     await consentFor(plum, phone);
     const id = await queue(plum, phone);
     const revoked = await withTenant(db, plum, (tx) =>
-      revokeSmsConsentFor(tx, phone, 'booking_page', { actor: { kind: 'system' }, now: clock.now() }),
+      revokeSmsConsentFor(tx, phone, 'booking_page', {
+        actor: { kind: 'system' },
+        now: clock.now(),
+      }),
     );
     expect(revoked).toBe(true);
     expect(await deliver(plum, id)).toBe('dropped');
@@ -489,7 +492,10 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
     );
     // A member stopped the newer number by hand earlier: the older yes still counts.
     await withTenant(db, t.tenantId, (tx) =>
-      revokeSmsConsentFor(tx, second, 'booking_page', { actor: { kind: 'system' }, now: clock.now() }),
+      revokeSmsConsentFor(tx, second, 'booking_page', {
+        actor: { kind: 'system' },
+        now: clock.now(),
+      }),
     );
     expect(await getClientTexts(db, t.owner, sam)).toMatchObject({
       status: 'on',
