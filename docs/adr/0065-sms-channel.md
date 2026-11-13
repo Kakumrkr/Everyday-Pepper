@@ -53,6 +53,7 @@ Approved at the S62 brief ("good with your recommendations… revise and improvi
 - **The last text** (AC-X-76, top-up): `booking_texts` records what each queued text was about (its client, booking, kind, start; no number). `GET /v1/clients/:id/texts` answers `lastText` (waiting until when, sent, delivered, not delivered, not sent and why) from the outbox message and the delivery report. The profile line is S62.2's.
 
 ## Not done
+- Approve by text (S63): [ADR-0066](0066-approve-by-text.md).
 - S62.2: the owner's "Texts and reminders" screen in More, the profile's last-text line, and "Confirmed by text" on the visit.
 - Marketing texts (separate consent; not in V1). MMS. Numbers outside the US and Canada. A number per business.
 - How long consent records are kept after a business is deleted (the TCPA's four-year limit); for the lawyer's review with the privacy policy.

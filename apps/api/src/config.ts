@@ -117,6 +117,11 @@ export interface ApiConfig extends ServiceConfig {
   smsWebhook: { accountSid: string; authToken: string } | null;
   /** Whether texts are sent (`SMS_PROVIDER` sandbox or twilio, S62): confirmation texts. */
   textsOn: boolean;
+  /**
+   * The sandbox's text path for tests (S63, ADR-0066 §5, AC-X-87): `SMS_PROVIDER=sandbox` where
+   * the scripted model may run (CI, or a development machine). Off: `/v1/dev/sms` is 404.
+   */
+  smsSandbox: boolean;
 }
 
 /**
@@ -137,12 +142,16 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     ai: loadAiConfig(env, present, service.environment),
     storage: loadStorageConfig('api', env),
     ...loadSupport(present),
-    ...smsOf(loadSmsConfig('api', env)),
+    ...smsOf(loadSmsConfig('api', env), scriptedAllowed(service.environment, env['NODE_ENV'])),
   };
 }
 
-function smsOf(sms: ReturnType<typeof loadSmsConfig>): Pick<ApiConfig, 'smsWebhook' | 'textsOn'> {
+function smsOf(
+  sms: ReturnType<typeof loadSmsConfig>,
+  testsMayRun: boolean,
+): Pick<ApiConfig, 'smsWebhook' | 'textsOn' | 'smsSandbox'> {
   return {
+    smsSandbox: sms?.provider === 'sandbox' && testsMayRun,
     smsWebhook:
       sms?.provider === 'twilio' ? { accountSid: sms.accountSid, authToken: sms.authToken } : null,
     textsOn: sms !== null,

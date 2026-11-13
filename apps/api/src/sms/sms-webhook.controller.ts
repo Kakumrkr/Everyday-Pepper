@@ -1,7 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { confirmBookingByText } from '@pepper/appointments';
 import {
-  classifySmsReply,
   OutboxMessageIdSchema,
   TenantIdSchema,
   TwilioInboundSmsSchema,
@@ -9,7 +7,7 @@ import {
   WebhookAckSchema,
   type WebhookAck,
 } from '@pepper/contracts';
-import { handleInboundSms, recordSmsStatus, systemClock, type Clock } from '@pepper/core';
+import { recordSmsStatus, type Clock } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE } from '@pepper/runtime';
 import {
@@ -27,13 +25,16 @@ import {
 } from '@nestjs/common';
 import { apiError, SkipOriginCheck } from '../auth/guards.js';
 import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.js';
+import { SmsSandboxController } from './sms-sandbox.controller.js';
+import { SMS_INBOUND_OPTIONS, SmsInboundService } from './sms-inbound.service.js';
 import { verifyTwilioSignature } from './twilio-signature.js';
 
 // Twilio's SMS webhooks (S61, ADR-0065 §5–6, AC-X-59, AC-X-61, AC-X-62): no session and no
 // Origin (Twilio calls them). The signature over the public URL and the exact form fields, and
 // the account, are checked before anything is read. A text to Pepper's number is handled in this
-// request: STOP is honoured before Twilio has its answer, and the reply goes back as TwiML; a
-// "C" confirms the booking a reminder was about (S62, AC-X-74). A status callback moves the
+// request (`SmsInboundService`): STOP is honoured before Twilio has its answer, and the reply goes
+// back as TwiML; a "C" confirms the booking a reminder was about (S62, AC-X-74), a "Y" and a code
+// approves the card a text showed (S63, AC-X-83). A status callback moves the
 // delivery the signed URL names. Off (404) unless SMS is on with
 // Twilio. Neither a number nor a text is logged.
 
@@ -42,6 +43,10 @@ export interface SmsWebhookOptions {
   twilio: { accountSid: string; authToken: string } | null;
   /** The public origin Twilio calls (`AUTH_BASE_URL`): the signature covers the full URL. */
   baseUrl: string;
+  /** Seals the outbox; the approval codes' key derives from it (S63). */
+  outboxKey: Buffer;
+  /** The sandbox's text path for tests (`/v1/dev/sms`, AC-X-87); off: 404. */
+  sandbox: boolean;
   clock?: Clock;
 }
 
@@ -80,6 +85,7 @@ export class SmsWebhookController {
     @Inject(DATABASE) database: { db: Database },
     @Inject(SMS_WEBHOOK_OPTIONS) private readonly options: SmsWebhookOptions,
     private readonly limits: RateLimiter,
+    private readonly inbound: SmsInboundService,
   ) {
     this.db = database.db;
   }
@@ -100,23 +106,12 @@ export class SmsWebhookController {
     if (!parsed.success || parsed.data.AccountSid !== twilio.accountSid) {
       throw new BadRequestException(apiError('validation_failed'));
     }
-    const receivedAt = (this.options.clock ?? systemClock).now();
-    const result = await handleInboundSms(
-      this.db,
-      {
-        provider: 'twilio',
-        eventId: parsed.data.MessageSid,
-        from: parsed.data.From,
-        body: parsed.data.Body,
-        receivedAt,
-      },
-      { helpUrl: new URL('/help', this.options.baseUrl).toString() },
-    );
-    // A keyword (an opt-out first) always wins; only then is a "C" read.
-    const reply =
-      result.keyword === null && classifySmsReply(parsed.data.Body) === 'confirm'
-        ? (await confirmBookingByText(this.db, { from: parsed.data.From, receivedAt })).reply
-        : result.reply;
+    const reply = await this.inbound.handle({
+      provider: 'twilio',
+      eventId: parsed.data.MessageSid,
+      from: parsed.data.From,
+      body: parsed.data.Body,
+    });
     // Only on success: an error stays JSON, like every other answer.
     response.setHeader('Content-Type', 'text/xml; charset=utf-8');
     return twiml(reply);
@@ -182,14 +177,29 @@ export class SmsWebhookController {
   }
 }
 
-/** Twilio's SMS webhooks. Needs `ConnectionsModule`. */
+/**
+ * Twilio's SMS webhooks, and the sandbox's text path where tests run. Needs `ConnectionsModule`
+ * and `ChatModule` (global: its `AiActionsService` approves a card by text).
+ */
 @Module({})
 export class SmsWebhookModule {
   static forRoot(options: SmsWebhookOptions): DynamicModule {
     return {
       module: SmsWebhookModule,
-      controllers: [SmsWebhookController],
-      providers: [{ provide: SMS_WEBHOOK_OPTIONS, useValue: options }, RateLimiter],
+      controllers: [SmsWebhookController, ...(options.sandbox ? [SmsSandboxController] : [])],
+      providers: [
+        { provide: SMS_WEBHOOK_OPTIONS, useValue: options },
+        {
+          provide: SMS_INBOUND_OPTIONS,
+          useValue: {
+            baseUrl: options.baseUrl,
+            outboxKey: options.outboxKey,
+            clock: options.clock,
+          },
+        },
+        RateLimiter,
+        SmsInboundService,
+      ],
     };
   }
 }

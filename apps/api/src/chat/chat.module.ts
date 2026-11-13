@@ -30,6 +30,8 @@ export class ChatModule {
   static forRoot(options: ChatOptions): DynamicModule {
     return {
       module: ChatModule,
+      // Global: a card approved by text (S63, the SMS module) runs through `AiActionsService`.
+      global: true,
       controllers: [
         ChatController,
         AiActionsController,
@@ -48,6 +50,7 @@ export class ChatModule {
         TurnEventLog,
         RateLimiter,
       ],
+      exports: [AiActionsService],
     };
   }
 }

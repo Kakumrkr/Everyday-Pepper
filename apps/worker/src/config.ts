@@ -90,6 +90,11 @@ export interface WorkerConfig extends ServiceConfig {
    */
   sms: SmsConfig | null;
   /**
+   * The sandbox's sent texts kept in Redis for tests (S63, AC-X-87): `SMS_PROVIDER=sandbox` in
+   * CI, or on a development machine (never a production build that forgot its environment).
+   */
+  smsSandboxLog: boolean;
+  /**
    * The web app's origin (`AUTH_BASE_URL`), where Twilio reports each text's delivery; `null`
    * without it, or without Twilio (the sandbox reports nothing).
    */
@@ -161,6 +166,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     storage: loadStorageConfig('worker', env),
     push: loadPushConfig('worker', env),
     sms,
+    smsSandboxLog: sms?.provider === 'sandbox' && testsMayRun(service.environment, env['NODE_ENV']),
     smsStatusBaseUrl:
       sms?.provider === 'twilio' && jobs.AUTH_BASE_URL !== undefined
         ? new URL(jobs.AUTH_BASE_URL).origin
@@ -219,4 +225,10 @@ function draftsConfig(
     baseUrl: new URL(jobs.AUTH_BASE_URL).origin,
     pollMs: jobs.DRAFTS_POLL_MS,
   };
+}
+
+/** Where tests run: CI, or a development machine (as the api's scripted model, S26). */
+function testsMayRun(environment: string, nodeEnv: string | undefined): boolean {
+  if (environment === 'ci') return true;
+  return environment === 'local' && nodeEnv !== 'production';
 }

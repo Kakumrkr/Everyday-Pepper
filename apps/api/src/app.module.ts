@@ -19,6 +19,7 @@ import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
 import { RemindersModule } from './reminders/reminders.controller.js';
 import { InboundModule } from './inbound/inbound.controller.js';
+import { MemberTextsModule } from './sms/member-texts.controller.js';
 import { SmsWebhookModule } from './sms/sms-webhook.controller.js';
 import { SupportModule } from './support/support.controller.js';
 import { TasksModule } from './tasks/tasks.module.js';
@@ -68,7 +69,13 @@ export class AppModule {
           inboundDomain: config.inbound.domain,
         }),
         InboundModule.forRoot({ webhookSecret: config.inbound.webhookSecret }),
-        SmsWebhookModule.forRoot({ twilio: config.smsWebhook, baseUrl: config.auth.baseUrl }),
+        SmsWebhookModule.forRoot({
+          twilio: config.smsWebhook,
+          baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+          sandbox: config.smsSandbox,
+        }),
+        MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

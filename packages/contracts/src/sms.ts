@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { PRIVACY_AI_SECTION, PRIVACY_PATH, privacyAiUrl } from './legal.js';
 import { BookingTextKindSchema } from './reminders.js';
 import { UtcDateTimeSchema } from './time.js';
+import { normalizePhone } from './clients.js';
 import { fromZoned, toZoned } from './zoned-time.js';
 
 // The SMS channel (S61, ADR-0065): the rules every text follows, whoever sends it. A text goes
@@ -165,6 +166,11 @@ export const OutboxSmsSchema = z
     to: SmsPhoneSchema,
     body: SmsBodySchema,
     urgent: z.literal(true).optional(),
+    /**
+     * The one text the person asked for just now (S63: a code to check their own number): sent
+     * without a standing consent; a STOP still drops it.
+     */
+    requested: z.literal(true).optional(),
     wordsBy: z.enum(['ai', 'template']),
   })
   .strict()
@@ -207,6 +213,8 @@ const STOP_OPENER_MAX_WORDS = 6;
 
 /** What a reply asks for: a keyword in any case, punctuation ignored; `null` for anything else. */
 export function classifySmsKeyword(body: string): SmsKeyword | null {
+  // "Yes 4821" answers an approval text (S63): never a START.
+  if (approvalCodeOf(body) !== null) return null;
   const words = body
     .normalize('NFKC')
     .toLowerCase()
@@ -230,12 +238,28 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
  * "C" or "Confirm" ("C.", "c", "Confirmed", "confirm!" too), alone. An opt-out always wins: a
  * keyword is read first, so CANCEL, STOP and the rest never confirm.
  */
-export type SmsReply = SmsKeyword | 'confirm';
+export type SmsReply = SmsKeyword | 'confirm' | 'approve' | 'approve_without_code';
 
 const CONFIRM_WORDS = new Set(['c', 'confirm', 'confirmed']);
 
-/** A reply's meaning: a keyword (`classifySmsKeyword`) first, then "C" to confirm; else `null`. */
+/**
+ * "Y" and the code from an approval text (S63, ADR-0066 §4): "Y 4821", "y4821", "Yes 4821",
+ * "Y: 4821." Only with exactly four digits; "YES" alone stays START.
+ */
+const APPROVAL_REPLY = /^(?:y|yes)\s*[-:.,]?\s*(\d{4})\s*[.!]?$/;
+
+/** The code an approval reply carries ("Y 4821" → "4821"); `null` for anything else. */
+export function approvalCodeOf(body: string): string | null {
+  return APPROVAL_REPLY.exec(body.normalize('NFKC').trim().toLowerCase())?.[1] ?? null;
+}
+
+/**
+ * A reply's meaning: "Y" and a code (`approve`) first, as no keyword carries digits; then a
+ * keyword (`classifySmsKeyword`); then "C" to confirm, or "Y" alone (`approve_without_code`,
+ * answered with how to reply); else `null`.
+ */
 export function classifySmsReply(body: string): SmsReply | null {
+  if (approvalCodeOf(body) !== null) return 'approve';
   const keyword = classifySmsKeyword(body);
   if (keyword !== null) return keyword;
   const words = body
@@ -244,7 +268,9 @@ export function classifySmsReply(body: string): SmsReply | null {
     .replace(/[^a-z\s]/g, ' ')
     .split(/\s+/)
     .filter((word) => word !== '');
-  return words.length === 1 && CONFIRM_WORDS.has(words[0] ?? '') ? 'confirm' : null;
+  if (words.length !== 1) return null;
+  if (CONFIRM_WORDS.has(words[0] ?? '')) return 'confirm';
+  return words[0] === 'y' ? 'approve_without_code' : null;
 }
 
 /** The longest business name a reply carries before it is shortened (two fit in two segments). */
@@ -329,11 +355,16 @@ export type SmsConsentSource = z.infer<typeof SmsConsentSourceSchema>;
 export const SMS_CONSENT_WORDING = {
   'sms-consent-v1':
     'Text me appointment confirmations and reminders from {business} at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+  // A member's own cards by text (S63, ADR-0066 §2).
+  'sms-consent-v2':
+    'Text me cards that need my OK from {business} at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.',
 } as const;
-export const SmsConsentWordingVersionSchema = z.enum(['sms-consent-v1']);
+export const SmsConsentWordingVersionSchema = z.enum(['sms-consent-v1', 'sms-consent-v2']);
 export type SmsConsentWordingVersion = z.infer<typeof SmsConsentWordingVersionSchema>;
 /** The wording shown with a new consent box. */
 export const SMS_CONSENT_WORDING_CURRENT: SmsConsentWordingVersion = 'sms-consent-v1';
+/** The wording a member agrees to when they turn "Text me cards" on (S63). */
+export const SMS_MEMBER_CONSENT_WORDING: SmsConsentWordingVersion = 'sms-consent-v2';
 
 /** The consent wording with the business's name in it. */
 export function smsConsentText(version: SmsConsentWordingVersion, business: string): string {
@@ -515,3 +546,62 @@ export function smsStatusCallbackUrl(baseUrl: string, tenantId: string, messageI
   url.searchParams.set('m', messageId);
   return url.toString();
 }
+
+/** A code Pepper texts to check a member's own number (S63, AC-X-80): six digits. */
+export const PhoneCheckCodeSchema = z.string().regex(/^\d{6}$/, 'Use the 6-digit code');
+export type PhoneCheckCode = z.infer<typeof PhoneCheckCodeSchema>;
+
+/** `POST /v1/me/phone`: the number to check (US or Canada, any common format). */
+export const StartPhoneCheckRequestSchema = z.object({ phone: z.string().max(40) }).strict();
+export type StartPhoneCheckRequest = z.infer<typeof StartPhoneCheckRequestSchema>;
+
+/** `POST /v1/me/phone`'s answer: until when the code works. */
+export const StartPhoneCheckResponseSchema = z.object({ expiresAt: UtcDateTimeSchema }).strict();
+export type StartPhoneCheckResponse = z.infer<typeof StartPhoneCheckResponseSchema>;
+
+/** `POST /v1/me/phone/verify`: the code from the text. */
+export const VerifyPhoneRequestSchema = z.object({ code: PhoneCheckCodeSchema }).strict();
+export type VerifyPhoneRequest = z.infer<typeof VerifyPhoneRequestSchema>;
+
+/**
+ * The member's own texts in this business (S63, AC-X-80/81): their checked number (`null`:
+ * none yet), whether "Text me cards" is on here, and whether their role may turn it on
+ * (owners and managers).
+ */
+export const MemberTextsSchema = z
+  .object({
+    phone: SmsPhoneSchema.nullable(),
+    cardTexts: z.boolean(),
+    canTextCards: z.boolean(),
+  })
+  .strict();
+export type MemberTexts = z.infer<typeof MemberTextsSchema>;
+
+/** `PATCH /v1/me/texts`. */
+export const UpdateMemberTextsRequestSchema = z.object({ cardTexts: z.boolean() }).strict();
+export type UpdateMemberTextsRequest = z.infer<typeof UpdateMemberTextsRequestSchema>;
+
+/** `POST /v1/dev/sms/inbound` (S63, AC-X-87): a text to Pepper's number, in the sandbox only. */
+export const SandboxInboundSmsRequestSchema = z
+  .object({ from: z.string().max(40), body: z.string().max(1600) })
+  .strict();
+export type SandboxInboundSmsRequest = z.infer<typeof SandboxInboundSmsRequestSchema>;
+
+/** Its answer: the reply Pepper sends back (`null`: none), as Twilio's TwiML would carry it. */
+export const SandboxInboundSmsResponseSchema = z.object({ reply: z.string().nullable() }).strict();
+export type SandboxInboundSmsResponse = z.infer<typeof SandboxInboundSmsResponseSchema>;
+
+/** `GET /v1/dev/sms/sent?to=`: the texts the sandbox sent to a number, the newest first. */
+export const SandboxSentSmsResponseSchema = z
+  .object({
+    texts: z.array(
+      z.object({ to: z.string(), body: z.string(), sentAt: UtcDateTimeSchema }).strict(),
+    ),
+  })
+  .strict();
+export type SandboxSentSmsResponse = z.infer<typeof SandboxSentSmsResponseSchema>;
+
+/** `GET /v1/dev/sms/sent`'s query: the number, in any common form. */
+export const SandboxSentSmsQuerySchema = z
+  .object({ to: z.string().max(40).transform(normalizePhone).pipe(SmsPhoneSchema) })
+  .strict();

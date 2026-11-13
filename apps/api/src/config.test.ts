@@ -200,4 +200,19 @@ describe('loadApiConfig', () => {
     expect(loadApiConfig({ ...required, SMS_PROVIDER: 'off' }).textsOn).toBe(false);
     expect(loadApiConfig({ ...required, SMS_PROVIDER: 'sandbox' }).textsOn).toBe(true);
   });
+
+  it('mounts the sandbox text path only with the sandbox where tests run (S63, AC-X-87)', () => {
+    const sandbox = { ...required, SMS_PROVIDER: 'sandbox' };
+    expect(loadApiConfig(sandbox).smsSandbox).toBe(true);
+    expect(loadApiConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'ci' }).smsSandbox).toBe(true);
+    expect(
+      loadApiConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'ci', NODE_ENV: 'production' })
+        .smsSandbox,
+    ).toBe(true);
+    // A production build that forgot its environment, or a real deployment: never.
+    expect(loadApiConfig({ ...sandbox, NODE_ENV: 'production' }).smsSandbox).toBe(false);
+    expect(loadApiConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'pilot' }).smsSandbox).toBe(false);
+    expect(loadApiConfig(required).smsSandbox).toBe(false);
+    expect(loadApiConfig({ ...required, SMS_PROVIDER: 'off' }).smsSandbox).toBe(false);
+  });
 });

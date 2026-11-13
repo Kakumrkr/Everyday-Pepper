@@ -16,7 +16,7 @@ import {
   type SmsSender,
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
-import { DATABASE, MAILER, raiseAlert } from '@pepper/runtime';
+import { DATABASE, MAILER, raiseAlert, SandboxSmsSender, SandboxTextLog } from '@pepper/runtime';
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
 import { handleDeliveryJob, OUTBOX_QUEUE, relayDue } from './relay.js';
@@ -34,6 +34,11 @@ export interface OutboxOptions {
   sms?: SmsSender | null;
   /** The web app's origin for Twilio's signed delivery reports; `null` or absent: none. */
   smsStatusBaseUrl?: string | null;
+  /**
+   * The sandbox's sent texts also go to Redis for tests to read (S63, AC-X-87): only with
+   * `SMS_PROVIDER=sandbox` where tests run.
+   */
+  sandboxTextLog?: boolean;
   /** Deliveries in flight per worker process. */
   concurrency?: number;
   clock?: Clock;
@@ -82,7 +87,10 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
       mailer,
       pusher: this.options.pusher ?? null,
       episodes: this.options.episodes ?? null,
-      sms: this.options.sms ?? null,
+      sms:
+        this.options.sandboxTextLog === true && this.options.sms instanceof SandboxSmsSender
+          ? this.options.sms.withTextLog(new SandboxTextLog(connection))
+          : (this.options.sms ?? null),
       smsStatusBaseUrl: this.options.smsStatusBaseUrl ?? null,
       clock: this.options.clock ?? systemClock,
     };

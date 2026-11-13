@@ -364,7 +364,7 @@ describe('confirm by text (AC-X-74)', () => {
 
     const revoked = phone();
     await remindedBooking(tenantA, revoked, start, now);
-    await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, revoked, now));
+    await withTenant(db, tenantA, (tx) => revokeSmsConsent(tx, revoked, 'booking_page', now));
     expect(await smsConfirmTarget(db, revoked, now)).toBeUndefined();
 
     expect(await smsConfirmTarget(db, 'not a number', now)).toBeUndefined();

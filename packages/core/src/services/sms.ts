@@ -153,16 +153,18 @@ export async function recordSmsConsent(
 }
 
 /**
- * Revokes the number's consent in the open transaction of a business (the client asked a member
- * to stop, or a member turned their own texts off): no text goes to it from the next delivery.
- * Returns whether there was one.
+ * Revokes the number's consent of one source in the open transaction of a business (the client
+ * asked a member to stop: `booking_page`; a member turned their own texts off:
+ * `member_settings`): no such text goes to it from the next delivery. Returns whether there
+ * was one.
  */
 export async function revokeSmsConsentFor(
   tx: TenantTx,
   phone: string,
+  source: SmsConsentSource,
   audit: { actor: AuditActor; requestId?: string | undefined; now: Date },
 ): Promise<boolean> {
-  const revoked = await revokeSmsConsent(tx, phone, audit.now);
+  const revoked = await revokeSmsConsent(tx, phone, source, audit.now);
   if (revoked === null) return false;
   await auditRevoked(tx, revoked, audit);
   return true;
@@ -207,7 +209,7 @@ export async function stopClientTexts(
     if (client === undefined) throw new ClientNotFoundError();
     // Every number the client said yes on (they may have booked with two).
     for (const consent of await listActiveSmsConsentsForClient(tx, id)) {
-      await revokeSmsConsentFor(tx, consent.phone, {
+      await revokeSmsConsentFor(tx, consent.phone, 'booking_page', {
         actor: auditActorOf(actor),
         requestId: actor.requestId,
         now,

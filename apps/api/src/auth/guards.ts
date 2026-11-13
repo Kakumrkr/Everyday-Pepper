@@ -124,6 +124,12 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   account_owns_business:
     'You’re the only owner of a business. Delete the business first, or make someone else an owner',
   account_being_deleted: 'Your account is being deleted. Keep your account first',
+  phone_not_textable: 'Use a US or Canadian mobile number',
+  phone_opted_out: 'This number replied STOP. Text START to it from your phone first',
+  phone_check_expired: 'That code has expired. Send a new one',
+  phone_check_locked: 'Too many tries. Send a new code',
+  phone_check_wrong_code: 'That code isn’t right. Check the text and try again',
+  phone_not_checked: 'Check your number first',
 };
 
 /** An `{ code, message }` body (`ApiErrorSchema`). */

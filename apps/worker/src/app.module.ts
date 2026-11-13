@@ -37,6 +37,7 @@ export class AppModule {
             smsLogger.log(line);
           }),
           smsStatusBaseUrl: config.smsStatusBaseUrl,
+          sandboxTextLog: config.smsSandboxLog,
         }),
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),
@@ -70,6 +71,7 @@ export class AppModule {
                 key: outboxKeyFrom(config.outboxSecret),
                 baseUrl: config.waitlist.baseUrl,
                 pollMs: config.waitlist.pollMs,
+                texts: config.sms !== null,
               }),
             ]),
       ],

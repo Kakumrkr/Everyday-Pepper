@@ -43,6 +43,8 @@ import {
   ClientNotFoundError,
   ConversationNotFoundError,
   ForbiddenError,
+  PhoneCheckError,
+  PhoneNotCheckedError,
   InviteInvalidError,
   InviteLimitReachedError,
   InviteNotFoundError,
@@ -119,6 +121,7 @@ export class TooManyRequestsException extends HttpException {
 /** Each domain error and the api's answer to it: the HTTP status and the stable code. */
 const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [ForbiddenError, ForbiddenException, 'forbidden'],
+  [PhoneNotCheckedError, ConflictException, 'phone_not_checked'],
   [MemberNotFoundError, NotFoundException, 'member_not_found'],
   [LastOwnerError, ConflictException, 'last_owner'],
   [DeletionNameMismatchError, BadRequestException, 'deletion_name_mismatch'],
@@ -297,6 +300,20 @@ export function toHttpError(error: unknown): unknown {
   }
   const imported = importAnswer(error);
   if (imported !== undefined) return imported;
+  if (error instanceof PhoneCheckError) {
+    switch (error.reason) {
+      case 'not_textable':
+        return new UnprocessableEntityException(apiError('phone_not_textable'));
+      case 'opted_out':
+        return new ConflictException(apiError('phone_opted_out'));
+      case 'no_check':
+        return new UnprocessableEntityException(apiError('phone_check_expired'));
+      case 'too_many_tries':
+        return new UnprocessableEntityException(apiError('phone_check_locked'));
+      case 'wrong_code':
+        return new UnprocessableEntityException(apiError('phone_check_wrong_code'));
+    }
+  }
   if (error instanceof WrongVerificationCodeError) {
     const body: WrongCode = {
       ...apiError('wrong_code'),

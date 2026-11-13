@@ -19,7 +19,7 @@ export interface RateLimit {
  */
 @Injectable()
 export class RateLimiter {
-  constructor(@Inject(REDIS) private readonly redis: Pick<Redis, 'multi'>) {}
+  constructor(@Inject(REDIS) private readonly redis: Pick<Redis, 'multi' | 'get'>) {}
 
   /** Counts a hit of `key` against `limit`; throws 429 once it is over. */
   async hit(limit: RateLimit, key: string): Promise<void> {
@@ -39,6 +39,17 @@ export class RateLimiter {
       throw new ServiceUnavailableException(apiError('temporarily_unavailable'));
     }
     if (count > limit.max) throw new TooManyRequestsException(apiError('too_many_requests'));
+  }
+
+  /** Whether `key` has used up `limit` in this window, without counting a hit (S63). */
+  async spent(limit: RateLimit, key: string): Promise<boolean> {
+    let value: string | null;
+    try {
+      value = await this.redis.get(`pepper:rate:${limit.name}:${key}`);
+    } catch {
+      throw new ServiceUnavailableException(apiError('temporarily_unavailable'));
+    }
+    return Number(value ?? 0) >= limit.max;
   }
 }
 

@@ -15,7 +15,14 @@ import {
   type TenantId,
   type TrustJson,
 } from '@pepper/contracts';
-import { actForBusiness, type Actor, type Clock } from '@pepper/core';
+import {
+  actForBusiness,
+  queueApprovalTexts,
+  smsCodeKeyFrom,
+  type Actor,
+  type Clock,
+} from '@pepper/core';
+import { waitlistOfferSummary } from './approval-summary.js';
 import {
   claimWaitlistMatch,
   expireWaitlistOffers,
@@ -57,6 +64,11 @@ export interface MatcherOptions {
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** For the offer emails (claim links, sealed in the outbox). */
   emails: { baseUrl: string; outboxKey: Buffer };
+  /**
+   * Whether this deployment sends texts (S63): an offer waiting for an OK is also texted to the
+   * owners and managers who asked for cards by text. Default no.
+   */
+  texts?: boolean;
 }
 
 export type MatchResult = WaitlistMatchOutcome | 'skipped' | 'retry';
@@ -204,7 +216,30 @@ async function matchIn(
       },
       { clock: options.clock, templateDefaults: options.autonomyOf(templateId) },
     );
-    return result.kind === 'executed' ? 'offered' : 'proposed';
+    if (result.kind === 'executed') return 'offered';
+    if (options.texts === true) {
+      // In a savepoint: a text that can't be queued never costs the offer, which waits in Pepper.
+      await tx
+        .transaction((savepoint) =>
+          queueApprovalTexts(savepoint, result.proposal, waitlistOfferSummary(result.proposal), {
+            codeKey: smsCodeKeyFrom(options.emails.outboxKey),
+            outboxKey: options.emails.outboxKey,
+            now,
+          }),
+        )
+        .catch((error: unknown) => {
+          // Reported (the kind only), never thrown: the offer stands without its texts.
+          trace
+            .getTracer('pepper.waitlist')
+            .startSpan('waitlist.approval_texts', {
+              attributes: { 'error.type': error instanceof Error ? error.name : 'unknown' },
+            })
+            .setStatus({ code: SpanStatusCode.ERROR })
+            .end();
+          return 0;
+        });
+    }
+    return 'proposed';
   } catch (error) {
     // Booked meanwhile, or every candidate gone since the ranking.
     if (error instanceof SlotUnavailableError) return 'no_match';
