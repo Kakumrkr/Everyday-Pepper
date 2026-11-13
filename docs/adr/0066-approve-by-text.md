@@ -24,6 +24,12 @@ Most cards wait for one tap, and the waitlist offer waits on the clock: a freed 
 - A card decided in the app before its text goes still gets the text; its "Y" answers "already handled". Cancelling the text with the decision is left for later.
 - The code lives only in the text and its hash; numbers are never logged.
 
+## Built in S63
+- Migration 0078: `user_phones` (the account's checked number, a code's HMAC, 5 tries), `memberships.card_texts`, `approval_texts` (one row a text: the card, the member, the number, the fingerprint shown, the code's HMAC, its expiry, when used; tenant RLS, forced), consents unique per source, and the definer `sms_approval_target` (ids only).
+- core `member-texts.ts` (`/v1/me/phone`, `/v1/me/phone/verify`, `GET/PATCH /v1/me/texts`; the code's text is `requested`: no standing consent, a STOP still drops it) and `approval-texts.ts` (`queueApprovalTexts`, `claimApprovalText`); ai `waitlistOfferSummary`; the matcher texts an offer waiting for an OK when the deployment sends texts, in a savepoint so a text never costs the offer.
+- api `SmsInboundService` behind both Twilio's webhook and the sandbox's `/v1/dev/sms` (§5): keywords, then "C", then "Y" and a code; one answer for every miss, 5 misses an hour per number (an HMAC of it in Redis), a bare "Y" answered only on a member's checked number, a failed approval answered as not done (the code is spent first). Card texts need a second factor, as a session would.
+- Tests: db (isolation incl.), core, ai matcher, api unit and `sms-approval.int.test.ts` (the whole path through the sandbox), runtime `SandboxTextLog`.
+
 ## Not done
 - S63.2: the number and "Text me cards" on More → Texts and reminders, the approve-by-text journey, the "Confirmed by text" journey and screenshot.
 - "N" to skip, other card kinds, cancelling a text once its card is decided.
