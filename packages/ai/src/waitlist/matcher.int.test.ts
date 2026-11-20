@@ -395,7 +395,7 @@ describe('S63: the offer waiting for an OK, by text (AC-X-82, AC-X-83)', () => {
     expect(text?.to).toBe('+15557770101');
     // Held for the quiet hours (07:00 in New York): the code works 2 hours from 08:00.
     expect(text?.body).toMatch(
-      /^Pepper: Tue 3pm opened with Jess\. Offer it to Ana and Sara\? Reply Y \d{4} by 10:00am\.$/,
+      /^Pepper: Tue 3pm opened with Jess\. Offer it to Ana and Sara\? Reply Y (\d{4}) to OK or N \1 to skip, by 10:00am\.$/,
     );
     const code = /Reply Y (\d{4})/.exec(text?.body ?? '')?.[1] ?? '';
 

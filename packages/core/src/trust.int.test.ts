@@ -41,6 +41,7 @@ import { ManualClock } from './clock.js';
 import {
   ActionNotFoundError,
   ForbiddenError,
+  ProposalChangedError,
   ProposalNotFoundError,
   ProposalNotPendingError,
   UndoRefusedError,
@@ -819,6 +820,28 @@ describe('approveProposal', () => {
       approveProposal(db, jessActor(), proposal.id, {
         shownFingerprint: proposal.fingerprint,
         runner: todoRunner,
+      }),
+    ).rejects.toThrow(new ProposalNotPendingError('rejected'));
+  });
+
+  it('rejects from a text only as shown, and only the first time (S64, AC-X-93)', async () => {
+    const proposal = await propose(jessActor(), jess);
+    // A card that moved since the text stays pending.
+    await expect(
+      rejectProposal(db, jessActor(), proposal.id, { shownFingerprint: 'f'.repeat(64) }),
+    ).rejects.toThrow(ProposalChangedError);
+    expect((await listPendingProposals(db, jessActor())).map((p) => p.id)).toContain(proposal.id);
+    expect(
+      await rejectProposal(db, jessActor(), proposal.id, {
+        shownFingerprint: proposal.fingerprint,
+        firstOnly: true,
+      }),
+    ).toMatchObject({ status: 'rejected', decidedByUserId: jess });
+    // Rejected already (in the app, say): the text is told, not handed the rejection again.
+    await expect(
+      rejectProposal(db, jessActor(), proposal.id, {
+        shownFingerprint: proposal.fingerprint,
+        firstOnly: true,
       }),
     ).rejects.toThrow(new ProposalNotPendingError('rejected'));
   });

@@ -213,8 +213,8 @@ const STOP_OPENER_MAX_WORDS = 6;
 
 /** What a reply asks for: a keyword in any case, punctuation ignored; `null` for anything else. */
 export function classifySmsKeyword(body: string): SmsKeyword | null {
-  // "Yes 4821" answers an approval text (S63): never a START.
-  if (approvalCodeOf(body) !== null) return null;
+  // "Yes 4821" and "No 4821" answer an approval text (S63–S64): never a keyword.
+  if (approvalReplyOf(body) !== null) return null;
   const words = body
     .normalize('NFKC')
     .toLowerCase()
@@ -238,28 +238,43 @@ export function classifySmsKeyword(body: string): SmsKeyword | null {
  * "C" or "Confirm" ("C.", "c", "Confirmed", "confirm!" too), alone. An opt-out always wins: a
  * keyword is read first, so CANCEL, STOP and the rest never confirm.
  */
-export type SmsReply = SmsKeyword | 'confirm' | 'approve' | 'approve_without_code';
+export type SmsReply =
+  SmsKeyword | 'confirm' | 'approve' | 'approve_without_code' | 'skip' | 'skip_without_code';
 
 const CONFIRM_WORDS = new Set(['c', 'confirm', 'confirmed']);
 
 /**
- * "Y" and the code from an approval text (S63, ADR-0066 §4): "Y 4821", "y4821", "Yes 4821",
- * "Y: 4821." Only with exactly four digits; "YES" alone stays START.
+ * A reply to an approval text (S63–S64, ADR-0066 §4): "Y" and its code approves the card, "N"
+ * and its code skips it: "Y 4821", "y4821", "Yes 4821", "N: 4821.", "No 4821". Only with exactly
+ * four digits; "YES" alone stays START.
  */
-const APPROVAL_REPLY = /^(?:y|yes)\s*[-:.,]?\s*(\d{4})\s*[.!]?$/;
+const APPROVAL_REPLY = /^(y|yes|n|no)\s*[-:.,]?\s*(\d{4})\s*[.!]?$/;
 
-/** The code an approval reply carries ("Y 4821" → "4821"); `null` for anything else. */
+/** What a reply to an approval text decides. */
+export type ApprovalDecision = 'approve' | 'skip';
+
+/** The decision and code a reply carries ("N 4821" → skip "4821"); `null` for anything else. */
+export function approvalReplyOf(body: string): { decision: ApprovalDecision; code: string } | null {
+  const match = APPROVAL_REPLY.exec(body.normalize('NFKC').trim().toLowerCase());
+  const [, word, code] = match ?? [];
+  if (word === undefined || code === undefined) return null;
+  return { decision: word.startsWith('y') ? 'approve' : 'skip', code };
+}
+
+/** The code an approving reply carries ("Y 4821" → "4821"); `null` for anything else. */
 export function approvalCodeOf(body: string): string | null {
-  return APPROVAL_REPLY.exec(body.normalize('NFKC').trim().toLowerCase())?.[1] ?? null;
+  const reply = approvalReplyOf(body);
+  return reply?.decision === 'approve' ? reply.code : null;
 }
 
 /**
- * A reply's meaning: "Y" and a code (`approve`) first, as no keyword carries digits; then a
- * keyword (`classifySmsKeyword`); then "C" to confirm, or "Y" alone (`approve_without_code`,
- * answered with how to reply); else `null`.
+ * A reply's meaning: "Y" or "N" and a code (`approve`, `skip`) first, as no keyword carries
+ * digits; then a keyword (`classifySmsKeyword`); then "C" to confirm, or "Y", "N" or "No" alone
+ * (`approve_without_code`, `skip_without_code`, answered with how to reply); else `null`.
  */
 export function classifySmsReply(body: string): SmsReply | null {
-  if (approvalCodeOf(body) !== null) return 'approve';
+  const reply = approvalReplyOf(body);
+  if (reply !== null) return reply.decision;
   const keyword = classifySmsKeyword(body);
   if (keyword !== null) return keyword;
   const words = body
@@ -269,8 +284,10 @@ export function classifySmsReply(body: string): SmsReply | null {
     .split(/\s+/)
     .filter((word) => word !== '');
   if (words.length !== 1) return null;
-  if (CONFIRM_WORDS.has(words[0] ?? '')) return 'confirm';
-  return words[0] === 'y' ? 'approve_without_code' : null;
+  const [word = ''] = words;
+  if (CONFIRM_WORDS.has(word)) return 'confirm';
+  if (word === 'y') return 'approve_without_code';
+  return word === 'n' || word === 'no' ? 'skip_without_code' : null;
 }
 
 /** The longest business name a reply carries before it is shortened (two fit in two segments). */

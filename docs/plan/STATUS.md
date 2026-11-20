@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S64** (SMS live after 10DLC, or the Phase 14 gate only).
+**S64 · Phase 14 gate, SMS in sandbox** (brief approved 2026-11-20: "Go with your recommendations and complete it"; D-1 C12 scored 7 on sandbox evidence, live named as the gap; D-2 `send_client_message` over SMS moves to a new "SMS live" session after 10DLC; D-3 PCR-012 puts S65–S68 before S58a/S57/S58b/S60; D-4 "N" declines the card as in the app).
+Done: 1 AC-X-93…95 · 2 core "N {code}" (contracts `approvalReplyOf`, claim's decision audited, `rejectProposal` with `shownFingerprint`/`firstOnly`, text "Reply Y 4821 to OK or N 4821 to skip, by …") · 3 api webhook "N" replies (unit 21/21, integration 7/7).
+Next: 4 journey `approve-by-text` "N" · 5 scorecard §9 gate · 6 PCR-012 + plan rows. The Texts and reminders screen's line about "Y" is left as is (the text itself says how to skip; no baseline churn).
 
 ## Last sessions
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
