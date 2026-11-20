@@ -116,7 +116,7 @@ Goal: Pepper fills the chair and proves it in dollars, with the owner tapping in
 | S56a.2 | **AI-suggested import mapping ("a")** (done S56a.2) | For columns S48's smart mapping misses: column names and masked samples only go to the model, the owner confirms each suggestion; its eval cases on scripted cassettes. Merges S56a's branch first. Built ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md)): `suggest_mapping` on the routine model, checked by the domain; "Use it" on the columns step; the preview's left-out line; the `import_mapping` set (7 cases); AC-W1-46…48. | Every eval set green on the scripted cassettes |
 | S56b | **Record ("b") + phase gate** — Rec (done S56b: $0.81, Phase 12 gate met, scorecard §8) | Merge S56a, probe the changed sets, record once, pass^3 on the gated sets; `KNOWN_REAL_MODEL_MISSES` empty (the two waitlist cases included). Phase cap $3.00. | Every gate met; the scorecard targets met |
 
-### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md); S58a–S60 after Phase 14 by [PCR-011](changes/PCR-011.md))
+### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md); S58a–S60 after Phase 14 by [PCR-011](changes/PCR-011.md) and after Phase 15 by [PCR-012](changes/PCR-012.md))
 Goal: a real business can run its week on Pepper safely, and nothing breaks unseen. Exit: every category ≥ 8, except staff experience (7) and market competitiveness (6), which reach 8 in Phases 16 and 15.
 
 | # | Target | Built | Done when |
@@ -148,9 +148,10 @@ Goal: reminders and confirmations by text, and the owner can approve by text. Ex
 | S62.2 | **Texts and reminders on screen** (done, [PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)) | More → "Texts and reminders" (texts on/off, day-before, same-day and its lead; owners and managers change, others read), the client profile's last-text line (when it went, delivered or not), "Confirmed by text" on the visit (ADR-0065, AC-X-75/76). | Screens at 375 px light and dark; the settings journey changes the reminders |
 | S63 | **Approve by text** | Pepper texts the owner a card summary ("Tue 2pm opened. Offer to Audy, Marco, Sam? Reply Y"); single-use signed codes, an expiry, sender verification, no personal data beyond first names. | A reply only approves the exact card shown; replay and spoof tests |
 | S63.2 | **Approve by text on screen** (done, [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)) | "Cards to your phone" on Texts and reminders (number check, "Text me cards"), "approved by text" in Activity (top-up), journeys for approve by text and "Confirmed by text" through the sandbox (ADR-0066, AC-X-88…92). | Journeys green; screens 375 px light/dark |
-| S64 | **SMS live + gate** | Live once 10DLC registration is approved (needs the LLC); `send_client_message` over SMS. Phase gate. If 10DLC isn't approved yet, everything stays in sandbox and this session is the gate only. | Scorecard target met |
+| S64 | **Phase 14 gate** (done; 10DLC not yet: SMS stays in sandbox, [PCR-012](changes/PCR-012.md)) | The gate (C12 3 → 7, [scorecard.md](scorecard.md) §9) and the top-up: "N" and the code skips a texted card (AC-X-93…95). | Scorecard target met |
+| S64.2 | **SMS live** (when the LLC, a paid provider and 10DLC exist; PCR-012) | The live switch with Twilio's keys; `send_client_message` over SMS (an AI tool change: "a"/"b" halves with a recording). | A real text both ways; evals green on the real model |
 
-### Phase 15 · Deposits (S65–S68)
+### Phase 15 · Deposits (S65–S68; before the rest of Phase 13 by [PCR-012](changes/PCR-012.md), in Stripe test mode)
 Goal: no-shows cost the owner nothing, and money never moves without the owner's OK. Exit: market competitiveness 8.
 
 | # | Target | Built | Done when |
