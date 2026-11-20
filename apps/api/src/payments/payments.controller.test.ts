@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 import type { IncomingMessage } from 'node:http';
-import type { PaymentAccountAnswer } from '@pepper/contracts';
+import { PaymentAccountAnswerSchema, type PaymentAccountAnswer } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
 import { describe, expect, it, vi } from 'vitest';
 import type { RateLimiter } from '../http/rate-limit.js';
@@ -22,7 +22,7 @@ const tenant = {
   userId: '0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a12',
   role: 'owner',
 } as unknown as TenantContext;
-const ANSWER: PaymentAccountAnswer = {
+const ANSWER: PaymentAccountAnswer = PaymentAccountAnswerSchema.parse({
   status: 'ready',
   chargesEnabled: true,
   payoutsEnabled: true,
@@ -33,7 +33,7 @@ const ANSWER: PaymentAccountAnswer = {
   disabledReason: null,
   syncedAt: '2026-11-20T15:00:00.000Z',
   canManage: true,
-};
+});
 
 function fakes() {
   const payments = {
