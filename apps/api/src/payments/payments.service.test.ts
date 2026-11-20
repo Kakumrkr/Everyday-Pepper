@@ -70,6 +70,31 @@ describe('PaymentsService', () => {
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
+  it('refuses a signed body that isn’t Stripe’s event (400)', async () => {
+    const stripe = service({
+      provider: 'stripe',
+      secretKey: 'sk_test_51NvServiceUnitTest00000',
+      webhookSecret: SECRET,
+      livemode: false,
+    });
+    for (const text of ['not json', '{"id":"evt_1","object":"customer"}', 'null']) {
+      const body = Buffer.from(text);
+      const answer = await codeOf(
+        stripe.receive(body, stripeSignatureHeader(SECRET, body, new Date())),
+      );
+      expect(answer).toMatchObject({ code: 'validation_failed' });
+    }
+  });
+
+  it('signs the sandbox’s events with its own secret only', async () => {
+    const sandbox = service({ provider: 'sandbox' });
+    const body = Buffer.from('{}');
+    // Not Stripe's secret, nor any a caller could know.
+    await expect(
+      sandbox.receive(body, stripeSignatureHeader(SECRET, body, new Date())),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+  });
+
   it('refuses the sandbox’s dev path with Stripe (404)', async () => {
     const stripe = service({
       provider: 'stripe',
