@@ -22,7 +22,7 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
 | C10 | Accessibility | 6 | 8 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
 | C11 | Security and privacy | 6 | 8 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
-| C12 | Market competitiveness | 3 | 3 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
+| C12 | Market competitiveness | 3 | 7 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
 | C13 | Switching value | 2 | 8 | 8 | 9 | "We move you": an import from any of the five tools with history, in minutes, undoable |
 | C14 | Pilot readiness | 3 | 3 | 9 | — | Deployed, a sending domain, support the same day, metrics from day one |
 | C15 | Public-launch readiness | 1 | 1 | — | 9 | Billing, a landing page, legal pages, pricing, support, a case study |
@@ -38,7 +38,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 11 · Switching + privacy (S51.2) | C13 8 · C11 8 (met, S51.2: §7) |
 | 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 (met, S56b: §8) |
 | 13 · Pilot readiness (S60) | the "Pilot gate" column |
-| 14 · SMS (S64) | C12 7 |
+| 14 · SMS (S64) | C12 7 (met in sandbox, S64: §9) |
 | 15 · Deposits (S68) | C12 8 |
 | 16 · Calendar + staff (S72) | C6 8 |
 | 17 · Launch gate (S76) | the "Launch gate" column |
@@ -74,6 +74,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 2026-11-03 | Phase 10 gate (S47.3) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 6 | 3 | 2 | 3 | 1 |
 | 2026-11-04 | Phase 11 gate (S51.2) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 | 2026-11-06 | Phase 12 gate (S56b) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
+| 2026-11-20 | Phase 14 gate (S64) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 7 | 8 | 3 | 1 |
 
 ## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
 
@@ -113,3 +114,8 @@ Scored by Claude in S56b from the tests and the recording below; only C1, C5 and
 - **C5 Owner experience 7 → 8.** Home's cards are ranked by the dollars at stake, from the business's own prices, with "Dismiss all" (S52, AC-W4-4); Activity lists everything Pepper did with its Undo (S52, AC-W7-4); the Autonomy page in More offers three presets with every action's own setting read back as standing rules (ADR-0055, AC-W7-5); the import preview speaks in one plain sentence (AC-W1-21, zeros left out in S56b) and says what is left out and why (AC-W1-48). Not yet 9: no timed owner run of a day's cards; approval by text comes in S63.
 - **C8 AI trust and safety 8 → 9.** **100% pass^3** on every safety and trust set: safety 21/21, permissions 9/9, autonomy 13/13, memory_delete 12/12, memory_safety 14/14, feed_safety 11/11, and scheduling, memory_recall, episodic and drafts at 100% too, import_mapping 7/8 over its 0.8 gate (186 cases × 3; one import trial left a column empty, the safe side); `KNOWN_REAL_MODEL_MISSES` empty for the first time since S37b (the two waitlist cases pass after the S44 domain check); the replay test (`packages/ai/src/evals/evals.int.test.ts`) holds it in CI. Honest refusals name no place that doesn't exist (prompt v9, checked by `cant-text-yet` and `cant-refund-yet`); the model sees an import's column names only as untrusted data and masked samples, and the domain checks every suggestion (ADR-0061); every action is explained, audited and undoable (Activity, S52) and the owner sees the words of every client message on its card (ADR-0060). Not yet 10: zero data retention on the production project (before the pilot), one memory_write miss at pass^1 (`mw-staff-fact`, safe), and no outside red-team.
 
+## 9. Phase 14 gate (S64, 2026-11-20): the evidence
+
+Scored by Claude in S64 from the tests below; only C12 was scored, the rest carry over. **SMS is built and proven in the sandbox, not live:** going live needs the LLC, a paid provider and 10DLC registration (S64.2, [PCR-012](changes/PCR-012.md)). The score credits what an owner gets the day the switch is on, as earlier gates credited features no owner had used yet; the gap is named below.
+
+- **C12 Market competitiveness 3 → 7.** Texts, the feature owners in the segment rely on most after booking itself, are complete: Twilio behind a port with a sandbox that never leaves the machine (ADR-0065); consent with the words agreed to, STOP/START/HELP answered in the signed webhook's own request, quiet hours, delivery status and GSM-7 segments (AC-X-57…69: contracts `sms.test.ts`, runtime `sms.test.ts`, db and core `sms.int.test.ts`, api `sms.int.test.ts`, `sms-webhook.controller.test.ts`, `twilio-signature.test.ts`); the day-before and same-day reminders and "C" to confirm, with owner settings (AC-X-70…79: appointments `reminders.int.test.ts`, `reminder-texts.int.test.ts`; e2e `texts-settings.spec.ts`, `confirm-by-text.spec.ts`); the booking page's opt-in (e2e `public-booking.spec.ts`). On top, the Pepper-only part competitors don't have: **cards approved or skipped by text** ("Y"/"N" and a single-use code, sender-checked, the exact card shown; ADR-0066, AC-X-80…95: core `approval-texts.int.test.ts`, `member-texts.int.test.ts`, api `sms-approval.int.test.ts`, e2e `approve-by-text.spec.ts`). The client's last text and "Confirmed by text" are on the profile and the visit (AC-X-76…79, `screens.spec.ts`). Not yet 8: no deposits or card on file (Phase 15), no week view or calendar sync (Phase 16), no reports (Phase 17); not yet live (no real carrier has carried a text: 10DLC), and the AI's `send_client_message` doesn't text yet (S64.2).

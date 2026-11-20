@@ -191,6 +191,19 @@ export class AiActionsService {
     );
   }
 
+  /**
+   * Skips a card from a text reply ("N" and its code, S64, AC-X-93): declined as in the app, only
+   * if it is still what the text showed (`ProposalChangedError`) and not already decided
+   * (`ProposalNotPendingError`, even if declined in the app).
+   */
+  async skip(tenant: TenantContext, id: ActionProposalId, fingerprint: string): Promise<void> {
+    await rejectProposal(this.db, actorOf(tenant), id, {
+      clock: this.clock,
+      shownFingerprint: fingerprint,
+      firstOnly: true,
+    });
+  }
+
   async undo(
     tenant: TenantContext,
     id: ActionExecutionId,

@@ -68,6 +68,7 @@ import {
   ActionTooLateError,
   ConcurrentActionError,
   ForbiddenError,
+  ProposalChangedError,
   ProposalNotFoundError,
   ProposalNotPendingError,
   UndoRefusedError,
@@ -377,7 +378,16 @@ export async function rejectProposal(
   db: Database,
   actor: Actor,
   proposalId: ActionProposalId,
-  options: { clock?: Clock } = {},
+  options: {
+    clock?: Clock;
+    /**
+     * What the member was shown (a text reply, S64): a proposal whose fingerprint moved since is
+     * `ProposalChangedError`, and stays pending.
+     */
+    shownFingerprint?: string;
+    /** A proposal already rejected is `ProposalNotPendingError`, not the rejection again. */
+    firstOnly?: boolean;
+  } = {},
 ): Promise<ActionProposal> {
   const id = ActionProposalIdSchema.parse(proposalId);
   const now = (options.clock ?? systemClock).now();
@@ -387,8 +397,14 @@ export async function rejectProposal(
     const proposal = await lockProposal(tx, id);
     if (proposal === undefined) throw new ProposalNotFoundError();
     checkDecider(member, AutonomyActionSchema.parse(proposal.action), proposal.requestedByUserId);
-    if (proposal.status === 'rejected') return toProposal(proposal);
+    if (proposal.status === 'rejected' && options.firstOnly !== true) return toProposal(proposal);
     if (proposal.status !== 'pending') throw new ProposalNotPendingError(settled(proposal.status));
+    if (
+      options.shownFingerprint !== undefined &&
+      options.shownFingerprint !== proposal.fingerprint
+    ) {
+      throw new ProposalChangedError();
+    }
     return toProposal(await decide(tx, member, proposal, 'rejected', now));
   });
 }

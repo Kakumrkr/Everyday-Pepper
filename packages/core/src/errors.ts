@@ -209,6 +209,17 @@ export class ProposalNotPendingError extends Error {
   }
 }
 
+/**
+ * The proposal is no longer what the member was shown (its fingerprint moved, e.g. a draft was
+ * edited): a decision from an old view, like a text reply, is not applied (S64, AC-X-93).
+ */
+export class ProposalChangedError extends Error {
+  constructor() {
+    super('This proposal changed since it was shown');
+    this.name = 'ProposalChangedError';
+  }
+}
+
 /** No such AI action in the business, or not one the member may see. */
 export class ActionNotFoundError extends Error {
   constructor() {
