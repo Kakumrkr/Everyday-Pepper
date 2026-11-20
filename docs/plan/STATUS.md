@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S63.2 · Approve by text on screen** (brief approved 2026-11-20: D-1 an additive `approvedVia: 'text'` on the Activity view, from `approval_texts.used_at`; D-2 the number row and "Text me cards" for owners and managers only, staff see the reminders only (Claude, on relook: a number does nothing for staff yet and each check costs a text); D-3 dropped: owners and managers already need two-step sign-in to use the app (`roleRequiresMfa`), so no extra state).
 Tasks: 1 AC-X-88…93 + traceability · 2 `lib/member-texts.ts` words + tests · 3 number sheet (number → code) + switch on `/more/texts` · 4 `approvedVia` in contracts/api + integration test · 5 "approved by text" in ActivityLog · 6 e2e: number check in `texts-settings.spec.ts`, `approve-by-text.spec.ts` (Y + code via `/v1/dev/sms`, receipt in Activity), "Confirmed by text" journey, `screens.spec.ts` shots.
-Done: — · Next: task 1. Open questions: none.
+Done: 1 AC-X-88…92 (five were enough) · 2–3 `member-texts.ts` (6 tests) + `CardTextsSection` on `/more/texts` · 4 `approval_texts.execution_id` (migration 0079) set after an approval by text executes, `approvedVia` on the view; found and fixed: a "Y" to a card already approved in the app answered "Done" (core marks a replayed approval, the text path says "handled", AC-X-83); api sms-approval 5/5, core trust 47/47 · 5 "approved by text" in Activity (ui 10/10).
+Next: task 6 (e2e). Open questions: none.
 
 ## Last sessions
 - **S63 Phase 14 · Approve by text, backend (2026-11-13)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #98](https://github.com/Kakumrkr/Everyday-Pepper/pull/98)). Full entry in [session-log.md](session-log.md).
