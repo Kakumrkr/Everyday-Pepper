@@ -6,7 +6,7 @@ import type { Redis } from '@pepper/runtime';
 import { describe, expect, it } from 'vitest';
 import { PaymentsService } from './payments.service.js';
 
-// What the api answers before any database work (S65, AC-X-95, AC-X-100): off is 404 on every
+// What the api answers before any database work (S65, AC-X-98, AC-X-103): off is 404 on every
 // route; a webhook whose signature doesn't check out is 401 before its body is read.
 
 const outboxKey = Buffer.alloc(32, 1);

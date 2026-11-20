@@ -13,7 +13,7 @@ import {
   type ProviderLink,
 } from './provider.js';
 
-// The sandbox (S65, ADR-0067 §8, AC-X-101): `PaymentsProvider` without Stripe, for tests and
+// The sandbox (S65, ADR-0067 §8, AC-X-104): `PaymentsProvider` without Stripe, for tests and
 // S65.2's journeys. Accounts live in a store (Redis for a day where the api runs, memory in unit
 // tests); the onboarding link goes straight back to Pepper's return page; `setState` moves an
 // account to what a journey needs. Nothing leaves the machine.

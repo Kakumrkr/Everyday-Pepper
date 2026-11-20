@@ -3711,7 +3711,7 @@ export type PaymentAccountRow = typeof paymentAccounts.$inferSelect;
 const paymentsWebhook = sql`COALESCE(current_setting('app.payments_webhook', true) = 'on', false)`;
 
 /**
- * Each Stripe webhook event Pepper handled (S65, ADR-0067 §6.3, AC-X-96): one row per event id,
+ * Each Stripe webhook event Pepper handled (S65, ADR-0067 §6.3, AC-X-99): one row per event id,
  * so a redelivery changes nothing. `received` until handled (an attempt that failed leaves it so
  * and Stripe delivers again), then `processed` or `ignored` (with why). No business data: the
  * event's id, type, account and times. A platform row, reached in the webhook's context or by a

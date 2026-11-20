@@ -8,6 +8,7 @@ import {
   UserIdSchema,
   type ActionProposal,
   type ActionProposalId,
+  type ApprovalDecision,
   type TenantId,
 } from '@pepper/contracts';
 import {
@@ -35,9 +36,10 @@ import { queueSms } from './sms.js';
 import { sameCodeHash, smsCodeHash } from './member-texts.js';
 
 // Cards by text (S63, ADR-0066 §3–4): a card that waits for an OK is texted to each owner or
-// manager who asked for it, with a code of its own; a reply of "Y" and that code is claimed
-// here, once, from that number only, and handed back to the caller to approve as that member
-// with the fingerprint the text was written from. This module never approves anything itself.
+// manager who asked for it, with a code of its own; a reply of "Y" (or "N", S64) and that code
+// is claimed here, once, from that number only, and handed back to the caller to approve (or
+// skip) as that member with the fingerprint the text was written from. This module never
+// decides a card itself.
 
 /** How long a text's code works at most after the text can go out (AC-X-82). */
 export const APPROVAL_TEXT_TTL_MS = 2 * 60 * 60 * 1000;
@@ -59,7 +61,7 @@ export interface ApprovalTextOptions {
  * Texts a pending proposal to every member who gets cards by text (AC-X-82), in the open
  * transaction of the business that made it, so the texts go if and only if the proposal
  * commits. `summary` is the card in a line, in the domain's words, first names only (the caller
- * builds it); the text adds "Reply Y {code} by {time}." Held for the quiet hours like every
+ * builds it); the text adds "Reply Y {code} to OK or N {code} to skip, by {time}." (AC-X-95). Held for the quiet hours like every
  * text that isn't urgent; none when the card would expire within 15 minutes of when it can go.
  * Returns how many were queued.
  */
@@ -87,7 +89,11 @@ export async function queueApprovalTexts(
     const code = await freshCode(tx, phone, options);
     const id = await queueSms(
       tx,
-      { to: phone, body: `Pepper: ${line} Reply Y ${code} by ${by}.`, wordsBy: 'template' },
+      {
+        to: phone,
+        body: `Pepper: ${line} Reply Y ${code} to OK or N ${code} to skip, by ${by}.`,
+        wordsBy: 'template',
+      },
       {
         key: options.outboxKey,
         dedupeKey: OutboxDedupeKeySchema.parse(`approval.text:${proposal.id}:${recipient.userId}`),
@@ -141,7 +147,7 @@ function byTime(timeZone: string, at: number): string {
     .replace(/\s?(AM|PM)$/i, (_, half: string) => half.toLowerCase());
 }
 
-/** What a "Y" and a code came to (AC-X-83…85); only `claimed` is to be approved. */
+/** What a "Y" or "N" and a code came to (AC-X-83…85, AC-X-93); only `claimed` is to be decided. */
 export type ApprovalClaim =
   /** No such text to this number, or the member may no longer approve by text: one answer. */
   | { kind: 'miss' }
@@ -160,7 +166,8 @@ export type ApprovalClaim =
     };
 
 /**
- * Claims the text a reply of "Y" and `code` from `from` answers (AC-X-83…85): the text sent to
+ * Claims the text a reply of "Y" or "N" and `code` from `from` answers (AC-X-83…85, AC-X-93,
+ * S64: the decision is audited with it, and the caller approves or skips): the text sent to
  * that number with that code (any business, `sms_approval_target`), locked in its business;
  * used → `used`, expired → `expired`; the number must still be the member's checked one, and the
  * member an owner or manager with a second factor and "Text me cards" on there, else `miss`.
@@ -169,7 +176,7 @@ export type ApprovalClaim =
  */
 export async function claimApprovalText(
   db: Database,
-  input: { from: string; code: string; receivedAt: Date },
+  input: { from: string; code: string; receivedAt: Date; decision?: ApprovalDecision },
   options: { codeKey: Buffer },
 ): Promise<ApprovalClaim> {
   const from = SmsPhoneSchema.safeParse(input.from);
@@ -195,7 +202,7 @@ export async function claimApprovalText(
         action: 'sms.approval_reply',
         entity: { type: 'approval_text', id: text.id },
         before: { used: false },
-        after: { used: true, proposalId: text.proposalId },
+        after: { used: true, proposalId: text.proposalId, decision: input.decision ?? 'approve' },
       },
     });
     return {

@@ -26,7 +26,7 @@ export interface ProviderLink {
 
 export interface PaymentsProvider {
   readonly provider: PaymentProvider;
-  /** Whether the key is live: an event of the other mode changes nothing (AC-X-97). */
+  /** Whether the key is live: an event of the other mode changes nothing (AC-X-100). */
   readonly livemode: boolean;
   createAccount(input: CreateAccountInput): Promise<StripeAccount>;
   retrieveAccount(accountId: StripeAccountId): Promise<StripeAccount>;

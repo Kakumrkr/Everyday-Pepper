@@ -2,6 +2,7 @@ import {
   ActionProposalIdSchema,
   OutboxMessageIdSchema,
   OutboxSmsSchema,
+  smsSegments,
   TenantIdSchema,
   type ActionProposal,
   type TenantId,
@@ -13,6 +14,7 @@ import {
   findOutboxMessage,
   insertExecution,
   insertProposal,
+  listAuditEntries,
   listDueOutboxMessages,
   newId,
   updateMembershipRole,
@@ -24,6 +26,7 @@ import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
 import { openOutboxContent, outboxKeyFrom } from './outbox.js';
 import {
+  APPROVAL_SUMMARY_MAX,
   claimApprovalText,
   executionsApprovedByText,
   queueApprovalTexts,
@@ -179,8 +182,8 @@ describe('queueApprovalTexts (AC-X-82)', () => {
     const sent = await cards(b.tenantId);
     expect(sent.map((text) => text.to).sort()).toEqual([owner.phone, manager.phone].sort());
     expect(sent.map((text) => text.body).sort()).toEqual([
-      `Pepper: ${SUMMARY} Reply Y 4821 by 1:00pm.`,
-      `Pepper: ${SUMMARY} Reply Y 4822 by 1:00pm.`,
+      `Pepper: ${SUMMARY} Reply Y 4821 to OK or N 4821 to skip, by 1:00pm.`,
+      `Pepper: ${SUMMARY} Reply Y 4822 to OK or N 4822 to skip, by 1:00pm.`,
     ]);
     // A retry of the same card queues nothing twice.
     expect(await queue(b, card)).toBe(0);
@@ -204,7 +207,7 @@ describe('queueApprovalTexts (AC-X-82)', () => {
     expect(await cards(b.tenantId)).toEqual([
       {
         to: owner.phone,
-        body: `Pepper: ${SUMMARY} Reply Y 4821 by 10:00am.`,
+        body: `Pepper: ${SUMMARY} Reply Y 4821 to OK or N 4821 to skip, by 10:00am.`,
         at: new Date('2036-11-14T14:00:00Z'),
       },
     ]);
@@ -247,6 +250,24 @@ describe('queueApprovalTexts (AC-X-82)', () => {
     expect(
       await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR))),
     ).toBe(0);
+  });
+
+  it('says how to skip, and fits two segments with the longest summary (AC-X-95)', async () => {
+    const b = await business('2036-11-13T17:00:00Z');
+    await b.join('owner');
+    const card = await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR));
+    await withTenant(db, b.tenantId, (tx) =>
+      queueApprovalTexts(tx, card, 'x'.repeat(APPROVAL_SUMMARY_MAX + 40), {
+        codeKey,
+        outboxKey,
+        // 12:10pm is the longest time the text can carry.
+        now: new Date('2036-11-13T16:10:00Z'),
+        drawCode: () => '4821',
+      }),
+    );
+    const [text] = await cards(b.tenantId);
+    expect(text?.body).toMatch(/ Reply Y 4821 to OK or N 4821 to skip, by 12:10pm\.$/);
+    expect(smsSegments(text?.body ?? '')).toMatchObject({ encoding: 'gsm7', segments: 2 });
   });
 });
 
@@ -310,6 +331,26 @@ describe('claimApprovalText (AC-X-83…85)', () => {
     expect(await claim(owner.phone, '1111', at)).toEqual({ kind: 'miss' });
     await setTwoFactor(db, owner.actor.context.userId, true);
     expect(await claim(owner.phone, '1111', at)).toMatchObject({ kind: 'claimed' });
+  });
+
+  it('audits the decision a reply carries, and spends the code either way (AC-X-93)', async () => {
+    const b = await business('2036-11-13T17:00:00Z');
+    const owner = await b.join('owner');
+    const card = await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR));
+    await queue(b, card, ['5151']);
+    const at = new Date(b.clock.now().getTime() + 60_000);
+    const skip = await claimApprovalText(
+      db,
+      { from: owner.phone, code: '5151', receivedAt: at, decision: 'skip' },
+      { codeKey },
+    );
+    expect(skip).toMatchObject({ kind: 'claimed', proposalId: card.id });
+    // A "Y" after the "N" finds the code spent.
+    expect(await claim(owner.phone, '5151', at)).toEqual({ kind: 'used' });
+    const audit = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 50 }));
+    expect(
+      audit.filter((entry) => entry.action === 'sms.approval_reply').map((entry) => entry.after),
+    ).toEqual([{ used: true, proposalId: card.id, decision: 'skip' }]);
   });
 
   it('is a miss once the member checked another number', async () => {

@@ -22,7 +22,7 @@ function sandbox() {
   });
 }
 
-describe('SandboxPaymentsProvider (AC-X-101)', () => {
+describe('SandboxPaymentsProvider (AC-X-104)', () => {
   it('answers the same account for the same key, as Stripe does', async () => {
     const provider = sandbox();
     const first = await provider.createAccount({ tenantId: TENANT, idempotencyKey: 'k1' });

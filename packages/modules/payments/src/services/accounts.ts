@@ -80,7 +80,7 @@ function statusOf(row: PaymentAccountRow): PaymentAccountStatus {
   });
 }
 
-/** `GET /v1/payments/account` (AC-X-94): owners and managers. */
+/** `GET /v1/payments/account` (AC-X-97): owners and managers. */
 export async function readPaymentAccount(
   deps: Pick<PaymentsDeps, 'db' | 'provider'>,
   actor: Actor,
@@ -129,7 +129,7 @@ export function answerOf(
 }
 
 /**
- * `POST /v1/payments/onboarding` (AC-X-93): the owner only. Creates the business's account the
+ * `POST /v1/payments/onboarding` (AC-X-96): the owner only. Creates the business's account the
  * first time (or after Stripe disconnected it) and answers a fresh Stripe-hosted onboarding link.
  * Two taps, two devices or a retry make one account: the key per business and generation, and
  * one row per business (the first insert wins; the loser's account is the same Stripe account
@@ -222,7 +222,7 @@ export async function paymentDashboardLink(
 }
 
 /**
- * `POST /v1/payments/account/sync` (AC-X-94): the owner, after Stripe's pages send them back
+ * `POST /v1/payments/account/sync` (AC-X-97): the owner, after Stripe's pages send them back
  * (a webhook can lag the redirect). Answers the account as it stands after the read.
  */
 export async function syncOwnPaymentAccount(
@@ -329,7 +329,7 @@ async function applyRead(
   return { applied: true, before, after: read.after };
 }
 
-/** The owners' push for a change worth telling (AC-X-102): one per change, keyed by it. */
+/** The owners' push for a change worth telling (AC-X-105): one per change, keyed by it. */
 export async function pushOwners(
   tx: TenantTx,
   deps: Pick<PaymentsDeps, 'outboxKey' | 'clock'>,

@@ -1,6 +1,6 @@
 import type { PaymentAccountStatus } from '@pepper/contracts';
 
-// What the owner hears when payments change (S65 top-up, ADR-0067 §7, AC-X-102): one push for
+// What the owner hears when payments change (S65 top-up, ADR-0067 §7, AC-X-105): one push for
 // a change they should know about, opening More → Payments. Never a client's or person's details
 // (it shows on a lock screen); the deadline as a date in the business's time zone.
 

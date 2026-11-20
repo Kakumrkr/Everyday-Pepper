@@ -79,7 +79,7 @@ REVOKE TRUNCATE ON "payment_webhook_events" FROM pepper_app;
 CREATE TRIGGER "payment_accounts_set_updated_at" BEFORE UPDATE ON "payment_accounts"
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 --> statement-breakpoint
--- Which business a Stripe account belongs to (AC-X-97). A webhook names a Stripe account, not
+-- Which business a Stripe account belongs to (AC-X-100). A webhook names a Stripe account, not
 -- a business, and arrives with none bound, so a definer function answers the tenant id for the
 -- stored account id and nothing else (never a row). The event's body and metadata are never
 -- trusted for it. A business being deleted is left out.

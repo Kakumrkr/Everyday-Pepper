@@ -169,7 +169,7 @@ function smsOf(
   };
 }
 
-/** A sandbox that could say "Payments are ready" only where tests run (AC-X-101). */
+/** A sandbox that could say "Payments are ready" only where tests run (AC-X-104). */
 function paymentsOf(payments: PaymentsConfig | null, testsMayRun: boolean): PaymentsConfig | null {
   if (payments?.provider === 'sandbox' && !testsMayRun) return null;
   return payments;

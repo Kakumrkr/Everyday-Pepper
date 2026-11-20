@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 
-// Stripe's webhook signature (S65, ADR-0067 §6.1, AC-X-95). `Stripe-Signature` is a list of
+// Stripe's webhook signature (S65, ADR-0067 §6.1, AC-X-98). `Stripe-Signature` is a list of
 // `key=value` pairs separated by commas, in any order: `t` (seconds since the epoch) and one or
 // more `v1` (hex HMAC-SHA256 of `"<t>.<raw body>"`, keyed with the endpoint's whole `whsec_…`
 // secret). While a secret is rolled Stripe signs with both, so any `v1` may match. `v0` and the

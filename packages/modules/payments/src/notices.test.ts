@@ -4,7 +4,7 @@ import { deadlineDate, paymentsNotice } from './notices.js';
 
 const NY = { dueBy: null, timeZone: 'America/New_York' };
 
-describe('paymentsNotice (AC-X-102)', () => {
+describe('paymentsNotice (AC-X-105)', () => {
   it('tells the owner when payments become ready', () => {
     expect(paymentsNotice('pending', 'ready', NY)).toEqual({
       title: 'Payments are ready',

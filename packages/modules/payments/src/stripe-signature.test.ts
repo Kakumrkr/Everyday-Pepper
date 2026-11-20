@@ -16,7 +16,7 @@ function check(header: string | undefined, now = NOW, payload = BODY) {
   return verifyStripeSignature({ secret: SECRET, payload, header, now });
 }
 
-describe('verifyStripeSignature (AC-X-95)', () => {
+describe('verifyStripeSignature (AC-X-98)', () => {
   it('signs "<t>.<raw body>" with HMAC-SHA256 under the whole secret, in hex', () => {
     // Independent of the code under test: the documented recipe, spelled out.
     const expected = createHmac('sha256', SECRET)

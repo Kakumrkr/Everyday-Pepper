@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { ApiErrorSchema } from '@pepper/contracts';
-import { ForbiddenError, ProposalNotPendingError } from '@pepper/core';
+import { ForbiddenError, ProposalChangedError, ProposalNotPendingError } from '@pepper/core';
 import type * as Appointments from '@pepper/appointments';
 import type * as Core from '@pepper/core';
 import type * as Db from '@pepper/db';
@@ -61,7 +61,7 @@ const MESSAGE = '0199f4b2-7c1e-7a00-8000-0000000000b2';
 class FakeConnectionsModule {}
 
 const limits = { hit: vi.fn(() => Promise.resolve()), spent: vi.fn(() => Promise.resolve(false)) };
-const approvals = { approve: vi.fn() };
+const approvals = { approve: vi.fn(), skip: vi.fn() };
 
 @Global()
 @Module({
@@ -149,6 +149,8 @@ beforeEach(() => {
   core.recordTextApproval.mockReset();
   core.recordTextApproval.mockResolvedValue(true);
   approvals.approve.mockReset();
+  approvals.skip.mockReset();
+  approvals.skip.mockResolvedValue(undefined);
   limits.hit.mockClear();
   limits.spent.mockReset();
   limits.spent.mockResolvedValue(false);
@@ -243,7 +245,7 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
       expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.done);
       expect(core.claimApprovalText).toHaveBeenCalledWith(
         {},
-        { from: '+15552340001', code: '4821', receivedAt: NOW },
+        { from: '+15552340001', code: '4821', receivedAt: NOW, decision: 'approve' },
         { codeKey: expect.any(Buffer) as Buffer },
       );
       // Only the first approval counts: a card already approved in the app is "handled".
@@ -324,6 +326,83 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
       const body = form(inbound('YES'));
       const response = await post(path, body, signature(path, body)).expect(200);
       expect(response.text).toContain('Pepper: resubscribed');
+      expect(core.claimApprovalText).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('"N" and a code (S64, AC-X-93, AC-X-94)', () => {
+    const CLAIMED = {
+      kind: 'claimed',
+      tenantId: TENANT,
+      approvalTextId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f7000aa',
+      context: { tenantId: TENANT, userId: MESSAGE, role: 'owner' },
+      proposalId: MESSAGE,
+      fingerprint: 'f'.repeat(64),
+    };
+    const reply = async (text: string) => {
+      core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+      const body = form(inbound(text));
+      const response = await post(path, body, signature(path, body)).expect(200);
+      return /<Message>(.*)<\/Message>/.exec(response.text)?.[1]?.replace(/&apos;/g, "'") ?? null;
+    };
+
+    it('claims the code as a skip, then declines as its member what the text showed', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      expect(await reply('No 4821')).toBe(APPROVAL_REPLIES.skipped);
+      expect(core.claimApprovalText).toHaveBeenCalledWith(
+        {},
+        { from: '+15552340001', code: '4821', receivedAt: NOW, decision: 'skip' },
+        { codeKey: expect.any(Buffer) as Buffer },
+      );
+      expect(approvals.skip).toHaveBeenCalledWith(CLAIMED.context, MESSAGE, 'f'.repeat(64));
+      // Never an approval, and nothing for Activity's "approved by text".
+      expect(approvals.approve).not.toHaveBeenCalled();
+      expect(core.recordTextApproval).not.toHaveBeenCalled();
+    });
+
+    it('leaves a changed or handled card, and never answers with a 500', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      for (const [error, words] of [
+        [new ProposalChangedError(), APPROVAL_REPLIES.changedNotSkipped],
+        [new ProposalNotPendingError('rejected'), APPROVAL_REPLIES.handled],
+        [new ProposalNotPendingError('approved'), APPROVAL_REPLIES.handled],
+        [new ProposalNotPendingError('expired'), APPROVAL_REPLIES.expired],
+        [new ForbiddenError(), APPROVAL_REPLIES.miss],
+        [new Error('connection reset'), APPROVAL_REPLIES.refused],
+      ] as const) {
+        approvals.skip.mockRejectedValueOnce(error);
+        expect(await reply('N 4821')).toBe(words);
+      }
+    });
+
+    it('follows the "Y" rules: a replay, a spoof, the miss limit and a STOP', async () => {
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'used' });
+      expect(await reply('N 4821')).toBe(APPROVAL_REPLIES.used);
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'miss' });
+      expect(await reply('n4821')).toBe(APPROVAL_REPLIES.miss);
+      // Counted with the "Y" misses: the same limit and key as a "Y" from this number.
+      core.claimApprovalText.mockResolvedValueOnce({ kind: 'miss' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.miss);
+      const misses = (limits.hit.mock.calls as unknown as [{ name: string }, string][]).filter(
+        ([limit]) => limit.name === 'sms-approval-miss',
+      );
+      expect(misses).toHaveLength(2);
+      expect(misses[0]).toEqual(misses[1]);
+      expect(misses[0]?.[0]).toMatchObject({ max: 5 });
+      limits.spent.mockResolvedValueOnce(true);
+      expect(await reply('N 4821')).toBe(APPROVAL_REPLIES.miss);
+      expect(core.claimApprovalText).toHaveBeenCalledTimes(3);
+      db.isSmsOptedOut.mockResolvedValue(true);
+      expect(await reply('N 4821')).toBeNull();
+      expect(await reply('No')).toBeNull();
+      expect(approvals.skip).not.toHaveBeenCalled();
+    });
+
+    it('tells a member\'s bare "N" or "No" how to reply, and a client\'s nothing', async () => {
+      expect(await reply('N')).toBe(APPROVAL_REPLIES.skipWithoutCode);
+      expect(await reply('No')).toBe(APPROVAL_REPLIES.skipWithoutCode);
+      db.isMemberPhone.mockResolvedValueOnce(false);
+      expect(await reply('No')).toBeNull();
       expect(core.claimApprovalText).not.toHaveBeenCalled();
     });
   });

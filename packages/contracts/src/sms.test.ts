@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   classifySmsKeyword,
   approvalCodeOf,
+  approvalReplyOf,
   classifySmsReply,
   normalizeSmsText,
   OutboxSmsSchema,
@@ -463,6 +464,38 @@ describe('approval replies (S63, AC-X-86)', () => {
       expect(classifySmsReply(body)).not.toBe('approve');
     }
     expect(classifySmsReply('STOP 4821')).toBe('stop');
+  });
+});
+
+describe('skip replies (S64, AC-X-93, AC-X-94)', () => {
+  it('reads "N" and a four-digit code as a skip, any case and light punctuation', () => {
+    for (const [body, code] of [
+      ['N 4821', '4821'],
+      ['n4821', '4821'],
+      [' No 0042 ', '0042'],
+      ['NO: 4821.', '4821'],
+      ['n-4821!', '4821'],
+      ['Ｎ　４８２１', '4821'],
+    ] as const) {
+      expect(approvalReplyOf(body)).toEqual({ decision: 'skip', code });
+      expect(classifySmsReply(body)).toBe('skip');
+      // Never a keyword, and never an approval.
+      expect(classifySmsKeyword(body)).toBeNull();
+      expect(approvalCodeOf(body)).toBeNull();
+    }
+    expect(approvalReplyOf('Yes 4821')).toEqual({ decision: 'approve', code: '4821' });
+  });
+
+  it('answers a bare "N" or "No" with how to reply, and lets the keywords win', () => {
+    for (const body of ['N', 'n.', 'No', 'NO!']) {
+      expect(classifySmsReply(body)).toBe('skip_without_code');
+    }
+    for (const body of ['N 482', 'No 48210', 'No 4821 thanks', 'Nope 4821', 'N 4821 4821']) {
+      expect(approvalReplyOf(body)).toBeNull();
+      expect(classifySmsReply(body)).not.toBe('skip');
+    }
+    expect(classifySmsReply('STOP')).toBe('stop');
+    expect(classifySmsReply('No thanks')).toBeNull();
   });
 });
 

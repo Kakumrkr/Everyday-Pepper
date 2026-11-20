@@ -15,7 +15,7 @@ export type PaymentProvider = z.infer<typeof PaymentProviderSchema>;
 export const StripeAccountIdSchema = z.string().regex(/^acct_[A-Za-z0-9]{1,64}$/);
 export type StripeAccountId = z.infer<typeof StripeAccountIdSchema>;
 
-/** A webhook event's id (`evt_…`), the key that makes each event count once (AC-X-96). */
+/** A webhook event's id (`evt_…`), the key that makes each event count once (AC-X-99). */
 export const StripeEventIdSchema = z.string().regex(/^evt_[A-Za-z0-9_]{1,100}$/);
 export type StripeEventId = z.infer<typeof StripeEventIdSchema>;
 
@@ -97,7 +97,7 @@ export function paymentAccountStatus(
   return 'action_needed';
 }
 
-/** `GET /v1/payments/account` (AC-X-94): owners and managers. */
+/** `GET /v1/payments/account` (AC-X-97): owners and managers. */
 export const PaymentAccountAnswerSchema = z
   .object({
     status: PaymentAccountStatusSchema,
@@ -118,7 +118,7 @@ export const PaymentAccountAnswerSchema = z
   .strict();
 export type PaymentAccountAnswer = z.infer<typeof PaymentAccountAnswerSchema>;
 
-/** `POST /v1/payments/onboarding` (AC-X-93): Stripe's single-use page, valid for minutes. */
+/** `POST /v1/payments/onboarding` (AC-X-96): Stripe's single-use page, valid for minutes. */
 export const PaymentOnboardingLinkSchema = z
   .object({ url: z.url({ protocol: /^https?$/ }), expiresAt: UtcDateTimeSchema })
   .strict();
@@ -130,7 +130,7 @@ export const PaymentDashboardLinkSchema = z
   .strict();
 export type PaymentDashboardLink = z.infer<typeof PaymentDashboardLinkSchema>;
 
-/** The states `POST /v1/dev/payments/account` puts the sandbox account in (AC-X-101). */
+/** The states `POST /v1/dev/payments/account` puts the sandbox account in (AC-X-104). */
 export const SandboxPaymentStateSchema = z.enum([
   'onboarding',
   'pending',
@@ -208,7 +208,7 @@ export const StripeErrorSchema = z.object({
   }),
 });
 
-/** The event types Pepper acts on; any other is acknowledged and ignored (AC-X-97). */
+/** The event types Pepper acts on; any other is acknowledged and ignored (AC-X-100). */
 export const HANDLED_STRIPE_EVENTS = [
   'account.updated',
   'capability.updated',

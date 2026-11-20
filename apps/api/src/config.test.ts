@@ -216,7 +216,7 @@ describe('loadApiConfig', () => {
     expect(loadApiConfig({ ...required, SMS_PROVIDER: 'off' }).smsSandbox).toBe(false);
   });
 
-  it('keeps payments off by default and the sandbox to where tests run (S65, AC-X-100)', () => {
+  it('keeps payments off by default and the sandbox to where tests run (S65, AC-X-103)', () => {
     expect(loadApiConfig(required).payments).toBeNull();
     const sandbox = { ...required, PAYMENTS_PROVIDER: 'sandbox' };
     expect(loadApiConfig(sandbox).payments).toEqual({ provider: 'sandbox' });

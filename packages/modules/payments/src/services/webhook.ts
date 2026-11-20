@@ -19,7 +19,7 @@ import {
 import { PaymentsProviderError } from '../provider.js';
 import { syncPaymentAccount, type PaymentsDeps } from './accounts.js';
 
-// Stripe's webhook events, once each (S65, ADR-0067 §6, AC-X-96…98). The caller has checked
+// Stripe's webhook events, once each (S65, ADR-0067 §6, AC-X-99…101). The caller has checked
 // the signature and parsed the envelope. An event counts once (its id); the business is found
 // only through the stored Stripe account id; what changed is read from Stripe again, never
 // taken from the event; the event is marked handled in the same transaction as the change.

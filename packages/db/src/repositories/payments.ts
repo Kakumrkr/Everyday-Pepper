@@ -132,7 +132,7 @@ export async function replacePaymentAccount(
 }
 
 /**
- * Applies a read of the account made at `syncedAt` (AC-X-97): only to a connected row of that
+ * Applies a read of the account made at `syncedAt` (AC-X-100): only to a connected row of that
  * Stripe account, and only when no newer read was applied, so reads finishing out of order
  * never move the status back. `undefined` when it didn't apply.
  */
@@ -220,7 +220,7 @@ export interface PaymentWebhookEventClaim {
 }
 
 /**
- * Records a delivery of an event once (AC-X-96): the first inserts it as `received`; a
+ * Records a delivery of an event once (AC-X-99): the first inserts it as `received`; a
  * redelivery of one still `received` counts an attempt and answers it to handle again; one
  * already handled answers its outcome, unchanged. The lock lasts only this short transaction:
  * two deliveries at once can both handle an event, which is harmless (a newer read wins, a

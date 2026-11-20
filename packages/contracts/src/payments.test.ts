@@ -27,7 +27,7 @@ function status(changes: Partial<PaymentAccountSnapshot>, deauthorized = false) 
   return paymentAccountStatus({ ...base, ...changes, deauthorized });
 }
 
-describe('paymentAccountStatus (AC-X-94)', () => {
+describe('paymentAccountStatus (AC-X-97)', () => {
   it('is not_connected with no account, or once Stripe disconnected it', () => {
     expect(paymentAccountStatus(null)).toBe('not_connected');
     expect(

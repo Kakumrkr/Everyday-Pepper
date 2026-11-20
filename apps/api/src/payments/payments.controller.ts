@@ -27,7 +27,7 @@ import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.j
 import { parseBody } from '../http/zod-body.js';
 import { PAYMENTS_OPTIONS, PaymentsService, type PaymentsOptions } from './payments.service.js';
 
-// Payments (S65, ADR-0067, AC-X-93…101). The owner connects the business's Stripe account
+// Payments (S65, ADR-0067, AC-X-96…104). The owner connects the business's Stripe account
 // (`payments.manage`); owners and managers read where it stands (`payments.read`); staff get
 // 403. Stripe's webhook has no session and no Origin: its signature is the check. Off: 404.
 
@@ -44,7 +44,7 @@ export class PaymentsController {
     private readonly limits: RateLimiter,
   ) {}
 
-  /** 200 where payments stand (AC-X-94); 403 staff; 404 `payments_off`. */
+  /** 200 where payments stand (AC-X-97); 403 staff; 404 `payments_off`. */
   @Get('account')
   @RequirePermission('payments.read')
   async account(@CurrentTenant() tenant: TenantContext): Promise<PaymentAccountAnswer> {
@@ -52,7 +52,7 @@ export class PaymentsController {
   }
 
   /**
-   * 200 a fresh Stripe-hosted onboarding link (AC-X-93), creating the business's account the
+   * 200 a fresh Stripe-hosted onboarding link (AC-X-96), creating the business's account the
    * first time; 409 `payments_rejected`; 503 `payments_unavailable`; 429; 403 for all but owners.
    */
   @Post('onboarding')
@@ -100,7 +100,7 @@ export class PaymentsWebhookController {
   ) {}
 
   /**
-   * Stripe's Connect events (AC-X-95…98): 200 `{ received: true }` once handled, ignored or a
+   * Stripe's Connect events (AC-X-98…101): 200 `{ received: true }` once handled, ignored or a
    * redelivery; 401 `webhook_signature_invalid`; 400 `validation_failed`; 500 when handling
    * failed (Stripe delivers again); 404 while payments are off.
    */
@@ -114,7 +114,7 @@ export class PaymentsWebhookController {
 }
 
 /**
- * The sandbox's payments path (AC-X-101): mounted only with `PAYMENTS_PROVIDER=sandbox` where
+ * The sandbox's payments path (AC-X-104): mounted only with `PAYMENTS_PROVIDER=sandbox` where
  * tests run, else this route doesn't exist (404). The signed-in owner moves their sandbox
  * account to a state; a signed event goes through the webhook's own check and handler.
  */

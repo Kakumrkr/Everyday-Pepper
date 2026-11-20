@@ -92,7 +92,7 @@ export class PaymentsService {
   }
 
   /**
-   * One delivery of Stripe's webhook (AC-X-95…97): the signature over the exact bytes first
+   * One delivery of Stripe's webhook (AC-X-98…100): the signature over the exact bytes first
    * (401), then the envelope (400), then the event once. A failure to handle it throws (500), so
    * Stripe delivers it again.
    */
@@ -116,7 +116,7 @@ export class PaymentsService {
   }
 
   /**
-   * The sandbox (AC-X-101): moves the signed-in owner's sandbox account to `state`, then
+   * The sandbox (AC-X-104): moves the signed-in owner's sandbox account to `state`, then
    * delivers a signed event through `receive`, the same path as Stripe's.
    */
   async sandboxState(

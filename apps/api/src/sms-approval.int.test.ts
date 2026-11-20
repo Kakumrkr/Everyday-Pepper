@@ -20,6 +20,7 @@ import {
   getProposal,
   outboxKeyFrom,
   queueApprovalTexts,
+  rejectProposal,
   smsCodeKeyFrom,
   systemClock,
   type Mailer,
@@ -329,7 +330,7 @@ async function cardTexted(member: Awaited<ReturnType<typeof owner>>, phone: stri
   await deliverDue(member.tenantId);
   const body = await lastTextTo(phone);
   expect(body).toMatch(
-    /^Pepper: Add a to-do: order more towels\? Reply Y \d{4} by \d{1,2}:\d{2}(am|pm)\.$/,
+    /^Pepper: Add a to-do: order more towels\? Reply Y (\d{4}) to OK or N \1 to skip, by \d{1,2}:\d{2}(am|pm)\.$/,
   );
   const code = /Reply Y (\d{4})/.exec(body)?.[1];
   if (code === undefined) throw new Error('no code');
@@ -355,6 +356,36 @@ describe('approve by text through the sandbox (AC-X-83…87)', () => {
     expect((await getProposal(database.db, actor, proposalId)).status).toBe('approved');
     // The same reply again (a replay, AC-X-84).
     expect(await textIn(phone, `Y ${code}`)).toBe(APPROVAL_REPLIES.used);
+  });
+
+  it('"N" and the code skips that card once, as declining it in the app (S64, AC-X-93)', async () => {
+    const member = await owner();
+    const phone = newPhone();
+    await textingCards(member, phone);
+    const { proposalId, code, actor } = await cardTexted(member, phone);
+    // Another number with the right code, and a bare "No": nothing changes.
+    expect(await textIn(newPhone(), `N ${code}`)).toBe(APPROVAL_REPLIES.miss);
+    expect(await textIn(phone, 'No')).toBe(APPROVAL_REPLIES.skipWithoutCode);
+    expect((await getProposal(database.db, actor, proposalId)).status).toBe('pending');
+
+    expect(await textIn(phone, `No ${code}`)).toBe(APPROVAL_REPLIES.skipped);
+    expect(await getProposal(database.db, actor, proposalId)).toMatchObject({
+      status: 'rejected',
+      decidedByUserId: member.userId,
+    });
+    // The code is spent: a "Y" after it, or the same "N" again, changes nothing.
+    expect(await textIn(phone, `Y ${code}`)).toBe(APPROVAL_REPLIES.used);
+    expect(await textIn(phone, `N ${code}`)).toBe(APPROVAL_REPLIES.used);
+    expect((await getProposal(database.db, actor, proposalId)).status).toBe('rejected');
+  });
+
+  it('tells an "N" to a card already declined in the app that it was handled', async () => {
+    const member = await owner();
+    const phone = newPhone();
+    await textingCards(member, phone);
+    const { proposalId, code, actor } = await cardTexted(member, phone);
+    await rejectProposal(database.db, actor, proposalId);
+    expect(await textIn(phone, `N ${code}`)).toBe(APPROVAL_REPLIES.handled);
   });
 
   it('answers nothing after a STOP, and keeps "C" for visits', async () => {

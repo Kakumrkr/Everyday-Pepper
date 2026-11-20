@@ -1,6 +1,6 @@
 # ADR-0067: Payments: Stripe Connect Express onboarding, account status and signed, idempotent webhooks
 
-- **Status:** Accepted. Approved by the user at the S65 brief on 2026-11-20 ("go with your recommendations on all four … don't compromise for anything"): D-1 S65 before S64/S58a/S57/S58b/S60 ([PCR-012](../plan/changes/PCR-012.md)); D-2 the backend and sandbox here, the screen in S65.2; D-3 the owner alone connects payments, managers read the status; D-4 no Stripe SDK: a small fetch adapter and our own signature check.
+- **Status:** Accepted. Approved by the user at the S65 brief on 2026-11-20 ("go with your recommendations on all four … don't compromise for anything"): D-1 S65 before S64/S58a/S57/S58b/S60 ([PCR-013](../plan/changes/PCR-013.md)); D-2 the backend and sandbox here, the screen in S65.2; D-3 the owner alone connects payments, managers read the status; D-4 no Stripe SDK: a small fetch adapter and our own signature check.
 - **Date:** 2026-11-20
 - **Builds on:** ADR-0065 (a provider behind a port, `off|sandbox|<provider>`, a signed webhook deduplicated by the provider's event id), ADR-0013 (the permission matrix), ADR-0010 (RLS, definer functions), ADR-0024 (the outbox, for the owner's push), ADR-0053/0054 (export and deletion)
 

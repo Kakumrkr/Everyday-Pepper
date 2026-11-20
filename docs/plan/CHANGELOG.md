@@ -2,10 +2,15 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
-## 0.38 — 2026-11-20
-- At the S65 brief (user): **Phase 15 (Deposits) starts now** ([PCR-012](changes/PCR-012.md)), before S64 (waits on 10DLC) and S58a–S60 (wait on the domain); Stripe's test mode and the sandbox need neither. S65 splits into S65 (Stripe Connect Express, backend: [ADR-0067](../adr/0067-payments-stripe-connect.md), `@pepper/payments` behind a port, no SDK, signed and idempotent webhooks) and S65.2 (payments on screen). Payments are the owner's alone (`payments.manage`); managers read the status (`payments.read`). AC-X-93…102.
+## 0.39 — 2026-11-20
+- At the S65 brief (user): **S65 splits in two** ([PCR-013](changes/PCR-013.md)): S65 (Stripe Connect Express, backend: [ADR-0067](../adr/0067-payments-stripe-connect.md), `@pepper/payments` behind a port, no SDK, signed and idempotent webhooks) and S65.2 (payments on screen). Payments are the owner's alone (`payments.manage`); managers read the status (`payments.read`). AC-X-96…105.
 
-  **Compatibility:** additive tables, permissions, an audit action and routes, off by default; no tool, prompt or event change; $0 of the AI budget.
+  **Compatibility:** additive tables, permissions, audit actions and routes, off by default; no tool, prompt or event change; $0 of the AI budget.
+
+## 0.38 — 2026-11-20
+- At the S64 brief (user): **Phase 15 (Deposits) before the rest of Phase 13** ([PCR-012](changes/PCR-012.md)). The domain and the SMS paperwork still wait; Stripe test mode needs only a free sign-up, so S65–S68 come next, then S58a, S57, S58b and S60. Phase 14 closes at S64 in sandbox (C12 7); a new **S64.2 SMS live** takes the live switch and `send_client_message` over SMS once the LLC and 10DLC exist.
+
+  **Compatibility:** order only; one line (`send_client_message` over SMS) moves from S64 to S64.2; no scope, acceptance criteria or gates change; $0 of the AI budget.
 
 ## 0.37 — 2026-11-12
 - At the S61 brief (user): **Phase 14 (SMS) before the rest of Phase 13** ([PCR-011](changes/PCR-011.md)). S58a, S57, S58b and S60 wait for the domain; S61–S64 come first, built in sandbox until 10DLC. S61 splits into S61 (the channel's backend, [ADR-0065](../adr/0065-sms-channel.md), Twilio behind a port) and S61.2 (consent on screen). AC-X-57…63.

@@ -1,4 +1,4 @@
-// Payments' records (S65, ADR-0067, AC-X-96…99): a business's one Stripe account (its own row
+// Payments' records (S65, ADR-0067, AC-X-99…102): a business's one Stripe account (its own row
 // only; a newer read wins; disconnected, then replaced once), the definer that maps a Stripe
 // account to its business (ids only), and webhook events written in the webhook's context, each
 // claimed once. Part of the isolation evidence with isolation.int.test.ts.

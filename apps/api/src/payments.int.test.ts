@@ -34,7 +34,7 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { AppModule } from './app.module.js';
 import { loadApiConfig } from './config.js';
 
-// Payments through the api against real Postgres and Redis (S65, ADR-0067, AC-X-93…101): the
+// Payments through the api against real Postgres and Redis (S65, ADR-0067, AC-X-96…104): the
 // whole app as configured from its environment, twice: with Stripe (its API answered in this
 // process from its documented shapes, so the webhook's real signature check runs with a known
 // secret) and with the sandbox (its dev route delivering signed events through the same path).
@@ -262,7 +262,7 @@ async function accountIdOf(tenantId: string): Promise<string> {
   return row.providerAccountId;
 }
 
-describe('payments with Stripe (AC-X-93…97)', () => {
+describe('payments with Stripe (AC-X-96…100)', () => {
   it('connects once for the owner, refuses staff, and reads the status', async () => {
     const b = await business(stripeServer);
     const before = PaymentAccountAnswerSchema.parse(
@@ -401,7 +401,7 @@ describe('payments with Stripe (AC-X-93…97)', () => {
   });
 });
 
-describe('payments in the sandbox (AC-X-101)', () => {
+describe('payments in the sandbox (AC-X-104)', () => {
   it('connects, then moves to each state through a signed event on the webhook’s path', async () => {
     const b = await business(sandboxServer);
     await b.owner.post('/v1/dev/payments/account', { state: 'ready' }).expect(409);

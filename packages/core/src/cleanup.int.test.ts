@@ -194,7 +194,7 @@ describe('cleanUp', () => {
     }
   });
 
-  it('deletes Stripe’s webhook events after 30 days, and newer ones never (S65, AC-X-99)', async () => {
+  it('deletes Stripe’s webhook events after 30 days, and newer ones never (S65, AC-X-102)', async () => {
     const at = (ms: number) => new Date(NOW - ms);
     const event = (id: string, receivedAt: Date) =>
       withPaymentsWebhook(db, (tx) =>

@@ -1,11 +1,18 @@
 import { createHmac } from 'node:crypto';
 import { confirmBookingByText } from '@pepper/appointments';
-import { approvalCodeOf, classifySmsReply, type TenantId } from '@pepper/contracts';
+import {
+  approvalReplyOf,
+  classifySmsReply,
+  type ApprovalDecision,
+  type TenantId,
+} from '@pepper/contracts';
 import {
   claimApprovalText,
   recordTextApproval,
+  type ApprovalClaim,
   ForbiddenError,
   handleInboundSms,
+  ProposalChangedError,
   ProposalNotFoundError,
   ProposalNotPendingError,
   smsCodeKeyFrom,
@@ -20,8 +27,8 @@ import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 
 // A text to Pepper's one number, whoever carried it (S61–S63, ADR-0065 §5, ADR-0066 §4): Twilio's
 // signed webhook, or the sandbox's path in tests (AC-X-87). Keywords first (an opt-out always
-// wins), then "C" to confirm a visit, then "Y" and a code to approve a card. The reply is
-// answered in the same request. Neither a number nor a text is logged.
+// wins), then "C" to confirm a visit, then "Y" or "N" and a code to approve or skip a card
+// (S64). The reply is answered in the same request. Neither a number nor a text is logged.
 
 export interface SmsInboundOptions {
   /** The public origin (`AUTH_BASE_URL`), for the help link. */
@@ -45,7 +52,7 @@ export interface InboundText {
 // A number's wrong codes: after 5 in an hour its codes stop for the hour (AC-X-85).
 const MISSES: RateLimit = { name: 'sms-approval-miss', max: 5, windowSeconds: 3600 };
 
-/** The answers to "Y" (one for every miss, so a reply never says whether a code exists). */
+/** The answers to "Y" and "N" (one for every miss, so a reply never says whether a code exists). */
 export const APPROVAL_REPLIES = {
   miss: "Pepper: That code doesn't match a card waiting for you. Open Pepper to see what's waiting.",
   used: "Pepper: That one's already done.",
@@ -54,7 +61,11 @@ export const APPROVAL_REPLIES = {
   changed: "Pepper: That card changed since my text, so I didn't do it. Open Pepper to see it now.",
   refused: "Pepper: I couldn't do that any more. Open Pepper to see why.",
   handled: 'Pepper: That card was already handled in Pepper.',
+  skipped: 'Pepper: Skipped. Nothing was done.',
+  changedNotSkipped:
+    'Pepper: That card changed since my text, so I left it for you. Open Pepper to see it now.',
   withoutCode: 'Pepper: To approve a card, reply Y and the code from my text, e.g. Y 4821.',
+  skipWithoutCode: 'Pepper: To skip a card, reply N and the code from my text, e.g. N 4821.',
 } as const;
 
 @Injectable()
@@ -82,15 +93,21 @@ export class SmsInboundService {
       { helpUrl: new URL('/help', this.options.baseUrl).toString() },
     );
     if (result.keyword !== null) return result.reply;
-    switch (classifySmsReply(text.body)) {
+    const kind = classifySmsReply(text.body);
+    switch (kind) {
       case 'confirm':
         return (await confirmBookingByText(this.db, { from: text.from, receivedAt })).reply;
       case 'approve':
-        return this.approve(text.from, approvalCodeOf(text.body) ?? '', receivedAt);
+      case 'skip': {
+        const reply = approvalReplyOf(text.body);
+        if (reply === null) return null;
+        return this.decide(text.from, reply.code, reply.decision, receivedAt);
+      }
       case 'approve_without_code':
-        // Only to a member's checked number: a client's "Y" to a reminder gets no reply, as before.
+      case 'skip_without_code':
+        // Only to a member's checked number: a client's "Y" or "No" to a reminder gets no reply.
         return (await isMemberPhone(this.db, text.from)) && !(await this.optedOut(text.from))
-          ? APPROVAL_REPLIES.withoutCode
+          ? APPROVAL_REPLIES[kind === 'skip_without_code' ? 'skipWithoutCode' : 'withoutCode']
           : null;
       // The keywords were answered above; anything else gets what `handleInboundSms` said.
       case 'help':
@@ -102,11 +119,16 @@ export class SmsInboundService {
   }
 
   /**
-   * "Y" and a code (AC-X-83…85): a number with 5 misses this hour gets the miss answer without a
-   * lookup; the text is claimed (spent) first, then approved as its member with what it showed.
-   * After a STOP nothing is answered.
+   * "Y" or "N" and a code (AC-X-83…85, AC-X-93…94): a number with 5 misses this hour (of either)
+   * gets the miss answer without a lookup; the text is claimed (spent) first, then approved or
+   * skipped as its member with what it showed. After a STOP nothing is answered.
    */
-  private async approve(from: string, code: string, receivedAt: Date): Promise<string | null> {
+  private async decide(
+    from: string,
+    code: string,
+    decision: ApprovalDecision,
+    receivedAt: Date,
+  ): Promise<string | null> {
     if (await this.optedOut(from)) return null;
     // Keyed by an HMAC, so the counters in Redis never reveal a number.
     const counter = createHmac('sha256', this.codeKey)
@@ -115,7 +137,7 @@ export class SmsInboundService {
     if (await this.limits.spent(MISSES, counter)) return APPROVAL_REPLIES.miss;
     const claim = await claimApprovalText(
       this.db,
-      { from, code, receivedAt },
+      { from, code, receivedAt, decision },
       { codeKey: this.codeKey },
     );
     switch (claim.kind) {
@@ -129,6 +151,7 @@ export class SmsInboundService {
       case 'claimed':
         break;
     }
+    if (decision === 'skip') return this.skip(claim);
     try {
       const result = await this.approvals.approve(
         claim.context,
@@ -156,6 +179,26 @@ export class SmsInboundService {
       // and report the failure (its kind only: never the number or the text).
       this.logger.error(
         `An approval by text failed: ${error instanceof Error ? error.name : 'unknown'}`,
+      );
+      return APPROVAL_REPLIES.refused;
+    }
+  }
+
+  /** "N" and a code, claimed: the card is declined as its member, as in the app (AC-X-93). */
+  private async skip(claim: Extract<ApprovalClaim, { kind: 'claimed' }>): Promise<string> {
+    try {
+      await this.approvals.skip(claim.context, claim.proposalId, claim.fingerprint);
+      return APPROVAL_REPLIES.skipped;
+    } catch (error) {
+      if (error instanceof ProposalChangedError) return APPROVAL_REPLIES.changedNotSkipped;
+      if (error instanceof ProposalNotPendingError) {
+        return error.status === 'expired' ? APPROVAL_REPLIES.expired : APPROVAL_REPLIES.handled;
+      }
+      if (error instanceof ForbiddenError || error instanceof ProposalNotFoundError) {
+        return APPROVAL_REPLIES.miss;
+      }
+      this.logger.error(
+        `A skip by text failed: ${error instanceof Error ? error.name : 'unknown'}`,
       );
       return APPROVAL_REPLIES.refused;
     }

@@ -1,13 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { loadPaymentsConfig } from './config.js';
 
-// The payments settings (S65, ADR-0067 §1, AC-X-100).
+// The payments settings (S65, ADR-0067 §1, AC-X-103).
 
 const KEY = 'sk_test_51NvTestKeyForConfigTests000000';
 const LIVE = 'sk_live_51NvLiveKeyForConfigTests000000';
 const SECRET = 'whsec_5f3a1c9e7b2d4f6a8c0e1b3d5f7a9c2e';
 
-describe('loadPaymentsConfig (AC-X-100)', () => {
+describe('loadPaymentsConfig (AC-X-103)', () => {
   it('is off by default, and with an empty value', () => {
     expect(loadPaymentsConfig('api', {})).toBeNull();
     expect(loadPaymentsConfig('api', { PAYMENTS_PROVIDER: '' })).toBeNull();

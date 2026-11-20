@@ -1,7 +1,7 @@
 // The payments services against real Postgres (S65, ADR-0067): onboarding once per business
-// (AC-X-93), the status (AC-X-94), webhook events once each, the business only through the
-// stored account, a fresh read, out-of-order reads, disconnection (AC-X-96…98), and the owners'
-// push once per change (AC-X-102).
+// (AC-X-96), the status (AC-X-97), webhook events once each, the business only through the
+// stored account, a fresh read, out-of-order reads, disconnection (AC-X-99…101), and the owners'
+// push once per change (AC-X-105).
 import {
   StripeAccountSchema,
   TenantIdSchema,
@@ -142,7 +142,7 @@ async function statusChanges(tenantId: TenantId) {
     .reverse();
 }
 
-describe('onboarding (AC-X-93)', () => {
+describe('onboarding (AC-X-96)', () => {
   it('creates one account for the owner and answers Stripe’s page', async () => {
     const business = await newBusiness();
     const link = await startPaymentOnboarding(business.deps, business.owner);
@@ -284,7 +284,7 @@ describe('another provider or mode (ADR-0067 §4)', () => {
   });
 });
 
-describe('status (AC-X-94)', () => {
+describe('status (AC-X-97)', () => {
   it('reads not_connected, then what Stripe says, to owners and managers; not to staff', async () => {
     const business = await newBusiness();
     const manager = await business.member('manager');
@@ -316,7 +316,7 @@ describe('status (AC-X-94)', () => {
   });
 });
 
-describe('webhook events (AC-X-96…98)', () => {
+describe('webhook events (AC-X-99…101)', () => {
   async function connected(state: 'pending' | 'ready' | 'action_needed' = 'pending') {
     const business = await newBusiness();
     await startPaymentOnboarding(business.deps, business.owner);
