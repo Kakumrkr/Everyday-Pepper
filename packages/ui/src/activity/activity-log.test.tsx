@@ -143,6 +143,16 @@ describe('activity words', () => {
     ).toBe('10:15 am, after approval · 1 email taken back · undone at 10:45 am');
   });
 
+  it('says a card was approved by text, by the viewer or by a lead (S63.2, AC-X-91)', () => {
+    expect(activityLine(receipt({ outcome: 'propose', approvedVia: 'text' }), NY).meta).toBe(
+      '10:15 am, approved by text · emailed 1 client',
+    );
+    expect(
+      activityLine(receipt({ outcome: 'propose', approvedVia: 'text', approvedByName: 'Ana' }), NY)
+        .meta,
+    ).toBe('10:15 am, approved by Ana by text · emailed 1 client');
+  });
+
   it('heads each local day: today, yesterday (also across a DST change), then the date', () => {
     expect(localDay('2026-11-04T03:00:00.000Z', NY)).toBe('2026-11-03');
     expect(dayHeading('2026-11-04', NY, NOW)).toBe('Today');
