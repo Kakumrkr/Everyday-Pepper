@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S63.2** (the screens and journeys of approve by text).
+**S63.2 · Approve by text on screen** (brief approved 2026-11-20: D-1 an additive `approvedVia: 'text'` on the Activity view, from `approval_texts.used_at`; D-2 the number row and "Text me cards" for owners and managers only, staff see the reminders only (Claude, on relook: a number does nothing for staff yet and each check costs a text); D-3 dropped: owners and managers already need two-step sign-in to use the app (`roleRequiresMfa`), so no extra state).
+Tasks: 1 AC-X-88…93 + traceability · 2 `lib/member-texts.ts` words + tests · 3 number sheet (number → code) + switch on `/more/texts` · 4 `approvedVia` in contracts/api + integration test · 5 "approved by text" in ActivityLog · 6 e2e: number check in `texts-settings.spec.ts`, `approve-by-text.spec.ts` (Y + code via `/v1/dev/sms`, receipt in Activity), "Confirmed by text" journey, `screens.spec.ts` shots.
+Done: — · Next: task 1. Open questions: none.
 
 ## Last sessions
 - **S63 Phase 14 · Approve by text, backend (2026-11-13)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #98](https://github.com/Kakumrkr/Everyday-Pepper/pull/98)). Full entry in [session-log.md](session-log.md).
