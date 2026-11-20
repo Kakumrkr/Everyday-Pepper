@@ -587,6 +587,8 @@ for (const width of WIDTHS) {
       // Texts and reminders (S62.2, AC-X-77): the switches, the same-day lead, the night rule.
       await page.goto('/more/texts');
       await hydrated(page.getByRole('switch', { name: 'On the day' }));
+      // An owner's own "Cards to your phone" (S63.2), with no number yet.
+      await expect(page.getByTestId('my-number')).toHaveText('None yet');
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`more-texts-${String(width)}-${scheme}.png`, SHOT);
 
@@ -743,6 +745,8 @@ for (const width of WIDTHS) {
       await sheet.getByRole('button', { name: 'Text me a code' }).click();
       const codeStep = page.getByRole('dialog', { name: 'Type the code' });
       await expect(codeStep.getByLabel('6-digit code')).toBeVisible();
+      // The pointer off the sheet: it rests where "Text me a code" was, over another button.
+      await page.mouse.move(0, 0);
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`more-texts-code-${String(width)}-${scheme}.png`, {
         ...SHOT,
