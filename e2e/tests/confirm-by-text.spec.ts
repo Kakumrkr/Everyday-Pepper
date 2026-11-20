@@ -34,7 +34,7 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
   browser,
   baseURL,
 }) => {
-  test.setTimeout(1_320_000);
+  test.setTimeout(900_000);
   await onboardOwner(page, { timeZone: daytimeZone() });
   const s = await salon(page);
   const origin = new URL(page.url()).origin;
@@ -44,12 +44,18 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
     headers: { origin },
   });
   expect(lead.status(), await lead.text()).toBe(200);
-  // Bookable an hour ahead (the default asks for two hours' notice).
+  // Bookable an hour ahead (the default asks for two hours' notice), on any 5 minutes, so the
+  // reminder is due within minutes of the booking.
   await callApi(
     page,
     'PUT',
     '/v1/rules',
-    { rules: [{ type: 'minimum_notice', params: { minutes: 0 } }] },
+    {
+      rules: [
+        { type: 'minimum_notice', params: { minutes: 0 } },
+        { type: 'slot_interval', params: { minutes: 5 } },
+      ],
+    },
     { parse: (body: unknown) => body },
   );
   const { business } = CurrentBusinessResponseSchema.parse(
@@ -75,12 +81,12 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
   await ana.getByRole('button', { name: 'Confirm booking' }).click();
   await expect(ana.getByRole('heading', { name: /You’re booked, Ana/ })).toBeVisible();
 
-  // The owner books her today, on the first quarter hour past an hour from now: the reminder is due within 15 minutes.
+  // The owner books her today, a little over an hour from now: the reminder is due in minutes.
   const clients = ClientsPageSchema.parse(
     await (await page.request.get(`/v1/clients?search=${encodeURIComponent(email)}`)).json(),
   );
   const clientId = clients.clients[0]?.id ?? '';
-  const startsAt = new Date(Math.ceil((Date.now() + 62 * MINUTE) / (15 * MINUTE)) * 15 * MINUTE);
+  const startsAt = new Date(Math.ceil((Date.now() + 61.5 * MINUTE) / (5 * MINUTE)) * 5 * MINUTE);
   await callApi(
     page,
     'POST',
@@ -94,9 +100,9 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
     BookingSchema,
   );
 
-  // The worker sends the same-day text when it is due (start − 1 h, at most 15 min from now;
+  // The worker sends the same-day text when it is due (start − 1 h, 2 to 7 minutes from now;
   // its reminders are polled each minute).
-  const reminder = await textTo(page, phone, /See you today at/, 1_080_000);
+  const reminder = await textTo(page, phone, /See you today at/, 600_000);
   expect(reminder).toContain('Reply C to confirm.');
   expect(await textIn(page, phone, 'C')).toMatch(/confirmed/i);
 
@@ -116,7 +122,7 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
       animations: 'disabled',
       mask: [
         sheet.getByTestId('booking-when'),
-        sheet.getByTestId('booking-confirmed-by-text'),
+        sheet.getByTestId('booking-confirmed-when'),
         page.getByTestId('calendar-day'),
       ],
     });
