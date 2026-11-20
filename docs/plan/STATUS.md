@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S65.2** (payments on screen).
+**S65 waiting to merge** ([PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101), head `2746fda`; code, close docs, review fixes all in). CI: all 7 test jobs green; the aggregator "E2E smoke (Docker Compose)" failed twice in 2 s with no runner assigned (no log): most likely Actions minutes/spending limit (comment on the PR).
+- Next: the user checks Settings → Billing → Actions, re-runs that one job; then, with the user's OK, squash-merge, unsubscribe, and start **S65.2** (payments on screen; top-up: Stripe requirements in plain words).
+- Note: S64 merged in parallel and took PCR-012/0.38/AC-X-93…95; this branch moved to PCR-013/0.39/AC-X-96…105 (merge commit `2746fda`).
 
 ## Last sessions
 - **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-013](changes/PCR-013.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
