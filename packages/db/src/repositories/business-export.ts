@@ -78,7 +78,8 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_screenshots: true,
   sms_consents: true,
   payment_accounts: true,
-  payment_webhook_events: 'Stripe’s notices to Pepper (S65): delivery records, deleted after 30 days',
+  payment_webhook_events:
+    'Stripe’s notices to Pepper (S65): delivery records, deleted after 30 days',
   sms_deliveries: 'text delivery state',
   booking_texts: 'text delivery state',
   booking_manage_links: 'reschedule links in reminders (hashes only)',

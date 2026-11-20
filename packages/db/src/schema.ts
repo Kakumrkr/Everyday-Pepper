@@ -3754,7 +3754,7 @@ export const paymentWebhookEvents = pgTable(
     ),
     check(
       'payment_webhook_events_ignored_reason',
-      sql`(${table.outcome} = 'ignored') = (${table.ignoredReason} IS NOT NULL) AND (${table.ignoredReason} IS NULL OR ${table.ignoredReason} IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account'))`,
+      sql`(${table.outcome} = 'ignored') = (${table.ignoredReason} IS NOT NULL) AND (${table.ignoredReason} IS NULL OR ${table.ignoredReason} IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account', 'unreadable_account'))`,
     ),
     check(
       'payment_webhook_events_processed_when_done',

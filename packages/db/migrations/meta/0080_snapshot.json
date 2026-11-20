@@ -8077,7 +8077,7 @@
         },
         "payment_webhook_events_ignored_reason": {
           "name": "payment_webhook_events_ignored_reason",
-          "value": "(\"payment_webhook_events\".\"outcome\" = 'ignored') = (\"payment_webhook_events\".\"ignored_reason\" IS NOT NULL) AND (\"payment_webhook_events\".\"ignored_reason\" IS NULL OR \"payment_webhook_events\".\"ignored_reason\" IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account'))"
+          "value": "(\"payment_webhook_events\".\"outcome\" = 'ignored') = (\"payment_webhook_events\".\"ignored_reason\" IS NOT NULL) AND (\"payment_webhook_events\".\"ignored_reason\" IS NULL OR \"payment_webhook_events\".\"ignored_reason\" IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account', 'unreadable_account'))"
         },
         "payment_webhook_events_processed_when_done": {
           "name": "payment_webhook_events_processed_when_done",

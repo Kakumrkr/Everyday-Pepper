@@ -205,6 +205,8 @@ export const PaymentWebhookIgnoredReasonSchema = z.enum([
   'other_mode',
   'unhandled_type',
   'no_account',
+  // Stripe refused to show the account (it is no longer the platform's): nothing to apply.
+  'unreadable_account',
 ]);
 export type PaymentWebhookIgnoredReason = z.infer<typeof PaymentWebhookIgnoredReasonSchema>;
 

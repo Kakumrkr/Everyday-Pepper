@@ -251,3 +251,65 @@ export function loadSmsConfig(service: NestServiceName, env: NodeJS.ProcessEnv):
     sender: twilio.TWILIO_SENDER,
   };
 }
+
+const PaymentsEnvSchema = z.object({
+  /**
+   * Where payments go (S65, ADR-0067 §1): `off` (the default: payments aren't offered, every
+   * payments route is 404), `sandbox` (accounts kept in Redis; nothing leaves the machine) or
+   * `stripe`.
+   */
+  PAYMENTS_PROVIDER: z.enum(['off', 'sandbox', 'stripe']).default('off'),
+});
+
+/** With `PAYMENTS_PROVIDER=stripe`, the key and the webhook secret are required. */
+const StripeEnvSchema = z
+  .object({
+    /** A secret (`sk_…`) or restricted (`rk_…`) key, test or live. A secret; never logged. */
+    STRIPE_SECRET_KEY: z
+      .string()
+      .regex(/^(sk|rk)_(test|live)_[A-Za-z0-9]{10,247}$/, 'Use the sk_… or rk_… key Stripe shows'),
+    /** The Connect webhook endpoint's signing secret (`whsec_…`). A secret; never logged. */
+    STRIPE_WEBHOOK_SECRET: z
+      .string()
+      .regex(/^whsec_[A-Za-z0-9+/=_-]{16,200}$/, 'Use the whsec_… secret Stripe shows'),
+    /**
+     * `on` allows a live key (P1-5: once the business entity exists). Off by default, so a live
+     * key pasted into a test deployment stops the process instead of moving real money.
+     */
+    STRIPE_LIVE: z.enum(['on', 'off']).default('off'),
+  })
+  .superRefine((env, context) => {
+    if (/^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY) && env.STRIPE_LIVE !== 'on') {
+      context.addIssue({
+        code: 'custom',
+        path: ['STRIPE_LIVE'],
+        message: 'A live key needs STRIPE_LIVE=on',
+      });
+    }
+  });
+
+export type PaymentsConfig =
+  | { provider: 'sandbox' }
+  | { provider: 'stripe'; secretKey: string; webhookSecret: string; livemode: boolean };
+
+/**
+ * Reads the payments settings; `null` when payments are off. With Stripe, a missing or
+ * malformed key, or a live key without `STRIPE_LIVE=on`, stops the process naming the variable
+ * (never its value). Never log the result: it carries the key.
+ */
+export function loadPaymentsConfig(
+  service: NestServiceName,
+  env: NodeJS.ProcessEnv,
+): PaymentsConfig | null {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  const { PAYMENTS_PROVIDER } = loadEnv(service, PaymentsEnvSchema, present);
+  if (PAYMENTS_PROVIDER === 'off') return null;
+  if (PAYMENTS_PROVIDER === 'sandbox') return { provider: 'sandbox' };
+  const stripe = loadEnv(service, StripeEnvSchema, present);
+  return {
+    provider: 'stripe',
+    secretKey: stripe.STRIPE_SECRET_KEY,
+    webhookSecret: stripe.STRIPE_WEBHOOK_SECRET,
+    livemode: /^(sk|rk)_live_/.test(stripe.STRIPE_SECRET_KEY),
+  };
+}

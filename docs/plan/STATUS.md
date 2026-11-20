@@ -11,10 +11,10 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T1 ADR-0067, PCR-012, ACs + traceability, playbook, CHANGELOG 0.38
 - [x] T2 contracts (payment schemas, `paymentAccountStatus`, permissions, audit actions) + `@pepper/payments` (port, signature check, Stripe fetch adapter on fixtures, sandbox): 19 + 14 unit tests green
 - [x] T3 db migration 0080 (`payment_accounts`, `payment_webhook_events`, `payment_account_tenant`), repositories, export (`payments.json`), isolation: db payments/isolation/export integration green
-- [ ] T4 runtime config (`PAYMENTS_PROVIDER`, `STRIPE_*`, live guard) + Stripe fetch adapter (contract fixtures) + sandbox
-- [ ] T5 services: onboarding, read, sync (newer read wins, audit), webhook handling (once per event, fresh read, deauthorized), owner push (top-up), clean-up 30 days
+- [x] T4 runtime `loadPaymentsConfig` (`PAYMENTS_PROVIDER`, `STRIPE_*`, `STRIPE_LIVE` guard): 5 tests
+- [x] T5 services (onboarding, read, dashboard, sync with newer-read-wins + audit + owner push, `handleStripeEvent`), clean-up 30 days, API error codes: payments int 14/14, core cleanup 4/4, typecheck all 16
 - [ ] T6 api: `/v1/payments/*`, `POST /v1/webhooks/stripe`, `/v1/dev/payments` (sandbox), wiring; integration tests
-- Next step: T4 (runtime config) + T5 services (adapter and sandbox already in `@pepper/payments`, T2).
+- Next step: T6 (api routes, webhook controller, sandbox dev route, wiring).
 
 ## Last sessions
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
