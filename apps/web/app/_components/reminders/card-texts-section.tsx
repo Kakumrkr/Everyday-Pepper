@@ -211,7 +211,7 @@ function NumberSheet({
         {step.kind === 'number' ? (
           <Input
             key="phone"
-            label="Mobile number"
+            label="Number"
             hint="A US or Canadian mobile."
             type="tel"
             inputMode="tel"

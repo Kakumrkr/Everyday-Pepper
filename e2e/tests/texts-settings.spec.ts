@@ -113,11 +113,11 @@ test('an owner checks their number with the texted code and turns on cards by te
   // A number Pepper can't text, then a wrong code: each says what to do.
   await cards.getByRole('button', { name: 'Add your number' }).click();
   const sheet = page.getByRole('dialog', { name: 'Your mobile number' });
-  await sheet.getByLabel('Mobile number').fill('+44 7700 900123');
+  await sheet.getByLabel('Number', { exact: true }).fill('+44 7700 900123');
   await sheet.getByRole('button', { name: 'Text me a code' }).click();
   await expect(sheet.getByRole('alert')).toHaveText('Use a US or Canadian mobile number.');
   const phone = newPhone();
-  await sheet.getByLabel('Mobile number').fill(typed(phone));
+  await sheet.getByLabel('Number', { exact: true }).fill(typed(phone));
   await sheet.getByRole('button', { name: 'Text me a code' }).click();
   const codeStep = page.getByRole('dialog', { name: 'Type the code' });
   await expect(codeStep).toContainText(
@@ -151,7 +151,7 @@ test('an owner checks their number with the texted code and turns on cards by te
   // (ADR-0066 §1). The code is pasted with a space, as it often is from a text.
   const second = newPhone();
   await cards.getByRole('button', { name: 'Change number' }).click();
-  await sheet.getByLabel('Mobile number').fill(typed(second));
+  await sheet.getByLabel('Number', { exact: true }).fill(typed(second));
   await sheet.getByRole('button', { name: 'Text me a code' }).click();
   const secondCode =
     /your code is (\d{6})\./.exec(await textTo(page, second, /your code is \d{6}/))?.[1] ?? '';

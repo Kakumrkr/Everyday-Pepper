@@ -741,7 +741,7 @@ for (const width of WIDTHS) {
       ).click();
       const number = newPhone();
       const sheet = page.getByRole('dialog', { name: 'Your mobile number' });
-      await sheet.getByLabel('Mobile number').fill(typed(number));
+      await sheet.getByLabel('Number', { exact: true }).fill(typed(number));
       await sheet.getByRole('button', { name: 'Text me a code' }).click();
       const codeStep = page.getByRole('dialog', { name: 'Type the code' });
       await expect(codeStep.getByLabel('6-digit code')).toBeVisible();

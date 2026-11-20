@@ -100,7 +100,7 @@ export async function checkNumberAndTextCards(page: Page, phone: string): Promis
     await hydrated(cards.getByRole('button', { name: /Add your number|Change number/ }))
   ).click();
   const sheet = page.getByRole('dialog', { name: 'Your mobile number' });
-  await sheet.getByLabel('Mobile number').fill(typed(phone));
+  await sheet.getByLabel('Number', { exact: true }).fill(typed(phone));
   await sheet.getByRole('button', { name: 'Text me a code' }).click();
   const dialog = page.getByRole('dialog', { name: 'Type the code' });
   await expect(dialog).toContainText(`I texted a code to ${typed(phone)}.`);
