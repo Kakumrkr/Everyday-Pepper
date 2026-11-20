@@ -227,7 +227,7 @@ export function isHandledStripeEvent(type: string): type is HandledStripeEventTy
 export const StripeEventSchema = z.object({
   id: StripeEventIdSchema,
   object: z.literal('event'),
-  type: z.string().regex(/^[a-z_.]{1,100}$/),
+  type: z.string().regex(/^[a-z0-9_.]{1,100}$/),
   created: StripeTimestampSchema,
   livemode: z.boolean(),
   account: StripeAccountIdSchema.nullish(),

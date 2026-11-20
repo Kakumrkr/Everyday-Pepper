@@ -190,6 +190,10 @@ describe('Stripe shapes (ADR-0067 §2)', () => {
       livemode: false,
       type: 'account.updated',
     });
+    // A type Pepper doesn't act on is still an event (acknowledged and ignored, never a 400).
+    expect(StripeEventSchema.safeParse({ ...event, type: 'v2.core.account.updated' }).success).toBe(
+      true,
+    );
     expect(StripeEventSchema.safeParse({ ...event, id: 'ev_1' }).success).toBe(false);
     expect(StripeEventSchema.safeParse({ ...event, created: 12 }).success).toBe(false);
   });

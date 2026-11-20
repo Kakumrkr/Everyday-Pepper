@@ -106,10 +106,12 @@ export async function insertPaymentAccount(
 }
 
 /**
- * Puts a new account on a row Stripe disconnected (connecting again, ADR-0067 §6.5). Only a
- * disconnected row of the expected generation changes, so two reconnects at once make one.
+ * Puts a new account on a row that is no longer this deployment's (connecting again, ADR-0067
+ * §4, §6.5): Stripe disconnected it, or it belongs to another provider or mode (the sandbox, or
+ * test keys before going live). Only such a row of the expected generation changes, so two
+ * reconnects at once make one.
  */
-export async function replaceDisconnectedPaymentAccount(
+export async function replacePaymentAccount(
   tx: TenantTx,
   id: string,
   previousGeneration: number,
@@ -122,7 +124,7 @@ export async function replaceDisconnectedPaymentAccount(
       and(
         eq(paymentAccounts.id, Id.parse(id)),
         eq(paymentAccounts.generation, previousGeneration),
-        sql`${paymentAccounts.deauthorizedAt} IS NOT NULL`,
+        sql`(${paymentAccounts.deauthorizedAt} IS NOT NULL OR ${paymentAccounts.provider} <> ${PaymentProviderSchema.parse(input.provider)} OR ${paymentAccounts.livemode} <> ${input.livemode})`,
       ),
     )
     .returning();
@@ -220,8 +222,10 @@ export interface PaymentWebhookEventClaim {
 /**
  * Records a delivery of an event once (AC-X-96): the first inserts it as `received`; a
  * redelivery of one still `received` counts an attempt and answers it to handle again; one
- * already handled answers its outcome, unchanged. The row is locked until the transaction ends,
- * so two deliveries at once don't both handle it.
+ * already handled answers its outcome, unchanged. The lock lasts only this short transaction:
+ * two deliveries at once can both handle an event, which is harmless (a newer read wins, a
+ * status change is applied, audited and pushed once, and finishing is conditional), so every
+ * effect added to the handling must be just as idempotent.
  */
 export async function claimPaymentWebhookEvent(
   tx: TenantTx,
@@ -244,7 +248,7 @@ export async function claimPaymentWebhookEvent(
       eventId,
       eventType: z
         .string()
-        .regex(/^[a-z_.]{1,100}$/)
+        .regex(/^[a-z0-9_.]{1,100}$/)
         .parse(input.eventType),
       accountId: input.accountId === null ? null : StripeAccountIdSchema.parse(input.accountId),
       livemode: input.livemode,

@@ -237,17 +237,64 @@ describe('onboarding (AC-X-93)', () => {
   });
 });
 
+describe('another provider or mode (ADR-0067 §4)', () => {
+  it('reads a sandbox or test account as not connected, and replaces it on connecting', async () => {
+    const business = await newBusiness();
+    await startPaymentOnboarding(business.deps, business.owner);
+    const sandboxRow = await accountOf(business.tenantId);
+    // The same business on Stripe now (the sandbox's store answers as "Stripe" here).
+    const stripe: PaymentsProvider = {
+      provider: 'stripe',
+      livemode: false,
+      createAccount: (input) => business.sandbox.createAccount(input),
+      retrieveAccount: (id) => business.sandbox.retrieveAccount(id),
+      createOnboardingLink: (input) => business.sandbox.createOnboardingLink(input),
+      createDashboardLink: (id) => business.sandbox.createDashboardLink(id),
+    };
+    await business.sandbox.setState(sandboxRow?.providerAccountId ?? '', 'ready');
+    business.clock.advanceBy(1000);
+    await syncOwnPaymentAccount(business.deps, business.owner);
+    expect((await readPaymentAccount(business.deps, business.owner)).status).toBe('ready');
+    const onStripe = { ...business.deps, provider: stripe };
+    expect((await readPaymentAccount(onStripe, business.owner)).status).toBe('not_connected');
+    await expect(paymentDashboardLink(onStripe, business.owner)).rejects.toBeInstanceOf(
+      PaymentsNotOnboardedError,
+    );
+    // An event for the old account changes nothing.
+    business.clock.advanceBy(1000);
+    expect(await syncOwnPaymentAccount(onStripe, business.owner)).toMatchObject({
+      status: 'not_connected',
+    });
+    await startPaymentOnboarding(onStripe, business.owner);
+    const replaced = await accountOf(business.tenantId);
+    expect(replaced).toMatchObject({ provider: 'stripe', generation: 2, status: 'onboarding' });
+    expect(replaced?.providerAccountId).not.toBe(sandboxRow?.providerAccountId);
+    expect(replaced?.id).toBe(sandboxRow?.id);
+  });
+
+  it('answers what Pepper knows when Stripe refuses for good to show the account', async () => {
+    const business = await newBusiness();
+    await startPaymentOnboarding(business.deps, business.owner);
+    const row = await accountOf(business.tenantId);
+    await business.sandbox.setState(row?.providerAccountId ?? '', 'deauthorized');
+    business.clock.advanceBy(1000);
+    expect(await syncOwnPaymentAccount(business.deps, business.owner)).toMatchObject({
+      status: 'onboarding',
+    });
+  });
+});
+
 describe('status (AC-X-94)', () => {
   it('reads not_connected, then what Stripe says, to owners and managers; not to staff', async () => {
     const business = await newBusiness();
     const manager = await business.member('manager');
     const staff = await business.member('staff');
-    expect(await readPaymentAccount(db, manager)).toMatchObject({
+    expect(await readPaymentAccount(business.deps, manager)).toMatchObject({
       status: 'not_connected',
       canManage: false,
       syncedAt: null,
     });
-    await expect(readPaymentAccount(db, staff)).rejects.toBeInstanceOf(ForbiddenError);
+    await expect(readPaymentAccount(business.deps, staff)).rejects.toBeInstanceOf(ForbiddenError);
     await startPaymentOnboarding(business.deps, business.owner);
     const row = await accountOf(business.tenantId);
     await business.sandbox.setState(row?.providerAccountId ?? '', 'action_needed');
@@ -265,7 +312,7 @@ describe('status (AC-X-94)', () => {
       syncedAt: '2026-11-20T15:00:01.000Z',
       canManage: true,
     });
-    expect((await readPaymentAccount(db, manager)).status).toBe('action_needed');
+    expect((await readPaymentAccount(business.deps, manager)).status).toBe('action_needed');
   });
 });
 
@@ -467,7 +514,7 @@ describe('webhook events (AC-X-96…98)', () => {
     await business.sandbox.setState(business.accountId, 'deauthorized');
     const gone = event('account.application.deauthorized', business.accountId);
     expect(await handleStripeEvent(business.deps, gone)).toMatchObject({ outcome: 'processed' });
-    expect((await readPaymentAccount(db, business.owner)).status).toBe('not_connected');
+    expect((await readPaymentAccount(business.deps, business.owner)).status).toBe('not_connected');
     expect(await statusChanges(business.tenantId)).toEqual([
       [{ status: 'onboarding' }, { status: 'ready' }, 'system'],
       [{ status: 'ready' }, { status: 'not_connected' }, 'system'],

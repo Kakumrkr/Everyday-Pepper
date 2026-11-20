@@ -8065,7 +8065,7 @@
         },
         "payment_webhook_events_type_format": {
           "name": "payment_webhook_events_type_format",
-          "value": "\"payment_webhook_events\".\"event_type\" ~ '^[a-z_.]{1,100}$'"
+          "value": "\"payment_webhook_events\".\"event_type\" ~ '^[a-z0-9_.]{1,100}$'"
         },
         "payment_webhook_events_account_format": {
           "name": "payment_webhook_events_account_format",

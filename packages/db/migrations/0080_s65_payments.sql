@@ -47,7 +47,7 @@ CREATE TABLE "payment_webhook_events" (
 	CONSTRAINT "payment_webhook_events_event_unique" UNIQUE("provider","event_id"),
 	CONSTRAINT "payment_webhook_events_provider_known" CHECK ("payment_webhook_events"."provider" IN ('stripe', 'sandbox')),
 	CONSTRAINT "payment_webhook_events_event_format" CHECK ("payment_webhook_events"."event_id" ~ '^evt_[A-Za-z0-9_]{1,100}$'),
-	CONSTRAINT "payment_webhook_events_type_format" CHECK ("payment_webhook_events"."event_type" ~ '^[a-z_.]{1,100}$'),
+	CONSTRAINT "payment_webhook_events_type_format" CHECK ("payment_webhook_events"."event_type" ~ '^[a-z0-9_.]{1,100}$'),
 	CONSTRAINT "payment_webhook_events_account_format" CHECK ("payment_webhook_events"."account_id" ~ '^acct_[A-Za-z0-9]{1,64}$'),
 	CONSTRAINT "payment_webhook_events_outcome_known" CHECK ("payment_webhook_events"."outcome" IN ('received', 'processed', 'ignored')),
 	CONSTRAINT "payment_webhook_events_ignored_reason" CHECK (("payment_webhook_events"."outcome" = 'ignored') = ("payment_webhook_events"."ignored_reason" IS NOT NULL) AND ("payment_webhook_events"."ignored_reason" IS NULL OR "payment_webhook_events"."ignored_reason" IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account', 'unreadable_account'))),

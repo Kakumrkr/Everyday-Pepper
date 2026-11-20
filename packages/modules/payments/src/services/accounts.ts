@@ -24,7 +24,7 @@ import {
   insertPaymentAccount,
   listMemberships,
   paymentAccountSnapshotOf,
-  replaceDisconnectedPaymentAccount,
+  replacePaymentAccount,
   withMember,
   withTenant,
   type Database,
@@ -34,7 +34,7 @@ import {
 } from '@pepper/db';
 import { PaymentsNotOnboardedError, PaymentsRejectedError } from '../errors.js';
 import { paymentsNotice, PAYMENTS_PAGE } from '../notices.js';
-import type { PaymentsProvider } from '../provider.js';
+import { PaymentsProviderError, type PaymentsProvider } from '../provider.js';
 
 // The business's Stripe account (S65, ADR-0067 §4–5, §7): connect it (the owner), read where it
 // stands (owners and managers), read it again from Stripe and apply what changed. No call to
@@ -56,9 +56,21 @@ export function accountIdempotencyKey(tenantId: TenantId, generation: number): s
   return `pepper-account-${tenantId}-${String(generation)}`;
 }
 
-/** A stored account Stripe hasn't disconnected. */
-function isConnected(row: PaymentAccountRow | undefined): row is PaymentAccountRow {
-  return row?.deauthorizedAt === null;
+/** The provider and mode a deployment works in (Stripe test or live, or the sandbox). */
+type ProviderMode = Pick<PaymentsProvider, 'provider' | 'livemode'>;
+
+/**
+ * A stored account this deployment can use: Stripe hasn't disconnected it, and it was made with
+ * this provider in this mode. One made in the sandbox, or with test keys before going live, is
+ * someone else's to Stripe: it reads as not connected and connecting again replaces it.
+ */
+function isCurrent(
+  row: PaymentAccountRow | undefined,
+  mode: ProviderMode,
+): row is PaymentAccountRow {
+  return (
+    row?.deauthorizedAt === null && row.provider === mode.provider && row.livemode === mode.livemode
+  );
 }
 
 function statusOf(row: PaymentAccountRow): PaymentAccountStatus {
@@ -70,19 +82,23 @@ function statusOf(row: PaymentAccountRow): PaymentAccountStatus {
 
 /** `GET /v1/payments/account` (AC-X-94): owners and managers. */
 export async function readPaymentAccount(
-  db: Database,
+  deps: Pick<PaymentsDeps, 'db' | 'provider'>,
   actor: Actor,
 ): Promise<PaymentAccountAnswer> {
   requirePermission(actor, 'payments.read');
-  const row = await withMember(db, actor.context, (tx) => findPaymentAccount(tx));
-  return answerOf(row, can(actor.context, 'payments.manage'));
+  const row = await withMember(deps.db, actor.context, (tx) => findPaymentAccount(tx));
+  return answerOf(
+    isCurrent(row, deps.provider) ? row : undefined,
+    can(actor.context, 'payments.manage'),
+  );
 }
 
+/** The answer for a current account (`undefined`: none this deployment can use). */
 export function answerOf(
   row: PaymentAccountRow | undefined,
   canManage: boolean,
 ): PaymentAccountAnswer {
-  if (!isConnected(row)) {
+  if (row?.deauthorizedAt !== null) {
     return PaymentAccountAnswerSchema.parse({
       status: 'not_connected',
       chargesEnabled: false,
@@ -126,10 +142,10 @@ export async function startPaymentOnboarding(
   requirePermission(actor, 'payments.manage');
   const { context } = actor;
   let row = await withMember(deps.db, context, (tx) => findPaymentAccount(tx));
-  if (isConnected(row) && statusOf(row) === 'rejected') {
+  if (isCurrent(row, deps.provider) && statusOf(row) === 'rejected') {
     throw new PaymentsRejectedError();
   }
-  if (!isConnected(row)) {
+  if (!isCurrent(row, deps.provider)) {
     row = await connectAccount(deps, actor, row);
   }
   const link = await deps.provider.createOnboardingLink({
@@ -170,7 +186,7 @@ async function connectAccount(
     const stored =
       previous === undefined
         ? await insertPaymentAccount(tx, input)
-        : await replaceDisconnectedPaymentAccount(tx, previous.id, previous.generation, input);
+        : await replacePaymentAccount(tx, previous.id, previous.generation, input);
     if (stored === undefined) {
       // Another request connected it first: keep that one.
       const winner = await findPaymentAccount(tx);
@@ -198,7 +214,7 @@ export async function paymentDashboardLink(
 ): Promise<PaymentDashboardLink> {
   requirePermission(actor, 'payments.manage');
   const row = await withMember(deps.db, actor.context, (tx) => findPaymentAccount(tx));
-  if (!isConnected(row) || !row.detailsSubmitted) {
+  if (!isCurrent(row, deps.provider) || !row.detailsSubmitted) {
     throw new PaymentsNotOnboardedError();
   }
   const link = await deps.provider.createDashboardLink(row.providerAccountId);
@@ -215,14 +231,21 @@ export async function syncOwnPaymentAccount(
 ): Promise<PaymentAccountAnswer> {
   requirePermission(actor, 'payments.manage');
   const row = await withMember(deps.db, actor.context, (tx) => findPaymentAccount(tx));
-  if (isConnected(row)) {
-    await syncPaymentAccount(deps, actor.context.tenantId, {
-      accountId: row.providerAccountId,
-      actor: { kind: 'user', userId: actor.context.userId },
-      requestId: actor.requestId,
-    });
+  if (isCurrent(row, deps.provider)) {
+    try {
+      await syncPaymentAccount(deps, actor.context.tenantId, {
+        accountId: row.providerAccountId,
+        actor: { kind: 'user', userId: actor.context.userId },
+        requestId: actor.requestId,
+      });
+    } catch (error) {
+      // Stripe refuses for good to show it (no longer the platform's): trying again won't help,
+      // so answer what Pepper knows; its disconnection event settles it. A passing failure is
+      // still the caller's "try again".
+      if (!(error instanceof PaymentsProviderError) || error.retryable) throw error;
+    }
   }
-  return readPaymentAccount(deps.db, actor);
+  return readPaymentAccount(deps, actor);
 }
 
 export interface SyncOptions {
@@ -272,7 +295,7 @@ async function applyRead(
   },
 ): Promise<SyncOutcome> {
   const row = await findPaymentAccount(tx, { lock: true });
-  if (!isConnected(row) || row.providerAccountId !== options.accountId) {
+  if (!isCurrent(row, deps.provider) || row.providerAccountId !== options.accountId) {
     return { applied: false, reason: 'no_account' };
   }
   const before = PaymentAccountStatusSchema.parse(row.status);

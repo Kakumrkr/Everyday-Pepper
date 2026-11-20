@@ -25,7 +25,7 @@ import {
   markPaymentAccountDeauthorized,
   paymentAccountSnapshotOf,
   paymentAccountTenant,
-  replaceDisconnectedPaymentAccount,
+  replacePaymentAccount,
   type NewPaymentAccount,
 } from './repositories/payments.js';
 import { createTenant } from './repositories/tenants.js';
@@ -210,7 +210,7 @@ describe('payment_accounts', () => {
     ).toBeUndefined();
     const next = newAccount({ generation: 2 });
     const replaced = await withTenant(db, tenant, (tx) =>
-      replaceDisconnectedPaymentAccount(tx, row.id, 1, next),
+      replacePaymentAccount(tx, row.id, 1, next),
     );
     expect(replaced).toMatchObject({
       providerAccountId: next.providerAccountId,
@@ -221,7 +221,7 @@ describe('payment_accounts', () => {
     // A second reconnect racing the first finds it connected: nothing changes.
     expect(
       await withTenant(db, tenant, (tx) =>
-        replaceDisconnectedPaymentAccount(tx, row.id, 1, newAccount({ generation: 2 })),
+        replacePaymentAccount(tx, row.id, 1, newAccount({ generation: 2 })),
       ),
     ).toBeUndefined();
   });

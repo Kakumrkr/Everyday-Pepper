@@ -3743,7 +3743,7 @@ export const paymentWebhookEvents = pgTable(
       'payment_webhook_events_event_format',
       sql`${table.eventId} ~ '^evt_[A-Za-z0-9_]{1,100}$'`,
     ),
-    check('payment_webhook_events_type_format', sql`${table.eventType} ~ '^[a-z_.]{1,100}$'`),
+    check('payment_webhook_events_type_format', sql`${table.eventType} ~ '^[a-z0-9_.]{1,100}$'`),
     check(
       'payment_webhook_events_account_format',
       sql`${table.accountId} ~ '^acct_[A-Za-z0-9]{1,64}$'`,

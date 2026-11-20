@@ -76,7 +76,7 @@ export class PaymentsService {
   }
 
   async account(tenant: TenantContext): Promise<PaymentAccountAnswer> {
-    return readPaymentAccount(this.on().deps.db, actorOf(tenant));
+    return readPaymentAccount(this.on().deps, actorOf(tenant));
   }
 
   async onboarding(tenant: TenantContext): Promise<PaymentOnboardingLink> {
@@ -135,7 +135,7 @@ export class PaymentsService {
       payload,
       stripeSignatureHeader(bound.webhookSecret, payload, bound.deps.clock.now()),
     );
-    return readPaymentAccount(bound.deps.db, actorOf(tenant));
+    return readPaymentAccount(bound.deps, actorOf(tenant));
   }
 
   private on(code: 'payments_off' | 'webhook_not_found' = 'payments_off'): Bound {
