@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.38 — 2026-11-20
+- At the S65 brief (user): **Phase 15 (Deposits) starts now** ([PCR-012](changes/PCR-012.md)), before S64 (waits on 10DLC) and S58a–S60 (wait on the domain); Stripe's test mode and the sandbox need neither. S65 splits into S65 (Stripe Connect Express, backend: [ADR-0067](../adr/0067-payments-stripe-connect.md), `@pepper/payments` behind a port, no SDK, signed and idempotent webhooks) and S65.2 (payments on screen). Payments are the owner's alone (`payments.manage`); managers read the status (`payments.read`). AC-X-93…102.
+
+  **Compatibility:** additive tables, permissions, an audit action and routes, off by default; no tool, prompt or event change; $0 of the AI budget.
+
 ## 0.37 — 2026-11-12
 - At the S61 brief (user): **Phase 14 (SMS) before the rest of Phase 13** ([PCR-011](changes/PCR-011.md)). S58a, S57, S58b and S60 wait for the domain; S61–S64 come first, built in sandbox until 10DLC. S61 splits into S61 (the channel's backend, [ADR-0065](../adr/0065-sms-channel.md), Twilio behind a port) and S61.2 (consent on screen). AC-X-57…63.
 

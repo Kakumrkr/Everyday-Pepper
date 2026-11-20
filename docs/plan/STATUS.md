@@ -1,13 +1,20 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-20 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S64** (S63.2 done)
+**Last updated:** 2026-11-20 · **Plan version:** 0.38 ([PCR-012](changes/PCR-012.md)) · **Current phase:** 15 — Deposits, started before S64 (waits on 10DLC) and S58a–S60 (wait on the domain) by PCR-012 → **S65** in progress
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S64** (SMS live after 10DLC, or the Phase 14 gate only).
+**S65 · Stripe Connect Express, backend** (brief approved 2026-11-20: D-1 S65 now, D-2 split, screen in S65.2, D-3 owner only, D-4 no SDK; [ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-012](changes/PCR-012.md), AC-X-93…102). Profile: backend/domain; no model recording.
+- [x] T1 ADR-0067, PCR-012, ACs + traceability, playbook, CHANGELOG 0.38
+- [ ] T2 contracts (payment schemas, `paymentAccountStatus`, permissions, audit action) + `@pepper/payments` skeleton (port, signature check)
+- [ ] T3 db migration 0080 (`payment_accounts`, `payment_webhook_events`, `payment_account_tenant`), repositories, isolation/export lists
+- [ ] T4 runtime config (`PAYMENTS_PROVIDER`, `STRIPE_*`, live guard) + Stripe fetch adapter (contract fixtures) + sandbox
+- [ ] T5 services: onboarding, read, sync (newer read wins, audit), webhook handling (once per event, fresh read, deauthorized), owner push (top-up), clean-up 30 days
+- [ ] T6 api: `/v1/payments/*`, `POST /v1/webhooks/stripe`, `/v1/dev/payments` (sandbox), wiring; integration tests
+- Next step: T2.
 
 ## Last sessions
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
@@ -104,12 +111,13 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
+| S65 | Stripe Connect Express, backend (now, PCR-012) | 15 | Webhook replay/signature tests |
+| S65.2 | Payments on screen | 15 | Screens 375 px light/dark; connect journey reaches "ready" |
 | S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
 | S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
-| S65 | Stripe Connect Express onboarding, idempotent webhooks | 15 | Webhook replay/signature tests |
 | S66 | Deposits + card on file, Stripe-hosted fields, refunds | 15 | Test-mode pay/cancel/refund journeys |
 | S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |
 | S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
