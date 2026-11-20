@@ -167,6 +167,28 @@ export async function withSmsInbound<T>(
 }
 
 /**
+ * Runs `work` in the payments webhook's context (S65, ADR-0067 §6.3): `payment_webhook_events`
+ * is reachable, nothing of any business is. For recording an event and the clean-up.
+ */
+export async function withPaymentsWebhook<T>(
+  db: Database,
+  work: (tx: TenantTx) => Promise<T>,
+): Promise<T> {
+  return db.transaction(async (tx) => {
+    await setTransactionPaymentsWebhook(tx);
+    return work(tx);
+  });
+}
+
+/**
+ * Makes `payment_webhook_events` reachable in an open business transaction too, so an event is
+ * marked handled in the same transaction as the change it made (a retry then changes nothing).
+ */
+export async function setTransactionPaymentsWebhook(tx: TenantTx): Promise<void> {
+  await tx.execute(sql`SELECT set_config('app.payments_webhook', 'on', true)`);
+}
+
+/**
  * Makes `inbound_emails` reachable in the open transaction too, for the inbound job's business
  * transaction that lands a reply and records it together (so a retry can't land it twice).
  */

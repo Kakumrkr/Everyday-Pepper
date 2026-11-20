@@ -17,6 +17,7 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 
 /** Written only when the business has consent records (S61). */
 const SMS_CONSENTS_FILE = 'text-consents.json';
+const PAYMENTS_FILE = 'payments.json';
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -78,6 +79,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
     ...(data.smsConsents.length > 0
       ? [`${SMS_CONSENTS_FILE}  Who agreed to your texts, when, how and the words they saw`]
       : []),
+    ...(data.payments === null
+      ? []
+      : [`${PAYMENTS_FILE}  Your Stripe account: which one, and where it stood`]),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
     `visits.csv gives each visit's date and time in ${localTimeLabel(data.business.timeZone, exportedAt.getTime())}, the business's time zone.`,
@@ -302,6 +306,23 @@ export function buildBusinessExport(
           revokedAt: consent.revokedAt === null ? null : at(consent.revokedAt),
         })),
       ),
+    ]);
+  }
+
+  // The business's Stripe account (S65, ADR-0067 §10), when it has one.
+  if (data.payments !== null) {
+    jsonFiles.push([
+      PAYMENTS_FILE,
+      json({
+        provider: data.payments.provider,
+        stripeAccount: data.payments.accountId,
+        status: data.payments.status,
+        takesPayments: data.payments.chargesEnabled,
+        getsPayouts: data.payments.payoutsEnabled,
+        connectedAt: at(data.payments.connectedAt),
+        disconnectedAt:
+          data.payments.disconnectedAt === null ? null : at(data.payments.disconnectedAt),
+      }),
     ]);
   }
 

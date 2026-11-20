@@ -3628,3 +3628,145 @@ export const supportSavedReplies = pgTable(
     }),
   ],
 );
+
+/** A list of Stripe requirement codes: at most 100, as the payments contract keeps them. */
+function requirementCodes(name: string) {
+  return text(name)
+    .array()
+    .notNull()
+    .default(sql`'{}'::text[]`);
+}
+
+/**
+ * The business's Stripe Connect Express account (S65, ADR-0067 §4–5): at most one per business,
+ * created once (`generation` names the Stripe idempotency key, so connecting again after Stripe
+ * disconnected it creates a new account). The columns are what Stripe last answered when Pepper
+ * read the account (`synced_at`); `status` is `paymentAccountStatus` of them, kept with them so a
+ * change is audited and pushed once. Never a card, a bank account or a person's details.
+ */
+export const paymentAccounts = pgTable(
+  'payment_accounts',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    provider: text('provider').notNull(),
+    providerAccountId: text('provider_account_id').notNull(),
+    generation: smallint('generation').notNull().default(1),
+    livemode: boolean('livemode').notNull(),
+    status: text('status').notNull(),
+    chargesEnabled: boolean('charges_enabled').notNull().default(false),
+    payoutsEnabled: boolean('payouts_enabled').notNull().default(false),
+    detailsSubmitted: boolean('details_submitted').notNull().default(false),
+    currentlyDue: requirementCodes('currently_due'),
+    pastDue: requirementCodes('past_due'),
+    eventuallyDue: requirementCodes('eventually_due'),
+    pendingVerification: requirementCodes('pending_verification'),
+    currentDeadline: timestamp('current_deadline', { withTimezone: true }),
+    disabledReason: text('disabled_reason'),
+    /** When Pepper read the account from Stripe: an older read never overwrites a newer one. */
+    syncedAt: timestamp('synced_at', { withTimezone: true }),
+    /** Stripe disconnected it (`account.application.deauthorized`). */
+    deauthorizedAt: timestamp('deauthorized_at', { withTimezone: true }),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('payment_accounts_tenant_unique').on(table.tenantId),
+    uniqueIndex('payment_accounts_provider_account_unique').on(
+      table.provider,
+      table.providerAccountId,
+    ),
+    check('payment_accounts_provider_known', sql`${table.provider} IN ('stripe', 'sandbox')`),
+    check(
+      'payment_accounts_account_format',
+      sql`${table.providerAccountId} ~ '^acct_[A-Za-z0-9]{1,64}$'`,
+    ),
+    check('payment_accounts_generation_range', sql`${table.generation} BETWEEN 1 AND 1000`),
+    check(
+      'payment_accounts_status_known',
+      sql`${table.status} IN ('not_connected', 'onboarding', 'pending', 'action_needed', 'ready', 'rejected')`,
+    ),
+    check(
+      'payment_accounts_requirements_size',
+      sql`cardinality(${table.currentlyDue}) <= 100 AND cardinality(${table.pastDue}) <= 100 AND cardinality(${table.eventuallyDue}) <= 100 AND cardinality(${table.pendingVerification}) <= 100`,
+    ),
+    check(
+      'payment_accounts_disabled_reason_format',
+      sql`${table.disabledReason} ~ '^[a-z_.]{1,100}$'`,
+    ),
+    check(
+      'payment_accounts_sandbox_not_live',
+      sql`${table.provider} = 'stripe' OR NOT ${table.livemode}`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type PaymentAccountRow = typeof paymentAccounts.$inferSelect;
+
+/** The payments webhook's context (S65, `withPaymentsWebhook`): set for one transaction only. */
+const paymentsWebhook = sql`COALESCE(current_setting('app.payments_webhook', true) = 'on', false)`;
+
+/**
+ * Each Stripe webhook event Pepper handled (S65, ADR-0067 §6.3, AC-X-96): one row per event id,
+ * so a redelivery changes nothing. `received` until handled (an attempt that failed leaves it so
+ * and Stripe delivers again), then `processed` or `ignored` (with why). No business data: the
+ * event's id, type, account and times. A platform row, reached in the webhook's context or by a
+ * logged operator; `tenant_id` once known, so it goes with the business; kept 30 days.
+ */
+export const paymentWebhookEvents = pgTable(
+  'payment_webhook_events',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    provider: text('provider').notNull(),
+    eventId: text('event_id').notNull(),
+    eventType: text('event_type').notNull(),
+    accountId: text('account_id'),
+    livemode: boolean('livemode').notNull(),
+    tenantId: uuid('tenant_id').references(() => tenants.id, { onDelete: 'cascade' }),
+    outcome: text('outcome').notNull().default('received'),
+    ignoredReason: text('ignored_reason'),
+    attempts: smallint('attempts').notNull().default(1),
+    /** When Stripe created the event. */
+    createdAtProvider: timestamp('created_at_provider', { withTimezone: true }).notNull(),
+    receivedAt: timestamp('received_at', { withTimezone: true }).notNull(),
+    processedAt: timestamp('processed_at', { withTimezone: true }),
+  },
+  (table) => [
+    unique('payment_webhook_events_event_unique').on(table.provider, table.eventId),
+    index('payment_webhook_events_received_idx').on(table.receivedAt),
+    check('payment_webhook_events_provider_known', sql`${table.provider} IN ('stripe', 'sandbox')`),
+    check(
+      'payment_webhook_events_event_format',
+      sql`${table.eventId} ~ '^evt_[A-Za-z0-9_]{1,100}$'`,
+    ),
+    check('payment_webhook_events_type_format', sql`${table.eventType} ~ '^[a-z_.]{1,100}$'`),
+    check(
+      'payment_webhook_events_account_format',
+      sql`${table.accountId} ~ '^acct_[A-Za-z0-9]{1,64}$'`,
+    ),
+    check(
+      'payment_webhook_events_outcome_known',
+      sql`${table.outcome} IN ('received', 'processed', 'ignored')`,
+    ),
+    check(
+      'payment_webhook_events_ignored_reason',
+      sql`(${table.outcome} = 'ignored') = (${table.ignoredReason} IS NOT NULL) AND (${table.ignoredReason} IS NULL OR ${table.ignoredReason} IN ('unknown_account', 'other_mode', 'unhandled_type', 'no_account'))`,
+    ),
+    check(
+      'payment_webhook_events_processed_when_done',
+      sql`(${table.outcome} = 'received') = (${table.processedAt} IS NULL)`,
+    ),
+    check('payment_webhook_events_attempts_range', sql`${table.attempts} BETWEEN 1 AND 1000`),
+    pgPolicy('payments_webhook', {
+      for: 'all',
+      using: paymentsWebhook,
+      withCheck: paymentsWebhook,
+    }),
+    pgPolicy('operator_access', { for: 'select', using: operatorAccess }),
+  ],
+);
+export type PaymentWebhookEventRow = typeof paymentWebhookEvents.$inferSelect;
