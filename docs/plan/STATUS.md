@@ -7,9 +7,7 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S65 waiting to merge** ([PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101), head `2746fda`; code, close docs, review fixes all in). CI: all 7 test jobs green; the aggregator "E2E smoke (Docker Compose)" failed twice in 2 s with no runner assigned (no log): most likely Actions minutes/spending limit (comment on the PR).
-- Next: the user checks Settings → Billing → Actions, re-runs that one job; then, with the user's OK, squash-merge, unsubscribe, and start **S65.2** (payments on screen; top-up: Stripe requirements in plain words).
-- Note: S64 merged in parallel and took PCR-012/0.38/AC-X-93…95; this branch moved to PCR-013/0.39/AC-X-96…105 (merge commit `2746fda`).
+Nothing. S65 merged (PR #101). Next: **S65.2** (payments on screen; top-up: Stripe requirements in plain words). Actions minutes ran out on 2026-11-20: CI on PR #101 ran green (8 of 8) with the repo public for that run, then back to private; wait for the monthly reset before the next PR.
 
 ## Last sessions
 - **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-013](changes/PCR-013.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
@@ -32,7 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
-- **S65 (user, 2026-11-20):** recommendations on all four (split, owner only, no SDK), "don't compromise"; Express by `controller`, a fresh read wins, reconnect after a mode change. Full wording in [decisions.md](decisions.md).
+- **S65 (user, 2026-11-20):** recommendations on all four (split, owner only, no SDK), "don't compromise"; Express by `controller`, a fresh read wins, reconnect after a mode change. Actions minutes ran out: the user made the repo public for the one CI run, private again after, no paid minutes. Full wording in [decisions.md](decisions.md).
 - **S64 (user, 2026-11-20):** no SMS service or domain paid yet, Stripe next: "Go with your recommendations and complete it" (D-1 C12 7 in sandbox; D-2 `send_client_message` over SMS → S64.2; D-3 [PCR-012](changes/PCR-012.md) Phase 15 next; D-4 "N" declines). Full wording in [decisions.md](decisions.md).
 - **S63.2 (user, 2026-11-20):** decisions OK'd, relook invited (D-2 owners/managers only; D-3 dropped); Activity's "by text" from a link set after the approval ran; replayed approvals by text answer "handled". Full wording in [decisions.md](decisions.md).
 Older ones (S25–S33) are in [decisions.md](decisions.md).
