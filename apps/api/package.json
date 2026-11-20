@@ -23,6 +23,7 @@
     "@pepper/core": "workspace:*",
     "@pepper/db": "workspace:*",
     "@pepper/imports": "workspace:*",
+    "@pepper/payments": "workspace:*",
     "@pepper/runtime": "workspace:*",
     "@pepper/storage": "workspace:*",
     "@pepper/templates": "workspace:*",

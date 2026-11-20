@@ -25,6 +25,11 @@ import {
   WaitlistOfferUsedError,
   WrongVerificationCodeError,
 } from '@pepper/appointments';
+import {
+  PaymentsNotOnboardedError,
+  PaymentsProviderError,
+  PaymentsRejectedError,
+} from '@pepper/payments';
 import type {
   ApiErrorCode,
   SlotUnavailable,
@@ -195,6 +200,10 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [GalleryFullError, ConflictException, 'gallery_full'],
   [ImportNotFoundError, NotFoundException, 'import_not_found'],
   [ImportNotStagedError, ConflictException, 'import_not_staged'],
+  // Payments (S65, ADR-0067): Stripe's own refusals never reach the owner in its words.
+  [PaymentsRejectedError, ConflictException, 'payments_rejected'],
+  [PaymentsNotOnboardedError, ConflictException, 'payments_not_onboarded'],
+  [PaymentsProviderError, ServiceUnavailableException, 'payments_unavailable'],
 ];
 
 /** 413: the body is over the limit (Nest has no exception class for it under this name). */

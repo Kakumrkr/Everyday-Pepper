@@ -13,8 +13,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T3 db migration 0080 (`payment_accounts`, `payment_webhook_events`, `payment_account_tenant`), repositories, export (`payments.json`), isolation: db payments/isolation/export integration green
 - [x] T4 runtime `loadPaymentsConfig` (`PAYMENTS_PROVIDER`, `STRIPE_*`, `STRIPE_LIVE` guard): 5 tests
 - [x] T5 services (onboarding, read, dashboard, sync with newer-read-wins + audit + owner push, `handleStripeEvent`), clean-up 30 days, API error codes: payments int 14/14, core cleanup 4/4, typecheck all 16
-- [ ] T6 api: `/v1/payments/*`, `POST /v1/webhooks/stripe`, `/v1/dev/payments` (sandbox), wiring; integration tests
-- Next step: T6 (api routes, webhook controller, sandbox dev route, wiring).
+- [x] T6 api: `/v1/payments/{account,onboarding,account/sync,dashboard}`, `POST /v1/webhooks/stripe`, `/v1/dev/payments/account` (sandbox), config, layer rule, compose/.env: api payments int 8/8, unit 3/3 + config
+- Next step: review (`/code-review`, `/security-review`), then `/session-close`.
 
 ## Last sessions
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
