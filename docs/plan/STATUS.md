@@ -1,25 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-13 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S63.2** (S63 done)
+**Last updated:** 2026-11-20 · **Plan version:** 0.37 ([PCR-011](changes/PCR-011.md)) · **Current phase:** 14 — SMS, before the rest of Phase 13 (PCR-011: S58a–S60 wait for the domain) → next **S64** (S63.2 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S63.2 · Approve by text on screen** (brief approved 2026-11-20: D-1 an additive `approvedVia: 'text'` on the Activity view, from `approval_texts.used_at`; D-2 the number row and "Text me cards" for owners and managers only, staff see the reminders only (Claude, on relook: a number does nothing for staff yet and each check costs a text); D-3 dropped: owners and managers already need two-step sign-in to use the app (`roleRequiresMfa`), so no extra state).
-Tasks: 1 AC-X-88…93 + traceability · 2 `lib/member-texts.ts` words + tests · 3 number sheet (number → code) + switch on `/more/texts` · 4 `approvedVia` in contracts/api + integration test · 5 "approved by text" in ActivityLog · 6 e2e: number check in `texts-settings.spec.ts`, `approve-by-text.spec.ts` (Y + code via `/v1/dev/sms`, receipt in Activity), "Confirmed by text" journey, `screens.spec.ts` shots.
-Done: 1 AC-X-88…92 (five were enough) · 2–3 `member-texts.ts` (6 tests) + `CardTextsSection` on `/more/texts` · 4 `approval_texts.execution_id` (migration 0079) set after an approval by text executes, `approvedVia` on the view; found and fixed: a "Y" to a card already approved in the app answered "Done" (core marks a replayed approval, the text path says "handled", AC-X-83); api sms-approval 5/5, core trust 47/47 · 5 "approved by text" in Activity (ui 10/10).
-6 e2e: `approve-by-text.spec.ts` 1/1, `texts-settings.spec.ts` 3/3, `confirm-by-text.spec.ts` 1/1 (4.0 min: no notice, 5-minute slots, a daytime zone), `screens.spec.ts` "Cards to your phone" ×3 + the more-texts shots with the new section; the sheet's confirmation time on its own line (for its mask). Cloud stack: `.claude/skills/session-close/e2e-stack.sh` (the Docker app images can't install through the proxy).
-Next: `/session-close` (review, tier 3, walkthrough). Open questions: none.
+Nothing in progress. Next: **S64** (SMS live after 10DLC, or the Phase 14 gate only).
 
 ## Last sessions
+- **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
+  - **Built:** "Cards to your phone" on Texts and reminders (number check, "Text me cards"); "approved by text" in Activity (migration 0079, top-up); journeys for approve by text and "Confirmed by text" with screenshots. AC-X-88…92. Fixed: a "Y" to a card handled in the app said "Done"; S63's approval-text tests failed from 2026-11-14 (fixed clock).
+  - **Checks:** `pnpm check` green (1st run); affected integration green (2nd: the date bomb in db); e2e 5/5 + screens 33/33; review 6 of 6 fixed, security none ≥ 8; CI green on the 1st run (21.1 min).
 - **S63 Phase 14 · Approve by text, backend (2026-11-13)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #98](https://github.com/Kakumrkr/Everyday-Pepper/pull/98)). Full entry in [session-log.md](session-log.md).
   - **Built:** the member's checked number and "Text me cards" (`/v1/me/phone`, `/v1/me/texts`); waitlist offers texted with a code a text ("Reply Y 4821 by 4:10pm"); "Y" and the code approve that card once, from that number only (spoof, replay, 5 misses an hour); the sandbox text path `/v1/dev/sms` (top-up). Migration 0078, AC-X-80…87.
   - **Checks:** `pnpm check` green (2nd run: prettier); affected integration 1,859 green (2nd run: the export list, a 2FA fixture); review 5 of 6 fixed, security none ≥ 8; no screen changed.
-- **S62.2 Phase 14 · Texts and reminders on screen (2026-11-12)** ([ADR-0065](../adr/0065-sms-channel.md), [PR #97](https://github.com/Kakumrkr/Everyday-Pepper/pull/97)). Full entry in [session-log.md](session-log.md).
-  - **Built:** More → "Texts and reminders" (owners and managers change, staff read); the profile's last-text line; "Confirmed by text" on the visit sheet and the day card (top-up). AC-X-77…79. CI: E2E on three runners at once behind the same required check.
-  - **Checks:** `pnpm check` green (1st run); web unit 490; e2e 7/7 + screens 30/30; review 8 of 9 fixed (the 9th, more billed minutes, the agreed tradeoff), security none ≥ 8.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -34,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S63.2 (user, 2026-11-20):** decisions OK'd, relook invited (D-2 owners/managers only; D-3 dropped); Activity's "by text" from a link set after the approval ran; replayed approvals by text answer "handled". Full wording in [decisions.md](decisions.md).
 Older ones (S25–S33) are in [decisions.md](decisions.md).
 - **S63 (user, 2026-11-13):** "Go ahead with your recommendations and complete the session" (D-1 split → S63.2 the screens and journeys; D-2 "Y 4821", a code a text; D-3 waitlist offers only; D-4 the number on the account, the switch per business, owners/managers; D-5 ADR-0066); "stop at a safe place" before `/compact` (checkpointed, resumed). **Claude:** the code text needs no standing consent; consents unique per source; card texts need a second factor; a bare "Y" answered only on a member's number; the review's 5 fixes. Full wording in [decisions.md](decisions.md).
 - **S62 (user, 2026-11-12):** "good with your recommendations… revise and improvise… complete successfully" (D-1 split → S62.2 the screens; D-2 day-before + same-day 2 h; D-3 a hashed link per reminder; D-4 `tenants.reminder_settings`, ADR-0065 section). **Claude:** no reminder planned for the night; the opt-in text carries the booking; links without expiry, swept 30 days after; "C" prefers the unconfirmed booking; the review's 10 fixes. Full wording in [decisions.md](decisions.md).
@@ -103,11 +100,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S63.2 | Approve by text on screen: the number and "Text me cards" on More → Texts and reminders; the approve-by-text journey; the "Confirmed by text" journey and screenshot (through `/v1/dev/sms`) | 14 | Journeys green; screens 375 px light/dark |
 | S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |

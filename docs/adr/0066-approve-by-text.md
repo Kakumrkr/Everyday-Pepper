@@ -30,6 +30,12 @@ Most cards wait for one tap, and the waitlist offer waits on the clock: a freed 
 - api `SmsInboundService` behind both Twilio's webhook and the sandbox's `/v1/dev/sms` (§5): keywords, then "C", then "Y" and a code; one answer for every miss, 5 misses an hour per number (an HMAC of it in Redis), a bare "Y" answered only on a member's checked number, a failed approval answered as not done (the code is spent first). Card texts need a second factor, as a session would.
 - Tests: db (isolation incl.), core, ai matcher, api unit and `sms-approval.int.test.ts` (the whole path through the sandbox), runtime `SandboxTextLog`.
 
+## Built in S63.2
+- More → Texts and reminders → "Cards to your phone" (owners and managers only; staff see no row: a number does nothing for them yet): the number sheet (number → code → checked) and "Text me cards" with the `sms-consent-v2` words under it (AC-X-88/89).
+- `approval_texts.execution_id` (migration 0079), set only after an approval by text executed; `approvedVia: 'text'` on the Activity view, read once per page; Activity says "approved by text" (AC-X-91).
+- A replayed approval is marked (`replayed: true`); the text path approves `firstOnly`, so a "Y" to a card already approved in the app answers "handled" and is never labelled by text (AC-X-83, a fix of S63).
+- Journeys: approve by text and "Confirmed by text" end to end through the sandbox, with screenshots (AC-X-90, AC-X-92).
+
 ## Not done
-- S63.2: the number and "Text me cards" on More → Texts and reminders, the approve-by-text journey, the "Confirmed by text" journey and screenshot.
+- "N" to skip, other card kinds, cancelling a text once its card is decided.
 - "N" to skip, other card kinds, cancelling a text once its card is decided.
