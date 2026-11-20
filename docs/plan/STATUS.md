@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-20 · **Plan version:** 0.38 ([PCR-012](changes/PCR-012.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S65** (Phase 14 gate met in sandbox, S64)
+**Last updated:** 2026-11-20 · **Plan version:** 0.39 ([PCR-013](changes/PCR-013.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S65.2** (S65 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S65** (Stripe Connect Express onboarding and webhooks, test mode).
+Nothing. S65 merged (PR #101). Next: **S65.2** (payments on screen; top-up: Stripe requirements in plain words). Actions minutes ran out on 2026-11-20: CI on PR #101 ran green (8 of 8) with the repo public for that run, then back to private; wait for the monthly reset before the next PR.
 
 ## Last sessions
+- **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-013](changes/PCR-013.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `@pepper/payments` (Stripe fetch adapter, one pinned version; Redis sandbox); one Express account per business, owner only; status from a fresh read; `POST /v1/webhooks/stripe` signed, once per event, the business only via the stored account; owners' push per change (top-up); migration 0080. AC-X-96…105.
+  - **Checks:** `pnpm check` green (4th run: prettier, two coverage gates by <0.1%, a type); affected integration 1,910 green (1st run); review 6 of 6 fixed, security none ≥ 8; no screen changed; merged S64's `main` (IDs renumbered).
 - **S64 Phase 14 · Gate in sandbox + "N" to skip (2026-11-20)** ([PCR-012](changes/PCR-012.md), [ADR-0066](../adr/0066-approve-by-text.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** "N" and the code skips a texted card as declining it in the app (fingerprint-checked, first only); the card text says how to skip (≤ 2 segments). AC-X-93…95. **Phase 14 gate:** C12 3 → 7 on sandbox evidence (scorecard §9). PCR-012: Stripe (S65–S68) next; `send_client_message` over SMS → S64.2 SMS live.
   - **Checks:** `pnpm check` green (1st run); affected integration green (ai re-run alone after the 10-min limit); e2e approve-by-text 2/2; review 4 of 4 fixed, security none ≥ 8; walkthrough at 375 px; CI green on the 1st run (18.8 min).
-- **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
-  - **Built:** "Cards to your phone" on Texts and reminders (number check, "Text me cards"); "approved by text" in Activity (migration 0079, top-up); journeys for approve by text and "Confirmed by text" with screenshots. AC-X-88…92. Fixed: a "Y" to a card handled in the app said "Done"; S63's approval-text tests failed from 2026-11-14 (fixed clock).
-  - **Checks:** `pnpm check` green (1st run); affected integration green (2nd: the date bomb in db); e2e 5/5 + screens 33/33; review 6 of 6 fixed, security none ≥ 8; CI green on the 1st run (21.1 min).
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -30,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S65 (user, 2026-11-20):** recommendations on all four (split, owner only, no SDK), "don't compromise"; Express by `controller`, a fresh read wins, reconnect after a mode change. Actions minutes ran out: the user made the repo public for the one CI run, private again after, no paid minutes. Full wording in [decisions.md](decisions.md).
 - **S64 (user, 2026-11-20):** no SMS service or domain paid yet, Stripe next: "Go with your recommendations and complete it" (D-1 C12 7 in sandbox; D-2 `send_client_message` over SMS → S64.2; D-3 [PCR-012](changes/PCR-012.md) Phase 15 next; D-4 "N" declines). Full wording in [decisions.md](decisions.md).
 - **S63.2 (user, 2026-11-20):** decisions OK'd, relook invited (D-2 owners/managers only; D-3 dropped); Activity's "by text" from a link set after the approval ran; replayed approvals by text answer "handled". Full wording in [decisions.md](decisions.md).
 Older ones (S25–S33) are in [decisions.md](decisions.md).
@@ -96,16 +97,16 @@ Raised by Claude at the brief of the session named.
 2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
 3. **By S57 (Phase 13, after S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
-5. **Before S65 (now):** sign up for a free Stripe account and stay in test mode (no business details needed yet). **Before SMS and Stripe go live (S64.2, after Phase 15):** form the LLC, pay for an SMS provider (Twilio) and register 10DLC (4–8 weeks), then activate the Stripe account.
+5. **Before S66 (S65 built on fixtures and the sandbox):** sign up for a free Stripe account and stay in test mode (no business details needed yet); S66 confirms the adapter against it. **Before SMS and Stripe go live (S64.2, after Phase 15):** form the LLC, pay for an SMS provider (Twilio) and register 10DLC (4–8 weeks), then activate the Stripe account.
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, M1–M2 and P1 are done (Phases 0–12 and 14 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, M1–M2 and P1 are done (Phases 0–12 and 14 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S65 | Stripe Connect Express onboarding, idempotent webhooks (test mode, [PCR-012](changes/PCR-012.md)) | 15 | Webhook replay/signature tests |
+| S65.2 | Payments on screen: More → Payments, return/refresh pages, journeys ([PCR-013](changes/PCR-013.md)) | 15 | Screens 375 px light/dark; connect journey reaches "ready" |
 | S66 | Deposits + card on file, Stripe-hosted fields, refunds | 15 | Test-mode pay/cancel/refund journeys |
 | S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |
 | S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |

@@ -1,0 +1,24 @@
+{
+  "id": "acct_1Nv0FGQ9RKHgCVdK",
+  "object": "account",
+  "charges_enabled": true,
+  "details_submitted": true,
+  "payouts_enabled": false,
+  "requirements": {
+    "alternatives": [],
+    "current_deadline": 1764720000,
+    "currently_due": ["individual.verification.document"],
+    "disabled_reason": null,
+    "errors": [
+      {
+        "code": "verification_document_expired",
+        "reason": "The document has expired.",
+        "requirement": "individual.verification.document"
+      }
+    ],
+    "eventually_due": ["individual.verification.document"],
+    "past_due": [],
+    "pending_verification": []
+  },
+  "type": "none"
+}

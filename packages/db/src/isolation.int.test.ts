@@ -56,6 +56,7 @@ import { insertConversation, insertMessage, insertTurn } from './repositories/co
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
+import { insertPaymentAccount } from './repositories/payments.js';
 import { insertRememberedDevice } from './repositories/remembered-devices.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
 import { insertOutboxMessage, listDueOutboxMessages } from './repositories/outbox.js';
@@ -112,6 +113,8 @@ const GLOBAL_TABLES: Record<string, string> = {
     'emails at the inbound webhook (S59.3, ADR-0063): stored before any business is known; forced RLS, the inbound context and logged operators only (below)',
   sms_keyword_events:
     'STOP, START and HELP sent to Pepper’s number (S61, ADR-0065): no business; forced RLS, the SMS context and logged operators only (`sms.int.test.ts`)',
+  payment_webhook_events:
+    'Stripe webhook events (S65, ADR-0067): stored before any business is known; forced RLS, the payments webhook context and logged operators only (`payments.int.test.ts`)',
   email_suppressions:
     'delivery problems Resend reported for an address (S59.3.2, ADR-0063 Part 2): no business; forced RLS, the inbound context and logged operators only (`email-suppression.int.test.ts`)',
 };
@@ -124,6 +127,8 @@ const GLOBAL_TABLES: Record<string, string> = {
  */
 const INBOUND_MAIL =
   "COALESCE((current_setting('app.inbound_mail'::text, true) = 'on'::text), false)";
+const PAYMENTS_WEBHOOK =
+  "COALESCE((current_setting('app.payments_webhook'::text, true) = 'on'::text), false)";
 const GLOBAL_TABLES_NAMING_A_BUSINESS: Record<
   string,
   { policyname: string; cmd: string; qual: string; with_check: string | null }[]
@@ -136,6 +141,15 @@ const GLOBAL_TABLES_NAMING_A_BUSINESS: Record<
       cmd: 'UPDATE',
       qual: `(${OPERATOR_ACCESS} AND (status = 'held'::text))`,
       with_check: OPERATOR_ACCESS,
+    },
+  ],
+  payment_webhook_events: [
+    { policyname: 'operator_access', cmd: 'SELECT', qual: OPERATOR_ACCESS, with_check: null },
+    {
+      policyname: 'payments_webhook',
+      cmd: 'ALL',
+      qual: PAYMENTS_WEBHOOK,
+      with_check: PAYMENTS_WEBHOOK,
     },
   ],
 };
@@ -753,6 +767,37 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'given_at = given_at',
     ownerLookup: 'sms_reply_lookup',
+  },
+  payment_accounts: {
+    tenantColumn: 'tenant_id',
+    // One per business (S65, ADR-0067 §4): never deleted by the services.
+    seed: async (tx) => {
+      const row = await insertPaymentAccount(tx, {
+        provider: 'sandbox',
+        providerAccountId: `acct_sandbox${randomBytes(8).toString('hex')}`,
+        generation: 1,
+        livemode: false,
+        status: 'onboarding',
+        snapshot: {
+          chargesEnabled: false,
+          payoutsEnabled: false,
+          detailsSubmitted: false,
+          currentlyDue: ['external_account'],
+          pastDue: [],
+          eventuallyDue: ['external_account'],
+          pendingVerification: [],
+          currentDeadline: null,
+          disabledReason: null,
+        },
+        syncedAt: new Date(),
+        createdBy: await insertUser(db),
+      });
+      if (row === undefined) throw new Error('seed payment account not stored');
+      return row.id;
+    },
+    touch: 'status = status',
+    noDelete: true,
+    ownerLookup: 'payment_account_lookup',
   },
   booking_texts: {
     tenantColumn: 'tenant_id',

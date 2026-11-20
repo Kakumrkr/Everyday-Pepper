@@ -5,8 +5,10 @@ import {
   loadOutboxSecret,
   loadPushPublicKey,
   loadServiceConfig,
+  loadPaymentsConfig,
   loadSmsConfig,
   type MailConfig,
+  type PaymentsConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
@@ -122,6 +124,11 @@ export interface ApiConfig extends ServiceConfig {
    * the scripted model may run (CI, or a development machine). Off: `/v1/dev/sms` is 404.
    */
   smsSandbox: boolean;
+  /**
+   * Payments (S65, ADR-0067): Stripe, or the sandbox where the scripted model may run (CI, or a
+   * development machine; anywhere else the sandbox means off). `null`: off, every route 404.
+   */
+  payments: PaymentsConfig | null;
 }
 
 /**
@@ -143,6 +150,10 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
     storage: loadStorageConfig('api', env),
     ...loadSupport(present),
     ...smsOf(loadSmsConfig('api', env), scriptedAllowed(service.environment, env['NODE_ENV'])),
+    payments: paymentsOf(
+      loadPaymentsConfig('api', env),
+      scriptedAllowed(service.environment, env['NODE_ENV']),
+    ),
   };
 }
 
@@ -156,6 +167,12 @@ function smsOf(
       sms?.provider === 'twilio' ? { accountSid: sms.accountSid, authToken: sms.authToken } : null,
     textsOn: sms !== null,
   };
+}
+
+/** A sandbox that could say "Payments are ready" only where tests run (AC-X-104). */
+function paymentsOf(payments: PaymentsConfig | null, testsMayRun: boolean): PaymentsConfig | null {
+  if (payments?.provider === 'sandbox' && !testsMayRun) return null;
+  return payments;
 }
 
 function loadSupport(

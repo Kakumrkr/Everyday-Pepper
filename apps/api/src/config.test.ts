@@ -215,4 +215,27 @@ describe('loadApiConfig', () => {
     expect(loadApiConfig(required).smsSandbox).toBe(false);
     expect(loadApiConfig({ ...required, SMS_PROVIDER: 'off' }).smsSandbox).toBe(false);
   });
+
+  it('keeps payments off by default and the sandbox to where tests run (S65, AC-X-103)', () => {
+    expect(loadApiConfig(required).payments).toBeNull();
+    const sandbox = { ...required, PAYMENTS_PROVIDER: 'sandbox' };
+    expect(loadApiConfig(sandbox).payments).toEqual({ provider: 'sandbox' });
+    expect(loadApiConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'ci' }).payments).toEqual({
+      provider: 'sandbox',
+    });
+    // A sandbox that could say "Payments are ready" never runs where real owners are.
+    expect(loadApiConfig({ ...sandbox, NODE_ENV: 'production' }).payments).toBeNull();
+    expect(loadApiConfig({ ...sandbox, DEPLOYMENT_ENVIRONMENT: 'pilot' }).payments).toBeNull();
+    const stripe = {
+      ...required,
+      DEPLOYMENT_ENVIRONMENT: 'pilot',
+      PAYMENTS_PROVIDER: 'stripe',
+      STRIPE_SECRET_KEY: 'sk_test_51NvApiConfigTestKey0000',
+      STRIPE_WEBHOOK_SECRET: 'whsec_5f3a1c9e7b2d4f6a8c0e1b3d5f7a9c2e',
+    };
+    expect(loadApiConfig(stripe).payments).toMatchObject({ provider: 'stripe', livemode: false });
+    expect(() =>
+      loadApiConfig({ ...stripe, STRIPE_SECRET_KEY: 'sk_live_51NvLive0000000' }),
+    ).toThrow('Invalid api environment: STRIPE_LIVE');
+  });
 });

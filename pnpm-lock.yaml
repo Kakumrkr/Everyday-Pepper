@@ -77,6 +77,9 @@ importers:
       '@pepper/imports':
         specifier: workspace:*
         version: link:../../packages/modules/imports
+      '@pepper/payments':
+        specifier: workspace:*
+        version: link:../../packages/modules/payments
       '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime
@@ -518,6 +521,40 @@ importers:
       fast-check:
         specifier: ^4.10.2
         version: 4.10.2
+      pg:
+        specifier: ^8.23.1
+        version: 8.23.1
+      vitest:
+        specifier: ^5.0.5
+        version: 5.0.5(@opentelemetry/api@1.9.1)(@types/node@22.20.5)(@vitest/coverage-v8@5.0.5)(jsdom@28.1.0(@noble/hashes@2.4.0))(vite@8.3.4(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15)(yaml@2.9.1))
+
+  packages/modules/payments:
+    dependencies:
+      '@pepper/contracts':
+        specifier: workspace:*
+        version: link:../../contracts
+      '@pepper/core':
+        specifier: workspace:*
+        version: link:../../core
+      '@pepper/db':
+        specifier: workspace:*
+        version: link:../../db
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
+    devDependencies:
+      '@pepper/config':
+        specifier: workspace:*
+        version: link:../../config
+      '@pepper/testing':
+        specifier: workspace:*
+        version: link:../../testing
+      '@types/pg':
+        specifier: ^8.23.1
+        version: 8.23.1
+      '@vitest/coverage-v8':
+        specifier: ^5.0.5
+        version: 5.0.5(vitest@5.0.5)
       pg:
         specifier: ^8.23.1
         version: 8.23.1

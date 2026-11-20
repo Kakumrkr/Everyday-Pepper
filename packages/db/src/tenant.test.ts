@@ -14,7 +14,9 @@ import {
   withUser,
   withInboundMail,
   withSmsInbound,
+  withPaymentsWebhook,
   setTransactionInboundMail,
+  setTransactionPaymentsWebhook,
 } from './tenant.js';
 
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
@@ -172,6 +174,11 @@ describe('withInboundMail / withSmsInbound / setTransactionInboundMail', () => {
   it.each([
     ['withInboundMail', withInboundMail, "SELECT set_config('app.inbound_mail', 'on', true)"],
     ['withSmsInbound', withSmsInbound, "SELECT set_config('app.sms_inbound', 'on', true)"],
+    [
+      'withPaymentsWebhook',
+      withPaymentsWebhook,
+      "SELECT set_config('app.payments_webhook', 'on', true)",
+    ],
   ] as const)(
     '%s opens its platform table transaction-locally before the work, and nothing else',
     async (_name, open, expected) => {
@@ -196,6 +203,18 @@ describe('withInboundMail / withSmsInbound / setTransactionInboundMail', () => {
     );
     expect(executed.map((query) => new PgDialect().sqlToQuery(query).sql)).toEqual([
       "SELECT set_config('app.inbound_mail', 'on', true)",
+    ]);
+  });
+});
+
+describe('setTransactionPaymentsWebhook (S65, ADR-0067)', () => {
+  it('opens the webhook events in the open business transaction', async () => {
+    const { tx, executed } = fakeDb();
+    await setTransactionPaymentsWebhook(
+      tx as unknown as Parameters<typeof setTransactionPaymentsWebhook>[0],
+    );
+    expect(executed.map((query) => new PgDialect().sqlToQuery(query).sql)).toEqual([
+      "SELECT set_config('app.payments_webhook', 'on', true)",
     ]);
   });
 });

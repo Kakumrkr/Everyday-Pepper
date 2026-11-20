@@ -92,6 +92,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     facts: [],
     support: { threads: [], messages: [], screenshots: [] },
     smsConsents: [],
+    payments: null,
     ...overrides,
   };
 }
@@ -214,6 +215,37 @@ describe('buildBusinessExport (AC-W1-37)', () => {
         ],
       },
     ]);
+  });
+
+  it('writes payments.json with the Stripe account and where it stood (S65, ADR-0067 §10)', () => {
+    const without = unzip(buildBusinessExport(data({}), AT).bytes);
+    expect(Object.keys(without)).not.toContain('payments.json');
+    const files = unzip(
+      buildBusinessExport(
+        data({
+          payments: {
+            provider: 'stripe',
+            accountId: 'acct_1Nv0FGQ9RKHgCVdK',
+            status: 'ready',
+            chargesEnabled: true,
+            payoutsEnabled: true,
+            connectedAt: AT,
+            disconnectedAt: null,
+          },
+        }),
+        AT,
+      ).bytes,
+    );
+    expect(JSON.parse(files['payments.json'] ?? 'null')).toEqual({
+      provider: 'stripe',
+      stripeAccount: 'acct_1Nv0FGQ9RKHgCVdK',
+      status: 'ready',
+      takesPayments: true,
+      getsPayouts: true,
+      connectedAt: AT.toISOString(),
+      disconnectedAt: null,
+    });
+    expect(files['README.txt']).toContain('payments.json');
   });
 
   it('writes text-consents.json with the words each consent was given to (S61, ADR-0065 §7)', () => {

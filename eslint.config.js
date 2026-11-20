@@ -42,6 +42,8 @@ const allowedInternalImports = {
     'testing',
     'appointments',
     'imports',
+    // S65 (ADR-0067): the business's Stripe account and Stripe's webhook.
+    'payments',
     'templates',
   ],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.

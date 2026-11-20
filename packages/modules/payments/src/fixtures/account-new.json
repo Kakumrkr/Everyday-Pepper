@@ -1,0 +1,80 @@
+{
+  "id": "acct_1Nv0FGQ9RKHgCVdK",
+  "object": "account",
+  "business_profile": { "mcc": null, "name": null, "url": null },
+  "business_type": null,
+  "capabilities": { "card_payments": "inactive", "transfers": "inactive" },
+  "charges_enabled": false,
+  "controller": {
+    "fees": { "payer": "application" },
+    "is_controller": true,
+    "losses": { "payments": "application" },
+    "requirement_collection": "stripe",
+    "stripe_dashboard": { "type": "express" },
+    "type": "application"
+  },
+  "country": "US",
+  "created": 1763650800,
+  "default_currency": "usd",
+  "details_submitted": false,
+  "email": null,
+  "external_accounts": {
+    "object": "list",
+    "data": [],
+    "has_more": false,
+    "total_count": 0,
+    "url": "/v1/accounts/acct_1Nv0FGQ9RKHgCVdK/external_accounts"
+  },
+  "future_requirements": {
+    "alternatives": [],
+    "current_deadline": null,
+    "currently_due": [],
+    "disabled_reason": null,
+    "errors": [],
+    "eventually_due": [],
+    "past_due": [],
+    "pending_verification": []
+  },
+  "metadata": { "pepper_tenant": "0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a11" },
+  "payouts_enabled": false,
+  "requirements": {
+    "alternatives": [],
+    "current_deadline": null,
+    "currently_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "business_type",
+      "external_account",
+      "representative.first_name",
+      "representative.last_name",
+      "tos_acceptance.date",
+      "tos_acceptance.ip"
+    ],
+    "disabled_reason": "requirements.past_due",
+    "errors": [],
+    "eventually_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "business_type",
+      "external_account",
+      "representative.first_name",
+      "representative.last_name",
+      "tos_acceptance.date",
+      "tos_acceptance.ip"
+    ],
+    "past_due": [
+      "business_profile.mcc",
+      "business_profile.url",
+      "business_type",
+      "external_account",
+      "representative.first_name",
+      "representative.last_name",
+      "tos_acceptance.date",
+      "tos_acceptance.ip"
+    ],
+    "pending_verification": []
+  },
+  "settings": {},
+  "tos_acceptance": { "date": null, "ip": null, "user_agent": null },
+  "type": "none"
+}

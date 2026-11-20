@@ -14,6 +14,10 @@ export const PermissionSchema = z.enum([
   // Download everything the business holds (S51, ADR-0053): the owner only.
   'business.export',
   'billing.manage',
+  // Payments (S65, ADR-0067): the business's Stripe account. Connecting it decides where the
+  // money goes, so the owner only; managers read where it stands.
+  'payments.read',
+  'payments.manage',
   'usage.read',
   // Team.
   'members.read',

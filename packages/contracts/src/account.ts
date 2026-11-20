@@ -72,6 +72,12 @@ export const ApiErrorCodeSchema = z.enum([
   'screenshot_limit_reached',
   // The inbound email webhook (S59.3, ADR-0063).
   'webhook_signature_invalid',
+  // Payments (S65, ADR-0067): off in this deployment; Stripe won't work with the business;
+  // the dashboard before onboarding is done; Stripe didn't answer (try again).
+  'payments_off',
+  'payments_rejected',
+  'payments_not_onboarded',
+  'payments_unavailable',
   'webhook_not_found',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',

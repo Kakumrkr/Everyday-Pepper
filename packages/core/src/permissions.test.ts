@@ -23,6 +23,8 @@ const EXPECTED: Record<Permission, [PermissionScope, PermissionScope, Permission
   'business.delete': ['all', null, null],
   'business.export': ['all', null, null],
   'billing.manage': ['all', null, null],
+  'payments.read': ['all', 'all', null],
+  'payments.manage': ['all', null, null],
   'usage.read': ['all', null, null],
   'members.read': ['all', 'all', null],
   'members.invite': ['all', 'all', null],

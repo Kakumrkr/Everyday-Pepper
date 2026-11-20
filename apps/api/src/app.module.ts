@@ -20,6 +20,7 @@ import { FeedModule } from './feed/feed.module.js';
 import { RemindersModule } from './reminders/reminders.controller.js';
 import { InboundModule } from './inbound/inbound.controller.js';
 import { MemberTextsModule } from './sms/member-texts.controller.js';
+import { PaymentsModule } from './payments/payments.controller.js';
 import { SmsWebhookModule } from './sms/sms-webhook.controller.js';
 import { SupportModule } from './support/support.controller.js';
 import { TasksModule } from './tasks/tasks.module.js';
@@ -76,6 +77,11 @@ export class AppModule {
           sandbox: config.smsSandbox,
         }),
         MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
+        PaymentsModule.forRoot({
+          config: config.payments,
+          baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+        }),
         ChatModule.forRoot({
           openai: config.ai.openai,
           scripted: config.ai.scripted,

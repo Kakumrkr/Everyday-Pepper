@@ -14,6 +14,7 @@ import {
 } from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 import { listSupportScreenshotsForExport } from './support-screenshots.js';
+import { findPaymentAccount } from './payments.js';
 import { listSmsConsentsForExport } from './sms.js';
 import { listSupportForExport } from './support.js';
 
@@ -76,6 +77,9 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_reads: 'when each member last opened a support request',
   support_screenshots: true,
   sms_consents: true,
+  payment_accounts: true,
+  payment_webhook_events:
+    'Stripe’s notices to Pepper (S65): delivery records, deleted after 30 days',
   sms_deliveries: 'text delivery state',
   booking_texts: 'text delivery state',
   booking_manage_links: 'reschedule links in reminders (hashes only)',
@@ -202,6 +206,19 @@ export interface BusinessExportData {
     givenAt: Date;
     revokedAt: Date | null;
   }[];
+  /**
+   * The business's Stripe account (S65, ADR-0067 §10): which one and where it stood; `null`
+   * without one. What Stripe holds (bank, identity) is the owner's at Stripe, not here.
+   */
+  payments: {
+    provider: string;
+    accountId: string;
+    status: string;
+    chargesEnabled: boolean;
+    payoutsEnabled: boolean;
+    connectedAt: Date;
+    disconnectedAt: Date | null;
+  } | null;
 }
 
 /**
@@ -373,5 +390,20 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       ),
     },
     smsConsents: await listSmsConsentsForExport(tx),
+    payments: await paymentsForExport(tx),
+  };
+}
+
+async function paymentsForExport(tx: TenantTx): Promise<BusinessExportData['payments']> {
+  const row = await findPaymentAccount(tx);
+  if (row === undefined) return null;
+  return {
+    provider: row.provider,
+    accountId: row.providerAccountId,
+    status: row.status,
+    chargesEnabled: row.chargesEnabled,
+    payoutsEnabled: row.payoutsEnabled,
+    connectedAt: row.createdAt,
+    disconnectedAt: row.deauthorizedAt,
   };
 }

@@ -27,10 +27,16 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
+import { claimPaymentWebhookEvent, findPaymentWebhookEvent, withPaymentsWebhook } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { ManualClock } from './clock.js';
 import { outboxKeyFrom, type Mailer } from './outbox.js';
-import { BOOKING_REQUEST_RETENTION_MS, cleanUp, OUTBOX_RETENTION_MS } from './services/cleanup.js';
+import {
+  BOOKING_REQUEST_RETENTION_MS,
+  cleanUp,
+  OUTBOX_RETENTION_MS,
+  PAYMENT_WEBHOOK_RETENTION_MS,
+} from './services/cleanup.js';
 import { deliverOutboxMessage, queueEmail } from './services/outbox.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -156,6 +162,7 @@ describe('cleanUp', () => {
       memoryProposedFacts: 0,
       waitlistOffers: 0,
       reminderLinks: 0,
+      paymentWebhookEvents: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -177,6 +184,7 @@ describe('cleanUp', () => {
       memoryProposedFacts: 0,
       waitlistOffers: 0,
       reminderLinks: 0,
+      paymentWebhookEvents: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -184,6 +192,30 @@ describe('cleanUp', () => {
         messages: [false, true],
       });
     }
+  });
+
+  it('deletes Stripe’s webhook events after 30 days, and newer ones never (S65, AC-X-102)', async () => {
+    const at = (ms: number) => new Date(NOW - ms);
+    const event = (id: string, receivedAt: Date) =>
+      withPaymentsWebhook(db, (tx) =>
+        claimPaymentWebhookEvent(tx, {
+          provider: 'stripe',
+          eventId: id,
+          eventType: 'account.updated',
+          accountId: 'acct_cleanup0001',
+          livemode: false,
+          createdAtProvider: receivedAt,
+          receivedAt,
+        }),
+      );
+    await event('evt_cleanup_old', at(PAYMENT_WEBHOOK_RETENTION_MS + DAY));
+    await event('evt_cleanup_new', at(PAYMENT_WEBHOOK_RETENTION_MS - DAY));
+    const result = await cleanUp(db, { clock: new ManualClock(new Date(NOW)) });
+    expect(result.paymentWebhookEvents).toBe(1);
+    const left = (id: string) =>
+      withPaymentsWebhook(db, (tx) => findPaymentWebhookEvent(tx, 'stripe', id));
+    expect(await left('evt_cleanup_old')).toBeUndefined();
+    expect(await left('evt_cleanup_new')).toBeDefined();
   });
 
   it('marks the AI proposals whose time ran out as expired, with an audit entry (ADR-0028)', async () => {

@@ -151,12 +151,13 @@ Goal: reminders and confirmations by text, and the owner can approve by text. Ex
 | S64 | **Phase 14 gate** (done; 10DLC not yet: SMS stays in sandbox, [PCR-012](changes/PCR-012.md)) | The gate (C12 3 → 7, [scorecard.md](scorecard.md) §9) and the top-up: "N" and the code skips a texted card (AC-X-93…95). | Scorecard target met |
 | S64.2 | **SMS live** (when the LLC, a paid provider and 10DLC exist; PCR-012) | The live switch with Twilio's keys; `send_client_message` over SMS (an AI tool change: "a"/"b" halves with a recording). | A real text both ways; evals green on the real model |
 
-### Phase 15 · Deposits (S65–S68; before the rest of Phase 13 by [PCR-012](changes/PCR-012.md), in Stripe test mode)
+### Phase 15 · Deposits (S65, S65.2, S66–S68; before the rest of Phase 13 by [PCR-012](changes/PCR-012.md), in Stripe test mode)
 Goal: no-shows cost the owner nothing, and money never moves without the owner's OK. Exit: market competitiveness 8.
 
 | # | Target | Built | Done when |
 |---|---|---|---|
-| S65 | **Stripe Connect Express** | Owner onboarding to Stripe, account status in Pepper, idempotent webhooks (ADR). | Webhook replay and signature tests |
+| S65 | **Stripe Connect Express, backend** (done, [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101); split at the brief by [PCR-013](changes/PCR-013.md): the screen is S65.2) | `@pepper/payments` behind a port ([ADR-0067](../adr/0067-payments-stripe-connect.md)): a fetch adapter pinned to one Stripe API version, a sandbox, one Express account per business (owner only), the status from a fresh read, `POST /v1/webhooks/stripe` (signature, once per event, the business only through the stored account id), the owners' push on a status change (top-up). AC-X-96…105. | Webhook replay and signature tests |
+| S65.2 | **Payments on screen** | More → Payments: connect, the status in words, what Stripe still needs and by when, the Express dashboard; the return and refresh pages; the deletion screen's note; journeys through the sandbox. | Screens at 375 px light and dark; the connect journey reaches "ready" |
 | S66 | **Deposits and card on file** | A deposit rule per service, Stripe-hosted payment fields on the booking page (no card data touches Pepper), card on file, refunds on cancel per policy. | Test-mode journeys for pay, cancel and refund |
 | S67 | **Smart deposits + policy builder** | Deposits only for new clients and clients with a no-show history; regulars exempt; a cancellation-policy builder whose text appears on the booking page and in emails. | The rule's fixture tests; the policy shown in every channel |
 | S68 | **No-show fee by approval + gate** | Charge or waive on a card, never automatic; receipts that hold up in a dispute. Phase gate. | No charge without an approved card, proven by tests |
