@@ -1,0 +1,38 @@
+{
+  "name": "@pepper/payments",
+  "version": "0.0.0",
+  "private": true,
+  "description": "L2 payments module (S65, ADR-0067): the business's Stripe Connect Express account behind a port (a fetch adapter pinned to one API version, and a sandbox), its status, and Stripe's signed, idempotent webhooks.",
+  "type": "module",
+  "exports": {
+    ".": {
+      "@pepper/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:integration": "vitest run --config vitest.int.config.ts"
+  },
+  "dependencies": {
+    "@pepper/contracts": "workspace:*",
+    "@pepper/core": "workspace:*",
+    "@pepper/db": "workspace:*",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@pepper/config": "workspace:*",
+    "@pepper/testing": "workspace:*",
+    "@types/pg": "^8.23.1",
+    "@vitest/coverage-v8": "^5.0.5",
+    "pg": "^8.23.1",
+    "vitest": "^5.0.5"
+  }
+}

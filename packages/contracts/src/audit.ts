@@ -15,6 +15,7 @@ import {
   UserIdSchema,
 } from './tenancy.js';
 import { BusinessPhotoKindSchema } from './photos.js';
+import { PaymentAccountStatusSchema, PaymentProviderSchema } from './payments.js';
 import { MemoryFactStatusSchema, MemorySourceSchema, MemorySubjectTypeSchema } from './memory.js';
 import { ReminderSettingsSchema } from './reminders.js';
 import { RuleSchema } from './rules.js';
@@ -415,6 +416,24 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('sms_consent'),
       before: z.object({ active: z.literal(true) }).strict(),
       after: z.object({ active: z.literal(false) }).strict(),
+    })
+    .strict(),
+  // Payments (S65, ADR-0067): the business's Stripe account was created, and each change of
+  // where it stands. Statuses only: never what Stripe asked for or who the owner is.
+  z
+    .object({
+      action: z.literal('payments.account_created'),
+      entity: entity('payment_account'),
+      before: z.null(),
+      after: z.object({ provider: PaymentProviderSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('payments.account_status_changed'),
+      entity: entity('payment_account'),
+      before: z.object({ status: PaymentAccountStatusSchema }).strict(),
+      after: z.object({ status: PaymentAccountStatusSchema }).strict(),
     })
     .strict(),
   z

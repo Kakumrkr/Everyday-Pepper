@@ -49,6 +49,9 @@ export const PERMISSION_MATRIX: Readonly<
   // ADR-0053: every client's details at once, so the owner only.
   'business.export': OWNER_ONLY,
   'billing.manage': OWNER_ONLY,
+  // ADR-0067: where the business's money goes, so the owner only; managers read the status.
+  'payments.read': OWNER_AND_MANAGER,
+  'payments.manage': OWNER_ONLY,
   'usage.read': OWNER_ONLY,
   'members.read': OWNER_AND_MANAGER,
   'members.invite': OWNER_AND_MANAGER,
