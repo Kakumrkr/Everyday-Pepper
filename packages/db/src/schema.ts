@@ -3412,6 +3412,12 @@ export const approvalTexts = pgTable(
     codeHash: text('code_hash').notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     usedAt: timestamp('used_at', { withTimezone: true }),
+    /**
+     * What the reply did once it was approved (S63.2, AC-X-91): the card's execution. A spent code
+     * whose approval didn't go through (changed, refused) has none, so Activity says "by text"
+     * only of what a text really approved.
+     */
+    executionId: uuid('execution_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -3424,6 +3430,12 @@ export const approvalTexts = pgTable(
       'approval_texts_used_after_created',
       sql`${table.usedAt} IS NULL OR ${table.usedAt} >= ${table.createdAt}`,
     ),
+    check(
+      'approval_texts_executed_when_used',
+      sql`${table.executionId} IS NULL OR ${table.usedAt} IS NOT NULL`,
+    ),
+    // Activity's "approved by text": the text behind an execution.
+    index('approval_texts_execution_idx').on(table.tenantId, table.executionId),
     foreignKey({
       name: 'approval_texts_message_fk',
       columns: [table.tenantId, table.id],
@@ -3433,6 +3445,11 @@ export const approvalTexts = pgTable(
       name: 'approval_texts_proposal_fk',
       columns: [table.tenantId, table.proposalId],
       foreignColumns: [aiActionProposals.tenantId, aiActionProposals.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'approval_texts_execution_fk',
+      columns: [table.tenantId, table.executionId],
+      foreignColumns: [aiActionExecutions.tenantId, aiActionExecutions.id],
     }).onDelete('cascade'),
     tenantIsolation(sql.raw('tenant_id')),
   ],

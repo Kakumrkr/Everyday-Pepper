@@ -1,0 +1,4 @@
+ALTER TABLE "approval_texts" ADD COLUMN "execution_id" uuid;--> statement-breakpoint
+ALTER TABLE "approval_texts" ADD CONSTRAINT "approval_texts_execution_fk" FOREIGN KEY ("tenant_id","execution_id") REFERENCES "public"."ai_action_executions"("tenant_id","id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "approval_texts_execution_idx" ON "approval_texts" USING btree ("tenant_id","execution_id");--> statement-breakpoint
+ALTER TABLE "approval_texts" ADD CONSTRAINT "approval_texts_executed_when_used" CHECK ("approval_texts"."execution_id" IS NULL OR "approval_texts"."used_at" IS NOT NULL);

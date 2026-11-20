@@ -4,6 +4,8 @@ import { Writable } from 'node:stream';
 import { scriptedResponse, type LlmProvider } from '@pepper/ai';
 import {
   ActionProposalIdSchema,
+  AiActionsResponseSchema,
+  AiProposalViewSchema,
   ChatEventSchema,
   MemberTextsSchema,
   SandboxInboundSmsResponseSchema,
@@ -379,5 +381,44 @@ describe('approve by text through the sandbox (AC-X-83…87)', () => {
     // The right code now gets the miss answer too, and the card still waits.
     expect(await textIn(phone, `Y ${code}`)).toBe(APPROVAL_REPLIES.miss);
     expect((await getProposal(database.db, actor, proposalId)).status).toBe('pending');
+  });
+
+  /** The card's receipt in Activity, as the owner's app reads it. */
+  async function receiptOf(member: Awaited<ReturnType<typeof owner>>, proposalId: string) {
+    const page = AiActionsResponseSchema.parse(
+      (await member.browser.get('/v1/ai/actions?limit=20').expect(200)).body,
+    );
+    const receipt = page.actions.find((action) => action.proposalId === proposalId);
+    if (receipt === undefined) throw new Error('no receipt');
+    return receipt;
+  }
+
+  it('says in Activity that a card was approved by text (AC-X-91)', async () => {
+    const member = await owner();
+    const phone = newPhone();
+    await textingCards(member, phone);
+    const { proposalId, code } = await cardTexted(member, phone);
+    expect(await textIn(phone, `Y ${code}`)).toBe(APPROVAL_REPLIES.done);
+    const receipt = await receiptOf(member, proposalId);
+    expect(receipt.approvedVia).toBe('text');
+    // Its own receipt says so too.
+    const own = await member.browser.get(`/v1/ai/actions/${receipt.id}`).expect(200);
+    expect((own.body as { approvedVia?: string }).approvedVia).toBe('text');
+  });
+
+  it('never says "by text" of a card approved in the app, even after its code was spent', async () => {
+    const member = await owner();
+    const phone = newPhone();
+    await textingCards(member, phone);
+    const { proposalId, code } = await cardTexted(member, phone);
+    const card = AiProposalViewSchema.parse(
+      (await member.browser.get(`/v1/ai/proposals/${proposalId}`).expect(200)).body,
+    );
+    await member.browser
+      .post(`/v1/ai/proposals/${proposalId}/approve`, { fingerprint: card.fingerprint })
+      .expect(200);
+    // The reply spends the code but approves nothing: the card was handled in the app.
+    expect(await textIn(phone, `Y ${code}`)).toBe(APPROVAL_REPLIES.handled);
+    expect((await receiptOf(member, proposalId)).approvedVia).toBeUndefined();
   });
 });

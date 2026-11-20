@@ -47,6 +47,7 @@ import {
   autonomyPresetOf,
   changeAutonomy,
   clientEmailAddresses,
+  executionsApprovedByText,
   getAction,
   getActionOfProposal,
   getAutonomy,
@@ -134,12 +135,21 @@ export class AiActionsService {
     tenant: TenantContext,
     id: ActionProposalId,
     fingerprint: string,
+    /**
+     * `firstOnly`: a card already approved is `proposal_not_pending`, not its receipt again (a
+     * text reply, S63.2: the app's double tap still gets the receipt; a "Y" to a card handled
+     * in the app is told so, AC-X-83, and never reads as approved by text, AC-X-91).
+     */
+    options: { firstOnly?: boolean } = {},
   ): Promise<ApproveProposalResponse> {
     const actor = actorOf(tenant);
     const deps = await this.chat.toolDeps(tenant);
     const result = await approveToolProposal(deps, id, fingerprint);
     switch (result.kind) {
       case 'executed':
+        if (options.firstOnly === true && result.replayed === true) {
+          throw new ProposalNotPendingError('approved');
+        }
         return { kind: 'executed', action: await this.actionView(actor, result.execution) };
       case 'stale':
         return { kind: 'stale', proposal: await this.proposalView(actor, result.proposal) };
@@ -267,9 +277,13 @@ export class AiActionsService {
 
   private async actionView(actor: Actor, execution: ActionExecution): Promise<AiActionView> {
     const me = actor.context.userId;
-    const [names, messages] = await Promise.all([
+    const [names, messages, byText] = await Promise.all([
       memberFirstNames(this.db, actor, [execution.onBehalfOfUserId]),
       actionMessages(this.db, actor, execution),
+      // Only an approved card can have been approved by text.
+      execution.proposalId === null
+        ? new Set<string>()
+        : executionsApprovedByText(this.db, actor, [execution.id]),
     ]);
     const forYou = execution.requestedByUserId === me || execution.onBehalfOfUserId === me;
     // No address on a receipt: the client's address now may not be where the email went.
@@ -303,6 +317,7 @@ export class AiActionsService {
         approvedByOther && execution.onBehalfOfUserId !== null
           ? (names.get(execution.onBehalfOfUserId) ?? null)
           : null,
+      ...(byText.has(execution.id) && { approvedVia: 'text' as const }),
       forYou,
       ...(await this.withMemory(actor, execution.explanation, null)),
       ...(await this.fillOf(actor, execution)),
