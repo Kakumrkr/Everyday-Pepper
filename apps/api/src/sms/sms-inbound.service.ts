@@ -1,8 +1,9 @@
 import { createHmac } from 'node:crypto';
 import { confirmBookingByText } from '@pepper/appointments';
-import { approvalCodeOf, classifySmsReply } from '@pepper/contracts';
+import { approvalCodeOf, classifySmsReply, type TenantId } from '@pepper/contracts';
 import {
   claimApprovalText,
+  recordTextApproval,
   ForbiddenError,
   handleInboundSms,
   ProposalNotFoundError,
@@ -133,9 +134,11 @@ export class SmsInboundService {
         claim.context,
         claim.proposalId,
         claim.fingerprint,
+        { firstOnly: true },
       );
       switch (result.kind) {
         case 'executed':
+          await this.linkExecution(claim.tenantId, claim.approvalTextId, result.action.id);
           return APPROVAL_REPLIES.done;
         case 'stale':
           return APPROVAL_REPLIES.changed;
@@ -155,6 +158,24 @@ export class SmsInboundService {
         `An approval by text failed: ${error instanceof Error ? error.name : 'unknown'}`,
       );
       return APPROVAL_REPLIES.refused;
+    }
+  }
+
+  /**
+   * Activity's "approved by text" (S63.2, AC-X-91). The card is done either way, so a failure
+   * here only loses that label: it is reported, never answered as a failed approval.
+   */
+  private async linkExecution(
+    tenantId: TenantId,
+    approvalTextId: string,
+    executionId: string,
+  ): Promise<void> {
+    try {
+      await recordTextApproval(this.db, tenantId, approvalTextId, executionId);
+    } catch (error) {
+      this.logger.error(
+        `Linking an approval by text failed: ${error instanceof Error ? error.name : 'unknown'}`,
+      );
     }
   }
 

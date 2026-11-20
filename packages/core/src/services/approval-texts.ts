@@ -20,13 +20,16 @@ import {
   insertApprovalText,
   isSmsOptedOut,
   listCardTextRecipients,
+  listExecutionsApprovedByText,
   lockApprovalText,
   markApprovalTextUsed,
+  setApprovalTextExecution,
   smsApprovalTarget,
   withTenant,
   type Database,
   type TenantTx,
 } from '@pepper/db';
+import { requirePermission, type Actor } from '../actor.js';
 import { decideTenantAccess, type TenantContext } from '../tenant-access.js';
 import { queueSms } from './sms.js';
 import { sameCodeHash, smsCodeHash } from './member-texts.js';
@@ -147,6 +150,8 @@ export type ApprovalClaim =
   | {
       kind: 'claimed';
       tenantId: TenantId;
+      /** The spent text, to link to what its approval does (`recordTextApproval`). */
+      approvalTextId: string;
       /** The member, with their role now, to approve as. */
       context: TenantContext;
       proposalId: ActionProposalId;
@@ -196,6 +201,7 @@ export async function claimApprovalText(
     return {
       kind: 'claimed',
       tenantId: target.tenantId,
+      approvalTextId: text.id,
       context,
       proposalId: ActionProposalIdSchema.parse(text.proposalId),
       fingerprint: text.fingerprint,
@@ -230,4 +236,32 @@ async function approverContext(
     twoFactorEnabled: state.twoFactorEnabled,
   });
   return access.allowed ? access.context : null;
+}
+
+/**
+ * Records that a claimed text's approval went through (S63.2, AC-X-91): the execution it made,
+ * so Activity can say the card was approved by text. Only after `executed`: a spent code whose
+ * approval was refused or found the card changed stays unlinked.
+ */
+export async function recordTextApproval(
+  db: Database,
+  tenantId: TenantId,
+  approvalTextId: string,
+  executionId: string,
+): Promise<boolean> {
+  return withTenant(db, tenantId, (tx) =>
+    setApprovalTextExecution(tx, approvalTextId, executionId),
+  );
+}
+
+/** Of these executions, the ones approved by a text reply (S63.2, AC-X-91). */
+export async function executionsApprovedByText(
+  db: Database,
+  actor: Actor,
+  executionIds: readonly string[],
+): Promise<Set<string>> {
+  requirePermission(actor, 'business.read');
+  return withTenant(db, actor.context.tenantId, (tx) =>
+    listExecutionsApprovedByText(tx, executionIds),
+  );
 }

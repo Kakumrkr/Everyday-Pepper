@@ -685,8 +685,12 @@ describe('approveProposal', () => {
       outcome: 'propose',
       onBehalfOfUserId: jess,
     });
-    // A double tap returns the same execution.
-    expect(await approveProposal(db, jessActor(), proposal.id, approval)).toEqual(result);
+    expect(result.replayed).toBeUndefined();
+    // A double tap returns the same execution, marked as a replay (a text reply says so, S63.2).
+    expect(await approveProposal(db, jessActor(), proposal.id, approval)).toEqual({
+      ...result,
+      replayed: true,
+    });
     expect((await tasksOf(jess)).length).toBe(before + 1);
   });
 
@@ -698,8 +702,10 @@ describe('approveProposal', () => {
       approveProposal(db, jessActor(), proposal.id, approval),
       approveProposal(db, ana(), proposal.id, approval),
     ]);
-    expect(a.kind).toBe('executed');
-    expect(b).toEqual(a);
+    if (a.kind !== 'executed' || b.kind !== 'executed') throw new Error('expected executions');
+    expect(b.execution).toEqual(a.execution);
+    // Exactly one of them ran it.
+    expect([a.replayed, b.replayed].filter((replayed) => replayed === true)).toHaveLength(1);
     expect((await tasksOf(jess)).length).toBe(before + 1);
   });
 

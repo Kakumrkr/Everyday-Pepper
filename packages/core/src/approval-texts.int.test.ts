@@ -5,11 +5,13 @@ import {
   TenantIdSchema,
   type ActionProposal,
   type TenantId,
+  type UserId,
 } from '@pepper/contracts';
 import {
   addMembership,
   createTenant,
   findOutboxMessage,
+  insertExecution,
   insertProposal,
   listDueOutboxMessages,
   newId,
@@ -21,7 +23,12 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Actor } from './actor.js';
 import { ManualClock } from './clock.js';
 import { openOutboxContent, outboxKeyFrom } from './outbox.js';
-import { claimApprovalText, queueApprovalTexts } from './services/approval-texts.js';
+import {
+  claimApprovalText,
+  executionsApprovedByText,
+  queueApprovalTexts,
+  recordTextApproval,
+} from './services/approval-texts.js';
 import {
   setMemberCardTexts,
   smsCodeKeyFrom,
@@ -57,7 +64,11 @@ afterAll(async () => {
   await database.stop();
 });
 
-/** A business in Chicago with the clock at `at`, and an owner texting cards to `phone`. */
+/**
+ * A business in Chicago with the clock at `at`, and an owner texting cards to `phone`. The
+ * clocks are years ahead: the database stamps rows with the real time, so a card made "now" by
+ * a clock in the past would expire before it was created (these failed from 2026-11-14 on).
+ */
 async function business(at: string) {
   const clock = new ManualClock(at);
   const tenantId = TenantIdSchema.parse(
@@ -158,7 +169,7 @@ const claim = (from: string, code: string, at: Date) =>
 describe('queueApprovalTexts (AC-X-82)', () => {
   it('texts each owner and manager who asked, with a code of their own, never staff', async () => {
     // 11:00 in Chicago.
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     const manager = await b.join('manager');
     await b.join('manager', false);
@@ -176,7 +187,7 @@ describe('queueApprovalTexts (AC-X-82)', () => {
   });
 
   it('texts no one whose reply couldn’t approve: a member without a second factor', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     await setTwoFactor(db, owner.actor.context.userId, false);
     expect(
@@ -186,25 +197,25 @@ describe('queueApprovalTexts (AC-X-82)', () => {
 
   it('holds a card for the quiet hours, and skips one that would expire first', async () => {
     // 21:30 in Chicago: the text can go at 8:00 tomorrow.
-    const b = await business('2026-11-14T03:30:00Z');
+    const b = await business('2036-11-14T03:30:00Z');
     const owner = await b.join('owner');
-    const card = await proposal(b.tenantId, new Date('2026-11-14T20:00:00Z'));
+    const card = await proposal(b.tenantId, new Date('2036-11-14T20:00:00Z'));
     expect(await queue(b, card)).toBe(1);
     expect(await cards(b.tenantId)).toEqual([
       {
         to: owner.phone,
         body: `Pepper: ${SUMMARY} Reply Y 4821 by 10:00am.`,
-        at: new Date('2026-11-14T14:00:00Z'),
+        at: new Date('2036-11-14T14:00:00Z'),
       },
     ]);
     // Expires at 8:10 tomorrow: no text.
-    expect(await queue(b, await proposal(b.tenantId, new Date('2026-11-14T14:10:00Z')))).toBe(0);
+    expect(await queue(b, await proposal(b.tenantId, new Date('2036-11-14T14:10:00Z')))).toBe(0);
     // Not pending: no text.
     expect(await queue(b, { ...card, status: 'approved' })).toBe(0);
   });
 
   it('draws a code no live text to that number has, across cards', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR)), [
       '7777',
@@ -220,7 +231,7 @@ describe('queueApprovalTexts (AC-X-82)', () => {
   });
 
   it('skips a number that replied STOP', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     await handleInboundSms(
       db,
@@ -241,7 +252,7 @@ describe('queueApprovalTexts (AC-X-82)', () => {
 
 describe('claimApprovalText (AC-X-83…85)', () => {
   it('claims once, then answers used; an expired one answers expired', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     const card = await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR));
     await queue(b, card, ['1357']);
@@ -249,6 +260,7 @@ describe('claimApprovalText (AC-X-83…85)', () => {
     expect(await claim(owner.phone, '1357', at)).toEqual({
       kind: 'claimed',
       tenantId: b.tenantId,
+      approvalTextId: expect.any(String) as string,
       context: owner.actor.context,
       proposalId: card.id,
       fingerprint: card.fingerprint,
@@ -266,7 +278,7 @@ describe('claimApprovalText (AC-X-83…85)', () => {
   });
 
   it('is a miss from another number, with a wrong code, or for a member who may no longer', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     const manager = await b.join('manager');
     await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR)), [
@@ -301,7 +313,7 @@ describe('claimApprovalText (AC-X-83…85)', () => {
   });
 
   it('is a miss once the member checked another number', async () => {
-    const b = await business('2026-11-13T17:00:00Z');
+    const b = await business('2036-11-13T17:00:00Z');
     const owner = await b.join('owner');
     await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR)), [
       '3333',
@@ -312,5 +324,71 @@ describe('claimApprovalText (AC-X-83…85)', () => {
     expect(await claim(owner.phone, '3333', new Date(b.clock.now().getTime() + 60_000))).toEqual({
       kind: 'miss',
     });
+  });
+});
+
+describe('recordTextApproval and executionsApprovedByText (S63.2, AC-X-91)', () => {
+  /** An execution of `card`, as approving it would record. */
+  async function executionOf(tenantId: TenantId, ownerId: UserId, card: ActionProposal) {
+    const row = await withTenant(db, tenantId, (tx) =>
+      insertExecution(tx, {
+        proposalId: card.id,
+        action: 'message.waitlist_offer',
+        tool: 'send_waitlist_offers',
+        outcome: 'propose',
+        idempotencyKey: `test:${newId()}`,
+        entity: { type: 'waitlist_match', id: newId() },
+        before: null,
+        after: null,
+        undo: null,
+        explanation: {
+          requestMessageId: null,
+          steps: [],
+          facts: [],
+          alternatives: [],
+          untrustedContext: false,
+          decision: { outcome: 'propose', reason: 'setting' },
+        },
+        outboxMessageIds: [],
+        onBehalfOf: ownerId,
+        recordOwner: null,
+      }),
+    );
+    if (row === undefined) throw new Error('no execution');
+    return row.id;
+  }
+
+  it('links only a spent text, once, and lists it in its own business only', async () => {
+    const b = await business('2036-11-13T17:00:00Z');
+    const owner = await b.join('owner');
+    const card = await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR));
+    await queue(b, card, ['8642']);
+    const execution = await executionOf(b.tenantId, owner.actor.context.userId, card);
+    // Test-only, from a validated uuid: the text queued for the card, within its business.
+    const found = await withTenant(db, b.tenantId, (tx) =>
+      tx.execute(`SELECT id FROM approval_texts WHERE proposal_id = '${card.id}'`),
+    );
+    // The text's id is its outbox message's (approval_texts_message_fk).
+    const textId = OutboxMessageIdSchema.parse(found.rows[0]?.['id']);
+
+    // Not replied to yet: nothing to link.
+    expect(await recordTextApproval(db, b.tenantId, textId, execution)).toBe(false);
+    const claimed = await claim(owner.phone, '8642', new Date(b.clock.now().getTime() + 60_000));
+    if (claimed.kind !== 'claimed') throw new Error('expected a claim');
+    expect(claimed.approvalTextId).toBe(textId);
+    expect(await recordTextApproval(db, b.tenantId, textId, execution)).toBe(true);
+    // Once: a second link changes nothing.
+    expect(await recordTextApproval(db, b.tenantId, textId, execution)).toBe(false);
+
+    const other = newId();
+    expect(await executionsApprovedByText(db, owner.actor, [execution, other])).toEqual(
+      new Set([execution]),
+    );
+    expect(await executionsApprovedByText(db, owner.actor, [])).toEqual(new Set());
+    // Another business sees none of it (RLS).
+    const elsewhere = await business('2036-11-13T17:00:00Z');
+    const stranger = await elsewhere.join('owner');
+    expect(await executionsApprovedByText(db, stranger.actor, [execution])).toEqual(new Set());
+    expect(await recordTextApproval(db, elsewhere.tenantId, textId, execution)).toBe(false);
   });
 });

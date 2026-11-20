@@ -70,6 +70,47 @@ export async function markApprovalTextUsed(tx: TenantTx, id: string, at: Date): 
 }
 
 /**
+ * Links a spent text to the execution its approval made (S63.2, AC-X-91); `false`: no such
+ * spent text, or it already has one.
+ */
+export async function setApprovalTextExecution(
+  tx: TenantTx,
+  id: string,
+  executionId: string,
+): Promise<boolean> {
+  const rows = await tx
+    .update(approvalTexts)
+    .set({ executionId: Id.parse(executionId) })
+    .where(
+      and(
+        eq(approvalTexts.id, Id.parse(id)),
+        isNotNull(approvalTexts.usedAt),
+        isNull(approvalTexts.executionId),
+      ),
+    )
+    .returning({ id: approvalTexts.id });
+  return rows.length > 0;
+}
+
+/** Of these executions, the ones a text reply approved (S63.2, AC-X-91). */
+export async function listExecutionsApprovedByText(
+  tx: TenantTx,
+  executionIds: readonly string[],
+): Promise<Set<string>> {
+  if (executionIds.length === 0) return new Set();
+  const rows = await tx
+    .select({ executionId: approvalTexts.executionId })
+    .from(approvalTexts)
+    .where(
+      inArray(
+        approvalTexts.executionId,
+        executionIds.map((id) => Id.parse(id)),
+      ),
+    );
+  return new Set(rows.flatMap((row) => (row.executionId === null ? [] : [row.executionId])));
+}
+
+/**
  * Which text a reply with this code's HMAC answers, across businesses (`sms_approval_target`,
  * ids only): a live one first, else one expired or used in the last day; `undefined`: none.
  */

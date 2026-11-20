@@ -258,7 +258,12 @@ export async function requestAction(
 }
 
 export type ApprovalResult =
-  | { kind: 'executed'; execution: ActionExecution }
+  | {
+      kind: 'executed';
+      execution: ActionExecution;
+      /** A second approval (a double tap): the first one's execution, nothing ran now. */
+      replayed?: true;
+    }
   /** The world changed since the member saw it: here is the fresh proposal to show. */
   | { kind: 'stale'; proposal: ActionProposal }
   /**
@@ -299,7 +304,7 @@ export async function approveProposal(
     if (proposal.status === 'approved') {
       const execution = await findExecutionOfProposal(tx, id);
       if (execution === undefined) throw new ProposalNotPendingError('approved');
-      return { kind: 'executed', execution: toExecution(execution) };
+      return { kind: 'executed', execution: toExecution(execution), replayed: true };
     }
     if (proposal.status !== 'pending') throw new ProposalNotPendingError(settled(proposal.status));
     checkRunner(runner, proposal);

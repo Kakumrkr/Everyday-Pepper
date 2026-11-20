@@ -39,7 +39,9 @@ import { withTenant, type TenantTx } from './tenant.js';
 import { insertUser, sqlState, startTestDatabase, type TestDatabase } from './test-support.js';
 
 const SHOWN = 'Text me cards that need my OK from A at this number. Reply STOP to opt out.';
-const T0 = new Date('2026-11-13T15:00:00Z');
+// Years ahead: a card's proposal is stamped with the database's real time, so a clock in the past
+// would make it expire before it was created (these failed from 2026-11-14 on).
+const T0 = new Date('2036-11-13T15:00:00Z');
 const HOUR = 3_600_000;
 let database: TestDatabase;
 let db: Database;

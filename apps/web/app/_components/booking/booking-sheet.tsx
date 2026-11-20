@@ -180,7 +180,13 @@ function BookingDetails({
                 label: 'Reply',
                 value: (
                   <span className="text-ok" data-testid="booking-confirmed-by-text">
-                    Confirmed by text, {dateTimeLabel(timeZone, confirmedAt)}
+                    Confirmed by text
+                    <span
+                      className="block text-ink-2 tabular-nums"
+                      data-testid="booking-confirmed-when"
+                    >
+                      {dateTimeLabel(timeZone, confirmedAt)}
+                    </span>
                   </span>
                 ),
               },

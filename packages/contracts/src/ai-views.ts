@@ -188,6 +188,11 @@ export const AiActionViewSchema = z.strictObject({
   undoReason: UndoReasonSchema.nullable(),
   /** A lead approved it for the member who asked (S23 log: the receipt is theirs too). */
   approvedByName: z.string().max(80).nullable(),
+  /**
+   * How its card was approved, when not in the app (S63.2, AC-X-91): `text`, a reply of "Y" and
+   * the code to Pepper's text (ADR-0066); absent otherwise.
+   */
+  approvedVia: z.literal('text').optional(),
   /** It was done for, or asked for by, the viewer. */
   forYou: z.boolean(),
   why: AiWhySchema,

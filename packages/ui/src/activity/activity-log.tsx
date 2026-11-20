@@ -102,11 +102,15 @@ export function activityLine(
       ? ACTION_LABEL[action.action]
       : action.summary);
   const time = formatInstant(action.createdAt, timeZone).split(', ').at(-1) ?? '';
+  // A reply to Pepper's text (S63.2, AC-X-91) is said; an approval in the app reads as before.
+  const byText = action.approvedVia === 'text' ? ' by text' : '';
   const how =
     action.approvedByName !== null
-      ? `approved by ${action.approvedByName}`
+      ? `approved by ${action.approvedByName}${byText}`
       : action.outcome === 'propose'
-        ? 'after approval'
+        ? byText === ''
+          ? 'after approval'
+          : 'approved by text'
         : 'on its own, as Autonomy allows';
   const counts = new Map<AiEmailStatus, number>();
   for (const email of action.emails) counts.set(email.status, (counts.get(email.status) ?? 0) + 1);

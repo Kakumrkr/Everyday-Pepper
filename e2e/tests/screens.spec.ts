@@ -34,6 +34,7 @@ import {
   unique,
   visitsCsv,
 } from './helpers.js';
+import { newPhone, textTo, typed } from './sms-helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 import { solidColorPhoto } from '@pepper/storage';
 
@@ -586,6 +587,8 @@ for (const width of WIDTHS) {
       // Texts and reminders (S62.2, AC-X-77): the switches, the same-day lead, the night rule.
       await page.goto('/more/texts');
       await hydrated(page.getByRole('switch', { name: 'On the day' }));
+      // An owner's own "Cards to your phone" (S63.2), with no number yet.
+      await expect(page.getByTestId('my-number')).toHaveText('None yet');
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`more-texts-${String(width)}-${scheme}.png`, SHOT);
 
@@ -720,6 +723,56 @@ async function southsideDay(
     );
   }
   return { date: formatDate(day), marcus: marcus.id, audy: audy.id, dre: dre.id };
+}
+
+for (const width of WIDTHS) {
+  test(`Cards to your phone at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const phone = width <= 375;
+    for (const scheme of SCHEMES) {
+      // Cards to your phone (S63.2, AC-X-88/89): the number sheet's code step, then the number
+      // checked and "Text me cards" on. A number of its own each time, masked.
+      await page.goto('/more/texts');
+      const cards = page.getByTestId('card-texts');
+      await (
+        await hydrated(cards.getByRole('button', { name: /^(Add your number|Change number)$/ }))
+      ).click();
+      const number = newPhone();
+      const sheet = page.getByRole('dialog', { name: 'Your mobile number' });
+      await sheet.getByLabel('Number', { exact: true }).fill(typed(number));
+      await sheet.getByRole('button', { name: 'Text me a code' }).click();
+      const codeStep = page.getByRole('dialog', { name: 'Type the code' });
+      await expect(codeStep.getByLabel('6-digit code')).toBeVisible();
+      // The pointer off the sheet: it rests where "Text me a code" was, over another button.
+      await page.mouse.move(0, 0);
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`more-texts-code-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        fullPage: false,
+        mask: [codeStep.getByText(/^I texted a code to/)],
+      });
+      if (phone) await expectTapTargets(page, 'the number sheet');
+      const code =
+        /your code is (\d{6})\./.exec(await textTo(page, number, /your code is \d{6}/))?.[1] ?? '';
+      await codeStep.getByLabel('6-digit code').fill(code);
+      await codeStep.getByRole('button', { name: 'Check the code' }).click();
+      await expect(codeStep).toHaveCount(0);
+      // A new number turns cards off (ADR-0066 §1): on again for the picture.
+      const textCards = cards.getByRole('switch', { name: 'Text me cards' });
+      await expect(textCards).not.toBeChecked();
+      await textCards.click();
+      await expect(textCards).toBeChecked();
+      await expect(toast(page)).toHaveCount(0, { timeout: 20_000 });
+      await still(page, scheme);
+      await expect.soft(page).toHaveScreenshot(`more-texts-cards-${String(width)}-${scheme}.png`, {
+        ...SHOT,
+        mask: [cards.getByTestId('my-number')],
+      });
+      if (phone) await expectTapTargets(page, 'Texts and reminders with cards on');
+    }
+  });
 }
 
 for (const width of WIDTHS) {
