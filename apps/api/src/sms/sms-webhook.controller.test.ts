@@ -27,12 +27,14 @@ const core = vi.hoisted(() => ({
   handleInboundSms: vi.fn(),
   recordSmsStatus: vi.fn(),
   claimApprovalText: vi.fn(),
+  recordTextApproval: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   handleInboundSms: core.handleInboundSms,
   recordSmsStatus: core.recordSmsStatus,
   claimApprovalText: core.claimApprovalText,
+  recordTextApproval: core.recordTextApproval,
 }));
 const db = vi.hoisted(() => ({ isSmsOptedOut: vi.fn(), isMemberPhone: vi.fn() }));
 vi.mock('@pepper/db', async (original) => ({
@@ -144,6 +146,8 @@ beforeEach(() => {
   core.handleInboundSms.mockResolvedValue({ keyword: 'stop', reply: 'Pepper: You & "they" <ok>' });
   core.recordSmsStatus.mockResolvedValue('moved');
   core.claimApprovalText.mockReset();
+  core.recordTextApproval.mockReset();
+  core.recordTextApproval.mockResolvedValue(true);
   approvals.approve.mockReset();
   limits.hit.mockClear();
   limits.spent.mockReset();
@@ -216,9 +220,12 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
   });
 
   describe('"Y" and a code (S63, AC-X-83…86)', () => {
+    const TEXT_ID = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f7000aa';
+    const EXECUTION = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f7000bb';
     const CLAIMED = {
       kind: 'claimed',
       tenantId: TENANT,
+      approvalTextId: TEXT_ID,
       context: { tenantId: TENANT, userId: MESSAGE, role: 'owner' },
       proposalId: MESSAGE,
       fingerprint: 'f'.repeat(64),
@@ -232,15 +239,36 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
 
     it('claims the code from this number, then approves as its member with what the text showed', async () => {
       core.claimApprovalText.mockResolvedValue(CLAIMED);
-      approvals.approve.mockResolvedValue({ kind: 'executed' });
+      approvals.approve.mockResolvedValue({ kind: 'executed', action: { id: EXECUTION } });
       expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.done);
       expect(core.claimApprovalText).toHaveBeenCalledWith(
         {},
         { from: '+15552340001', code: '4821', receivedAt: NOW },
         { codeKey: expect.any(Buffer) as Buffer },
       );
-      expect(approvals.approve).toHaveBeenCalledWith(CLAIMED.context, MESSAGE, 'f'.repeat(64));
+      // Only the first approval counts: a card already approved in the app is "handled".
+      expect(approvals.approve).toHaveBeenCalledWith(CLAIMED.context, MESSAGE, 'f'.repeat(64), {
+        firstOnly: true,
+      });
+      // Activity's "approved by text" (S63.2, AC-X-91): the text linked to what it did.
+      expect(core.recordTextApproval).toHaveBeenCalledWith({}, TENANT, TEXT_ID, EXECUTION);
       expect(appointments.confirmBookingByText).not.toHaveBeenCalled();
+    });
+
+    it('still says done when only the Activity link fails (the card is approved)', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      approvals.approve.mockResolvedValue({ kind: 'executed', action: { id: EXECUTION } });
+      core.recordTextApproval.mockRejectedValueOnce(new Error('connection reset'));
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.done);
+    });
+
+    it('links nothing when the approval did not run', async () => {
+      core.claimApprovalText.mockResolvedValue(CLAIMED);
+      approvals.approve.mockResolvedValueOnce({ kind: 'stale' });
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.changed);
+      approvals.approve.mockRejectedValueOnce(new ProposalNotPendingError('approved'));
+      expect(await reply('Y 4821')).toBe(APPROVAL_REPLIES.handled);
+      expect(core.recordTextApproval).not.toHaveBeenCalled();
     });
 
     it('answers a changed, refused, expired or handled card without running it', async () => {

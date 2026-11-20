@@ -228,11 +228,11 @@ function NumberSheet({
             label="6-digit code"
             inputMode="numeric"
             autoComplete="one-time-code"
-            maxLength={6}
             required
             value={code}
             onChange={(event) => {
-              setCode(event.target.value.replace(/\D/g, ''));
+              // A pasted "482 193" or "482-193" keeps all six digits (no maxLength to cut it).
+              setCode(event.target.value.replace(/\D/g, '').slice(0, 6));
             }}
           />
         )}

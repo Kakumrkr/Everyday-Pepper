@@ -8,7 +8,7 @@ import {
   toast,
   unique,
 } from './helpers.js';
-import { checkNumberAndTextCards, newPhone, textTo, typed } from './sms-helpers.js';
+import { newPhone, textTo, typed } from './sms-helpers.js';
 
 // Texts and reminders on screen (S62.2, AC-X-77, ADR-0065): the owner finds them in More, each
 // change saves at once and stays; staff read the same settings and cannot change them.
@@ -147,7 +147,23 @@ test('an owner checks their number with the texted code and turns on cards by te
   await page.reload();
   await expect(await hydrated(cards.getByRole('switch', { name: 'Text me cards' }))).toBeChecked();
 
-  // A new number: checked the same way, and cards by text are off until turned on again.
-  await checkNumberAndTextCards(page, newPhone());
-  await expect(page.getByRole('switch', { name: 'Text me cards' })).toBeChecked();
+  // A new number: checked the same way, and cards by text are off until turned on again
+  // (ADR-0066 §1). The code is pasted with a space, as it often is from a text.
+  const second = newPhone();
+  await cards.getByRole('button', { name: 'Change number' }).click();
+  await sheet.getByLabel('Mobile number').fill(typed(second));
+  await sheet.getByRole('button', { name: 'Text me a code' }).click();
+  const secondCode =
+    /your code is (\d{6})\./.exec(await textTo(page, second, /your code is \d{6}/))?.[1] ?? '';
+  await codeStep
+    .getByLabel('6-digit code')
+    .fill(`${secondCode.slice(0, 3)} ${secondCode.slice(3)}`);
+  await expect(codeStep.getByLabel('6-digit code')).toHaveValue(secondCode);
+  await codeStep.getByRole('button', { name: 'Check the code' }).click();
+  await expect(codeStep).toHaveCount(0);
+  await expect(toast(page).last()).toContainText(
+    'Number checked. Text me cards is off for the new number: turn it on again to get them.',
+  );
+  await expect(cards.getByTestId('my-number')).toHaveText(typed(second));
+  await expect(cards.getByRole('switch', { name: 'Text me cards' })).not.toBeChecked();
 });

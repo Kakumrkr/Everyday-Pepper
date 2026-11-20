@@ -124,8 +124,14 @@ export class AiActionsService {
       ...(query.after === undefined ? {} : { after: query.after }),
     });
     const page = recent.slice(0, limit);
+    // Which of the page's approvals came by text, in one read for the whole page.
+    const byText = await executionsApprovedByText(
+      this.db,
+      actor,
+      page.flatMap((e) => (e.proposalId === null ? [] : [e.id])),
+    );
     return {
-      actions: await Promise.all(page.map((e) => this.actionView(actor, e))),
+      actions: await Promise.all(page.map((e) => this.actionView(actor, e, byText))),
       next: recent.length > limit ? (page.at(-1)?.id ?? null) : null,
     };
   }
@@ -275,15 +281,21 @@ export class AiActionsService {
     };
   }
 
-  private async actionView(actor: Actor, execution: ActionExecution): Promise<AiActionView> {
+  /** `pageByText`: the page's approvals by text, when the caller read them for a whole page. */
+  private async actionView(
+    actor: Actor,
+    execution: ActionExecution,
+    pageByText?: ReadonlySet<string>,
+  ): Promise<AiActionView> {
     const me = actor.context.userId;
     const [names, messages, byText] = await Promise.all([
       memberFirstNames(this.db, actor, [execution.onBehalfOfUserId]),
       actionMessages(this.db, actor, execution),
       // Only an approved card can have been approved by text.
-      execution.proposalId === null
-        ? new Set<string>()
-        : executionsApprovedByText(this.db, actor, [execution.id]),
+      pageByText ??
+        (execution.proposalId === null
+          ? new Set<string>()
+          : executionsApprovedByText(this.db, actor, [execution.id])),
     ]);
     const forYou = execution.requestedByUserId === me || execution.onBehalfOfUserId === me;
     // No address on a receipt: the client's address now may not be where the email went.
