@@ -1,28 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-20 · **Plan version:** 0.38 ([PCR-012](changes/PCR-012.md)) · **Current phase:** 15 — Deposits, started before S64 (waits on 10DLC) and S58a–S60 (wait on the domain) by PCR-012 → **S65** in progress
+**Last updated:** 2026-11-20 · **Plan version:** 0.38 ([PCR-012](changes/PCR-012.md)) · **Current phase:** 15 — Deposits, started before S64 (waits on 10DLC) and S58a–S60 (wait on the domain) by PCR-012 → next **S65.2** (S65 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S65 · Stripe Connect Express, backend** (brief approved 2026-11-20: D-1 S65 now, D-2 split, screen in S65.2, D-3 owner only, D-4 no SDK; [ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-012](changes/PCR-012.md), AC-X-93…102). Profile: backend/domain; no model recording.
-- [x] T1 ADR-0067, PCR-012, ACs + traceability, playbook, CHANGELOG 0.38
-- [x] T2 contracts (payment schemas, `paymentAccountStatus`, permissions, audit actions) + `@pepper/payments` (port, signature check, Stripe fetch adapter on fixtures, sandbox): 19 + 14 unit tests green
-- [x] T3 db migration 0080 (`payment_accounts`, `payment_webhook_events`, `payment_account_tenant`), repositories, export (`payments.json`), isolation: db payments/isolation/export integration green
-- [x] T4 runtime `loadPaymentsConfig` (`PAYMENTS_PROVIDER`, `STRIPE_*`, `STRIPE_LIVE` guard): 5 tests
-- [x] T5 services (onboarding, read, dashboard, sync with newer-read-wins + audit + owner push, `handleStripeEvent`), clean-up 30 days, API error codes: payments int 14/14, core cleanup 4/4, typecheck all 16
-- [x] T6 api: `/v1/payments/{account,onboarding,account/sync,dashboard}`, `POST /v1/webhooks/stripe`, `/v1/dev/payments/account` (sandbox), config, layer rule, compose/.env: api payments int 8/8, unit 3/3 + config
-- Next step: review (`/code-review`, `/security-review`), then `/session-close`.
+Nothing in progress. Next: **S65.2** (payments on screen).
 
 ## Last sessions
+- **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-012](changes/PCR-012.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `@pepper/payments` (Stripe fetch adapter, one pinned version; Redis sandbox); one Express account per business, owner only; status from a fresh read; `POST /v1/webhooks/stripe` signed, once per event, the business only via the stored account; owners' push per change (top-up); migration 0080. AC-X-93…102.
+  - **Checks:** `pnpm check` green (4th run: prettier, two coverage gates by <0.1%, a type); affected integration 1,910 green (1st run); review 6 of 6 fixed, security none ≥ 8; no screen changed.
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
   - **Built:** "Cards to your phone" on Texts and reminders (number check, "Text me cards"); "approved by text" in Activity (migration 0079, top-up); journeys for approve by text and "Confirmed by text" with screenshots. AC-X-88…92. Fixed: a "Y" to a card handled in the app said "Done"; S63's approval-text tests failed from 2026-11-14 (fixed clock).
   - **Checks:** `pnpm check` green (1st run); affected integration green (2nd: the date bomb in db); e2e 5/5 + screens 33/33; review 6 of 6 fixed, security none ≥ 8; CI green on the 1st run (21.1 min).
-- **S63 Phase 14 · Approve by text, backend (2026-11-13)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #98](https://github.com/Kakumrkr/Everyday-Pepper/pull/98)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the member's checked number and "Text me cards" (`/v1/me/phone`, `/v1/me/texts`); waitlist offers texted with a code a text ("Reply Y 4821 by 4:10pm"); "Y" and the code approve that card once, from that number only (spoof, replay, 5 misses an hour); the sandbox text path `/v1/dev/sms` (top-up). Migration 0078, AC-X-80…87.
-  - **Checks:** `pnpm check` green (2nd run: prettier); affected integration 1,859 green (2nd run: the export list, a 2FA fixture); review 5 of 6 fixed, security none ≥ 8; no screen changed.
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -37,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S65 (user, 2026-11-20):** recommendations on all four (S65 now, split, owner only, no SDK), "don't compromise"; Express by `controller`, a fresh read wins, reconnect after a mode change. Full wording in [decisions.md](decisions.md).
 - **S63.2 (user, 2026-11-20):** decisions OK'd, relook invited (D-2 owners/managers only; D-3 dropped); Activity's "by text" from a link set after the approval ran; replayed approvals by text answer "handled". Full wording in [decisions.md](decisions.md).
 Older ones (S25–S33) are in [decisions.md](decisions.md).
 - **S63 (user, 2026-11-13):** "Go ahead with your recommendations and complete the session" (D-1 split → S63.2 the screens and journeys; D-2 "Y 4821", a code a text; D-3 waitlist offers only; D-4 the number on the account, the switch per business, owners/managers; D-5 ADR-0066); "stop at a safe place" before `/compact` (checkpointed, resumed). **Claude:** the code text needs no standing consent; consents unique per source; card texts need a second factor; a bare "Y" answered only on a member's number; the review's 5 fixes. Full wording in [decisions.md](decisions.md).
@@ -107,11 +101,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S65, M1–M2 and P1 are done (Phases 0–12: the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S65 | Stripe Connect Express, backend (now, PCR-012) | 15 | Webhook replay/signature tests |
 | S65.2 | Payments on screen | 15 | Screens 375 px light/dark; connect journey reaches "ready" |
 | S64 | SMS live after 10DLC; **Phase 14 gate** | 14 | C12 ≥ 7 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
