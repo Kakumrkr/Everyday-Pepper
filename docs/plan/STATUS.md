@@ -12,7 +12,7 @@ Nothing in progress. Next: **S65** (Stripe Connect Express onboarding and webhoo
 ## Last sessions
 - **S64 Phase 14 · Gate in sandbox + "N" to skip (2026-11-20)** ([PCR-012](changes/PCR-012.md), [ADR-0066](../adr/0066-approve-by-text.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** "N" and the code skips a texted card as declining it in the app (fingerprint-checked, first only); the card text says how to skip (≤ 2 segments). AC-X-93…95. **Phase 14 gate:** C12 3 → 7 on sandbox evidence (scorecard §9). PCR-012: Stripe (S65–S68) next; `send_client_message` over SMS → S64.2 SMS live.
-  - **Checks:** see session-log (pnpm check, affected integration, e2e approve-by-text, CI).
+  - **Checks:** `pnpm check` green (1st run); affected integration green (ai re-run alone after the 10-min limit); e2e approve-by-text 2/2; review 4 of 4 fixed, security none ≥ 8; walkthrough at 375 px; CI green on the 1st run (18.8 min).
 - **S63.2 Phase 14 · Approve by text on screen (2026-11-20)** ([ADR-0066](../adr/0066-approve-by-text.md), [PR #99](https://github.com/Kakumrkr/Everyday-Pepper/pull/99)). Full entry in [session-log.md](session-log.md).
   - **Built:** "Cards to your phone" on Texts and reminders (number check, "Text me cards"); "approved by text" in Activity (migration 0079, top-up); journeys for approve by text and "Confirmed by text" with screenshots. AC-X-88…92. Fixed: a "Y" to a card handled in the app said "Done"; S63's approval-text tests failed from 2026-11-14 (fixed clock).
   - **Checks:** `pnpm check` green (1st run); affected integration green (2nd: the date bomb in db); e2e 5/5 + screens 33/33; review 6 of 6 fixed, security none ≥ 8; CI green on the 1st run (21.1 min).
