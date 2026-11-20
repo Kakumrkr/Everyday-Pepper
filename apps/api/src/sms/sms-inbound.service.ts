@@ -28,8 +28,7 @@ import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 // A text to Pepper's one number, whoever carried it (S61–S63, ADR-0065 §5, ADR-0066 §4): Twilio's
 // signed webhook, or the sandbox's path in tests (AC-X-87). Keywords first (an opt-out always
 // wins), then "C" to confirm a visit, then "Y" or "N" and a code to approve or skip a card
-// (S64). The reply is
-// answered in the same request. Neither a number nor a text is logged.
+// (S64). The reply is answered in the same request. Neither a number nor a text is logged.
 
 export interface SmsInboundOptions {
   /** The public origin (`AUTH_BASE_URL`), for the help link. */
@@ -94,7 +93,8 @@ export class SmsInboundService {
       { helpUrl: new URL('/help', this.options.baseUrl).toString() },
     );
     if (result.keyword !== null) return result.reply;
-    switch (classifySmsReply(text.body)) {
+    const kind = classifySmsReply(text.body);
+    switch (kind) {
       case 'confirm':
         return (await confirmBookingByText(this.db, { from: text.from, receivedAt })).reply;
       case 'approve':
@@ -107,11 +107,7 @@ export class SmsInboundService {
       case 'skip_without_code':
         // Only to a member's checked number: a client's "Y" or "No" to a reminder gets no reply.
         return (await isMemberPhone(this.db, text.from)) && !(await this.optedOut(text.from))
-          ? APPROVAL_REPLIES[
-              classifySmsReply(text.body) === 'skip_without_code'
-                ? 'skipWithoutCode'
-                : 'withoutCode'
-            ]
+          ? APPROVAL_REPLIES[kind === 'skip_without_code' ? 'skipWithoutCode' : 'withoutCode']
           : null;
       // The keywords were answered above; anything else gets what `handleInboundSms` said.
       case 'help':
@@ -195,7 +191,9 @@ export class SmsInboundService {
       return APPROVAL_REPLIES.skipped;
     } catch (error) {
       if (error instanceof ProposalChangedError) return APPROVAL_REPLIES.changedNotSkipped;
-      if (error instanceof ProposalNotPendingError) return APPROVAL_REPLIES.handled;
+      if (error instanceof ProposalNotPendingError) {
+        return error.status === 'expired' ? APPROVAL_REPLIES.expired : APPROVAL_REPLIES.handled;
+      }
       if (error instanceof ForbiddenError || error instanceof ProposalNotFoundError) {
         return APPROVAL_REPLIES.miss;
       }

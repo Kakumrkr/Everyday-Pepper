@@ -251,6 +251,7 @@ describe('queueApprovalTexts (AC-X-82)', () => {
       await queue(b, await proposal(b.tenantId, new Date(b.clock.now().getTime() + 24 * HOUR))),
     ).toBe(0);
   });
+
   it('says how to skip, and fits two segments with the longest summary (AC-X-95)', async () => {
     const b = await business('2036-11-13T17:00:00Z');
     await b.join('owner');

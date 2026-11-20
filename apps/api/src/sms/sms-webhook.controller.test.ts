@@ -366,6 +366,7 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
         [new ProposalChangedError(), APPROVAL_REPLIES.changedNotSkipped],
         [new ProposalNotPendingError('rejected'), APPROVAL_REPLIES.handled],
         [new ProposalNotPendingError('approved'), APPROVAL_REPLIES.handled],
+        [new ProposalNotPendingError('expired'), APPROVAL_REPLIES.expired],
         [new ForbiddenError(), APPROVAL_REPLIES.miss],
         [new Error('connection reset'), APPROVAL_REPLIES.refused],
       ] as const) {
