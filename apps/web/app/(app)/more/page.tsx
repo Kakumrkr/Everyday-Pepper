@@ -14,6 +14,7 @@ import {
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { HELP_PATH } from '../../../lib/help';
+import { paymentsSummary } from '../../../lib/payments';
 import { REMINDER_SETTINGS_PATH, remindersSummary } from '../../../lib/reminder-settings';
 import { PRIVACY_PATH } from '@pepper/contracts';
 import { newRequestHref, SUPPORT_PATHS } from '../../../lib/support';
@@ -26,6 +27,7 @@ import {
   currentAccount,
   currentBusiness,
   currentJson,
+  currentPayments,
   currentSupportUnread,
 } from '../../_server/account';
 
@@ -53,11 +55,14 @@ export default async function MorePage() {
   // Texts and reminders (S62.2): whoever reads the calendar sees what clients get; read beside
   // the rest, so the row's line costs no extra wait.
   const readsCalendar = current?.permissions.includes('calendar.read') === true;
-  const [businessDeletion, accountDeletion, support, reminders] = await Promise.all([
+  // Payments (S65.2): owners and managers, unless payments are off in this deployment.
+  const readsPayments = current?.permissions.includes('payments.read') === true;
+  const [businessDeletion, accountDeletion, support, reminders, payments] = await Promise.all([
     current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
     currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
     current === null ? null : currentSupportUnread(),
     readsCalendar ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema) : null,
+    readsPayments ? currentPayments() : null,
   ]);
   const unread = support ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
@@ -156,6 +161,25 @@ export default async function MorePage() {
           </List>
         </section>
       ) : null}
+      {payments === null || payments.state === 'off' ? null : (
+        <section aria-labelledby="more-payments">
+          <h2 id="more-payments" className="m-0 mb-1 type-heading">
+            Getting paid
+          </h2>
+          <List>
+            <ListRow
+              title={<HelpTitle icon="card">Payments</HelpTitle>}
+              meta={
+                payments.state === 'on'
+                  ? paymentsSummary(payments.account, timeZone)
+                  : 'Deposits through Stripe'
+              }
+              href={ROUTES.payments}
+              renderLink={kitLink}
+            />
+          </List>
+        </section>
+      )}
       {current === null ? null : <NotificationsCard />}
       {feed?.canChangeSettings === true ? (
         <section aria-labelledby="rebooking-heading" className="flex flex-col gap-3">
@@ -207,7 +231,7 @@ function HelpTitle({
   icon,
   children,
 }: {
-  icon: 'help' | 'chat' | 'activity' | 'lock';
+  icon: 'help' | 'chat' | 'activity' | 'lock' | 'card';
   children: string;
 }) {
   return (

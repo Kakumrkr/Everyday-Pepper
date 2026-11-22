@@ -10,6 +10,7 @@ import {
   loadCurrentBusiness,
   loadInvites,
   loadMembers,
+  loadPaymentAccount,
   loadPublicBusiness,
   requiredStep,
   ROUTES,
@@ -282,5 +283,53 @@ describe('account recovery checks (S44)', () => {
   it('sends an emailed link back through /email-confirmed, keeping an allowed next page', () => {
     expect(confirmedUrl(null)).toBe('/email-confirmed');
     expect(confirmedUrl('/invite')).toBe('/email-confirmed?next=%2Finvite');
+  });
+});
+
+describe('loadPaymentAccount (AC-X-106)', () => {
+  const account = {
+    status: 'ready',
+    chargesEnabled: true,
+    payoutsEnabled: true,
+    detailsSubmitted: true,
+    due: [],
+    eventuallyDue: [],
+    dueBy: null,
+    disabledReason: null,
+    syncedAt: '2026-11-22T15:00:00.000Z',
+    canManage: true,
+  };
+  const options = (fetch: typeof globalThis.fetch) => ({
+    baseUrl: 'http://api:3001',
+    cookie: 'pepper=1',
+    fetch,
+  });
+
+  it('reads the account with the cookie', async () => {
+    const { fetch, calls } = answering(200, account);
+    await expect(loadPaymentAccount(options(fetch))).resolves.toEqual({ state: 'on', account });
+    expect(calls[0]?.url).toBe('http://api:3001/v1/payments/account');
+  });
+
+  it('is off only for the api’s own payments_off', async () => {
+    const off = answering(404, { code: 'payments_off', message: 'x' });
+    await expect(loadPaymentAccount(options(off.fetch))).resolves.toEqual({ state: 'off' });
+    const other = answering(404, { code: 'not_found', message: 'x' });
+    await expect(loadPaymentAccount(options(other.fetch))).resolves.toEqual({
+      state: 'unavailable',
+    });
+  });
+
+  it('is unavailable for a refusal, a failure or another shape', async () => {
+    for (const [status, body] of [
+      [403, { code: 'forbidden', message: 'x' }],
+      [500, null],
+      [200, { ...account, status: 'mystery' }],
+    ] as const) {
+      const { fetch } = answering(status, body);
+      await expect(loadPaymentAccount(options(fetch))).resolves.toEqual({ state: 'unavailable' });
+    }
+    const down = vi.fn(() => Promise.reject(new Error('down')));
+    await expect(loadPaymentAccount(options(down))).resolves.toEqual({ state: 'unavailable' });
   });
 });

@@ -115,6 +115,13 @@ const PATHS = {
       <path d="M9.6 9.5a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.1-2.4 3.6M12 17h.01" />
     </>
   ),
+  // Payments (S65.2): a card.
+  card: (
+    <>
+      <rect x="3" y="5.5" width="18" height="13" rx="2.5" />
+      <path d="M3 10h18M7 15h4" />
+    </>
+  ),
   // "Did this help?" (S59.2.2): always beside their words, never alone.
   thumbUp: (
     <>

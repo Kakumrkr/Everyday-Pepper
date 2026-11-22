@@ -13,8 +13,10 @@ import {
   loadInvites,
   loadJson,
   loadMembers,
+  loadPaymentAccount,
   loadPublicBusiness,
   type Account,
+  type PaymentsRead,
   type PublicPage,
 } from '../../lib/account';
 import { loadCalendarDay, type CalendarDay } from '../../lib/calendar-data';
@@ -67,6 +69,11 @@ export async function currentJson<T extends z.ZodType>(
 ): Promise<z.infer<T> | null> {
   return loadJson(path, schema, await callOptions());
 }
+
+/** Where the active business's payments stand (S65.2); More and the page share it. */
+export const currentPayments = cache(async (): Promise<PaymentsRead> => {
+  return loadPaymentAccount(await callOptions());
+});
 
 /**
  * A business's public booking page (no session; S17). The visitor's address goes along, so the
