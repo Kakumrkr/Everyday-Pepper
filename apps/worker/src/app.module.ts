@@ -38,6 +38,8 @@ export class AppModule {
           }),
           smsStatusBaseUrl: config.smsStatusBaseUrl,
           sandboxTextLog: config.smsSandboxLog,
+          payments: config.payments,
+          baseUrl: config.support.baseUrl ?? '',
         }),
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),

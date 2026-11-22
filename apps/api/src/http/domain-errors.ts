@@ -9,6 +9,10 @@ import {
   GalleryFullError,
   PhotoNotFoundError,
   IdempotencyKeyReusedError,
+  DepositRuleMismatchError,
+  DepositsClosedError,
+  PaymentNotNeededError,
+  PaymentRequiredError,
   ServiceNotFoundError,
   SlotUnavailableError,
   StaffMemberNotFoundError,
@@ -28,6 +32,8 @@ import {
 import {
   PaymentsNotOnboardedError,
   PaymentsProviderError,
+  DepositsUnavailableError,
+  PaymentNotAuthorizedError,
   PaymentsRejectedError,
 } from '@pepper/payments';
 import type {
@@ -115,6 +121,13 @@ import { apiError } from '../auth/guards.js';
 
 type ErrorClass = abstract new (...args: never[]) => Error;
 type Answer = new (body: object) => HttpException;
+
+/** 402: the booking needs its deposit first (S66; Nest has no exception class for it). */
+export class PaymentRequiredException extends HttpException {
+  constructor(body: object) {
+    super(body, HttpStatus.PAYMENT_REQUIRED);
+  }
+}
 
 /** 429: too many requests (Nest has no exception class for it). */
 export class TooManyRequestsException extends HttpException {
@@ -204,6 +217,13 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [PaymentsRejectedError, ConflictException, 'payments_rejected'],
   [PaymentsNotOnboardedError, ConflictException, 'payments_not_onboarded'],
   [PaymentsProviderError, ServiceUnavailableException, 'payments_unavailable'],
+  // Deposits (S66, ADR-0068).
+  [DepositRuleMismatchError, UnprocessableEntityException, 'deposit_rule_mismatch'],
+  [DepositsClosedError, ConflictException, 'deposits_unavailable'],
+  [DepositsUnavailableError, ConflictException, 'deposits_unavailable'],
+  [PaymentNotNeededError, ConflictException, 'payment_not_needed'],
+  [PaymentRequiredError, PaymentRequiredException, 'payment_required'],
+  [PaymentNotAuthorizedError, PaymentRequiredException, 'payment_required'],
 ];
 
 /** 413: the body is over the limit (Nest has no exception class for it under this name). */

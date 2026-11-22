@@ -60,6 +60,8 @@ const allowedInternalImports = {
     'testing',
     'appointments',
     'imports',
+    // S66: the deposits' captures, refunds and sweep (ADR-0068).
+    'payments',
     'templates',
   ],
   'apps/web': ['contracts', 'ui'],

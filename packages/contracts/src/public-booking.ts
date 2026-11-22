@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DepositTermsSchema } from './deposits.js';
 import { BusinessPhotosSchema } from './photos.js';
 import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
@@ -50,6 +51,8 @@ export const PublicServiceSchema = z.object({
   durationMinutes: z.number().int(),
   priceFromCents: z.number().int().nullable(),
   priceToCents: z.number().int().nullable(),
+  /** What booking it asks for now (S66, AC-X-113); `null`: nothing. */
+  deposit: DepositTermsSchema.nullable(),
 });
 export type PublicService = z.infer<typeof PublicServiceSchema>;
 

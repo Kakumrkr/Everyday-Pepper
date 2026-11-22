@@ -429,5 +429,9 @@ describe('payments in the sandbox (AC-X-104)', () => {
   it('isn’t there with Stripe (404)', async () => {
     const b = await business(stripeServer);
     await b.owner.post('/v1/dev/payments/account', { state: 'ready' }).expect(404);
+    // The sandbox's card either (S66, AC-X-120).
+    await b.owner
+      .post('/v1/dev/payments/intent', { clientSecret: 'pi_1_secret_a', outcome: 'succeeded' })
+      .expect(404);
   });
 });

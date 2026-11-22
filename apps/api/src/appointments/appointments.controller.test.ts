@@ -55,6 +55,7 @@ const SERVICE: Service = {
   priceFromCents: 6500,
   priceToCents: null,
   active: true,
+  deposit: { kind: 'none' },
   createdAt: AT,
   updatedAt: AT,
 };

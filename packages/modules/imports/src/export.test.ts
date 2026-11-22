@@ -93,6 +93,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     support: { threads: [], messages: [], screenshots: [] },
     smsConsents: [],
     payments: null,
+    deposits: [],
     ...overrides,
   };
 }
@@ -246,6 +247,26 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       disconnectedAt: null,
     });
     expect(files['README.txt']).toContain('payments.json');
+  });
+
+  it('writes deposits.json with each booking page deposit and what became of it (S66)', () => {
+    const without = unzip(buildBusinessExport(data({}), AT).bytes);
+    expect(Object.keys(without)).not.toContain('deposits.json');
+    const deposit = {
+      bookingId: '0190e7a8-0000-7000-8000-000000000001',
+      kind: 'deposit',
+      amountCents: 1500,
+      refundHours: 24,
+      status: 'refunded',
+      stripePayment: 'pi_3Nv0FGQ9RKHgCVdK',
+      createdAt: AT,
+      settledAt: AT,
+    };
+    const files = unzip(buildBusinessExport(data({ deposits: [deposit] }), AT).bytes);
+    expect(JSON.parse(files['deposits.json'] ?? 'null')).toEqual([
+      { ...deposit, createdAt: AT.toISOString(), settledAt: AT.toISOString() },
+    ]);
+    expect(files['README.txt']).toContain('deposits.json');
   });
 
   it('writes text-consents.json with the words each consent was given to (S61, ADR-0065 §7)', () => {

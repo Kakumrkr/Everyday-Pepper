@@ -95,11 +95,12 @@ function toBusiness(tenant: {
   phone: string | null;
   publicAddress: string | null;
   cancellationPolicy: string | null;
+  depositRefundHours: number;
 }): Business {
   const { id, name, slug, timeZone, locale, templateId, brandColor } = tenant;
-  const { phone, publicAddress, cancellationPolicy } = tenant;
+  const { phone, publicAddress, cancellationPolicy, depositRefundHours } = tenant;
   return BusinessSchema.parse({
-    ...{ id, name, slug, timeZone, locale, templateId, brandColor },
+    ...{ id, name, slug, timeZone, locale, templateId, brandColor, depositRefundHours },
     ...{ phone, publicAddress, cancellationPolicy },
   });
 }

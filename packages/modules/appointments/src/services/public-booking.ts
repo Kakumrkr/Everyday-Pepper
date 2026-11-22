@@ -5,6 +5,7 @@ import {
   BookingIdSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
+  depositTermsOf,
   SmsConsentWordingVersionSchema,
   ClientContactSchema,
   ClientEmailSchema,
@@ -17,6 +18,7 @@ import {
   PublicBookingSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
+  TenantIdSchema,
   TenantSlugSchema,
   UtcDateTimeSchema,
   VERIFICATION_CODE_TTL_MINUTES,
@@ -33,6 +35,7 @@ import {
   type BookingConfirmInput,
   type BookingRequestId,
   type BookingRequestInput,
+  type DepositTerms,
   type DeviceToken,
   type ManageToken,
   type OfferToken,
@@ -40,6 +43,7 @@ import {
   type PublicOffer,
   type PublicBusiness,
   type StaffMemberId,
+  type TenantId,
   type TenantSlug,
   type UtcDateTime,
   type VerificationCode,
@@ -54,6 +58,7 @@ import {
   appendAuditEntry,
   BookingOverlapError,
   countBookingVerificationsExpiringAfter,
+  depositRuleOf,
   findBookingByManageTokenHash,
   findClient,
   findClientsByContact,
@@ -70,6 +75,7 @@ import {
   listStaffMembers,
   listWorkingHoursOf,
   lockBookingByManageTokenHash,
+  extendBookingVerification,
   lockBookingVerification,
   lockStaffMember,
   lockWaitlistEntry,
@@ -100,6 +106,9 @@ import {
   BookingRequestExpiredError,
   BookingRequestNotFoundError,
   BookingRequestUsedError,
+  DepositsClosedError,
+  PaymentNotNeededError,
+  PaymentRequiredError,
   ServiceNotFoundError,
   SlotUnavailableError,
   StaffMemberNotFoundError,
@@ -165,9 +174,42 @@ export interface PublicOptions {
    * caller queues there (the outbox, ADR-0024) commits with the change, or not at all.
    */
   notify?: BookingNotify;
+  /** Deposits and cards on file (S66, ADR-0068): absent, deposit services can't be booked. */
+  deposits?: PublicDeposits | undefined;
 }
 
-/** What a booking page call needs to hash codes: a secret key of the deployment. */
+/**
+ * What the booking page asks of payments (S66, ADR-0068 §3–4), given by the caller so that
+ * appointments never depends on the payments module.
+ */
+export interface PublicDeposits {
+  /** Whether the business can take a deposit now (its account, in this deployment). */
+  open(tx: TenantTx): Promise<boolean>;
+  /** Outside any transaction: Stripe says the request's payment is authorized, else it throws. */
+  ready(tenantId: TenantId, requestId: string): Promise<void>;
+  /** In the booking's transaction: ties the payment to it; `false` when none is waiting. */
+  attach(
+    tx: TenantTx,
+    input: { requestId: string; bookingId: string; startsAt: Date; now: Date },
+  ): Promise<boolean>;
+  /** In a client's move's transaction: the refund's end follows only while it hasn't passed. */
+  rescheduled(tx: TenantTx, input: { bookingId: string; startsAt: Date; now: Date }): Promise<void>;
+  /** In a cancel's transaction: keeps or refunds the deposit. */
+  cancelled(
+    tx: TenantTx,
+    input: { bookingId: string; startsAt: Date; by: 'client' | 'business'; now: Date },
+  ): Promise<void>;
+}
+
+/** A service's terms at the business's window (AC-X-113); `null`: nothing asked. */
+export function depositTermsFor(
+  service: Pick<ServiceRow, 'depositKind' | 'depositValue' | 'priceFromCents'>,
+  tenant: Pick<Tenant, 'depositRefundHours'>,
+): DepositTerms | null {
+  return depositTermsOf(depositRuleOf(service), service.priceFromCents, tenant.depositRefundHours);
+}
+
+/** What the booking page call needs to hash codes: a secret key of the deployment. */
 export interface CodeOptions extends PublicOptions {
   /** HMAC key for the stored code hashes (at least 32 bytes), never stored with them. */
   codeKey: Buffer;
@@ -180,12 +222,20 @@ export interface RequestOptions extends CodeOptions {
 }
 
 /** The menu and team the booking page shows. */
-export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise<PublicBusiness> {
+export async function getPublicBusiness(
+  db: Database,
+  slug: TenantSlug,
+  options: Pick<PublicOptions, 'deposits'> = {},
+): Promise<PublicBusiness> {
   return inPage(
     db,
     slug,
     async (tx, tenant) => {
-      const services = (await listServices(tx)).filter((s) => s.active);
+      // A service asking for a deposit the business can't take now isn't bookable online (S66).
+      const depositsOpen = (await options.deposits?.open(tx)) ?? false;
+      const services = (await listServices(tx)).filter(
+        (s) => s.active && (depositsOpen || depositTermsFor(s, tenant) === null),
+      );
       const activeServices = new Set(services.map((s) => s.id));
       const active = (await listStaffMembers(tx)).filter((s) => s.active);
       // Someone without working hours can never be booked, so the page leaves them out (S46,
@@ -223,6 +273,7 @@ export async function getPublicBusiness(db: Database, slug: TenantSlug): Promise
             durationMinutes: s.durationMinutes,
             priceFromCents: s.priceFromCents,
             priceToCents: s.priceToCents,
+            deposit: depositTermsFor(s, tenant),
           })),
         staff: staff.map((s) => ({
           id: s.id,
@@ -291,6 +342,8 @@ export async function requestBooking(
   code: VerificationCode;
   email: BookingEmailDetails;
   remembered: boolean;
+  /** S66: the service asks for a deposit or a card, so the request is paid before it's booked. */
+  paymentNeeded: boolean;
 }> {
   const request = BookingRequestInputSchema.parse(input);
   const now = nowOf(options);
@@ -308,6 +361,10 @@ export async function requestBooking(
         throw new TooManyBookingRequestsError();
       }
       const serviceRow = await activeServiceRow(tx, request.serviceId);
+      const paymentNeeded = depositTermsFor(serviceRow, tenant) !== null;
+      if (paymentNeeded && !((await options.deposits?.open(tx)) ?? false)) {
+        throw new DepositsClosedError();
+      }
       const service = serviceToBook(serviceRow);
       const staffName =
         request.staffMemberId === null ? null : await activeStaffName(tx, request.staffMemberId);
@@ -339,6 +396,7 @@ export async function requestBooking(
       );
       return {
         remembered,
+        paymentNeeded,
         requestId: BookingRequestIdSchema.parse(row.id),
         expiresAt: UtcDateTimeSchema.parse(expiresAt.toISOString()),
         code,
@@ -360,6 +418,58 @@ export async function requestBooking(
     }
     throw error;
   }
+}
+
+/** A booking request whose code was just checked, with what paying for it needs (S66). */
+export interface PaymentRequest {
+  tenantId: TenantId;
+  requestId: BookingRequestId;
+  startsAt: Date;
+  terms: DepositTerms;
+  /** On the client's statement: "<business>: <service>". */
+  description: string;
+}
+
+/** How long a request stays open once its payment starts (S66). */
+export const PAYMENT_WINDOW_MINUTES = 30;
+
+/**
+ * Before paying (S66, AC-X-114): checks the request's code (a wrong one counts an attempt) and
+ * answers what its payment is for, with the service's terms read now. `PaymentNotNeededError`
+ * for a service that asks for nothing; `DepositsClosedError` while the business can't take one.
+ */
+export async function verifyPaymentRequest(
+  db: Database,
+  slug: TenantSlug,
+  requestId: BookingRequestId,
+  code: VerificationCode,
+  options: CodeOptions,
+): Promise<PaymentRequest> {
+  const id = BookingRequestIdSchema.parse(requestId);
+  const now = nowOf(options);
+  await checkCode(db, slug, id, VerificationCodeSchema.parse(code), {
+    now,
+    codeKey: options.codeKey,
+    purpose: 'booking',
+  });
+  return inPage(db, slug, async (tx, tenant) => {
+    const request = await lockBookingVerification(tx, id);
+    if (request?.purpose !== 'booking') throw new BookingRequestNotFoundError();
+    const serviceRow = await activeServiceRow(tx, ServiceIdSchema.parse(request.serviceId));
+    const terms = depositTermsFor(serviceRow, tenant);
+    if (terms === null) throw new PaymentNotNeededError();
+    if (!((await options.deposits?.open(tx)) ?? false)) throw new DepositsClosedError();
+    // Typing a card can outlast the code's ten minutes: the request stays open for the payment
+    // (shorter than the hour after which the sweep lets an unused one go).
+    await extendBookingVerification(tx, id, new Date(now + PAYMENT_WINDOW_MINUTES * MINUTE_MS));
+    return {
+      tenantId: TenantIdSchema.parse(tenant.id),
+      requestId: id,
+      startsAt: request.startsAt,
+      terms,
+      description: `${tenant.name}: ${serviceRow.name}`.slice(0, 200),
+    };
+  });
 }
 
 /**
@@ -388,6 +498,22 @@ export async function confirmBookingRequest(
   const { code, startsAt, remember } = BookingConfirmInputSchema.parse(input);
   const now = nowOf(options);
   await checkCode(db, slug, id, code, { now, codeKey: options.codeKey, purpose: 'booking' });
+
+  // A deposit service is booked only once Stripe says its payment is authorized (S66, AC-X-115):
+  // read before the booking's transaction, since no call to Stripe runs inside one.
+  const paying = await inPage(db, slug, async (tx, tenant) => {
+    const request = await lockBookingVerification(tx, id);
+    if (request?.purpose !== 'booking') throw new BookingRequestNotFoundError();
+    const serviceRow = await activeServiceRow(tx, ServiceIdSchema.parse(request.serviceId));
+    return {
+      tenantId: TenantIdSchema.parse(tenant.id),
+      needed: depositTermsFor(serviceRow, tenant) !== null,
+    };
+  });
+  if (paying.needed) {
+    if (options.deposits === undefined) throw new PaymentRequiredError();
+    await options.deposits.ready(paying.tenantId, id);
+  }
 
   const { token: manageToken, hash: newHash } = newManageToken();
   let search: AlternativesSearch | undefined;
@@ -430,6 +556,19 @@ export async function confirmBookingRequest(
         manageTokenHash: newHash,
       });
       await setVerificationBooking(tx, id, BookingIdSchema.parse(row.id));
+      // The rule read again with the booking: a deposit added meanwhile needs its payment too.
+      if (depositTermsFor(serviceRow, tenant) !== null) {
+        const attached =
+          paying.needed &&
+          options.deposits !== undefined &&
+          (await options.deposits.attach(tx, {
+            requestId: id,
+            bookingId: row.id,
+            startsAt: row.startsAt,
+            now: new Date(now),
+          }));
+        if (!attached) throw new PaymentRequiredError();
+      }
       await noteFirstBookingIn(tx);
       await keepReminderInStep(tx, row, now);
       await requestInsights(tx);
@@ -689,6 +828,13 @@ export async function cancelManagedBooking(
       const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
       if (cancelled === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, cancelled);
+      // The deposit by the window agreed, until the refund's stored end (S66, AC-X-117).
+      await options.deposits?.cancelled(tx, {
+        bookingId: row.id,
+        startsAt: row.startsAt,
+        by: 'client',
+        now: new Date(now),
+      });
       await keepReminderInStep(tx, cancelled, now);
       await requestInsights(tx);
       await requestWaitlistMatch(tx, row, now);
@@ -750,6 +896,11 @@ export async function rescheduleManagedBooking(
       });
       if (moved === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, moved);
+      await options.deposits?.rescheduled(tx, {
+        bookingId: row.id,
+        startsAt: moved.startsAt,
+        now: new Date(now),
+      });
       await keepReminderInStep(tx, moved, now);
       await requestInsights(tx);
       await requestWaitlistMatch(tx, row, now);

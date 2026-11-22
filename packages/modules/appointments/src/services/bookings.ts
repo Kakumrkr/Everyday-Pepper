@@ -384,6 +384,15 @@ export interface ChangeBookingOptions {
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** Told about a move or cancellation inside its transaction, when `notifyClient`. */
   notify?: BookingNotify;
+  /**
+   * Told about a cancellation inside its transaction (S66: the team's cancel refunds a deposit,
+   * AC-X-118). Pepper's own tools give none: its cancels can be undone, money can't.
+   */
+  onCancelled?:
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
+  /** Told about the team's move inside its transaction (S66: a deposit's refund window follows). */
+  onMoved?:
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
 }
 
 /**
@@ -433,6 +442,10 @@ export async function changeBookingIn(
     await requestInsights(tx);
     // A cancelled time is offered to the waitlist (S37, AC-W5-1).
     if (parsed.status === 'cancelled') await requestWaitlistMatch(tx, row, now);
+    // A correction of what happened (completed or no-show → cancelled) moves no money.
+    if (parsed.status === 'cancelled' && row.status === 'confirmed' && options.onCancelled) {
+      await options.onCancelled(tx, { bookingId: row.id, startsAt: row.startsAt });
+    }
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
       await tellClient(tx, changed, 'cancelled', options.notify);
     }
@@ -469,6 +482,7 @@ export async function changeBookingIn(
     throw error;
   }
   if (moved === undefined) throw new BookingNotFoundError();
+  if (options.onMoved) await options.onMoved(tx, { bookingId: row.id, startsAt: moved.startsAt });
   await keepReminderInStep(tx, moved, now);
   await requestInsights(tx);
   // The old time is free now (S37): offered to the waitlist.

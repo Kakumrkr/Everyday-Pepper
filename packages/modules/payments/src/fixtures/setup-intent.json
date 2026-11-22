@@ -1,0 +1,10 @@
+{
+  "id": "seti_1Nv0HdQ9RKHgCVdKaBcDeFgH",
+  "object": "setup_intent",
+  "client_secret": "seti_1Nv0HdQ9RKHgCVdKaBcDeFgH_secret_P4nTGqV1aBcD2e",
+  "customer": "cus_P4nTGqV1aBcD2e",
+  "livemode": false,
+  "on_behalf_of": "acct_1Nv0FGQ9RKHgCVdK",
+  "status": "requires_payment_method",
+  "usage": "off_session"
+}

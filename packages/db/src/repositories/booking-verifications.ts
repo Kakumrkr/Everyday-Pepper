@@ -92,6 +92,23 @@ export async function addVerificationAttempt(tx: TenantTx, id: BookingRequestId)
   return row.attempts;
 }
 
+/**
+ * Keeps a request open until at least `until` (S66: a client typing a card outlives the code's
+ * ten minutes); never shortens it.
+ */
+export async function extendBookingVerification(
+  tx: TenantTx,
+  id: BookingRequestId,
+  until: Date,
+): Promise<void> {
+  await tx
+    .update(bookingVerifications)
+    .set({
+      expiresAt: sql`GREATEST(${bookingVerifications.expiresAt}, ${until.toISOString()}::timestamptz)`,
+    })
+    .where(eq(bookingVerifications.id, BookingRequestIdSchema.parse(id)));
+}
+
 /** Records the booking a request's code confirmed; it cannot be used again. */
 export async function setVerificationBooking(
   tx: TenantTx,

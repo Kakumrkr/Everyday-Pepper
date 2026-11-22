@@ -3,6 +3,7 @@ import {
   PaymentAccountAnswerSchema,
   PaymentDashboardLinkSchema,
   PaymentOnboardingLinkSchema,
+  SandboxIntentRequestSchema,
   SandboxPaymentRequestSchema,
   type PaymentAccountAnswer,
   type PaymentDashboardLink,
@@ -35,6 +36,8 @@ import { PAYMENTS_OPTIONS, PaymentsService, type PaymentsOptions } from './payme
 const OWNER_CALLS: RateLimit = { name: 'payments-owner', max: 30, windowSeconds: 600 };
 // Stripe calls from many addresses; the limit only stops a flood (each refused call costs one HMAC).
 const DELIVERIES: RateLimit = { name: 'payments-webhook-ip', max: 1200, windowSeconds: 600 };
+// The sandbox's card (S66): journeys pay a handful of times; nothing more is needed.
+const SANDBOX_CARDS: RateLimit = { name: 'payments-sandbox-card-ip', max: 120, windowSeconds: 600 };
 
 @Controller('v1/payments')
 @UseGuards(TenantGuard)
@@ -138,16 +141,42 @@ export class PaymentsSandboxController {
   }
 }
 
+/**
+ * The sandbox's card (S66, AC-X-120): mounted only with `PAYMENTS_PROVIDER=sandbox` where tests
+ * run, else 404. The booking page has no session; the payment's client secret is the proof, as
+ * it is for Stripe's own field. 204 settled; 400; 404 an unknown secret; 409 already settled.
+ */
+@Controller('v1/dev/payments/intent')
+export class PaymentsSandboxIntentController {
+  constructor(
+    private readonly payments: PaymentsService,
+    private readonly limits: RateLimiter,
+  ) {}
+
+  @Post()
+  @HttpCode(204)
+  async settle(@Body() body: unknown, @Req() request: IncomingMessage): Promise<void> {
+    await this.limits.hit(SANDBOX_CARDS, clientAddress(request));
+    const { clientSecret, outcome } = parseBody(SandboxIntentRequestSchema, body);
+    await answering(() => this.payments.sandboxIntent(clientSecret, outcome));
+  }
+}
+
 /** Payments. Needs `AuthModule` (global) and `ConnectionsModule`. */
 @Module({})
 export class PaymentsModule {
   static forRoot(options: PaymentsOptions): DynamicModule {
     return {
       module: PaymentsModule,
+      // The booking page and the team's bookings take deposits through it (S66).
+      global: true,
+      exports: [PaymentsService],
       controllers: [
         PaymentsController,
         PaymentsWebhookController,
-        ...(options.config?.provider === 'sandbox' ? [PaymentsSandboxController] : []),
+        ...(options.config?.provider === 'sandbox'
+          ? [PaymentsSandboxController, PaymentsSandboxIntentController]
+          : []),
       ],
       providers: [{ provide: PAYMENTS_OPTIONS, useValue: options }, RateLimiter, PaymentsService],
     };

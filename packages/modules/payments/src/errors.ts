@@ -15,3 +15,22 @@ export class PaymentsNotOnboardedError extends Error {
     this.name = 'PaymentsNotOnboardedError';
   }
 }
+
+/**
+ * The business can't take a deposit now (S66, AC-X-113): payments aren't ready, or the request's
+ * payment is done with. Deposit services can't be booked online until they can.
+ */
+export class DepositsUnavailableError extends Error {
+  constructor() {
+    super('Deposits can’t be taken for this business now');
+    this.name = 'DepositsUnavailableError';
+  }
+}
+
+/** Stripe doesn't say the request's payment is authorized (S66, AC-X-115): nothing is booked. */
+export class PaymentNotAuthorizedError extends Error {
+  constructor() {
+    super('The deposit is not authorized');
+    this.name = 'PaymentNotAuthorizedError';
+  }
+}

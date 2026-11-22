@@ -1,4 +1,8 @@
 import {
+  BookingPaymentStartInputSchema,
+  BookingPaymentStartSchema,
+  VerificationCodeSchema,
+  type BookingPaymentStart,
   AvailabilityQuerySchema,
   BookingConfirmInputSchema,
   BookingFunnelEventInputSchema,
@@ -145,6 +149,29 @@ export class PublicBookingController {
       );
     }
     return confirmed.response;
+  }
+
+  /**
+   * The request's deposit or card (S66, AC-X-114): 200 Stripe's client secret and the terms, the
+   * same each time. 422 `wrong_code` with `attemptsLeft`; 410 `booking_request_expired`; 409
+   * `booking_request_used`, `payment_not_needed` or `deposits_unavailable`; 503 while payments
+   * are off or Stripe doesn't answer.
+   */
+  @Post('booking-requests/:requestId/payment')
+  @HttpCode(200)
+  async payment(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<BookingPaymentStart> {
+    const { slug, requestId } = parseBody(RequestParamsSchema, params);
+    const { code } = parseBody(BookingPaymentStartInputSchema, body);
+    await this.limits.hit(CODE_CHECKS, clientAddress(request));
+    return BookingPaymentStartSchema.parse(
+      await answering(() =>
+        this.booking.payment(slug, requestId, VerificationCodeSchema.parse(code)),
+      ),
+    );
   }
 
   /**

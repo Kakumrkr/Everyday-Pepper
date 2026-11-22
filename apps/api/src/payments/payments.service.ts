@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import {
   StripeEventSchema,
   WebhookAckSchema,
+  type BookingPaymentStart,
   type PaymentAccountAnswer,
   type PaymentDashboardLink,
   type PaymentOnboardingLink,
@@ -9,11 +10,20 @@ import {
   type WebhookAck,
 } from '@pepper/contracts';
 import { systemClock, type Actor, type Clock, type TenantContext } from '@pepper/core';
-import { findPaymentAccount, withMember, type Database } from '@pepper/db';
+import { findPaymentAccount, withMember, type Database, type TenantTx } from '@pepper/db';
+import type { PublicDeposits } from '@pepper/appointments';
 import {
+  attachBookingPaymentIn,
+  chargeableAccountIn,
+  requireAuthorizedPayment,
+  moveDepositWindowIn,
+  settleDepositOnCancelIn,
+  startBookingPayment,
+  type VerifiedPaymentRequest,
   handleStripeEvent,
   paymentDashboardLink,
   PaymentsNotOnboardedError,
+  PaymentsProviderError,
   RedisSandboxAccountStore,
   readPaymentAccount,
   SandboxPaymentsProvider,
@@ -34,6 +44,7 @@ import {
 } from '@pepper/runtime';
 import {
   BadRequestException,
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
@@ -136,6 +147,72 @@ export class PaymentsService {
       stripeSignatureHeader(bound.webhookSecret, payload, bound.deps.clock.now()),
     );
     return readPaymentAccount(bound.deps, actorOf(tenant));
+  }
+
+  // ---- Deposits (S66, ADR-0068) ----
+
+  /**
+   * What the booking page asks of payments (AC-X-113…117); `undefined` while payments are off,
+   * so deposit services can't be booked online.
+   */
+  publicDeposits(): PublicDeposits | undefined {
+    const bound = this.bound;
+    if (bound === null) return undefined;
+    const { deps } = bound;
+    return {
+      open: async (tx) => (await chargeableAccountIn(tx, deps.provider)) !== undefined,
+      ready: (tenantId, requestId) => requireAuthorizedPayment(deps, tenantId, requestId),
+      attach: (tx, input) => attachBookingPaymentIn(tx, { ...input, outboxKey: deps.outboxKey }),
+      cancelled: async (tx, input) => {
+        await settleDepositOnCancelIn(tx, { ...input, outboxKey: deps.outboxKey });
+      },
+      rescheduled: (tx, input) => moveDepositWindowIn(tx, { ...input, by: 'client' }),
+    };
+  }
+
+  /** The team's move (AC-X-117): a deposit's refund window follows the new time. */
+  teamMoved():
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined {
+    const bound = this.bound;
+    if (bound === null) return undefined;
+    const { deps } = bound;
+    return (tx, booking) =>
+      moveDepositWindowIn(tx, { ...booking, by: 'business', now: deps.clock.now() });
+  }
+
+  /** The team's cancel (AC-X-118): a paid deposit is refunded in full, in the cancel's transaction. */
+  teamCancelled():
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined {
+    const bound = this.bound;
+    if (bound === null) return undefined;
+    const { deps } = bound;
+    return async (tx, booking) => {
+      await settleDepositOnCancelIn(tx, {
+        ...booking,
+        by: 'business',
+        now: deps.clock.now(),
+        outboxKey: deps.outboxKey,
+      });
+    };
+  }
+
+  /** `POST …/booking-requests/:id/payment` (AC-X-114), once the code was checked. */
+  startPayment(request: VerifiedPaymentRequest): Promise<BookingPaymentStart> {
+    return startBookingPayment(this.on().deps, request);
+  }
+
+  /** The sandbox's card (AC-X-120): settles a payment by its client secret; 404 elsewhere. */
+  async sandboxIntent(clientSecret: string, outcome: 'succeeded' | 'declined'): Promise<void> {
+    const bound = this.on();
+    if (bound.sandbox === null) throw new NotFoundException(apiError('payments_off'));
+    try {
+      await bound.sandbox.settleIntent(clientSecret, outcome);
+    } catch (error) {
+      // The sandbox's own refusals: no such payment (404), or one already settled (409).
+      if (!(error instanceof PaymentsProviderError)) throw error;
+      if (error.status === 404) throw new NotFoundException(apiError('validation_failed'));
+      throw new ConflictException(apiError('validation_failed'));
+    }
   }
 
   private on(code: 'payments_off' | 'webhook_not_found' = 'payments_off'): Bound {

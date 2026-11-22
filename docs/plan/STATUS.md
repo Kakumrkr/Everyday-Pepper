@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-22 · **Plan version:** 0.39 ([PCR-013](changes/PCR-013.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S66** (S65.2 done)
+**Last updated:** 2026-11-22 · **Plan version:** 0.40 ([PCR-014](changes/PCR-014.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S66.2** (S66 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing. S65.2 merged (PR #102). Next: **S66** (deposits and card on file; top-up: the deposit and the policy in words before Stripe's card field).
+Nothing in progress.
 
 ## Last sessions
+- **S66 Phase 15 · Deposits and card on file, backend (2026-11-22)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PCR-014](changes/PCR-014.md), [PR #103](https://github.com/Kakumrkr/Everyday-Pepper/pull/103)). Full entry in [session-log.md](session-log.md).
+  - **Built:** a deposit rule per service and a refund window; terms for the page in one function (top-up); authorize, then book, then capture through the outbox; refunds by the stored window (the team's always); the worker's sweep; the sandbox card. AC-X-111…120.
+  - **Checks:** `pnpm check` green (3rd run: two web fixtures, api branch coverage 79.2 → 81.1%); affected integration 1,961 green (one fixture fixed); e2e `public-booking` 7/7; review 8 of 10 fixed, security 1 (medium, fixed); no screen changed.
 - **S65.2 Phase 15 · Payments on screen (2026-11-22)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PR #102](https://github.com/Kakumrkr/Everyday-Pepper/pull/102)). Full entry in [session-log.md](session-log.md).
   - **Built:** More → Payments: the status and what Stripe needs in words, with the day it's due (top-up), connect/finish/send, the Express dashboard, Stripe's return and refresh pages, managers read-only, the deletion screen's Stripe line. AC-X-106…110. No api change.
   - **Checks:** `pnpm check` green (1st run); e2e 7/7 + screens 36/36; review 4 of 4 fixed, security none ≥ 8; walkthrough at 375 px.
-- **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-013](changes/PCR-013.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `@pepper/payments` (Stripe fetch adapter, one pinned version; Redis sandbox); one Express account per business, owner only; status from a fresh read; `POST /v1/webhooks/stripe` signed, once per event, the business only via the stored account; owners' push per change (top-up); migration 0080. AC-X-96…105.
-  - **Checks:** `pnpm check` green (4th run: prettier, two coverage gates by <0.1%, a type); affected integration 1,910 green (1st run); review 6 of 6 fixed, security none ≥ 8; no screen changed; merged S64's `main` (IDs renumbered).
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -30,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S66 (user, 2026-11-22):** "Go ahead with your recommendations and complete the session" (D-1 split → S66.2; D-2 destination charges; D-3 a rule per service; D-4 the window, 24 h; D-5 authorize then book; D-6 sandbox); "continue with your recommendation" (the refund window stored, [PCR-014](changes/PCR-014.md)). Full wording in [decisions.md](decisions.md).
 - **S65.2 (user, 2026-11-22):** managers read Payments without buttons (recommendation); CI minutes fine, PR opened normally. Full wording in [decisions.md](decisions.md).
 - **S65 (user, 2026-11-20):** recommendations on all four (split, owner only, no SDK), "don't compromise"; Express by `controller`, a fresh read wins, reconnect after a mode change. Actions minutes ran out: the user made the repo public for the one CI run, private again after, no paid minutes. Full wording in [decisions.md](decisions.md).
 - **S64 (user, 2026-11-20):** no SMS service or domain paid yet, Stripe next: "Go with your recommendations and complete it" (D-1 C12 7 in sandbox; D-2 `send_client_message` over SMS → S64.2; D-3 [PCR-012](changes/PCR-012.md) Phase 15 next; D-4 "N" declines). Full wording in [decisions.md](decisions.md).
@@ -106,7 +107,7 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S66 | Deposits + card on file, Stripe-hosted fields, refunds | 15 | Test-mode pay/cancel/refund journeys |
+| S66.2 | Deposits on screen: service field, Stripe field with the terms in words, journeys | 15 | Test-mode pay/cancel/refund journeys |
 | S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |
 | S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |

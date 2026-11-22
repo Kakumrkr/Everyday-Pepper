@@ -29,6 +29,7 @@ const SERVICE = {
   bufferAfterMinutes: 0,
   priceFromCents: null,
   priceToCents: null,
+  deposit: { kind: 'none' },
   active: true,
   createdAt: T,
   updatedAt: T,

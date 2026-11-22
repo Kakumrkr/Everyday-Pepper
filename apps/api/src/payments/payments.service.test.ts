@@ -1,6 +1,6 @@
 import 'reflect-metadata';
-import { NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { stripeSignatureHeader } from '@pepper/payments';
+import { ConflictException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { PaymentsProviderError, stripeSignatureHeader } from '@pepper/payments';
 import type { Database } from '@pepper/db';
 import type { Redis } from '@pepper/runtime';
 import { describe, expect, it } from 'vitest';
@@ -103,5 +103,73 @@ describe('PaymentsService', () => {
       livemode: false,
     });
     await expect(stripe.sandboxState(tenant, 'ready')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  // ---- Deposits (S66) ----
+  const STRIPE = {
+    provider: 'stripe',
+    secretKey: 'sk_test_51NvServiceUnitTest00000',
+    webhookSecret: SECRET,
+    livemode: false,
+  } as const;
+  const paying = {
+    tenantId: '0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a11',
+    requestId: '0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a13',
+    startsAt: new Date('2099-03-10T17:00:00Z'),
+    terms: { kind: 'deposit', amountCents: 1500, refundHours: 24 },
+    description: 'Juniper: Fade',
+  } as never;
+
+  it('gives no deposit hooks while payments are off, and 404 for a payment', async () => {
+    const off = service(null);
+    expect(off.publicDeposits()).toBeUndefined();
+    expect(off.teamCancelled()).toBeUndefined();
+    expect(off.teamMoved()).toBeUndefined();
+    expect(() => off.startPayment(paying)).toThrow(NotFoundException);
+    await expect(off.sandboxIntent('pi_x_secret_y', 'succeeded')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+  });
+
+  it('gives every deposit hook when payments are on', () => {
+    const stripe = service(STRIPE);
+    const hooks = stripe.publicDeposits();
+    expect(Object.keys(hooks ?? {}).sort()).toEqual([
+      'attach',
+      'cancelled',
+      'open',
+      'ready',
+      'rescheduled',
+    ]);
+    expect(typeof stripe.teamCancelled()).toBe('function');
+    expect(typeof stripe.teamMoved()).toBe('function');
+  });
+
+  it('answers the sandbox card only in the sandbox: 404 with Stripe', async () => {
+    await expect(
+      service(STRIPE).sandboxIntent('pi_x_secret_y', 'succeeded'),
+    ).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('maps the sandbox’s refusals: unknown 404, already settled 409, others thrown', async () => {
+    const sandbox = service({ provider: 'sandbox' });
+    // The bound sandbox is private: its card is replaced to answer each refusal.
+    const inner = (sandbox as unknown as { bound: { sandbox: { settleIntent: unknown } } }).bound
+      .sandbox;
+    const refuse = (error: Error) => {
+      inner.settleIntent = () => Promise.reject(error);
+    };
+    refuse(new PaymentsProviderError(404, 'invalid_request_error', 'resource_missing', false));
+    await expect(sandbox.sandboxIntent('pi_x_secret_y', 'succeeded')).rejects.toBeInstanceOf(
+      NotFoundException,
+    );
+    refuse(new PaymentsProviderError(400, 'invalid_request_error', null, false));
+    await expect(sandbox.sandboxIntent('pi_x_secret_y', 'declined')).rejects.toBeInstanceOf(
+      ConflictException,
+    );
+    refuse(new Error('redis down'));
+    await expect(sandbox.sandboxIntent('pi_x_secret_y', 'declined')).rejects.toThrow('redis down');
+    inner.settleIntent = () => Promise.resolve();
+    await expect(sandbox.sandboxIntent('pi_x_secret_y', 'succeeded')).resolves.toBeUndefined();
   });
 });

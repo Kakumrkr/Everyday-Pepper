@@ -3,15 +3,26 @@ import {
   StripeAccountLinkSchema,
   StripeAccountSchema,
   StripeErrorSchema,
+  StripeCustomerSchema,
   StripeLoginLinkSchema,
+  StripePaymentIntentSchema,
+  StripeRefundSchema,
+  StripeSetupIntentSchema,
   type StripeAccount,
   type StripeAccountId,
+  type StripeCustomerId,
+  type StripePaymentIntent,
+  type StripeRefund,
+  type StripeSetupIntent,
 } from '@pepper/contracts';
 import type { z } from 'zod';
 import {
   isRetryableStatus,
   PaymentsProviderError,
   type CreateAccountInput,
+  type CreateCardSetupInput,
+  type CreateCustomerInput,
+  type CreateDepositInput,
   type OnboardingLinkInput,
   type PaymentsProvider,
   type ProviderLink,
@@ -91,6 +102,97 @@ export class StripePaymentsProvider implements PaymentsProvider {
       { form: {} },
     );
     return { url: link.url, expiresAt: null };
+  }
+
+  async createCustomer(input: CreateCustomerInput): Promise<{ id: StripeCustomerId }> {
+    const customer = await this.call(StripeCustomerSchema, 'POST', '/v1/customers', {
+      form: { 'metadata[pepper_tenant]': input.tenantId },
+      idempotencyKey: input.idempotencyKey,
+    });
+    return { id: customer.id };
+  }
+
+  /** A destination charge on the business's behalf, authorized only (ADR-0068 §3). */
+  createDeposit(input: CreateDepositInput): Promise<StripePaymentIntent> {
+    return this.call(StripePaymentIntentSchema, 'POST', '/v1/payment_intents', {
+      form: {
+        amount: String(input.amountCents),
+        currency: 'usd',
+        customer: input.customerId,
+        capture_method: 'manual',
+        setup_future_usage: 'off_session',
+        on_behalf_of: input.accountId,
+        'transfer_data[destination]': input.accountId,
+        'automatic_payment_methods[enabled]': 'true',
+        // Cards in the page, no redirect away from the booking.
+        'automatic_payment_methods[allow_redirects]': 'never',
+        description: input.description,
+        'metadata[pepper_tenant]': input.tenantId,
+        'metadata[pepper_request]': input.requestId,
+      },
+      idempotencyKey: input.idempotencyKey,
+    });
+  }
+
+  createCardSetup(input: CreateCardSetupInput): Promise<StripeSetupIntent> {
+    return this.call(StripeSetupIntentSchema, 'POST', '/v1/setup_intents', {
+      form: {
+        customer: input.customerId,
+        usage: 'off_session',
+        on_behalf_of: input.accountId,
+        'automatic_payment_methods[enabled]': 'true',
+        'automatic_payment_methods[allow_redirects]': 'never',
+        'metadata[pepper_tenant]': input.tenantId,
+        'metadata[pepper_request]': input.requestId,
+      },
+      idempotencyKey: input.idempotencyKey,
+    });
+  }
+
+  retrievePaymentIntent(id: string): Promise<StripePaymentIntent> {
+    return this.call(
+      StripePaymentIntentSchema,
+      'GET',
+      `/v1/payment_intents/${encodeURIComponent(id)}`,
+    );
+  }
+
+  retrieveSetupIntent(id: string): Promise<StripeSetupIntent> {
+    return this.call(StripeSetupIntentSchema, 'GET', `/v1/setup_intents/${encodeURIComponent(id)}`);
+  }
+
+  capturePaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent> {
+    return this.call(
+      StripePaymentIntentSchema,
+      'POST',
+      `/v1/payment_intents/${encodeURIComponent(id)}/capture`,
+      { form: {}, idempotencyKey },
+    );
+  }
+
+  cancelPaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent> {
+    return this.call(
+      StripePaymentIntentSchema,
+      'POST',
+      `/v1/payment_intents/${encodeURIComponent(id)}/cancel`,
+      { form: { cancellation_reason: 'abandoned' }, idempotencyKey },
+    );
+  }
+
+  createRefund(paymentIntentId: string, idempotencyKey: string): Promise<StripeRefund> {
+    return this.call(StripeRefundSchema, 'POST', '/v1/refunds', {
+      form: {
+        payment_intent: paymentIntentId,
+        // The business's share comes back from its balance, not the platform's.
+        reverse_transfer: 'true',
+        reason: 'requested_by_customer',
+      },
+      idempotencyKey,
+    });
+  }
+
+  retrieveRefund(id: string): Promise<StripeRefund> {
+    return this.call(StripeRefundSchema, 'GET', `/v1/refunds/${encodeURIComponent(id)}`);
   }
 
   private async call<T extends z.ZodType>(

@@ -142,6 +142,27 @@ async function statusChanges(tenantId: TenantId) {
     .reverse();
 }
 
+/** Every call of `provider`, as an object a test can override parts of. */
+function delegate(provider: PaymentsProvider): PaymentsProvider {
+  return {
+    provider: provider.provider,
+    livemode: provider.livemode,
+    createAccount: (input) => provider.createAccount(input),
+    retrieveAccount: (id) => provider.retrieveAccount(id),
+    createOnboardingLink: (input) => provider.createOnboardingLink(input),
+    createDashboardLink: (id) => provider.createDashboardLink(id),
+    createCustomer: (input) => provider.createCustomer(input),
+    createDeposit: (input) => provider.createDeposit(input),
+    createCardSetup: (input) => provider.createCardSetup(input),
+    retrievePaymentIntent: (id) => provider.retrievePaymentIntent(id),
+    retrieveSetupIntent: (id) => provider.retrieveSetupIntent(id),
+    capturePaymentIntent: (id, key) => provider.capturePaymentIntent(id, key),
+    cancelPaymentIntent: (id, key) => provider.cancelPaymentIntent(id, key),
+    createRefund: (id, key) => provider.createRefund(id, key),
+    retrieveRefund: (id) => provider.retrieveRefund(id),
+  };
+}
+
 describe('onboarding (AC-X-96)', () => {
   it('creates one account for the owner and answers Stripe’s page', async () => {
     const business = await newBusiness();
@@ -244,6 +265,7 @@ describe('another provider or mode (ADR-0067 §4)', () => {
     const sandboxRow = await accountOf(business.tenantId);
     // The same business on Stripe now (the sandbox's store answers as "Stripe" here).
     const stripe: PaymentsProvider = {
+      ...delegate(business.sandbox),
       provider: 'stripe',
       livemode: false,
       createAccount: (input) => business.sandbox.createAccount(input),
@@ -377,6 +399,7 @@ describe('webhook events (AC-X-99…101)', () => {
     if (row === undefined) throw new Error('no account');
     let failing = true;
     const flaky: PaymentsProvider = {
+      ...delegate(business.sandbox),
       provider: 'sandbox',
       livemode: false,
       createAccount: (input) => business.sandbox.createAccount(input),
@@ -455,6 +478,7 @@ describe('webhook events (AC-X-99…101)', () => {
     // Two reads: the first starts earlier but answers later, with the older state.
     const answers: { resolve: (account: StripeAccount) => void }[] = [];
     const slow: PaymentsProvider = {
+      ...delegate(business.sandbox),
       provider: 'sandbox',
       livemode: false,
       createAccount: (input) => business.sandbox.createAccount(input),

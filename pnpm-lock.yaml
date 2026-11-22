@@ -226,6 +226,9 @@ importers:
       '@pepper/imports':
         specifier: workspace:*
         version: link:../../packages/modules/imports
+      '@pepper/payments':
+        specifier: workspace:*
+        version: link:../../packages/modules/payments
       '@pepper/runtime':
         specifier: workspace:*
         version: link:../../packages/runtime

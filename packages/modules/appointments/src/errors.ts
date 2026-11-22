@@ -218,3 +218,41 @@ export class GalleryFullError extends Error {
     this.name = 'GalleryFullError';
   }
 }
+
+/** A service's deposit rule doesn't fit its price (S66, AC-X-111): what to change, in words. */
+export class DepositRuleMismatchError extends Error {
+  constructor(readonly reason: string) {
+    super(reason);
+    this.name = 'DepositRuleMismatchError';
+  }
+}
+
+/**
+ * A booking page request for a service with a deposit, without an authorized payment (S66,
+ * AC-X-115): nothing is booked.
+ */
+export class PaymentRequiredError extends Error {
+  constructor() {
+    super('This booking needs its deposit or card first');
+    this.name = 'PaymentRequiredError';
+  }
+}
+
+/**
+ * A service with a deposit while the business can't take one (S66, AC-X-113): it can't be booked
+ * online until payments can take charges.
+ */
+export class DepositsClosedError extends Error {
+  constructor() {
+    super('This service can’t be booked online right now');
+    this.name = 'DepositsClosedError';
+  }
+}
+
+/** A payment asked for a service that needs none (S66). */
+export class PaymentNotNeededError extends Error {
+  constructor() {
+    super('This service needs no deposit');
+    this.name = 'PaymentNotNeededError';
+  }
+}
