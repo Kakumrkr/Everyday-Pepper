@@ -1,13 +1,23 @@
 import { createHash, randomBytes } from 'node:crypto';
 import {
   StripeAccountSchema,
+  StripePaymentIntentSchema,
+  StripeRefundSchema,
+  StripeSetupIntentSchema,
   type SandboxPaymentState,
   type StripeAccount,
   type StripeAccountId,
+  type StripeCustomerId,
+  type StripePaymentIntent,
+  type StripeRefund,
+  type StripeSetupIntent,
 } from '@pepper/contracts';
 import {
   PaymentsProviderError,
   type CreateAccountInput,
+  type CreateCardSetupInput,
+  type CreateCustomerInput,
+  type CreateDepositInput,
   type OnboardingLinkInput,
   type PaymentsProvider,
   type ProviderLink,
@@ -173,4 +183,177 @@ export class SandboxPaymentsProvider implements PaymentsProvider {
   private async save(account: StripeAccount): Promise<void> {
     await this.options.store.set(`account:${account.id}`, JSON.stringify(account));
   }
+
+  // ---- Deposits and cards (S66, ADR-0068 §8): Stripe's answers, kept in the store ----
+
+  /** As Stripe does: the same key answers what it made the first time. */
+  private async once<T>(
+    key: string,
+    make: () => Promise<{ id: string; value: T }>,
+    read: (id: string) => Promise<T>,
+  ): Promise<T> {
+    const keyed = `key:${createHash('sha256').update(key).digest('hex')}`;
+    const existing = await this.options.store.get(keyed);
+    if (existing !== null) return read(existing);
+    const made = await make();
+    await this.options.store.set(keyed, made.id);
+    return made.value;
+  }
+
+  async createCustomer(input: CreateCustomerInput): Promise<{ id: StripeCustomerId }> {
+    return this.once(
+      input.idempotencyKey,
+      () => {
+        const id = `cus_sandbox${randomBytes(8).toString('hex')}`;
+        return Promise.resolve({ id, value: { id } });
+      },
+      (id) => Promise.resolve({ id }),
+    );
+  }
+
+  async createDeposit(input: CreateDepositInput): Promise<StripePaymentIntent> {
+    await this.retrieveAccount(input.accountId);
+    return this.once(
+      input.idempotencyKey,
+      async () => {
+        const id = `pi_sandbox${randomBytes(8).toString('hex')}`;
+        const intent = StripePaymentIntentSchema.parse({
+          id,
+          object: 'payment_intent',
+          amount: input.amountCents,
+          amount_received: 0,
+          currency: 'usd',
+          customer: input.customerId,
+          status: 'requires_payment_method',
+          client_secret: `${id}_secret_${randomBytes(12).toString('hex')}`,
+          livemode: false,
+        });
+        await this.keep(intent);
+        return { id, value: intent };
+      },
+      (id) => this.retrievePaymentIntent(id),
+    );
+  }
+
+  async createCardSetup(input: CreateCardSetupInput): Promise<StripeSetupIntent> {
+    await this.retrieveAccount(input.accountId);
+    return this.once(
+      input.idempotencyKey,
+      async () => {
+        const id = `seti_sandbox${randomBytes(8).toString('hex')}`;
+        const intent = StripeSetupIntentSchema.parse({
+          id,
+          object: 'setup_intent',
+          customer: input.customerId,
+          status: 'requires_payment_method',
+          client_secret: `${id}_secret_${randomBytes(12).toString('hex')}`,
+          livemode: false,
+        });
+        await this.keep(intent);
+        return { id, value: intent };
+      },
+      (id) => this.retrieveSetupIntent(id),
+    );
+  }
+
+  async retrievePaymentIntent(id: string): Promise<StripePaymentIntent> {
+    return StripePaymentIntentSchema.parse(await this.stored(`intent:${id}`));
+  }
+
+  async retrieveSetupIntent(id: string): Promise<StripeSetupIntent> {
+    return StripeSetupIntentSchema.parse(await this.stored(`intent:${id}`));
+  }
+
+  async capturePaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent> {
+    return this.once(
+      idempotencyKey,
+      async () => {
+        const intent = await this.retrievePaymentIntent(id);
+        if (intent.status !== 'requires_capture') throw refused('payment_intent_unexpected_state');
+        const captured = {
+          ...intent,
+          status: 'succeeded' as const,
+          amount_received: intent.amount,
+        };
+        await this.keep(captured);
+        return { id, value: captured };
+      },
+      (captured) => this.retrievePaymentIntent(captured),
+    );
+  }
+
+  async cancelPaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent> {
+    return this.once(
+      idempotencyKey,
+      async () => {
+        const intent = await this.retrievePaymentIntent(id);
+        if (intent.status === 'succeeded' || intent.status === 'canceled') {
+          throw refused('payment_intent_unexpected_state');
+        }
+        const canceled = { ...intent, status: 'canceled' as const };
+        await this.keep(canceled);
+        return { id, value: canceled };
+      },
+      (canceled) => this.retrievePaymentIntent(canceled),
+    );
+  }
+
+  async createRefund(paymentIntentId: string, idempotencyKey: string): Promise<StripeRefund> {
+    return this.once(
+      idempotencyKey,
+      async () => {
+        const intent = await this.retrievePaymentIntent(paymentIntentId);
+        if (intent.status !== 'succeeded') throw refused('charge_already_refunded');
+        const id = `re_sandbox${randomBytes(8).toString('hex')}`;
+        const refund = StripeRefundSchema.parse({
+          id,
+          object: 'refund',
+          amount: intent.amount,
+          status: 'succeeded',
+        });
+        await this.options.store.set(`refund:${id}`, JSON.stringify(refund));
+        return { id, value: refund };
+      },
+      (id) => this.retrieveRefund(id),
+    );
+  }
+
+  async retrieveRefund(id: string): Promise<StripeRefund> {
+    return StripeRefundSchema.parse(await this.stored(`refund:${id}`));
+  }
+
+  /**
+   * Settles an intent as Stripe's field would after the client typed a card (the dev route,
+   * AC-X-120): `succeeded` authorizes a payment (or saves a setup's card); `declined` leaves it
+   * waiting for another card. The client secret is the proof, as it is for Stripe.js.
+   */
+  async settleIntent(clientSecret: string, outcome: 'succeeded' | 'declined'): Promise<void> {
+    const id = /^((?:pi|seti)_[A-Za-z0-9]+)_secret_/.exec(clientSecret)?.[1];
+    const raw = id === undefined ? null : await this.options.store.get(`intent:${id}`);
+    if (raw === null) throw refused('resource_missing', 404);
+    const intent = StripePaymentIntentSchema.or(StripeSetupIntentSchema).parse(JSON.parse(raw));
+    if (intent.client_secret !== clientSecret) throw refused('resource_missing', 404);
+    if (intent.status !== 'requires_payment_method') throw refused('unexpected_state');
+    if (outcome === 'declined') return;
+    await this.keep(
+      intent.object === 'payment_intent'
+        ? { ...intent, status: 'requires_capture' }
+        : { ...intent, status: 'succeeded' },
+    );
+  }
+
+  private async keep(intent: StripePaymentIntent | StripeSetupIntent): Promise<void> {
+    await this.options.store.set(`intent:${intent.id}`, JSON.stringify(intent));
+  }
+
+  private async stored(key: string): Promise<unknown> {
+    const raw = await this.options.store.get(key);
+    if (raw === null) throw refused('resource_missing', 404);
+    return JSON.parse(raw);
+  }
+}
+
+/** What Stripe answers for a call it won't do: not worth trying again. */
+function refused(code: string, status = 400): PaymentsProviderError {
+  return new PaymentsProviderError(status, 'invalid_request_error', code, false);
 }

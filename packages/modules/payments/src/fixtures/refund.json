@@ -1,0 +1,11 @@
+{
+  "id": "re_3Nv0HdQ9RKHgCVdK0aBcDeFg",
+  "object": "refund",
+  "amount": 1500,
+  "charge": "ch_3Nv0HdQ9RKHgCVdK0aBcDeFg",
+  "currency": "usd",
+  "payment_intent": "pi_3Nv0HdQ9RKHgCVdK1aBcDeFg",
+  "reason": "requested_by_customer",
+  "status": "succeeded",
+  "transfer_reversal": "trr_1Nv0HdQ9RKHgCVdK"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "pi_3Nv0HdQ9RKHgCVdK1aBcDeFg",
+  "object": "payment_intent",
+  "amount": 1500,
+  "amount_capturable": 1500,
+  "amount_received": 0,
+  "capture_method": "manual",
+  "client_secret": "pi_3Nv0HdQ9RKHgCVdK1aBcDeFg_secret_Kz9cPaVoFHjZ1234",
+  "currency": "usd",
+  "customer": "cus_P4nTGqV1aBcD2e",
+  "livemode": false,
+  "on_behalf_of": "acct_1Nv0FGQ9RKHgCVdK",
+  "setup_future_usage": "off_session",
+  "status": "requires_capture",
+  "transfer_data": { "destination": "acct_1Nv0FGQ9RKHgCVdK" },
+  "metadata": { "pepper_request": "0199f0a4-7c1e-7d2a-9b3c-4d5e6f708100" }
+}

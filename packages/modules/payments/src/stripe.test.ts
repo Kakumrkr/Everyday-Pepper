@@ -195,3 +195,117 @@ describe('StripePaymentsProvider', () => {
     });
   });
 });
+
+describe('StripePaymentsProvider: deposits and cards (S66, ADR-0068 §3)', () => {
+  const CUSTOMER = 'cus_P4nTGqV1aBcD2e';
+  const INTENT = 'pi_3Nv0HdQ9RKHgCVdK1aBcDeFg';
+  const REQUEST = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708100';
+
+  it('makes a customer with the client’s address and name, once per key', async () => {
+    const { fetch, seen } = stub(200, fixture('customer'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    const customer = await stripe.createCustomer({
+      tenantId: TENANT,
+      email: 'client@example.com',
+      name: 'Ana Client',
+      idempotencyKey: 'pepper-customer-r1',
+    });
+    expect(customer).toEqual({ id: CUSTOMER });
+    expect(seen[0]?.url).toBe('https://api.stripe.com/v1/customers');
+    expect(seen[0]?.headers['Idempotency-Key']).toBe('pepper-customer-r1');
+    expect(seen[0]?.form).toEqual({
+      email: 'client@example.com',
+      name: 'Ana Client',
+      'metadata[pepper_tenant]': TENANT,
+    });
+  });
+
+  it('authorizes a destination charge on the business’s behalf and keeps the card', async () => {
+    const { fetch, seen } = stub(200, fixture('payment-intent-authorized'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    const intent = await stripe.createDeposit({
+      tenantId: TENANT,
+      requestId: REQUEST,
+      accountId: ACCOUNT,
+      customerId: CUSTOMER,
+      amountCents: 1500,
+      description: 'Juniper: Fade',
+      idempotencyKey: 'pepper-deposit-r1',
+    });
+    expect(intent).toMatchObject({ id: INTENT, status: 'requires_capture', amount: 1500 });
+    expect(seen[0]?.url).toBe('https://api.stripe.com/v1/payment_intents');
+    expect(seen[0]?.form).toEqual({
+      amount: '1500',
+      currency: 'usd',
+      customer: CUSTOMER,
+      capture_method: 'manual',
+      setup_future_usage: 'off_session',
+      on_behalf_of: ACCOUNT,
+      'transfer_data[destination]': ACCOUNT,
+      'automatic_payment_methods[enabled]': 'true',
+      'automatic_payment_methods[allow_redirects]': 'never',
+      description: 'Juniper: Fade',
+      'metadata[pepper_tenant]': TENANT,
+      'metadata[pepper_request]': REQUEST,
+    });
+  });
+
+  it('keeps a card with nothing paid through a setup on the business’s behalf', async () => {
+    const { fetch, seen } = stub(200, fixture('setup-intent'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    const setup = await stripe.createCardSetup({
+      tenantId: TENANT,
+      requestId: REQUEST,
+      accountId: ACCOUNT,
+      customerId: CUSTOMER,
+      idempotencyKey: 'pepper-card-r1',
+    });
+    expect(setup.status).toBe('requires_payment_method');
+    expect(seen[0]?.url).toBe('https://api.stripe.com/v1/setup_intents');
+    expect(seen[0]?.form).toMatchObject({
+      customer: CUSTOMER,
+      usage: 'off_session',
+      on_behalf_of: ACCOUNT,
+    });
+  });
+
+  it('reads, captures and lets go of a payment, each POST with its key', async () => {
+    const { fetch, seen } = stub(200, fixture('payment-intent-authorized'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    await stripe.retrievePaymentIntent(INTENT);
+    await stripe.capturePaymentIntent(INTENT, 'pepper-capture-p1');
+    await stripe.cancelPaymentIntent(INTENT, 'pepper-void-p1');
+    expect(seen.map((call) => [call.method, call.url])).toEqual([
+      ['GET', `https://api.stripe.com/v1/payment_intents/${INTENT}`],
+      ['POST', `https://api.stripe.com/v1/payment_intents/${INTENT}/capture`],
+      ['POST', `https://api.stripe.com/v1/payment_intents/${INTENT}/cancel`],
+    ]);
+    expect(seen[1]?.headers['Idempotency-Key']).toBe('pepper-capture-p1');
+    expect(seen[2]?.form).toEqual({ cancellation_reason: 'abandoned' });
+  });
+
+  it('refunds the whole payment, reversing the transfer to the business', async () => {
+    const { fetch, seen } = stub(200, fixture('refund'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    const refund = await stripe.createRefund(INTENT, 'pepper-refund-p1');
+    expect(refund).toMatchObject({ status: 'succeeded', amount: 1500 });
+    expect(seen[0]?.form).toEqual({
+      payment_intent: INTENT,
+      reverse_transfer: 'true',
+      reason: 'requested_by_customer',
+    });
+    expect(seen[0]?.headers['Idempotency-Key']).toBe('pepper-refund-p1');
+    await stripe.retrieveRefund(refund.id);
+    expect(seen[1]?.url).toBe(`https://api.stripe.com/v1/refunds/${refund.id}`);
+  });
+
+  it('refuses an answer that isn’t the object asked for', async () => {
+    const stripe = new StripePaymentsProvider({
+      secretKey: KEY,
+      fetch: stub(200, fixture('refund')).fetch,
+    });
+    await expect(stripe.retrievePaymentIntent(INTENT)).rejects.toMatchObject({
+      type: 'invalid_answer',
+    });
+  });
+});

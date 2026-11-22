@@ -1,4 +1,13 @@
-import type { PaymentProvider, StripeAccount, StripeAccountId, TenantId } from '@pepper/contracts';
+import type {
+  PaymentProvider,
+  StripeAccount,
+  StripeAccountId,
+  StripeCustomerId,
+  StripePaymentIntent,
+  StripeRefund,
+  StripeSetupIntent,
+  TenantId,
+} from '@pepper/contracts';
 
 // The payments port (S65, ADR-0067 §1): what the services ask of Stripe. `StripePaymentsProvider`
 // calls Stripe's API; `SandboxPaymentsProvider` never leaves the machine. Callers never hold a
@@ -24,6 +33,39 @@ export interface ProviderLink {
   expiresAt: Date | null;
 }
 
+/** A client Stripe keeps a card for (S66): on the platform, named by the business's request. */
+export interface CreateCustomerInput {
+  tenantId: TenantId;
+  /** The client's address and name, for Stripe's receipts and a dispute's evidence. */
+  email: string;
+  name: string;
+  idempotencyKey: string;
+}
+
+/**
+ * A deposit (S66, ADR-0068 §3): a destination charge on the business's behalf, authorized now and
+ * captured once booked, the card kept for later (`setup_future_usage=off_session`).
+ */
+export interface CreateDepositInput {
+  tenantId: TenantId;
+  requestId: string;
+  accountId: StripeAccountId;
+  customerId: StripeCustomerId;
+  amountCents: number;
+  /** On the client's statement and receipt: the business and the service. */
+  description: string;
+  idempotencyKey: string;
+}
+
+/** A card kept for later with nothing paid now (S66): a SetupIntent on the business's behalf. */
+export interface CreateCardSetupInput {
+  tenantId: TenantId;
+  requestId: string;
+  accountId: StripeAccountId;
+  customerId: StripeCustomerId;
+  idempotencyKey: string;
+}
+
 export interface PaymentsProvider {
   readonly provider: PaymentProvider;
   /** Whether the key is live: an event of the other mode changes nothing (AC-X-100). */
@@ -32,6 +74,19 @@ export interface PaymentsProvider {
   retrieveAccount(accountId: StripeAccountId): Promise<StripeAccount>;
   createOnboardingLink(input: OnboardingLinkInput): Promise<ProviderLink>;
   createDashboardLink(accountId: StripeAccountId): Promise<ProviderLink>;
+  // Deposits and cards on file (S66, ADR-0068). Every POST carries the caller's key.
+  createCustomer(input: CreateCustomerInput): Promise<{ id: StripeCustomerId }>;
+  createDeposit(input: CreateDepositInput): Promise<StripePaymentIntent>;
+  createCardSetup(input: CreateCardSetupInput): Promise<StripeSetupIntent>;
+  retrievePaymentIntent(id: string): Promise<StripePaymentIntent>;
+  retrieveSetupIntent(id: string): Promise<StripeSetupIntent>;
+  /** Takes the authorized amount (after the booking committed). */
+  capturePaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent>;
+  /** Lets an authorization go: nothing was taken (nobody booked with it). */
+  cancelPaymentIntent(id: string, idempotencyKey: string): Promise<StripePaymentIntent>;
+  /** The whole payment back to the client, the transfer to the business reversed. */
+  createRefund(paymentIntentId: string, idempotencyKey: string): Promise<StripeRefund>;
+  retrieveRefund(id: string): Promise<StripeRefund>;
 }
 
 /**
