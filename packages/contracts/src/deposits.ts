@@ -229,8 +229,11 @@ export const SandboxIntentRequestSchema = z
   .strict();
 export type SandboxIntentRequest = z.infer<typeof SandboxIntentRequestSchema>;
 
-/** A `payment` outbox message (ADR-0068 §4): which payment to refund. Ids only. */
+/**
+ * A `payment` outbox message (ADR-0068 §3–4): capture a booked deposit, or refund (or let go of)
+ * a cancelled one. Ids only.
+ */
 export const OutboxPaymentSchema = z
-  .object({ kind: z.literal('refund'), bookingPaymentId: z.uuid() })
+  .object({ kind: z.enum(['capture', 'refund']), bookingPaymentId: z.uuid() })
   .strict();
 export type OutboxPayment = z.infer<typeof OutboxPaymentSchema>;

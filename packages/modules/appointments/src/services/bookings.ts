@@ -384,6 +384,11 @@ export interface ChangeBookingOptions {
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** Told about a move or cancellation inside its transaction, when `notifyClient`. */
   notify?: BookingNotify;
+  /**
+   * Told about a cancellation inside its transaction (S66: the team's cancel refunds a deposit,
+   * AC-X-118). Pepper's own tools give none: its cancels can be undone, money can't.
+   */
+  onCancelled?: (tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>;
 }
 
 /**
@@ -433,6 +438,9 @@ export async function changeBookingIn(
     await requestInsights(tx);
     // A cancelled time is offered to the waitlist (S37, AC-W5-1).
     if (parsed.status === 'cancelled') await requestWaitlistMatch(tx, row, now);
+    if (parsed.status === 'cancelled' && options.onCancelled !== undefined) {
+      await options.onCancelled(tx, { bookingId: row.id, startsAt: row.startsAt });
+    }
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
       await tellClient(tx, changed, 'cancelled', options.notify);
     }

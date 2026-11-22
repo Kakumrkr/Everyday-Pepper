@@ -3,6 +3,7 @@ import {
   OutboxEmailSchema,
   OutboxEpisodeSchema,
   OutboxMessageIdSchema,
+  OutboxPaymentSchema,
   OutboxPushSchema,
   OutboxSmsSchema,
   smsSendableAt,
@@ -15,6 +16,7 @@ import {
   type OutboxEmailInput,
   type OutboxMessageId,
   type OutboxPushInput,
+  type OutboxPayment,
 } from '@pepper/contracts';
 import {
   addUsage,
@@ -103,6 +105,27 @@ export async function queuePush(
 }
 
 /**
+ * Queues a payment step (`OutboxPaymentSchema`, S66, ADR-0068: a capture or a refund) in the
+ * open transaction of a business, like `queueEmail`: it runs if and only if the change commits.
+ */
+export async function queuePayment(
+  tx: TenantTx,
+  job: OutboxPayment,
+  options: { key: Buffer; dedupeKey: OutboxDedupeKey; now: Date },
+): Promise<OutboxMessageId | undefined> {
+  const content = OutboxPaymentSchema.parse(job);
+  const id = OutboxMessageIdSchema.parse(newId());
+  const row = await insertOutboxMessage(tx, {
+    id,
+    type: 'payment',
+    dedupeKey: OutboxDedupeKeySchema.parse(options.dedupeKey),
+    payload: sealOutboxContent(options.key, id, Buffer.from(JSON.stringify(content))),
+    availableAt: options.now,
+  });
+  return row === undefined ? undefined : id;
+}
+
+/**
  * What one delivery call did. `dropped`: a push whose device is gone (the member turned it
  * off, or the push service no longer knows it); nothing is wrong, so nothing is alerted.
  */
@@ -124,6 +147,16 @@ export type EpisodeWriter = (
   job: OutboxEpisode,
 ) => Promise<unknown>;
 
+/**
+ * Runs a payment step an outbox message names (S66, ADR-0068): `@pepper/payments`'s runner, given
+ * by the worker. It throws to be retried (Stripe unavailable, a passing failure).
+ */
+export type PaymentRunner = (
+  db: Database,
+  tenantId: TenantId,
+  job: OutboxPayment,
+) => Promise<unknown>;
+
 export interface DeliveryOptions {
   key: Buffer;
   mailer: Mailer;
@@ -132,6 +165,11 @@ export interface DeliveryOptions {
    * gives up with an alert): the api queues them only when an embedding model is configured.
    */
   episodes?: EpisodeWriter | null;
+  /**
+   * `null` or absent: this worker has no payments, so a queued step fails (and retries, then
+   * gives up with an alert): the api queues them only with payments configured.
+   */
+  payments?: PaymentRunner | null;
   /**
    * `null` or absent: this worker has no VAPID keys, so a queued push fails (and retries,
    * then gives up with an alert): the api queues pushes only when push is configured, so
@@ -207,6 +245,10 @@ export async function deliverOutboxMessage(
       dropped = !(await sendPush(db, tenantId, opened, options));
     } else if (claimed.type === 'sms') {
       text = await sendSms(db, tenantId, id, opened, options);
+    } else if (claimed.type === 'payment') {
+      const runner = options.payments ?? null;
+      if (runner === null) throw new ChannelUnavailableError('payment');
+      await runner(db, tenantId, OutboxPaymentSchema.parse(opened));
     } else if (claimed.type === 'episode') {
       const writer = options.episodes ?? null;
       if (writer === null) throw new ChannelUnavailableError('episode');

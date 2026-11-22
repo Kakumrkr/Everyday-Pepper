@@ -156,16 +156,18 @@ export async function touchBookingPayment(tx: TenantTx, id: string): Promise<voi
 }
 
 /**
- * Payments still open (made and not booked, booked and not captured, a refund pending) untouched
- * since `before`, oldest first, across businesses (AC-X-116): their business and id only.
+ * Payments the sweep looks after (made `ageMs` ago and not booked; a refund Stripe left pending,
+ * untouched for `ageMs`), by the database's clock, oldest first, across businesses (AC-X-116):
+ * their business and id only.
  */
 export async function listOpenBookingPayments(
   db: Database,
-  before: Date,
+  ageMs: number,
   limit: number,
 ): Promise<{ tenantId: TenantId; id: string }[]> {
+  const age = `${String(Math.max(0, Math.trunc(ageMs)))} milliseconds`;
   const result = await db.execute<{ tenant_id: string; id: string }>(
-    sql`SELECT tenant_id, id FROM open_booking_payments(${before.toISOString()}::timestamptz, ${Math.trunc(limit)})`,
+    sql`SELECT tenant_id, id FROM open_booking_payments(${age}::interval, ${Math.trunc(limit)})`,
   );
   return result.rows.map((row) => ({
     tenantId: TenantIdSchema.parse(row.tenant_id),

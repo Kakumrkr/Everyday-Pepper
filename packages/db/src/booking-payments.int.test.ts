@@ -144,13 +144,15 @@ describe('booking_payments', () => {
     await withTenant(db, b, (tx) =>
       moveBookingPayment(tx, closed.id, ['started'], { status: 'voided' }),
     );
-    const later = new Date(Date.now() + 60_000);
-    const found = await listOpenBookingPayments(db, later, 500);
+    await db.execute(sql`SELECT 1`);
+    // Every row was touched just now: an age of 0 finds them, a minute finds none of them.
+    const found = await listOpenBookingPayments(db, 0, 500);
     const ids = found.map((row) => row.id);
     expect(ids).toEqual(expect.arrayContaining([open.id, other.id]));
     expect(ids).not.toContain(closed.id);
     expect(found.find((row) => row.id === open.id)?.tenantId).toBe(a);
-    expect(await listOpenBookingPayments(db, new Date(0), 500)).toEqual([]);
+    const minute = (await listOpenBookingPayments(db, 60_000, 500)).map((row) => row.id);
+    expect(minute).not.toContain(open.id);
   });
 });
 
