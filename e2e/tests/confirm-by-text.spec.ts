@@ -114,17 +114,23 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
   await expect(sheet.getByTestId('booking-confirmed-by-text')).toContainText('Confirmed by text');
 
   // The sheet at 375 px in light and dark (DESIGN.md D6); the day and times move with today.
+  // They are hidden, not masked: a mask is as wide as the text under it, so a longer date
+  // ("Wed, Dec 23" against "Sun, Nov 1") changed the picture (S65.2's CI). Hidden on one line,
+  // they keep the layout and draw nothing, whatever the date.
   if (test.info().project.name !== 'mobile') return;
   await page.setViewportSize({ width: 375, height: 812 });
+  const movesWithToday = [
+    '[data-testid="booking-when"]',
+    '[data-testid="booking-confirmed-when"]',
+    '[data-testid="calendar-day"]',
+  ].join(', ');
+  await page.addStyleTag({
+    content: `${movesWithToday} { visibility: hidden; white-space: nowrap; }`,
+  });
   for (const scheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
     await expect.soft(page).toHaveScreenshot(`booking-confirmed-by-text-375-${scheme}.png`, {
       animations: 'disabled',
-      mask: [
-        sheet.getByTestId('booking-when'),
-        sheet.getByTestId('booking-confirmed-when'),
-        page.getByTestId('calendar-day'),
-      ],
     });
   }
 });

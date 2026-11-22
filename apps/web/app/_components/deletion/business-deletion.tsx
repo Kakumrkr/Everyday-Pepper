@@ -11,6 +11,7 @@ import { formText } from '../../../lib/form';
 import { ExportDownload } from '../export-download';
 import { Notice } from '../form-parts';
 import { TabActionBar } from '../tab-action-bar';
+import { DELETION_STRIPE_NOTE } from '../../../lib/payments';
 
 /**
  * Delete business (S51.2, ADR-0054, AC-W1-40): first "Download your data" (the S51 retro's
@@ -126,6 +127,7 @@ export function BusinessDeletion({
             title="In 30 days, everything is deleted"
             meta="Clients, visits, the team, photos and what Pepper knows. Until then you can keep it."
           />
+          <ListRow title={DELETION_STRIPE_NOTE.title} meta={DELETION_STRIPE_NOTE.meta} />
         </List>
       </section>
       <form

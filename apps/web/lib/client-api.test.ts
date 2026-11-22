@@ -23,6 +23,9 @@ describe('messageFor', () => {
     [422, { code: 'draft_refused', message: 'x' }, 'Leave out links'],
     [409, { code: 'nudge_not_sendable', message: 'x' }, 'can’t go to this client'],
     [404, { code: 'unsubscribe_link_invalid', message: 'x' }, 'link doesn’t work'],
+    [409, { code: 'payments_rejected', message: 'x' }, 'can’t take payments'],
+    [503, { code: 'payments_unavailable', message: 'x' }, 'Stripe isn’t answering'],
+    [409, { code: 'payments_not_onboarded', message: 'x' }, 'Finish with Stripe first'],
   ])('explains %i %j', (status, body, expected) => {
     expect(messageFor(status, body)).toContain(expected);
   });

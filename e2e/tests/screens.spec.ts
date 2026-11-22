@@ -34,6 +34,7 @@ import {
   unique,
   visitsCsv,
 } from './helpers.js';
+import { stripeSays } from './payments-helpers.js';
 import { newPhone, textTo, typed } from './sms-helpers.js';
 import { expectTapTargets } from './tap-targets.js';
 import { solidColorPhoto } from '@pepper/storage';
@@ -772,6 +773,41 @@ for (const width of WIDTHS) {
       });
       if (phone) await expectTapTargets(page, 'Texts and reminders with cards on');
     }
+  });
+}
+
+for (const width of WIDTHS) {
+  test(`Payments at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const phone = width <= 375;
+    // More → Payments (S65.2, AC-X-106…109): not connected, then Stripe needing a photo ID by a
+    // day (masked: it moves with the clock), then ready.
+    const shots = async (name: string, mask: Locator[] = []): Promise<void> => {
+      for (const scheme of SCHEMES) {
+        await page.goto('/more/payments');
+        await expect(page.getByTestId('payments-status')).toBeVisible();
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, mask });
+        if (phone) await expectTapTargets(page, name);
+      }
+    };
+    await shots('more-payments');
+
+    await page.goto('/more/payments');
+    await (await hydrated(page.getByRole('button', { name: 'Connect with Stripe' }))).click();
+    await expect(toast(page)).toContainText('You haven’t finished with Stripe yet.');
+    await stripeSays(page, 'action_needed');
+    await shots('more-payments-needs', [
+      page.getByText(/^Send it by /),
+      page.getByText(/^By [A-Z][a-z]{2} \d{1,2}$/),
+    ]);
+
+    await stripeSays(page, 'ready');
+    await shots('more-payments-ready');
   });
 }
 
