@@ -110,6 +110,7 @@ export interface BookingPaymentChange {
   bookedAt?: Date;
   capturedAt?: Date;
   settledAt?: Date;
+  refundEndsAt?: Date;
 }
 
 /**
@@ -133,6 +134,7 @@ export async function moveBookingPayment(
       ...(change.bookedAt !== undefined && { bookedAt: change.bookedAt }),
       ...(change.capturedAt !== undefined && { capturedAt: change.capturedAt }),
       ...(change.settledAt !== undefined && { settledAt: change.settledAt }),
+      ...(change.refundEndsAt !== undefined && { refundEndsAt: change.refundEndsAt }),
     })
     .where(
       and(

@@ -362,6 +362,21 @@ describe('deposits on the booking page (S66)', () => {
     await updateBookingPage(db, { context: owner }, { depositRefundHours: 24 });
   });
 
+  it('AC-X-117: moving the booking inside the window doesn’t win the deposit back (security review)', async () => {
+    await updateBookingPage(db, { context: owner }, { depositRefundHours: 48 });
+    const [slot] = await slots(depositServiceId, 0);
+    const [far] = await slots(depositServiceId, 8);
+    if (slot === undefined || far === undefined) throw new Error('no free time');
+    const { client, booked, bookingId } = await bookWithDeposit(slot);
+    await client
+      .post('/booking/reschedule', { token: booked.manageToken, startsAt: far.startsAt })
+      .expect(200);
+    await client.post('/booking/cancel', { token: booked.manageToken }).expect(200);
+    await deliverQueued();
+    expect(await paymentStatus(bookingId)).toBe('kept');
+    await updateBookingPage(db, { context: owner }, { depositRefundHours: 24 });
+  });
+
   it('AC-X-118: the team’s cancel always refunds', async () => {
     await updateBookingPage(db, { context: owner }, { depositRefundHours: 168 });
     const [slot] = await slots(depositServiceId, 5);

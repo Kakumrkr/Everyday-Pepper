@@ -3816,6 +3816,11 @@ export const bookingPayments = pgTable(
     currency: text('currency').notNull().default('usd'),
     /** The window the client agreed to, kept with the payment. */
     refundHours: integer('refund_hours').notNull(),
+    /**
+     * Until when a client's cancel is refunded (set when booked). A reschedule moves it only while
+     * it hasn't passed, so moving a booking can't win back a deposit already kept (S66 review).
+     */
+    refundEndsAt: timestamp('refund_ends_at', { withTimezone: true }),
     status: text('status').notNull().default('started'),
     refundId: text('refund_id'),
     bookedAt: timestamp('booked_at', { withTimezone: true }),

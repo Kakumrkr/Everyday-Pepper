@@ -190,8 +190,10 @@ export interface PublicDeposits {
   /** In the booking's transaction: ties the payment to it; `false` when none is waiting. */
   attach(
     tx: TenantTx,
-    input: { requestId: string; bookingId: string; now: Date },
+    input: { requestId: string; bookingId: string; startsAt: Date; now: Date },
   ): Promise<boolean>;
+  /** In a client's move's transaction: the refund's end follows only while it hasn't passed. */
+  rescheduled(tx: TenantTx, input: { bookingId: string; startsAt: Date; now: Date }): Promise<void>;
   /** In a cancel's transaction: keeps or refunds the deposit. */
   cancelled(
     tx: TenantTx,
@@ -562,6 +564,7 @@ export async function confirmBookingRequest(
           (await options.deposits.attach(tx, {
             requestId: id,
             bookingId: row.id,
+            startsAt: row.startsAt,
             now: new Date(now),
           }));
         if (!attached) throw new PaymentRequiredError();
@@ -825,7 +828,7 @@ export async function cancelManagedBooking(
       const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
       if (cancelled === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, cancelled);
-      // The deposit by the window agreed, from the booking's current time (S66, AC-X-117).
+      // The deposit by the window agreed, until the refund's stored end (S66, AC-X-117).
       await options.deposits?.cancelled(tx, {
         bookingId: row.id,
         startsAt: row.startsAt,
@@ -893,6 +896,11 @@ export async function rescheduleManagedBooking(
       });
       if (moved === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, moved);
+      await options.deposits?.rescheduled(tx, {
+        bookingId: row.id,
+        startsAt: moved.startsAt,
+        now: new Date(now),
+      });
       await keepReminderInStep(tx, moved, now);
       await requestInsights(tx);
       await requestWaitlistMatch(tx, row, now);

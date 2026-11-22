@@ -2,7 +2,6 @@ import {
   BookingPaymentStartSchema,
   BookingPaymentStatusSchema,
   depositRefundEndsAt,
-  isRefundable,
   StripeAccountIdSchema,
   StripeCustomerIdSchema,
   UserIdSchema,
@@ -221,7 +220,7 @@ export async function requireAuthorizedPayment(
  */
 export async function attachBookingPaymentIn(
   tx: TenantTx,
-  input: { requestId: string; bookingId: string; now: Date; outboxKey: Buffer },
+  input: { requestId: string; bookingId: string; startsAt: Date; now: Date; outboxKey: Buffer },
 ): Promise<boolean> {
   const row = await findBookingPaymentByRequest(tx, input.requestId, { lock: true });
   if (row?.status !== 'started') return false;
@@ -229,6 +228,7 @@ export async function attachBookingPaymentIn(
     status: row.kind === 'deposit' ? 'booked' : 'card_saved',
     bookingId: input.bookingId,
     bookedAt: input.now,
+    refundEndsAt: depositRefundEndsAt(input.startsAt, row.refundHours),
   });
   if (moved === undefined) return false;
   if (moved.kind === 'deposit') {
@@ -239,6 +239,26 @@ export async function attachBookingPaymentIn(
 
 /** Who cancelled: the client from their link, or the business (a member, or Pepper on an OK). */
 export type CancelledBy = 'client' | 'business';
+
+/**
+ * In a move's transaction (AC-X-117): the refund's end follows the booking's new time when the
+ * business moved it, or when the client moved it while a cancel would still have been refunded.
+ * Once it has passed, a client's move keeps it, so a reschedule can't win back a kept deposit.
+ */
+export async function moveDepositWindowIn(
+  tx: TenantTx,
+  input: { bookingId: string; startsAt: Date; by: CancelledBy; now: Date },
+): Promise<void> {
+  const row = await findBookingPaymentByBooking(tx, input.bookingId, { lock: true });
+  if (row?.kind !== 'deposit' || (row.status !== 'booked' && row.status !== 'captured')) return;
+  const open = row.refundEndsAt === null || input.now.getTime() <= row.refundEndsAt.getTime();
+  if (input.by === 'client' && !open) return;
+  const status = BookingPaymentStatusSchema.parse(row.status);
+  await moveBookingPayment(tx, row.id, [status], {
+    status,
+    refundEndsAt: depositRefundEndsAt(input.startsAt, row.refundHours),
+  });
+}
 
 /**
  * In the cancel's transaction (AC-X-117/118): a paid deposit is refunded in full when the business
@@ -254,8 +274,8 @@ export async function settleDepositOnCancelIn(
   if (row?.kind !== 'deposit' || (row.status !== 'booked' && row.status !== 'captured')) {
     return null;
   }
-  const refund =
-    input.by === 'business' || isRefundable(input.startsAt, row.refundHours, input.now);
+  const endsAt = row.refundEndsAt ?? depositRefundEndsAt(input.startsAt, row.refundHours);
+  const refund = input.by === 'business' || input.now.getTime() <= endsAt.getTime();
   if (!refund) {
     await move(tx, row, ['booked', 'captured'], { status: 'kept', settledAt: input.now });
     return 'kept';

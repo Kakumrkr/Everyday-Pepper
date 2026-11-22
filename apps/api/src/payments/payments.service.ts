@@ -16,6 +16,7 @@ import {
   attachBookingPaymentIn,
   chargeableAccountIn,
   requireAuthorizedPayment,
+  moveDepositWindowIn,
   settleDepositOnCancelIn,
   startBookingPayment,
   type VerifiedPaymentRequest,
@@ -165,7 +166,18 @@ export class PaymentsService {
       cancelled: async (tx, input) => {
         await settleDepositOnCancelIn(tx, { ...input, outboxKey: deps.outboxKey });
       },
+      rescheduled: (tx, input) => moveDepositWindowIn(tx, { ...input, by: 'client' }),
     };
+  }
+
+  /** The team's move (AC-X-117): a deposit's refund window follows the new time. */
+  teamMoved():
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined {
+    const bound = this.bound;
+    if (bound === null) return undefined;
+    const { deps } = bound;
+    return (tx, booking) =>
+      moveDepositWindowIn(tx, { ...booking, by: 'business', now: deps.clock.now() });
   }
 
   /** The team's cancel (AC-X-118): a paid deposit is refunded in full, in the cancel's transaction. */

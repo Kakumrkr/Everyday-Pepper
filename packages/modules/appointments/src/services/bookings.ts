@@ -390,6 +390,9 @@ export interface ChangeBookingOptions {
    */
   onCancelled?:
     ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
+  /** Told about the team's move inside its transaction (S66: a deposit's refund window follows). */
+  onMoved?:
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
 }
 
 /**
@@ -479,6 +482,7 @@ export async function changeBookingIn(
     throw error;
   }
   if (moved === undefined) throw new BookingNotFoundError();
+  if (options.onMoved) await options.onMoved(tx, { bookingId: row.id, startsAt: moved.startsAt });
   await keepReminderInStep(tx, moved, now);
   await requestInsights(tx);
   // The old time is free now (S37): offered to the waitlist.

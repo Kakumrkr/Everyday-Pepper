@@ -1850,6 +1850,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "refund_ends_at": {
+          "name": "refund_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
         "status": {
           "name": "status",
           "type": "text",

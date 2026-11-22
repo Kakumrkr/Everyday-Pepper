@@ -239,6 +239,7 @@ export class PublicBookingService {
     const moved = await rescheduleManagedBooking(this.db, slug, token, startsAt, {
       templateRuleDefaults,
       notify: this.notify,
+      deposits: this.deposits,
     });
     return moved.booking;
   }

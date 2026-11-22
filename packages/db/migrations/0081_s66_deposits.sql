@@ -13,6 +13,7 @@ CREATE TABLE "booking_payments" (
 	"amount_cents" integer NOT NULL,
 	"currency" text DEFAULT 'usd' NOT NULL,
 	"refund_hours" integer NOT NULL,
+	"refund_ends_at" timestamp with time zone,
 	"status" text DEFAULT 'started' NOT NULL,
 	"refund_id" text,
 	"booked_at" timestamp with time zone,

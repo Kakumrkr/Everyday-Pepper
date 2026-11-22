@@ -38,6 +38,7 @@ import {
   attachBookingPaymentIn,
   requireAuthorizedPayment,
   runPaymentJob,
+  moveDepositWindowIn,
   settleDepositOnCancelIn,
   startBookingPayment,
   sweepBookingPayments,
@@ -201,6 +202,7 @@ async function paidAndBooked(business: Awaited<ReturnType<typeof newBusiness>>, 
       await attachBookingPaymentIn(tx, {
         requestId: asked.requestId,
         bookingId: id,
+        startsAt,
         now: business.clock.now(),
         outboxKey,
       }),
@@ -280,6 +282,7 @@ describe('booking only when authorized (AC-X-115)', () => {
       attachBookingPaymentIn(tx, {
         requestId: asked.requestId,
         bookingId,
+        startsAt: VISIT,
         now: business.clock.now(),
         outboxKey,
       }),
@@ -321,6 +324,7 @@ describe('booking only when authorized (AC-X-115)', () => {
       await attachBookingPaymentIn(tx, {
         requestId: asked.requestId,
         bookingId,
+        startsAt: VISIT,
         now: business.clock.now(),
         outboxKey,
       });
@@ -422,6 +426,7 @@ describe('cancelling (AC-X-117, AC-X-118)', () => {
       await attachBookingPaymentIn(tx, {
         requestId: asked.requestId,
         bookingId: id,
+        startsAt: VISIT,
         now: business.clock.now(),
         outboxKey,
       });
@@ -447,6 +452,70 @@ describe('cancelling (AC-X-117, AC-X-118)', () => {
     business.sandbox.createRefund = original;
     await runPaymentJob(business.deps, business.tenantId, refundStep);
     expect((await paymentOf(business.tenantId, asked.requestId)).status).toBe('refunded');
+  });
+});
+
+describe('a move and the refund window (AC-X-117, security review)', () => {
+  const HOUR = 60 * 60 * 1000;
+  const cancel = (
+    business: Awaited<ReturnType<typeof newBusiness>>,
+    bookingId: string,
+    startsAt: Date,
+    now: Date,
+  ) =>
+    withTenant(db, business.tenantId, (tx) =>
+      settleDepositOnCancelIn(tx, { bookingId, startsAt, by: 'client', now, outboxKey }),
+    );
+  const moveTo = (
+    business: Awaited<ReturnType<typeof newBusiness>>,
+    bookingId: string,
+    startsAt: Date,
+    now: Date,
+    by: 'client' | 'business' = 'client',
+  ) =>
+    withTenant(db, business.tenantId, (tx) =>
+      moveDepositWindowIn(tx, { bookingId, startsAt, by, now }),
+    );
+
+  it('is set when booked: the agreed hours before the start', async () => {
+    const business = await newBusiness();
+    const { asked } = await paidAndBooked(business);
+    expect((await paymentOf(business.tenantId, asked.requestId)).refundEndsAt).toEqual(
+      new Date(VISIT.getTime() - 24 * HOUR),
+    );
+  });
+
+  it('a client moving the booking inside the window can’t win the deposit back', async () => {
+    const business = await newBusiness();
+    const { asked, bookingId } = await paidAndBooked(business);
+    const late = new Date(VISIT.getTime() - 2 * HOUR);
+    const later = new Date(VISIT.getTime() + 7 * 24 * HOUR);
+    await moveTo(business, bookingId, later, late);
+    expect((await paymentOf(business.tenantId, asked.requestId)).refundEndsAt).toEqual(
+      new Date(VISIT.getTime() - 24 * HOUR),
+    );
+    expect(await cancel(business, bookingId, later, late)).toBe('kept');
+  });
+
+  it('a client moving it in time takes the window along', async () => {
+    const business = await newBusiness();
+    const { bookingId } = await paidAndBooked(business);
+    const early = new Date(VISIT.getTime() - 3 * 24 * HOUR);
+    const later = new Date(VISIT.getTime() + 7 * 24 * HOUR);
+    await moveTo(business, bookingId, later, early);
+    // Past the first window, still before the new one: refunded.
+    expect(await cancel(business, bookingId, later, new Date(VISIT.getTime() - 2 * HOUR))).toBe(
+      'refund_pending',
+    );
+  });
+
+  it('the business moving it always takes the window along', async () => {
+    const business = await newBusiness();
+    const { bookingId } = await paidAndBooked(business);
+    const late = new Date(VISIT.getTime() - 2 * HOUR);
+    const later = new Date(VISIT.getTime() + 7 * 24 * HOUR);
+    await moveTo(business, bookingId, later, late, 'business');
+    expect(await cancel(business, bookingId, later, late)).toBe('refund_pending');
   });
 });
 

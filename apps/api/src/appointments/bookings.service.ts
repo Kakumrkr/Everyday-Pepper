@@ -83,6 +83,7 @@ export class BookingsService {
       templateRuleDefaults,
       notify: this.emails.notify,
       onCancelled: this.payments?.teamCancelled(),
+      onMoved: this.payments?.teamMoved(),
     });
   }
 
