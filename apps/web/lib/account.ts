@@ -1,4 +1,5 @@
 import {
+  ApiErrorSchema,
   CurrentBusinessResponseSchema,
   InvitesResponseSchema,
   MembersResponseSchema,
@@ -87,8 +88,10 @@ export async function loadPaymentAccount(options: ApiCallOptions): Promise<Payme
   if (response === null) return { state: 'unavailable' };
   const body: unknown = await response.json().catch(() => undefined);
   if (response.status === 404) {
-    const code = (body as { code?: unknown } | undefined)?.code;
-    return code === 'payments_off' ? { state: 'off' } : { state: 'unavailable' };
+    const refusal = ApiErrorSchema.safeParse(body);
+    return refusal.success && refusal.data.code === 'payments_off'
+      ? { state: 'off' }
+      : { state: 'unavailable' };
   }
   if (response.status !== 200) return { state: 'unavailable' };
   const parsed = PaymentAccountAnswerSchema.safeParse(body);

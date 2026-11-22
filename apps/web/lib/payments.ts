@@ -17,6 +17,27 @@ export function dueDay(at: string | Date, timeZone: string): string {
   );
 }
 
+/**
+ * Stripe's deadline for what is due, as a line under each thing: "By Dec 3", or "Was due Nov 1"
+ * once it has passed (Stripe keeps a passed deadline while the things are past due).
+ */
+export function dueLine(dueBy: string, timeZone: string, now: Date = new Date()): string {
+  const day = dueDay(dueBy, timeZone);
+  return isOverdue(dueBy, now) ? `Was due ${day}` : `By ${day}`;
+}
+
+function isOverdue(dueBy: string, now: Date): boolean {
+  return new Date(dueBy).getTime() <= now.getTime();
+}
+
+/**
+ * `action_needed` with nothing to send: Stripe paused the account for its own reason
+ * (`platform_paused`, `listed`, `other`), so only its dashboard can say why.
+ */
+function pausedByStripe(answer: PaymentAccountAnswer): boolean {
+  return answer.status === 'action_needed' && answer.due.length === 0;
+}
+
 /** What a code Pepper doesn't know reads as. */
 export const UNKNOWN_REQUIREMENT = 'One more detail for Stripe';
 
@@ -97,7 +118,19 @@ export interface PaymentsWords {
 }
 
 /** Where payments stand, for the page's top. */
-export function paymentsWords(answer: PaymentAccountAnswer, timeZone: string): PaymentsWords {
+export function paymentsWords(
+  answer: PaymentAccountAnswer,
+  timeZone: string,
+  now: Date = new Date(),
+): PaymentsWords {
+  if (pausedByStripe(answer)) {
+    return {
+      badge: 'Paused',
+      tone: 'warn',
+      title: 'Stripe paused payments',
+      body: 'Its dashboard says why and what to do. If that doesn’t help, tell us and a person will look.',
+    };
+  }
   switch (answer.status) {
     case 'not_connected':
       return {
@@ -122,14 +155,24 @@ export function paymentsWords(answer: PaymentAccountAnswer, timeZone: string): P
       };
     case 'action_needed': {
       const many = requirementsInWords(answer.due).length > 1;
-      const when = answer.dueBy === null ? '' : ` by ${dueDay(answer.dueBy, timeZone)}`;
+      const it = many ? 'them' : 'it';
       const payoutsWait =
         answer.chargesEnabled && !answer.payoutsEnabled ? ' Payments are on; payouts wait.' : '';
+      const title = many ? 'Stripe needs a few more things' : 'Stripe needs one more thing';
+      if (answer.dueBy !== null && isOverdue(answer.dueBy, now)) {
+        return {
+          badge: 'Overdue',
+          tone: 'danger',
+          title,
+          body: `Send ${it} now. Stripe wanted ${it} by ${dueDay(answer.dueBy, timeZone)}.${payoutsWait}`,
+        };
+      }
+      const when = answer.dueBy === null ? '' : ` by ${dueDay(answer.dueBy, timeZone)}`;
       return {
         badge: 'Needs your input',
         tone: 'warn',
-        title: many ? 'Stripe needs a few more things' : 'Stripe needs one more thing',
-        body: `Send ${many ? 'them' : 'it'}${when} so payments keep working.${payoutsWait}`,
+        title,
+        body: `Send ${it}${when} so payments keep working.${payoutsWait}`,
       };
     }
     case 'ready':
@@ -150,15 +193,21 @@ export function paymentsWords(answer: PaymentAccountAnswer, timeZone: string): P
 }
 
 /** The More row's one line. */
-export function paymentsSummary(answer: PaymentAccountAnswer, timeZone: string): string {
+export function paymentsSummary(
+  answer: PaymentAccountAnswer,
+  timeZone: string,
+  now: Date = new Date(),
+): string {
+  if (pausedByStripe(answer)) return 'Stripe paused payments';
+  let needs = 'Stripe needs one more thing';
+  if (answer.dueBy !== null) {
+    needs += isOverdue(answer.dueBy, now) ? ', now' : ` by ${dueDay(answer.dueBy, timeZone)}`;
+  }
   const lines: Record<PaymentAccountStatus, string> = {
     not_connected: 'Take deposits with Stripe',
     onboarding: 'Not finished with Stripe',
     pending: 'Stripe is checking your details',
-    action_needed:
-      answer.dueBy === null
-        ? 'Stripe needs one more thing'
-        : `Stripe needs one more thing by ${dueDay(answer.dueBy, timeZone)}`,
+    action_needed: needs,
     ready: 'Payments are on',
     rejected: 'Stripe can’t take payments for you',
   };
@@ -181,7 +230,8 @@ export function paymentsActions(answer: PaymentAccountAnswer): PaymentsActions {
     action_needed: 'Send it to Stripe',
   };
   return {
-    onboarding: onboarding[answer.status] ?? null,
+    // Paused with nothing due: Stripe's pages have nothing to collect.
+    onboarding: pausedByStripe(answer) ? null : (onboarding[answer.status] ?? null),
     // Stripe's dashboard opens once the details are in (else 409 `payments_not_onboarded`).
     dashboard: answer.detailsSubmitted && answer.status !== 'not_connected',
     check: answer.status === 'pending',

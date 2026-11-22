@@ -13,7 +13,7 @@ import { ROUTES } from '../../../lib/account';
 import { sendJson } from '../../../lib/client-api';
 import {
   checkedNote,
-  dueDay,
+  dueLine,
   PAYMENTS_DASHBOARD_PATH,
   PAYMENTS_ONBOARDING_PATH,
   PAYMENTS_SYNC_PATH,
@@ -79,6 +79,18 @@ export function PaymentsPanel({
   }
 
   useEffect(() => {
+    // Back from Stripe's pages: a page the browser kept (back/forward cache) comes back as it
+    // was left, with the tapped button still busy.
+    const restored = (event: PageTransitionEvent): void => {
+      if (event.persisted) setBusy(null);
+    };
+    window.addEventListener('pageshow', restored);
+    return () => {
+      window.removeEventListener('pageshow', restored);
+    };
+  }, []);
+
+  useEffect(() => {
     // Once per arrival (React runs effects twice in development).
     if (handled.current || arrival === null) return;
     handled.current = true;
@@ -108,7 +120,7 @@ export function PaymentsPanel({
   const words = paymentsWords(account, timeZone);
   const actions = paymentsActions(account);
   const needs = account.status === 'action_needed' ? requirementsInWords(account.due) : [];
-  const by = account.dueBy === null ? null : dueDay(account.dueBy, timeZone);
+  const by = account.dueBy === null ? null : dueLine(account.dueBy, timeZone);
 
   return (
     <div className="flex flex-col gap-6">
@@ -153,7 +165,7 @@ export function PaymentsPanel({
                 <Icon name="alert" className="mt-0.5 text-warn" />
                 <span className="flex flex-col gap-0.5">
                   <span className="type-body font-semibold text-ink">{need}</span>
-                  {by === null ? null : <span className="type-caption text-ink-2">By {by}</span>}
+                  {by === null ? null : <span className="type-caption text-ink-2">{by}</span>}
                 </span>
               </li>
             ))}

@@ -8,6 +8,7 @@ import {
   checkedNote,
   DELETION_STRIPE_NOTE,
   dueDay,
+  dueLine,
   paymentsActions,
   paymentsArrival,
   paymentsSummary,
@@ -19,6 +20,8 @@ import {
 } from './payments';
 
 const NY = 'America/New_York';
+/** A fixed now, before the deadlines below, so the tests don't age. */
+const NOW = new Date('2026-11-22T15:00:00.000Z');
 
 /** A checked answer; times as plain strings, as the api sends them. */
 function answer(
@@ -112,7 +115,7 @@ describe('dueDay', () => {
 describe('paymentsWords (AC-X-107)', () => {
   it('has words, never codes, for every status', () => {
     for (const status of STATUSES) {
-      const words = paymentsWords(answer({ status, due: ['individual.id_number'] }), NY);
+      const words = paymentsWords(answer({ status, due: ['individual.id_number'] }), NY, NOW);
       for (const text of [words.badge, words.title, words.body]) {
         expect(text).not.toMatch(/_|\b(?:sync|requirement|null)\b|!/i);
         expect(text.length).toBeGreaterThan(0);
@@ -158,23 +161,31 @@ describe('paymentsWords (AC-X-107)', () => {
   });
 
   it('tones by status: ready is ok, rejected is danger', () => {
-    expect(paymentsWords(answer(), NY).tone).toBe('ok');
-    expect(paymentsWords(answer({ status: 'rejected' }), NY).tone).toBe('danger');
+    expect(paymentsWords(answer(), NY, NOW).tone).toBe('ok');
+    expect(paymentsWords(answer({ status: 'rejected' }), NY, NOW).tone).toBe('danger');
   });
 });
 
 describe('paymentsSummary (AC-X-106)', () => {
   it('sums it up for More', () => {
-    expect(paymentsSummary(answer(), NY)).toBe('Payments are on');
-    expect(paymentsSummary(answer({ status: 'not_connected' }), NY)).toBe(
+    expect(paymentsSummary(answer(), NY, NOW)).toBe('Payments are on');
+    expect(paymentsSummary(answer({ status: 'not_connected' }), NY, NOW)).toBe(
       'Take deposits with Stripe',
     );
     expect(
-      paymentsSummary(answer({ status: 'action_needed', dueBy: '2026-12-04T03:00:00.000Z' }), NY),
+      paymentsSummary(
+        answer({
+          status: 'action_needed',
+          due: ['external_account'],
+          dueBy: '2026-12-04T03:00:00.000Z',
+        }),
+        NY,
+        NOW,
+      ),
     ).toBe('Stripe needs one more thing by Dec 3');
-    expect(paymentsSummary(answer({ status: 'action_needed' }), NY)).toBe(
-      'Stripe needs one more thing',
-    );
+    expect(
+      paymentsSummary(answer({ status: 'action_needed', due: ['external_account'] }), NY, NOW),
+    ).toBe('Stripe needs one more thing');
   });
 });
 
@@ -201,11 +212,13 @@ describe('paymentsActions (AC-X-108, AC-X-109)', () => {
       dashboard: false,
       check: false,
     });
-    expect(paymentsActions(answer({ status: 'action_needed' }))).toEqual({
-      onboarding: 'Send it to Stripe',
-      dashboard: true,
-      check: false,
-    });
+    expect(paymentsActions(answer({ status: 'action_needed', due: ['external_account'] }))).toEqual(
+      {
+        onboarding: 'Send it to Stripe',
+        dashboard: true,
+        check: false,
+      },
+    );
   });
 
   it('offers the dashboard once the details are in, and a fresh check while Stripe checks', () => {
@@ -249,5 +262,45 @@ describe('arrival and notes (AC-X-108)', () => {
     expect(DELETION_STRIPE_NOTE.meta).toBe(
       'Pepper can’t close it for you. If you want it closed, ask Stripe.',
     );
+  });
+});
+
+describe('a deadline that has passed, and Stripe pausing on its own (AC-X-107)', () => {
+  const past = '2026-11-01T17:00:00.000Z';
+
+  it('says "was due" under each thing once the day has gone', () => {
+    expect(dueLine('2026-12-04T03:00:00.000Z', NY, NOW)).toBe('By Dec 3');
+    expect(dueLine(past, NY, NOW)).toBe('Was due Nov 1');
+  });
+
+  it('asks for it now, never "by" a day that has gone', () => {
+    const overdue = answer({
+      status: 'action_needed',
+      chargesEnabled: false,
+      payoutsEnabled: false,
+      due: ['external_account'],
+      dueBy: past,
+    });
+    const words = paymentsWords(overdue, NY, NOW);
+    expect(words.badge).toBe('Overdue');
+    expect(words.tone).toBe('danger');
+    expect(words.body).toBe('Send it now. Stripe wanted it by Nov 1.');
+    expect(paymentsSummary(overdue, NY, NOW)).toBe('Stripe needs one more thing, now');
+    expect(paymentsActions(overdue).onboarding).toBe('Send it to Stripe');
+  });
+
+  it('with nothing to send, says Stripe paused payments and offers only its dashboard', () => {
+    const paused = answer({
+      status: 'action_needed',
+      chargesEnabled: false,
+      payoutsEnabled: false,
+      due: [],
+      disabledReason: 'platform_paused',
+    });
+    const words = paymentsWords(paused, NY, NOW);
+    expect(words.title).toBe('Stripe paused payments');
+    expect(words.body).not.toMatch(/Send/);
+    expect(paymentsSummary(paused, NY, NOW)).toBe('Stripe paused payments');
+    expect(paymentsActions(paused)).toEqual({ onboarding: null, dashboard: true, check: false });
   });
 });
