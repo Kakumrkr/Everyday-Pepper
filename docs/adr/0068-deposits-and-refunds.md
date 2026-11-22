@@ -1,6 +1,6 @@
 # ADR-0068: Deposits and card on file: authorize, then book, then capture; refunds by the window
 
-- **Status:** Accepted. Approved by the user at the S66 brief on 2026-11-22 ("Go ahead with your recommendations and complete the session"): D-1 S66 the backend, S66.2 the screens and journeys; D-2 destination charges on the business's behalf, the card saved on a platform customer; D-3 a rule per service (none, fixed, percent, card on file); D-4 a refund window in hours (24 by default), the business's cancels always refunded; D-5 the slot is never held unpaid (see §3; this replaces the brief's 15-minute `pending_payment` hold, which would have reached every reader of a booking's status); D-6 the sandbox for every test, a Stripe test-mode probe when the user gives a test key.
+- **Status:** Accepted; built in S66 (below). Approved by the user at the S66 brief on 2026-11-22 ("Go ahead with your recommendations and complete the session"): D-1 S66 the backend, S66.2 the screens and journeys; D-2 destination charges on the business's behalf, the card saved on a platform customer; D-3 a rule per service (none, fixed, percent, card on file); D-4 a refund window in hours (24 by default), the business's cancels always refunded; D-5 the slot is never held unpaid (see §3; this replaces the brief's 15-minute `pending_payment` hold, which would have reached every reader of a booking's status); D-6 the sandbox for every test, a Stripe test-mode probe when the user gives a test key.
 - **Date:** 2026-11-22
 - **Builds on:** ADR-0067 (the payments port, the fetch adapter, the sandbox, the business's Express account), ADR-0022 (the booking page's request and code), ADR-0024 (the outbox), ADR-0037 (a job the worker is given, as for episodes), ADR-0010 (RLS)
 
@@ -26,4 +26,9 @@ Phase 15 promises that no-shows cost the owner nothing. The first piece is a dep
 - The real test-mode run waits for a Stripe test key (D-6).
 
 ## Built in S66
-Filled in at the close.
+- Contracts `deposits.ts` (rule, terms, window, statuses, Stripe shapes); migration 0081 (`services.deposit_kind/value`, `tenants.deposit_refund_hours`, `booking_payments` with `refund_ends_at`, the `payment` outbox type, the definer `open_booking_payments`); the export's `deposits.json`.
+- `@pepper/payments`: customers, deposits, card setups, capture, void and refunds in the Stripe adapter and the sandbox; `services/deposits.ts` (start, authorized check, attach, capture and refund by outbox message, the cancel's refund or keep, the window's move, the sweep, owners told of a failed refund or capture).
+- Appointments: `PublicDeposits` (open, ready, attach, cancelled, rescheduled) and `ChangeBookingOptions.onCancelled/onMoved`; a request stays open 30 minutes once its payment starts.
+- Api: `POST …/booking-requests/:id/payment`, `POST /v1/dev/payments/intent` (sandbox only), 402 `payment_required`; the worker's payments runner and 5-minute sweep.
+- From the review: the sweep retries a void Stripe failed; a refund refused for good is `refund_failed`; outcome corrections move no money; no client name or email at Stripe; the refund window is stored and a client's late move keeps it (security review, PCR-014).
+- Not yet: the screens and journeys (S66.2); a real Stripe test-mode run (needs a test key, S66.2).
