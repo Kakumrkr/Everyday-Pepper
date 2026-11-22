@@ -7,14 +7,14 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S66 — Deposits and card on file, backend** (split at the brief: S66.2 the screens and journeys). User: "Go ahead with your recommendations and complete the session" (D-1 split; D-2 destination charges `on_behalf_of`, card saved on a platform Customer; D-3 none/fixed/percent/card only per service; D-4 full refund ≥ N h (24) before, else kept, owner cancel always refunds; D-5 → authorize-then-book instead of a `pending_payment` status (Claude, ADR-0068); D-6 sandbox, a test-mode probe if a key is given). Tasks:
-1. ACs (AC-X-111…), traceability, ADR-0068, playbook/STATUS rows — next
-2. Contracts + migration 0081 + db repositories (service deposit, refund hours, `booking_payments`, RLS)
-3. Port + Stripe adapter + sandbox (customer, intents, capture/cancel, refunds)
-4. Deposit terms (pure) in contracts
-5. Payment before booking (start, ready on a fresh read, attach in the booking's transaction, capture after)
-6. Refund on cancel (client in window, owner always) through the outbox; the worker's runner and sweep
-7. API: public business terms, `booking-requests/:id/payment`, owner fields, sandbox route
+**S66 — Deposits and card on file, backend** (split at the brief: S66.2 the screens and journeys). User: "Go ahead with your recommendations and complete the session" (D-1 split; D-2 destination charges `on_behalf_of`, card saved on a platform Customer; D-3 none/fixed/percent/card only per service; D-4 full refund ≥ N h (24) before, else kept, owner cancel always refunds; D-5 → authorize-then-book instead of a `pending_payment` status (Claude, ADR-0068); D-6 sandbox, a test-mode probe if a key is given). Done (each committed, checks green):
+1. ACs AC-X-111…120, traceability, ADR-0068, playbook/STATUS rows (S66.2 added)
+2. Contracts `deposits.ts`, migration 0081, `booking_payments` repo, export `deposits.json`, isolation suite (db int 509 green)
+3. Port + Stripe adapter + sandbox (payments unit 35 green, fixtures)
+4–6. Deposits service (start, authorized check, attach, capture/refund via `payment` outbox messages, sweep); appointments `PublicDeposits` + `onCancelled` (payments int 30 green, coverage 92/94/85/93)
+7. Api `…/payment`, `/v1/dev/payments/intent`, team cancel refunds; worker runner + sweep (api deposits int 6/6, api unit 558)
+Claude (in ADR-0068): authorize-then-book instead of `pending_payment`; capture through the outbox; Pepper's (AI) cancels leave the deposit (S68's card); waitlist claims take no deposit yet; deposit services hidden while charges are off; remembered devices still get the code.
+Next: `/code-review`, `/security-review`, then `/session-close` (pnpm check, affected integration, `public-booking.spec.ts`).
 
 ## Last sessions
 - **S65.2 Phase 15 · Payments on screen (2026-11-22)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PR #102](https://github.com/Kakumrkr/Everyday-Pepper/pull/102)). Full entry in [session-log.md](session-log.md).
