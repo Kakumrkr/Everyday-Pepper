@@ -140,15 +140,21 @@ describe('booking_payments', () => {
     const open = await withTenant(db, a, (tx) => insertBookingPayment(tx, payment()));
     const other = await withTenant(db, b, (tx) => insertBookingPayment(tx, payment()));
     const closed = await withTenant(db, b, (tx) => insertBookingPayment(tx, payment()));
-    if (open === undefined || other === undefined || closed === undefined) throw new Error('seed');
-    await withTenant(db, b, (tx) =>
-      moveBookingPayment(tx, closed.id, ['started'], { status: 'voided' }),
-    );
+    const unsettled = await withTenant(db, b, (tx) => insertBookingPayment(tx, payment()));
+    if (!open || !other || !closed || !unsettled) throw new Error('seed');
+    await withTenant(db, b, async (tx) => {
+      // Let go at Stripe: closed. Voided but Stripe not yet told: still the sweep's.
+      await moveBookingPayment(tx, closed.id, ['started'], {
+        status: 'voided',
+        settledAt: new Date(),
+      });
+      await moveBookingPayment(tx, unsettled.id, ['started'], { status: 'voided' });
+    });
     await db.execute(sql`SELECT 1`);
     // Every row was touched just now: an age of 0 finds them, a minute finds none of them.
     const found = await listOpenBookingPayments(db, 0, 500);
     const ids = found.map((row) => row.id);
-    expect(ids).toEqual(expect.arrayContaining([open.id, other.id]));
+    expect(ids).toEqual(expect.arrayContaining([open.id, other.id, unsettled.id]));
     expect(ids).not.toContain(closed.id);
     expect(found.find((row) => row.id === open.id)?.tenantId).toBe(a);
     const minute = (await listOpenBookingPayments(db, 60_000, 500)).map((row) => row.id);

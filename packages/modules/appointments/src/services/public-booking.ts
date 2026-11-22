@@ -75,6 +75,7 @@ import {
   listStaffMembers,
   listWorkingHoursOf,
   lockBookingByManageTokenHash,
+  extendBookingVerification,
   lockBookingVerification,
   lockStaffMember,
   lockWaitlistEntry,
@@ -427,6 +428,9 @@ export interface PaymentRequest {
   description: string;
 }
 
+/** How long a request stays open once its payment starts (S66). */
+export const PAYMENT_WINDOW_MINUTES = 30;
+
 /**
  * Before paying (S66, AC-X-114): checks the request's code (a wrong one counts an attempt) and
  * answers what its payment is for, with the service's terms read now. `PaymentNotNeededError`
@@ -453,6 +457,9 @@ export async function verifyPaymentRequest(
     const terms = depositTermsFor(serviceRow, tenant);
     if (terms === null) throw new PaymentNotNeededError();
     if (!((await options.deposits?.open(tx)) ?? false)) throw new DepositsClosedError();
+    // Typing a card can outlast the code's ten minutes: the request stays open for the payment
+    // (shorter than the hour after which the sweep lets an unused one go).
+    await extendBookingVerification(tx, id, new Date(now + PAYMENT_WINDOW_MINUTES * MINUTE_MS));
     return {
       tenantId: TenantIdSchema.parse(tenant.id),
       requestId: id,

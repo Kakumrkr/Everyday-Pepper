@@ -310,6 +310,35 @@ describe('deposits on the booking page (S66)', () => {
     expect(await paymentStatus(requestId)).toBe('captured');
   });
 
+  it('AC-X-114: a client typing a card has 30 minutes, not the code’s 10 (review)', async () => {
+    const [, , slot] = await slots(depositServiceId, 6);
+    if (slot === undefined) throw new Error('no free time');
+    const client = visitor();
+    const asked = await client
+      .post('/booking-requests', {
+        serviceId: depositServiceId,
+        staffMemberId: null,
+        startsAt: slot.startsAt,
+        name: 'Dee',
+        email: 'dee@example.test',
+        phone: null,
+      })
+      .expect(201);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const expiry = async () => {
+      const { rows } = await withTenant(db, tenantId, (tx) =>
+        tx.execute<{ at: string }>(
+          sql`SELECT expires_at::text AS at FROM booking_verifications WHERE id = ${requestId}`,
+        ),
+      );
+      return Date.parse(String(rows[0]?.at));
+    };
+    expect(await expiry()).toBeLessThan(Date.now() + 11 * 60_000);
+    const code = codeIn(mailer.sent.at(-1));
+    await client.post(`/booking-requests/${requestId}/payment`, { code }).expect(200);
+    expect(await expiry()).toBeGreaterThan(Date.now() + 29 * 60_000);
+  });
+
   it('AC-X-117: a cancel from the link in time refunds the deposit in full', async () => {
     const [slot] = await slots(depositServiceId, 4);
     if (slot === undefined) throw new Error('no free time');
