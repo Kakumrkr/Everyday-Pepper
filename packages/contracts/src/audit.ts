@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { BookingPaymentStatusSchema, DepositRuleSchema } from './deposits.js';
 import { BusinessExportCountsSchema } from './export.js';
 import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
@@ -67,6 +68,8 @@ const ServiceValuesSchema = z
     priceFromCents: z.number().int().nullable(),
     priceToCents: z.number().int().nullable(),
     active: z.boolean(),
+    /** S66; entries before it have none. */
+    deposit: DepositRuleSchema.optional(),
   })
   .strict();
 const StaffMemberValuesSchema = z
@@ -107,9 +110,9 @@ const TenantChangeSchema = z.union([
     .object({
       brandColor: BrandColorSchema.nullable().optional(),
       profileChanged: z
-        .array(z.enum(['phone', 'publicAddress', 'cancellationPolicy']))
+        .array(z.enum(['phone', 'publicAddress', 'cancellationPolicy', 'depositRefundHours']))
         .min(1)
-        .max(3),
+        .max(4),
     })
     .strict(),
 ]);
@@ -441,6 +444,21 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       entity: entity('payment_account'),
       before: z.object({ status: PaymentAccountStatusSchema }).strict(),
       after: z.object({ status: PaymentAccountStatusSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      // A booking page payment moved (S66, ADR-0068 §6): statuses and the amount only.
+      action: z.literal('payments.deposit_changed'),
+      entity: entity('booking_payment'),
+      before: z.object({ status: BookingPaymentStatusSchema }).strict().nullable(),
+      after: z
+        .object({
+          status: BookingPaymentStatusSchema,
+          amountCents: z.number().int().min(0),
+          bookingId: z.uuid().nullable(),
+        })
+        .strict(),
     })
     .strict(),
   z

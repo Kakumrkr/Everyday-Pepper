@@ -110,11 +110,11 @@ export async function updateCurrentTenantBookingPage(
   tx: TenantTx,
   settings: BookingPageSettings,
 ): Promise<Tenant | undefined> {
-  const { brandColor, phone, publicAddress, cancellationPolicy } =
+  const { brandColor, phone, publicAddress, cancellationPolicy, depositRefundHours } =
     BookingPageSettingsSchema.parse(settings);
   const [tenant] = await tx
     .update(tenants)
-    .set({ brandColor, phone, publicAddress, cancellationPolicy })
+    .set({ brandColor, phone, publicAddress, cancellationPolicy, depositRefundHours })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();
   return tenant;

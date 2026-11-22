@@ -568,6 +568,13 @@
       "when": 1795193597860,
       "tag": "0080_s65_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 81,
+      "version": "7",
+      "when": 1795372014062,
+      "tag": "0081_s66_deposits",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,7 @@ import {
   type WeeklyHours,
 } from '@pepper/contracts';
 import type { OwnedRecord } from '@pepper/core';
+import { depositRuleOf } from '@pepper/db';
 import type {
   BookingRow,
   BookingRuleRow,
@@ -59,6 +60,7 @@ export function serviceAuditValues(row: ServiceRow): Values<'service.created'> {
     priceFromCents: row.priceFromCents,
     priceToCents: row.priceToCents,
     active: row.active,
+    deposit: depositRuleOf(row),
   };
 }
 

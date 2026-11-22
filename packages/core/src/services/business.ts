@@ -81,7 +81,12 @@ export async function createBusiness(
 }
 
 /** The booking page's profile fields (S47); the audit names those that changed. */
-const PROFILE_FIELDS = ['phone', 'publicAddress', 'cancellationPolicy'] as const;
+const PROFILE_FIELDS = [
+  'phone',
+  'publicAddress',
+  'cancellationPolicy',
+  'depositRefundHours',
+] as const;
 
 /**
  * Sets the booking page's settings (PCR-001: its color, `null` for Pepper's neutral default;

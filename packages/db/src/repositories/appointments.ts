@@ -1,4 +1,8 @@
 import {
+  DepositKindSchema,
+  DepositRuleSchema,
+  type DepositKind,
+  type DepositRule,
   ServiceInputSchema,
   StaffColorSchema,
   TEMPLATE_LIMITS,
@@ -79,16 +83,35 @@ export async function insertService(
   fields: ServiceFields,
   options: { rebookAfterDays?: number | null } = {},
 ): Promise<ServiceRow> {
-  const values = ServiceInputSchema.parse(fields);
+  const { deposit, ...values } = ServiceInputSchema.parse(fields);
   const rebookAfterDays = RebookAfterDaysSchema.parse(options.rebookAfterDays ?? null);
   return serviceNameUnique(async () => {
     const [row] = await tx
       .insert(services)
-      .values({ ...values, rebookAfterDays })
+      .values({ ...values, ...depositColumns(deposit ?? { kind: 'none' }), rebookAfterDays })
       .returning();
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- INSERT ... RETURNING of one row returns one row
     return row!;
   });
+}
+
+/** A deposit rule as the service's columns (S66, ADR-0068 §1). */
+function depositColumns(rule: DepositRule): {
+  depositKind: DepositKind;
+  depositValue: number | null;
+} {
+  const parsed = DepositRuleSchema.parse(rule);
+  if (parsed.kind === 'fixed') return { depositKind: 'fixed', depositValue: parsed.amountCents };
+  if (parsed.kind === 'percent') return { depositKind: 'percent', depositValue: parsed.percent };
+  return { depositKind: parsed.kind, depositValue: null };
+}
+
+/** A service's deposit rule, from its columns (S66). */
+export function depositRuleOf(row: Pick<ServiceRow, 'depositKind' | 'depositValue'>): DepositRule {
+  const kind = DepositKindSchema.parse(row.depositKind);
+  if (kind === 'fixed') return DepositRuleSchema.parse({ kind, amountCents: row.depositValue });
+  if (kind === 'percent') return DepositRuleSchema.parse({ kind, percent: row.depositValue });
+  return { kind };
 }
 
 /** Replaces a service's fields; `undefined` when there is no such service. */
@@ -97,11 +120,12 @@ export async function updateService(
   id: ServiceId,
   fields: ServiceFields,
 ): Promise<ServiceRow | undefined> {
-  const values = ServiceInputSchema.parse(fields);
+  const { deposit, ...values } = ServiceInputSchema.parse(fields);
   return serviceNameUnique(async () => {
     const [row] = await tx
       .update(services)
-      .set(values)
+      // Left out, the rule stays (S66): the caller checked it still fits the price.
+      .set({ ...values, ...(deposit === undefined ? {} : depositColumns(deposit)) })
       .where(eq(services.id, Id.parse(id)))
       .returning();
     return row;

@@ -1,5 +1,6 @@
 import { asc, isNull } from 'drizzle-orm';
 import {
+  bookingPayments,
   bookingRules,
   bookings,
   clients,
@@ -78,6 +79,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_screenshots: true,
   sms_consents: true,
   payment_accounts: true,
+  booking_payments: true,
   payment_webhook_events:
     'Stripe’s notices to Pepper (S65): delivery records, deleted after 30 days',
   sms_deliveries: 'text delivery state',
@@ -219,6 +221,17 @@ export interface BusinessExportData {
     connectedAt: Date;
     disconnectedAt: Date | null;
   } | null;
+  /** Deposits and cards taken on the booking page (S66, ADR-0068 §6): Stripe's ids, no card. */
+  deposits: {
+    bookingId: string | null;
+    kind: string;
+    amountCents: number;
+    refundHours: number;
+    status: string;
+    stripePayment: string;
+    createdAt: Date;
+    settledAt: Date | null;
+  }[];
 }
 
 /**
@@ -391,6 +404,18 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
     },
     smsConsents: await listSmsConsentsForExport(tx),
     payments: await paymentsForExport(tx),
+    deposits: (await tx.select().from(bookingPayments).orderBy(asc(bookingPayments.createdAt))).map(
+      (row) => ({
+        bookingId: row.bookingId,
+        kind: row.kind,
+        amountCents: row.amountCents,
+        refundHours: row.refundHours,
+        status: row.status,
+        stripePayment: row.intentId,
+        createdAt: row.createdAt,
+        settledAt: row.settledAt,
+      }),
+    ),
   };
 }
 

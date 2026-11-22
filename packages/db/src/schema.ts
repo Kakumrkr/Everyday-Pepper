@@ -189,6 +189,8 @@ export const tenants = pgTable(
     phone: text('phone'),
     publicAddress: text('public_address'),
     cancellationPolicy: text('cancellation_policy'),
+    // Hours before the start a client may cancel and get a deposit back (S66, ADR-0068).
+    depositRefundHours: integer('deposit_refund_hours').notNull().default(24),
     // When the business is deleted for good (S51.2, ADR-0054): 30 days after the owner asked;
     // NULL: not being deleted. While set, the booking page is closed and no email goes out.
     deletionDueAt: timestamp('deletion_due_at', { withTimezone: true }),
@@ -206,6 +208,7 @@ export const tenants = pgTable(
       'tenants_cancellation_policy_length',
       sql`length(${table.cancellationPolicy}) BETWEEN 1 AND 600`,
     ),
+    check('tenants_deposit_refund_hours_range', sql`${table.depositRefundHours} BETWEEN 0 AND 168`),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),
@@ -542,10 +545,18 @@ export const services = pgTable(
     // When a regular of this service is usually due again (the rebooking insight, ADR-0039);
     // NULL: not a repeat service, or not set.
     rebookAfterDays: integer('rebook_after_days'),
+    // What booking it online asks for (S66, ADR-0068 §1): `none`, `fixed` (cents in the value),
+    // `percent` (1–100 of the starting price) or `card` (a card on file, nothing paid now).
+    depositKind: text('deposit_kind').notNull().default('none'),
+    depositValue: integer('deposit_value'),
     active: boolean('active').notNull().default(true),
     ...timestamps,
   },
   (table) => [
+    check(
+      'services_deposit_rule',
+      sql`(${table.depositKind} IN ('none', 'card') AND ${table.depositValue} IS NULL) OR (${table.depositKind} = 'fixed' AND ${table.depositValue} BETWEEN 50 AND 10000000) OR (${table.depositKind} = 'percent' AND ${table.depositValue} BETWEEN 1 AND 100 AND ${table.priceFromCents} IS NOT NULL)`,
+    ),
     check('services_rebook_after_days_range', sql`${table.rebookAfterDays} BETWEEN 7 AND 365`),
     unique('services_tenant_id_id_unique').on(table.tenantId, table.id),
     uniqueIndex('services_tenant_name_unique').on(table.tenantId, sql`lower(${table.name})`),
@@ -1257,7 +1268,13 @@ export const businessPhotos = pgTable(
   ],
 );
 
-export const outboxMessageType = pgEnum('outbox_message_type', ['email', 'push', 'episode', 'sms']);
+export const outboxMessageType = pgEnum('outbox_message_type', [
+  'email',
+  'push',
+  'episode',
+  'sms',
+  'payment',
+]);
 export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead', 'cancelled']);
 
 /**
@@ -3770,3 +3787,88 @@ export const paymentWebhookEvents = pgTable(
   ],
 );
 export type PaymentWebhookEventRow = typeof paymentWebhookEvents.$inferSelect;
+
+/**
+ * A booking page payment (S66, ADR-0068 §6): a deposit (a PaymentIntent, authorized then captured)
+ * or a card kept for later (a SetupIntent), made after the request's code and before the booking.
+ * Stripe's ids only: no card details. One per request; at most one per booking.
+ */
+export const bookingPayments = pgTable(
+  'booking_payments',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    /** The booking request it was made for (`booking_verifications`; swept later, no key). */
+    requestId: uuid('request_id').notNull(),
+    /** Set in the booking's transaction. */
+    bookingId: uuid('booking_id'),
+    provider: text('provider').notNull(),
+    livemode: boolean('livemode').notNull(),
+    kind: text('kind').notNull(),
+    intentId: text('intent_id').notNull(),
+    customerId: text('customer_id').notNull(),
+    /** The connected account it was charged on behalf of. */
+    accountId: text('account_id').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    currency: text('currency').notNull().default('usd'),
+    /** The window the client agreed to, kept with the payment. */
+    refundHours: integer('refund_hours').notNull(),
+    status: text('status').notNull().default('started'),
+    refundId: text('refund_id'),
+    bookedAt: timestamp('booked_at', { withTimezone: true }),
+    capturedAt: timestamp('captured_at', { withTimezone: true }),
+    settledAt: timestamp('settled_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('booking_payments_request_unique').on(table.tenantId, table.requestId),
+    uniqueIndex('booking_payments_booking_unique')
+      .on(table.tenantId, table.bookingId)
+      .where(sql`${table.bookingId} IS NOT NULL`),
+    uniqueIndex('booking_payments_intent_unique').on(table.provider, table.intentId),
+    index('booking_payments_open_idx')
+      .on(table.status, table.createdAt)
+      .where(sql`${table.status} IN ('started', 'booked', 'refund_pending')`),
+    foreignKey({
+      name: 'booking_payments_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    check('booking_payments_provider_known', sql`${table.provider} IN ('stripe', 'sandbox')`),
+    check(
+      'booking_payments_sandbox_not_live',
+      sql`${table.provider} = 'stripe' OR NOT ${table.livemode}`,
+    ),
+    check('booking_payments_kind_known', sql`${table.kind} IN ('deposit', 'card')`),
+    check(
+      'booking_payments_intent_format',
+      sql`(${table.kind} = 'deposit' AND ${table.intentId} ~ '^pi_[A-Za-z0-9]{1,100}$') OR (${table.kind} = 'card' AND ${table.intentId} ~ '^seti_[A-Za-z0-9]{1,100}$')`,
+    ),
+    check(
+      'booking_payments_customer_format',
+      sql`${table.customerId} ~ '^cus_[A-Za-z0-9]{1,100}$'`,
+    ),
+    check('booking_payments_account_format', sql`${table.accountId} ~ '^acct_[A-Za-z0-9]{1,64}$'`),
+    check(
+      'booking_payments_amount',
+      sql`(${table.kind} = 'deposit' AND ${table.amountCents} BETWEEN 50 AND 10000000) OR (${table.kind} = 'card' AND ${table.amountCents} = 0)`,
+    ),
+    check('booking_payments_currency', sql`${table.currency} = 'usd'`),
+    check('booking_payments_refund_hours_range', sql`${table.refundHours} BETWEEN 0 AND 168`),
+    check(
+      'booking_payments_status_known',
+      sql`${table.status} IN ('started', 'booked', 'captured', 'card_saved', 'kept', 'refund_pending', 'refunded', 'refund_failed', 'voided', 'capture_failed')`,
+    ),
+    check(
+      'booking_payments_booked_has_booking',
+      sql`(${table.status} IN ('started', 'voided')) = (${table.bookingId} IS NULL)`,
+    ),
+    check('booking_payments_refund_format', sql`${table.refundId} ~ '^re_[A-Za-z0-9]{1,100}$'`),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type BookingPaymentRow = typeof bookingPayments.$inferSelect;

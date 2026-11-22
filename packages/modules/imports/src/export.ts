@@ -18,6 +18,7 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 /** Written only when the business has consent records (S61). */
 const SMS_CONSENTS_FILE = 'text-consents.json';
 const PAYMENTS_FILE = 'payments.json';
+const DEPOSITS_FILE = 'deposits.json';
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -82,6 +83,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
     ...(data.payments === null
       ? []
       : [`${PAYMENTS_FILE}  Your Stripe account: which one, and where it stood`]),
+    ...(data.deposits.length > 0
+      ? [`${DEPOSITS_FILE}  Deposits and cards taken on your booking page, and what became of each`]
+      : []),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
     `visits.csv gives each visit's date and time in ${localTimeLabel(data.business.timeZone, exportedAt.getTime())}, the business's time zone.`,
@@ -323,6 +327,20 @@ export function buildBusinessExport(
         disconnectedAt:
           data.payments.disconnectedAt === null ? null : at(data.payments.disconnectedAt),
       }),
+    ]);
+  }
+
+  // Deposits and cards from the booking page (S66, ADR-0068 §6), when there are any.
+  if (data.deposits.length > 0) {
+    jsonFiles.push([
+      DEPOSITS_FILE,
+      json(
+        data.deposits.map((deposit) => ({
+          ...deposit,
+          createdAt: at(deposit.createdAt),
+          settledAt: deposit.settledAt === null ? null : at(deposit.settledAt),
+        })),
+      ),
     ]);
   }
 

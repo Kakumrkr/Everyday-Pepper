@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DepositRuleSchema, depositRuleProblem } from './deposits.js';
 import { UserIdSchema } from './tenancy.js';
 import { UtcDateTimeSchema } from './time.js';
 
@@ -51,8 +52,20 @@ export const ServiceInputSchema = z
     priceFromCents: PriceCentsSchema.nullable().default(null),
     priceToCents: PriceCentsSchema.nullable().default(null),
     active: z.boolean().default(true),
+    /**
+     * What booking it online asks for (S66, AC-X-111). Left out: none for a new service, and an
+     * existing one keeps its rule (screens before S66.2 don't send it).
+     */
+    deposit: DepositRuleSchema.optional(),
   })
   .strict()
+  .superRefine((s, ctx) => {
+    const problem =
+      s.deposit === undefined ? null : depositRuleProblem(s.deposit, s.priceFromCents);
+    if (problem !== null) {
+      ctx.addIssue({ code: 'custom', message: problem.message, path: ['deposit', problem.path] });
+    }
+  })
   .refine((s) => s.priceToCents === null || s.priceFromCents !== null, {
     message: 'A price range needs a "from" price',
     path: ['priceToCents'],
@@ -76,6 +89,8 @@ export const ServiceSchema = z.object({
   priceFromCents: z.number().int().nullable(),
   priceToCents: z.number().int().nullable(),
   active: z.boolean(),
+  /** S66 (AC-X-111). */
+  deposit: DepositRuleSchema,
   createdAt: UtcDateTimeSchema,
   updatedAt: UtcDateTimeSchema,
 });

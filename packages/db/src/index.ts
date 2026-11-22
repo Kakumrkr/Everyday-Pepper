@@ -39,6 +39,7 @@ export * from './repositories/email-suppression.js';
 export * from './repositories/remembered-devices.js';
 export * from './repositories/sessions.js';
 export * from './repositories/payments.js';
+export * from './repositories/booking-payments.js';
 export * from './repositories/sms.js';
 export * from './repositories/tasks.js';
 export * from './repositories/tenants.js';

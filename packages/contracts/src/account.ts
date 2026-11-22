@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DepositRefundHoursSchema } from './deposits.js';
 import { MailingAddressSchema } from './drafts.js';
 import { normalizePhone } from './clients.js';
 import { PermissionSchema } from './permissions.js';
@@ -78,6 +79,10 @@ export const ApiErrorCodeSchema = z.enum([
   'payments_rejected',
   'payments_not_onboarded',
   'payments_unavailable',
+  'deposit_rule_mismatch',
+  'payment_required',
+  'payment_not_needed',
+  'deposits_unavailable',
   'webhook_not_found',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',
@@ -241,6 +246,8 @@ export const BusinessSchema = z
     templateId: TemplateIdSchema.nullable(),
     /** The booking page's color (PCR-001); `null`: Pepper's neutral default. */
     brandColor: BrandColorSchema.nullable(),
+    /** Hours before the start a client may cancel and get a deposit back (S66, AC-X-112). */
+    depositRefundHours: DepositRefundHoursSchema,
   })
   .extend(BusinessProfileSchema.shape);
 export type Business = z.infer<typeof BusinessSchema>;
@@ -250,7 +257,7 @@ export type Business = z.infer<typeof BusinessSchema>;
  * left out stays as it is (S47 added the profile next to the color); at least one is needed.
  */
 export const BookingPageSettingsSchema = z
-  .object({ brandColor: BrandColorSchema.nullable() })
+  .object({ brandColor: BrandColorSchema.nullable(), depositRefundHours: DepositRefundHoursSchema })
   .extend(BusinessProfileSchema.shape)
   .partial()
   .strict()

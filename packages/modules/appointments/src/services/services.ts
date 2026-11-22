@@ -1,4 +1,5 @@
 import {
+  depositRuleProblem,
   ServiceIdSchema,
   ServiceInputSchema,
   type Service,
@@ -8,6 +9,7 @@ import {
 import { auditActorOf, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
+  depositRuleOf,
   insertService,
   listServices as listServiceRows,
   lockService,
@@ -16,7 +18,7 @@ import {
   type Database,
   type TenantTx,
 } from '@pepper/db';
-import { ServiceNotFoundError } from '../errors.js';
+import { DepositRuleMismatchError, ServiceNotFoundError } from '../errors.js';
 import { sameValues, serviceAuditValues, toService } from '../mapping.js';
 import { noteBookableIn } from './activation.js';
 
@@ -85,6 +87,12 @@ export async function updateService(
   return withTenant(db, actor.context.tenantId, async (tx) => {
     const current = await lockService(tx, id);
     if (current === undefined) throw new ServiceNotFoundError();
+    // A rule left out stays (S66): it must still fit the new price.
+    const problem =
+      fields.deposit === undefined
+        ? depositRuleProblem(depositRuleOf(current), fields.priceFromCents)
+        : null;
+    if (problem !== null) throw new DepositRuleMismatchError(problem.message);
     const row = await updateServiceRow(tx, id, fields);
     if (row === undefined) throw new ServiceNotFoundError();
     const [before, after] = [serviceAuditValues(current), serviceAuditValues(row)];

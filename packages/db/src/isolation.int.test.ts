@@ -56,6 +56,7 @@ import { insertConversation, insertMessage, insertTurn } from './repositories/co
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
+import { insertBookingPayment } from './repositories/booking-payments.js';
 import { insertPaymentAccount } from './repositories/payments.js';
 import { insertRememberedDevice } from './repositories/remembered-devices.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
@@ -798,6 +799,28 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: 'status = status',
     noDelete: true,
     ownerLookup: 'payment_account_lookup',
+  },
+  booking_payments: {
+    tenantColumn: 'tenant_id',
+    // A booking page payment (S66, ADR-0068 §6): never deleted by the services.
+    seed: async (tx) => {
+      const row = await insertBookingPayment(tx, {
+        requestId: newId(),
+        provider: 'sandbox',
+        livemode: false,
+        kind: 'deposit',
+        intentId: `pi_sandbox${randomBytes(8).toString('hex')}`,
+        customerId: `cus_sandbox${randomBytes(8).toString('hex')}`,
+        accountId: `acct_sandbox${randomBytes(8).toString('hex')}`,
+        amountCents: 1500,
+        refundHours: 24,
+      });
+      if (row === undefined) throw new Error('seed booking payment not stored');
+      return row.id;
+    },
+    touch: 'status = status',
+    noDelete: true,
+    ownerLookup: 'booking_payment_sweep',
   },
   booking_texts: {
     tenantColumn: 'tenant_id',

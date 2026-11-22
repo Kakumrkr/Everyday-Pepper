@@ -33,6 +33,7 @@ const BUSINESS: Business = {
   timeZone: 'America/New_York',
   locale: 'en-US',
   templateId: 'beauty-salon',
+  depositRefundHours: 24,
   brandColor: null,
   phone: null,
   publicAddress: null,
