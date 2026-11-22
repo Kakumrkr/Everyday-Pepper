@@ -12,8 +12,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T2 `apps/web/lib/payments.ts` wording (status, requirement codes → words, due day) + tests.
 - [x] T3 `/more/payments` page + client panel (connect, return/refresh, dashboard, manager read-only), More row, `card` icon.
 - [x] T4 Delete-business screen's Stripe note.
-- [ ] T5 `e2e/tests/payments.spec.ts` + `screens.spec.ts` shots.
-Next: T5 (bring up the stack, write `payments.spec.ts`, then the screenshot shots).
+- [x] T5 `e2e/tests/payments.spec.ts` + `screens.spec.ts` shots.
+Next: close (`/code-review`, `/security-review`, `pnpm check`, e2e of changed specs, walkthrough, PR).
 
 ## Last sessions
 - **S65 Phase 15 · Stripe Connect Express, backend (2026-11-20)** ([ADR-0067](../adr/0067-payments-stripe-connect.md), [PCR-013](changes/PCR-013.md), [PR #101](https://github.com/Kakumrkr/Everyday-Pepper/pull/101)). Full entry in [session-log.md](session-log.md).
