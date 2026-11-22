@@ -83,6 +83,7 @@ describe('loadCurrentBusiness', () => {
       phone: null,
       publicAddress: null,
       cancellationPolicy: null,
+      depositRefundHours: 24,
     },
     role: 'owner',
     permissions: ['business.read', 'members.read'],
