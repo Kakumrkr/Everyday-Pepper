@@ -4,10 +4,12 @@ import {
   loadOutboxSecret,
   loadPushConfig,
   loadServiceConfig,
+  loadPaymentsConfig,
   loadSmsConfig,
   type MailConfig,
   type PushConfig,
   type ServiceConfig,
+  type PaymentsConfig,
   type SmsConfig,
 } from '@pepper/runtime/instrument';
 import { loadOpenAiConfig, type OpenAiConfig } from '@pepper/ai/config';
@@ -90,6 +92,11 @@ export interface WorkerConfig extends ServiceConfig {
    */
   sms: SmsConfig | null;
   /**
+   * Payments (S66, ADR-0068): the deposits' captures, refunds and sweep, with the api's provider;
+   * `null` while off. The sandbox only where tests may run, as the api's.
+   */
+  payments: PaymentsConfig | null;
+  /**
    * The sandbox's sent texts kept in Redis for tests (S63, AC-X-87): `SMS_PROVIDER=sandbox` in
    * CI, or on a development machine (never a production build that forgot its environment).
    */
@@ -166,6 +173,10 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
     storage: loadStorageConfig('worker', env),
     push: loadPushConfig('worker', env),
     sms,
+    payments: paymentsOf(
+      loadPaymentsConfig('worker', env),
+      testsMayRun(service.environment, env['NODE_ENV']),
+    ),
     smsSandboxLog: sms?.provider === 'sandbox' && testsMayRun(service.environment, env['NODE_ENV']),
     smsStatusBaseUrl:
       sms?.provider === 'twilio' && jobs.AUTH_BASE_URL !== undefined
@@ -203,6 +214,11 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
         ? null
         : { baseUrl: new URL(jobs.AUTH_BASE_URL).origin, pollMs: jobs.WAITLIST_POLL_MS },
   };
+}
+
+function paymentsOf(payments: PaymentsConfig | null, testsMay: boolean): PaymentsConfig | null {
+  if (payments?.provider === 'sandbox' && !testsMay) return null;
+  return payments;
 }
 
 function episodesConfig(

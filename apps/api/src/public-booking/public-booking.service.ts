@@ -13,6 +13,7 @@ import {
   recordBookingStep,
   confirmWaitlistJoin,
   requestWaitlistJoin,
+  verifyPaymentRequest,
   waitlistCodeEmail,
   type BookingNotify,
 } from '@pepper/appointments';
@@ -23,6 +24,8 @@ import {
   type BookingConfirmInput,
   type BookingConfirmResponse,
   type BookingFunnelEventInput,
+  type BookingPaymentStart,
+  type VerificationCode,
   type DeviceToken,
   type BookingRequest,
   type BookingRequestId,
@@ -41,9 +44,10 @@ import type { Mailer } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
-import { Inject, Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional, ServiceUnavailableException } from '@nestjs/common';
 import { apiError } from '../auth/guards.js';
 import { BookingEmails } from '../booking-emails/booking-emails.js';
+import { PaymentsService } from '../payments/payments.service.js';
 import { TeamPushes } from '../push/team-pushes.js';
 
 export interface PublicBookingOptions {
@@ -74,8 +78,15 @@ export class PublicBookingService {
     @Inject(PUBLIC_BOOKING_OPTIONS) private readonly options: PublicBookingOptions,
     private readonly emails: BookingEmails,
     private readonly pushes: TeamPushes,
+    // Absent (payments off, or a test without it): deposit services can't be booked online.
+    @Optional() private readonly payments?: PaymentsService,
   ) {
     this.db = database.db;
+  }
+
+  /** Deposits (S66, ADR-0068): what the domain asks of payments, or none. */
+  private get deposits() {
+    return this.payments?.publicDeposits();
   }
 
   /** The client's email and the team's push about a change, both in its transaction. */
@@ -85,7 +96,7 @@ export class PublicBookingService {
   };
 
   business(slug: TenantSlug): Promise<PublicBusiness> {
-    return getPublicBusiness(this.db, slug);
+    return getPublicBusiness(this.db, slug, { deposits: this.deposits });
   }
 
   availability(
@@ -118,8 +129,10 @@ export class PublicBookingService {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
       deviceToken,
+      deposits: this.deposits,
     });
-    if (asked.remembered && deviceToken !== undefined) {
+    // A deposit is paid before booking (S66, AC-X-115): a remembered device gets the code too.
+    if (asked.remembered && deviceToken !== undefined && !asked.paymentNeeded) {
       const { response } = await this.confirm(slug, asked.requestId, { code: asked.code });
       // Its 90 days start again, so the cookie's do too.
       return {
@@ -172,11 +185,33 @@ export class PublicBookingService {
       codeKey: this.options.codeKey,
       templateRuleDefaults,
       notify: this.notify,
+      deposits: this.deposits,
     });
     return {
       response: { booking: confirmed.booking, manageToken: confirmed.manageToken },
       ...(confirmed.device === undefined ? {} : { device: confirmed.device.token }),
     };
+  }
+
+  /**
+   * Starts (or answers again) the request's deposit or card (S66, AC-X-114): the code first, a
+   * wrong one counting an attempt; then Stripe's client secret and the terms.
+   */
+  async payment(
+    slug: TenantSlug,
+    requestId: BookingRequestId,
+    code: VerificationCode,
+  ): Promise<BookingPaymentStart> {
+    const payments = this.payments;
+    const deposits = this.deposits;
+    if (payments === undefined || deposits === undefined) {
+      throw new ServiceUnavailableException(apiError('deposits_unavailable'));
+    }
+    const request = await verifyPaymentRequest(this.db, slug, requestId, code, {
+      codeKey: this.options.codeKey,
+      deposits,
+    });
+    return payments.startPayment(request);
   }
 
   /** "Forget this device" (S47): the business stops remembering the browser's token. */
@@ -211,6 +246,7 @@ export class PublicBookingService {
   async cancel(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {
     const cancelled = await cancelManagedBooking(this.db, slug, token, {
       notify: this.notify,
+      deposits: this.deposits,
     });
     return cancelled.booking;
   }

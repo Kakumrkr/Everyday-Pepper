@@ -174,7 +174,7 @@ export interface PublicOptions {
    */
   notify?: BookingNotify;
   /** Deposits and cards on file (S66, ADR-0068): absent, deposit services can't be booked. */
-  deposits?: PublicDeposits;
+  deposits?: PublicDeposits | undefined;
 }
 
 /**

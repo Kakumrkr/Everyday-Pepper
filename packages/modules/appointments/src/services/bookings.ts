@@ -388,7 +388,8 @@ export interface ChangeBookingOptions {
    * Told about a cancellation inside its transaction (S66: the team's cancel refunds a deposit,
    * AC-X-118). Pepper's own tools give none: its cancels can be undone, money can't.
    */
-  onCancelled?: (tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>;
+  onCancelled?:
+    ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
 }
 
 /**

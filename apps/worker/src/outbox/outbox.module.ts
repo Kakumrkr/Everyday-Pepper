@@ -16,7 +16,23 @@ import {
   type SmsSender,
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
-import { DATABASE, MAILER, raiseAlert, SandboxSmsSender, SandboxTextLog } from '@pepper/runtime';
+import {
+  RedisSandboxAccountStore,
+  runPaymentJob,
+  SandboxPaymentsProvider,
+  StripePaymentsProvider,
+  sweepBookingPayments,
+  type PaymentsProvider,
+} from '@pepper/payments';
+import {
+  DATABASE,
+  MAILER,
+  raiseAlert,
+  SandboxSmsSender,
+  SandboxTextLog,
+  type PaymentsConfig,
+} from '@pepper/runtime';
+import { Periodic } from '../jobs/periodic.js';
 import { Queue, Worker, type Job } from 'bullmq';
 import { Redis } from 'ioredis';
 import { handleDeliveryJob, OUTBOX_QUEUE, relayDue } from './relay.js';
@@ -39,6 +55,15 @@ export interface OutboxOptions {
    * `SMS_PROVIDER=sandbox` where tests run.
    */
   sandboxTextLog?: boolean;
+  /**
+   * Payments (S66, ADR-0068): captures and refunds from the outbox, and the payments sweep;
+   * `null` or absent: payments are off, so the api queues none.
+   */
+  payments?: PaymentsConfig | null;
+  /** Pepper's public origin (the sandbox's dashboard page). */
+  baseUrl?: string;
+  /** How often the payments sweep runs (default 5 minutes). */
+  paymentsSweepMs?: number;
   /** Deliveries in flight per worker process. */
   concurrency?: number;
   clock?: Clock;
@@ -62,6 +87,7 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
   private timer: NodeJS.Timeout | undefined;
   private relaying = false;
   private relayFailing = false;
+  private sweep: Periodic | undefined;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -93,6 +119,7 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
           : (this.options.sms ?? null),
       smsStatusBaseUrl: this.options.smsStatusBaseUrl ?? null,
       clock: this.options.clock ?? systemClock,
+      payments: this.paymentsRunner(connection),
     };
     this.worker = new Worker(
       OUTBOX_QUEUE,
@@ -127,8 +154,40 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
     }
   }
 
+  /**
+   * The payments runner and its sweep (S66, AC-X-116/119), with the api's provider: the sandbox
+   * shares its store in Redis, so a sandbox payment the api made is found here.
+   */
+  private paymentsRunner(connection: Redis) {
+    const config = this.options.payments ?? null;
+    if (config === null) return null;
+    const clock = this.options.clock ?? systemClock;
+    const provider: PaymentsProvider =
+      config.provider === 'sandbox'
+        ? new SandboxPaymentsProvider({
+            store: new RedisSandboxAccountStore(connection),
+            baseUrl: this.options.baseUrl ?? '',
+            now: () => clock.now(),
+          })
+        : new StripePaymentsProvider({ secretKey: config.secretKey });
+    const deps = { db: this.db, provider, clock };
+    this.sweep = new Periodic(
+      'Payments sweep',
+      this.options.paymentsSweepMs ?? 5 * 60_000,
+      () => sweepBookingPayments(deps),
+      this.logger,
+    );
+    this.sweep.start();
+    return (
+      db: Database,
+      tenantId: Parameters<typeof runPaymentJob>[1],
+      job: Parameters<typeof runPaymentJob>[2],
+    ) => runPaymentJob({ ...deps, db }, tenantId, job);
+  }
+
   async onApplicationShutdown(): Promise<void> {
     clearInterval(this.timer);
+    await this.sweep?.stop();
     await this.worker?.close();
     await this.queue?.close();
     await this.connection?.quit().catch(() => undefined);

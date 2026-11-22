@@ -33,7 +33,8 @@ import type { Actor, TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { PaymentsService } from '../payments/payments.service.js';
 import { BookingEmails } from '../booking-emails/booking-emails.js';
 
 /**
@@ -49,6 +50,8 @@ export class BookingsService {
   constructor(
     @Inject(DATABASE) database: { db: Database },
     private readonly emails: BookingEmails,
+    // S66: the team's cancel refunds a paid deposit (AC-X-118); absent while payments are off.
+    @Optional() private readonly payments?: PaymentsService,
   ) {
     this.db = database.db;
   }
@@ -79,6 +82,7 @@ export class BookingsService {
     return changeBooking(this.db, actorOf(tenant), id, change, {
       templateRuleDefaults,
       notify: this.emails.notify,
+      onCancelled: this.payments?.teamCancelled(),
     });
   }
 
