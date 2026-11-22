@@ -224,6 +224,7 @@ describe('getPublicBusiness', () => {
           id: p.service.id,
           name: 'Haircut',
           category: null,
+          deposit: null,
           durationMinutes: 60,
           priceFromCents: 6500,
           priceToCents: null,
