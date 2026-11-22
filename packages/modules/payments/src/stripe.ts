@@ -106,11 +106,7 @@ export class StripePaymentsProvider implements PaymentsProvider {
 
   async createCustomer(input: CreateCustomerInput): Promise<{ id: StripeCustomerId }> {
     const customer = await this.call(StripeCustomerSchema, 'POST', '/v1/customers', {
-      form: {
-        email: input.email,
-        name: input.name,
-        'metadata[pepper_tenant]': input.tenantId,
-      },
+      form: { 'metadata[pepper_tenant]': input.tenantId },
       idempotencyKey: input.idempotencyKey,
     });
     return { id: customer.id };

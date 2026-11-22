@@ -5,13 +5,14 @@ import {
   isRefundable,
   StripeAccountIdSchema,
   StripeCustomerIdSchema,
+  UserIdSchema,
   type BookingPaymentStart,
   type BookingPaymentStatus,
   type DepositTerms,
   type OutboxPayment,
   type TenantId,
 } from '@pepper/contracts';
-import { queuePayment } from '@pepper/core';
+import { queuePayment, queuePushToMembers } from '@pepper/core';
 import {
   appendAuditEntry,
   findBookingPayment,
@@ -19,6 +20,7 @@ import {
   findBookingPaymentByRequest,
   findPaymentAccount,
   insertBookingPayment,
+  listMemberships,
   listOpenBookingPayments,
   moveBookingPayment,
   touchBookingPayment,
@@ -45,8 +47,6 @@ export interface VerifiedPaymentRequest {
   tenantId: TenantId;
   requestId: string;
   startsAt: Date;
-  email: string;
-  name: string;
   terms: DepositTerms;
   /** On the client's statement: the business and the service. */
   description: string;
@@ -110,8 +110,6 @@ export async function startBookingPayment(
   const account = StripeAccountIdSchema.parse(accountId);
   const customer = await deps.provider.createCustomer({
     tenantId,
-    email: request.email,
-    name: request.name,
     idempotencyKey: customerKey(requestId),
   });
   const customerId = StripeCustomerIdSchema.parse(customer.id);
@@ -286,7 +284,7 @@ async function queueStep(
  * Stripe fails for a passing reason; anything else is recorded on the payment.
  */
 export async function runPaymentJob(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock' | 'outboxKey'>,
   tenantId: TenantId,
   job: OutboxPayment,
 ): Promise<void> {
@@ -300,7 +298,7 @@ export async function runPaymentJob(
 
 /** Takes a booked deposit (or one kept by a quick late cancel), once (its key). */
 async function capture(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock' | 'outboxKey'>,
   tenantId: TenantId,
   row: BookingPaymentRow,
 ): Promise<void> {
@@ -318,12 +316,15 @@ async function capture(
   const now = deps.clock.now();
   await withTenant(deps.db, tenantId, async (tx) => {
     const status: BookingPaymentStatus = row.status === 'kept' ? 'kept' : 'captured';
-    await move(
+    const moved = await move(
       tx,
       row,
       [BookingPaymentStatusSchema.parse(row.status)],
       succeeded ? { status, capturedAt: now } : { status: 'capture_failed', settledAt: now },
     );
+    if (!succeeded && moved !== undefined) {
+      await tellOwners(tx, moved, 'capture_failed', { outboxKey: deps.outboxKey, now });
+    }
   });
 }
 
@@ -332,7 +333,7 @@ async function capture(
  * was taken); a captured one is refunded in full with the transfer reversed, once (its key).
  */
 async function refund(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock' | 'outboxKey'>,
   tenantId: TenantId,
   row: BookingPaymentRow,
 ): Promise<void> {
@@ -345,8 +346,15 @@ async function refund(
     );
     return;
   }
-  const answered = await deps.provider.createRefund(row.intentId, `pepper-refund-${row.id}`);
-  await withTenant(deps.db, tenantId, (tx) => applyRefund(tx, row, answered, now));
+  let answered: { id: string | null; status: string };
+  try {
+    answered = await deps.provider.createRefund(row.intentId, `pepper-refund-${row.id}`);
+  } catch (error) {
+    // Refused for good (refunded in Stripe's dashboard, disputed): recorded and told, not retried.
+    if (!(error instanceof PaymentsProviderError) || error.retryable) throw error;
+    answered = { id: null, status: 'failed' };
+  }
+  await withTenant(deps.db, tenantId, (tx) => applyRefund(tx, row, answered, now, deps));
 }
 
 /**
@@ -369,25 +377,63 @@ async function letGo(provider: PaymentsProvider, row: BookingPaymentRow): Promis
 async function applyRefund(
   tx: TenantTx,
   row: BookingPaymentRow,
-  answered: { id: string; status: string },
+  answered: { id: string | null; status: string },
   now: Date,
+  deps: Pick<PaymentsDeps, 'outboxKey'>,
 ): Promise<void> {
+  const refundId = answered.id === null ? {} : { refundId: answered.id };
   if (answered.status === 'succeeded') {
-    await move(tx, row, ['refund_pending'], {
-      status: 'refunded',
-      refundId: answered.id,
-      settledAt: now,
-    });
+    await move(tx, row, ['refund_pending'], { status: 'refunded', ...refundId, settledAt: now });
   } else if (answered.status === 'failed' || answered.status === 'canceled') {
-    await move(tx, row, ['refund_pending'], {
+    const failed = await move(tx, row, ['refund_pending'], {
       status: 'refund_failed',
-      refundId: answered.id,
+      ...refundId,
       settledAt: now,
     });
+    if (failed !== undefined) {
+      await tellOwners(tx, failed, 'refund_failed', { outboxKey: deps.outboxKey, now });
+    }
   } else {
     // Pending at Stripe: the sweep reads it again.
-    await move(tx, row, ['refund_pending'], { status: 'refund_pending', refundId: answered.id });
+    await move(tx, row, ['refund_pending'], { status: 'refund_pending', ...refundId });
   }
+}
+
+/**
+ * A deposit that couldn't be given back or taken: every owner hears, once per payment, opening
+ * More → Payments (Stripe's dashboard). No client's name on the lock screen.
+ */
+async function tellOwners(
+  tx: TenantTx,
+  row: BookingPaymentRow,
+  outcome: 'refund_failed' | 'capture_failed',
+  options: { outboxKey: Buffer; now: Date },
+): Promise<void> {
+  const owners = (await listMemberships(tx))
+    .filter((membership) => membership.role === 'owner')
+    .map((membership) => UserIdSchema.parse(membership.userId));
+  const amount = '$' + (row.amountCents / 100).toFixed(2);
+  const notice =
+    outcome === 'refund_failed'
+      ? {
+          title: 'A deposit couldn’t be refunded',
+          body:
+            'Stripe refused to give back a ' +
+            amount +
+            ' deposit. Refund it from your Stripe dashboard.',
+          url: '/more/payments',
+        }
+      : {
+          title: 'A deposit couldn’t be taken',
+          body:
+            'Stripe refused a ' + amount + ' deposit for a booking. The booking stands without it.',
+          url: '/more/payments',
+        };
+  await queuePushToMembers(tx, owners, notice, {
+    key: options.outboxKey,
+    dedupeKey: 'payment.' + outcome + ':' + row.id,
+    now: options.now,
+  });
 }
 
 /**
@@ -396,11 +442,15 @@ async function applyRefund(
  * then can't take a payment being let go), then asks Stripe. Answers how many it looked at.
  */
 export async function sweepBookingPayments(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
-  options: { limit?: number } = {},
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock' | 'outboxKey'>,
+  options: { limit?: number; ageMs?: number } = {},
 ): Promise<number> {
   const now = deps.clock.now();
-  const open = await listOpenBookingPayments(deps.db, UNUSED_PAYMENT_MS, options.limit ?? 100);
+  const open = await listOpenBookingPayments(
+    deps.db,
+    options.ageMs ?? UNUSED_PAYMENT_MS,
+    options.limit ?? 100,
+  );
   for (const { tenantId, id } of open) {
     try {
       await sweepOne(deps, tenantId, id, now);
@@ -414,7 +464,7 @@ export async function sweepBookingPayments(
 }
 
 async function sweepOne(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock' | 'outboxKey'>,
   tenantId: TenantId,
   id: string,
   now: Date,
@@ -422,27 +472,36 @@ async function sweepOne(
   const row = await withTenant(deps.db, tenantId, (tx) => findBookingPayment(tx, id));
   if (row === undefined) return;
   if (!isOurs(row, deps.provider)) {
-    // Made by another deployment's provider (the sandbox before Stripe): nothing to ask.
-    await withTenant(deps.db, tenantId, (tx) =>
-      move(tx, row, ['started'], { status: 'voided', settledAt: now }),
-    );
+    // Made by another deployment's provider (the sandbox before Stripe): nothing to ask, so
+    // each such row is closed and leaves the sweep's list.
+    await withTenant(deps.db, tenantId, async (tx) => {
+      await move(tx, row, ['started', 'voided'], { status: 'voided', settledAt: now });
+      await move(tx, row, ['refund_pending'], { status: 'refund_failed', settledAt: now });
+    });
     return;
   }
-  if (row.status === 'started') {
+  if (row.status === 'started' || (row.status === 'voided' && row.settledAt === null)) {
+    // Marked first, so a booking can no longer take it; settled once Stripe let it go, and
+    // looked at again by a later sweep until then (AC-X-116).
     const voided = await withTenant(deps.db, tenantId, (tx) =>
-      move(tx, row, ['started'], { status: 'voided', settledAt: now }),
+      move(tx, row, ['started', 'voided'], { status: 'voided' }),
     );
-    if (voided === undefined || row.kind !== 'deposit') return;
-    const intent = await deps.provider.retrievePaymentIntent(row.intentId);
-    if (intent.status !== 'canceled' && intent.status !== 'succeeded') {
-      await deps.provider.cancelPaymentIntent(row.intentId, `pepper-void-${row.id}`);
+    if (voided === undefined) return;
+    if (row.kind === 'deposit') {
+      const intent = await deps.provider.retrievePaymentIntent(row.intentId);
+      if (intent.status !== 'canceled' && intent.status !== 'succeeded') {
+        await deps.provider.cancelPaymentIntent(row.intentId, `pepper-void-${row.id}`);
+      }
     }
+    await withTenant(deps.db, tenantId, (tx) =>
+      move(tx, row, ['voided'], { status: 'voided', settledAt: now }),
+    );
     return;
   }
   if (row.status === 'refund_pending' && row.refundId !== null) {
     const answered = await deps.provider.retrieveRefund(row.refundId);
     await withTenant(deps.db, tenantId, async (tx) => {
-      await applyRefund(tx, row, answered, now);
+      await applyRefund(tx, row, answered, now, deps);
       // Still pending: looked at again after the others.
       await touchBookingPayment(tx, row.id);
     });

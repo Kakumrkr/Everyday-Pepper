@@ -156,8 +156,8 @@ export async function touchBookingPayment(tx: TenantTx, id: string): Promise<voi
 }
 
 /**
- * Payments the sweep looks after (made `ageMs` ago and not booked; a refund Stripe left pending,
- * untouched for `ageMs`), by the database's clock, oldest first, across businesses (AC-X-116):
+ * Payments the sweep looks after (made `ageMs` ago and not booked; voided but not yet let go at
+ * Stripe; a refund Stripe left pending; the last two untouched for `ageMs`), by the database's clock, oldest first, across businesses (AC-X-116):
  * their business and id only.
  */
 export async function listOpenBookingPayments(

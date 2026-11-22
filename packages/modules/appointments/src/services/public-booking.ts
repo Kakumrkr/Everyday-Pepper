@@ -422,8 +422,6 @@ export interface PaymentRequest {
   tenantId: TenantId;
   requestId: BookingRequestId;
   startsAt: Date;
-  email: string;
-  name: string;
   terms: DepositTerms;
   /** On the client's statement: "<business>: <service>". */
   description: string;
@@ -459,8 +457,6 @@ export async function verifyPaymentRequest(
       tenantId: TenantIdSchema.parse(tenant.id),
       requestId: id,
       startsAt: request.startsAt,
-      email: request.email,
-      name: request.name,
       terms,
       description: `${tenant.name}: ${serviceRow.name}`.slice(0, 200),
     };

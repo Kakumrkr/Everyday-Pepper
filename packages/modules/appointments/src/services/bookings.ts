@@ -439,7 +439,8 @@ export async function changeBookingIn(
     await requestInsights(tx);
     // A cancelled time is offered to the waitlist (S37, AC-W5-1).
     if (parsed.status === 'cancelled') await requestWaitlistMatch(tx, row, now);
-    if (parsed.status === 'cancelled' && options.onCancelled !== undefined) {
+    // A correction of what happened (completed or no-show → cancelled) moves no money.
+    if (parsed.status === 'cancelled' && row.status === 'confirmed' && options.onCancelled) {
       await options.onCancelled(tx, { bookingId: row.id, startsAt: row.startsAt });
     }
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {

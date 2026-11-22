@@ -201,23 +201,17 @@ describe('StripePaymentsProvider: deposits and cards (S66, ADR-0068 §3)', () =>
   const INTENT = 'pi_3Nv0HdQ9RKHgCVdK1aBcDeFg';
   const REQUEST = '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708100';
 
-  it('makes a customer with the client’s address and name, once per key', async () => {
+  it('makes a customer without the client’s name or email, once per key', async () => {
     const { fetch, seen } = stub(200, fixture('customer'));
     const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
     const customer = await stripe.createCustomer({
       tenantId: TENANT,
-      email: 'client@example.com',
-      name: 'Ana Client',
       idempotencyKey: 'pepper-customer-r1',
     });
     expect(customer).toEqual({ id: CUSTOMER });
     expect(seen[0]?.url).toBe('https://api.stripe.com/v1/customers');
     expect(seen[0]?.headers['Idempotency-Key']).toBe('pepper-customer-r1');
-    expect(seen[0]?.form).toEqual({
-      email: 'client@example.com',
-      name: 'Ana Client',
-      'metadata[pepper_tenant]': TENANT,
-    });
+    expect(seen[0]?.form).toEqual({ 'metadata[pepper_tenant]': TENANT });
   });
 
   it('authorizes a destination charge on the business’s behalf and keeps the card', async () => {

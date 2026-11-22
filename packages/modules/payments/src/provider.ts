@@ -33,12 +33,12 @@ export interface ProviderLink {
   expiresAt: Date | null;
 }
 
-/** A client Stripe keeps a card for (S66): on the platform, named by the business's request. */
+/**
+ * A client Stripe keeps a card for (S66): on the platform, with no name or email (the client's
+ * details stay in Pepper, so deleting the client leaves nothing of theirs at Stripe).
+ */
 export interface CreateCustomerInput {
   tenantId: TenantId;
-  /** The client's address and name, for Stripe's receipts and a dispute's evidence. */
-  email: string;
-  name: string;
   idempotencyKey: string;
 }
 

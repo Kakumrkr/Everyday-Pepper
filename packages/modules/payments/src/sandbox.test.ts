@@ -101,12 +101,7 @@ describe('SandboxPaymentsProvider: deposits and cards (S66, AC-X-120)', () => {
     const provider = sandbox();
     const account = await provider.createAccount({ tenantId: TENANT, idempotencyKey: 'a' });
     await provider.setState(account.id, 'ready');
-    const customer = await provider.createCustomer({
-      tenantId: TENANT,
-      email: 'c@example.com',
-      name: 'C',
-      idempotencyKey: 'c',
-    });
+    const customer = await provider.createCustomer({ tenantId: TENANT, idempotencyKey: 'c' });
     return { provider, accountId: account.id, customerId: customer.id };
   }
 

@@ -170,7 +170,7 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
             now: () => clock.now(),
           })
         : new StripePaymentsProvider({ secretKey: config.secretKey });
-    const deps = { db: this.db, provider, clock };
+    const deps = { db: this.db, provider, clock, outboxKey: this.options.key };
     this.sweep = new Periodic(
       'Payments sweep',
       this.options.paymentsSweepMs ?? 5 * 60_000,

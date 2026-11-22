@@ -22,6 +22,7 @@ import {
   insertStaffMember,
   listAuditEntries,
   newId,
+  savePushSubscription,
   withTenant,
   type BookingPaymentRow,
   type Database,
@@ -108,7 +109,7 @@ async function newBusiness(options: { ready?: boolean } = {}) {
     clock.advanceBy(1000);
     await syncOwnPaymentAccount(deps, owner);
   }
-  return { tenantId, clock, sandbox, deps };
+  return { tenantId, ownerId, clock, sandbox, deps };
 }
 
 const DEPOSIT: DepositTerms = { kind: 'deposit', amountCents: 1500, refundHours: 24 };
@@ -118,8 +119,6 @@ function request(tenantId: TenantId, terms: DepositTerms = DEPOSIT): VerifiedPay
     tenantId,
     requestId: newId(),
     startsAt: VISIT,
-    email: 'ana@example.test',
-    name: 'Ana',
     terms,
     description: 'Fade Room: Fade',
   };
@@ -475,5 +474,75 @@ describe('the sweep (AC-X-116)', () => {
     await expect(startBookingPayment(business.deps, asked)).rejects.toThrow(
       DepositsUnavailableError,
     );
+  });
+
+  it('tries letting go again when Stripe failed, until it did (review)', async () => {
+    const business = await newBusiness();
+    const asked = request(business.tenantId);
+    const started = await startBookingPayment(business.deps, asked);
+    await business.sandbox.settleIntent(started.clientSecret, 'succeeded');
+    await withTenant(db, business.tenantId, (tx) =>
+      tx.execute(
+        `UPDATE booking_payments SET created_at = now() - interval '${String(UNUSED_PAYMENT_MS + 60_000)} milliseconds'`,
+      ),
+    );
+    const original = business.sandbox.cancelPaymentIntent.bind(business.sandbox);
+    business.sandbox.cancelPaymentIntent = () =>
+      Promise.reject(new PaymentsProviderError(503, 'api_error', null, true));
+    await sweepBookingPayments(business.deps, { limit: 500 });
+    const held = await paymentOf(business.tenantId, asked.requestId);
+    expect(held).toMatchObject({ status: 'voided', settledAt: null });
+    expect((await business.sandbox.retrievePaymentIntent(held.intentId)).status).toBe(
+      'requires_capture',
+    );
+    business.sandbox.cancelPaymentIntent = original;
+    await sweepBookingPayments(business.deps, { limit: 500, ageMs: 0 });
+    const let_go = await paymentOf(business.tenantId, asked.requestId);
+    expect(let_go.settledAt).not.toBeNull();
+    expect((await business.sandbox.retrievePaymentIntent(let_go.intentId)).status).toBe('canceled');
+  });
+});
+
+describe('a deposit Stripe won’t give back (review)', () => {
+  it('is recorded refund_failed, not retried, and every owner is told', async () => {
+    const business = await newBusiness();
+    await withTenant(db, business.tenantId, (tx) =>
+      savePushSubscription(tx, {
+        userId: business.ownerId,
+        endpoint: 'https://fcm.googleapis.com/fcm/send/' + newId(),
+        p256dh: 'B'.repeat(87),
+        auth: 'a'.repeat(22),
+      }),
+    );
+    const { asked, bookingId } = await paidAndBooked(business);
+    for (const step of await queued(business.tenantId)) {
+      await runPaymentJob(business.deps, business.tenantId, step);
+    }
+    await withTenant(db, business.tenantId, (tx) =>
+      settleDepositOnCancelIn(tx, {
+        bookingId,
+        startsAt: VISIT,
+        by: 'business',
+        now: business.clock.now(),
+        outboxKey,
+      }),
+    );
+    business.sandbox.createRefund = () =>
+      Promise.reject(
+        new PaymentsProviderError(400, 'invalid_request_error', 'charge_already_refunded', false),
+      );
+    const [, refundStep] = await queued(business.tenantId);
+    if (refundStep === undefined) throw new Error('no refund step');
+    await runPaymentJob(business.deps, business.tenantId, refundStep);
+    expect((await paymentOf(business.tenantId, asked.requestId)).status).toBe('refund_failed');
+    const pushes = await withTenant(db, business.tenantId, (tx) =>
+      tx.execute<{ key: string }>(
+        "SELECT dedupe_key AS key FROM outbox_messages WHERE dedupe_key LIKE 'payment.refund_failed:%'",
+      ),
+    );
+    // One push to the owner's one device, once.
+    expect(pushes.rows).toHaveLength(1);
+    await runPaymentJob(business.deps, business.tenantId, refundStep);
+    expect((await paymentOf(business.tenantId, asked.requestId)).status).toBe('refund_failed');
   });
 });

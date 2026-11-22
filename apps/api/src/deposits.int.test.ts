@@ -171,7 +171,16 @@ async function deliverQueued(): Promise<void> {
     mailer,
     clock: systemClock,
     payments: (database: Database, tenant: TenantId, job: Parameters<typeof runPaymentJob>[2]) =>
-      runPaymentJob({ db: database, provider: sandbox, clock: systemClock }, tenant, job),
+      runPaymentJob(
+        {
+          db: database,
+          provider: sandbox,
+          clock: systemClock,
+          outboxKey: outboxKeyFrom(OUTBOX_SECRET),
+        },
+        tenant,
+        job,
+      ),
   };
   for (const due of await listDueOutboxMessages(db, new Date(), 100)) {
     await deliverOutboxMessage(db, due, options);
@@ -336,6 +345,22 @@ describe('deposits on the booking page (S66)', () => {
     await deliverQueued();
     expect(await paymentStatus(bookingId)).toBe('refunded');
     await updateBookingPage(db, { context: owner }, { depositRefundHours: 24 });
+  });
+
+  it('AC-X-118: correcting a no-show to cancelled moves no money (review)', async () => {
+    const [slot] = await slots(depositServiceId, 7);
+    if (slot === undefined) throw new Error('no free time');
+    const { requestId, bookingId } = await bookWithDeposit(slot);
+    // As if the visit happened and the owner marked it a no-show.
+    await withTenant(db, tenantId, (tx) =>
+      tx.execute(sql`UPDATE bookings SET status = 'no_show' WHERE id = ${bookingId}`),
+    );
+    await app.get(BookingsService).changeBooking(owner, BookingIdSchema.parse(bookingId), {
+      status: 'cancelled',
+      notifyClient: false,
+    });
+    await deliverQueued();
+    expect(await paymentStatus(requestId)).toBe('captured');
   });
 
   it('AC-X-113: while payments can’t take charges, the deposit service can’t be requested', async () => {

@@ -57,8 +57,9 @@ CREATE TRIGGER "booking_payments_set_updated_at" BEFORE UPDATE ON "booking_payme
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 --> statement-breakpoint
 -- The payments sweep (AC-X-116) runs without a business: a definer function answers the business
--- and id of payments it looks after (made `p_age` ago and not booked; a refund Stripe left pending,
--- untouched for `p_age`), by the database's clock, oldest first, and nothing else. Captures and refunds not yet asked for are the
+-- and id of payments it looks after (made `p_age` ago and not booked; voided but not yet let go at
+-- Stripe; a refund Stripe left pending; the last two untouched for `p_age`), by the database's
+-- clock, oldest first, and nothing else. Captures and refunds not yet asked for are the
 -- outbox's. Each is then handled in its business's own transaction.
 CREATE POLICY "booking_payment_sweep" ON "booking_payments" AS PERMISSIVE FOR SELECT TO CURRENT_USER
   USING (true);
@@ -70,6 +71,7 @@ CREATE FUNCTION open_booking_payments(p_age interval, p_limit integer)
   AS $$
     SELECT p.tenant_id, p.id FROM booking_payments p
      WHERE (p.status = 'started' AND p.created_at < now() - p_age)
+        OR (p.status = 'voided' AND p.settled_at IS NULL AND p.updated_at < now() - p_age)
         OR (p.status = 'refund_pending' AND p.refund_id IS NOT NULL AND p.updated_at < now() - p_age)
      ORDER BY p.updated_at
      LIMIT LEAST(GREATEST(p_limit, 0), 500)
