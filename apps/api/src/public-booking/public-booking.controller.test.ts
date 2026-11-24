@@ -50,6 +50,7 @@ const BUSINESS: PublicBusiness = {
   services: [],
   staff: [],
   photos: { logo: null, cover: null, gallery: [] },
+  depositAudience: 'everyone',
 };
 const SLOT = AvailableSlotSchema.parse({
   staffMemberId: STAFF_ID,

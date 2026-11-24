@@ -4,7 +4,9 @@ import {
   depositRuleProblem,
   MAX_DEPOSIT_REFUND_HOURS,
   MIN_DEPOSIT_CENTS,
+  type BookingDeposit,
   type BookingPaymentStart,
+  type DepositAudience,
   type DepositKind,
   type DepositRule,
   type DepositTerms,
@@ -93,8 +95,20 @@ export function percentPreview(percentText: string, priceFromCents: number | nul
   return `${String(percent)}% · ${formatMoney(cents)} of ${formatMoney(priceFromCents)}`;
 }
 
-/** The deposit on the menu's row: "Deposit $15", "Deposit 20% ($9)", "Card on file", or none. */
-export function depositLabel(rule: DepositRule, priceFromCents: number | null): string | null {
+/**
+ * The deposit on the menu's row: "Deposit $15", "Deposit 20% ($9)", "Card on file", or none;
+ * with new clients and no-shows only, "… · new clients" (S67, AC-X-128).
+ */
+export function depositLabel(
+  rule: DepositRule,
+  priceFromCents: number | null,
+  audience: DepositAudience = 'everyone',
+): string | null {
+  const label = ruleLabel(rule, priceFromCents);
+  return label === null || audience === 'everyone' ? label : `${label} · new clients`;
+}
+
+function ruleLabel(rule: DepositRule, priceFromCents: number | null): string | null {
   if (rule.kind === 'none') return null;
   if (rule.kind === 'card') return 'Card on file';
   if (rule.kind === 'fixed') return `Deposit ${formatMoney(rule.amountCents)}`;
@@ -104,10 +118,62 @@ export function depositLabel(rule: DepositRule, priceFromCents: number | null): 
     : `Deposit ${String(rule.percent)}% (${formatMoney(cents)})`;
 }
 
-/** A service's terms on the booking page's menu (AC-X-113): "$15 deposit", "Card to book". */
-export function termsLabel(terms: DepositTerms | null): string | null {
+/**
+ * A service's terms on the booking page's menu (AC-X-113): "$15 deposit", "Card to book"; with
+ * new clients and no-shows only, "… for new clients" (S67, AC-X-128).
+ */
+export function termsLabel(
+  terms: DepositTerms | null,
+  audience: DepositAudience = 'everyone',
+): string | null {
   if (terms === null) return null;
-  return terms.kind === 'card' ? 'Card to book' : `${formatMoney(terms.amountCents)} deposit`;
+  const label =
+    terms.kind === 'card' ? 'Card to book' : `${formatMoney(terms.amountCents)} deposit`;
+  return audience === 'everyone' ? label : `${label} for new clients`;
+}
+
+/** Who pays a deposit, in booking page settings (S67, AC-X-125). */
+export const DEPOSIT_AUDIENCE_CHOICES: readonly { value: DepositAudience; label: string }[] = [
+  { value: 'everyone', label: 'Everyone' },
+  { value: 'new_and_no_show', label: 'New and no-shows' },
+];
+
+/** What the owner's choice means, in one sentence (AC-X-125). */
+export function audienceSentence(audience: DepositAudience): string {
+  return audience === 'everyone'
+    ? 'Every client pays the deposit to book online.'
+    : 'Clients who’ve visited before book without one, unless they missed a visit in the last 12 months.';
+}
+
+/** The service sheet's line under the deposit (AC-X-128); `null` when everyone pays. */
+export function audienceNote(audience: DepositAudience): string | null {
+  return audience === 'everyone'
+    ? null
+    : 'Only new clients and clients who missed a visit pay it. Regulars don’t.';
+}
+
+/**
+ * The team's booking sheet, in one line (S67 top-up, AC-X-129): what was paid and where it
+ * stands, by the server's stored window, in the business's time zone. `null`: no deposit.
+ */
+export function teamDepositLine(deposit: BookingDeposit | null, timeZone: string): string | null {
+  if (deposit === null) return null;
+  if (deposit.kind === 'card') return 'Card on file';
+  const amount = formatMoney(deposit.amountCents);
+  switch (deposit.status) {
+    case 'held':
+      return deposit.refundableNow && deposit.refundEndsAt !== null
+        ? `${amount} deposit paid · refundable until ${dateTimeLabel(timeZone, deposit.refundEndsAt)}`
+        : `${amount} deposit paid · no longer refundable`;
+    case 'kept':
+      return `${amount} deposit kept`;
+    case 'refunding':
+      return `${amount} deposit refund on its way`;
+    case 'refunded':
+      return `${amount} deposit refunded`;
+    case 'refund_failed':
+      return `${amount} refund failed · check Stripe`;
+  }
 }
 
 /** The refund windows offered (AC-X-112); the business's own is added when it isn't one. */
@@ -222,4 +288,13 @@ export function manageDepositWords(
     case 'refunded':
       return { beforeCancel: null, status: `Your ${amount} deposit was refunded to your card.` };
   }
+}
+
+/**
+ * What the team's Cancel does to the deposit (S67 review; AC-X-118: the team's cancel always
+ * refunds), said before they confirm; `null` when nothing is held or only a card is kept.
+ */
+export function teamCancelDepositWords(deposit: BookingDeposit | null): string | null {
+  if (deposit?.kind !== 'deposit' || deposit.status !== 'held') return null;
+  return `Their ${formatMoney(deposit.amountCents)} deposit goes back to their card.`;
 }

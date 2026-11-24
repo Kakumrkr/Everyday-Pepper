@@ -1,10 +1,13 @@
 import type { IncomingMessage } from 'node:http';
 import {
+  BookingDepositAnswerSchema,
+  BookingIdSchema,
   PaymentAccountAnswerSchema,
   PaymentDashboardLinkSchema,
   PaymentOnboardingLinkSchema,
   SandboxIntentRequestSchema,
   SandboxPaymentRequestSchema,
+  type BookingDepositAnswer,
   type PaymentAccountAnswer,
   type PaymentDashboardLink,
   type PaymentOnboardingLink,
@@ -17,6 +20,7 @@ import {
   Get,
   HttpCode,
   Module,
+  Param,
   Post,
   Req,
   UseGuards,
@@ -26,6 +30,7 @@ import { CurrentTenant, RequirePermission, SkipOriginCheck, TenantGuard } from '
 import { answering } from '../http/domain-errors.js';
 import { clientAddress, RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { parseBody } from '../http/zod-body.js';
+import { z } from 'zod';
 import { PAYMENTS_OPTIONS, PaymentsService, type PaymentsOptions } from './payments.service.js';
 
 // Payments (S65, ADR-0067, AC-X-96…104). The owner connects the business's Stripe account
@@ -37,6 +42,7 @@ const OWNER_CALLS: RateLimit = { name: 'payments-owner', max: 30, windowSeconds:
 // Stripe calls from many addresses; the limit only stops a flood (each refused call costs one HMAC).
 const DELIVERIES: RateLimit = { name: 'payments-webhook-ip', max: 1200, windowSeconds: 600 };
 // The sandbox's card (S66): journeys pay a handful of times; nothing more is needed.
+const BookingParamsSchema = z.object({ bookingId: BookingIdSchema });
 const SANDBOX_CARDS: RateLimit = { name: 'payments-sandbox-card-ip', max: 120, windowSeconds: 600 };
 
 @Controller('v1/payments')
@@ -52,6 +58,22 @@ export class PaymentsController {
   @RequirePermission('payments.read')
   async account(@CurrentTenant() tenant: TenantContext): Promise<PaymentAccountAnswer> {
     return PaymentAccountAnswerSchema.parse(await answering(() => this.payments.account(tenant)));
+  }
+
+  /**
+   * 200 a booking's deposit for the team's sheet (S67, AC-X-129), `deposit: null` when it took
+   * none; 403 staff; 404 `payments_off`.
+   */
+  @Get('bookings/:bookingId/deposit')
+  @RequirePermission('payments.read')
+  async bookingDeposit(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+  ): Promise<BookingDepositAnswer> {
+    const { bookingId } = parseBody(BookingParamsSchema, params);
+    return BookingDepositAnswerSchema.parse({
+      deposit: await answering(() => this.payments.bookingDeposit(tenant, bookingId)),
+    });
   }
 
   /**

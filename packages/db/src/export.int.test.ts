@@ -122,7 +122,13 @@ describe('readBusinessExport (AC-W1-37)', () => {
     const fade = await business('Fade');
     await business('Other');
     const data = await withTenant(db, fade, readBusinessExport);
-    expect(data.business).toMatchObject({ name: 'Fade', timeZone: 'America/Chicago' });
+    expect(data.business).toMatchObject({
+      name: 'Fade',
+      timeZone: 'America/Chicago',
+      // The deposit settings (S66, S67) go with the business.
+      depositRefundHours: 24,
+      depositAudience: 'everyone',
+    });
     expect(data.services.map((s) => s.name)).toEqual(['Fade cut']);
     expect(data.staff.map((s) => s.displayName)).toEqual(['Fade Jess']);
     expect(data.clients.map((c) => [c.name, c.email, c.tags])).toEqual([

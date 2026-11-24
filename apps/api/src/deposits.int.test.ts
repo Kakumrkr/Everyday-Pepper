@@ -7,8 +7,11 @@ import {
   BookingIdSchema,
   BookingPaymentStartSchema,
   BookingRequestResponseSchema,
+  ClientIdSchema,
   PublicBookingResponseSchema,
   PublicBusinessSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
   TenantIdSchema,
   UserIdSchema,
   type AvailableSlot,
@@ -26,6 +29,8 @@ import {
   type TenantContext,
 } from '@pepper/core';
 import {
+  insertBooking,
+  insertClient,
   listDueOutboxMessages,
   prepareDatabase,
   users,
@@ -75,6 +80,7 @@ const mailer = new RecordingMailer();
 let tenantId: TenantId;
 let owner: TenantContext;
 let depositServiceId: string;
+let jessId: string;
 let ipCounter = 0;
 let emails = 0;
 
@@ -130,6 +136,7 @@ beforeAll(async () => {
     displayName: 'Jess',
     serviceIds: [fade.id, consult.id],
   });
+  jessId = jess.id;
   await replaceWorkingHours(db, actor, jess.id, {
     intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
   });
@@ -441,6 +448,23 @@ describe('deposits on the booking page (S66)', () => {
     expect(await paymentStatus(requestId)).toBe('captured');
   });
 
+  it("AC-X-129: the team reads the booking's deposit; staff can't", async () => {
+    const [, , , slot] = await slots(depositServiceId, 5);
+    if (slot === undefined) throw new Error('no free time');
+    const { bookingId } = await bookWithDeposit(slot);
+    const payments = app.get(PaymentsService);
+    expect(await payments.bookingDeposit(owner, BookingIdSchema.parse(bookingId))).toEqual({
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt: new Date(Date.parse(slot.startsAt) - DAY).toISOString(),
+      status: 'held',
+      refundableNow: true,
+    });
+    await expect(
+      payments.bookingDeposit({ ...owner, role: 'staff' }, BookingIdSchema.parse(bookingId)),
+    ).rejects.toThrow();
+  });
+
   it('AC-X-113: while payments can’t take charges, the deposit service can’t be requested', async () => {
     const [slot] = await slots(depositServiceId, 6);
     if (slot === undefined) throw new Error('no free time');
@@ -457,5 +481,159 @@ describe('deposits on the booking page (S66)', () => {
       .expect(409);
     expect(refused.body).toMatchObject({ code: 'deposits_unavailable' });
     await app.get(PaymentsService).sandboxState(owner, 'ready');
+  });
+});
+
+describe('who pays a deposit (S67, ADR-0068 amendment)', () => {
+  const HOUR = 3_600_000;
+
+  beforeAll(async () => {
+    await app.get(PaymentsService).sandboxState(owner, 'ready');
+    await updateBookingPage(db, { context: owner }, { depositAudience: 'new_and_no_show' });
+  });
+
+  afterAll(async () => {
+    await updateBookingPage(db, { context: owner }, { depositAudience: 'everyone' });
+  });
+
+  /** A client of the business with one visit that ended `daysAgo` days ago, in `status`. */
+  async function clientWithVisit(status: 'confirmed' | 'completed' | 'no_show', daysAgo: number) {
+    emails += 1;
+    const email = `known-${String(emails)}@example.test`;
+    await withTenant(db, tenantId, async (tx) => {
+      const client = await insertClient(tx, { name: 'Rae', email, phone: null, source: 'team' });
+      // Each past visit at its own hour, so two never overlap for Jess.
+      const start = new Date(
+        Math.floor(Date.now() / DAY) * DAY - daysAgo * DAY - (emails % 200) * DAY - HOUR,
+      );
+      const row = await insertBooking(tx, {
+        clientId: ClientIdSchema.parse(client.id),
+        serviceId: ServiceIdSchema.parse(depositServiceId),
+        staffMemberId: StaffMemberIdSchema.parse(jessId),
+        startsAt: start,
+        endsAt: new Date(start.getTime() + HOUR),
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: 4000,
+        priceToCents: null,
+        source: 'team',
+        overridden: false,
+        idempotencyKey: null,
+        createdBy: null,
+      });
+      if (status !== 'confirmed') {
+        await tx.execute(sql`UPDATE bookings SET status = ${status} WHERE id = ${row.id}`);
+      }
+    });
+    return email;
+  }
+
+  async function ask(email: string, slot: AvailableSlot, cookie?: string) {
+    const client = visitor();
+    let call = request(server)
+      .post(`/v1/public/businesses/${SLUG}/booking-requests`)
+      .set('origin', ORIGIN)
+      .set('x-forwarded-for', `198.51.100.${String((ipCounter += 1))}`);
+    if (cookie !== undefined) call = call.set('cookie', cookie);
+    const asked = await call
+      .send({
+        serviceId: depositServiceId,
+        staffMemberId: null,
+        startsAt: slot.startsAt,
+        name: 'Rae',
+        email,
+        phone: null,
+      })
+      .expect(201);
+    return { client, asked };
+  }
+
+  it('AC-X-126/127: a regular books with no payment once the code proves the email', async () => {
+    const [slot] = await slots(depositServiceId, 8);
+    if (slot === undefined) throw new Error('no free time');
+    const email = await clientWithVisit('completed', 30);
+    const { client, asked } = await ask(email, slot);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const code = codeIn(mailer.sent.at(-1));
+    const exempt = await client.post(`/booking-requests/${requestId}/payment`, { code });
+    expect(exempt.status).toBe(409);
+    expect(exempt.body).toMatchObject({ code: 'payment_not_needed' });
+    await client.post(`/booking-requests/${requestId}/confirm`, { code }).expect(201);
+    expect(await paymentStatus(requestId)).toBeUndefined();
+  });
+
+  it('AC-X-126: a visit that ended without being marked completed makes a regular too', async () => {
+    const [, slot] = await slots(depositServiceId, 8);
+    if (slot === undefined) throw new Error('no free time');
+    const { client, asked } = await ask(await clientWithVisit('confirmed', 3), slot);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const code = codeIn(mailer.sent.at(-1));
+    await client.post(`/booking-requests/${requestId}/payment`, { code }).expect(409);
+  });
+
+  it('AC-X-126: a new client, and a client with a recent no-show, pay', async () => {
+    const [, , slot] = await slots(depositServiceId, 8);
+    if (slot === undefined) throw new Error('no free time');
+    emails += 1;
+    for (const email of [
+      `new-${String(emails)}@example.test`,
+      await clientWithVisit('no_show', 60),
+    ]) {
+      const { client, asked } = await ask(email, slot);
+      const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+      const code = codeIn(mailer.sent.at(-1));
+      await client.post(`/booking-requests/${requestId}/payment`, { code }).expect(200);
+      await client.post(`/booking-requests/${requestId}/confirm`, { code }).expect(402);
+    }
+  });
+
+  it('AC-X-127: before the code, a regular and a stranger get the same answer', async () => {
+    const [, , , slot] = await slots(depositServiceId, 8);
+    if (slot === undefined) throw new Error('no free time');
+    emails += 1;
+    const stranger = await ask(`stranger-${String(emails)}@example.test`, slot);
+    const regular = await ask(await clientWithVisit('completed', 10), slot);
+    expect(Object.keys(regular.asked.body as object).sort()).toEqual(
+      Object.keys(stranger.asked.body as object).sort(),
+    );
+    expect(regular.asked.body).not.toHaveProperty('confirmed');
+  });
+
+  it('AC-X-127: a no-show marked after the code makes them pay at confirm', async () => {
+    const [slot] = await slots(depositServiceId, 9);
+    if (slot === undefined) throw new Error('no free time');
+    const email = await clientWithVisit('completed', 30);
+    const { client, asked } = await ask(email, slot);
+    const { requestId } = BookingRequestResponseSchema.parse(asked.body);
+    const code = codeIn(mailer.sent.at(-1));
+    await client.post(`/booking-requests/${requestId}/payment`, { code }).expect(409);
+    await withTenant(db, tenantId, (tx) =>
+      tx.execute(
+        sql`UPDATE bookings SET status = 'no_show' WHERE client_id = (SELECT id FROM clients WHERE email = ${email})`,
+      ),
+    );
+    const refused = await client.post(`/booking-requests/${requestId}/confirm`, { code });
+    expect(refused.status).toBe(402);
+    expect(refused.body).toMatchObject({ code: 'payment_required' });
+  });
+
+  it('AC-X-127: a remembered regular is confirmed at once, with no code email', async () => {
+    const [slot] = await slots(depositServiceId, 10);
+    const [later] = await slots(depositServiceId, 12);
+    if (slot === undefined || later === undefined) throw new Error('no free time');
+    const email = await clientWithVisit('completed', 30);
+    const first = await ask(email, slot);
+    const { requestId } = BookingRequestResponseSchema.parse(first.asked.body);
+    const code = codeIn(mailer.sent.at(-1));
+    const confirmed = await first.client
+      .post(`/booking-requests/${requestId}/confirm`, { code, remember: true })
+      .expect(201);
+    const cookie = (confirmed.headers['set-cookie']?.[0] ?? '').split(';')[0];
+    expect(cookie).not.toBe('');
+    const sent = mailer.sent.length;
+    const again = await ask(email, later, cookie);
+    expect(again.asked.body).toHaveProperty('confirmed');
+    // No code email: the confirmation goes through the outbox.
+    expect(mailer.sent.length).toBe(sent);
   });
 });

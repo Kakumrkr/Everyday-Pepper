@@ -1,5 +1,9 @@
 import { z } from 'zod';
-import { DepositTermsSchema, PublicBookingDepositSchema } from './deposits.js';
+import {
+  DepositAudienceSchema,
+  DepositTermsSchema,
+  PublicBookingDepositSchema,
+} from './deposits.js';
 import { BusinessPhotosSchema } from './photos.js';
 import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
@@ -76,6 +80,8 @@ export const PublicBusinessSchema = z
     staff: z.array(PublicStaffMemberSchema),
     /** Its logo, cover and gallery (S47.2, ADR-0048); none until the owner adds them. */
     photos: BusinessPhotosSchema,
+    /** Who pays the services' deposits (S67, AC-X-128): the menu says "for new clients". */
+    depositAudience: DepositAudienceSchema,
     // The phone, public address and cancellation policy the business chose to show (S47).
   })
   .extend(BusinessProfileSchema.shape);

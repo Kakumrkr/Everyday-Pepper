@@ -3,6 +3,8 @@ import {
   StripeEventSchema,
   WebhookAckSchema,
   type BookingPaymentStart,
+  type BookingDeposit,
+  type BookingId,
   type PaymentAccountAnswer,
   type PaymentDashboardLink,
   type PaymentOnboardingLink,
@@ -26,6 +28,7 @@ import {
   PaymentsNotOnboardedError,
   PaymentsProviderError,
   RedisSandboxAccountStore,
+  readBookingDeposit,
   readPaymentAccount,
   SandboxPaymentsProvider,
   startPaymentOnboarding,
@@ -91,6 +94,14 @@ export class PaymentsService {
 
   async account(tenant: TenantContext): Promise<PaymentAccountAnswer> {
     return readPaymentAccount(this.on().deps, actorOf(tenant));
+  }
+
+  /** A booking's deposit for the team's sheet (S67, AC-X-129). */
+  async bookingDeposit(
+    tenant: TenantContext,
+    bookingId: BookingId,
+  ): Promise<BookingDeposit | null> {
+    return readBookingDeposit(this.on().deps, actorOf(tenant), bookingId);
   }
 
   async onboarding(tenant: TenantContext): Promise<PaymentOnboardingLink> {

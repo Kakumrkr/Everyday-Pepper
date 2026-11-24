@@ -1,15 +1,17 @@
 'use client';
 
 import {
+  BookingDepositAnswerSchema,
   BookingSchema,
   type AvailableSlot,
+  type BookingDeposit,
   type BookingChange,
   type BookingStatus,
 } from '@pepper/contracts';
 import { Button, cx, DetailTable, Select, Sheet, SheetFooter } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   bookableStaff,
   bookingActions,
@@ -22,7 +24,8 @@ import {
 } from '../../../lib/booking';
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
-import { sendJson } from '../../../lib/client-api';
+import { fetchJson, sendJson } from '../../../lib/client-api';
+import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
@@ -126,6 +129,8 @@ function BookingDetails({
   // The sheet's clock: the api checks the real one (done and no-show only once started).
   const [now] = useState(() => Date.now());
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
+  const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
+  const deposit = teamDepositLine(depositRead, timeZone);
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -191,6 +196,18 @@ function BookingDetails({
                 ),
               },
             ]),
+        ...(deposit === null
+          ? []
+          : [
+              {
+                label: 'Deposit',
+                value: (
+                  <span className="tabular-nums" data-testid="booking-deposit">
+                    {deposit}
+                  </span>
+                ),
+              },
+            ]),
         ...(booking.overridden
           ? [
               {
@@ -210,6 +227,11 @@ function BookingDetails({
         <p className="m-0 type-body font-semibold">
           Cancel this booking? The time becomes free again.
         </p>
+        {teamCancelDepositWords(depositRead) === null ? null : (
+          <p className="m-0 type-body text-ink-2" data-testid="booking-cancel-deposit">
+            {teamCancelDepositWords(depositRead)}
+          </p>
+        )}
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
           Email the client that it is cancelled
         </NotifyClient>
@@ -436,4 +458,26 @@ function MoveBooking({
       </SheetFooter>
     </div>
   );
+}
+
+/**
+ * The booking's deposit (S67 top-up, AC-X-129), read when the sheet opens: owners and managers
+ * only; `null` with none, while loading, or when payments are off here.
+ */
+function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | null {
+  const [deposit, setDeposit] = useState<BookingDeposit | null>(null);
+  useEffect(() => {
+    if (!reads) return;
+    let current = true;
+    void fetchJson(
+      `/v1/payments/bookings/${encodeURIComponent(bookingId)}/deposit`,
+      BookingDepositAnswerSchema,
+    ).then((answer) => {
+      if (current && answer.ok) setDeposit(answer.data.deposit);
+    });
+    return () => {
+      current = false;
+    };
+  }, [bookingId, reads]);
+  return deposit;
 }

@@ -1,0 +1,2 @@
+ALTER TABLE "tenants" ADD COLUMN "deposit_audience" text DEFAULT 'everyone' NOT NULL;--> statement-breakpoint
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_deposit_audience_valid" CHECK ("tenants"."deposit_audience" IN ('everyone', 'new_and_no_show'));

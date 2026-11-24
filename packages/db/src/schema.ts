@@ -191,6 +191,11 @@ export const tenants = pgTable(
     cancellationPolicy: text('cancellation_policy'),
     // Hours before the start a client may cancel and get a deposit back (S66, ADR-0068).
     depositRefundHours: integer('deposit_refund_hours').notNull().default(24),
+    // Who pays the services' deposits (S67, ADR-0068 amendment): everyone, or only new clients
+    // and clients with a no-show (regulars exempt).
+    depositAudience: text('deposit_audience', { enum: ['everyone', 'new_and_no_show'] })
+      .notNull()
+      .default('everyone'),
     // When the business is deleted for good (S51.2, ADR-0054): 30 days after the owner asked;
     // NULL: not being deleted. While set, the booking page is closed and no email goes out.
     deletionDueAt: timestamp('deletion_due_at', { withTimezone: true }),
@@ -209,6 +214,10 @@ export const tenants = pgTable(
       sql`length(${table.cancellationPolicy}) BETWEEN 1 AND 600`,
     ),
     check('tenants_deposit_refund_hours_range', sql`${table.depositRefundHours} BETWEEN 0 AND 168`),
+    check(
+      'tenants_deposit_audience_valid',
+      sql`${table.depositAudience} IN ('everyone', 'new_and_no_show')`,
+    ),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),
     tenantIsolation(sql.raw('id')),

@@ -45,7 +45,7 @@ import {
 import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
-import { sendJson, type CallResult } from '../../../lib/client-api';
+import { errorCodeOf, sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { photoAlt, photoSrc, photoSrcSet } from '../../../lib/photos';
 import {
@@ -390,6 +390,11 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       go('pay');
       return;
     }
+    // A regular the business doesn't ask (S67, AC-X-127): the code proved it, so book now.
+    if (answer.status === 409 && errorCodeOf(answer.body) === 'payment_not_needed') {
+      await confirm();
+      return;
+    }
     const problem = confirmProblem(answer.status, answer.body);
     if (problem === 'wrong_code' || problem === 'expired') {
       setError(codeProblemText(problem, answer.body));
@@ -503,7 +508,10 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                     <ChoiceRow
                       key={item.id}
                       title={item.name}
-                      meta={[durationLabel(item.durationMinutes), termsLabel(item.deposit)]
+                      meta={[
+                        durationLabel(item.durationMinutes),
+                        termsLabel(item.deposit, business.depositAudience),
+                      ]
                         .filter(Boolean)
                         .join(' · ')}
                       trailing={priceLabel(item)}

@@ -34,6 +34,7 @@ const BUSINESS: Business = {
   locale: 'en-US',
   templateId: 'beauty-salon',
   depositRefundHours: 24,
+  depositAudience: 'everyone',
   brandColor: null,
   phone: null,
   publicAddress: null,

@@ -2,7 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { ServiceInputSchema } from './appointments.js';
 import { BookingPageSettingsSchema } from './account.js';
 import {
+  BookingDepositSchema,
+  DepositAudienceSchema,
+  depositApplies,
   DepositRuleSchema,
+  NO_SHOW_LOOKBACK_DAYS,
+  noShowsSince,
   depositRefundEndsAt,
   depositRuleProblem,
   depositTermsOf,
@@ -124,5 +129,83 @@ describe('payment shapes', () => {
     expect(
       OutboxPaymentSchema.safeParse({ kind: 'refund', bookingPaymentId: id, amount: 1 }).success,
     ).toBe(false);
+  });
+});
+
+describe('who pays a deposit (AC-X-125, AC-X-126)', () => {
+  it('is everyone or new clients and no-shows, everyone by default', () => {
+    expect(DepositAudienceSchema.options).toEqual(['everyone', 'new_and_no_show']);
+    expect(BookingPageSettingsSchema.parse({ depositAudience: 'new_and_no_show' })).toEqual({
+      depositAudience: 'new_and_no_show',
+    });
+    expect(BookingPageSettingsSchema.safeParse({ depositAudience: 'regulars' }).success).toBe(
+      false,
+    );
+  });
+
+  // The fixtures of the rule: the client the booking would go to, and what they have done.
+  const cases: {
+    name: string;
+    standing: { endedVisits: number; recentNoShows: number } | null;
+    pays: boolean;
+  }[] = [
+    { name: 'no client with this email (new)', standing: null, pays: true },
+    {
+      name: 'a client with no visit yet (booked, cancelled)',
+      standing: { endedVisits: 0, recentNoShows: 0 },
+      pays: true,
+    },
+    {
+      name: 'a regular: one visit that has ended',
+      standing: { endedVisits: 1, recentNoShows: 0 },
+      pays: false,
+    },
+    {
+      name: 'a regular with many visits',
+      standing: { endedVisits: 12, recentNoShows: 0 },
+      pays: false,
+    },
+    {
+      name: 'a regular with a no-show this year',
+      standing: { endedVisits: 12, recentNoShows: 1 },
+      pays: true,
+    },
+    {
+      name: 'a no-show and nothing else',
+      standing: { endedVisits: 0, recentNoShows: 1 },
+      pays: true,
+    },
+  ];
+  for (const { name, standing, pays } of cases) {
+    it(`new clients and no-shows: ${name} ${pays ? 'pays' : 'is exempt'}`, () => {
+      expect(depositApplies('new_and_no_show', standing)).toBe(pays);
+    });
+    it(`everyone: ${name} pays`, () => {
+      expect(depositApplies('everyone', standing)).toBe(true);
+    });
+  }
+
+  it('counts no-shows of the last 12 months', () => {
+    expect(NO_SHOW_LOOKBACK_DAYS).toBe(365);
+    expect(noShowsSince(new Date('2026-11-24T15:00:00Z')).toISOString()).toBe(
+      '2025-11-24T15:00:00.000Z',
+    );
+  });
+});
+
+describe("the team's view of a deposit (AC-X-129)", () => {
+  it('carries the amount, the stored window and where it stands', () => {
+    const paid = {
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt: '2026-11-24T20:00:00.000Z',
+      status: 'held',
+      refundableNow: true,
+    };
+    expect(BookingDepositSchema.parse(paid)).toEqual(paid);
+    for (const status of ['held', 'kept', 'refunding', 'refunded', 'refund_failed']) {
+      expect(BookingDepositSchema.safeParse({ ...paid, status }).success).toBe(true);
+    }
+    expect(BookingDepositSchema.safeParse({ ...paid, status: 'voided' }).success).toBe(false);
   });
 });

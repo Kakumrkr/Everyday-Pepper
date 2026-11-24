@@ -7,6 +7,7 @@ import {
   type BookingSource,
   type BookingStatus,
   type ClientId,
+  type ClientStanding,
   type ServiceId,
   type StaffMemberId,
   type UserId,
@@ -257,6 +258,26 @@ export async function listClientBookings(
     .where(and(...conditions))
     .orderBy(...order)
     .limit(z.number().int().min(1).max(50).parse(options.limit));
+}
+
+/**
+ * What the business knows of a client for its deposits (S67, AC-X-126): visits that have ended
+ * by `now` (confirmed or completed; imported ones are bookings too) and no-shows starting since
+ * `since`. Cancelled bookings count for neither. Read by the booking page's transaction, which has
+ * no member (staff would see only their own bookings, RLS).
+ */
+export async function clientStandingIn(
+  tx: TenantTx,
+  options: { clientId: ClientId; now: Date; since: Date },
+): Promise<ClientStanding> {
+  const [row] = await tx
+    .select({
+      endedVisits: sql<number>`count(*) FILTER (WHERE ${bookings.status} IN ('confirmed', 'completed') AND ${bookings.endsAt} <= ${options.now})::int`,
+      recentNoShows: sql<number>`count(*) FILTER (WHERE ${bookings.status} = 'no_show' AND ${bookings.startsAt} >= ${options.since})::int`,
+    })
+    .from(bookings)
+    .where(eq(bookings.clientId, Id.parse(options.clientId)));
+  return { endedVisits: row?.endedVisits ?? 0, recentNoShows: row?.recentNoShows ?? 0 };
 }
 
 async function bookingWrite<T>(write: () => Promise<T>): Promise<T> {

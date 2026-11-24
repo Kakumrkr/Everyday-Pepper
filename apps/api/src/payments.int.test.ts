@@ -272,6 +272,13 @@ describe('payments with Stripe (AC-X-96…100)', () => {
     expect(before).toMatchObject({ status: 'not_connected', canManage: true });
     await b.staff.get('/v1/payments/account').expect(403);
     await b.staff.post('/v1/payments/onboarding').expect(403);
+    // A booking's deposit (S67, AC-X-129): the team's read, not staff's; no payment reads null.
+    const booking = '0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a13';
+    await b.staff.get(`/v1/payments/bookings/${booking}/deposit`).expect(403);
+    expect(
+      (await b.owner.get(`/v1/payments/bookings/${booking}/deposit`).expect(200)).body,
+    ).toEqual({ deposit: null });
+    await b.owner.get('/v1/payments/bookings/not-an-id/deposit').expect(400);
 
     const link = PaymentOnboardingLinkSchema.parse(
       (await b.owner.post('/v1/payments/onboarding').expect(200)).body,

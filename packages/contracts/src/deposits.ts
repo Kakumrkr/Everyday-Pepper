@@ -55,6 +55,43 @@ export function depositRuleProblem(
   return null;
 }
 
+/**
+ * Who a business asks for its services' deposits (S67, AC-X-125): everyone (S66's behaviour and
+ * the default), or only new clients and clients with a no-show; regulars are exempt.
+ */
+export const DepositAudienceSchema = z.enum(['everyone', 'new_and_no_show']);
+export type DepositAudience = z.infer<typeof DepositAudienceSchema>;
+export const DEFAULT_DEPOSIT_AUDIENCE: DepositAudience = 'everyone';
+
+/** How far back a no-show makes a client pay again (AC-X-126): 12 months. */
+export const NO_SHOW_LOOKBACK_DAYS = 365;
+
+/** The start of the no-shows that count at `now` (AC-X-126). */
+export function noShowsSince(now: Date): Date {
+  return new Date(now.getTime() - NO_SHOW_LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+}
+
+/**
+ * What the business knows of the client a booking would go to (AC-X-126): visits that have
+ * ended (confirmed or completed, imported included) and no-shows since `noShowsSince`.
+ */
+export interface ClientStanding {
+  endedVisits: number;
+  recentNoShows: number;
+}
+
+/**
+ * Whether a client pays the service's deposit (ADR-0068, S67 amendment). `standing` is `null`
+ * when the business has no client with the verified email. Read only once the email is proven.
+ */
+export function depositApplies(
+  audience: DepositAudience,
+  standing: ClientStanding | null,
+): boolean {
+  if (audience === 'everyone') return true;
+  return standing === null || standing.endedVisits === 0 || standing.recentNoShows > 0;
+}
+
 /** The cents a rule takes now from a service at `priceFromCents` (0 for none or card). */
 export function depositCentsOf(rule: DepositRule, priceFromCents: number | null): number {
   if (rule.kind === 'fixed') return rule.amountCents;
@@ -263,3 +300,26 @@ export const OutboxPaymentSchema = z
   .object({ kind: z.enum(['capture', 'refund']), bookingPaymentId: z.uuid() })
   .strict();
 export type OutboxPayment = z.infer<typeof OutboxPaymentSchema>;
+
+/**
+ * A booking's deposit as the team sees it on the booking sheet (S67, AC-X-129): what was paid
+ * (or a card only kept), the stored refund end (`null` for a card), and where it stands, a
+ * refund Stripe refused for good included (`refund_failed`); `refundableNow` by the server's
+ * clock. `null` from the route: no payment that took something.
+ */
+export const BookingDepositSchema = z
+  .object({
+    kind: BookingPaymentKindSchema,
+    amountCents: z.number().int().min(0),
+    refundEndsAt: z.iso.datetime().nullable(),
+    status: z.enum(['held', 'kept', 'refunding', 'refunded', 'refund_failed']),
+    refundableNow: z.boolean(),
+  })
+  .strict();
+export type BookingDeposit = z.infer<typeof BookingDepositSchema>;
+
+/** `GET /v1/payments/bookings/:bookingId/deposit` (AC-X-129). */
+export const BookingDepositAnswerSchema = z
+  .object({ deposit: BookingDepositSchema.nullable() })
+  .strict();
+export type BookingDepositAnswer = z.infer<typeof BookingDepositAnswerSchema>;

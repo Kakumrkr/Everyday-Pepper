@@ -70,6 +70,7 @@ export default async function ServicesPage() {
       categories={categories}
       state={services === null ? 'failed' : list.length === 0 ? 'empty' : 'listed'}
       deposits={deposits}
+      audience={current.business.depositAudience}
       actions={
         <Link href={ROUTES.rules} className={buttonStyle({ variant: 'secondary', size: 'sm' })}>
           Booking rules
@@ -103,7 +104,11 @@ export default async function ServicesPage() {
                         .filter(Boolean)
                         .join(' · '),
                       people.length === 0 ? 'No one offers it yet' : people.join(', '),
-                      depositLabel(service.deposit, service.priceFromCents),
+                      depositLabel(
+                        service.deposit,
+                        service.priceFromCents,
+                        current.business.depositAudience,
+                      ),
                     ].filter((line): line is string => line !== null)}
                     edit={
                       manages ? (
@@ -111,6 +116,7 @@ export default async function ServicesPage() {
                           service={service}
                           categories={categories}
                           deposits={deposits}
+                          audience={current.business.depositAudience}
                         />
                       ) : null
                     }
@@ -126,7 +132,14 @@ export default async function ServicesPage() {
         brandColor={current.business.brandColor}
         profile={current.business}
         manages={managesPage}
-        refundHours={deposits === 'hidden' ? null : current.business.depositRefundHours}
+        deposits={
+          deposits === 'hidden'
+            ? null
+            : {
+                refundHours: current.business.depositRefundHours,
+                audience: current.business.depositAudience,
+              }
+        }
       />
       {managesPage ? (
         <PhotosCard

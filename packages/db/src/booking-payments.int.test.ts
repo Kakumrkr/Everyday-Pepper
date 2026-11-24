@@ -220,4 +220,21 @@ describe('deposit rules on services and the refund window', () => {
     const fresh = await createTenant(db, { name: 'w', slug: 'dep-window-2', timeZone: 'UTC' });
     expect(fresh.depositRefundHours).toBe(24);
   });
+
+  it('asks everyone until the business chooses new clients and no-shows (S67, AC-X-125)', async () => {
+    const tenant = await business('dep-audience');
+    await withTenant(db, tenant, async (tx) => {
+      expect((await updateCurrentTenantBookingPage(tx, { phone: null }))?.depositAudience).toBe(
+        'everyone',
+      );
+      const set = await updateCurrentTenantBookingPage(tx, { depositAudience: 'new_and_no_show' });
+      expect(set?.depositAudience).toBe('new_and_no_show');
+      const kept = await updateCurrentTenantBookingPage(tx, { depositRefundHours: 12 });
+      expect(kept?.depositAudience).toBe('new_and_no_show');
+    });
+    const error = await withTenant(db, tenant, (tx) =>
+      tx.execute(sql`UPDATE tenants SET deposit_audience = 'regulars'`),
+    ).catch((e: unknown) => e);
+    expect(sqlState(error)).toBe('23514');
+  });
 });

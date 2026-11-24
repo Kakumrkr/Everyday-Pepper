@@ -100,6 +100,9 @@ export interface BusinessExportData {
     phone: string | null;
     publicAddress: string | null;
     cancellationPolicy: string | null;
+    /** The deposit refund window (S66) and who pays one (S67). */
+    depositRefundHours: number;
+    depositAudience: string;
     mailingAddress: string | null;
     reviewUrl: string | null;
     createdAt: Date;
@@ -251,6 +254,8 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       phone: tenants.phone,
       publicAddress: tenants.publicAddress,
       cancellationPolicy: tenants.cancellationPolicy,
+      depositRefundHours: tenants.depositRefundHours,
+      depositAudience: tenants.depositAudience,
       mailingAddress: tenants.mailingAddress,
       reviewUrl: tenants.reviewUrl,
       createdAt: tenants.createdAt,

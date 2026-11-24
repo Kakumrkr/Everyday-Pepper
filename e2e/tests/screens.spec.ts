@@ -1,4 +1,5 @@
 import {
+  BookingsResponseSchema,
   SupportCreatedSchema,
   SupportScreenshotSchema,
   SupportSavedReplyListSchema,
@@ -1521,5 +1522,33 @@ for (const width of WIDTHS) {
       'Cancel now and get your $15 back.',
     );
     await shots('deposit-cancel');
+
+    // The team's booking sheet (S67 top-up, AC-X-129): the deposit in one line.
+    const { business } = CurrentBusinessResponseSchema.parse(
+      await (await page.request.get('/v1/tenant')).json(),
+    );
+    const listed = BookingsResponseSchema.parse(
+      await (
+        await page.request.get('/v1/bookings', {
+          params: {
+            from: new Date().toISOString(),
+            to: new Date(Date.now() + 7 * 86_400_000).toISOString(),
+          },
+        })
+      ).json(),
+    );
+    const paid = listed.bookings.find((b) => b.source === 'booking_page');
+    if (paid === undefined) throw new Error('no booking from the page');
+    const day = new Intl.DateTimeFormat('en-CA', { timeZone: business.timeZone }).format(
+      new Date(paid.startsAt),
+    );
+    await page.goto(`/calendar?date=${day}`);
+    await (await hydrated(page.getByTestId('booking-block').first())).click();
+    const line = page.getByTestId('booking-deposit');
+    await expect(line).toHaveText(/^\$15 deposit paid · refundable until /);
+    await fixedText(line, '$15 deposit paid · refundable until Thu, Dec 3, 9:00 AM');
+    await fixedText(page.getByTestId('booking-when'), 'Thu, Dec 4, 9:00 AM – 9:45 AM');
+    await fixedText(page.getByTestId('calendar-day'), 'Thursday, December 4');
+    await shots('deposit-team-sheet', { fullPage: false });
   });
 }

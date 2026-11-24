@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.41 — 2026-11-24
+- At the S67 brief (user): **S67 splits in two** ([PCR-015](changes/PCR-015.md)): S67 (smart deposits: "Who pays a deposit" per business, regulars exempt, the standing read only after the code; the team's sheet shows the deposit) and S67.2 (the cancellation-policy builder, on the booking page and in every email). AC-X-125…129.
+
+  **Compatibility:** an additive column (default "Everyone", so nothing changes until an owner chooses), a read route; no tool, prompt or event change; $0 of the AI budget.
+
 ## 0.40 — 2026-11-22
 - At the S66 brief (user): **S66 splits in two** ([PCR-014](changes/PCR-014.md)): S66 (deposits and card on file, backend: [ADR-0068](../adr/0068-deposits-and-refunds.md), authorize then book then capture, refunds by the window through the outbox) and S66.2 (the screens and journeys). AC-X-111…120. From the S66 security review: the refund window is stored when the booking is made, and a client's move takes it along only while it is open (AC-X-117).
 

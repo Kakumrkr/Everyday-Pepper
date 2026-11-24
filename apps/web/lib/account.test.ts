@@ -84,6 +84,7 @@ describe('loadCurrentBusiness', () => {
       publicAddress: null,
       cancellationPolicy: null,
       depositRefundHours: 24,
+      depositAudience: 'everyone',
     },
     role: 'owner',
     permissions: ['business.read', 'members.read'],
@@ -211,6 +212,7 @@ describe('loadPublicBusiness', () => {
     publicAddress: null,
     cancellationPolicy: null,
     photos: { logo: null, cover: null, gallery: [] },
+    depositAudience: 'everyone',
     services: [],
     staff: [],
   };

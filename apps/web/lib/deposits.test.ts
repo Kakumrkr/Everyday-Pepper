@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
+  audienceNote,
+  audienceSentence,
+  DEPOSIT_AUDIENCE_CHOICES,
   depositFields,
   depositLabel,
   depositRuleFrom,
@@ -9,6 +12,8 @@ import {
   refundChoices,
   refundHoursLabel,
   refundWindowSentence,
+  teamCancelDepositWords,
+  teamDepositLine,
   termsLabel,
 } from './deposits';
 
@@ -189,5 +194,96 @@ describe('the manage page before Cancel (AC-X-123, S66.2 top-up)', () => {
         TZ,
       ).beforeCancel,
     ).toBe('Cancelling costs nothing.');
+  });
+});
+
+describe('who pays a deposit, in words (S67, AC-X-125, AC-X-128)', () => {
+  it('offers everyone or new clients and no-shows, with what each means', () => {
+    expect(DEPOSIT_AUDIENCE_CHOICES.map((choice) => choice.value)).toEqual([
+      'everyone',
+      'new_and_no_show',
+    ]);
+    expect(audienceSentence('everyone')).toBe('Every client pays the deposit to book online.');
+    expect(audienceSentence('new_and_no_show')).toBe(
+      'Clients who’ve visited before book without one, unless they missed a visit in the last 12 months.',
+    );
+  });
+
+  it('says on the menu and the service sheet who pays', () => {
+    const terms = { kind: 'deposit' as const, amountCents: 1500, refundHours: 24 };
+    expect(termsLabel(terms, 'everyone')).toBe('$15 deposit');
+    expect(termsLabel(terms, 'new_and_no_show')).toBe('$15 deposit for new clients');
+    expect(termsLabel({ kind: 'card', refundHours: 24 }, 'new_and_no_show')).toBe(
+      'Card to book for new clients',
+    );
+    expect(termsLabel(null, 'new_and_no_show')).toBeNull();
+    expect(depositLabel({ kind: 'fixed', amountCents: 1500 }, 4500, 'new_and_no_show')).toBe(
+      'Deposit $15 · new clients',
+    );
+    expect(depositLabel({ kind: 'none' }, 4500, 'new_and_no_show')).toBeNull();
+    expect(audienceNote('everyone')).toBeNull();
+    expect(audienceNote('new_and_no_show')).toBe(
+      'Only new clients and clients who missed a visit pay it. Regulars don’t.',
+    );
+  });
+});
+
+describe('the team’s booking sheet (S67 top-up, AC-X-129)', () => {
+  const held = {
+    kind: 'deposit' as const,
+    amountCents: 1500,
+    refundEndsAt: '2026-11-24T21:00:00.000Z',
+    status: 'held' as const,
+    refundableNow: true,
+  };
+
+  it('says the deposit in one line, on the business’s clock', () => {
+    expect(teamDepositLine(held, TZ)).toBe(
+      '$15 deposit paid · refundable until Tue, Nov 24, 3:00 PM',
+    );
+    expect(teamDepositLine({ ...held, refundableNow: false }, TZ)).toBe(
+      '$15 deposit paid · no longer refundable',
+    );
+    expect(teamDepositLine({ ...held, status: 'kept', refundableNow: false }, TZ)).toBe(
+      '$15 deposit kept',
+    );
+    expect(teamDepositLine({ ...held, status: 'refunding', refundableNow: false }, TZ)).toBe(
+      '$15 deposit refund on its way',
+    );
+    expect(teamDepositLine({ ...held, status: 'refunded', refundableNow: false }, TZ)).toBe(
+      '$15 deposit refunded',
+    );
+    expect(teamDepositLine({ ...held, status: 'refund_failed', refundableNow: false }, TZ)).toBe(
+      '$15 refund failed · check Stripe',
+    );
+  });
+
+  it('says a card on file plainly, and nothing without a deposit', () => {
+    const card = {
+      kind: 'card' as const,
+      amountCents: 0,
+      refundEndsAt: null,
+      status: 'held' as const,
+      refundableNow: false,
+    };
+    expect(teamDepositLine(card, TZ)).toBe('Card on file');
+    expect(teamDepositLine({ ...card, status: 'kept' }, TZ)).toBe('Card on file');
+    expect(teamDepositLine(null, TZ)).toBeNull();
+  });
+});
+
+describe('the team’s cancel (S67 review, AC-X-118)', () => {
+  it('says a held deposit goes back, and nothing otherwise', () => {
+    const held = {
+      kind: 'deposit' as const,
+      amountCents: 1500,
+      refundEndsAt: '2026-11-24T21:00:00.000Z',
+      status: 'held' as const,
+      refundableNow: false,
+    };
+    expect(teamCancelDepositWords(held)).toBe('Their $15 deposit goes back to their card.');
+    expect(teamCancelDepositWords({ ...held, status: 'kept' })).toBeNull();
+    expect(teamCancelDepositWords({ ...held, kind: 'card', amountCents: 0 })).toBeNull();
+    expect(teamCancelDepositWords(null)).toBeNull();
   });
 });
