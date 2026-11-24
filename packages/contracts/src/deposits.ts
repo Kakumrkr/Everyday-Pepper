@@ -212,9 +212,16 @@ export const BookingPaymentStartInputSchema = z
   .strict();
 export type BookingPaymentStartInput = z.infer<typeof BookingPaymentStartInputSchema>;
 
+/** Stripe's publishable key (`pk_…`): public by design, it loads Stripe's field on the page. */
+export const StripePublishableKeySchema = z
+  .string()
+  .regex(/^pk_(test|live)_[A-Za-z0-9]{10,247}$/, 'Use the pk_… key Stripe shows');
+
 /** Its answer: what the hosted field needs, and the terms the page shows beside it. */
 export const BookingPaymentStartSchema = z.object({
   clientSecret: StripeClientSecretSchema,
+  /** The key Stripe's field loads with; `null` with the sandbox, which has no field (S66.2). */
+  publishableKey: StripePublishableKeySchema.nullable(),
   terms: DepositTermsSchema,
   /** The moment a client's cancel stops getting the deposit back, for the requested time. */
   refundEndsAt: z.iso.datetime(),
@@ -222,6 +229,25 @@ export const BookingPaymentStartSchema = z.object({
   provider: z.enum(['stripe', 'sandbox']),
 });
 export type BookingPaymentStart = z.infer<typeof BookingPaymentStartSchema>;
+
+/**
+ * A booking's deposit as its client sees it on the manage page (S66.2, AC-X-123): what was paid
+ * (or a card only kept), until when a cancel gets it back (the stored window, `null` for a card
+ * on file), and where it stands: `held` (paid or kept on file), `kept` (a late cancel),
+ * `refunding` (a refund on its way; a failed one is the business's to sort out, and it was told),
+ * `refunded`. `refundableNow` is the server's answer for this moment, so the page never decides
+ * by the browser's clock alone.
+ */
+export const PublicBookingDepositSchema = z
+  .object({
+    kind: BookingPaymentKindSchema,
+    amountCents: z.number().int().min(0),
+    refundEndsAt: z.iso.datetime().nullable(),
+    status: z.enum(['held', 'kept', 'refunding', 'refunded']),
+    refundableNow: z.boolean(),
+  })
+  .strict();
+export type PublicBookingDeposit = z.infer<typeof PublicBookingDepositSchema>;
 
 /** `POST /v1/dev/payments/intent` (AC-X-120): settles a sandbox payment as a card would. */
 export const SandboxIntentRequestSchema = z

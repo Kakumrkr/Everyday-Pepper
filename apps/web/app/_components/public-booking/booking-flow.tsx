@@ -2,6 +2,7 @@
 
 import {
   BookingConfirmResponseSchema,
+  BookingPaymentStartSchema,
   BookingRequestResponseSchema,
   DeviceForgetResponseSchema,
   PRIVACY_PATH,
@@ -14,6 +15,7 @@ import {
   WrongCodeSchema,
   type AvailableSlot,
   type BookingConfirmResponse,
+  type BookingPaymentStart,
   type PublicBusiness,
   type WaitlistConfirmResponse,
 } from '@pepper/contracts';
@@ -60,12 +62,17 @@ import {
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
 import { Notice } from '../form-parts';
 import { PhotoImage } from '../photo-image';
+import { termsLabel } from '../../../lib/deposits';
+import { DepositStep } from './deposit-step';
 import { SlotPicker } from './slot-picker';
 
-type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'done' | 'waitlisted';
-const STEPS: readonly Step[] = ['service', 'staff', 'time', 'details', 'verify'];
-// The step bar's names, by the steps above.
-const STEP_NAMES = ['Service', 'Who', 'Time', 'Your details', 'Your code'] as const;
+type Step = 'service' | 'staff' | 'time' | 'details' | 'verify' | 'pay' | 'done' | 'waitlisted';
+const STEPS: readonly Step[] = ['service', 'staff', 'time', 'details', 'verify', 'pay'];
+// The step bar's names, by the steps above; the last only for a service that asks for a
+// deposit or a card (S66.2).
+const STEP_NAMES = ['Service', 'Who', 'Time', 'Your details', 'Your code', 'Pay'] as const;
+// A card on file charges nothing now, so its step isn't called "Pay".
+const CARD_STEP_NAMES = ['Service', 'Who', 'Time', 'Your details', 'Your code', 'Card'] as const;
 
 /** What to say about a wrong or expired code. */
 function codeProblemText(problem: 'wrong_code' | 'expired', body: unknown): string {
@@ -165,6 +172,10 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientDetails, string>>>({});
   const [busy, setBusy] = useState(false);
   const [booked, setBooked] = useState<BookingConfirmResponse | null>(null);
+  // The request's payment (S66.2): what Stripe's field needs and the terms in words.
+  const [payment, setPayment] = useState<BookingPaymentStart | null>(null);
+  // Stripe said yes to it: a later confirm books with it, never asks for the card again.
+  const [paid, setPaid] = useState(false);
   // "Join the waitlist" (S38a): the day with nothing free; the steps after it join instead.
   const [waitlistDay, setWaitlistDay] = useState<{ date: string; label: string } | null>(null);
   const [waitlisted, setWaitlisted] = useState<WaitlistConfirmResponse | null>(null);
@@ -181,10 +192,14 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [visitId] = useState(newVisitId);
 
   useEffect(() => {
-    recordBookingStep(slug, visitId, step);
+    // The payment step isn't a funnel step of its own yet: it counts as the code's (S66.2).
+    if (step !== 'pay') recordBookingStep(slug, visitId, step);
   }, [slug, visitId, step]);
 
   const service = serviceOf(business, serviceId);
+  // A deposit or a card on file (S66.2): paid after the code, before the booking is made.
+  const needsPayment = waitlistDay === null && (service?.deposit ?? null) !== null;
+  const steps = needsPayment ? STEPS : STEPS.slice(0, -1);
   const staffNames = useMemo(
     () => new Map<string, string>(business.staff.map((member) => [member.id, member.displayName])),
     [business.staff],
@@ -231,6 +246,8 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
         return;
       }
       setRequestId(parsed.data.requestId);
+      setPayment(null);
+      setPaid(false);
       setCode('');
       setAlternatives(null);
       // A remembered browser: booked already, no code to type (S47).
@@ -340,10 +357,49 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
         return;
       case 'taken':
         setAlternatives(alternativesOf(answer) ?? []);
+        // After paying, the nearest times are offered where the code was: the same payment
+        // books one of them (AC-X-115).
+        if (step === 'pay') go('verify');
         return;
       case 'other':
         setError(answer.message);
     }
+  }
+
+  /**
+   * A deposit service (S66.2, AC-X-122): the code proves the address, then the payment is made
+   * (asking again answers the same one) and the page shows its terms and Stripe's field.
+   */
+  async function startPayment(): Promise<void> {
+    if (requestId === null) return;
+    setBusy(true);
+    setError(null);
+    const answer = await sendJson(
+      'POST',
+      publicApiPath(slug, `/booking-requests/${requestId}/payment`),
+      { code: code.trim() },
+    );
+    setBusy(false);
+    if (answer.ok) {
+      const parsed = BookingPaymentStartSchema.safeParse(answer.data);
+      if (!parsed.success) {
+        setError('Something went wrong. Try again.');
+        return;
+      }
+      setPayment(parsed.data);
+      go('pay');
+      return;
+    }
+    const problem = confirmProblem(answer.status, answer.body);
+    if (problem === 'wrong_code' || problem === 'expired') {
+      setError(codeProblemText(problem, answer.body));
+      return;
+    }
+    if (answer.status === 503) {
+      setError(`${business.name} can’t take deposits online right now. Try again later.`);
+      return;
+    }
+    setError(answer.message);
   }
 
   async function onVerify(event: SubmitEvent<HTMLFormElement>): Promise<void> {
@@ -353,10 +409,13 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       return;
     }
     if (waitlistDay !== null) await joinWaitlist();
+    // Once the card went through (a taken time sent the client back here), the same payment
+    // books: starting it again would show Stripe's field for an intent already authorized.
+    else if (needsPayment && !paid) await startPayment();
     else await confirm();
   }
 
-  const index = STEPS.indexOf(step);
+  const index = steps.indexOf(step);
   const picked: { step: Step; label: string }[] = [];
   if (service !== undefined && index > 0) {
     const price = priceLabel(service);
@@ -396,7 +455,15 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
 
   return (
     <div className="flex flex-col gap-5">
-      {index >= 0 ? <StepBar steps={STEP_NAMES} current={index} /> : null}
+      {index >= 0 ? (
+        <StepBar
+          steps={(service?.deposit?.kind === 'card' ? CARD_STEP_NAMES : STEP_NAMES).slice(
+            0,
+            steps.length,
+          )}
+          current={index}
+        />
+      ) : null}
       {picked.length > 0 && step !== 'done' ? (
         <List label="Your choices" className="rounded-lg bg-surface px-4">
           {picked.map((choice) => (
@@ -436,7 +503,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                     <ChoiceRow
                       key={item.id}
                       title={item.name}
-                      meta={durationLabel(item.durationMinutes)}
+                      meta={[durationLabel(item.durationMinutes), termsLabel(item.deposit)]
+                        .filter(Boolean)
+                        .join(' · ')}
                       trailing={priceLabel(item)}
                       onSelect={() => {
                         setServiceId(item.id);
@@ -662,9 +731,11 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                   <Button type="submit" form={formId} busy={busy}>
                     {busy
                       ? 'Confirming…'
-                      : waitlistDay === null
-                        ? 'Confirm booking'
-                        : 'Join the waitlist'}
+                      : waitlistDay !== null
+                        ? 'Join the waitlist'
+                        : needsPayment
+                          ? 'Continue'
+                          : 'Confirm booking'}
                   </Button>
                 }
               />
@@ -735,6 +806,21 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
         </>
       ) : null}
 
+      {step === 'pay' && payment !== null ? (
+        <>
+          {heading('Almost booked')}
+          <DepositStep
+            start={payment}
+            timeZone={timeZone}
+            busy={busy}
+            onPaid={() => {
+              setPaid(true);
+              return confirm();
+            }}
+          />
+          {error === null ? null : <Notice tone="error">{error}</Notice>}
+        </>
+      ) : null}
       {step === 'done' && booked !== null && details !== null ? (
         <>
           <Done />

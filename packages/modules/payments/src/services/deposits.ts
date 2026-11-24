@@ -9,6 +9,7 @@ import {
   type BookingPaymentStatus,
   type DepositTerms,
   type OutboxPayment,
+  type PublicBookingDeposit,
   type TenantId,
 } from '@pepper/contracts';
 import { queuePayment, queuePushToMembers } from '@pepper/core';
@@ -93,14 +94,18 @@ export async function chargeableAccountIn(
  * what Stripe's field needs and the terms; no card data passes through Pepper.
  */
 export async function startBookingPayment(
-  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'>,
+  deps: Pick<PaymentsDeps, 'db' | 'provider' | 'clock'> & {
+    /** Stripe's publishable key, for its field on the page; `null` with the sandbox (S66.2). */
+    publishableKey?: string | null;
+  },
   request: VerifiedPaymentRequest,
 ): Promise<BookingPaymentStart> {
+  const key = deps.publishableKey ?? null;
   const { tenantId, requestId, terms } = request;
   const existing = await withTenant(deps.db, tenantId, (tx) =>
     findBookingPaymentByRequest(tx, requestId),
   );
-  if (existing !== undefined) return answer(deps.provider, existing, request);
+  if (existing !== undefined) return answer(deps.provider, key, existing, request);
 
   const accountId = await withTenant(deps.db, tenantId, (tx) =>
     chargeableAccountIn(tx, deps.provider),
@@ -148,11 +153,12 @@ export async function startBookingPayment(
     return row;
   });
   if (stored === undefined) throw new Error('booking payment vanished while starting');
-  return answer(deps.provider, stored, request);
+  return answer(deps.provider, key, stored, request);
 }
 
 async function answer(
   provider: PaymentsProvider,
+  publishableKey: string | null,
   row: BookingPaymentRow,
   request: VerifiedPaymentRequest,
 ): Promise<BookingPaymentStart> {
@@ -172,6 +178,7 @@ async function answer(
       : { kind: 'card', refundHours: row.refundHours };
   return BookingPaymentStartSchema.parse({
     clientSecret: intent.client_secret,
+    publishableKey: provider.provider === 'stripe' ? publishableKey : null,
     terms,
     refundEndsAt: depositRefundEndsAt(request.startsAt, row.refundHours).toISOString(),
     provider: provider.provider,
@@ -239,6 +246,51 @@ export async function attachBookingPaymentIn(
 
 /** Who cancelled: the client from their link, or the business (a member, or Pepper on an OK). */
 export type CancelledBy = 'client' | 'business';
+
+/** What the client is told about each stored status (S66.2, AC-X-123); absent: nothing to say. */
+const CLIENT_STATUS: Partial<Record<BookingPaymentStatus, PublicBookingDeposit['status']>> = {
+  booked: 'held',
+  captured: 'held',
+  card_saved: 'held',
+  kept: 'kept',
+  refund_pending: 'refunding',
+  // A refund Stripe refused for good is the business's to sort out (its owners were told); the
+  // client isn't told their deposit is kept when it was meant to come back.
+  refund_failed: 'refunding',
+  refunded: 'refunded',
+};
+
+/**
+ * A booking's deposit for its client's manage page (S66.2, AC-X-123), in the booking's read:
+ * the stored window decides `refundableNow`, never the page. `null` with no payment, or one that
+ * never took anything (let go, or its capture refused).
+ */
+export async function bookingDepositIn(
+  tx: TenantTx,
+  input: { bookingId: string; startsAt: Date; now: Date },
+): Promise<PublicBookingDeposit | null> {
+  const row = await findBookingPaymentByBooking(tx, input.bookingId);
+  if (row === undefined) return null;
+  const status = CLIENT_STATUS[BookingPaymentStatusSchema.parse(row.status)];
+  if (status === undefined) return null;
+  if (row.kind === 'card') {
+    return {
+      kind: 'card',
+      amountCents: 0,
+      refundEndsAt: null,
+      status,
+      refundableNow: false,
+    };
+  }
+  const endsAt = row.refundEndsAt ?? depositRefundEndsAt(input.startsAt, row.refundHours);
+  return {
+    kind: 'deposit',
+    amountCents: row.amountCents,
+    refundEndsAt: endsAt.toISOString(),
+    status,
+    refundableNow: status === 'held' && input.now.getTime() <= endsAt.getTime(),
+  };
+}
 
 /**
  * In a move's transaction (AC-X-117): the refund's end follows the booking's new time when the

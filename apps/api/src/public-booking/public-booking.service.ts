@@ -232,7 +232,7 @@ export class PublicBookingService {
   }
 
   managed(slug: TenantSlug, token: ManageToken): Promise<PublicBooking> {
-    return getManagedBooking(this.db, slug, token);
+    return getManagedBooking(this.db, slug, token, { deposits: this.deposits });
   }
 
   async reschedule(slug: TenantSlug, token: ManageToken, startsAt: string): Promise<PublicBooking> {

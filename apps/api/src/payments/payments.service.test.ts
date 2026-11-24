@@ -55,6 +55,7 @@ describe('PaymentsService', () => {
       provider: 'stripe',
       secretKey: 'sk_test_51NvServiceUnitTest00000',
       webhookSecret: SECRET,
+      publishableKey: 'pk_test_51NvServiceUnitTest00000',
       livemode: false,
     });
     const body = Buffer.from('{"id":"evt_1","object":"event"}');
@@ -75,6 +76,7 @@ describe('PaymentsService', () => {
       provider: 'stripe',
       secretKey: 'sk_test_51NvServiceUnitTest00000',
       webhookSecret: SECRET,
+      publishableKey: 'pk_test_51NvServiceUnitTest00000',
       livemode: false,
     });
     for (const text of ['not json', '{"id":"evt_1","object":"customer"}', 'null']) {
@@ -100,6 +102,7 @@ describe('PaymentsService', () => {
       provider: 'stripe',
       secretKey: 'sk_test_51NvServiceUnitTest00000',
       webhookSecret: SECRET,
+      publishableKey: 'pk_test_51NvServiceUnitTest00000',
       livemode: false,
     });
     await expect(stripe.sandboxState(tenant, 'ready')).rejects.toBeInstanceOf(NotFoundException);
@@ -110,6 +113,7 @@ describe('PaymentsService', () => {
     provider: 'stripe',
     secretKey: 'sk_test_51NvServiceUnitTest00000',
     webhookSecret: SECRET,
+    publishableKey: 'pk_test_51NvServiceUnitTest00000',
     livemode: false,
   } as const;
   const paying = {
@@ -137,6 +141,7 @@ describe('PaymentsService', () => {
     expect(Object.keys(hooks ?? {}).sort()).toEqual([
       'attach',
       'cancelled',
+      'describe',
       'open',
       'ready',
       'rescheduled',

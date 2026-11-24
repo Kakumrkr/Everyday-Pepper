@@ -1,11 +1,12 @@
 'use client';
 
 import { BusinessSchema, CANCELLATION_POLICY_MAX, type BusinessProfile } from '@pepper/contracts';
-import { brandTokens, Button, FOCUS_RING, Input, Textarea } from '@pepper/ui';
+import { brandTokens, Button, FOCUS_RING, Input, Select, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { profileFields, profileFromFields, type ProfileFields } from '../../../lib/booking-profile';
 import { sendJson } from '../../../lib/client-api';
+import { refundChoices, refundHoursLabel, refundWindowSentence } from '../../../lib/deposits';
 import { HELP_LINKS } from '../../../lib/help';
 import { HelpLink } from '../help/help-link';
 import { Notice } from '../form-parts';
@@ -14,18 +15,22 @@ import { Notice } from '../form-parts';
  * The business's public booking page (S17): its link, and for owners and managers its color
  * (PCR-001). Any color works: the page adjusts it until its text is readable (WCAG AA). On the
  * kit since S42.2: a quiet section, since nothing here waits on a decision. Since S47 also the
- * phone, address and cancellation policy clients see there (AC-W8-7).
+ * phone, address and cancellation policy clients see there (AC-W8-7), and since S66.2 the
+ * deposit refund window (AC-X-112), where the deployment offers payments.
  */
 export function BookingPageCard({
   slug,
   brandColor,
   profile,
   manages,
+  refundHours = null,
 }: {
   slug: string;
   brandColor: string | null;
   profile: BusinessProfile;
   manages: boolean;
+  /** The deposit refund window (S66.2); `null` hides it (payments off here). */
+  refundHours?: number | null;
 }) {
   const router = useRouter();
   const [color, setColor] = useState(brandColor ?? brandTokens(null).light.biz);
@@ -93,6 +98,7 @@ export function BookingPageCard({
         ) : null}
         {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
         {manages ? <ProfileForm profile={profile} /> : null}
+        {manages && refundHours !== null ? <RefundWindowForm hours={refundHours} /> : null}
       </div>
     </section>
   );
@@ -185,6 +191,73 @@ function ProfileForm({ profile }: { profile: BusinessProfile }) {
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" variant="secondary" size="sm" busy={busy}>
           Save details
+        </Button>
+      </div>
+      {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+    </form>
+  );
+}
+
+/**
+ * The deposit refund window (AC-X-112): how long before the start a client may cancel and get
+ * the deposit back. Saved on its own; a booking keeps the window it was made with (ADR-0068).
+ */
+function RefundWindowForm({ hours }: { hours: number }) {
+  const router = useRouter();
+  const [value, setValue] = useState(hours);
+  const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const headingId = useId();
+
+  async function save(): Promise<void> {
+    setNotice(null);
+    setBusy(true);
+    const answer = await sendJson('PUT', '/v1/tenant/booking-page', {
+      depositRefundHours: value,
+    });
+    setBusy(false);
+    const parsed = answer.ok ? BusinessSchema.safeParse(answer.data) : null;
+    if (parsed?.success !== true) {
+      setNotice({ tone: 'error', text: answer.ok ? 'Something went wrong.' : answer.message });
+      return;
+    }
+    setValue(parsed.data.depositRefundHours);
+    setNotice({ tone: 'ok', text: 'Saved. New bookings get this window.' });
+    router.refresh();
+  }
+
+  return (
+    <form
+      aria-labelledby={headingId}
+      noValidate
+      className="flex flex-col gap-4 border-t border-line pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void save();
+      }}
+    >
+      <div className="flex flex-col gap-1">
+        <h3 id={headingId} className="m-0 type-subheading text-ink">
+          Deposit refunds
+        </h3>
+        <p className="m-0 type-body text-ink-2">For services that take a deposit.</p>
+      </div>
+      <Select
+        label="Free cancellation until"
+        hint={refundWindowSentence(value)}
+        name="depositRefundHours"
+        value={String(value)}
+        options={refundChoices(hours).map((choice) => ({
+          value: String(choice),
+          label: choice === 0 ? refundHoursLabel(0) : `${refundHoursLabel(choice)} before`,
+        }))}
+        onChange={(event) => {
+          setValue(Number(event.target.value));
+        }}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" variant="secondary" size="sm" busy={busy}>
+          Save refund window
         </Button>
       </div>
       {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}

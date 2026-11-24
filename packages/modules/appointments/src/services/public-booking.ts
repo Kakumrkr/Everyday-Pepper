@@ -37,6 +37,7 @@ import {
   type BookingRequestInput,
   type DepositTerms,
   type DeviceToken,
+  type PublicBookingDeposit,
   type ManageToken,
   type OfferToken,
   type PublicBooking,
@@ -199,6 +200,11 @@ export interface PublicDeposits {
     tx: TenantTx,
     input: { bookingId: string; startsAt: Date; by: 'client' | 'business'; now: Date },
   ): Promise<void>;
+  /** In the booking's read: its deposit as the client is told about it (S66.2, AC-X-123). */
+  describe(
+    tx: TenantTx,
+    input: { bookingId: string; startsAt: Date; now: Date },
+  ): Promise<PublicBookingDeposit | null>;
 }
 
 /** A service's terms at the business's window (AC-X-113); `null`: nothing asked. */
@@ -596,7 +602,7 @@ export async function confirmBookingRequest(
           { actor: { kind: 'system' } },
         );
       }
-      const booking = await toPublicBooking(tx, row, now);
+      const booking = await toPublicBooking(tx, row, now, options.deposits);
       const email: BookingEmailDetails = {
         businessName: tenant.name,
         slug: tenant.slug,
@@ -805,7 +811,7 @@ export async function getManagedBooking(
     async (tx) => {
       const row = await findBookingByManageTokenHash(tx, hash);
       if (row === undefined) throw new BookingNotFoundError();
-      return toPublicBooking(tx, row, now);
+      return toPublicBooking(tx, row, now, options.deposits);
     },
     { readOnly: true, whileClosing: true },
   );
@@ -838,7 +844,7 @@ export async function cancelManagedBooking(
       await keepReminderInStep(tx, cancelled, now);
       await requestInsights(tx);
       await requestWaitlistMatch(tx, row, now);
-      const result = await withEmail(tx, tenant, cancelled, now);
+      const result = await withEmail(tx, tenant, cancelled, now, options.deposits);
       await options.notify?.(tx, {
         kind: 'cancelled',
         email: result.email,
@@ -904,7 +910,7 @@ export async function rescheduleManagedBooking(
       await keepReminderInStep(tx, moved, now);
       await requestInsights(tx);
       await requestWaitlistMatch(tx, row, now);
-      const result = await withEmail(tx, tenant, moved, now);
+      const result = await withEmail(tx, tenant, moved, now, options.deposits);
       await options.notify?.(tx, {
         kind: 'rescheduled',
         email: result.email,
@@ -1122,7 +1128,12 @@ async function auditUpdate(tx: TenantTx, before: BookingRow, after: BookingRow):
 }
 
 /** A booking as its client sees it. */
-async function toPublicBooking(tx: TenantTx, row: BookingRow, now: number): Promise<PublicBooking> {
+async function toPublicBooking(
+  tx: TenantTx,
+  row: BookingRow,
+  now: number,
+  deposits: PublicDeposits | undefined,
+): Promise<PublicBooking> {
   const service = await findService(tx, ServiceIdSchema.parse(row.serviceId));
   const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(row.staffMemberId));
   // Bookings reference both with foreign keys, and neither is ever deleted.
@@ -1134,6 +1145,12 @@ async function toPublicBooking(tx: TenantTx, row: BookingRow, now: number): Prom
     service: { id: service.id, name: service.name },
     staff: { id: staff.id, displayName: staff.displayName },
     changeable: isChangeable(row, now),
+    deposit:
+      (await deposits?.describe(tx, {
+        bookingId: row.id,
+        startsAt: row.startsAt,
+        now: new Date(now),
+      })) ?? null,
   });
 }
 
@@ -1142,9 +1159,10 @@ async function withEmail(
   tenant: Tenant,
   row: BookingRow,
   now: number,
+  deposits: PublicDeposits | undefined,
 ): Promise<{ booking: PublicBooking; email: BookingEmailDetails }> {
   return {
-    booking: await toPublicBooking(tx, row, now),
+    booking: await toPublicBooking(tx, row, now, deposits),
     // The address the link was sent to, or the one the business has on file now.
     email: await emailDetailsOf(tx, tenant, row),
   };
@@ -1304,7 +1322,7 @@ export async function claimWaitlistOffer(
         after: bookingAuditValues(booked),
       },
     });
-    const result = await withEmail(tx, tenant, booked, now);
+    const result = await withEmail(tx, tenant, booked, now, options.deposits);
     await options.notify?.(tx, {
       kind: 'confirmed',
       email: result.email,

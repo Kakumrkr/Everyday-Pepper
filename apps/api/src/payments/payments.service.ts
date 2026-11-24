@@ -16,6 +16,7 @@ import {
   attachBookingPaymentIn,
   chargeableAccountIn,
   requireAuthorizedPayment,
+  bookingDepositIn,
   moveDepositWindowIn,
   settleDepositOnCancelIn,
   startBookingPayment,
@@ -71,6 +72,8 @@ interface Bound {
   deps: PaymentsDeps;
   /** The webhook endpoint's signing secret; the sandbox's is made at start-up. */
   webhookSecret: string;
+  /** Stripe's publishable key for its card field (S66.2); `null` with the sandbox. */
+  publishableKey: string | null;
   sandbox: SandboxPaymentsProvider | null;
 }
 
@@ -167,6 +170,7 @@ export class PaymentsService {
         await settleDepositOnCancelIn(tx, { ...input, outboxKey: deps.outboxKey });
       },
       rescheduled: (tx, input) => moveDepositWindowIn(tx, { ...input, by: 'client' }),
+      describe: (tx, input) => bookingDepositIn(tx, input),
     };
   }
 
@@ -198,7 +202,8 @@ export class PaymentsService {
 
   /** `POST …/booking-requests/:id/payment` (AC-X-114), once the code was checked. */
   startPayment(request: VerifiedPaymentRequest): Promise<BookingPaymentStart> {
-    return startBookingPayment(this.on().deps, request);
+    const bound = this.on();
+    return startBookingPayment({ ...bound.deps, publishableKey: bound.publishableKey }, request);
   }
 
   /** The sandbox's card (AC-X-120): settles a payment by its client secret; 404 elsewhere. */
@@ -228,6 +233,7 @@ function bind(db: Database, redis: Redis, options: PaymentsOptions): Bound | nul
   let provider: PaymentsProvider;
   let sandbox: SandboxPaymentsProvider | null = null;
   let webhookSecret: string;
+  let publishableKey: string | null = null;
   if (config.provider === 'sandbox') {
     sandbox = new SandboxPaymentsProvider({
       store: new RedisSandboxAccountStore(redis),
@@ -240,10 +246,12 @@ function bind(db: Database, redis: Redis, options: PaymentsOptions): Bound | nul
   } else {
     provider = new StripePaymentsProvider({ secretKey: config.secretKey });
     webhookSecret = config.webhookSecret;
+    publishableKey = config.publishableKey;
   }
   return {
     deps: { db, provider, clock, outboxKey: options.outboxKey, baseUrl: options.baseUrl },
     webhookSecret,
+    publishableKey,
     sandbox,
   };
 }

@@ -272,6 +272,10 @@ const StripeEnvSchema = z
     STRIPE_WEBHOOK_SECRET: z
       .string()
       .regex(/^whsec_[A-Za-z0-9+/=_-]{16,200}$/, 'Use the whsec_… secret Stripe shows'),
+    /** The publishable key (`pk_…`, S66.2): public, it loads Stripe's card field on the page. */
+    STRIPE_PUBLISHABLE_KEY: z
+      .string()
+      .regex(/^pk_(test|live)_[A-Za-z0-9]{10,247}$/, 'Use the pk_… key Stripe shows'),
     /**
      * `on` allows a live key (P1-5: once the business entity exists). Off by default, so a live
      * key pasted into a test deployment stops the process instead of moving real money.
@@ -286,11 +290,26 @@ const StripeEnvSchema = z
         message: 'A live key needs STRIPE_LIVE=on',
       });
     }
+    // Both keys from the same mode: a test field can't pay a live intent, nor the other way.
+    const liveSecret = /^(sk|rk)_live_/.test(env.STRIPE_SECRET_KEY);
+    if (env.STRIPE_PUBLISHABLE_KEY.startsWith('pk_live_') !== liveSecret) {
+      context.addIssue({
+        code: 'custom',
+        path: ['STRIPE_PUBLISHABLE_KEY'],
+        message: 'Use the publishable key of the same mode as the secret key',
+      });
+    }
   });
 
 export type PaymentsConfig =
   | { provider: 'sandbox' }
-  | { provider: 'stripe'; secretKey: string; webhookSecret: string; livemode: boolean };
+  | {
+      provider: 'stripe';
+      secretKey: string;
+      webhookSecret: string;
+      publishableKey: string;
+      livemode: boolean;
+    };
 
 /**
  * Reads the payments settings; `null` when payments are off. With Stripe, a missing or
@@ -310,6 +329,7 @@ export function loadPaymentsConfig(
     provider: 'stripe',
     secretKey: stripe.STRIPE_SECRET_KEY,
     webhookSecret: stripe.STRIPE_WEBHOOK_SECRET,
+    publishableKey: stripe.STRIPE_PUBLISHABLE_KEY,
     livemode: /^(sk|rk)_live_/.test(stripe.STRIPE_SECRET_KEY),
   };
 }

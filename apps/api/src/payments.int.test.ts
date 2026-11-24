@@ -161,6 +161,7 @@ beforeAll(async () => {
     PAYMENTS_PROVIDER: 'stripe',
     STRIPE_SECRET_KEY: KEY,
     STRIPE_WEBHOOK_SECRET: SECRET,
+    STRIPE_PUBLISHABLE_KEY: 'pk_test_51NvApiIntegrationKey0000',
   });
   sandboxApp = await startApp({ PAYMENTS_PROVIDER: 'sandbox' });
   stripeServer = stripeApp.getHttpServer() as Server;

@@ -1095,10 +1095,11 @@ describe('waitlist', () => {
 
     const actions = (await auditOf(b.tenantId)).map((e) => e.action);
     expect(actions.slice(0, 2)).toEqual(['waitlist_entry.updated', 'waitlist_entry.created']);
-    const waitlistEntries = (await auditOf(b.tenantId)).filter((e) =>
-      e.action.startsWith('waitlist'),
-    );
-    expect(JSON.stringify(waitlistEntries)).not.toMatch(/09:00|12:00|2026-11-07"|Maria/);
+    // Only what was audited: the entry's own `at` is the real clock and can read "…T02:09:00".
+    const waitlistValues = (await auditOf(b.tenantId))
+      .filter((e) => e.action.startsWith('waitlist'))
+      .map((e) => ({ before: e.before, after: e.after }));
+    expect(JSON.stringify(waitlistValues)).not.toMatch(/09:00|12:00|2026-11-07"|Maria/);
   });
 
   it('an entry whose windows have all passed is refused; one that has since passed reads as expired', async () => {

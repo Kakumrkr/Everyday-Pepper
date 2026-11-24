@@ -7,6 +7,7 @@ import {
   BookingIdSchema,
   BookingPaymentStartSchema,
   BookingRequestResponseSchema,
+  PublicBookingResponseSchema,
   PublicBusinessSchema,
   TenantIdSchema,
   UserIdSchema,
@@ -344,10 +345,34 @@ describe('deposits on the booking page (S66)', () => {
     if (slot === undefined) throw new Error('no free time');
     const { client, booked, bookingId } = await bookWithDeposit(slot);
     expect(await paymentStatus(bookingId)).toBe('captured');
-    await client.post('/booking/cancel', { token: booked.manageToken }).expect(200);
+    // AC-X-123: the manage page is told, before the cancel, that it gets the $15 back.
+    const refundEndsAt = new Date(Date.parse(slot.startsAt) - DAY).toISOString();
+    expect(booked.booking.deposit).toEqual({
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt,
+      status: 'held',
+      refundableNow: true,
+    });
+    const looked = await client.post('/booking/lookup', { token: booked.manageToken }).expect(200);
+    expect(PublicBookingResponseSchema.parse(looked.body).booking.deposit).toMatchObject({
+      status: 'held',
+      refundableNow: true,
+    });
+    const cancelled = await client
+      .post('/booking/cancel', { token: booked.manageToken })
+      .expect(200);
+    expect(PublicBookingResponseSchema.parse(cancelled.body).booking.deposit).toMatchObject({
+      status: 'refunding',
+      refundableNow: false,
+    });
     expect(await paymentStatus(bookingId)).toBe('refund_pending');
     await deliverQueued();
     expect(await paymentStatus(bookingId)).toBe('refunded');
+    const after = await client.post('/booking/lookup', { token: booked.manageToken }).expect(200);
+    expect(PublicBookingResponseSchema.parse(after.body).booking.deposit).toMatchObject({
+      status: 'refunded',
+    });
   });
 
   it('AC-X-117: a cancel after the window keeps the deposit', async () => {
@@ -356,7 +381,16 @@ describe('deposits on the booking page (S66)', () => {
     if (slot === undefined) throw new Error('no free time');
     const { client, payment, booked, bookingId } = await bookWithDeposit(slot);
     expect(payment.terms.refundHours).toBe(168);
-    await client.post('/booking/cancel', { token: booked.manageToken }).expect(200);
+    expect(payment.publishableKey).toBeNull();
+    // AC-X-123: the window has passed, so the page says the deposit is kept, before and after.
+    expect(booked.booking.deposit).toMatchObject({ status: 'held', refundableNow: false });
+    const cancelled = await client
+      .post('/booking/cancel', { token: booked.manageToken })
+      .expect(200);
+    expect(PublicBookingResponseSchema.parse(cancelled.body).booking.deposit).toMatchObject({
+      status: 'kept',
+      amountCents: 1500,
+    });
     await deliverQueued();
     expect(await paymentStatus(bookingId)).toBe('kept');
     await updateBookingPage(db, { context: owner }, { depositRefundHours: 24 });

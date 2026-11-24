@@ -36,6 +36,7 @@ import { MemorySandboxAccountStore, SandboxPaymentsProvider } from '../sandbox.j
 import { startPaymentOnboarding, syncOwnPaymentAccount, type PaymentsDeps } from './accounts.js';
 import {
   attachBookingPaymentIn,
+  bookingDepositIn,
   requireAuthorizedPayment,
   runPaymentJob,
   moveDepositWindowIn,
@@ -351,6 +352,12 @@ describe('cancelling (AC-X-117, AC-X-118)', () => {
     );
   }
 
+  function depositSeen(business: Awaited<ReturnType<typeof newBusiness>>, bookingId: string) {
+    return withTenant(db, business.tenantId, (tx) =>
+      bookingDepositIn(tx, { bookingId, startsAt: VISIT, now: business.clock.now() }),
+    );
+  }
+
   async function runAll(business: Awaited<ReturnType<typeof newBusiness>>) {
     for (const step of await queued(business.tenantId)) {
       await runPaymentJob(business.deps, business.tenantId, step);
@@ -433,6 +440,35 @@ describe('cancelling (AC-X-117, AC-X-118)', () => {
       return id;
     });
     expect(await cancel(business, bookingId, 'business')).toBeNull();
+    // S66.2 (AC-X-123): the manage page says the card is only kept, with no window to keep.
+    expect(await depositSeen(business, bookingId)).toEqual({
+      kind: 'card',
+      amountCents: 0,
+      refundEndsAt: null,
+      status: 'held',
+      refundableNow: false,
+    });
+  });
+
+  it('tells the manage page where the deposit stands, by the stored window (S66.2, AC-X-123)', async () => {
+    const business = await newBusiness();
+    const { bookingId } = await paidAndBooked(business);
+    await runAll(business);
+    business.clock.set(new Date('2099-03-09T17:00:00Z'));
+    expect(await depositSeen(business, bookingId)).toEqual({
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt: '2099-03-09T17:00:00.000Z',
+      status: 'held',
+      refundableNow: true,
+    });
+    business.clock.set(new Date('2099-03-09T17:00:01Z'));
+    expect(await depositSeen(business, bookingId)).toMatchObject({ refundableNow: false });
+    expect(await cancel(business, bookingId, 'client')).toBe('kept');
+    expect(await depositSeen(business, bookingId)).toMatchObject({
+      status: 'kept',
+      refundableNow: false,
+    });
   });
 
   it('retries a passing Stripe failure (the outbox retries; nothing moves)', async () => {

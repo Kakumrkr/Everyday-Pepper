@@ -134,6 +134,7 @@ describe('PaymentsModule', () => {
         provider: 'stripe' as const,
         secretKey: 'sk_test_x',
         webhookSecret: 'whsec_x',
+        publishableKey: 'pk_test_51NvControllerTest0000',
         livemode: false,
       },
     ]) {
