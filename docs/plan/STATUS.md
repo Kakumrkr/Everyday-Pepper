@@ -1,13 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-24 · **Plan version:** 0.40 ([PCR-014](changes/PCR-014.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S67** (S66.2 done)
+**Last updated:** 2026-11-24 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S67** (S66.2 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S67 Smart deposits** (brief approved 2026-11-24, user: "go with the recommended options": split [PCR-015](changes/PCR-015.md), one setting per business, fixed definitions). Branch `claude/nice-sagan-g64mbg`. AC-X-125…129.
+- [x] T1 docs: ACs, traceability, PCR-015, CHANGELOG 0.41, playbook/STATUS rows, ADR-0068 "S67" (tier 0)
+- [ ] T2 contracts: `DepositAudienceSchema`, `ClientStanding`, `depositApplies` + fixtures (tier 1)
+- [ ] T3 db: migration 0082 `tenants.deposit_audience`; standing by email; settings save (tier 1–2)
+- [ ] T4 appointments: standing after the code, again at confirm; remembered regular (tier 1–2)
+- [ ] T5 api: settings field, `GET /v1/bookings/:id/deposit` (owners, managers) (tier 1–2)
+- [ ] T6 web: "Who pays a deposit" in settings, menu words; e2e regular journey (tier 1–2 + spec)
+- [ ] T7 top-up: the team sheet's deposit line; screenshots (tier 1–2 + spec)
+Next: T2.
 
 ## Last sessions
 - **S66.2 Phase 15 · Deposits on screen (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PR #104](https://github.com/Kakumrkr/Everyday-Pepper/pull/104)). Full entry in [session-log.md](session-log.md).
@@ -108,7 +116,8 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S67 | Smart deposits + cancellation-policy builder | 15 | Rule fixtures; policy in every channel |
+| S67 | Smart deposits (regulars exempt) + the team sheet's deposit line | 15 | Rule fixtures; the regular's journey |
+| S67.2 | Cancellation-policy builder: on the booking page and in every email | 15 | Policy in every channel |
 | S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
