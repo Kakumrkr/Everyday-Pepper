@@ -1,27 +1,50 @@
 'use client';
 
 import { ServiceSchema, type Service } from '@pepper/contracts';
-import { Button, buttonStyle, Checkbox, Icon, Input, Sheet, SheetFooter } from '@pepper/ui';
+import {
+  Button,
+  buttonStyle,
+  Checkbox,
+  Icon,
+  Input,
+  Segmented,
+  Sheet,
+  SheetFooter,
+} from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
+import {
+  DEPOSIT_CHOICES,
+  depositFields,
+  depositRuleFrom,
+  percentPreview,
+  type DepositFields,
+} from '../../../lib/deposits';
 import { centsFromText, textFromCents } from '../../../lib/setup';
 import { Notice } from '../form-parts';
 
 /**
  * Adds a service to the menu (`POST /v1/services`) or edits one (`PUT /v1/services/:id`, all
  * fields). Owners and managers only; the api checks it again. On the kit (S42.2): its fields,
- * and Save in the sheet's footer within thumb reach (D3).
+ * and Save in the sheet's footer within thumb reach (D3). Since S66.2 its deposit (AC-X-121).
  */
 export function ServiceEditor({
   service,
   categories,
   open: shown,
   onOpenChange,
+  deposits = 'hidden',
 }: {
   /** The service to edit; none adds a new one. */
   service?: Service;
+  /**
+   * Whether the deposit field shows (S66.2): `open` when the business can take card payments,
+   * `waiting` while Stripe isn't ready (the field shows and says so), `hidden` with payments off
+   * in this deployment (the rule is left as it is).
+   */
+  deposits?: DepositsState;
   /** Categories in use, offered as suggestions. */
   categories: string[];
   /** Opened from elsewhere too (the empty menu's "Add your first service"). */
@@ -61,6 +84,7 @@ export function ServiceEditor({
         key={key}
         service={service}
         categories={categories}
+        deposits={deposits}
         onDone={() => {
           setOpen(false);
         }}
@@ -69,18 +93,25 @@ export function ServiceEditor({
   );
 }
 
+export type DepositsState = 'open' | 'waiting' | 'hidden';
+
 function ServiceForm({
   service,
   categories,
+  deposits,
   onDone,
 }: {
   service: Service | undefined;
   categories: string[];
+  deposits: DepositsState;
   onDone: () => void;
 }) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [priceText, setPriceText] = useState(textFromCents(service?.priceFromCents ?? null));
+  const [deposit, setDeposit] = useState<DepositFields>(() => depositFields(service?.deposit));
+  const [depositError, setDepositError] = useState<string | null>(null);
   const formId = useId();
 
   async function submit(event: SubmitEvent<HTMLFormElement>) {
@@ -92,6 +123,13 @@ function ServiceForm({
       setError('Enter prices as amounts, e.g. 65 or 65.50.');
       return;
     }
+    const checked = deposits === 'hidden' ? null : depositRuleFrom(deposit, priceFrom);
+    if (checked !== null && !checked.ok) {
+      setDepositError(checked.message);
+      setError(null);
+      return;
+    }
+    setDepositError(null);
     const category = formText(form, 'category').trim();
     const body = {
       name: formText(form, 'name'),
@@ -102,6 +140,8 @@ function ServiceForm({
       priceFromCents: priceFrom,
       priceToCents: priceTo,
       active: (form.elements.namedItem('active') as HTMLInputElement | null)?.checked ?? true,
+      // Left out while payments are off here: the api keeps the stored rule.
+      ...(checked === null ? {} : { deposit: checked.rule }),
     };
     setBusy(true);
     const answer =
@@ -150,7 +190,10 @@ function ServiceForm({
           name="priceFrom"
           inputMode="decimal"
           placeholder="None"
-          defaultValue={textFromCents(service?.priceFromCents ?? null)}
+          value={priceText}
+          onChange={(event) => {
+            setPriceText(event.target.value);
+          }}
         />
         <Input
           label="Up to ($)"
@@ -183,6 +226,21 @@ function ServiceForm({
           defaultValue={service?.bufferAfterMinutes ?? 0}
         />
       </div>
+      {deposits === 'hidden' ? null : (
+        <DepositField
+          fields={deposit}
+          onChange={(next) => {
+            setDeposit(next);
+            setDepositError(null);
+          }}
+          priceFromCents={(() => {
+            const cents = centsFromText(priceText);
+            return cents === 'invalid' ? null : cents;
+          })()}
+          waiting={deposits === 'waiting'}
+          error={depositError}
+        />
+      )}
       <Checkbox
         name="active"
         label="Clients can book it"
@@ -195,5 +253,88 @@ function ServiceForm({
         </Button>
       </SheetFooter>
     </form>
+  );
+}
+
+/**
+ * What booking the service online asks for (AC-X-121): nothing, an amount, a percent of the
+ * price (with what it comes to), or a card on file. The refund window is the business's, in
+ * booking page settings.
+ */
+function DepositField({
+  fields,
+  onChange,
+  priceFromCents,
+  waiting,
+  error,
+}: {
+  fields: DepositFields;
+  onChange: (fields: DepositFields) => void;
+  priceFromCents: number | null;
+  waiting: boolean;
+  error: string | null;
+}) {
+  const headingId = useId();
+  const preview = fields.kind === 'percent' ? percentPreview(fields.percent, priceFromCents) : null;
+  return (
+    <fieldset aria-labelledby={headingId} className="m-0 flex flex-col gap-3 border-0 p-0">
+      <legend id={headingId} className="p-0 type-label text-ink">
+        Deposit when booked online
+      </legend>
+      <Segmented
+        label="Deposit"
+        options={DEPOSIT_CHOICES}
+        value={fields.kind}
+        onValueChange={(kind) => {
+          const next = DEPOSIT_CHOICES.find((choice) => choice.value === kind)?.value;
+          if (next !== undefined) onChange({ ...fields, kind: next });
+        }}
+      />
+      {fields.kind === 'fixed' ? (
+        <Input
+          label="Deposit ($)"
+          name="depositAmount"
+          inputMode="decimal"
+          placeholder="15"
+          value={fields.amount}
+          error={error ?? undefined}
+          hint="Paid when booking. The rest is paid at the visit."
+          onChange={(event) => {
+            onChange({ ...fields, amount: event.target.value });
+          }}
+        />
+      ) : null}
+      {fields.kind === 'percent' ? (
+        <Input
+          label="Deposit (% of the price)"
+          name="depositPercent"
+          inputMode="numeric"
+          placeholder="20"
+          value={fields.percent}
+          error={error ?? undefined}
+          hint={preview ?? 'A percent of the “Price from” above.'}
+          onChange={(event) => {
+            onChange({ ...fields, percent: event.target.value });
+          }}
+        />
+      ) : null}
+      {fields.kind === 'card' ? (
+        <p className="m-0 type-caption text-ink-2">
+          Clients add a card to book. Nothing is charged now.
+        </p>
+      ) : null}
+      {fields.kind === 'none' ? (
+        <p className="m-0 type-caption text-ink-2">Clients book without paying anything.</p>
+      ) : null}
+      {error !== null && (fields.kind === 'none' || fields.kind === 'card') ? (
+        <Notice tone="error">{error}</Notice>
+      ) : null}
+      {waiting && fields.kind !== 'none' ? (
+        <p className="m-0 rounded-md bg-warn-soft px-4 py-3 type-label text-warn">
+          Deposits start once Stripe payments are ready (More → Payments). Until then, clients can’t
+          book this service online.
+        </p>
+      ) : null}
+    </fieldset>
   );
 }

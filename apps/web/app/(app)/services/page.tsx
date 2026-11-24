@@ -12,9 +12,15 @@ import { ROUTES } from '../../../lib/account';
 import { durationLabel, priceLabel, servicesByCategory } from '../../../lib/setup';
 import { BookingPageCard } from '../../_components/setup/booking-page-card';
 import { PhotosCard } from '../../_components/setup/photos-card';
-import { ServiceEditor } from '../../_components/setup/service-editor';
 import { ServicesScreen } from '../../_components/setup/services-screen';
-import { currentAccount, currentBusiness, currentJson } from '../../_server/account';
+import { depositLabel } from '../../../lib/deposits';
+import { ServiceEditor, type DepositsState } from '../../_components/setup/service-editor';
+import {
+  currentAccount,
+  currentBusiness,
+  currentJson,
+  currentPayments,
+} from '../../_server/account';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Services · Pepper' };
@@ -33,13 +39,22 @@ export default async function ServicesPage() {
   if (!current?.permissions.includes('services.read')) redirect(ROUTES.home);
 
   const managesPage = current.permissions.includes('settings.manage');
-  const [services, staff, photos] = await Promise.all([
+  const manages = current.permissions.includes('services.manage');
+  const [services, staff, photos, payments] = await Promise.all([
     currentJson('/v1/services', ServicesResponseSchema),
     currentJson('/v1/staff', StaffResponseSchema),
     // The booking page's photos (S47.2): owners and managers only.
     managesPage ? currentJson('/v1/tenant/photos', BusinessPhotosSchema) : Promise.resolve(null),
+    // Whether deposits can be taken (S66.2): the deposit field and the refund window show only
+    // where the deployment offers payments.
+    manages ? currentPayments() : Promise.resolve(null),
   ]);
-  const manages = current.permissions.includes('services.manage');
+  const deposits: DepositsState =
+    payments === null || payments.state === 'off'
+      ? 'hidden'
+      : payments.state === 'on' && !payments.account.chargesEnabled
+        ? 'waiting'
+        : 'open';
   const list = services?.services ?? [];
   const categories = [
     ...new Set(list.flatMap((service) => (service.category === null ? [] : [service.category]))),
@@ -54,6 +69,7 @@ export default async function ServicesPage() {
       manages={manages}
       categories={categories}
       state={services === null ? 'failed' : list.length === 0 ? 'empty' : 'listed'}
+      deposits={deposits}
       actions={
         <Link href={ROUTES.rules} className={buttonStyle({ variant: 'secondary', size: 'sm' })}>
           Booking rules
@@ -87,9 +103,16 @@ export default async function ServicesPage() {
                         .filter(Boolean)
                         .join(' · '),
                       people.length === 0 ? 'No one offers it yet' : people.join(', '),
-                    ]}
+                      depositLabel(service.deposit, service.priceFromCents),
+                    ].filter((line): line is string => line !== null)}
                     edit={
-                      manages ? <ServiceEditor service={service} categories={categories} /> : null
+                      manages ? (
+                        <ServiceEditor
+                          service={service}
+                          categories={categories}
+                          deposits={deposits}
+                        />
+                      ) : null
                     }
                   />
                 );
@@ -103,6 +126,7 @@ export default async function ServicesPage() {
         brandColor={current.business.brandColor}
         profile={current.business}
         manages={managesPage}
+        refundHours={deposits === 'hidden' ? null : current.business.depositRefundHours}
       />
       {managesPage ? (
         <PhotosCard

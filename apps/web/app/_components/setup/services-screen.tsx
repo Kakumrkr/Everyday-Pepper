@@ -4,7 +4,7 @@ import { EmptyState } from '@pepper/ui';
 import { useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
 import { kitLink } from '../kit-link';
-import { ServiceEditor } from './service-editor';
+import { ServiceEditor, type DepositsState } from './service-editor';
 
 /**
  * The Services screen's header, its empty and failed states, and the menu below (S42.2): one
@@ -16,6 +16,7 @@ export function ServicesScreen({
   categories,
   state,
   actions,
+  deposits,
   children,
 }: {
   /** Owners and managers (the api decides again). */
@@ -24,6 +25,8 @@ export function ServicesScreen({
   state: 'failed' | 'empty' | 'listed';
   /** The header's other actions (Booking rules). */
   actions: ReactNode;
+  /** Whether the deposit field shows in the sheet (S66.2). */
+  deposits: DepositsState;
   children: ReactNode;
 }) {
   // Focus goes back to the header's button on close, opened from either: a save replaces the
@@ -41,7 +44,12 @@ export function ServicesScreen({
         <div className="flex flex-wrap gap-2">
           {actions}
           {manages ? (
-            <ServiceEditor categories={categories} open={adding} onOpenChange={setAdding} />
+            <ServiceEditor
+              categories={categories}
+              open={adding}
+              onOpenChange={setAdding}
+              deposits={deposits}
+            />
           ) : null}
         </div>
       </header>
