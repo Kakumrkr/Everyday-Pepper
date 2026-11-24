@@ -7,6 +7,7 @@ import {
   type BookingPaymentStart,
   type DepositKind,
   type DepositRule,
+  type DepositTerms,
   type PublicBookingDeposit,
 } from '@pepper/contracts';
 import { formatMoney } from '@pepper/ui';
@@ -95,6 +96,12 @@ export function depositLabel(rule: DepositRule, priceFromCents: number | null): 
   return priceFromCents === null
     ? `Deposit ${String(rule.percent)}%`
     : `Deposit ${String(rule.percent)}% (${formatMoney(cents)})`;
+}
+
+/** A service's terms on the booking page's menu (AC-X-113): "$15 deposit", "Card to book". */
+export function termsLabel(terms: DepositTerms | null): string | null {
+  if (terms === null) return null;
+  return terms.kind === 'card' ? 'Card to book' : `${formatMoney(terms.amountCents)} deposit`;
 }
 
 /** The refund windows offered (AC-X-112); the business's own is added when it isn't one. */

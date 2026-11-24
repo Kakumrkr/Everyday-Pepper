@@ -9,6 +9,7 @@ import {
   refundChoices,
   refundHoursLabel,
   refundWindowSentence,
+  termsLabel,
 } from './deposits';
 
 // Deposits in words (S66.2, AC-X-121…123).
@@ -64,6 +65,9 @@ describe('the service sheet’s deposit field (AC-X-121)', () => {
     expect(depositLabel({ kind: 'fixed', amountCents: 1500 }, 4500)).toBe('Deposit $15');
     expect(depositLabel({ kind: 'percent', percent: 20 }, 4500)).toBe('Deposit 20% ($9)');
     expect(depositLabel({ kind: 'card' }, null)).toBe('Card on file');
+    expect(termsLabel(null)).toBeNull();
+    expect(termsLabel({ kind: 'deposit', amountCents: 1500, refundHours: 24 })).toBe('$15 deposit');
+    expect(termsLabel({ kind: 'card', refundHours: 24 })).toBe('Card to book');
   });
 
   it('offers the refund windows, with the business’s own, in words (AC-X-112)', () => {
