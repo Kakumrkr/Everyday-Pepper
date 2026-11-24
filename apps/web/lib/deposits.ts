@@ -167,6 +167,7 @@ export function paymentWords(start: BookingPaymentStart, timeZone: string): Paym
 export function manageDepositWords(
   deposit: PublicBookingDeposit | null,
   timeZone: string,
+  now: number = Date.now(),
 ): { beforeCancel: string | null; status: string | null } {
   if (deposit === null) return { beforeCancel: null, status: null };
   if (deposit.kind === 'card') {
@@ -180,7 +181,11 @@ export function manageDepositWords(
     case 'held': {
       const until =
         deposit.refundEndsAt === null ? null : dateTimeLabel(timeZone, deposit.refundEndsAt);
-      return deposit.refundableNow
+      // The server's answer, and no longer once its stored end has passed while the page was open.
+      const refundable =
+        deposit.refundableNow &&
+        (deposit.refundEndsAt === null || now <= Date.parse(deposit.refundEndsAt));
+      return refundable
         ? {
             beforeCancel: `Cancel now and get your ${amount} back.`,
             status:

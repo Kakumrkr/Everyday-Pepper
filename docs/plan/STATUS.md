@@ -13,9 +13,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] 3. Service sheet deposit field
 - [x] 4. Refund window in booking page settings
 - [x] 5. Payment step in the booking flow (Stripe field / sandbox stand-in)
-- [ ] 6. Manage page deposit line before Cancel (top-up) and the outcome after
+- [x] 6. Manage page deposit line before Cancel (top-up) and the outcome after
 - [ ] 7. `deposits.spec.ts` journeys + screens baselines
-Next: task 6 (manage page). Task 5: `deposit-step.tsx` (Stripe Payment Element via `@stripe/stripe-js/pure`, or the sandbox stand-in); the funnel counts the pay step as the code’s (no new funnel step). Tasks 3–4: `lib/deposits.ts` holds every deposit sentence (unit-tested); the sheet and window show only where payments are offered. Task 2 added `STRIPE_PUBLISHABLE_KEY` (required with stripe, same mode) and `publishableKey` on the payment start.
+Next: task 7 (deposits.spec.ts + screens). Task 5: `deposit-step.tsx` (Stripe Payment Element via `@stripe/stripe-js/pure`, or the sandbox stand-in); the funnel counts the pay step as the code’s (no new funnel step). Tasks 3–4: `lib/deposits.ts` holds every deposit sentence (unit-tested); the sheet and window show only where payments are offered. Task 2 added `STRIPE_PUBLISHABLE_KEY` (required with stripe, same mode) and `publishableKey` on the payment start.
 
 ## Last sessions
 - **S66 Phase 15 · Deposits and card on file, backend (2026-11-22)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PCR-014](changes/PCR-014.md), [PR #103](https://github.com/Kakumrkr/Everyday-Pepper/pull/103)). Full entry in [session-log.md](session-log.md).

@@ -10,6 +10,7 @@ import { Button, buttonStyle, cx, chipStyle, DetailTable } from '@pepper/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
+import { manageDepositWords } from '../../../lib/deposits';
 import { publicApiPath, readManageToken } from '../../../lib/public-booking';
 import { Notice } from '../form-parts';
 import { alternativesOf } from '../booking/refusal';
@@ -132,6 +133,8 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
   }
 
   const { booking } = view;
+  // What cancelling does to the deposit, and where it stands (S66.2, AC-X-123).
+  const deposit = manageDepositWords(booking.deposit, timeZone);
   return (
     <div className="flex flex-col gap-5">
       <h1 className="m-0 type-display text-ink">Your booking</h1>
@@ -153,6 +156,11 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
           },
         ]}
       />
+      {deposit.status === null ? null : (
+        <p className="m-0 type-body text-ink-2" data-testid="deposit-status">
+          {deposit.status}
+        </p>
+      )}
       {!booking.changeable ? (
         booking.status === 'cancelled' ? (
           <a
@@ -194,6 +202,11 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
           <p className="m-0 type-body font-semibold text-ink">
             Cancel this booking? This can’t be undone, and the time goes to someone else.
           </p>
+          {deposit.beforeCancel === null ? null : (
+            <p className="m-0 type-body text-ink" data-testid="cancel-deposit">
+              {deposit.beforeCancel}
+            </p>
+          )}
           <div className="flex flex-wrap gap-3">
             <Button variant="danger" busy={busy} onClick={() => void cancel()}>
               {busy ? 'Cancelling…' : 'Yes, cancel it'}

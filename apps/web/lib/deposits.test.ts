@@ -133,11 +133,16 @@ describe('the manage page before Cancel (AC-X-123, S66.2 top-up)', () => {
   } as const;
 
   it('says the deposit comes back inside the window, and is kept after it', () => {
-    expect(manageDepositWords(held, TZ)).toEqual({
+    expect(manageDepositWords(held, TZ, Date.parse('2026-11-30T12:00:00.000Z'))).toEqual({
       beforeCancel: 'Cancel now and get your $15 back.',
       status: 'You paid a $15 deposit. Cancel by Tue, Dec 1, 3:00 PM to get it back.',
     });
     expect(manageDepositWords({ ...held, refundableNow: false }, TZ).beforeCancel).toBe(
+      'Your $15 deposit is kept if you cancel now.',
+    );
+    // The page stayed open past the stored end: kept, whatever the server said on opening.
+    const after = Date.parse('2026-12-01T21:00:01.000Z');
+    expect(manageDepositWords(held, TZ, after).beforeCancel).toBe(
       'Your $15 deposit is kept if you cancel now.',
     );
   });
