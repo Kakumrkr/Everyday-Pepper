@@ -13,9 +13,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T3 db: migration 0082 `tenants.deposit_audience`; standing by email; settings save (tier 1–2)
 - [x] T4 appointments: standing after the code, again at confirm; remembered regular (tier 1–2)
 - [x] T5 api: settings field, `GET /v1/payments/bookings/:id/deposit` (owners, managers) (tier 1–2)
-- [ ] T6 web: "Who pays a deposit" in settings, menu words; e2e regular journey (tier 1–2 + spec)
-- [ ] T7 top-up: the team sheet's deposit line; screenshots (tier 1–2 + spec)
-Next: T6 (web: "Who pays a deposit" in settings, menu words, e2e regular journey).
+- [x] T6 web: "Who pays a deposit" in settings, menu words; e2e regular journey (tier 1–2 + spec)
+- [x] T7 top-up: the team sheet's deposit line; screenshots (tier 1–2 + spec)
+Next: close (`/session-close`): review, pnpm check, affected integration, e2e specs, walkthrough, PR.
 
 ## Last sessions
 - **S66.2 Phase 15 · Deposits on screen (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PR #104](https://github.com/Kakumrkr/Everyday-Pepper/pull/104)). Full entry in [session-log.md](session-log.md).

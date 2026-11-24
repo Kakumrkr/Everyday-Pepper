@@ -32,6 +32,8 @@ export interface BookingAbilities {
   /** Read and change visit notes (staff: their own clients' visits, S32). */
   readsNotes: boolean;
   managesNotes: boolean;
+  /** Read a booking's deposit on its sheet (owners and managers, S67, AC-X-129). */
+  readsPayments: boolean;
 }
 
 export function bookingAbilities(
@@ -45,6 +47,7 @@ export function bookingAbilities(
     ownStaffOnly: role === 'staff',
     readsNotes: permissions.includes('client_notes.read'),
     managesNotes: permissions.includes('client_notes.manage'),
+    readsPayments: permissions.includes('payments.read'),
   };
 }
 

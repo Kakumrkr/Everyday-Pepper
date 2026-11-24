@@ -1,12 +1,23 @@
 'use client';
 
-import { BusinessSchema, CANCELLATION_POLICY_MAX, type BusinessProfile } from '@pepper/contracts';
-import { brandTokens, Button, FOCUS_RING, Input, Select, Textarea } from '@pepper/ui';
+import {
+  BusinessSchema,
+  CANCELLATION_POLICY_MAX,
+  type BusinessProfile,
+  type DepositAudience,
+} from '@pepper/contracts';
+import { brandTokens, Button, FOCUS_RING, Input, Segmented, Select, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
 import { profileFields, profileFromFields, type ProfileFields } from '../../../lib/booking-profile';
 import { sendJson } from '../../../lib/client-api';
-import { refundChoices, refundHoursLabel, refundWindowSentence } from '../../../lib/deposits';
+import {
+  audienceSentence,
+  DEPOSIT_AUDIENCE_CHOICES,
+  refundChoices,
+  refundHoursLabel,
+  refundWindowSentence,
+} from '../../../lib/deposits';
 import { HELP_LINKS } from '../../../lib/help';
 import { HelpLink } from '../help/help-link';
 import { Notice } from '../form-parts';
@@ -16,21 +27,22 @@ import { Notice } from '../form-parts';
  * (PCR-001). Any color works: the page adjusts it until its text is readable (WCAG AA). On the
  * kit since S42.2: a quiet section, since nothing here waits on a decision. Since S47 also the
  * phone, address and cancellation policy clients see there (AC-W8-7), and since S66.2 the
- * deposit refund window (AC-X-112), where the deployment offers payments.
+ * deposit refund window (AC-X-112), where the deployment offers payments; since S67 who pays a
+ * deposit (AC-X-125).
  */
 export function BookingPageCard({
   slug,
   brandColor,
   profile,
   manages,
-  refundHours = null,
+  deposits = null,
 }: {
   slug: string;
   brandColor: string | null;
   profile: BusinessProfile;
   manages: boolean;
-  /** The deposit refund window (S66.2); `null` hides it (payments off here). */
-  refundHours?: number | null;
+  /** The refund window (S66.2) and who pays (S67); `null` hides them (payments off here). */
+  deposits?: { refundHours: number; audience: DepositAudience } | null;
 }) {
   const router = useRouter();
   const [color, setColor] = useState(brandColor ?? brandTokens(null).light.biz);
@@ -98,7 +110,9 @@ export function BookingPageCard({
         ) : null}
         {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
         {manages ? <ProfileForm profile={profile} /> : null}
-        {manages && refundHours !== null ? <RefundWindowForm hours={refundHours} /> : null}
+        {manages && deposits !== null ? (
+          <DepositsForm hours={deposits.refundHours} audience={deposits.audience} />
+        ) : null}
       </div>
     </section>
   );
@@ -199,12 +213,14 @@ function ProfileForm({ profile }: { profile: BusinessProfile }) {
 }
 
 /**
- * The deposit refund window (AC-X-112): how long before the start a client may cancel and get
- * the deposit back. Saved on its own; a booking keeps the window it was made with (ADR-0068).
+ * The business's deposits (AC-X-112, S67 AC-X-125): who pays one, and how long before the start
+ * a client may cancel and get it back. Saved together; a booking keeps the window it was made
+ * with (ADR-0068).
  */
-function RefundWindowForm({ hours }: { hours: number }) {
+function DepositsForm({ hours, audience }: { hours: number; audience: DepositAudience }) {
   const router = useRouter();
   const [value, setValue] = useState(hours);
+  const [who, setWho] = useState(audience);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const headingId = useId();
@@ -214,6 +230,7 @@ function RefundWindowForm({ hours }: { hours: number }) {
     setBusy(true);
     const answer = await sendJson('PUT', '/v1/tenant/booking-page', {
       depositRefundHours: value,
+      depositAudience: who,
     });
     setBusy(false);
     const parsed = answer.ok ? BusinessSchema.safeParse(answer.data) : null;
@@ -222,7 +239,8 @@ function RefundWindowForm({ hours }: { hours: number }) {
       return;
     }
     setValue(parsed.data.depositRefundHours);
-    setNotice({ tone: 'ok', text: 'Saved. New bookings get this window.' });
+    setWho(parsed.data.depositAudience);
+    setNotice({ tone: 'ok', text: 'Saved. New bookings follow these.' });
     router.refresh();
   }
 
@@ -238,9 +256,24 @@ function RefundWindowForm({ hours }: { hours: number }) {
     >
       <div className="flex flex-col gap-1">
         <h3 id={headingId} className="m-0 type-subheading text-ink">
-          Deposit refunds
+          Deposits
         </h3>
         <p className="m-0 type-body text-ink-2">For services that take a deposit.</p>
+      </div>
+      <div className="flex flex-col gap-2">
+        <span aria-hidden="true" className="type-label text-ink">
+          Who pays a deposit
+        </span>
+        <Segmented
+          label="Who pays a deposit"
+          options={DEPOSIT_AUDIENCE_CHOICES}
+          value={who}
+          onValueChange={(next) => {
+            const choice = DEPOSIT_AUDIENCE_CHOICES.find((option) => option.value === next);
+            if (choice !== undefined) setWho(choice.value);
+          }}
+        />
+        <p className="m-0 type-caption text-ink-2">{audienceSentence(who)}</p>
       </div>
       <Select
         label="Free cancellation until"
@@ -257,7 +290,7 @@ function RefundWindowForm({ hours }: { hours: number }) {
       />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" variant="secondary" size="sm" busy={busy}>
-          Save refund window
+          Save deposits
         </Button>
       </div>
       {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}

@@ -212,6 +212,7 @@ describe('loadPublicBusiness', () => {
     publicAddress: null,
     cancellationPolicy: null,
     photos: { logo: null, cover: null, gallery: [] },
+    depositAudience: 'everyone',
     services: [],
     staff: [],
   };

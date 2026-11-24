@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  BookingDepositAnswerSchema,
   BookingSchema,
   type AvailableSlot,
   type BookingChange,
@@ -9,7 +10,7 @@ import {
 import { Button, cx, DetailTable, Select, Sheet, SheetFooter } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   bookableStaff,
   bookingActions,
@@ -22,7 +23,8 @@ import {
 } from '../../../lib/booking';
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
-import { sendJson } from '../../../lib/client-api';
+import { fetchJson, sendJson } from '../../../lib/client-api';
+import { teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
@@ -126,6 +128,7 @@ function BookingDetails({
   // The sheet's clock: the api checks the real one (done and no-show only once started).
   const [now] = useState(() => Date.now());
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
+  const deposit = useDepositLine(booking.id, timeZone, abilities.readsPayments);
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -187,6 +190,18 @@ function BookingDetails({
                     >
                       {dateTimeLabel(timeZone, confirmedAt)}
                     </span>
+                  </span>
+                ),
+              },
+            ]),
+        ...(deposit === null
+          ? []
+          : [
+              {
+                label: 'Deposit',
+                value: (
+                  <span className="tabular-nums" data-testid="booking-deposit">
+                    {deposit}
                   </span>
                 ),
               },
@@ -436,4 +451,26 @@ function MoveBooking({
       </SheetFooter>
     </div>
   );
+}
+
+/**
+ * The booking's deposit in one line (S67 top-up, AC-X-129), read when the sheet opens: owners
+ * and managers only; `null` with none, while loading, or when payments are off here.
+ */
+function useDepositLine(bookingId: string, timeZone: string, reads: boolean): string | null {
+  const [line, setLine] = useState<string | null>(null);
+  useEffect(() => {
+    if (!reads) return;
+    let current = true;
+    void fetchJson(
+      `/v1/payments/bookings/${encodeURIComponent(bookingId)}/deposit`,
+      BookingDepositAnswerSchema,
+    ).then((answer) => {
+      if (current && answer.ok) setLine(teamDepositLine(answer.data.deposit, timeZone));
+    });
+    return () => {
+      current = false;
+    };
+  }, [bookingId, timeZone, reads]);
+  return line;
 }

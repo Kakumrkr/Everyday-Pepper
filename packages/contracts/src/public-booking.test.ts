@@ -147,6 +147,7 @@ describe('PublicBusinessSchema', () => {
       publicAddress: '12 Main St\nAustin, TX 78701',
       cancellationPolicy: null,
       photos: { logo: null, cover: null, gallery: [] },
+      depositAudience: 'everyone',
     });
     expect(parsed.brandColor).toBe('#7a3e6c');
     expect(parsed.phone).toBe('+15551234567');

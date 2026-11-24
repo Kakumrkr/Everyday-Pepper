@@ -45,6 +45,7 @@ describe('bookingAbilities', () => {
       'clients.manage',
       'client_notes.read',
       'client_notes.manage',
+      'payments.read',
     ];
     expect(bookingAbilities(owner, 'owner')).toEqual({
       books: true,
@@ -53,6 +54,7 @@ describe('bookingAbilities', () => {
       ownStaffOnly: false,
       readsNotes: true,
       managesNotes: true,
+      readsPayments: true,
     });
     expect(bookingAbilities(['bookings.manage', 'client_notes.read'], 'staff')).toEqual({
       books: true,
@@ -61,6 +63,7 @@ describe('bookingAbilities', () => {
       ownStaffOnly: true,
       readsNotes: true,
       managesNotes: false,
+      readsPayments: false,
     });
     expect(bookingAbilities([], 'manager').books).toBe(false);
   });

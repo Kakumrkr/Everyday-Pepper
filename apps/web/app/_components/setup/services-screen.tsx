@@ -1,5 +1,6 @@
 'use client';
 
+import type { DepositAudience } from '@pepper/contracts';
 import { EmptyState } from '@pepper/ui';
 import { useState, type ReactNode } from 'react';
 import { ROUTES } from '../../../lib/account';
@@ -17,6 +18,7 @@ export function ServicesScreen({
   state,
   actions,
   deposits,
+  audience = 'everyone',
   children,
 }: {
   /** Owners and managers (the api decides again). */
@@ -27,6 +29,8 @@ export function ServicesScreen({
   actions: ReactNode;
   /** Whether the deposit field shows in the sheet (S66.2). */
   deposits: DepositsState;
+  /** Who pays a deposit (S67, AC-X-128): the sheet says so under the field. */
+  audience?: DepositAudience;
   children: ReactNode;
 }) {
   // Focus goes back to the header's button on close, opened from either: a save replaces the
@@ -49,6 +53,7 @@ export function ServicesScreen({
               open={adding}
               onOpenChange={setAdding}
               deposits={deposits}
+              audience={audience}
             />
           ) : null}
         </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { ServiceSchema, type Service } from '@pepper/contracts';
+import { ServiceSchema, type DepositAudience, type Service } from '@pepper/contracts';
 import {
   Button,
   buttonStyle,
@@ -16,6 +16,7 @@ import { useId, useState, type SubmitEvent } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import {
+  audienceNote,
   DEPOSIT_CHOICES,
   depositFields,
   depositRuleFrom,
@@ -36,6 +37,7 @@ export function ServiceEditor({
   open: shown,
   onOpenChange,
   deposits = 'hidden',
+  audience = 'everyone',
 }: {
   /** The service to edit; none adds a new one. */
   service?: Service;
@@ -45,6 +47,8 @@ export function ServiceEditor({
    * in this deployment (the rule is left as it is).
    */
   deposits?: DepositsState;
+  /** Who pays a deposit (S67, AC-X-128): said under the field. */
+  audience?: DepositAudience;
   /** Categories in use, offered as suggestions. */
   categories: string[];
   /** Opened from elsewhere too (the empty menu's "Add your first service"). */
@@ -85,6 +89,7 @@ export function ServiceEditor({
         service={service}
         categories={categories}
         deposits={deposits}
+        audience={audience}
         onDone={() => {
           setOpen(false);
         }}
@@ -99,11 +104,13 @@ function ServiceForm({
   service,
   categories,
   deposits,
+  audience,
   onDone,
 }: {
   service: Service | undefined;
   categories: string[];
   deposits: DepositsState;
+  audience: DepositAudience;
   onDone: () => void;
 }) {
   const router = useRouter();
@@ -238,6 +245,7 @@ function ServiceForm({
             return cents === 'invalid' ? null : cents;
           })()}
           waiting={deposits === 'waiting'}
+          audience={audience}
           error={depositError}
         />
       )}
@@ -266,12 +274,14 @@ function DepositField({
   onChange,
   priceFromCents,
   waiting,
+  audience,
   error,
 }: {
   fields: DepositFields;
   onChange: (fields: DepositFields) => void;
   priceFromCents: number | null;
   waiting: boolean;
+  audience: DepositAudience;
   error: string | null;
 }) {
   const headingId = useId();
@@ -325,6 +335,9 @@ function DepositField({
       ) : null}
       {fields.kind === 'none' ? (
         <p className="m-0 type-caption text-ink-2">Clients book without paying anything.</p>
+      ) : null}
+      {fields.kind !== 'none' && audienceNote(audience) !== null ? (
+        <p className="m-0 type-caption text-ink-2">{audienceNote(audience)}</p>
       ) : null}
       {error !== null && (fields.kind === 'none' || fields.kind === 'card') ? (
         <Notice tone="error">{error}</Notice>

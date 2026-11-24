@@ -1,4 +1,11 @@
-import { CurrentBusinessResponseSchema, ServiceSchema, StaffMemberSchema } from '@pepper/contracts';
+import {
+  BookingSchema,
+  BookingsResponseSchema,
+  ClientSchema,
+  CurrentBusinessResponseSchema,
+  ServiceSchema,
+  StaffMemberSchema,
+} from '@pepper/contracts';
 import { expect, test, type Browser, type Page } from '@playwright/test';
 import {
   anotherPerson,
@@ -26,8 +33,12 @@ const EVERY_DAY = {
   intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({ weekday, start: '09:00', end: '17:00' })),
 };
 
-/** A $45 haircut Jess offers every day, and payments ready in the sandbox; returns the slug. */
+/** A $45 haircut Jess offers every day, and payments ready in the sandbox. */
 async function salonWithPayments(page: Page): Promise<string> {
+  return (await salonParts(page)).slug;
+}
+
+async function salonParts(page: Page) {
   const tenant = CurrentBusinessResponseSchema.parse(
     await (await page.request.get('/v1/tenant')).json(),
   );
@@ -51,7 +62,7 @@ async function salonWithPayments(page: Page): Promise<string> {
   // Connected (the sandbox's link comes straight back), then Stripe says it's ready.
   await callApi(page, 'POST', '/v1/payments/onboarding', {}, { parse: (body) => body }, 200);
   await stripeSays(page, 'ready');
-  return tenant.business.slug;
+  return { slug: tenant.business.slug, serviceId: service.id, jessId: jess.id };
 }
 
 /**
@@ -152,6 +163,31 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   await expect(early.getByTestId('deposit-status')).toContainText(
     /You paid a \$15 deposit\. Cancel by .+ to get it back\./,
   );
+  // AC-X-129: the owner's booking sheet says it in one line, without opening Stripe.
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const listed = BookingsResponseSchema.parse(
+    await (
+      await page.request.get('/v1/bookings', {
+        params: {
+          from: new Date().toISOString(),
+          to: new Date(Date.now() + 7 * 86_400_000).toISOString(),
+        },
+      })
+    ).json(),
+  );
+  const paid = listed.bookings.find((b) => b.source === 'booking_page');
+  if (paid === undefined) throw new Error('no booking from the page');
+  const day = new Intl.DateTimeFormat('en-CA', { timeZone: business.timeZone }).format(
+    new Date(paid.startsAt),
+  );
+  await page.goto(`/calendar?date=${day}`);
+  await (await hydrated(page.getByTestId('booking-block'))).click();
+  await expect(page.getByTestId('booking-deposit')).toHaveText(
+    /^\$15 deposit paid · refundable until .+ (AM|PM)$/,
+  );
+  await page.keyboard.press('Escape');
   await (await hydrated(early.getByRole('button', { name: 'Cancel booking' }))).click();
   await expect(early.getByTestId('cancel-deposit')).toHaveText('Cancel now and get your $15 back.');
   await early.getByRole('button', { name: 'Yes, cancel it' }).click();
@@ -174,8 +210,8 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   await page.goto('/services');
   await (await hydrated(window)).selectOption('168');
   await expect(page.getByText(/at least a week before/)).toBeVisible();
-  await page.getByRole('button', { name: 'Save refund window' }).click();
-  await expect(page.getByText('Saved. New bookings get this window.')).toBeVisible();
+  await page.getByRole('button', { name: 'Save deposits' }).click();
+  await expect(page.getByText('Saved. New bookings follow these.')).toBeVisible();
 
   const late = await bookAndPay(
     browser,
@@ -190,4 +226,87 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   );
   await late.getByRole('button', { name: 'Yes, cancel it' }).click();
   await expect(late.getByTestId('deposit-status')).toHaveText('Your $15 deposit was kept.');
+});
+
+test('with "New and no-shows", a regular books with no card, and the menu says who pays (S67)', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  const { slug, serviceId, jessId } = await salonParts(page);
+  await callApi(
+    page,
+    'PUT',
+    `/v1/services/${serviceId}`,
+    {
+      name: 'Haircut',
+      durationMinutes: 60,
+      priceFromCents: 4500,
+      deposit: { kind: 'fixed', amountCents: 1500 },
+    },
+    ServiceSchema,
+  );
+  // A regular: a client whose visit two days ago has ended (the team booked it then).
+  const email = `${unique('regular')}@example.test`;
+  const regular = await callApi(
+    page,
+    'POST',
+    '/v1/clients',
+    { name: 'Rae Kim', email },
+    ClientSchema,
+  );
+  const past = new Date(Date.now() - 2 * 86_400_000);
+  past.setUTCMinutes(0, 0, 0);
+  await callApi(
+    page,
+    'POST',
+    '/v1/bookings',
+    {
+      clientId: regular.id,
+      serviceId,
+      staffMemberId: jessId,
+      startsAt: past.toISOString(),
+      override: true,
+      notifyClient: false,
+    },
+    BookingSchema,
+  );
+
+  // AC-X-125: the owner chooses who pays, and the sentence says what it means.
+  await page.goto('/services');
+  const who = page.getByRole('radiogroup', { name: 'Who pays a deposit' });
+  await (await hydrated(who.getByRole('radio', { name: 'New and no-shows' }))).click();
+  await expect(
+    page.getByText(
+      'Clients who’ve visited before book without one, unless they missed a visit in the last 12 months.',
+    ),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Save deposits' }).click();
+  await expect(page.getByText('Saved. New bookings follow these.')).toBeVisible();
+  // AC-X-128: the service sheet says it too.
+  await (await hydrated(page.getByRole('button', { name: 'Edit Haircut' }))).click();
+  await expect(
+    page.getByText('Only new clients and clients who missed a visit pay it. Regulars don’t.'),
+  ).toBeVisible();
+
+  // AC-X-127: the regular books; after the code there's no card step.
+  const client = await anotherPerson(browser, baseURL);
+  await client.goto(`/book/${slug}`);
+  const haircut = await hydrated(client.getByRole('button', { name: /Haircut/ }));
+  await expect(haircut).toContainText('$15 deposit for new clients');
+  await haircut.click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await client.getByRole('group', { name: 'Day' }).getByRole('button').nth(3).click();
+  await client.getByTestId('free-times').getByRole('button').first().click();
+  await client.getByLabel('Full name').fill('Rae Kim');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  await expect(client.getByRole('heading', { name: 'Check your email' })).toBeVisible();
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  await client.getByLabel('Code').fill(code);
+  await client.getByRole('button', { name: 'Continue' }).click();
+  await expect(client.getByRole('heading', { name: /You’re booked, Rae/ })).toBeVisible();
+  await expect(client.getByRole('heading', { name: 'Almost booked' })).toHaveCount(0);
 });

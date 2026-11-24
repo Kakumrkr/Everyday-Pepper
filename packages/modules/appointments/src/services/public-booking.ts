@@ -299,6 +299,7 @@ export async function getPublicBusiness(
         phone: tenant.phone,
         publicAddress: tenant.publicAddress,
         cancellationPolicy: tenant.cancellationPolicy,
+        depositAudience: tenant.depositAudience,
         photos: await businessPhotosIn(tx),
         services: services
           .filter((s) => offered.has(s.id))
