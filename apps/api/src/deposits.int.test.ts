@@ -448,6 +448,23 @@ describe('deposits on the booking page (S66)', () => {
     expect(await paymentStatus(requestId)).toBe('captured');
   });
 
+  it("AC-X-129: the team reads the booking's deposit; staff can't", async () => {
+    const [, , , slot] = await slots(depositServiceId, 5);
+    if (slot === undefined) throw new Error('no free time');
+    const { bookingId } = await bookWithDeposit(slot);
+    const payments = app.get(PaymentsService);
+    expect(await payments.bookingDeposit(owner, BookingIdSchema.parse(bookingId))).toEqual({
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt: new Date(Date.parse(slot.startsAt) - DAY).toISOString(),
+      status: 'held',
+      refundableNow: true,
+    });
+    await expect(
+      payments.bookingDeposit({ ...owner, role: 'staff' }, BookingIdSchema.parse(bookingId)),
+    ).rejects.toThrow();
+  });
+
   it('AC-X-113: while payments can’t take charges, the deposit service can’t be requested', async () => {
     const [slot] = await slots(depositServiceId, 6);
     if (slot === undefined) throw new Error('no free time');

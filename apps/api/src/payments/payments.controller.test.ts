@@ -48,6 +48,15 @@ function fakes() {
     dashboard: vi.fn(() => Promise.resolve({ url: 'https://connect.stripe.com/express/x' })),
     receive: vi.fn(() => Promise.resolve({ received: true as const })),
     sandboxState: vi.fn(() => Promise.resolve(ANSWER)),
+    bookingDeposit: vi.fn(() =>
+      Promise.resolve({
+        kind: 'deposit' as const,
+        amountCents: 1500,
+        refundEndsAt: '2026-11-24T20:00:00.000Z',
+        status: 'held' as const,
+        refundableNow: true,
+      }),
+    ),
   };
   const limits = { hit: vi.fn(() => Promise.resolve()) };
   return {
@@ -79,6 +88,30 @@ describe('PaymentsController', () => {
     const { payments, service, limiter } = fakes();
     payments.account.mockResolvedValueOnce({ ...ANSWER, secret: 'x' } as never);
     await expect(new PaymentsController(service, limiter).account(tenant)).rejects.toThrow();
+  });
+});
+
+describe("the team's view of a booking's deposit (S67, AC-X-129)", () => {
+  const BOOKING = '0b9b2f9e-8d6d-4e7c-9d7f-3c1f0c9a1a13';
+
+  it('answers the deposit, or null, without counting against the owner limit', async () => {
+    const { payments, limits, service, limiter } = fakes();
+    const controller = new PaymentsController(service, limiter);
+    const answer = await controller.bookingDeposit(tenant, { bookingId: BOOKING });
+    expect(answer.deposit).toMatchObject({ amountCents: 1500, status: 'held' });
+    expect(payments.bookingDeposit).toHaveBeenCalledWith(tenant, BOOKING);
+    payments.bookingDeposit.mockResolvedValueOnce(null as never);
+    expect(await controller.bookingDeposit(tenant, { bookingId: BOOKING })).toEqual({
+      deposit: null,
+    });
+    expect(limits.hit).not.toHaveBeenCalled();
+  });
+
+  it('refuses an id that is not one, before asking anything', async () => {
+    const { payments, service, limiter } = fakes();
+    const controller = new PaymentsController(service, limiter);
+    await expect(controller.bookingDeposit(tenant, { bookingId: 'x' })).rejects.toThrow();
+    expect(payments.bookingDeposit).not.toHaveBeenCalled();
   });
 });
 

@@ -317,3 +317,9 @@ export const BookingDepositSchema = z
   })
   .strict();
 export type BookingDeposit = z.infer<typeof BookingDepositSchema>;
+
+/** `GET /v1/payments/bookings/:bookingId/deposit` (AC-X-129). */
+export const BookingDepositAnswerSchema = z
+  .object({ deposit: BookingDepositSchema.nullable() })
+  .strict();
+export type BookingDepositAnswer = z.infer<typeof BookingDepositAnswerSchema>;

@@ -13,7 +13,13 @@ import {
   type OutboxPayment,
   type TenantId,
 } from '@pepper/contracts';
-import { createBusiness, ManualClock, openOutboxContent, outboxKeyFrom } from '@pepper/core';
+import {
+  createBusiness,
+  ForbiddenError,
+  ManualClock,
+  openOutboxContent,
+  outboxKeyFrom,
+} from '@pepper/core';
 import {
   findBookingPaymentByRequest,
   insertBooking,
@@ -40,6 +46,7 @@ import {
   requireAuthorizedPayment,
   runPaymentJob,
   moveDepositWindowIn,
+  readBookingDeposit,
   settleDepositOnCancelIn,
   startBookingPayment,
   sweepBookingPayments,
@@ -649,5 +656,74 @@ describe('a deposit Stripe won’t give back (review)', () => {
     expect(pushes.rows).toHaveLength(1);
     await runPaymentJob(business.deps, business.tenantId, refundStep);
     expect((await paymentOf(business.tenantId, asked.requestId)).status).toBe('refund_failed');
+    // The team is told it failed (AC-X-129), where the client reads "on its way".
+    const owner = {
+      context: { tenantId: business.tenantId, userId: business.ownerId, role: 'owner' as const },
+    };
+    expect((await readBookingDeposit(business.deps, owner, bookingId))?.status).toBe(
+      'refund_failed',
+    );
+  });
+});
+
+describe("the team's view of a booking's deposit (S67 top-up, AC-X-129)", () => {
+  const as = (
+    business: Awaited<ReturnType<typeof newBusiness>>,
+    role: 'owner' | 'manager' | 'staff',
+  ) => ({
+    context: { tenantId: business.tenantId, userId: business.ownerId, role },
+  });
+
+  it('reads what was paid and until when a cancel gets it back, by the stored window', async () => {
+    const business = await newBusiness();
+    const { bookingId } = await paidAndBooked(business);
+    const ends = new Date(VISIT.getTime() - 24 * 3_600_000).toISOString();
+    expect(await readBookingDeposit(business.deps, as(business, 'manager'), bookingId)).toEqual({
+      kind: 'deposit',
+      amountCents: 1500,
+      refundEndsAt: ends,
+      status: 'held',
+      refundableNow: true,
+    });
+    // Past the window: still held, no longer refundable.
+    business.clock.set(new Date(VISIT.getTime() - 3_600_000));
+    expect(await readBookingDeposit(business.deps, as(business, 'owner'), bookingId)).toMatchObject(
+      {
+        status: 'held',
+        refundableNow: false,
+      },
+    );
+    // A late cancel keeps it.
+    await withTenant(db, business.tenantId, (tx) =>
+      settleDepositOnCancelIn(tx, {
+        bookingId,
+        startsAt: VISIT,
+        by: 'client',
+        now: business.clock.now(),
+        outboxKey,
+      }),
+    );
+    expect(await readBookingDeposit(business.deps, as(business, 'owner'), bookingId)).toMatchObject(
+      {
+        status: 'kept',
+        refundableNow: false,
+      },
+    );
+  });
+
+  it('answers null without a payment that took something, and is not for staff', async () => {
+    const business = await newBusiness();
+    const bookingId = await withTenant(db, business.tenantId, (tx) => seedBooking(tx));
+    expect(await readBookingDeposit(business.deps, as(business, 'owner'), bookingId)).toBeNull();
+    await expect(
+      readBookingDeposit(business.deps, as(business, 'staff'), bookingId),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
+  it("never reads another business's payment", async () => {
+    const business = await newBusiness();
+    const other = await newBusiness();
+    const { bookingId } = await paidAndBooked(business);
+    expect(await readBookingDeposit(other.deps, as(other, 'owner'), bookingId)).toBeNull();
   });
 });

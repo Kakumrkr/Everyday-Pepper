@@ -5,6 +5,8 @@ import {
   StripeAccountIdSchema,
   StripeCustomerIdSchema,
   UserIdSchema,
+  BookingIdSchema,
+  type BookingDeposit,
   type BookingPaymentStart,
   type BookingPaymentStatus,
   type DepositTerms,
@@ -12,9 +14,10 @@ import {
   type PublicBookingDeposit,
   type TenantId,
 } from '@pepper/contracts';
-import { queuePayment, queuePushToMembers } from '@pepper/core';
+import { queuePayment, queuePushToMembers, requirePermission, type Actor } from '@pepper/core';
 import {
   appendAuditEntry,
+  findBooking,
   findBookingPayment,
   findBookingPaymentByBooking,
   findBookingPaymentByRequest,
@@ -24,6 +27,7 @@ import {
   listOpenBookingPayments,
   moveBookingPayment,
   touchBookingPayment,
+  withMember,
   withTenant,
   type BookingPaymentChange,
   type BookingPaymentRow,
@@ -260,6 +264,39 @@ const CLIENT_STATUS: Partial<Record<BookingPaymentStatus, PublicBookingDeposit['
   refunded: 'refunded',
 };
 
+/** What the team is told about each stored status (S67, AC-X-129): a failed refund is said. */
+const TEAM_STATUS: Partial<Record<BookingPaymentStatus, BookingDeposit['status']>> = {
+  ...CLIENT_STATUS,
+  refund_failed: 'refund_failed',
+};
+
+/** A payment row as a view at `now`, with the stored window (S66.2/S67). */
+function depositViewOf<S extends string>(
+  row: BookingPaymentRow,
+  statuses: Partial<Record<BookingPaymentStatus, S>>,
+  input: { startsAt: Date; now: Date },
+): {
+  kind: 'deposit' | 'card';
+  amountCents: number;
+  refundEndsAt: string | null;
+  status: S;
+  refundableNow: boolean;
+} | null {
+  const status = statuses[BookingPaymentStatusSchema.parse(row.status)];
+  if (status === undefined) return null;
+  if (row.kind === 'card') {
+    return { kind: 'card', amountCents: 0, refundEndsAt: null, status, refundableNow: false };
+  }
+  const endsAt = row.refundEndsAt ?? depositRefundEndsAt(input.startsAt, row.refundHours);
+  return {
+    kind: 'deposit',
+    amountCents: row.amountCents,
+    refundEndsAt: endsAt.toISOString(),
+    status,
+    refundableNow: status === 'held' && input.now.getTime() <= endsAt.getTime(),
+  };
+}
+
 /**
  * A booking's deposit for its client's manage page (S66.2, AC-X-123), in the booking's read:
  * the stored window decides `refundableNow`, never the page. `null` with no payment, or one that
@@ -270,26 +307,28 @@ export async function bookingDepositIn(
   input: { bookingId: string; startsAt: Date; now: Date },
 ): Promise<PublicBookingDeposit | null> {
   const row = await findBookingPaymentByBooking(tx, input.bookingId);
-  if (row === undefined) return null;
-  const status = CLIENT_STATUS[BookingPaymentStatusSchema.parse(row.status)];
-  if (status === undefined) return null;
-  if (row.kind === 'card') {
-    return {
-      kind: 'card',
-      amountCents: 0,
-      refundEndsAt: null,
-      status,
-      refundableNow: false,
-    };
-  }
-  const endsAt = row.refundEndsAt ?? depositRefundEndsAt(input.startsAt, row.refundHours);
-  return {
-    kind: 'deposit',
-    amountCents: row.amountCents,
-    refundEndsAt: endsAt.toISOString(),
-    status,
-    refundableNow: status === 'held' && input.now.getTime() <= endsAt.getTime(),
-  };
+  return row === undefined ? null : depositViewOf(row, CLIENT_STATUS, input);
+}
+
+/**
+ * A booking's deposit for the team's booking sheet (S67 top-up, AC-X-129): owners and managers
+ * (`payments.read`); a refund Stripe refused is said as such. `null`: no such booking in the
+ * business, or no payment that took something.
+ */
+export async function readBookingDeposit(
+  deps: Pick<PaymentsDeps, 'db' | 'clock'>,
+  actor: Actor,
+  bookingId: string,
+): Promise<BookingDeposit | null> {
+  requirePermission(actor, 'payments.read');
+  const id = BookingIdSchema.parse(bookingId);
+  return withMember(deps.db, actor.context, async (tx) => {
+    const booking = await findBooking(tx, id);
+    if (booking === undefined) return null;
+    const row = await findBookingPaymentByBooking(tx, booking.id);
+    if (row === undefined) return null;
+    return depositViewOf(row, TEAM_STATUS, { startsAt: booking.startsAt, now: deps.clock.now() });
+  });
 }
 
 /**
