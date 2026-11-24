@@ -793,7 +793,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
 
       {step === 'pay' && payment !== null ? (
         <>
-          {heading(payment.terms.kind === 'card' ? 'Add your card' : 'Pay your deposit')}
+          {heading('Almost booked')}
           <DepositStep start={payment} timeZone={timeZone} busy={busy} onPaid={() => confirm()} />
           {error === null ? null : <Notice tone="error">{error}</Notice>}
         </>

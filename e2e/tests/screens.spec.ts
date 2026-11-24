@@ -1430,3 +1430,87 @@ for (const width of WIDTHS) {
     ]);
   });
 }
+
+/** Puts fixed text in place of a day that moves with today (a mask follows the text's width). */
+async function fixedText(part: Locator, text: string): Promise<void> {
+  await part.evaluate((element, fixed) => {
+    element.textContent = fixed;
+  }, text);
+}
+
+for (const width of WIDTHS) {
+  test(`Deposits: the service sheet, the payment and the manage page at ${String(width)} px, light and dark`, async ({
+    page,
+  }) => {
+    test.setTimeout(240_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const slug = await southsideMenu(page);
+    // Payments ready in the sandbox, then a $15 deposit on the skin fade (AC-X-121).
+    const origin = { origin: new URL(page.url()).origin };
+    const onboarding = await page.request.post('/v1/payments/onboarding', { headers: origin });
+    expect(onboarding.ok(), await onboarding.text()).toBe(true);
+    await stripeSays(page, 'ready');
+    const phone = width === 375;
+    const shots = async (name: string, options: { fullPage?: boolean } = {}) => {
+      if (phone) await expectTapTargets(page, name);
+      for (const scheme of SCHEMES) {
+        await still(page, scheme);
+        await expect
+          .soft(page)
+          .toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, { ...SHOT, ...options });
+      }
+      await page.emulateMedia({ colorScheme: 'light' });
+    };
+
+    await page.goto('/services');
+    await (await hydrated(page.getByRole('button', { name: 'Edit Skin fade' }))).click();
+    const sheet = page.getByRole('dialog', { name: 'Edit Skin fade' });
+    await sheet.getByRole('radio', { name: 'Amount' }).click();
+    await sheet.getByLabel('Deposit ($)').fill('15');
+    await shots('deposit-sheet', { fullPage: false });
+    await sheet.getByRole('button', { name: 'Save' }).click();
+    await expect(sheet).toBeHidden();
+
+    // A client books the skin fade three days ahead: the terms, then the (sandbox's) card.
+    await page.goto(`/book/${slug}`);
+    await (await hydrated(page.getByRole('button', { name: /^Skin fade/ }))).click();
+    await page.getByRole('button', { name: /^Anyone available/ }).click();
+    await page.getByRole('group', { name: 'Day' }).getByRole('button').nth(3).click();
+    await page.getByTestId('free-times').getByRole('button').first().click();
+    const email = `${unique('dee')}@example.test`;
+    await page.getByLabel('Full name').fill('Dee Park');
+    await page.getByLabel('Email').fill(email);
+    await page.getByRole('button', { name: 'Send my code' }).click();
+    const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+    await page.getByLabel('Code').fill(code);
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.getByRole('heading', { name: 'Almost booked' })).toBeVisible();
+    const terms = page.getByTestId('deposit-terms');
+    await fixedText(
+      terms.getByText(/^Cancel by /),
+      'Cancel by Thu, Dec 3, 9:00 AM and you get the $15 back. After that, it’s kept.',
+    );
+    await fixedText(page.getByText(DATED).first(), 'Thu, Dec 4, 9:00 AM');
+    await shots('deposit-pay');
+
+    await page.getByRole('button', { name: 'Pay $15 and book' }).click();
+    await expect(page.getByRole('heading', { name: 'You’re booked, Dee' })).toBeVisible();
+    await page.getByRole('link', { name: 'Reschedule or cancel' }).click();
+    const status = page.getByTestId('deposit-status');
+    await expect(status).toContainText('You paid a $15 deposit.');
+    await hydrated(page.getByRole('button', { name: 'Cancel booking' }));
+    await fixedText(page.getByText(DATED).first(), 'Thu, Dec 4, 9:00 AM');
+    await fixedText(
+      status,
+      'You paid a $15 deposit. Cancel by Thu, Dec 3, 9:00 AM to get it back.',
+    );
+    await shots('deposit-manage');
+
+    await page.getByRole('button', { name: 'Cancel booking' }).click();
+    await expect(page.getByTestId('cancel-deposit')).toHaveText(
+      'Cancel now and get your $15 back.',
+    );
+    await shots('deposit-cancel');
+  });
+}

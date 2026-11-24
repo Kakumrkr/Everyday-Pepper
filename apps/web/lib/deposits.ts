@@ -138,23 +138,30 @@ export interface PaymentWords {
   button: string;
 }
 
-export function paymentWords(start: BookingPaymentStart, timeZone: string): PaymentWords {
+export function paymentWords(
+  start: BookingPaymentStart,
+  timeZone: string,
+  now: number = Date.now(),
+): PaymentWords {
   const until = dateTimeLabel(timeZone, start.refundEndsAt);
+  // A visit sooner than the window: no cancel gets the deposit back, and the page says so.
+  const passed = Date.parse(start.refundEndsAt) <= now;
   if (start.terms.kind === 'card') {
     return {
       title: 'Add a card to book',
       lines: [
         'Nothing is charged now. Stripe keeps your card for this booking.',
-        `Cancel any time before ${until} at no cost.`,
       ],
       button: 'Save card and book',
     };
   }
   const amount = formatMoney(start.terms.amountCents);
   const lines = [
-    start.terms.refundHours === 0
-      ? `Cancel any time before your visit and you get the ${amount} back.`
-      : `Cancel by ${until} and you get the ${amount} back. After that, it’s kept.`,
+    passed
+      ? `Your visit is soon, so the ${amount} is kept if you cancel.`
+      : start.terms.refundHours === 0
+        ? `Cancel any time before your visit and you get the ${amount} back.`
+        : `Cancel by ${until} and you get the ${amount} back. After that, it’s kept.`,
     'The rest is paid at your visit.',
   ];
   return { title: `Pay a ${amount} deposit to book`, lines, button: `Pay ${amount} and book` };

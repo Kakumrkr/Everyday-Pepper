@@ -96,6 +96,7 @@ describe('the booking page’s terms before the card field (AC-X-122)', () => {
         provider: 'sandbox',
       },
       TZ,
+      Date.parse('2026-11-30T12:00:00.000Z'),
     );
     expect(words).toEqual({
       title: 'Pay a $15 deposit to book',
@@ -105,6 +106,21 @@ describe('the booking page’s terms before the card field (AC-X-122)', () => {
       ],
       button: 'Pay $15 and book',
     });
+  });
+
+  it('says a visit sooner than the window keeps the deposit on a cancel', () => {
+    const words = paymentWords(
+      {
+        clientSecret: SECRET,
+        publishableKey: null,
+        terms: { kind: 'deposit', amountCents: 1500, refundHours: 168 },
+        refundEndsAt: '2026-12-01T21:00:00.000Z',
+        provider: 'sandbox',
+      },
+      TZ,
+      Date.parse('2026-12-02T12:00:00.000Z'),
+    );
+    expect(words.lines[0]).toBe('Your visit is soon, so the $15 is kept if you cancel.');
   });
 
   it('says a card on file charges nothing now', () => {
