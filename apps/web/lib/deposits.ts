@@ -18,6 +18,9 @@ import { centsFromText, textFromCents } from './setup';
 // page's terms before Stripe's card field, and the manage page's line before Cancel. One place,
 // so the owner's sheet, the client's page and the tests say the same thing.
 
+/** The largest fixed deposit the contract takes (`DepositRuleSchema`). */
+const MAX_FIXED_DEPOSIT_CENTS = 10_000_000;
+
 /** The service sheet's choice, in the order shown. */
 export const DEPOSIT_CHOICES: readonly { value: DepositKind; label: string }[] = [
   { value: 'none', label: 'None' },
@@ -60,7 +63,10 @@ export function depositRuleFrom(
       return { ok: false, message: 'Enter the deposit as an amount, e.g. 15 or 12.50.' };
     }
     if (cents < MIN_DEPOSIT_CENTS) return { ok: false, message: 'A deposit is at least $0.50.' };
-    rule = { kind: 'fixed', amountCents: Math.min(cents, 10_000_000) };
+    if (cents > MAX_FIXED_DEPOSIT_CENTS) {
+      return { ok: false, message: 'A deposit is at most $100,000.' };
+    }
+    rule = { kind: 'fixed', amountCents: cents };
   } else {
     const percent = Number(fields.percent.trim());
     if (
@@ -149,9 +155,7 @@ export function paymentWords(
   if (start.terms.kind === 'card') {
     return {
       title: 'Add a card to book',
-      lines: [
-        'Nothing is charged now. Stripe keeps your card for this booking.',
-      ],
+      lines: ['Nothing is charged now. Stripe keeps your card for this booking.'],
       button: 'Save card and book',
     };
   }

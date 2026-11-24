@@ -71,6 +71,8 @@ const STEPS: readonly Step[] = ['service', 'staff', 'time', 'details', 'verify',
 // The step bar's names, by the steps above; the last only for a service that asks for a
 // deposit or a card (S66.2).
 const STEP_NAMES = ['Service', 'Who', 'Time', 'Your details', 'Your code', 'Pay'] as const;
+// A card on file charges nothing now, so its step isn't called "Pay".
+const CARD_STEP_NAMES = ['Service', 'Who', 'Time', 'Your details', 'Your code', 'Card'] as const;
 
 /** What to say about a wrong or expired code. */
 function codeProblemText(problem: 'wrong_code' | 'expired', body: unknown): string {
@@ -172,6 +174,8 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [booked, setBooked] = useState<BookingConfirmResponse | null>(null);
   // The request's payment (S66.2): what Stripe's field needs and the terms in words.
   const [payment, setPayment] = useState<BookingPaymentStart | null>(null);
+  // Stripe said yes to it: a later confirm books with it, never asks for the card again.
+  const [paid, setPaid] = useState(false);
   // "Join the waitlist" (S38a): the day with nothing free; the steps after it join instead.
   const [waitlistDay, setWaitlistDay] = useState<{ date: string; label: string } | null>(null);
   const [waitlisted, setWaitlisted] = useState<WaitlistConfirmResponse | null>(null);
@@ -243,6 +247,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       }
       setRequestId(parsed.data.requestId);
       setPayment(null);
+      setPaid(false);
       setCode('');
       setAlternatives(null);
       // A remembered browser: booked already, no code to type (S47).
@@ -404,7 +409,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       return;
     }
     if (waitlistDay !== null) await joinWaitlist();
-    else if (needsPayment) await startPayment();
+    // Once the card went through (a taken time sent the client back here), the same payment
+    // books: starting it again would show Stripe's field for an intent already authorized.
+    else if (needsPayment && !paid) await startPayment();
     else await confirm();
   }
 
@@ -448,7 +455,15 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
 
   return (
     <div className="flex flex-col gap-5">
-      {index >= 0 ? <StepBar steps={STEP_NAMES.slice(0, steps.length)} current={index} /> : null}
+      {index >= 0 ? (
+        <StepBar
+          steps={(service?.deposit?.kind === 'card' ? CARD_STEP_NAMES : STEP_NAMES).slice(
+            0,
+            steps.length,
+          )}
+          current={index}
+        />
+      ) : null}
       {picked.length > 0 && step !== 'done' ? (
         <List label="Your choices" className="rounded-lg bg-surface px-4">
           {picked.map((choice) => (
@@ -794,7 +809,15 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       {step === 'pay' && payment !== null ? (
         <>
           {heading('Almost booked')}
-          <DepositStep start={payment} timeZone={timeZone} busy={busy} onPaid={() => confirm()} />
+          <DepositStep
+            start={payment}
+            timeZone={timeZone}
+            busy={busy}
+            onPaid={() => {
+              setPaid(true);
+              return confirm();
+            }}
+          />
           {error === null ? null : <Notice tone="error">{error}</Notice>}
         </>
       ) : null}

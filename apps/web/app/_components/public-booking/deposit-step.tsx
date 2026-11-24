@@ -37,8 +37,11 @@ export function DepositStep({
           </p>
         ))}
       </div>
-      {start.provider === 'sandbox' || start.publishableKey === null ? (
+      {start.provider === 'sandbox' ? (
         <SandboxCard start={start} button={words.button} busy={busy} onPaid={onPaid} />
+      ) : start.publishableKey === null ? (
+        // Stripe without the key its field needs (a deployment's mistake): never the test card.
+        <Notice tone="error">The card form can’t load right now. Try again later.</Notice>
       ) : (
         <StripeCard
           start={start}

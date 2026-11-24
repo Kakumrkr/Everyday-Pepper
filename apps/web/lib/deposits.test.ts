@@ -40,6 +40,11 @@ describe('the service sheet’s deposit field (AC-X-121)', () => {
     });
     expect(depositRuleFrom({ ...fields, amount: '0.25' }, 4500)).toMatchObject({ ok: false });
     expect(depositRuleFrom({ ...fields, amount: 'ten' }, 4500)).toMatchObject({ ok: false });
+    // Never cut down without a word (review).
+    expect(depositRuleFrom({ ...fields, amount: '250000' }, null)).toEqual({
+      ok: false,
+      message: 'A deposit is at most $100,000.',
+    });
     expect(depositRuleFrom({ kind: 'percent', amount: '', percent: '20' }, null)).toEqual({
       ok: false,
       message: 'A percent deposit needs a price.',
