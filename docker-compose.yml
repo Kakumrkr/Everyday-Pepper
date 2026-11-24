@@ -131,6 +131,7 @@ services:
       PAYMENTS_PROVIDER: ${PAYMENTS_PROVIDER:-sandbox}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
       STRIPE_LIVE: ${STRIPE_LIVE:-off}
       # Web Push (ADR-0026): the api only needs the public key. Local-only default key pair (the
       # worker has the private half); generate your own for anything real.

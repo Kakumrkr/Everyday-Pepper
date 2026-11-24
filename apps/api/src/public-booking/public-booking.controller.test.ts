@@ -63,6 +63,7 @@ const BOOKING = {
   service: { id: SERVICE_ID, name: 'Haircut' },
   staff: { id: STAFF_ID, displayName: 'Jess' },
   changeable: true,
+  deposit: null,
 } as PublicBooking;
 const OFFER = {
   status: 'open',

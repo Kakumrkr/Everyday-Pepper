@@ -232,6 +232,7 @@ describe('loadApiConfig', () => {
       PAYMENTS_PROVIDER: 'stripe',
       STRIPE_SECRET_KEY: 'sk_test_51NvApiConfigTestKey0000',
       STRIPE_WEBHOOK_SECRET: 'whsec_5f3a1c9e7b2d4f6a8c0e1b3d5f7a9c2e',
+      STRIPE_PUBLISHABLE_KEY: 'pk_test_51NvApiConfigTestKey0000',
     };
     expect(loadApiConfig(stripe).payments).toMatchObject({ provider: 'stripe', livemode: false });
     expect(() =>

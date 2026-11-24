@@ -9,13 +9,13 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S66.2 Deposits on screen** (user, 2026-11-24: "go ahead with your recommendations"; D-1 one session, fallback cut: the Stripe step to S66.3; D-2 `@stripe/stripe-js` only, loaded on the payment step; D-3 percent shows its dollars; D-4 CI runs normally, the repo is public). ACs AC-X-121…124.
 - [x] 1. ACs into acceptance-criteria and traceability
-- [ ] 2. Contract + api: `deposit` on `PublicBooking` (lookup/cancel/reschedule)
+- [x] 2. Contract + api: `deposit` on `PublicBooking` (lookup/cancel/reschedule)
 - [ ] 3. Service sheet deposit field
 - [ ] 4. Refund window in booking page settings
 - [ ] 5. Payment step in the booking flow (Stripe field / sandbox stand-in)
 - [ ] 6. Manage page deposit line before Cancel (top-up) and the outcome after
 - [ ] 7. `deposits.spec.ts` journeys + screens baselines
-Next: task 2.
+Next: task 3 (service sheet). Task 2 added `STRIPE_PUBLISHABLE_KEY` (required with stripe, same mode) and `publishableKey` on the payment start.
 
 ## Last sessions
 - **S66 Phase 15 · Deposits and card on file, backend (2026-11-22)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PCR-014](changes/PCR-014.md), [PR #103](https://github.com/Kakumrkr/Everyday-Pepper/pull/103)). Full entry in [session-log.md](session-log.md).

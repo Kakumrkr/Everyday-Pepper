@@ -412,6 +412,7 @@ describe('confirmBookingRequest', () => {
       service: { id: p.service.id, name: 'Haircut' },
       staff: { id: p.jess.id, displayName: 'Jess' },
       changeable: true,
+      deposit: null,
     });
     const [booking] = await bookingsOf(p);
     expect(booking).toMatchObject({ source: 'booking_page', staffMemberId: p.jess.id });

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DepositTermsSchema } from './deposits.js';
+import { DepositTermsSchema, PublicBookingDepositSchema } from './deposits.js';
 import { BusinessPhotosSchema } from './photos.js';
 import { BusinessProfileSchema } from './account.js';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
@@ -177,6 +177,8 @@ export const PublicBookingSchema = z.object({
   staff: z.object({ id: StaffMemberIdSchema, displayName: z.string() }),
   /** Still `confirmed` and not started: the client may reschedule or cancel it. */
   changeable: z.boolean(),
+  /** Its deposit or card on file (S66.2, AC-X-123); `null` when none was taken. */
+  deposit: PublicBookingDepositSchema.nullable(),
 });
 export type PublicBooking = z.infer<typeof PublicBookingSchema>;
 
