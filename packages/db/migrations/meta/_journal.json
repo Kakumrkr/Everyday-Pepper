@@ -575,6 +575,13 @@
       "when": 1795372014062,
       "tag": "0081_s66_deposits",
       "breakpoints": true
+    },
+    {
+      "idx": 82,
+      "version": "7",
+      "when": 1795542092512,
+      "tag": "0082_s67_deposit_audience",
+      "breakpoints": true
     }
   ]
 }

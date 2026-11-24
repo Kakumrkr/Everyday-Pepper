@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { DepositRefundHoursSchema } from './deposits.js';
+import { DepositAudienceSchema, DepositRefundHoursSchema } from './deposits.js';
 import { MailingAddressSchema } from './drafts.js';
 import { normalizePhone } from './clients.js';
 import { PermissionSchema } from './permissions.js';
@@ -248,6 +248,8 @@ export const BusinessSchema = z
     brandColor: BrandColorSchema.nullable(),
     /** Hours before the start a client may cancel and get a deposit back (S66, AC-X-112). */
     depositRefundHours: DepositRefundHoursSchema,
+    /** Who pays the services' deposits (S67, AC-X-125). */
+    depositAudience: DepositAudienceSchema,
   })
   .extend(BusinessProfileSchema.shape);
 export type Business = z.infer<typeof BusinessSchema>;
@@ -257,7 +259,11 @@ export type Business = z.infer<typeof BusinessSchema>;
  * left out stays as it is (S47 added the profile next to the color); at least one is needed.
  */
 export const BookingPageSettingsSchema = z
-  .object({ brandColor: BrandColorSchema.nullable(), depositRefundHours: DepositRefundHoursSchema })
+  .object({
+    brandColor: BrandColorSchema.nullable(),
+    depositRefundHours: DepositRefundHoursSchema,
+    depositAudience: DepositAudienceSchema,
+  })
   .extend(BusinessProfileSchema.shape)
   .partial()
   .strict()

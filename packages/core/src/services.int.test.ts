@@ -184,6 +184,22 @@ describe('updateBookingPage (PCR-001, ADR-0022)', () => {
     expect(JSON.stringify(changes)).not.toContain('Main St');
   });
 
+  it('sets who pays a deposit and audits it with the profile (S67, AC-X-125)', async () => {
+    const team = await newTeam();
+    const manager = as(team, team.manager, 'manager');
+    const after = await updateBookingPage(db, manager, { depositAudience: 'new_and_no_show' });
+    expect(after.depositAudience).toBe('new_and_no_show');
+    const entries = await withTenant(db, team.tenantId, (tx) =>
+      listAuditEntries(tx, { limit: 10 }),
+    );
+    expect(
+      entries.filter((e) => e.action === 'tenant.updated').map((e) => [e.before, e.after]),
+    ).toEqual([[{ profileChanged: ['depositAudience'] }, { profileChanged: ['depositAudience'] }]]);
+    await expect(
+      updateBookingPage(db, as(team, team.staff, 'staff'), { depositAudience: 'everyone' }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
   it('is not for staff', async () => {
     const team = await newTeam();
     await expect(

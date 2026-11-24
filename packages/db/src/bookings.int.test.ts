@@ -29,6 +29,7 @@ import {
   findBookingByIdempotencyKey,
   insertBooking,
   insertWaitlistEntry,
+  clientStandingIn,
   listBookings,
   listClientBookings,
   listOccupancy,
@@ -349,6 +350,47 @@ describe('bookings', () => {
       withTenant(db, b.tenant, (tx) => listBookings(tx, { ...range, clientId }));
     expect((await of(b.client)).map((r) => r.id)).toEqual([maria.id]);
     expect((await of(ClientIdSchema.parse(lee.id))).map((r) => r.id)).toEqual([lees.id]);
+  });
+
+  it("counts a client's ended visits and recent no-shows (S67, AC-X-126)", async () => {
+    const b = await newBusiness();
+    const now = at('2026-11-24T15:00:00Z');
+    const since = at('2025-11-24T15:00:00Z');
+    const standing = () =>
+      withTenant(db, b.tenant, (tx) => clientStandingIn(tx, { clientId: b.client, now, since }));
+    expect(await standing()).toEqual({ endedVisits: 0, recentNoShows: 0 });
+    // Upcoming, cancelled and still running visits count for neither.
+    await book(b, booking(b, b.jess, '2026-12-01T14:00:00Z'));
+    const cancelled = await book(b, booking(b, b.jess, '2026-11-01T14:00:00Z'));
+    await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, BookingIdSchema.parse(cancelled.id), 'cancelled'),
+    );
+    await book(b, booking(b, b.marco, '2026-11-24T14:30:00Z'));
+    expect(await standing()).toEqual({ endedVisits: 0, recentNoShows: 0 });
+    // A confirmed visit that has ended counts, as a completed one does.
+    await book(b, booking(b, b.jess, '2026-10-01T14:00:00Z'));
+    const done = await book(b, booking(b, b.jess, '2026-09-01T14:00:00Z'));
+    await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, BookingIdSchema.parse(done.id), 'completed'),
+    );
+    expect(await standing()).toEqual({ endedVisits: 2, recentNoShows: 0 });
+    // A no-show inside the 12 months counts; an older one doesn't.
+    const old = await book(b, booking(b, b.jess, '2025-06-01T14:00:00Z'));
+    const recent = await book(b, booking(b, b.jess, '2026-08-01T14:00:00Z'));
+    await withTenant(db, b.tenant, async (tx) => {
+      await setBookingStatus(tx, BookingIdSchema.parse(old.id), 'no_show');
+      await setBookingStatus(tx, BookingIdSchema.parse(recent.id), 'no_show');
+    });
+    expect(await standing()).toEqual({ endedVisits: 2, recentNoShows: 1 });
+    // Another client's visits are theirs.
+    const lee = await withTenant(db, b.tenant, (tx) =>
+      insertClient(tx, { name: 'Lee', email: null, phone: null, source: 'team' }),
+    );
+    expect(
+      await withTenant(db, b.tenant, (tx) =>
+        clientStandingIn(tx, { clientId: ClientIdSchema.parse(lee.id), now, since }),
+      ),
+    ).toEqual({ endedVisits: 0, recentNoShows: 0 });
   });
 
   it("lists a client's bookings either side of a moment, nearest first (S26b)", async () => {

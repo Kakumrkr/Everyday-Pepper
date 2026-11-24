@@ -58,6 +58,7 @@ describe('CurrentBusinessResponseSchema', () => {
         templateId: 'beauty-salon',
         brandColor: '#7a3e6c',
         depositRefundHours: 24,
+        depositAudience: 'everyone',
         phone: null,
         publicAddress: null,
         cancellationPolicy: null,

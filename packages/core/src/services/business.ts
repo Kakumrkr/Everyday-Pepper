@@ -86,6 +86,7 @@ const PROFILE_FIELDS = [
   'publicAddress',
   'cancellationPolicy',
   'depositRefundHours',
+  'depositAudience',
 ] as const;
 
 /**

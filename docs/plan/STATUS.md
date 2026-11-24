@@ -9,13 +9,13 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S67 Smart deposits** (brief approved 2026-11-24, user: "go with the recommended options": split [PCR-015](changes/PCR-015.md), one setting per business, fixed definitions). Branch `claude/nice-sagan-g64mbg`. AC-X-125…129.
 - [x] T1 docs: ACs, traceability, PCR-015, CHANGELOG 0.41, playbook/STATUS rows, ADR-0068 "S67" (tier 0)
-- [ ] T2 contracts: `DepositAudienceSchema`, `ClientStanding`, `depositApplies` + fixtures (tier 1)
-- [ ] T3 db: migration 0082 `tenants.deposit_audience`; standing by email; settings save (tier 1–2)
+- [x] T2 contracts: `DepositAudienceSchema`, `ClientStanding`, `depositApplies` + fixtures (tier 1)
+- [x] T3 db: migration 0082 `tenants.deposit_audience`; standing by email; settings save (tier 1–2)
 - [ ] T4 appointments: standing after the code, again at confirm; remembered regular (tier 1–2)
 - [ ] T5 api: settings field, `GET /v1/bookings/:id/deposit` (owners, managers) (tier 1–2)
 - [ ] T6 web: "Who pays a deposit" in settings, menu words; e2e regular journey (tier 1–2 + spec)
 - [ ] T7 top-up: the team sheet's deposit line; screenshots (tier 1–2 + spec)
-Next: T2.
+Next: T4 (appointments: standing after the code, again at confirm).
 
 ## Last sessions
 - **S66.2 Phase 15 · Deposits on screen (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PR #104](https://github.com/Kakumrkr/Everyday-Pepper/pull/104)). Full entry in [session-log.md](session-log.md).

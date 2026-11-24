@@ -84,6 +84,7 @@ describe('loadCurrentBusiness', () => {
       publicAddress: null,
       cancellationPolicy: null,
       depositRefundHours: 24,
+      depositAudience: 'everyone',
     },
     role: 'owner',
     permissions: ['business.read', 'members.read'],

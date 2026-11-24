@@ -110,9 +110,17 @@ const TenantChangeSchema = z.union([
     .object({
       brandColor: BrandColorSchema.nullable().optional(),
       profileChanged: z
-        .array(z.enum(['phone', 'publicAddress', 'cancellationPolicy', 'depositRefundHours']))
+        .array(
+          z.enum([
+            'phone',
+            'publicAddress',
+            'cancellationPolicy',
+            'depositRefundHours',
+            'depositAudience',
+          ]),
+        )
         .min(1)
-        .max(4),
+        .max(5),
     })
     .strict(),
 ]);
