@@ -5,7 +5,9 @@ import {
   BookingIdSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
+  depositApplies,
   depositTermsOf,
+  noShowsSince,
   SmsConsentWordingVersionSchema,
   ClientContactSchema,
   ClientEmailSchema,
@@ -62,6 +64,7 @@ import {
   depositRuleOf,
   findBookingByManageTokenHash,
   findClient,
+  clientStandingIn,
   findClientsByContact,
   findWaitlistOfferByTokenHash,
   findService,
@@ -215,6 +218,33 @@ export function depositTermsFor(
   return depositTermsOf(depositRuleOf(service), service.priceFromCents, tenant.depositRefundHours);
 }
 
+/**
+ * Whether this client pays the service's deposit (S67, ADR-0068 amendment): the service asks for
+ * one, and the business asks everyone or the client isn't a regular. Call it only once `email` is
+ * proven (the code, or a device the business remembers for it): it reads who the client is.
+ */
+async function depositNeededIn(
+  tx: TenantTx,
+  tenant: Pick<Tenant, 'depositRefundHours' | 'depositAudience'>,
+  service: Pick<ServiceRow, 'depositKind' | 'depositValue' | 'priceFromCents'>,
+  email: string,
+  now: number,
+): Promise<boolean> {
+  if (depositTermsFor(service, tenant) === null) return false;
+  if (tenant.depositAudience === 'everyone') return true;
+  const client = await existingClientFor(tx, email);
+  const at = new Date(now);
+  const standing =
+    client === undefined
+      ? null
+      : await clientStandingIn(tx, {
+          clientId: ClientIdSchema.parse(client.id),
+          now: at,
+          since: noShowsSince(at),
+        });
+  return depositApplies(tenant.depositAudience, standing);
+}
+
 /** What the booking page call needs to hash codes: a secret key of the deployment. */
 export interface CodeOptions extends PublicOptions {
   /** HMAC key for the stored code hashes (at least 32 bytes), never stored with them. */
@@ -348,7 +378,10 @@ export async function requestBooking(
   code: VerificationCode;
   email: BookingEmailDetails;
   remembered: boolean;
-  /** S66: the service asks for a deposit or a card, so the request is paid before it's booked. */
+  /**
+   * S66: the service asks for a deposit or a card, so the request is paid before it's booked;
+   * S67: `false` for a regular only when `remembered` proved the email.
+   */
   paymentNeeded: boolean;
 }> {
   const request = BookingRequestInputSchema.parse(input);
@@ -367,8 +400,8 @@ export async function requestBooking(
         throw new TooManyBookingRequestsError();
       }
       const serviceRow = await activeServiceRow(tx, request.serviceId);
-      const paymentNeeded = depositTermsFor(serviceRow, tenant) !== null;
-      if (paymentNeeded && !((await options.deposits?.open(tx)) ?? false)) {
+      const asksDeposit = depositTermsFor(serviceRow, tenant) !== null;
+      if (asksDeposit && !((await options.deposits?.open(tx)) ?? false)) {
         throw new DepositsClosedError();
       }
       const service = serviceToBook(serviceRow);
@@ -400,6 +433,11 @@ export async function requestBooking(
         request.email,
         new Date(now),
       );
+      // Who the client is is read only once the email is proven (AC-X-127): here by the device;
+      // otherwise after the code, so this answer is the same for every address.
+      const paymentNeeded =
+        asksDeposit &&
+        (!remembered || (await depositNeededIn(tx, tenant, serviceRow, request.email, now)));
       return {
         remembered,
         paymentNeeded,
@@ -442,7 +480,8 @@ export const PAYMENT_WINDOW_MINUTES = 30;
 /**
  * Before paying (S66, AC-X-114): checks the request's code (a wrong one counts an attempt) and
  * answers what its payment is for, with the service's terms read now. `PaymentNotNeededError`
- * for a service that asks for nothing; `DepositsClosedError` while the business can't take one.
+ * for a service that asks for nothing, or a regular the business doesn't ask (S67);
+ * `DepositsClosedError` while the business can't take one.
  */
 export async function verifyPaymentRequest(
   db: Database,
@@ -463,7 +502,10 @@ export async function verifyPaymentRequest(
     if (request?.purpose !== 'booking') throw new BookingRequestNotFoundError();
     const serviceRow = await activeServiceRow(tx, ServiceIdSchema.parse(request.serviceId));
     const terms = depositTermsFor(serviceRow, tenant);
-    if (terms === null) throw new PaymentNotNeededError();
+    // The code just proved the email: a regular pays nothing (S67, AC-X-127).
+    if (terms === null || !(await depositNeededIn(tx, tenant, serviceRow, request.email, now))) {
+      throw new PaymentNotNeededError();
+    }
     if (!((await options.deposits?.open(tx)) ?? false)) throw new DepositsClosedError();
     // Typing a card can outlast the code's ten minutes: the request stays open for the payment
     // (shorter than the hour after which the sweep lets an unused one go).
@@ -513,7 +555,7 @@ export async function confirmBookingRequest(
     const serviceRow = await activeServiceRow(tx, ServiceIdSchema.parse(request.serviceId));
     return {
       tenantId: TenantIdSchema.parse(tenant.id),
-      needed: depositTermsFor(serviceRow, tenant) !== null,
+      needed: await depositNeededIn(tx, tenant, serviceRow, request.email, now),
     };
   });
   if (paying.needed) {
@@ -544,6 +586,8 @@ export async function confirmBookingRequest(
         templateRuleDefaults: options.templateRuleDefaults,
       };
       const staffMemberId = await lockFirstBookable(tx, search);
+      // The rule read again with the booking (S67): a no-show marked meanwhile makes them pay.
+      const depositNeeded = await depositNeededIn(tx, tenant, serviceRow, request.email, now);
       const client = await clientFor(tx, request);
       const row = await insertBooking(tx, {
         clientId: ClientIdSchema.parse(client.id),
@@ -563,7 +607,8 @@ export async function confirmBookingRequest(
       });
       await setVerificationBooking(tx, id, BookingIdSchema.parse(row.id));
       // The rule read again with the booking: a deposit added meanwhile needs its payment too.
-      if (depositTermsFor(serviceRow, tenant) !== null) {
+      // A payment Stripe authorized above is attached as agreed, even if no longer asked (S67).
+      if (depositNeeded || paying.needed) {
         const attached =
           paying.needed &&
           options.deposits !== undefined &&
@@ -573,7 +618,7 @@ export async function confirmBookingRequest(
             startsAt: row.startsAt,
             now: new Date(now),
           }));
-        if (!attached) throw new PaymentRequiredError();
+        if (depositNeeded && !attached) throw new PaymentRequiredError();
       }
       await noteFirstBookingIn(tx);
       await keepReminderInStep(tx, row, now);
@@ -1072,6 +1117,15 @@ async function lockFirstBookable(tx: TenantTx, search: AlternativesSearch): Prom
   throw new SlotTaken();
 }
 
+/** The business's client a booking with this (verified) email address goes to, if any. */
+async function existingClientFor(tx: TenantTx, address: string): Promise<ClientRow | undefined> {
+  const email = ClientEmailSchema.parse(address);
+  const [existing] = (await findClientsByContact(tx, ClientContactSchema.parse(email))).filter(
+    (c) => c.email === email,
+  );
+  return existing;
+}
+
 /**
  * The business's client with the verified email address, or a new one from the request. An
  * existing client keeps the name and phone the business has for them.
@@ -1080,11 +1134,9 @@ async function clientFor(
   tx: TenantTx,
   request: { name: string; email: string; phone: string | null },
 ): Promise<ClientRow> {
-  const email = ClientEmailSchema.parse(request.email);
-  const [existing] = (await findClientsByContact(tx, ClientContactSchema.parse(email))).filter(
-    (c) => c.email === email,
-  );
+  const existing = await existingClientFor(tx, request.email);
   if (existing !== undefined) return existing;
+  const email = ClientEmailSchema.parse(request.email);
   const client = await insertClient(tx, {
     name: request.name,
     email,
