@@ -32,3 +32,10 @@ Phase 15 promises that no-shows cost the owner nothing. The first piece is a dep
 - Api: `POST …/booking-requests/:id/payment`, `POST /v1/dev/payments/intent` (sandbox only), 402 `payment_required`; the worker's payments runner and 5-minute sweep.
 - From the review: the sweep retries a void Stripe failed; a refund refused for good is `refund_failed`; outcome corrections move no money; no client name or email at Stripe; the refund window is stored and a client's late move keeps it (security review, PCR-014).
 - Not yet: the screens and journeys (S66.2); a real Stripe test-mode run (needs a test key, S66.2).
+
+## Built in S66.2
+- The service sheet's deposit field and the refund window in booking page settings (owners and managers; only where the deployment offers payments; "waiting" while Stripe can't take charges). Every sentence about a deposit lives in `apps/web/lib/deposits.ts`.
+- The booking page's payment step after the code: the terms in words first, then Stripe's Payment Element (`@stripe/stripe-js/pure`, loaded on that step only) or the sandbox's test card. A paid request that met a taken time books one of the alternatives with the same payment, without the card field again.
+- `PublicBooking.deposit` (`kind`, `amountCents`, `refundEndsAt`, `status` held/kept/refunding/refunded, `refundableNow`) from lookup, cancel and reschedule, through `PublicDeposits.describe`. `refund_failed` reads as `refunding` to the client (the business was told). The manage page says before Cancel what cancelling does now, by the server's stored window.
+- `STRIPE_PUBLISHABLE_KEY` is required with `PAYMENTS_PROVIDER=stripe`, of the same mode as the secret key, and answered as `publishableKey` with the payment start (`null` in the sandbox).
+- Not yet: a real Stripe test-mode run (the user's test keys); a waitlist claim of a deposit service books without one (S67); the funnel has no step of its own for paying.
