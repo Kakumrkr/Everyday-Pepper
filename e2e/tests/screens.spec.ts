@@ -408,6 +408,15 @@ for (const width of WIDTHS) {
         const wide = await page.evaluate(() => document.documentElement.scrollWidth);
         expect(wide, `${name} scrolls sideways`).toBeLessThanOrEqual(width);
       }
+      // The client's address (its length follows the worker's process id) and the visit's day
+      // as fixed text before the mask: a mask is as wide as its text, so a longer one rewrapped
+      // "…, with a link" and failed the shot on CI (S66.2).
+      await page.getByText(/^ana-\d+-\d+-\d+@example\.test$/).evaluateAll((elements) => {
+        for (const element of elements) element.textContent = 'ana@example.test';
+      });
+      await page.getByText(DATED).evaluateAll((elements) => {
+        for (const element of elements) element.textContent = 'Thu, Dec 4, 9:00 AM';
+      });
       for (const scheme of SCHEMES) {
         await still(page, scheme);
         await expect
