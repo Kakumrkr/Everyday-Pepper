@@ -219,6 +219,8 @@ describe('getPublicBusiness', () => {
       cancellationPolicy: null,
       // No photos until the owner adds them (S47.2).
       photos: { logo: null, cover: null, gallery: [] },
+      // Everyone pays a deposit until the owner chooses otherwise (S67).
+      depositAudience: 'everyone',
       services: [
         {
           id: p.service.id,
