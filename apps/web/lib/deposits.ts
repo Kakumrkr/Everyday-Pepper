@@ -95,8 +95,20 @@ export function percentPreview(percentText: string, priceFromCents: number | nul
   return `${String(percent)}% · ${formatMoney(cents)} of ${formatMoney(priceFromCents)}`;
 }
 
-/** The deposit on the menu's row: "Deposit $15", "Deposit 20% ($9)", "Card on file", or none. */
-export function depositLabel(rule: DepositRule, priceFromCents: number | null): string | null {
+/**
+ * The deposit on the menu's row: "Deposit $15", "Deposit 20% ($9)", "Card on file", or none;
+ * with new clients and no-shows only, "… · new clients" (S67, AC-X-128).
+ */
+export function depositLabel(
+  rule: DepositRule,
+  priceFromCents: number | null,
+  audience: DepositAudience = 'everyone',
+): string | null {
+  const label = ruleLabel(rule, priceFromCents);
+  return label === null || audience === 'everyone' ? label : `${label} · new clients`;
+}
+
+function ruleLabel(rule: DepositRule, priceFromCents: number | null): string | null {
   if (rule.kind === 'none') return null;
   if (rule.kind === 'card') return 'Card on file';
   if (rule.kind === 'fixed') return `Deposit ${formatMoney(rule.amountCents)}`;
@@ -276,4 +288,13 @@ export function manageDepositWords(
     case 'refunded':
       return { beforeCancel: null, status: `Your ${amount} deposit was refunded to your card.` };
   }
+}
+
+/**
+ * What the team's Cancel does to the deposit (S67 review; AC-X-118: the team's cancel always
+ * refunds), said before they confirm; `null` when nothing is held or only a card is kept.
+ */
+export function teamCancelDepositWords(deposit: BookingDeposit | null): string | null {
+  if (deposit?.kind !== 'deposit' || deposit.status !== 'held') return null;
+  return `Their ${formatMoney(deposit.amountCents)} deposit goes back to their card.`;
 }

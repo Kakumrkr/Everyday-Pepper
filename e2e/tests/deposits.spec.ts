@@ -187,6 +187,12 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   await expect(page.getByTestId('booking-deposit')).toHaveText(
     /^\$15 deposit paid · refundable until .+ (AM|PM)$/,
   );
+  // The team's cancel says what it does to the deposit before they confirm (AC-X-118).
+  await page.getByRole('button', { name: 'Cancel booking' }).click();
+  await expect(page.getByTestId('booking-cancel-deposit')).toHaveText(
+    'Their $15 deposit goes back to their card.',
+  );
+  await page.getByRole('button', { name: 'Keep it' }).click();
   await page.keyboard.press('Escape');
   await (await hydrated(early.getByRole('button', { name: 'Cancel booking' }))).click();
   await expect(early.getByTestId('cancel-deposit')).toHaveText('Cancel now and get your $15 back.');

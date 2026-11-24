@@ -104,7 +104,11 @@ export default async function ServicesPage() {
                         .filter(Boolean)
                         .join(' · '),
                       people.length === 0 ? 'No one offers it yet' : people.join(', '),
-                      depositLabel(service.deposit, service.priceFromCents),
+                      depositLabel(
+                        service.deposit,
+                        service.priceFromCents,
+                        current.business.depositAudience,
+                      ),
                     ].filter((line): line is string => line !== null)}
                     edit={
                       manages ? (

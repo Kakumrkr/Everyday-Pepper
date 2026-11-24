@@ -4,6 +4,7 @@ import {
   BookingDepositAnswerSchema,
   BookingSchema,
   type AvailableSlot,
+  type BookingDeposit,
   type BookingChange,
   type BookingStatus,
 } from '@pepper/contracts';
@@ -24,7 +25,7 @@ import {
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
 import { fetchJson, sendJson } from '../../../lib/client-api';
-import { teamDepositLine } from '../../../lib/deposits';
+import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
@@ -128,7 +129,8 @@ function BookingDetails({
   // The sheet's clock: the api checks the real one (done and no-show only once started).
   const [now] = useState(() => Date.now());
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
-  const deposit = useDepositLine(booking.id, timeZone, abilities.readsPayments);
+  const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
+  const deposit = teamDepositLine(depositRead, timeZone);
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -225,6 +227,11 @@ function BookingDetails({
         <p className="m-0 type-body font-semibold">
           Cancel this booking? The time becomes free again.
         </p>
+        {teamCancelDepositWords(depositRead) === null ? null : (
+          <p className="m-0 type-body text-ink-2" data-testid="booking-cancel-deposit">
+            {teamCancelDepositWords(depositRead)}
+          </p>
+        )}
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
           Email the client that it is cancelled
         </NotifyClient>
@@ -454,11 +461,11 @@ function MoveBooking({
 }
 
 /**
- * The booking's deposit in one line (S67 top-up, AC-X-129), read when the sheet opens: owners
- * and managers only; `null` with none, while loading, or when payments are off here.
+ * The booking's deposit (S67 top-up, AC-X-129), read when the sheet opens: owners and managers
+ * only; `null` with none, while loading, or when payments are off here.
  */
-function useDepositLine(bookingId: string, timeZone: string, reads: boolean): string | null {
-  const [line, setLine] = useState<string | null>(null);
+function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | null {
+  const [deposit, setDeposit] = useState<BookingDeposit | null>(null);
   useEffect(() => {
     if (!reads) return;
     let current = true;
@@ -466,11 +473,11 @@ function useDepositLine(bookingId: string, timeZone: string, reads: boolean): st
       `/v1/payments/bookings/${encodeURIComponent(bookingId)}/deposit`,
       BookingDepositAnswerSchema,
     ).then((answer) => {
-      if (current && answer.ok) setLine(teamDepositLine(answer.data.deposit, timeZone));
+      if (current && answer.ok) setDeposit(answer.data.deposit);
     });
     return () => {
       current = false;
     };
-  }, [bookingId, timeZone, reads]);
-  return line;
+  }, [bookingId, reads]);
+  return deposit;
 }

@@ -12,6 +12,7 @@ import {
   refundChoices,
   refundHoursLabel,
   refundWindowSentence,
+  teamCancelDepositWords,
   teamDepositLine,
   termsLabel,
 } from './deposits';
@@ -216,6 +217,10 @@ describe('who pays a deposit, in words (S67, AC-X-125, AC-X-128)', () => {
       'Card to book for new clients',
     );
     expect(termsLabel(null, 'new_and_no_show')).toBeNull();
+    expect(depositLabel({ kind: 'fixed', amountCents: 1500 }, 4500, 'new_and_no_show')).toBe(
+      'Deposit $15 · new clients',
+    );
+    expect(depositLabel({ kind: 'none' }, 4500, 'new_and_no_show')).toBeNull();
     expect(audienceNote('everyone')).toBeNull();
     expect(audienceNote('new_and_no_show')).toBe(
       'Only new clients and clients who missed a visit pay it. Regulars don’t.',
@@ -264,5 +269,21 @@ describe('the team’s booking sheet (S67 top-up, AC-X-129)', () => {
     expect(teamDepositLine(card, TZ)).toBe('Card on file');
     expect(teamDepositLine({ ...card, status: 'kept' }, TZ)).toBe('Card on file');
     expect(teamDepositLine(null, TZ)).toBeNull();
+  });
+});
+
+describe('the team’s cancel (S67 review, AC-X-118)', () => {
+  it('says a held deposit goes back, and nothing otherwise', () => {
+    const held = {
+      kind: 'deposit' as const,
+      amountCents: 1500,
+      refundEndsAt: '2026-11-24T21:00:00.000Z',
+      status: 'held' as const,
+      refundableNow: false,
+    };
+    expect(teamCancelDepositWords(held)).toBe('Their $15 deposit goes back to their card.');
+    expect(teamCancelDepositWords({ ...held, status: 'kept' })).toBeNull();
+    expect(teamCancelDepositWords({ ...held, kind: 'card', amountCents: 0 })).toBeNull();
+    expect(teamCancelDepositWords(null)).toBeNull();
   });
 });
