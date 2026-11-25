@@ -19,7 +19,12 @@ import {
   type PaymentsRead,
   type PublicPage,
 } from '../../lib/account';
-import { loadCalendarDay, type CalendarDay } from '../../lib/calendar-data';
+import {
+  loadCalendarDay,
+  loadCalendarWeek,
+  type CalendarDay,
+  type CalendarWeek,
+} from '../../lib/calendar-data';
 import { loadWebServerEnv } from '../../lib/env';
 import { opsAccessOf, type OpsAccess } from '../../lib/ops';
 
@@ -57,6 +62,14 @@ export async function currentCalendarDay(range: {
   to: string;
 }): Promise<CalendarDay> {
   return loadCalendarDay(await callOptions(), range);
+}
+
+/** One staff member's week for [from, to), the member chosen by `pick` (S69). */
+export async function currentCalendarWeek(
+  range: { from: string; to: string },
+  pick: Parameters<typeof loadCalendarWeek>[2],
+): Promise<CalendarWeek> {
+  return loadCalendarWeek(await callOptions(), range, pick);
 }
 
 /**

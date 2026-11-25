@@ -1,4 +1,4 @@
-import { buttonStyle, cx, EmptyState, FOCUS_RING, Icon } from '@pepper/ui';
+import { EmptyState, Icon } from '@pepper/ui';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -17,26 +17,18 @@ import {
 import { bookableStaff, bookingAbilities, type BookingSetup } from '../../../lib/booking';
 import { seesDetailsOf, visitClient } from '../../../lib/calendar-data';
 import { NewBooking } from '../../_components/booking/new-booking';
+import { ARROW_LINK, DAY_LINK, SEGMENT, ViewSwitch } from '../../_components/calendar/calendar-nav';
 import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
 import { kitLink } from '../../_components/kit-link';
 import { currentAccount, currentBusiness, currentCalendarDay } from '../../_server/account';
+import { WeekCalendar } from './week-calendar';
 
 export const dynamic = 'force-dynamic';
 export const metadata: Metadata = { title: 'Calendar · Pepper' };
 
-// The day buttons: kit pills, the arrows square (44 px, D3).
-const DAY_LINK = buttonStyle({ variant: 'secondary', size: 'sm' });
-const ARROW_LINK = cx(DAY_LINK, 'w-11 px-0');
-// The staff filter as the kit's segmented track (DESIGN.md §2); links, so each view has a URL.
-const SEGMENT = cx(
-  'inline-flex min-h-11 shrink-0 items-center rounded-pill px-4 type-label whitespace-nowrap no-underline',
-  'text-ink-2 transition motion-base ease-standard hover:text-ink',
-  'aria-[current=true]:bg-surface aria-[current=true]:text-ink aria-[current=true]:shadow-raised',
-  FOCUS_RING,
-);
-
 /**
- * The calendar's day view: one column per staff member on the business's clock. Owners and
+ * The calendar: a day of everyone, or one staff member's week (`?view=week`, S69:
+ * `WeekCalendar`). The day view: one column per staff member on the business's clock. Owners and
  * managers see every booking; staff see their own in full and colleagues' as busy times
  * (AC-W9-1: the api decides what each role gets). Members who may book get "New booking" and
  * a sheet for each booking they see in full (S15). On the kit (S42): the day's title and its
@@ -56,7 +48,18 @@ export default async function CalendarPage({
 
   const { timeZone } = current.business;
   const today = todayIn(timeZone, Date.now());
-  const { date, staffMemberId } = readCalendarParams(await searchParams, today);
+  const { date, staffMemberId, view } = readCalendarParams(await searchParams, today);
+  if (view === 'week') {
+    return (
+      <WeekCalendar
+        current={current}
+        userId={account.me.user.id}
+        date={date}
+        today={today}
+        staffMemberId={staffMemberId}
+      />
+    );
+  }
   const day = await currentCalendarDay(dayRange(timeZone, date));
   const services = new Map(day.services.map((service) => [service.id, service.name]));
   const userId = account.me.user.id;
@@ -113,6 +116,13 @@ export default async function CalendarPage({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          <ViewSwitch
+            view="day"
+            hrefs={{
+              day: calendarHref(date, staffMemberId),
+              week: calendarHref(date, staffMemberId, 'week'),
+            }}
+          />
           {books ? <NewBooking setup={setup} date={formatDate(date)} /> : null}
           <Link href={ROUTES.waitlist} className={DAY_LINK}>
             Waitlist

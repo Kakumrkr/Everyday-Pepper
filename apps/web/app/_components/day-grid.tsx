@@ -123,7 +123,7 @@ export function DayGrid({
                   item.column !== column || item.entry === null
                     ? []
                     : [
-                        <Entry
+                        <CalendarBlock
                           key={`${item.startsAt}-${item.entry.kind === 'booking' ? item.entry.id : 'busy'}`}
                           entry={item.entry}
                           staffMemberId={member.id}
@@ -152,7 +152,11 @@ export function DayGrid({
   );
 }
 
-function Entry({
+/**
+ * One entry on a time grid (the day view's, and the week view's, S69): a colleague's busy time,
+ * a booking that opens its sheet when the member may book, or a booking to read.
+ */
+export function CalendarBlock({
   entry,
   staffMemberId,
   setup,
@@ -160,6 +164,7 @@ function Entry({
   tone,
   top,
   height,
+  className: extra,
 }: {
   entry: CalendarEntry;
   staffMemberId: string;
@@ -169,6 +174,8 @@ function Entry({
   tone: string;
   top: number;
   height: number;
+  /** More classes for the block (the week view dims one being dragged). */
+  className?: string | undefined;
 }) {
   const time = timeRange(timeZone, entry.startsAt, entry.endsAt);
   const position = { top: `${top.toString()}%`, height: `${height.toString()}%` };
@@ -193,6 +200,7 @@ function Entry({
     'absolute inset-x-1 overflow-hidden rounded-sm border-0 border-l-4 border-solid px-2 py-1 text-left type-caption leading-tight text-ink',
     tone,
     entry.status === 'no_show' && 'opacity-70',
+    extra,
   );
   const style = position;
   const content = (

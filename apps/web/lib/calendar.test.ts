@@ -69,12 +69,19 @@ describe('readCalendarParams', () => {
       {
         date: { year: 2026, month: 12, day: 1 },
         staffMemberId: STAFF_ID,
+        view: 'day',
       },
     );
-    expect(readCalendarParams({}, nov3)).toEqual({ date: nov3, staffMemberId: null });
+    expect(readCalendarParams({}, nov3)).toEqual({ date: nov3, staffMemberId: null, view: 'day' });
     expect(
       readCalendarParams({ date: ['2026-12-01', '2026-12-02'], staff: 'not-an-id' }, nov3),
-    ).toEqual({ date: nov3, staffMemberId: null });
+    ).toEqual({ date: nov3, staffMemberId: null, view: 'day' });
+  });
+
+  it('reads the week view, and anything else as the day view (S69)', () => {
+    expect(readCalendarParams({ view: 'week' }, nov3).view).toBe('week');
+    expect(readCalendarParams({ view: 'month' }, nov3).view).toBe('day');
+    expect(readCalendarParams({ view: ['week', 'week'] }, nov3).view).toBe('day');
   });
 });
 
@@ -82,6 +89,13 @@ describe('calendarHref', () => {
   it('links a day, with the staff filter if any', () => {
     expect(calendarHref(nov3, null)).toBe('/calendar?date=2026-11-03');
     expect(calendarHref(nov3, STAFF_ID)).toBe(`/calendar?date=2026-11-03&staff=${STAFF_ID}`);
+  });
+
+  it('links the week view (S69)', () => {
+    expect(calendarHref(nov3, STAFF_ID, 'week')).toBe(
+      `/calendar?date=2026-11-03&staff=${STAFF_ID}&view=week`,
+    );
+    expect(calendarHref(nov3, null, 'day')).toBe('/calendar?date=2026-11-03');
   });
 });
 
