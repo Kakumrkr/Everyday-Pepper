@@ -1,24 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-25 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S68** (S67.2 done)
+**Last updated:** 2026-11-25 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 done (gate met in the sandbox, S68) → next the first row of Planned sessions (**S58a**, local; S57–S60 need the domain, PCR-012)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S68 · No-show fee by approval + Phase 15 gate** (brief pre-approved by the stored prompt: D-1 one session; D-2 the fee from the terms stored with the booking's payment, none without; D-3 a kept deposit counts toward the fee; D-4 owners only, ask-only `payment.no_show_fee`; D-5 Undo a day: cancels before the charge, refunds after; D-6 the card proposed in the no-show's transaction, team or Pepper).
-Tasks: 1 ACs + ADR · 2 contracts · 3 migration 0084 · 4 payments port/services/worker · 5 ai system tool + hook · 6 card words, receipt email, e2e · 7 C12 gate.
-Done: T1 ACs AC-X-136…143 + traceability · T2 contracts (`payment.no_show_fee` ask-only owners, `no-show-fees.ts`, outbox `fee_charge`/`fee_refund`, `payment_method`, audit `payments.fee_changed`) · T3 migration 0084 (`booking_payments.policy_sentence/no_show_fee_cents`, `booking_fees`) · T4 payments (`createOffSessionCharge`, `services/fees.ts`, receipt email) · T5 ai `charge_no_show_fee` + `proposeNoShowFeeIn` (requested by the member who marked it: the proposals' member RLS), the api's team no-show hook, `canDecide` needs the action's permission; eslint: `@pepper/ai` may import `@pepper/payments` (Claude, S68).
-Next: T6 card words/buttons (ui labels, a "Money" Autonomy group), e2e `no-show-fee.spec.ts`; T7 ADR amendment + C12 gate.
+Nothing in progress.
 
 ## Last sessions
+- **S68 Phase 15 · No-show fee by approval + gate (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107)). Full entry in [session-log.md](session-log.md).
+  - **Built:** the client's terms stored with the booking's payment; a no-show (team or Pepper) proposes one card with their policy sentence and "No-shows may be charged $20 · charge $20 or waive" (top-up), "Charge $20"/"Waive", owners only; the approved charge off-session after a 60 s grace, the receipt email, Undo (cancel or refund), `booking_fees` and `no-show-fees.json`. Phase 15 gate: C12 7 → 8. AC-X-136…143.
+  - **Checks:** `pnpm check` green (3rd run); affected integration 2,009 green; e2e 43 passed + 12 baselines redrawn; review 8 of 8 fixed, security none ≥ 8; walkthrough at 375 px light and dark.
 - **S67.2 Phase 15 · Cancellation-policy builder (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)). Full entry in [session-log.md](session-log.md).
   - **Built:** the policy in booking page settings (notice = the refund window; a later cancel and a no-show cost nothing, an amount or a percent; the owner's note), Pepper's one sentence from `@pepper/contracts` on the booking and manage pages and in the confirmation, reminder, reschedule and cancel emails; the confirmation's deposit line (top-up). AC-X-130…135.
   - **Checks:** `pnpm check` green (a format fix); affected integration 1,982 green; e2e 14 + screens 39 passed; review 6 of 7 fixed, security none ≥ 8; walkthrough at 375 px.
-- **S67 Phase 15 · Smart deposits (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PCR-015](changes/PCR-015.md), [PR #105](https://github.com/Kakumrkr/Everyday-Pepper/pull/105)). Full entry in [session-log.md](session-log.md).
-  - **Built:** "Who pays a deposit" per business (Everyone / New and no-shows); a regular books with no card step, read only after the code and again at confirm; the menu, settings, sheet and Services row say who pays; the team's booking sheet shows the deposit in one line (top-up), its Cancel says the deposit goes back. AC-X-125…129.
-  - **Checks:** `pnpm check` green (2nd run); affected integration green (1 fixture fixed); e2e 54 passed; review 3 of 4 fixed, security none ≥ 8; walkthrough at 375 px.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -34,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S68 (stored prompt, 2026-11-25):** pre-approved recommendations (D-1 one session; D-2 the fee from the stored terms; D-3 a kept deposit counts; D-4 owners only, ask-only; D-5 Undo a day; D-6 the card in the no-show's transaction). Full wording in [decisions.md](decisions.md).
 - **S67.2 (user, 2026-11-25):** "go ahead, start with your recommendations" (D-1 one session; D-2 the notice is the refund window; D-3 nothing/amount/percent, fees only with payments, "may be charged"; D-4 the old text stays as the owner's note; D-5 the words in contracts). Full wording in [decisions.md](decisions.md).
 - **S67 (user, 2026-11-24):** "go with the recommended options" (D-1 split → S67.2 the policy builder, [PCR-015](changes/PCR-015.md); D-2 one setting per business; D-3 fixed definitions: a visit that has ended, a no-show in 12 months). Full wording in [decisions.md](decisions.md).
 - **S66.2 (user, 2026-11-24):** "go ahead with your recommendations" (D-1 one session; D-2 `@stripe/stripe-js` only; D-3 a percent shows its dollars; D-4 CI normally, the repo is public); the weekly scheduled CI run explained (minutes used up, no runner). Full wording in [decisions.md](decisions.md).
@@ -110,11 +108,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, M1–M2 and P1 are done (Phases 0–12 and 14 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
