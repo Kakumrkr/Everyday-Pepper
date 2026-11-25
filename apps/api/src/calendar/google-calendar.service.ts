@@ -8,13 +8,12 @@ import type {
 import { systemClock, type Actor, type Clock, type TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
 import {
+  calendarProviderFor,
   calendarTokenKeyFrom,
   completeCalendarConnect,
   disconnectCalendar,
-  GoogleCalendarProvider,
   listOutsideBusy,
   readOwnCalendar,
-  SandboxCalendarProvider,
   startCalendarConnect,
   type CalendarDeps,
 } from '@pepper/google-calendar';
@@ -36,11 +35,6 @@ export interface GoogleCalendarOptions {
 }
 
 export const GOOGLE_CALENDAR_OPTIONS = Symbol('GOOGLE_CALENDAR_OPTIONS');
-
-/** The app's page Google sends the member back to (S70.2 builds it). */
-export function calendarReturnUrl(baseUrl: string): string {
-  return new URL('/more/calendar/google', baseUrl).toString();
-}
 
 @Injectable()
 export class GoogleCalendarService {
@@ -92,20 +86,11 @@ function bind(db: Database, options: GoogleCalendarOptions): CalendarDeps | null
   const { config } = options;
   if (config === null) return null;
   const clock = options.clock ?? systemClock;
-  const redirectUri = calendarReturnUrl(options.baseUrl);
   return {
     db,
     clock,
     tokenKey: calendarTokenKeyFrom(options.outboxKey),
-    provider:
-      config.provider === 'sandbox'
-        ? new SandboxCalendarProvider(redirectUri, () => clock.now().getTime())
-        : new GoogleCalendarProvider({
-            clientId: config.clientId,
-            clientSecret: config.clientSecret,
-            redirectUri,
-            now: () => clock.now().getTime(),
-          }),
+    provider: calendarProviderFor(config, options.baseUrl, () => clock.now().getTime()),
   };
 }
 

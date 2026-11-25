@@ -12,7 +12,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Done: 1 AC-X-152…159, ADR-0069 · 2 migration 0085 (3 tables, forced RLS, `job_scan('calendar')`), db repo + isolation 540 green · 3 contracts `calendar-sync.ts`, audit actions · 4 `@pepper/google-calendar` (port, fetch adapter, sandbox, sealing; services connect/finish/disconnect/read/pass): unit 34, int 24 green.
 - Claude: the token key is HKDF from the outbox key (purpose `pepper/google-calendar-tokens`), no new secret; PKCE sent, the hashed one-time state is the CSRF check (Google documents PKCE for installed apps only).
 - Done: 5 runtime `loadGoogleCalendarConfig` (4 unit), api `GoogleCalendarModule` (connect/callback/status/disconnect/outside-busy; error codes), api int 5 green, api unit 564.
-- Next: task 6 worker job.
+- Done: 6 worker `Calendar job` (`CALENDAR_POLL_MS`, default 1 min), `calendarProviderFor` shared by api and worker; Compose and `.env.example` sandbox; worker unit green.
+- Next: task 7 availability (`slotsFor` reads the busy blocks).
 
 ## Last sessions
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).

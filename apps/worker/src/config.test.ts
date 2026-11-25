@@ -57,6 +57,32 @@ describe('loadWorkerConfig', () => {
     expect(loadWorkerConfig(required).smsSandboxLog).toBe(false);
   });
 
+  it('reads staff calendars with Google or the sandbox, the sandbox only where tests run (S70, AC-X-158)', () => {
+    expect(loadWorkerConfig(required).googleCalendar).toBeNull();
+    const sandbox = { ...required, GOOGLE_CALENDAR_PROVIDER: 'sandbox' };
+    expect(loadWorkerConfig(sandbox).googleCalendar).toEqual({
+      settings: { provider: 'sandbox' },
+      baseUrl: 'http://localhost',
+      pollMs: 60_000,
+    });
+    expect(loadWorkerConfig({ ...sandbox, NODE_ENV: 'production' }).googleCalendar).toBeNull();
+    expect(
+      loadWorkerConfig({
+        ...required,
+        GOOGLE_CALENDAR_PROVIDER: 'google',
+        GOOGLE_CLIENT_ID: '123456789012-abcdefghijklmnop0123.apps.googleusercontent.com',
+        GOOGLE_CLIENT_SECRET: 'GOCSPX-abcdefghijklmnopqrstuvwx',
+        AUTH_BASE_URL: 'https://app.pepper.test/x',
+        CALENDAR_POLL_MS: '30000',
+        NODE_ENV: 'production',
+      }).googleCalendar,
+    ).toMatchObject({
+      settings: { provider: 'google' },
+      baseUrl: 'https://app.pepper.test',
+      pollMs: 30_000,
+    });
+  });
+
   it('requires DATABASE_URL and REDIS_URL', () => {
     expect(() => loadWorkerConfig({ OUTBOX_SECRET: required.OUTBOX_SECRET })).toThrow(
       'Invalid worker environment: DATABASE_URL, REDIS_URL',

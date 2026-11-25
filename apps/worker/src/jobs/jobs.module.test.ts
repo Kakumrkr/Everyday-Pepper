@@ -33,6 +33,11 @@ vi.mock('@pepper/core', async (original) => ({
   deleteAllSupportScreenshotImages: core.deleteAllSupportScreenshotImages,
 }));
 vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE'), MAILER: Symbol('MAILER') }));
+const calendar = vi.hoisted(() => ({ runDueCalendarReads: vi.fn() }));
+vi.mock('@pepper/google-calendar', async (original) => ({
+  ...(await original<object>()),
+  runDueCalendarReads: calendar.runDueCalendarReads,
+}));
 const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
 vi.mock('./drafts.js', () => ({ morningDraftsJob: drafts.morningDraftsJob }));
 
@@ -328,6 +333,33 @@ describe('JobsRunner', () => {
       'Inbound email: 2 landed, 1 held, 0 ignored, 0 refused, 0 failed',
     );
     expect(warn).toHaveBeenCalledWith('Inbound email: 1 left for a retry (ResendInboundError)');
+    log.mockRestore();
+    warn.mockRestore();
+    await runner.onApplicationShutdown();
+  });
+
+  it('reads staff calendars only when configured, with the clock and the outbox key, counts only (S70)', async () => {
+    expect(new JobsRunner(DB as never, OPTIONS).calendar).toBeNull();
+    calendar.runDueCalendarReads.mockResolvedValue({ read: 3, failed: 1, needsReconnect: 1 });
+    const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+    const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
+    const provider = { name: 'sandbox' } as never;
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      calendar: { provider, pollMs: 60_000 },
+    });
+    await runner.calendar?.runOnce();
+    expect(calendar.runDueCalendarReads).toHaveBeenCalledWith({
+      db: DB.db,
+      clock,
+      provider,
+      tokenKey: expect.any(Buffer) as Buffer,
+    });
+    const [deps] = calendar.runDueCalendarReads.mock.calls[0] as [{ tokenKey: Buffer }];
+    // Its own key, derived from the outbox key, never the outbox key itself.
+    expect(deps.tokenKey.equals(OPTIONS.key)).toBe(false);
+    expect(log).toHaveBeenCalledWith('Calendar: 3 read');
+    expect(warn).toHaveBeenCalledWith('Calendar: 1 failed, 1 need reconnecting');
     log.mockRestore();
     warn.mockRestore();
     await runner.onApplicationShutdown();
