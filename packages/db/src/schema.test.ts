@@ -9,6 +9,9 @@ import {
   autonomySettings,
   bookingFunnelEvents,
   businessPhotos,
+  calendarBusyBlocks,
+  calendarConnections,
+  calendarConnectStates,
   emailSuppressions,
   inboundEmails,
   invites,
@@ -204,6 +207,54 @@ describe('schema foreign keys', () => {
         onDelete: 'no action',
       },
     ]);
+  });
+});
+
+describe('Google Calendar (S70, ADR-0069)', () => {
+  it('goes with its business, its staff member and the member who connected it', () => {
+    expect(foreignKeys(calendarConnections)).toEqual(
+      expect.arrayContaining([
+        { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+        { from: ['created_by'], to: 'users(id)', onDelete: 'set null' },
+        {
+          from: ['tenant_id', 'staff_member_id'],
+          to: 'staff_members(tenant_id,id)',
+          onDelete: 'cascade',
+        },
+        {
+          from: ['tenant_id', 'membership_id'],
+          to: 'memberships(tenant_id,id)',
+          onDelete: 'cascade',
+        },
+      ]),
+    );
+    expect(foreignKeys(calendarConnectStates)).toHaveLength(3);
+    expect(foreignKeys(calendarBusyBlocks)).toEqual(
+      expect.arrayContaining([
+        {
+          from: ['tenant_id', 'connection_id'],
+          to: 'calendar_connections(tenant_id,id)',
+          onDelete: 'cascade',
+        },
+      ]),
+    );
+  });
+
+  it('keeps busy times as start and end only, and lets only the sync scan read across businesses', () => {
+    expect(
+      getTableConfig(calendarBusyBlocks)
+        .columns.map((c) => c.name)
+        .sort(),
+    ).toEqual(
+      ['connection_id', 'ends_at', 'id', 'staff_member_id', 'starts_at', 'tenant_id'].sort(),
+    );
+    expect(getTableConfig(calendarConnections).policies.map((p) => [p.name, p.for])).toEqual([
+      ['tenant_isolation', 'all'],
+      ['job_scan', 'select'],
+    ]);
+    for (const table of [calendarConnectStates, calendarBusyBlocks]) {
+      expect(getTableConfig(table).policies.map((p) => p.name)).toEqual(['tenant_isolation']);
+    }
   });
 });
 
