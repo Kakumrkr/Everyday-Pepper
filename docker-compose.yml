@@ -129,6 +129,7 @@ services:
       SMS_PROVIDER: ${SMS_PROVIDER:-sandbox}
       # Payments (S65, ADR-0067): the sandbox, as in .env.example; Stripe needs its keys.
       PAYMENTS_PROVIDER: ${PAYMENTS_PROVIDER:-sandbox}
+      GOOGLE_CALENDAR_PROVIDER: ${GOOGLE_CALENDAR_PROVIDER:-sandbox}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
       STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
@@ -177,6 +178,7 @@ services:
       SMS_PROVIDER: ${SMS_PROVIDER:-sandbox}
       # Deposits' captures, refunds and sweep (S66, ADR-0068): the api's provider.
       PAYMENTS_PROVIDER: ${PAYMENTS_PROVIDER:-sandbox}
+      GOOGLE_CALENDAR_PROVIDER: ${GOOGLE_CALENDAR_PROVIDER:-sandbox}
       # Episodes (S31, ADR-0037): summaries of quiet conversations, with the routine model and
       # the embedding model. Off unless the key and OPENAI_MODEL_EMBEDDING are set (as for the api).
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}

@@ -41,6 +41,7 @@ export * from './repositories/sessions.js';
 export * from './repositories/payments.js';
 export * from './repositories/booking-payments.js';
 export * from './repositories/booking-fees.js';
+export * from './repositories/calendar-sync.js';
 export * from './repositories/sms.js';
 export * from './repositories/tasks.js';
 export * from './repositories/tenants.js';

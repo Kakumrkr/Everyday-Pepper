@@ -3,11 +3,13 @@ import { describe, expect, it } from 'vitest';
 import {
   clampStart,
   dropLabel,
+  DROP_PROBLEM_WORDS,
   dropProblem,
   layoutWeek,
   lineAt,
   minuteAt,
   notWorking,
+  placedOn,
   startAt,
   weekDates,
   weekdayHeading,
@@ -263,12 +265,47 @@ describe('startAt and dropLabel', () => {
   });
 });
 
+describe('placedOn (S70)', () => {
+  const layout = { startMinute: 8 * 60, endMinute: 20 * 60 };
+  it('places items on the grid without widening it, clipped to its hours', () => {
+    const noon = { startsAt: '2026-11-25T17:00:00.000Z', endsAt: '2026-11-25T18:00:00.000Z' };
+    const allDay = { startsAt: '2026-11-25T05:00:00.000Z', endsAt: '2026-11-26T05:00:00.000Z' };
+    expect(placedOn(NY, layout, nov25, [noon, allDay])).toEqual([
+      { item: noon, top: (4 / 12) * 100, height: (1 / 12) * 100 },
+      { item: allDay, top: 0, height: 100 },
+    ]);
+  });
+
+  it('leaves out what falls outside the day or its hours', () => {
+    const early = { startsAt: '2026-11-25T11:00:00.000Z', endsAt: '2026-11-25T12:00:00.000Z' };
+    const otherDay = { startsAt: '2026-11-26T17:00:00.000Z', endsAt: '2026-11-26T18:00:00.000Z' };
+    expect(placedOn(NY, layout, nov25, [early, otherDay])).toEqual([]);
+  });
+});
+
 describe('dropProblem', () => {
   const now = Date.parse('2026-11-25T15:00:00.000Z');
   const target = { startsAt: '2026-11-26T15:00:00.000Z', endsAt: '2026-11-26T16:00:00.000Z' };
 
   it('is none for a free working time', () => {
     expect(dropProblem(target, { bookings: [], off: [], now })).toBeNull();
+  });
+
+  it('marks a time that is busy in Google Calendar (S70 top-up, AC-X-159)', () => {
+    const google = [{ startsAt: '2026-11-26T15:45:00.000Z', endsAt: '2026-11-26T17:00:00.000Z' }];
+    expect(dropProblem(target, { bookings: [], off: [], outside: google, now })).toBe('google');
+    // In working hours but busy in Google: Google's word, not "Not working then".
+    expect(dropProblem(target, { bookings: [], off: google, outside: google, now })).toBe('google');
+    // Touching is not overlapping.
+    expect(
+      dropProblem(target, {
+        bookings: [],
+        off: [],
+        outside: [{ startsAt: '2026-11-26T16:00:00.000Z', endsAt: '2026-11-26T17:00:00.000Z' }],
+        now,
+      }),
+    ).toBeNull();
+    expect(DROP_PROBLEM_WORDS.google).toBe('Busy in Google Calendar');
   });
 
   it('marks a time that overlaps another booking', () => {

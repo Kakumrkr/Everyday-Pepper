@@ -10,6 +10,7 @@ import { S3ObjectStore } from '@pepper/storage';
 import { Logger, Module, type DynamicModule } from '@nestjs/common';
 import type { WorkerConfig } from './config.js';
 import { ImportsModule } from './imports/imports.module.js';
+import { calendarProviderFor } from '@pepper/google-calendar';
 import { JobsModule } from './jobs/jobs.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
 import { episodeWriterFor } from './outbox/episodes.js';
@@ -43,6 +44,17 @@ export class AppModule {
         }),
         JobsModule.forRoot({
           key: outboxKeyFrom(config.outboxSecret),
+          calendar:
+            config.googleCalendar === null
+              ? null
+              : {
+                  provider: calendarProviderFor(
+                    config.googleCalendar.settings,
+                    config.googleCalendar.baseUrl,
+                    Date.now,
+                  ),
+                  pollMs: config.googleCalendar.pollMs,
+                },
           reminderPollMs: config.reminderPollMs,
           reminders: { baseUrl: config.support.baseUrl, texts: config.sms !== null },
           cleanupIntervalMs: config.cleanupIntervalMs,

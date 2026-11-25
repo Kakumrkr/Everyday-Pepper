@@ -171,6 +171,7 @@ Goal: staff plan their week in Pepper and their personal calendar blocks booking
 |---|---|---|---|
 | S69 | **Week view + drag to move** | Week view per staff member (Day/Week in Calendar, one staff member at a time, Monday first); drag to move (a long press on touch) asks whether to tell the client and never overrides the rules. Added at the brief: while dragging, off-hours shaded, the time it would land on said aloud, and a taken time marked before the drop; the moved booking's receipt has Undo. AC-X-144…151. | Playwright drag journeys; no move without the double-booking check |
 | S70 | **Google Calendar in** | OAuth, busy blocks from staff calendars into availability (the old Phase 10). The user starts Google's OAuth verification in Phase 10. | Contract tests; token-expiry scenario |
+| S70.2 | **Google Calendar on screen** (split from S70, ADR-0069) | More → Calendar: connect, reconnect, disconnect; the status on Team; the "Reconnect" feed card when a token expires; the OAuth journey and the first run against real Google in testing mode. | Connect journey e2e; a real testing-mode connect |
 | S71 | **Google Calendar out** | Bookings as events, incremental sync, reconciliation. | Conflict and duplicate scenarios |
 | S72 | **Recurring appointments + staff week** | "Every Tue 7 am for 8 weeks", with each date checked; staff's "My week". Phase gate. | Recurrence property tests |
 

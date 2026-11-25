@@ -4,11 +4,13 @@ import {
   loadOutboxSecret,
   loadPushConfig,
   loadServiceConfig,
+  loadGoogleCalendarConfig,
   loadPaymentsConfig,
   loadSmsConfig,
   type MailConfig,
   type PushConfig,
   type ServiceConfig,
+  type GoogleCalendarConfig,
   type PaymentsConfig,
   type SmsConfig,
 } from '@pepper/runtime/instrument';
@@ -71,6 +73,8 @@ const JobsEnvSchema = z.object({
     .optional(),
   /** How often the inbound job looks for received emails (S59.3: a reply lands in a minute). */
   INBOUND_POLL_MS: z.coerce.number().int().min(1000).max(300_000).default(15_000),
+  /** How often the calendar job looks for calendars due a read (S70: each every 5 minutes). */
+  CALENDAR_POLL_MS: z.coerce.number().int().min(1000).max(300_000).default(60_000),
   /** A business's monthly allowance of model tokens, as the api's (episodes count, S31). */
   AI_MONTHLY_TOKENS: z.coerce.number().int().min(1).max(1_000_000_000).default(5_000_000),
 });
@@ -96,6 +100,11 @@ export interface WorkerConfig extends ServiceConfig {
    * `null` while off. The sandbox only where tests may run, as the api's.
    */
   payments: PaymentsConfig | null;
+  /**
+   * Google Calendar (S70, ADR-0069): the read of staff members' busy times, with the api's
+   * provider; `null` while off. The sandbox only where tests may run, as the api's.
+   */
+  googleCalendar: { settings: GoogleCalendarConfig; baseUrl: string; pollMs: number } | null;
   /**
    * The sandbox's sent texts kept in Redis for tests (S63, AC-X-87): `SMS_PROVIDER=sandbox` in
    * CI, or on a development machine (never a production build that forgot its environment).
@@ -177,6 +186,11 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
       loadPaymentsConfig('worker', env),
       testsMayRun(service.environment, env['NODE_ENV']),
     ),
+    googleCalendar: googleCalendarOf(
+      loadGoogleCalendarConfig('worker', env),
+      testsMayRun(service.environment, env['NODE_ENV']),
+      jobs,
+    ),
     smsSandboxLog: sms?.provider === 'sandbox' && testsMayRun(service.environment, env['NODE_ENV']),
     smsStatusBaseUrl:
       sms?.provider === 'twilio' && jobs.AUTH_BASE_URL !== undefined
@@ -213,6 +227,21 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
       jobs.AUTH_BASE_URL === undefined
         ? null
         : { baseUrl: new URL(jobs.AUTH_BASE_URL).origin, pollMs: jobs.WAITLIST_POLL_MS },
+  };
+}
+
+/** Off, or the sandbox where tests may not run, reads nothing (AC-X-158). */
+function googleCalendarOf(
+  settings: GoogleCalendarConfig | null,
+  testsMay: boolean,
+  jobs: { AUTH_BASE_URL?: string | undefined; CALENDAR_POLL_MS: number },
+): WorkerConfig['googleCalendar'] {
+  if (settings === null || (settings.provider === 'sandbox' && !testsMay)) return null;
+  return {
+    settings,
+    // Google's return page is the api's concern; the worker only refreshes and reads.
+    baseUrl: new URL(jobs.AUTH_BASE_URL ?? 'http://localhost').origin,
+    pollMs: jobs.CALENDAR_POLL_MS,
   };
 }
 

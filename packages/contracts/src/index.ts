@@ -46,3 +46,4 @@ export * from './usage.js';
 export * from './tasks.js';
 export * from './waitlist.js';
 export * from './zoned-time.js';
+export * from './calendar-sync.js';

@@ -158,7 +158,19 @@ describe('loadCalendarWeek (S69)', () => {
   const week = { from: '2026-11-02T05:00:00.000Z', to: '2026-11-09T05:00:00.000Z' };
   const hoursPath = `/v1/staff/${STAFF.id}/hours`;
   const timeOffPath = `/v1/staff/${STAFF.id}/time-off`;
+  const outsidePath = '/v1/calendar/outside-busy';
   const answers = {
+    [outsidePath]: {
+      busy: [
+        {
+          staffMemberId: STAFF.id,
+          startsAt: '2026-11-03T17:00:00.000Z',
+          endsAt: '2026-11-03T18:00:00.000Z',
+          source: 'google',
+        },
+      ],
+      truncated: false,
+    },
     ...full([booking(1, id(50))]),
     [hoursPath]: { intervals: [{ weekday: 2, start: '09:00', end: '17:00' }] },
     [timeOffPath]: {
@@ -199,10 +211,18 @@ describe('loadCalendarWeek (S69)', () => {
       { startsAt: '2026-11-04T15:00:00.000Z', endsAt: '2026-11-04T17:00:00.000Z' },
     ]);
     expect(loaded.failed).toBe(false);
+    // Their Google busy times, times only (S70, AC-X-159).
+    expect(loaded.outside).toEqual([
+      { startsAt: '2026-11-03T17:00:00.000Z', endsAt: '2026-11-03T18:00:00.000Z' },
+    ]);
     // Only that member's bookings and busy times are asked for (AC-X-145).
     const query = new URLSearchParams({ ...week, staffMemberId: STAFF.id }).toString();
     expect(paths).toEqual(
-      expect.arrayContaining([`/v1/bookings?${query}`, `/v1/calendar/busy?${query}`]),
+      expect.arrayContaining([
+        `/v1/bookings?${query}`,
+        `/v1/calendar/busy?${query}`,
+        `${outsidePath}?${query}`,
+      ]),
     );
     expect(paths).toContain(
       `${timeOffPath}?${new URLSearchParams({ from: week.from }).toString()}`,
@@ -210,9 +230,11 @@ describe('loadCalendarWeek (S69)', () => {
   });
 
   it('shades nothing when the hours fail, and says the view is incomplete only for visits', async () => {
-    const { options } = api(answers, [hoursPath]);
+    const { options } = api(answers, [hoursPath, outsidePath]);
     const loaded = await loadCalendarWeek(options, week, (staff) => staff[0] ?? null);
     expect(loaded.hours).toBeNull();
+    // Google's busy times missing: none drawn, the view still whole (the api still refuses).
+    expect(loaded.outside).toEqual([]);
     expect(loaded.failed).toBe(false);
     const broken = api(answers, ['/v1/calendar/busy']);
     expect((await loadCalendarWeek(broken.options, week, (staff) => staff[0] ?? null)).failed).toBe(

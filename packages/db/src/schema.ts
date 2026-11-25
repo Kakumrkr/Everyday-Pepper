@@ -56,7 +56,15 @@ function tenantIsolation(column: SQL): ReturnType<typeof pgPolicy> {
  * only in a transaction without a tenant whose `app.job_scan` setting names `job`.
  */
 function jobScan(
-  job: 'reminders' | 'cleanup' | 'tasks' | 'insights' | 'waitlist' | 'imports' | 'support',
+  job:
+    | 'reminders'
+    | 'cleanup'
+    | 'tasks'
+    | 'insights'
+    | 'waitlist'
+    | 'imports'
+    | 'support'
+    | 'calendar',
 ): ReturnType<typeof pgPolicy> {
   return pgPolicy('job_scan', {
     for: 'select',
@@ -3988,3 +3996,166 @@ export const bookingFees = pgTable(
   ],
 );
 export type BookingFeeRow = typeof bookingFees.$inferSelect;
+
+/**
+ * A staff member's Google Calendar, connected by the member linked to them (S70, ADR-0069): at
+ * most one per staff member. The refresh token, and the latest access token while it lasts, are
+ * sealed (AES-256-GCM, a key derived from `OUTBOX_SECRET` for this purpose, bound to the row's
+ * id), never stored in the clear and never returned. `needs_reconnect`: Google refused the
+ * refresh token (expired or revoked); its busy blocks are kept until the member reconnects or
+ * disconnects. Removing the member or the staff member removes the connection.
+ */
+export const calendarConnections = pgTable(
+  'calendar_connections',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    membershipId: uuid('membership_id').notNull(),
+    provider: text('provider').notNull(),
+    /** The Google account's email as Google verified it: "Connected as …". */
+    accountEmail: text('account_email').notNull(),
+    status: text('status').notNull().default('connected'),
+    /**
+     * Raised by each reconnect: a read that began before it (holding the old, revoked grant)
+     * writes nothing, so it can't mark the new connection refused or store the old busy times.
+     */
+    generation: integer('generation').notNull().default(1),
+    /** When the member connected (or last reconnected); not moved by reads. */
+    connectedAt: timestamp('connected_at', { withTimezone: true }).notNull().defaultNow(),
+    refreshTokenSealed: bytea('refresh_token_sealed').notNull(),
+    accessTokenSealed: bytea('access_token_sealed'),
+    accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
+    /** The last read of the busy times that worked. */
+    syncedAt: timestamp('synced_at', { withTimezone: true }),
+    /** The last try, worked or not: the next is due `GOOGLE_SYNC_EVERY` after it. */
+    attemptedAt: timestamp('attempted_at', { withTimezone: true }),
+    /** Why the last try failed (`rate_limited`, `unavailable`, `invalid_grant`…); `NULL` when it worked. */
+    lastError: text('last_error'),
+    createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('calendar_connections_tenant_id_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('calendar_connections_staff_unique').on(table.tenantId, table.staffMemberId),
+    index('calendar_connections_membership_idx').on(table.tenantId, table.membershipId),
+    index('calendar_connections_due_idx').on(table.status, table.attemptedAt),
+    foreignKey({
+      name: 'calendar_connections_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'calendar_connections_membership_fk',
+      columns: [table.tenantId, table.membershipId],
+      foreignColumns: [memberships.tenantId, memberships.id],
+    }).onDelete('cascade'),
+    check('calendar_connections_provider_known', sql`${table.provider} IN ('google', 'sandbox')`),
+    check(
+      'calendar_connections_status_known',
+      sql`${table.status} IN ('connected', 'needs_reconnect')`,
+    ),
+    check(
+      'calendar_connections_email_length',
+      sql`char_length(${table.accountEmail}) BETWEEN 3 AND 320`,
+    ),
+    check('calendar_connections_error_format', sql`${table.lastError} ~ '^[a-z_]{1,64}$'`),
+    check('calendar_connections_generation_range', sql`${table.generation} >= 1`),
+    check(
+      'calendar_connections_access_token_pair',
+      sql`(${table.accessTokenSealed} IS NULL) = (${table.accessTokenExpiresAt} IS NULL)`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('calendar'),
+  ],
+);
+export type CalendarConnectionRow = typeof calendarConnections.$inferSelect;
+
+/**
+ * One "Connect Google Calendar" in flight (S70, ADR-0069 §3): the hash of the `state` sent to
+ * Google (never the state itself) and the PKCE verifier, sealed. Used once, by the same member,
+ * within 10 minutes; a new start replaces the staff member's and removes the business's expired
+ * ones.
+ */
+export const calendarConnectStates = pgTable(
+  'calendar_connect_states',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    membershipId: uuid('membership_id').notNull(),
+    stateHash: bytea('state_hash').notNull(),
+    verifierSealed: bytea('verifier_sealed').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('calendar_connect_states_staff_unique').on(table.tenantId, table.staffMemberId),
+    uniqueIndex('calendar_connect_states_hash_unique').on(table.stateHash),
+    foreignKey({
+      name: 'calendar_connect_states_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'calendar_connect_states_membership_fk',
+      columns: [table.tenantId, table.membershipId],
+      foreignColumns: [memberships.tenantId, memberships.id],
+    }).onDelete('cascade'),
+    check('calendar_connect_states_hash_length', sql`octet_length(${table.stateHash}) = 32`),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type CalendarConnectStateRow = typeof calendarConnectStates.$inferSelect;
+
+/**
+ * A busy time from a staff member's Google Calendar (S70, ADR-0069 §4): its start and end only,
+ * never a title, a place or who else is there. Replaced on each read for the window read;
+ * removed with the connection. Availability treats it like time off.
+ */
+export const calendarBusyBlocks = pgTable(
+  'calendar_busy_blocks',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    connectionId: uuid('connection_id').notNull(),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    startsAt: timestamp('starts_at', { withTimezone: true }).notNull(),
+    endsAt: timestamp('ends_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index('calendar_busy_blocks_staff_ends_at_idx').on(
+      table.tenantId,
+      table.staffMemberId,
+      table.endsAt,
+    ),
+    index('calendar_busy_blocks_connection_idx').on(table.tenantId, table.connectionId),
+    foreignKey({
+      name: 'calendar_busy_blocks_connection_fk',
+      columns: [table.tenantId, table.connectionId],
+      foreignColumns: [calendarConnections.tenantId, calendarConnections.id],
+    }).onDelete('cascade'),
+    foreignKey({
+      name: 'calendar_busy_blocks_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }).onDelete('cascade'),
+    check('calendar_busy_blocks_ends_after_start', sql`${table.endsAt} > ${table.startsAt}`),
+    check(
+      'calendar_busy_blocks_max_length',
+      sql`${table.endsAt} - ${table.startsAt} <= interval '70 days'`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type CalendarBusyBlockRow = typeof calendarBusyBlocks.$inferSelect;

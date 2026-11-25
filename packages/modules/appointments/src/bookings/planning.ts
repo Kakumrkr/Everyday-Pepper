@@ -48,6 +48,11 @@ export interface StaffRows {
   hours: readonly (WorkingMinutes & { staffMemberId: string })[];
   timeOff: readonly TimeOffRow[];
   occupancy: readonly Occupancy[];
+  /**
+   * Busy times from staff members' outside calendars (S70, ADR-0069 §6: Google Calendar); this
+   * one's are picked. They block like time off. None: no calendar is connected.
+   */
+  busy?: readonly { staffMemberId: string; startsAt: Date; endsAt: Date }[];
   /** The business's whole rule set. */
   rules: readonly Rule[];
   templateDefaults?: Partial<RuleDefaults>;
@@ -72,8 +77,9 @@ export function staffAvailabilityOf(rows: StaffRows): StaffAvailability {
     bookings: rows.occupancy
       .filter((o) => o.staffMemberId === staff.id && o.bookingId !== rows.excludeBookingId)
       .map(existingBookingOf),
-    // Outside calendars come with Google Calendar sync (Phase 10).
-    busy: [],
+    busy: (rows.busy ?? [])
+      .filter((b) => b.staffMemberId === staff.id)
+      .map((b) => ({ start: b.startsAt.getTime(), end: b.endsAt.getTime() })),
     rules: resolveRules(rows.rules, staffMemberId, rows.templateDefaults),
   };
 }

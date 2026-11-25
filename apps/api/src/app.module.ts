@@ -20,6 +20,7 @@ import { FeedModule } from './feed/feed.module.js';
 import { RemindersModule } from './reminders/reminders.controller.js';
 import { InboundModule } from './inbound/inbound.controller.js';
 import { MemberTextsModule } from './sms/member-texts.controller.js';
+import { GoogleCalendarModule } from './calendar/google-calendar.controller.js';
 import { PaymentsModule } from './payments/payments.controller.js';
 import { SmsWebhookModule } from './sms/sms-webhook.controller.js';
 import { SupportModule } from './support/support.controller.js';
@@ -79,6 +80,11 @@ export class AppModule {
         MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         PaymentsModule.forRoot({
           config: config.payments,
+          baseUrl: config.auth.baseUrl,
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+        }),
+        GoogleCalendarModule.forRoot({
+          config: config.googleCalendar,
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),
         }),

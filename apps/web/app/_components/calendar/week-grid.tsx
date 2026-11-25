@@ -19,6 +19,7 @@ import {
   dropLabel,
   dropProblem,
   layoutWeek,
+  placedOn,
   lineAt,
   minuteAt,
   startAt,
@@ -84,6 +85,7 @@ export function WeekGrid({
   tone,
   entries: given,
   off,
+  outside,
   working,
   now,
   setup,
@@ -97,6 +99,11 @@ export function WeekGrid({
   entries: CalendarEntry[];
   /** When they aren't working, per day: shaded, and a hint for a drop. */
   off: Timed[][];
+  /**
+   * When their Google Calendar says they're busy (S70 top-up, AC-X-159): shaded like the
+   * not-working hours, labelled "Busy (Google)", and a hint for a drop. Never opens or drags.
+   */
+  outside: Timed[];
   /** Their working hours as instants: the grid fits them. */
   working: Timed[];
   /** The current instant (from the server: the now-line and today's column). */
@@ -194,12 +201,13 @@ export function WeekGrid({
           {
             bookings: bookings.filter((other) => other.id !== entry.id),
             off: offFlat,
+            outside,
             now: Date.now(),
           },
         ),
       };
     },
-    [bookings, dates, layout.endMinute, layout.startMinute, offFlat, timeZone],
+    [bookings, dates, layout.endMinute, layout.startMinute, offFlat, outside, timeZone],
   );
 
   const stop = useCallback(() => {
@@ -487,6 +495,21 @@ export function WeekGrid({
                       style={{ top: `${String(shade.top)}%`, height: `${String(shade.height)}%` }}
                     />
                   ))}
+                  {placedOn(timeZone, layout, day.date, outside).map(
+                    ({ item: busy, top, height: tall }) => (
+                      <div
+                        key={`google-${busy.startsAt}`}
+                        data-testid="google-busy"
+                        className="pointer-events-none absolute inset-x-0 overflow-hidden border-l-2 border-line-strong bg-surface-2 px-2 py-1"
+                        style={{ top: `${String(top)}%`, height: `${String(tall)}%` }}
+                      >
+                        <span className="type-caption text-ink-2">Busy (Google)</span>
+                        <span className="sr-only">
+                          {`, ${timeLabel(timeZone, busy.startsAt)} to ${timeLabel(timeZone, busy.endsAt)}`}
+                        </span>
+                      </div>
+                    ),
+                  )}
                   {layout.hours.slice(1).map((minute, line) => (
                     <div
                       key={minute}

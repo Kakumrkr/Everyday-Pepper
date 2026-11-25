@@ -85,6 +85,14 @@ export const ApiErrorCodeSchema = z.enum([
   'payment_not_needed',
   'deposits_unavailable',
   'webhook_not_found',
+  // Google Calendar (S70, ADR-0069): off here; no staff member to connect for; Google's answer
+  // can't finish the connect; free/busy not granted; nothing connected; Google didn't answer.
+  'calendar_off',
+  'calendar_not_linked',
+  'calendar_connect_invalid',
+  'calendar_scope_missing',
+  'calendar_not_connected',
+  'calendar_unavailable',
   // Waitlist offers (S37, ADR-0041).
   'waitlist_offer_not_found',
   'waitlist_offer_used',

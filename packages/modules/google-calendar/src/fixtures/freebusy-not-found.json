@@ -1,0 +1,8 @@
+{
+  "kind": "calendar#freeBusy",
+  "timeMin": "2026-12-01T00:00:00.000Z",
+  "timeMax": "2027-01-30T00:00:00.000Z",
+  "calendars": {
+    "primary": { "errors": [{ "domain": "global", "reason": "notFound" }], "busy": [] }
+  }
+}

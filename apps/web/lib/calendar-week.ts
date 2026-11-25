@@ -231,6 +231,34 @@ export function layoutWeek<T extends Timed>(
 }
 
 /**
+ * Where `items` sit on `date`'s column of an already laid-out grid (S70: Google busy times),
+ * clipped to its hours like the shading, so they never widen the grid: an all-day block stays
+ * inside the day's hours. Each keeps its item, for its times.
+ */
+export function placedOn<T extends Timed>(
+  timeZone: string,
+  layout: Pick<WeekLayout<unknown>, 'startMinute' | 'endMinute'>,
+  date: CivilDate,
+  items: readonly T[],
+): { item: T; top: number; height: number }[] {
+  const length = layout.endMinute - layout.startMinute;
+  return items.flatMap((item) => {
+    const at = onDay(timeZone, date, item);
+    if (at === null) return [];
+    const top = Math.max(at.start, layout.startMinute);
+    const bottom = Math.min(at.end, layout.endMinute);
+    if (bottom <= top) return [];
+    return [
+      {
+        item,
+        top: ((top - layout.startMinute) / length) * 100,
+        height: ((bottom - top) / length) * 100,
+      },
+    ];
+  });
+}
+
+/**
  * Where a line for `instant` (the now-line) sits on `date`'s column of a laid-out grid, as a
  * percentage of its height; `null` when the instant falls outside the grid's hours. Placed with
  * the grid's own range, so the line meets the blocks beside it.
@@ -290,12 +318,13 @@ export function dropLabel(timeZone: string, instant: string): string {
 }
 
 /** Why a dragged booking can't go where it is (a hint: the api decides). */
-export type DropProblem = 'past' | 'taken' | 'off';
+export type DropProblem = 'past' | 'taken' | 'google' | 'off';
 
 /** What the dragged block says about a problem. */
 export const DROP_PROBLEM_WORDS: Record<DropProblem, string> = {
   past: 'In the past',
   taken: 'Booked then',
+  google: 'Busy in Google Calendar',
   off: 'Not working then',
 };
 
@@ -307,16 +336,23 @@ function overlaps(a: Timed, b: Timed): boolean {
 
 /**
  * Whether a dragged booking would land on a problem, before it is dropped: in the past, over
- * another of the staff member's bookings (`bookings`, the dragged one left out), or outside
- * their working hours or in time off (`off`). `null` when it looks free. Only a hint: buffers,
- * booking rules and changes since the page loaded are the api's to check.
+ * another of the staff member's bookings (`bookings`, the dragged one left out), busy in their
+ * Google Calendar (`outside`, S70), or outside their working hours or in time off (`off`).
+ * `null` when it looks free. Only a hint: buffers, booking rules and changes since the page
+ * loaded are the api's to check.
  */
 export function dropProblem(
   target: Timed,
-  around: { bookings: readonly Timed[]; off: readonly Timed[]; now: number },
+  around: {
+    bookings: readonly Timed[];
+    off: readonly Timed[];
+    outside?: readonly Timed[];
+    now: number;
+  },
 ): DropProblem | null {
   if (Date.parse(target.startsAt) < around.now) return 'past';
   if (around.bookings.some((booking) => overlaps(target, booking))) return 'taken';
+  if ((around.outside ?? []).some((busy) => overlaps(target, busy))) return 'google';
   if (around.off.some((off) => overlaps(target, off))) return 'off';
   return null;
 }

@@ -97,6 +97,24 @@ describe('staffAvailabilityOf', () => {
     expect(availability.rules).toMatchObject({ slotIntervalMinutes: 30, minimumNoticeMinutes: 0 });
   });
 
+  it("takes the staff member's own Google busy times as busy (S70, AC-X-156)", () => {
+    const block = (staffMemberId: string, start: string, end: string) => ({
+      staffMemberId,
+      startsAt: new Date(start),
+      endsAt: new Date(end),
+    });
+    const availability = staffAvailabilityOf({
+      ...rows,
+      busy: [
+        block(JESS, '2026-11-02T17:00:00Z', '2026-11-02T18:00:00Z'),
+        block(MARCO, '2026-11-02T15:00:00Z', '2026-11-02T16:00:00Z'),
+      ],
+    });
+    expect(availability.busy).toEqual([
+      { start: t('2026-11-02T17:00:00Z'), end: t('2026-11-02T18:00:00Z') },
+    ]);
+  });
+
   it('leaves out the booking being moved', () => {
     const availability = staffAvailabilityOf({ ...rows, excludeBookingId: BOOKING });
     expect(availability.bookings.map((b) => b.start)).toEqual([t('2026-11-02T16:00:00Z')]);

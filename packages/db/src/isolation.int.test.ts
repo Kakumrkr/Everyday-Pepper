@@ -57,6 +57,11 @@ import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
 import { insertBookingFee } from './repositories/booking-fees.js';
+import {
+  replaceConnectState,
+  saveCalendarConnection,
+  storeCalendarRead,
+} from './repositories/calendar-sync.js';
 import { insertBookingPayment, moveBookingPayment } from './repositories/booking-payments.js';
 import { insertPaymentAccount } from './repositories/payments.js';
 import { insertRememberedDevice } from './repositories/remembered-devices.js';
@@ -823,6 +828,49 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     noDelete: true,
     ownerLookup: 'booking_payment_sweep',
   },
+  calendar_connections: {
+    tenantColumn: 'tenant_id',
+    // A staff member's Google Calendar (S70, ADR-0069): sealed tokens, read across businesses
+    // by the sync's scan (ids only).
+    seed: async (tx) => (await seedCalendarConnection(tx)).id,
+    touch: 'status = status',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('calendar'::text))",
+  },
+  calendar_connect_states: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const staffMemberId = await seedStaff(tx);
+      const membership = await addMembership(tx, { userId: await insertUser(db), role: 'staff' });
+      const stateHash = randomBytes(32);
+      await replaceConnectState(
+        tx,
+        {
+          staffMemberId,
+          membershipId: membership.id,
+          stateHash,
+          verifierSealed: randomBytes(60),
+          expiresAt: new Date(Date.now() + 600_000),
+        },
+        new Date(),
+      );
+      return rowId(tx, 'calendar_connect_states', 'staff_member_id', staffMemberId);
+    },
+    touch: 'expires_at = expires_at',
+  },
+  calendar_busy_blocks: {
+    tenantColumn: 'tenant_id',
+    seed: async (tx) => {
+      const connection = await seedCalendarConnection(tx);
+      await storeCalendarRead(
+        tx,
+        connection,
+        [{ start: Date.parse('2026-12-01T15:00:00Z'), end: Date.parse('2026-12-01T16:00:00Z') }],
+        new Date(),
+      );
+      return rowId(tx, 'calendar_busy_blocks', 'connection_id', connection.id);
+    },
+    touch: 'ends_at = ends_at',
+  },
   booking_fees: {
     tenantColumn: 'tenant_id',
     // A no-show fee the owner approved (S68, AC-X-142): the dispute record, never deleted.
@@ -1359,6 +1407,28 @@ async function seedWaitlistMatch(tx: TenantTx): Promise<string> {
 }
 
 /** A new active staff member of the transaction's tenant. */
+async function seedCalendarConnection(tx: TenantTx) {
+  const staffMemberId = await seedStaff(tx);
+  const userId = await insertUser(db);
+  const membership = await addMembership(tx, { userId, role: 'staff' });
+  return saveCalendarConnection(
+    tx,
+    {
+      id: newId(),
+      staffMemberId,
+      membershipId: membership.id,
+      provider: 'sandbox',
+      accountEmail: 'jess@example.com',
+      refreshTokenSealed: randomBytes(60),
+      accessTokenSealed: randomBytes(60),
+      accessTokenExpiresAt: new Date(Date.now() + 3_600_000),
+      createdBy: userId,
+      connectedAt: new Date(),
+    },
+    false,
+  );
+}
+
 async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
   const staff = await insertStaffMember(tx, {
     displayName: 'Jess',
@@ -1370,6 +1440,15 @@ async function seedStaff(tx: TenantTx): Promise<StaffMemberId> {
 }
 
 /** The id of the one row of `table` that `column` = `value` selects. */
+async function rowId(tx: TenantTx, table: string, column: string, value: string): Promise<string> {
+  const result = await tx.execute(
+    sql`SELECT id FROM ${sql.identifier(table)} WHERE ${sql.identifier(column)} = ${value}`,
+  );
+  const id = (result.rows[0] as { id?: unknown } | undefined)?.id;
+  if (typeof id !== 'string') throw new Error(`no ${table} row seeded`);
+  return id;
+}
+
 async function seedSupportThread(tx: TenantTx): Promise<{ threadId: string; userId: UserId }> {
   const userId = await insertUser(db);
   const alphabet = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';

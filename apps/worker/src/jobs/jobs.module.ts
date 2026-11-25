@@ -15,6 +15,11 @@ import {
   sendDueReminders,
 } from '@pepper/appointments';
 import {
+  calendarTokenKeyFrom,
+  runDueCalendarReads,
+  type CalendarProvider,
+} from '@pepper/google-calendar';
+import {
   cleanUp,
   runDueDeletions,
   runSupportHousekeeping,
@@ -34,6 +39,11 @@ import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
 import { Periodic } from './periodic.js';
 
 export interface JobsOptions {
+  /**
+   * The calendar job (S70, ADR-0069 §7): staff members' Google busy times read every 5 minutes,
+   * each due calendar looked for every `pollMs`; absent or `null`: Google Calendar is off.
+   */
+  calendar?: { provider: CalendarProvider; pollMs: number } | null;
   /** Seals the reminder emails it queues (`outboxKeyFrom(OUTBOX_SECRET)`). */
   key: Buffer;
   /** How often due reminders are queued (AC-W6-1: well under 5 minutes). */
@@ -123,6 +133,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   readonly morning: Periodic;
   readonly support: Periodic;
   readonly inbound: Periodic | null;
+  readonly calendar: Periodic | null;
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -279,6 +290,30 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
             },
             this.logger,
           );
+    const calendar = options.calendar ?? null;
+    this.calendar =
+      calendar === null
+        ? null
+        : new Periodic(
+            'Calendar job',
+            calendar.pollMs,
+            async () => {
+              const result = await runDueCalendarReads({
+                db,
+                clock,
+                provider: calendar.provider,
+                tokenKey: calendarTokenKeyFrom(options.key),
+              });
+              // Counts only: never a calendar, an account or a busy time.
+              if (result.read > 0) this.logger.log(`Calendar: ${String(result.read)} read`);
+              if (result.failed > 0 || result.needsReconnect > 0) {
+                this.logger.warn(
+                  `Calendar: ${String(result.failed)} failed, ${String(result.needsReconnect)} need reconnecting`,
+                );
+              }
+            },
+            this.logger,
+          );
     const store = options.objectStore ?? null;
     this.deletions = new Periodic(
       'Deletion job',
@@ -325,6 +360,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     this.morning.start();
     this.support.start();
     this.inbound?.start();
+    this.calendar?.start();
     this.cleanup.start({ immediately: true });
   }
 
@@ -336,6 +372,7 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
       this.morning.stop(),
       this.support.stop(),
       this.inbound?.stop(),
+      this.calendar?.stop(),
       this.cleanup.stop(),
       this.deletions.stop(),
     ]);
@@ -343,8 +380,8 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
 }
 
 /**
- * The reminder, due-task, insights, morning (drafts, briefing), support, inbound email, clean-up
- * and deletion jobs. Needs `ConnectionsModule`; `MailModule` for the public requests' reminders.
+ * The reminder, due-task, insights, morning (drafts, briefing), support, inbound email,
+ * calendar, clean-up and deletion jobs. Needs `ConnectionsModule`; `MailModule` for the public requests' reminders.
  */
 @Module({})
 export class JobsModule {
