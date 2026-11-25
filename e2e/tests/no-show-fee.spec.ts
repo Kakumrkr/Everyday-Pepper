@@ -109,17 +109,16 @@ async function missedYesterday(page: Page, timeZone: string, minute: number): Pr
   const booking = bookings.at(-1);
   if (booking === undefined) throw new Error('no booking');
   const yesterday = addDays(toZoned(timeZone, Date.now()), -1);
-  await callApi(
-    page,
-    'PATCH',
-    `/v1/bookings/${booking.id}`,
-    {
+  const moved = await page.request.patch(`/v1/bookings/${booking.id}`, {
+    data: {
       startsAt: new Date(fromZoned(timeZone, yesterday, minute)).toISOString(),
       override: true,
       notifyClient: false,
     },
-    BookingSchema,
-  );
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(moved.status(), await moved.text()).toBe(200);
+  BookingSchema.parse(await moved.json());
   return formatDate(yesterday);
 }
 
