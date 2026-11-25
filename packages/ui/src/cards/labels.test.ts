@@ -1,10 +1,16 @@
-import { AutonomyActionSchema, MemoryFactShownSchema, type AiWhy } from '@pepper/contracts';
+import {
+  AutonomyActionSchema,
+  levelAllowed,
+  MemoryFactShownSchema,
+  type AiWhy,
+} from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   AUTONOMY_GROUPS,
   changeRows,
   decisionLabels,
   DIAL_LABEL,
+  LOCKED_HELP,
   emailLine,
   factLine,
   formatInstant,
@@ -424,6 +430,11 @@ describe('the autonomy page groups', () => {
     ]);
     expect(AUTONOMY_GROUPS[2]?.actions).toEqual(['payment.no_show_fee']);
     for (const action of AutonomyActionSchema.options) expect(DIAL_LABEL[action]).not.toBe('');
+    // Each locked dial says its own reason (S68: the fee's isn't a booking rule's, CI run 1).
+    for (const action of AutonomyActionSchema.options.filter((a) => !levelAllowed(a, 'auto'))) {
+      expect(LOCKED_HELP[action]).toBeDefined();
+    }
+    expect(new Set(Object.values(LOCKED_HELP)).size).toBe(Object.keys(LOCKED_HELP).length);
   });
 });
 

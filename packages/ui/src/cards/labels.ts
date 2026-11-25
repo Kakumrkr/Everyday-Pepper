@@ -61,6 +61,18 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'payment.no_show_fee': 'Charge a no-show the fee your policy allows',
 };
 
+/**
+ * Why an action's dial is locked, on the Autonomy page: each action that can't do it alone says
+ * its own reason (S68: the no-show fee's is money, not a booking rule's).
+ */
+export const LOCKED_HELP: Partial<Record<AutonomyAction, string>> = {
+  'rule.change': 'Always needs your OK: a new rule changes when clients can book.',
+  'message.bulk':
+    'Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake.',
+  'payment.no_show_fee':
+    'Always needs the owner’s OK: money moves only when you tap Charge on the card.',
+};
+
 export const LEVEL_LABEL: Record<AutonomyLevel, string> = {
   ask: 'Ask me',
   notify: 'Do it and tell me',
