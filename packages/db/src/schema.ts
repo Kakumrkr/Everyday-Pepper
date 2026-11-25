@@ -4019,6 +4019,13 @@ export const calendarConnections = pgTable(
     /** The Google account's email as Google verified it: "Connected as …". */
     accountEmail: text('account_email').notNull(),
     status: text('status').notNull().default('connected'),
+    /**
+     * Raised by each reconnect: a read that began before it (holding the old, revoked grant)
+     * writes nothing, so it can't mark the new connection refused or store the old busy times.
+     */
+    generation: integer('generation').notNull().default(1),
+    /** When the member connected (or last reconnected); not moved by reads. */
+    connectedAt: timestamp('connected_at', { withTimezone: true }).notNull().defaultNow(),
     refreshTokenSealed: bytea('refresh_token_sealed').notNull(),
     accessTokenSealed: bytea('access_token_sealed'),
     accessTokenExpiresAt: timestamp('access_token_expires_at', { withTimezone: true }),
@@ -4057,6 +4064,7 @@ export const calendarConnections = pgTable(
       sql`char_length(${table.accountEmail}) BETWEEN 3 AND 320`,
     ),
     check('calendar_connections_error_format', sql`${table.lastError} ~ '^[a-z_]{1,64}$'`),
+    check('calendar_connections_generation_range', sql`${table.generation} >= 1`),
     check(
       'calendar_connections_access_token_pair',
       sql`(${table.accessTokenSealed} IS NULL) = (${table.accessTokenExpiresAt} IS NULL)`,
@@ -4070,7 +4078,8 @@ export type CalendarConnectionRow = typeof calendarConnections.$inferSelect;
 /**
  * One "Connect Google Calendar" in flight (S70, ADR-0069 §3): the hash of the `state` sent to
  * Google (never the state itself) and the PKCE verifier, sealed. Used once, by the same member,
- * within 10 minutes; a new start for the same staff member replaces it.
+ * within 10 minutes; a new start replaces the staff member's and removes the business's expired
+ * ones.
  */
 export const calendarConnectStates = pgTable(
   'calendar_connect_states',
@@ -4144,7 +4153,7 @@ export const calendarBusyBlocks = pgTable(
     check('calendar_busy_blocks_ends_after_start', sql`${table.endsAt} > ${table.startsAt}`),
     check(
       'calendar_busy_blocks_max_length',
-      sql`${table.endsAt} - ${table.startsAt} <= interval '62 days'`,
+      sql`${table.endsAt} - ${table.startsAt} <= interval '70 days'`,
     ),
     tenantIsolation(sql.raw('tenant_id')),
   ],

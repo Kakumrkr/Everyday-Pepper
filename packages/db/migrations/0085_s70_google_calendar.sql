@@ -8,7 +8,7 @@ CREATE TABLE "calendar_busy_blocks" (
 	"starts_at" timestamp with time zone NOT NULL,
 	"ends_at" timestamp with time zone NOT NULL,
 	CONSTRAINT "calendar_busy_blocks_ends_after_start" CHECK ("calendar_busy_blocks"."ends_at" > "calendar_busy_blocks"."starts_at"),
-	CONSTRAINT "calendar_busy_blocks_max_length" CHECK ("calendar_busy_blocks"."ends_at" - "calendar_busy_blocks"."starts_at" <= interval '62 days')
+	CONSTRAINT "calendar_busy_blocks_max_length" CHECK ("calendar_busy_blocks"."ends_at" - "calendar_busy_blocks"."starts_at" <= interval '70 days')
 );
 --> statement-breakpoint
 ALTER TABLE "calendar_busy_blocks" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
@@ -33,6 +33,8 @@ CREATE TABLE "calendar_connections" (
 	"provider" text NOT NULL,
 	"account_email" text NOT NULL,
 	"status" text DEFAULT 'connected' NOT NULL,
+	"generation" integer DEFAULT 1 NOT NULL,
+	"connected_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"refresh_token_sealed" "bytea" NOT NULL,
 	"access_token_sealed" "bytea",
 	"access_token_expires_at" timestamp with time zone,
@@ -47,6 +49,7 @@ CREATE TABLE "calendar_connections" (
 	CONSTRAINT "calendar_connections_status_known" CHECK ("calendar_connections"."status" IN ('connected', 'needs_reconnect')),
 	CONSTRAINT "calendar_connections_email_length" CHECK (char_length("calendar_connections"."account_email") BETWEEN 3 AND 320),
 	CONSTRAINT "calendar_connections_error_format" CHECK ("calendar_connections"."last_error" ~ '^[a-z_]{1,64}$'),
+	CONSTRAINT "calendar_connections_generation_range" CHECK ("calendar_connections"."generation" >= 1),
 	CONSTRAINT "calendar_connections_access_token_pair" CHECK (("calendar_connections"."access_token_sealed" IS NULL) = ("calendar_connections"."access_token_expires_at" IS NULL))
 );
 --> statement-breakpoint

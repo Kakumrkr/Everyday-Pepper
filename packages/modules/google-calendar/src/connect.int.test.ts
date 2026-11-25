@@ -326,6 +326,23 @@ describe('reconnecting and disconnecting (AC-X-155, AC-X-157)', () => {
     expect((await readOwnCalendar(deps, jo.actor)).connection).toBeNull();
   });
 
+  it('a token that can no longer be opened never blocks a disconnect or a reconnect', async () => {
+    const { tenantId, deps, sandbox } = await business();
+    const jo = await linkedStaff(tenantId);
+    const { url } = await startCalendarConnect(deps, jo.actor);
+    await completeCalendarConnect(deps, jo.actor, answerOf(url));
+    const rotated = { ...deps, tokenKey: calendarTokenKeyFrom(outboxKeyFrom('z'.repeat(40))) };
+    const again = await startCalendarConnect(rotated, jo.actor);
+    expect(
+      (await completeCalendarConnect(rotated, jo.actor, answerOf(again.url))).connection?.status,
+    ).toBe('connected');
+    // The old grant couldn't be opened, so it wasn't revoked; nothing failed for it.
+    expect(sandbox.revokes).toHaveLength(0);
+    await disconnectCalendar(deps, jo.actor);
+    expect((await readOwnCalendar(deps, jo.actor)).connection).toBeNull();
+    expect(sandbox.revokes).toHaveLength(0);
+  });
+
   it('removing the member removes the connection', async () => {
     const { tenantId, deps } = await business();
     const jo = await linkedStaff(tenantId);

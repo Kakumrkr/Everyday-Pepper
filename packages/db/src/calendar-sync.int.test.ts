@@ -17,6 +17,7 @@ import {
   recordCalendarFailure,
   replaceConnectState,
   saveCalendarConnection,
+  storeAccessToken,
   storeCalendarRead,
   takeConnectState,
 } from './repositories/calendar-sync.js';
@@ -29,6 +30,7 @@ let database: TestDatabase;
 let db: Database;
 
 const EVERY = 5 * 60_000;
+const NOW = new Date('2026-12-01T12:00:00Z');
 const at = (iso: string) => Date.parse(iso);
 const RANGE = { from: new Date('2026-12-01T00:00:00Z'), to: new Date('2026-12-02T00:00:00Z') };
 
@@ -60,6 +62,7 @@ async function connected(tx: TenantTx) {
       accessTokenSealed: randomBytes(60),
       accessTokenExpiresAt: new Date('2026-12-01T13:00:00Z'),
       createdBy: userId,
+      connectedAt: new Date('2026-12-01T12:00:00Z'),
     },
     false,
   );
@@ -89,11 +92,43 @@ describe('calendar connect states', () => {
         verifierSealed: randomBytes(40),
         expiresAt: new Date('2026-12-01T12:10:00Z'),
       });
-      await replaceConnectState(tx, state(first));
-      await replaceConnectState(tx, state(second));
+      await replaceConnectState(tx, state(first), NOW);
+      await replaceConnectState(tx, state(second), NOW);
       expect(await takeConnectState(tx, first)).toBeUndefined();
       expect((await takeConnectState(tx, second))?.staffMemberId).toBe(staffMemberId);
       expect(await takeConnectState(tx, second)).toBeUndefined();
+    });
+  });
+
+  it("a new start removes the business's expired states", async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const a = await connected(tx);
+      const b = await connected(tx);
+      const stale = randomBytes(32);
+      await replaceConnectState(
+        tx,
+        {
+          staffMemberId: a.staffMemberId,
+          membershipId: a.membership.id,
+          stateHash: stale,
+          verifierSealed: randomBytes(40),
+          expiresAt: new Date('2026-12-01T11:00:00Z'),
+        },
+        new Date('2026-12-01T10:55:00Z'),
+      );
+      await replaceConnectState(
+        tx,
+        {
+          staffMemberId: b.staffMemberId,
+          membershipId: b.membership.id,
+          stateHash: randomBytes(32),
+          verifierSealed: randomBytes(40),
+          expiresAt: new Date('2026-12-01T12:10:00Z'),
+        },
+        NOW,
+      );
+      expect(await takeConnectState(tx, stale)).toBeUndefined();
     });
   });
 
@@ -101,13 +136,17 @@ describe('calendar connect states', () => {
     const tenant = await business();
     const error = await withTenant(db, tenant, async (tx) => {
       const { staffMemberId, membership } = await connected(tx);
-      return replaceConnectState(tx, {
-        staffMemberId,
-        membershipId: membership.id,
-        stateHash: randomBytes(8),
-        verifierSealed: randomBytes(40),
-        expiresAt: new Date(),
-      }).catch((e: unknown) => e);
+      return replaceConnectState(
+        tx,
+        {
+          staffMemberId,
+          membershipId: membership.id,
+          stateHash: randomBytes(8),
+          verifierSealed: randomBytes(40),
+          expiresAt: new Date(),
+        },
+        NOW,
+      ).catch((e: unknown) => e);
     });
     expect(sqlState(error)).toBe('23514');
   });
@@ -161,7 +200,7 @@ describe('calendar connections', () => {
       expect(await claimCalendarConnection(tx, id, now, EVERY)).toBeDefined();
       // Claimed: a second worker in the same five minutes gets nothing.
       expect(await claimCalendarConnection(tx, id, now, EVERY)).toBeUndefined();
-      expect(await recordCalendarFailure(tx, id, 'invalid_grant')).toEqual({
+      expect(await recordCalendarFailure(tx, { id, generation: 1 }, 'invalid_grant')).toEqual({
         before: 'connected',
         after: 'needs_reconnect',
       });
@@ -171,7 +210,12 @@ describe('calendar connections', () => {
       expect(stored?.lastError).toBe('invalid_grant');
       // A read that finished after the refusal doesn't replace what was kept.
       expect(
-        await storeCalendarRead(tx, { id, staffMemberId: stored?.staffMemberId ?? '' }, [], now),
+        await storeCalendarRead(
+          tx,
+          { id, staffMemberId: stored?.staffMemberId ?? '', generation: 1 },
+          [],
+          now,
+        ),
       ).toBe(false);
       expect(
         await listBusyBlocksBetween(tx, [StaffMemberIdSchema.parse(stored?.staffMemberId)], RANGE),
@@ -184,11 +228,80 @@ describe('calendar connections', () => {
     });
   });
 
+  it("a read begun before a reconnect writes nothing: the old grant's failure isn't the new one's", async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const { row, userId } = await connected(tx);
+      const claimed = await claimCalendarConnection(tx, row.id, NOW, EVERY, true);
+      expect(claimed?.generation).toBe(1);
+      const reconnectedAt = new Date('2026-12-02T09:00:00Z');
+      const again = await saveCalendarConnection(
+        tx,
+        {
+          id: row.id,
+          staffMemberId: row.staffMemberId,
+          membershipId: row.membershipId,
+          provider: 'sandbox',
+          accountEmail: 'jo@example.com',
+          refreshTokenSealed: randomBytes(60),
+          accessTokenSealed: randomBytes(60),
+          accessTokenExpiresAt: new Date(),
+          createdBy: userId,
+          connectedAt: reconnectedAt,
+        },
+        true,
+      );
+      expect(again.generation).toBe(2);
+      expect(again.connectedAt).toEqual(reconnectedAt);
+      const old = { id: row.id, staffMemberId: row.staffMemberId, generation: 1 };
+      expect(await recordCalendarFailure(tx, old, 'invalid_grant')).toBeUndefined();
+      expect(await storeCalendarRead(tx, old, [], NOW)).toBe(false);
+      await storeAccessToken(tx, old, randomBytes(10), new Date());
+      const now = await findCalendarConnection(tx, row.id);
+      expect(now?.status).toBe('connected');
+      expect(now?.accessTokenSealed?.equals(again.accessTokenSealed ?? Buffer.alloc(0))).toBe(true);
+    });
+  });
+
+  it('reads move neither when it was connected nor its generation', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const { row } = await connected(tx);
+      await claimCalendarConnection(tx, row.id, NOW, EVERY, true);
+      await storeCalendarRead(tx, row, [], NOW);
+      const after = await findCalendarConnection(tx, row.id);
+      expect(after?.connectedAt).toEqual(row.connectedAt);
+      expect(after?.generation).toBe(1);
+    });
+  });
+
+  it('a refused token that cannot be opened also needs reconnecting', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const { row } = await connected(tx);
+      expect(await recordCalendarFailure(tx, row, 'token_unreadable')).toEqual({
+        before: 'connected',
+        after: 'needs_reconnect',
+      });
+    });
+  });
+
+  it('keep a busy stretch as long as the whole window read (7 days back, 60 ahead)', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const { row, staffMemberId } = await connected(tx);
+      const from = Date.parse('2026-11-24T12:00:00Z');
+      const to = from + 67 * 86_400_000;
+      expect(await storeCalendarRead(tx, row, [{ start: from, end: to }], NOW)).toBe(true);
+      expect(await listBusyBlocksBetween(tx, [staffMemberId], RANGE)).toHaveLength(1);
+    });
+  });
+
   it('a passing error keeps the connection connected', async () => {
     const tenant = await business();
     await withTenant(db, tenant, async (tx) => {
       const { row } = await connected(tx);
-      expect(await recordCalendarFailure(tx, row.id, 'rate_limited')).toEqual({
+      expect(await recordCalendarFailure(tx, row, 'rate_limited')).toEqual({
         before: 'connected',
         after: 'connected',
       });
@@ -228,6 +341,7 @@ describe('calendar connections', () => {
           accessTokenSealed: randomBytes(60),
           accessTokenExpiresAt: new Date(),
           createdBy: userId,
+          connectedAt: new Date(),
         },
         false,
       ).catch((e: unknown) => e);

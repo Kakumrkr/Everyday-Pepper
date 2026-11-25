@@ -3,11 +3,11 @@ import {
   GoogleApiErrorSchema,
   GoogleFreeBusyResponseSchema,
   GoogleIdTokenClaimsSchema,
+  GoogleRateLimitReasonSchema,
   GoogleTokenErrorSchema,
   GoogleTokenResponseSchema,
   type CalendarSyncError,
 } from '@pepper/contracts';
-import { z } from 'zod';
 import {
   CalendarProviderError,
   type AccessToken,
@@ -215,14 +215,13 @@ function statusCode(status: number): CalendarSyncError {
   return 'bad_response';
 }
 
-const RATE_REASONS = z.enum(['rateLimitExceeded', 'userRateLimitExceeded', 'quotaExceeded']);
-
 /** Calendar's 403 with a `usageLimits` reason is a rate limit, like its 429. */
 function apiErrorCode(status: number, body: unknown): CalendarSyncError {
   if (status === 403) {
     const parsed = GoogleApiErrorSchema.safeParse(body);
     const reasons = parsed.success ? (parsed.data.error.errors ?? []) : [];
-    if (reasons.some((e) => RATE_REASONS.safeParse(e.reason).success)) return 'rate_limited';
+    if (reasons.some((e) => GoogleRateLimitReasonSchema.safeParse(e.reason).success))
+      return 'rate_limited';
   }
   return statusCode(status);
 }

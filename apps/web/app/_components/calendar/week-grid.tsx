@@ -207,7 +207,7 @@ export function WeekGrid({
         ),
       };
     },
-    [bookings, dates, layout.endMinute, layout.startMinute, offFlat, timeZone],
+    [bookings, dates, layout.endMinute, layout.startMinute, offFlat, outside, timeZone],
   );
 
   const stop = useCallback(() => {

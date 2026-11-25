@@ -7,7 +7,7 @@ import {
   type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
-import { and, asc, eq, gt, inArray, isNull, lt, lte, or } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   calendarBusyBlocks,
@@ -36,19 +36,36 @@ export interface NewConnectState {
   expiresAt: Date;
 }
 
-/** Stores a connect state, replacing the staff member's earlier one (one in flight at a time). */
-export async function replaceConnectState(tx: TenantTx, input: NewConnectState): Promise<void> {
-  const staffMemberId = Id.parse(input.staffMemberId);
-  await tx
-    .delete(calendarConnectStates)
-    .where(eq(calendarConnectStates.staffMemberId, staffMemberId));
-  await tx.insert(calendarConnectStates).values({
-    staffMemberId,
+/**
+ * Stores a connect state, replacing the staff member's earlier one (one in flight at a time; two
+ * taps at once leave the later), and removes the business's expired ones.
+ */
+export async function replaceConnectState(
+  tx: TenantTx,
+  input: NewConnectState,
+  now: Date,
+): Promise<void> {
+  const values = {
+    staffMemberId: Id.parse(input.staffMemberId),
     membershipId: Id.parse(input.membershipId),
     stateHash: input.stateHash,
     verifierSealed: input.verifierSealed,
     expiresAt: input.expiresAt,
-  });
+  };
+  await tx.delete(calendarConnectStates).where(lt(calendarConnectStates.expiresAt, now));
+  await tx
+    .insert(calendarConnectStates)
+    .values(values)
+    .onConflictDoUpdate({
+      target: [calendarConnectStates.tenantId, calendarConnectStates.staffMemberId],
+      set: {
+        membershipId: values.membershipId,
+        stateHash: values.stateHash,
+        verifierSealed: values.verifierSealed,
+        expiresAt: values.expiresAt,
+        createdAt: sql`now()`,
+      },
+    });
 }
 
 /** Takes a connect state by its hash, once: it is deleted whether or not it is still valid. */
@@ -126,12 +143,15 @@ export interface ConnectionTokens {
   accessTokenSealed: Buffer;
   accessTokenExpiresAt: Date;
   createdBy: string;
+  /** Now: when it was connected (a reconnect moves it). */
+  connectedAt: Date;
 }
 
 /**
  * Stores a new connection, or a reconnection of the staff member's existing one (`id` is then
- * that row's): connected again, the new tokens, the error cleared. A connection made by another
- * request in between fails on the staff member's unique index.
+ * that row's): connected again, the new tokens, the error cleared, the generation raised (so a
+ * read still holding the old grant writes nothing). A connection made by another request in
+ * between fails on the staff member's unique index.
  */
 export async function saveCalendarConnection(
   tx: TenantTx,
@@ -148,12 +168,13 @@ export async function saveCalendarConnection(
     accessTokenExpiresAt: input.accessTokenExpiresAt,
     lastError: null,
     attemptedAt: null,
+    connectedAt: input.connectedAt,
     createdBy: Id.parse(input.createdBy),
   };
   const [row] = existing
     ? await tx
         .update(calendarConnections)
-        .set(values)
+        .set({ ...values, generation: sql`${calendarConnections.generation} + 1` })
         .where(
           and(
             eq(calendarConnections.id, Id.parse(input.id)),
@@ -208,7 +229,7 @@ export async function listDueCalendarConnections(
           or(isNull(calendarConnections.attemptedAt), lte(calendarConnections.attemptedAt, before)),
         ),
       )
-      .orderBy(asc(calendarConnections.attemptedAt), asc(calendarConnections.id))
+      .orderBy(sql`${calendarConnections.attemptedAt} ASC NULLS FIRST`, asc(calendarConnections.id))
       .limit(max),
   );
   return rows.map((row) => ({
@@ -249,26 +270,40 @@ export async function claimCalendarConnection(
   return row;
 }
 
-/** Keeps a fresh access token (sealed) and when it expires. */
+/** Which connection a read claimed: its id and the generation it read the tokens of. */
+export interface ClaimedConnection {
+  id: string;
+  generation: number;
+}
+
+function sameGrant(claimed: ClaimedConnection) {
+  return and(
+    eq(calendarConnections.id, Id.parse(claimed.id)),
+    eq(calendarConnections.generation, z.number().int().min(1).parse(claimed.generation)),
+  );
+}
+
+/** Keeps a fresh access token (sealed) and when it expires, unless reconnected meanwhile. */
 export async function storeAccessToken(
   tx: TenantTx,
-  id: string,
+  claimed: ClaimedConnection,
   sealed: Buffer,
   expiresAt: Date,
 ): Promise<void> {
   await tx
     .update(calendarConnections)
     .set({ accessTokenSealed: sealed, accessTokenExpiresAt: expiresAt })
-    .where(eq(calendarConnections.id, Id.parse(id)));
+    .where(sameGrant(claimed));
 }
 
 /**
  * Replaces a connection's busy blocks with one read's (start and end only) and records it worked.
- * Only while still connected: a connection removed or refused meanwhile keeps what it had.
+ * Only while still connected with the grant read: a connection removed, refused or reconnected
+ * meanwhile keeps what it has.
  */
 export async function storeCalendarRead(
   tx: TenantTx,
-  connection: Pick<CalendarConnectionRow, 'id' | 'staffMemberId'>,
+  connection: Pick<CalendarConnectionRow, 'id' | 'staffMemberId' | 'generation'>,
   blocks: readonly { start: number; end: number }[],
   syncedAt: Date,
 ): Promise<boolean> {
@@ -276,7 +311,7 @@ export async function storeCalendarRead(
   const [still] = await tx
     .update(calendarConnections)
     .set({ syncedAt, lastError: null })
-    .where(and(eq(calendarConnections.id, id), eq(calendarConnections.status, 'connected')))
+    .where(and(sameGrant(connection), eq(calendarConnections.status, 'connected')))
     .returning({ id: calendarConnections.id });
   if (still === undefined) return false;
   await tx.delete(calendarBusyBlocks).where(eq(calendarBusyBlocks.connectionId, id));
@@ -294,22 +329,23 @@ export async function storeCalendarRead(
 }
 
 /**
- * Records a failed read: the error code, and for `invalid_grant` the move to `needs_reconnect`
- * (the access token dropped). Answers the status before, so a change is audited once.
+ * Records a failed read: the error code, and for `invalid_grant` or `token_unreadable` the move
+ * to `needs_reconnect` (the access token dropped). Answers the status before, so a change is
+ * audited once. Nothing when the member reconnected meanwhile: the failure was the old grant's.
  */
 export async function recordCalendarFailure(
   tx: TenantTx,
-  id: string,
+  claimed: ClaimedConnection,
   error: CalendarSyncError,
 ): Promise<{ before: string; after: string } | undefined> {
   const code = CalendarSyncErrorSchema.parse(error);
   const [before] = await tx
     .select({ status: calendarConnections.status })
     .from(calendarConnections)
-    .where(eq(calendarConnections.id, Id.parse(id)))
+    .where(sameGrant(claimed))
     .for('update');
   if (before === undefined) return undefined;
-  const refused = code === 'invalid_grant';
+  const refused = code === 'invalid_grant' || code === 'token_unreadable';
   const [after] = await tx
     .update(calendarConnections)
     .set({
@@ -320,7 +356,7 @@ export async function recordCalendarFailure(
         accessTokenExpiresAt: null,
       }),
     })
-    .where(eq(calendarConnections.id, Id.parse(id)))
+    .where(sameGrant(claimed))
     .returning({ status: calendarConnections.status });
   return after === undefined ? undefined : { before: before.status, after: after.status };
 }

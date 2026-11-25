@@ -90,7 +90,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   approval_texts: 'cards texted to members for an OK (code hashes only)',
   calendar_connections:
     'staff members’ Google Calendar links (S70): sealed sign-in tokens, never exported',
-  calendar_connect_states: 'one-time Google sign-in states, gone within 10 minutes',
+  calendar_connect_states: 'one-time Google sign-in states (10 minutes; hashes and sealed values)',
   calendar_busy_blocks: 'busy times copied from Google Calendar, which still holds them',
 };
 

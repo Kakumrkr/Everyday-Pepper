@@ -95,6 +95,7 @@ async function googleBusy(b: Business, start: string, end: string): Promise<void
         accessTokenSealed: randomBytes(40),
         accessTokenExpiresAt: new Date(NOW),
         createdBy: b.jessUser,
+        connectedAt: new Date(NOW),
       },
       false,
     );

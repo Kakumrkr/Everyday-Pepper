@@ -22,6 +22,8 @@ export const CalendarSyncErrorSchema = z.enum([
   'unavailable',
   'not_found',
   'bad_response',
+  /** The sealed token can't be opened (the key changed): only a reconnect helps. */
+  'token_unreadable',
 ]);
 export type CalendarSyncError = z.infer<typeof CalendarSyncErrorSchema>;
 
@@ -39,7 +41,7 @@ export const CALENDAR_SYNC_DAYS = 60;
 export const CALENDAR_SYNC_EVERY_MS = 5 * 60_000;
 /** How long a "Connect Google Calendar" may take, from the start to Google's answer. */
 export const CALENDAR_CONNECT_TTL_MS = 10 * 60_000;
-/** At most this many busy times are kept from one read (a calendar booked every 15 minutes). */
+/** At most this many busy times are kept from one read, the soonest (a 15-minute grid's worth). */
 export const MAX_BUSY_BLOCKS_PER_READ = 6000;
 
 // ---- Google's answers (developers.google.com, read 2026-11-25) ----
@@ -87,9 +89,10 @@ export const GoogleFreeBusyResponseSchema = z.object({
   calendars: z.record(
     z.string(),
     z.object({
+      // A hard bound on what is parsed; what is kept is capped after merging (busyBlocksOf).
       busy: z
         .array(z.object({ start: GoogleDateTimeSchema, end: GoogleDateTimeSchema }))
-        .max(MAX_BUSY_BLOCKS_PER_READ)
+        .max(50_000)
         .default([]),
       errors: z
         .array(z.object({ domain: z.string().max(200), reason: z.string().max(200) }))
@@ -99,6 +102,13 @@ export const GoogleFreeBusyResponseSchema = z.object({
   ),
 });
 export type GoogleFreeBusyResponse = z.infer<typeof GoogleFreeBusyResponseSchema>;
+
+/** Calendar's 403 reasons that mean a rate limit, like its 429. */
+export const GoogleRateLimitReasonSchema = z.enum([
+  'rateLimitExceeded',
+  'userRateLimitExceeded',
+  'quotaExceeded',
+]);
 
 /** Google's API error envelope (401 `authError`, 403/429 `rateLimitExceeded`…). */
 export const GoogleApiErrorSchema = z.object({
@@ -168,7 +178,8 @@ export type OutsideBusyResponse = z.infer<typeof OutsideBusyResponseSchema>;
 
 /**
  * Google's busy times as Pepper stores them: clipped to the window read, adjacent or overlapping
- * ones merged, empty ones dropped, by start. Pure: the sync and its tests share it.
+ * ones merged, empty ones dropped, by start, the first `MAX_BUSY_BLOCKS_PER_READ` kept. Pure: the
+ * sync and its tests share it.
  */
 export function busyBlocksOf(
   busy: readonly { start: string; end: string }[],
@@ -187,5 +198,5 @@ export function busyBlocksOf(
     if (last !== undefined && block.start <= last.end) last.end = Math.max(last.end, block.end);
     else merged.push({ ...block });
   }
-  return merged;
+  return merged.slice(0, MAX_BUSY_BLOCKS_PER_READ);
 }

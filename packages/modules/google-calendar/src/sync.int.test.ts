@@ -10,6 +10,7 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
+import { randomBytes } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { insertUser, startTestDatabase, type TestDatabase } from './int-support.js';
 import { CalendarProviderError, type AccessToken, type FreeBusyInput } from './provider.js';
@@ -166,6 +167,18 @@ describe('the read (AC-X-154)', () => {
     expect((await readOwnCalendar(c.deps, c.jo)).connection?.status).toBe('connected');
     c.clock.advanceBy(5 * MINUTE);
     expect(await pass(c)).toBe('read');
+  });
+});
+
+describe('a token that can no longer be opened (the outbox secret changed)', () => {
+  it('needs reconnecting, keeps its busy times, and is no longer read', async () => {
+    const c = await connectedCalendar();
+    const otherKey = { ...c.deps, tokenKey: calendarTokenKeyFrom(randomBytes(32)) };
+    c.clock.advanceBy(5 * MINUTE);
+    expect(await readCalendar(otherKey, c.tenantId, c.connectionId)).toBe('needs_reconnect');
+    expect(await busyToday(c)).toHaveLength(1);
+    c.clock.advanceBy(5 * MINUTE);
+    expect(await pass(c)).toBe('skipped');
   });
 });
 

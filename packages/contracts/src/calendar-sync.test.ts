@@ -57,6 +57,27 @@ describe('busyBlocksOf', () => {
   });
 });
 
+describe('busyBlocksOf: many busy times', () => {
+  it('keeps the soonest 6000 of a very busy calendar, instead of failing the read', () => {
+    const start = Date.parse('2026-12-01T00:00:00Z');
+    const busy = Array.from({ length: 7000 }, (_, i) => ({
+      start: new Date(start + i * 20 * 60_000).toISOString(),
+      end: new Date(start + i * 20 * 60_000 + 10 * 60_000).toISOString(),
+    }));
+    const parsed = GoogleFreeBusyResponseSchema.parse({
+      timeMin: '2026-12-01T00:00:00Z',
+      timeMax: '2027-04-01T00:00:00Z',
+      calendars: { primary: { busy } },
+    });
+    const kept = busyBlocksOf(parsed.calendars['primary']?.busy ?? [], {
+      from: start,
+      to: Date.parse('2027-04-01T00:00:00Z'),
+    });
+    expect(kept).toHaveLength(6000);
+    expect(kept[0]?.start).toBe(start);
+  });
+});
+
 describe("Google's answers", () => {
   it('reads a freeBusy answer with offsets and an empty calendar', () => {
     const parsed = GoogleFreeBusyResponseSchema.parse({

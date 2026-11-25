@@ -842,13 +842,17 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       const staffMemberId = await seedStaff(tx);
       const membership = await addMembership(tx, { userId: await insertUser(db), role: 'staff' });
       const stateHash = randomBytes(32);
-      await replaceConnectState(tx, {
-        staffMemberId,
-        membershipId: membership.id,
-        stateHash,
-        verifierSealed: randomBytes(60),
-        expiresAt: new Date(Date.now() + 600_000),
-      });
+      await replaceConnectState(
+        tx,
+        {
+          staffMemberId,
+          membershipId: membership.id,
+          stateHash,
+          verifierSealed: randomBytes(60),
+          expiresAt: new Date(Date.now() + 600_000),
+        },
+        new Date(),
+      );
       return rowId(tx, 'calendar_connect_states', 'staff_member_id', staffMemberId);
     },
     touch: 'expires_at = expires_at',
@@ -1419,6 +1423,7 @@ async function seedCalendarConnection(tx: TenantTx) {
       accessTokenSealed: randomBytes(60),
       accessTokenExpiresAt: new Date(Date.now() + 3_600_000),
       createdBy: userId,
+      connectedAt: new Date(),
     },
     false,
   );

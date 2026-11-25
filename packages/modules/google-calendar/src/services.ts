@@ -50,7 +50,24 @@ import {
   CalendarScopeMissingError,
 } from './errors.js';
 import { CalendarProviderError, type CalendarProvider } from './provider.js';
-import { codeChallengeOf, openToken, randomToken, sealToken, stateHashOf } from './tokens.js';
+import {
+  codeChallengeOf,
+  openToken,
+  randomToken,
+  SealedTokenError,
+  sealToken,
+  stateHashOf,
+} from './tokens.js';
+
+/** A sealed token opened, or `null` when it can't be (another key): nothing to revoke then. */
+function openedOrNull(key: Buffer, rowId: string, purpose: string, sealed: Buffer): string | null {
+  try {
+    return openToken(key, rowId, purpose, sealed);
+  } catch (error) {
+    if (error instanceof SealedTokenError) return null;
+    throw error;
+  }
+}
 
 // Google Calendar in (S70, ADR-0069): a member connects their own staff member's calendar,
 // Pepper keeps its tokens sealed and its busy times (start and end only), and the worker reads
@@ -93,7 +110,7 @@ export function toCalendarConnection(row: CalendarConnectionRow): CalendarConnec
     status: row.status === 'needs_reconnect' ? 'needs_reconnect' : 'connected',
     syncedAt:
       row.syncedAt === null ? null : (row.syncedAt.toISOString() as CalendarConnection['syncedAt']),
-    connectedAt: row.updatedAt.toISOString() as CalendarConnection['connectedAt'],
+    connectedAt: row.connectedAt.toISOString() as CalendarConnection['connectedAt'],
   };
 }
 
@@ -133,12 +150,16 @@ export async function startCalendarConnect(
   const loginHint = await withMember(deps.db, actor.context, async (tx) => {
     const linked = await linkedOf(tx, actor);
     if (linked === undefined) throw new CalendarNotLinkedError();
-    await replaceConnectState(tx, {
-      ...linked,
-      stateHash,
-      verifierSealed: sealToken(deps.tokenKey, stateHash.toString('hex'), 'verifier', verifier),
-      expiresAt: new Date(deps.clock.now().getTime() + CALENDAR_CONNECT_TTL_MS),
-    });
+    await replaceConnectState(
+      tx,
+      {
+        ...linked,
+        stateHash,
+        verifierSealed: sealToken(deps.tokenKey, stateHash.toString('hex'), 'verifier', verifier),
+        expiresAt: new Date(deps.clock.now().getTime() + CALENDAR_CONNECT_TTL_MS),
+      },
+      deps.clock.now(),
+    );
     const existing = await findCalendarConnectionOfStaff(
       tx,
       StaffMemberIdSchema.parse(linked.staffMemberId),
@@ -205,10 +226,11 @@ export async function completeCalendarConnect(
     const staffMemberId = StaffMemberIdSchema.parse(linked.staffMemberId);
     const existing = await findCalendarConnectionOfStaff(tx, staffMemberId);
     const id = existing?.id ?? newId();
+    // A grant whose token can't be opened (the key changed) has nothing left to revoke.
     const previous =
       existing === undefined
         ? null
-        : openToken(deps.tokenKey, existing.id, 'refresh', existing.refreshTokenSealed);
+        : openedOrNull(deps.tokenKey, existing.id, 'refresh', existing.refreshTokenSealed);
     const stored = await saveCalendarConnection(
       tx,
       {
@@ -221,6 +243,7 @@ export async function completeCalendarConnect(
         accessTokenSealed: sealToken(deps.tokenKey, id, 'access', granted.accessToken),
         accessTokenExpiresAt: granted.expiresAt,
         createdBy: actor.context.userId,
+        connectedAt: deps.clock.now(),
       },
       existing !== undefined,
     );
@@ -260,7 +283,8 @@ export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Prom
       StaffMemberIdSchema.parse(linked.staffMemberId),
     );
     if (row === undefined) throw new CalendarNotConnectedError();
-    const token = openToken(deps.tokenKey, row.id, 'refresh', row.refreshTokenSealed);
+    // An unreadable token (the key changed) never keeps a member from disconnecting.
+    const token = openedOrNull(deps.tokenKey, row.id, 'refresh', row.refreshTokenSealed);
     await deleteCalendarConnection(tx, row.id);
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
@@ -277,7 +301,7 @@ export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Prom
     });
     return token;
   });
-  await deps.provider.revoke(refreshToken).catch(() => undefined);
+  if (refreshToken !== null) await deps.provider.revoke(refreshToken).catch(() => undefined);
 }
 
 export type CalendarReadOutcome = 'read' | 'skipped' | 'failed' | 'needs_reconnect';
@@ -299,13 +323,6 @@ export async function readCalendar(
     claimCalendarConnection(tx, connectionId, now, CALENDAR_SYNC_EVERY_MS, options.force ?? false),
   );
   if (claimed === undefined) return 'skipped';
-  const refreshToken = openToken(deps.tokenKey, claimed.id, 'refresh', claimed.refreshTokenSealed);
-  let access =
-    claimed.accessTokenSealed !== null &&
-    claimed.accessTokenExpiresAt !== null &&
-    claimed.accessTokenExpiresAt.getTime() - EXPIRY_MARGIN_MS > now.getTime()
-      ? openToken(deps.tokenKey, claimed.id, 'access', claimed.accessTokenSealed)
-      : null;
   let fresh: { accessToken: string; expiresAt: Date } | null = null;
   const window = {
     from: new Date(now.getTime() - READ_BACK_MS),
@@ -313,6 +330,18 @@ export async function readCalendar(
   };
 
   try {
+    const refreshToken = openToken(
+      deps.tokenKey,
+      claimed.id,
+      'refresh',
+      claimed.refreshTokenSealed,
+    );
+    let access =
+      claimed.accessTokenSealed !== null &&
+      claimed.accessTokenExpiresAt !== null &&
+      claimed.accessTokenExpiresAt.getTime() - EXPIRY_MARGIN_MS > now.getTime()
+        ? openToken(deps.tokenKey, claimed.id, 'access', claimed.accessTokenSealed)
+        : null;
     if (access === null) {
       fresh = await deps.provider.refresh(refreshToken);
       access = fresh.accessToken;
@@ -337,7 +366,7 @@ export async function readCalendar(
       if (fresh !== null) {
         await storeAccessToken(
           tx,
-          claimed.id,
+          claimed,
           sealToken(deps.tokenKey, claimed.id, 'access', fresh.accessToken),
           fresh.expiresAt,
         );
@@ -346,25 +375,28 @@ export async function readCalendar(
     });
     return stored ? 'read' : 'skipped';
   } catch (error) {
-    const code: CalendarSyncError =
-      error instanceof CalendarProviderError ? error.code : 'bad_response';
+    if (error instanceof SealedTokenError) {
+      // The key changed: no token of this connection opens again; only a reconnect helps.
+      return failed(deps, tenantId, claimed, 'token_unreadable');
+    }
     if (!(error instanceof CalendarProviderError)) {
       // Not Google's answer: a bug or the database. Recorded, then raised for the job's log.
-      await failed(deps, tenantId, claimed.id, code);
+      await failed(deps, tenantId, claimed, 'bad_response');
       throw error;
     }
-    return failed(deps, tenantId, claimed.id, code);
+    return failed(deps, tenantId, claimed, error.code);
   }
 }
 
 async function failed(
   deps: CalendarDeps,
   tenantId: TenantId,
-  id: string,
+  claimed: { id: string; generation: number },
   code: CalendarSyncError,
 ): Promise<CalendarReadOutcome> {
+  const { id } = claimed;
   return withTenant(deps.db, tenantId, async (tx) => {
-    const moved = await recordCalendarFailure(tx, id, code);
+    const moved = await recordCalendarFailure(tx, claimed, code);
     if (moved !== undefined && moved.before !== moved.after) {
       await appendAuditEntry(tx, {
         actor: { kind: 'system' },

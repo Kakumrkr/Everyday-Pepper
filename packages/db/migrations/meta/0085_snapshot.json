@@ -1,5 +1,5 @@
 {
-  "id": "fa713b7e-c08c-4d12-85c6-3a99a1c2bd1f",
+  "id": "c91291d9-ae74-4269-8103-5ddc2ff46c68",
   "prevId": "04f471eb-c7b0-4bff-9468-97e0a19d31ac",
   "version": "7",
   "dialect": "postgresql",
@@ -4093,7 +4093,7 @@
         },
         "calendar_busy_blocks_max_length": {
           "name": "calendar_busy_blocks_max_length",
-          "value": "\"calendar_busy_blocks\".\"ends_at\" - \"calendar_busy_blocks\".\"starts_at\" <= interval '62 days'"
+          "value": "\"calendar_busy_blocks\".\"ends_at\" - \"calendar_busy_blocks\".\"starts_at\" <= interval '70 days'"
         }
       },
       "isRLSEnabled": false
@@ -4305,6 +4305,20 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'connected'"
+        },
+        "generation": {
+          "name": "generation",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "connected_at": {
+          "name": "connected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
         },
         "refresh_token_sealed": {
           "name": "refresh_token_sealed",
@@ -4534,6 +4548,10 @@
         "calendar_connections_error_format": {
           "name": "calendar_connections_error_format",
           "value": "\"calendar_connections\".\"last_error\" ~ '^[a-z_]{1,64}$'"
+        },
+        "calendar_connections_generation_range": {
+          "name": "calendar_connections_generation_range",
+          "value": "\"calendar_connections\".\"generation\" >= 1"
         },
         "calendar_connections_access_token_pair": {
           "name": "calendar_connections_access_token_pair",
