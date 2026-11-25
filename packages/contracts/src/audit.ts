@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BookingPaymentStatusSchema, DepositRuleSchema } from './deposits.js';
 import { BookingFeeStatusSchema } from './no-show-fees.js';
+import { CalendarConnectionStatusSchema, CalendarProviderSchema } from './calendar-sync.js';
 import { BusinessExportCountsSchema } from './export.js';
 import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
@@ -489,6 +490,39 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
             .nullable(),
         })
         .strict(),
+    })
+    .strict(),
+  // Google Calendar (S70, ADR-0069): a staff member's calendar connected, disconnected, or its
+  // status moved (Google refused the refresh token). The provider and status only: never the
+  // Google account, a token or a busy time.
+  z
+    .object({
+      action: z.literal('calendar.connected'),
+      entity: entity('calendar_connection'),
+      before: z.null(),
+      after: z
+        .object({
+          provider: CalendarProviderSchema,
+          staffMemberId: z.uuid(),
+          reconnected: z.boolean(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('calendar.disconnected'),
+      entity: entity('calendar_connection'),
+      before: z.object({ provider: CalendarProviderSchema, staffMemberId: z.uuid() }).strict(),
+      after: z.null(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('calendar.connection_changed'),
+      entity: entity('calendar_connection'),
+      before: z.object({ status: CalendarConnectionStatusSchema }).strict(),
+      after: z.object({ status: CalendarConnectionStatusSchema }).strict(),
     })
     .strict(),
   z
