@@ -5,6 +5,7 @@ import {
   CalendarConnectionAnswerSchema,
   CalendarConnectStartSchema,
   OutsideBusyResponseSchema,
+  TeamCalendarConnectionsSchema,
   TenantIdSchema,
   UserIdSchema,
 } from '@pepper/contracts';
@@ -200,6 +201,31 @@ describe('Google Calendar with the sandbox (AC-X-152, AC-X-157, AC-X-159)', () =
     expect(JSON.stringify(busy)).not.toContain('sandbox.test');
   });
 
+  it('the Team list reads each staff member’s state, never the email or another business (AC-X-165)', async () => {
+    const { owner, jess, staffMemberId } = await business(sandboxServer);
+    expect((await owner.get('/v1/calendar/connections').expect(200)).body).toEqual({
+      connections: [],
+    });
+    await connect(jess);
+    const listed = await owner.get('/v1/calendar/connections').expect(200);
+    const team = TeamCalendarConnectionsSchema.parse(listed.body);
+    expect(team.connections).toHaveLength(1);
+    expect(team.connections[0]).toMatchObject({
+      staffMemberId,
+      provider: 'sandbox',
+      status: 'connected',
+    });
+    expect(team.connections[0]?.syncedAt).not.toBeNull();
+    expect(JSON.stringify(listed.body)).not.toContain('sandbox.test');
+    expect(JSON.stringify(listed.body)).not.toMatch(/sbx-[ar]-|accountEmail/);
+    // A colleague reads the same list (staff.read); another business sees none of it.
+    expect((await jess.get('/v1/calendar/connections').expect(200)).body).toEqual(listed.body);
+    const other = await business(sandboxServer);
+    expect((await other.owner.get('/v1/calendar/connections').expect(200)).body).toEqual({
+      connections: [],
+    });
+  });
+
   it('the owner, with no staff member of their own, cannot connect', async () => {
     const { owner } = await business(sandboxServer);
     expect((await owner.get('/v1/calendar/google').expect(200)).body).toEqual({
@@ -250,6 +276,7 @@ describe('Google Calendar off (AC-X-158)', () => {
     const { jess } = await business(offServer);
     const calls = [
       () => jess.get('/v1/calendar/google'),
+      () => jess.get('/v1/calendar/connections'),
       () => jess.post('/v1/calendar/google/connect'),
       () => jess.post('/v1/calendar/google/callback', { code: 'x', state: 'A'.repeat(43) }),
       () => jess.delete('/v1/calendar/google'),

@@ -5,9 +5,11 @@ import {
   CalendarConnectStartSchema,
   MAX_LIST_ITEMS,
   OutsideBusyResponseSchema,
+  TeamCalendarConnectionsSchema,
   type CalendarConnectionAnswer,
   type CalendarConnectStart,
   type OutsideBusyResponse,
+  type TeamCalendarConnections,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
 import {
@@ -52,6 +54,18 @@ export class GoogleCalendarController {
   @RequirePermission('calendar.read')
   async own(@CurrentTenant() tenant: TenantContext): Promise<CalendarConnectionAnswer> {
     return CalendarConnectionAnswerSchema.parse(await answering(() => this.calendar.own(tenant)));
+  }
+
+  /**
+   * 200 every staff member's calendar state for the Team list (S70.2, AC-X-164, AC-X-165):
+   * status and last read, never the account's email; `staff.read`, like the list; 404 off.
+   */
+  @Get('connections')
+  @RequirePermission('staff.read')
+  async team(@CurrentTenant() tenant: TenantContext): Promise<TeamCalendarConnections> {
+    return TeamCalendarConnectionsSchema.parse(
+      await answering(() => this.calendar.team(tenant, MAX_LIST_ITEMS)),
+    );
   }
 
   /** 200 Google's consent page to send the member to; 409 `calendar_not_linked`; 429; 404 off. */
