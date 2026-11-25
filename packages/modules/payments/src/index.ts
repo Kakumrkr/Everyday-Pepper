@@ -4,6 +4,7 @@ export * from './provider.js';
 export * from './sandbox.js';
 export * from './services/accounts.js';
 export * from './services/deposits.js';
+export * from './services/fees.js';
 export * from './services/webhook.js';
 export * from './stripe.js';
 export * from './stripe-signature.js';

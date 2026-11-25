@@ -153,6 +153,7 @@ function delegate(provider: PaymentsProvider): PaymentsProvider {
     createDashboardLink: (id) => provider.createDashboardLink(id),
     createCustomer: (input) => provider.createCustomer(input),
     createDeposit: (input) => provider.createDeposit(input),
+    createOffSessionCharge: (input) => provider.createOffSessionCharge(input),
     createCardSetup: (input) => provider.createCardSetup(input),
     retrievePaymentIntent: (id) => provider.retrievePaymentIntent(id),
     retrieveSetupIntent: (id) => provider.retrieveSetupIntent(id),

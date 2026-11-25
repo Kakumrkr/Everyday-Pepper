@@ -293,6 +293,64 @@ describe('StripePaymentsProvider: deposits and cards (S66, ADR-0068 §3)', () =>
     expect(seen[1]?.url).toBe(`https://api.stripe.com/v1/refunds/${refund.id}`);
   });
 
+  it('charges a kept card off-session on the business’s behalf, once per key (S68, AC-X-140)', async () => {
+    const { fetch, seen } = stub(200, fixture('payment-intent-fee'));
+    const stripe = new StripePaymentsProvider({ secretKey: KEY, fetch });
+    const charged = await stripe.createOffSessionCharge({
+      tenantId: TENANT,
+      bookingFeeId: 'f1',
+      accountId: ACCOUNT,
+      customerId: CUSTOMER,
+      paymentMethodId: 'pm_1Nv0HdQ9RKHgCVdKcard',
+      amountCents: 2000,
+      description: 'Sunny Cuts · missed visit',
+      idempotencyKey: 'pepper-fee-f1',
+    });
+    expect(charged).toMatchObject({
+      status: 'succeeded',
+      payment_method: 'pm_1Nv0HdQ9RKHgCVdKcard',
+    });
+    expect(seen[0]?.url).toBe('https://api.stripe.com/v1/payment_intents');
+    expect(seen[0]?.form).toEqual({
+      amount: '2000',
+      currency: 'usd',
+      customer: CUSTOMER,
+      payment_method: 'pm_1Nv0HdQ9RKHgCVdKcard',
+      off_session: 'true',
+      confirm: 'true',
+      on_behalf_of: ACCOUNT,
+      'transfer_data[destination]': ACCOUNT,
+      description: 'Sunny Cuts · missed visit',
+      'metadata[pepper_tenant]': TENANT,
+      'metadata[pepper_fee]': 'f1',
+    });
+    expect(seen[0]?.headers['Idempotency-Key']).toBe('pepper-fee-f1');
+  });
+
+  it('says a declined off-session charge by Stripe’s code, not worth retrying', async () => {
+    const stripe = new StripePaymentsProvider({
+      secretKey: KEY,
+      fetch: stub(402, fixture('error-card-declined')).fetch,
+    });
+    await expect(
+      stripe.createOffSessionCharge({
+        tenantId: TENANT,
+        bookingFeeId: 'f1',
+        accountId: ACCOUNT,
+        customerId: CUSTOMER,
+        paymentMethodId: 'pm_1',
+        amountCents: 2000,
+        description: 'd',
+        idempotencyKey: 'k',
+      }),
+    ).rejects.toMatchObject({
+      status: 402,
+      type: 'card_error',
+      code: 'card_declined',
+      retryable: false,
+    });
+  });
+
   it('refuses an answer that isn’t the object asked for', async () => {
     const stripe = new StripePaymentsProvider({
       secretKey: KEY,

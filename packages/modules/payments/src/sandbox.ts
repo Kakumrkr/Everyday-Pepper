@@ -18,6 +18,7 @@ import {
   type CreateCardSetupInput,
   type CreateCustomerInput,
   type CreateDepositInput,
+  type CreateOffSessionChargeInput,
   type OnboardingLinkInput,
   type PaymentsProvider,
   type ProviderLink,
@@ -335,11 +336,57 @@ export class SandboxPaymentsProvider implements PaymentsProvider {
     if (intent.client_secret !== clientSecret) throw refused('resource_missing', 404);
     if (intent.status !== 'requires_payment_method') throw refused('unexpected_state');
     if (outcome === 'declined') return;
+    // The card Stripe keeps on the customer for later (S68: a no-show fee charges it).
+    const paymentMethod = `pm_sandbox${randomBytes(8).toString('hex')}`;
     await this.keep(
       intent.object === 'payment_intent'
-        ? { ...intent, status: 'requires_capture' }
-        : { ...intent, status: 'succeeded' },
+        ? { ...intent, status: 'requires_capture', payment_method: paymentMethod }
+        : { ...intent, status: 'succeeded', payment_method: paymentMethod },
     );
+  }
+
+  /**
+   * An approved no-show fee (S68): succeeds on a card the sandbox gave out, unless a test set
+   * what that card does next (`setCardOutcome`): declined, or needing the client.
+   */
+  async createOffSessionCharge(input: CreateOffSessionChargeInput): Promise<StripePaymentIntent> {
+    await this.retrieveAccount(input.accountId);
+    return this.once(
+      input.idempotencyKey,
+      async () => {
+        if (!/^pm_sandbox[a-f0-9]+$/.test(input.paymentMethodId)) {
+          throw refused('resource_missing', 404);
+        }
+        const outcome = await this.options.store.get(`card:${input.paymentMethodId}`);
+        if (outcome !== null) {
+          throw new PaymentsProviderError(402, 'card_error', outcome, false);
+        }
+        const id = `pi_sandbox${randomBytes(8).toString('hex')}`;
+        const intent = StripePaymentIntentSchema.parse({
+          id,
+          object: 'payment_intent',
+          amount: input.amountCents,
+          amount_received: input.amountCents,
+          currency: 'usd',
+          customer: input.customerId,
+          status: 'succeeded',
+          client_secret: null,
+          payment_method: input.paymentMethodId,
+          livemode: false,
+        });
+        await this.keep(intent);
+        return { id, value: intent };
+      },
+      (id) => this.retrievePaymentIntent(id),
+    );
+  }
+
+  /** What a kept card does at its next off-session charge (tests and the dev journeys). */
+  async setCardOutcome(
+    paymentMethodId: string,
+    outcome: 'card_declined' | 'authentication_required',
+  ): Promise<void> {
+    await this.options.store.set(`card:${paymentMethodId}`, outcome);
   }
 
   private async keep(intent: StripePaymentIntent | StripeSetupIntent): Promise<void> {

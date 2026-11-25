@@ -188,3 +188,69 @@ describe('SandboxPaymentsProvider: deposits and cards (S66, AC-X-120)', () => {
     ).rejects.toMatchObject({ status: 403 });
   });
 });
+
+describe('SandboxPaymentsProvider: no-show fees (S68, AC-X-140)', () => {
+  async function keptCard() {
+    const provider = sandbox();
+    const account = await provider.createAccount({ tenantId: TENANT, idempotencyKey: 'a' });
+    await provider.setState(account.id, 'ready');
+    const customer = await provider.createCustomer({ tenantId: TENANT, idempotencyKey: 'c' });
+    const setup = await provider.createCardSetup({
+      tenantId: TENANT,
+      requestId: 'r',
+      accountId: account.id,
+      customerId: customer.id,
+      idempotencyKey: 'set',
+    });
+    await provider.settleIntent(setup.client_secret ?? '', 'succeeded');
+    const saved = await provider.retrieveSetupIntent(setup.id);
+    return { provider, accountId: account.id, customerId: customer.id, card: saved.payment_method };
+  }
+
+  it('keeps the card a client gave, and charges it off-session once per key', async () => {
+    const { provider, accountId, customerId, card } = await keptCard();
+    expect(card).toMatch(/^pm_sandbox[a-f0-9]+$/);
+    const input = {
+      tenantId: TENANT,
+      bookingFeeId: 'f',
+      accountId,
+      customerId,
+      paymentMethodId: card ?? '',
+      amountCents: 2000,
+      description: 'd',
+      idempotencyKey: 'fee',
+    };
+    const charged = await provider.createOffSessionCharge(input);
+    expect(charged).toMatchObject({ status: 'succeeded', amount: 2000, amount_received: 2000 });
+    expect((await provider.createOffSessionCharge(input)).id).toBe(charged.id);
+    const refund = await provider.createRefund(charged.id, 'fee-refund');
+    expect(refund).toMatchObject({ status: 'succeeded', amount: 2000 });
+  });
+
+  it('declines a card told to, or one it never gave out', async () => {
+    const { provider, accountId, customerId, card } = await keptCard();
+    await provider.setCardOutcome(card ?? '', 'authentication_required');
+    const input = {
+      tenantId: TENANT,
+      bookingFeeId: 'f',
+      accountId,
+      customerId,
+      paymentMethodId: card ?? '',
+      amountCents: 2000,
+      description: 'd',
+      idempotencyKey: 'fee',
+    };
+    await expect(provider.createOffSessionCharge(input)).rejects.toMatchObject({
+      status: 402,
+      code: 'authentication_required',
+      retryable: false,
+    });
+    await expect(
+      provider.createOffSessionCharge({
+        ...input,
+        paymentMethodId: 'pm_other',
+        idempotencyKey: 'x',
+      }),
+    ).rejects.toMatchObject({ status: 404 });
+  });
+});

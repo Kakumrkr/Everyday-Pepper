@@ -1,0 +1,16 @@
+{
+  "id": "pi_3Nv0JkQ9RKHgCVdK0FeeChrg",
+  "object": "payment_intent",
+  "amount": 2000,
+  "amount_received": 2000,
+  "capture_method": "automatic",
+  "client_secret": "pi_3Nv0JkQ9RKHgCVdK0FeeChrg_secret_Lp0dQbWpGIkA5678",
+  "currency": "usd",
+  "customer": "cus_P4nTGqV1aBcD2e",
+  "livemode": false,
+  "on_behalf_of": "acct_1Nv0FGQ9RKHgCVdK",
+  "payment_method": "pm_1Nv0HdQ9RKHgCVdKcard",
+  "status": "succeeded",
+  "transfer_data": { "destination": "acct_1Nv0FGQ9RKHgCVdK" },
+  "metadata": { "pepper_fee": "0199f0a4-7c1e-7d2a-9b3c-4d5e6f708200" }
+}
