@@ -336,6 +336,9 @@ importers:
       '@pepper/imports':
         specifier: workspace:*
         version: link:../modules/imports
+      '@pepper/payments':
+        specifier: workspace:*
+        version: link:../modules/payments
       openai:
         specifier: 7.32.0
         version: 7.32.0(@aws-sdk/credential-provider-node@3.972.92)(@smithy/signature-v4@5.7.5)(undici@8.12.2)(zod@4.6.7)

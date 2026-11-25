@@ -1,9 +1,16 @@
-import { AutonomyActionSchema, MemoryFactShownSchema, type AiWhy } from '@pepper/contracts';
+import {
+  AutonomyActionSchema,
+  levelAllowed,
+  MemoryFactShownSchema,
+  type AiWhy,
+} from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   AUTONOMY_GROUPS,
   changeRows,
+  decisionLabels,
   DIAL_LABEL,
+  LOCKED_HELP,
   emailLine,
   factLine,
   formatInstant,
@@ -412,14 +419,22 @@ describe('whyModel (assembled from the record, never model prose)', () => {
 });
 
 describe('the autonomy page groups', () => {
-  it('covers every action once, internal changes first, messages to clients second', () => {
+  it('covers every action once: internal changes, messages to clients, then money', () => {
     const listed = AUTONOMY_GROUPS.flatMap((group) => group.actions);
+    expect(listed).toHaveLength(new Set(listed).size);
     expect([...listed].sort()).toEqual([...AutonomyActionSchema.options].sort());
     expect(AUTONOMY_GROUPS.map((group) => group.title)).toEqual([
       'Changes inside Pepper',
       'Messages to clients',
+      'Money',
     ]);
+    expect(AUTONOMY_GROUPS[2]?.actions).toEqual(['payment.no_show_fee']);
     for (const action of AutonomyActionSchema.options) expect(DIAL_LABEL[action]).not.toBe('');
+    // Each locked dial says its own reason (S68: the fee's isn't a booking rule's, CI run 1).
+    for (const action of AutonomyActionSchema.options.filter((a) => !levelAllowed(a, 'auto'))) {
+      expect(LOCKED_HELP[action]).toBeDefined();
+    }
+    expect(new Set(Object.values(LOCKED_HELP)).size).toBe(Object.keys(LOCKED_HELP).length);
   });
 });
 
@@ -433,5 +448,47 @@ describe('safeScreenLink (links only from ScreenLinkSchema)', () => {
       expect(safeScreenLink({ label: 'x', href })).toBeNull();
     }
     expect(safeScreenLink(null)).toBeNull();
+  });
+});
+
+describe('the no-show fee card (S68, AC-X-138)', () => {
+  const after = {
+    fee: 'no_show',
+    clientName: 'Ana',
+    serviceName: 'Haircut',
+    staffName: 'Jess',
+    date: '2026-11-03',
+    time: '10:00',
+    endTime: '11:00',
+    amount: '$20',
+    card: 'card_on_file',
+    keptDeposit: null,
+    policy:
+      'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.',
+    choice: 'No-shows may be charged $20 · charge $20 or waive',
+  };
+
+  it('shows the visit, the card, the client’s own terms and the choice', () => {
+    expect(changeRows('payment.no_show_fee', null, after)).toEqual([
+      { label: 'Client', before: null, after: 'Ana' },
+      { label: 'Missed', before: null, after: 'Tue, Nov 3 · 10:00 am–11:00 am' },
+      { label: 'Service', before: null, after: 'Haircut' },
+      { label: 'Card', before: null, after: 'Card on file' },
+      { label: 'Their policy', before: null, after: after.policy },
+      { label: 'Fee', before: null, after: 'No-shows may be charged $20 · charge $20 or waive' },
+    ]);
+    expect(changeRows('payment.no_show_fee', null, { ...after, card: 'deposit_card' })[3]).toEqual({
+      label: 'Card',
+      before: null,
+      after: 'The deposit’s card',
+    });
+  });
+
+  it('puts the money on the button: "Charge $20" or "Waive"', () => {
+    expect(decisionLabels('payment.no_show_fee', after)).toEqual({
+      approve: 'Charge $20',
+      reject: 'Waive',
+    });
+    expect(decisionLabels('booking.move', null)).toEqual({ approve: 'Approve', reject: 'Not now' });
   });
 });

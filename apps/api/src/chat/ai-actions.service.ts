@@ -287,8 +287,11 @@ export class AiActionsService {
           ? null
           : (names.get(proposal.decidedByUserId) ?? null),
       forYou,
+      // Their own request, if their role may do it at all (S68: staff never get a no-show
+      // fee's Charge button), or anyone's they reach.
       canDecide:
-        proposal.status === 'pending' && (forYou || this.reachesAll(actor, proposal.action)),
+        proposal.status === 'pending' &&
+        ((forYou && this.mayDo(actor, proposal.action)) || this.reachesAll(actor, proposal.action)),
       ...(await this.withMemory(actor, proposal.explanation, proposedFactOf(proposal))),
       ...(shown?.draft !== undefined && { draft: shown.draft }),
     };
@@ -414,6 +417,11 @@ export class AiActionsService {
         return shown.success ? [shown.data] : [];
       }),
     };
+  }
+
+  /** Whether the member's role may do this kind of action at all (their own records at least). */
+  private mayDo(actor: Actor, action: AutonomyAction): boolean {
+    return permissionScope(actor.context.role, AUTONOMY_ACTIONS[action].permission) !== null;
   }
 
   /** Whether the member's role reaches every record of this kind (owners and managers). */

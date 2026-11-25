@@ -16,7 +16,7 @@ import {
   ownClientAddress,
   unique,
 } from './helpers.js';
-import { stripeSays } from './payments-helpers.js';
+import { buildPolicy, POLICY_SENTENCE, stripeSays } from './payments-helpers.js';
 
 // Deposits on screen (S66.2, AC-X-121…124, ADR-0068), through the Stripe sandbox: the owner sets
 // a $15 deposit on the service sheet and the refund window in booking page settings; a client
@@ -122,32 +122,6 @@ async function bookAndPay(
   // AC-X-132: the manage page says the policy too.
   await expect(client.getByTestId('policy-sentence')).toHaveText(policy);
   return client;
-}
-
-/** The policy the owner builds below (S67.2): a day's notice, $20 for a no-show. */
-const POLICY_SENTENCE =
-  'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.';
-
-/** The owner turns the cancellation policy on with a $20 no-show fee (S67.2, AC-X-130/131). */
-async function buildPolicy(page: Page): Promise<void> {
-  const policy = page
-    .getByRole('region', { name: 'Your booking page' })
-    .getByRole('form', { name: 'Cancellation policy' });
-  await (
-    await hydrated(
-      policy
-        .getByRole('radiogroup', { name: 'Cancellation policy' })
-        .getByRole('radio', { name: 'On' }),
-    )
-  ).click();
-  const noShow = policy.getByRole('radiogroup', { name: 'A no-show costs' });
-  await noShow.getByRole('radio', { name: 'Amount' }).click();
-  await policy.getByLabel('No-show fee ($)').fill('20');
-  await expect(policy.getByTestId('policy-preview')).toContainText(POLICY_SENTENCE);
-  await policy.getByRole('button', { name: 'Save policy' }).click();
-  await expect(
-    policy.getByText('Saved. Clients see it when they book and in their emails.'),
-  ).toBeVisible();
 }
 
 test('an owner asks a $15 deposit; a client pays it, and cancelling in time gives it back while a late cancel keeps it', async ({

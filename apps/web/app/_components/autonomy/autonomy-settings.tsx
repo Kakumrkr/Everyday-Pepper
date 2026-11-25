@@ -22,6 +22,7 @@ import {
   Icon,
   LEVEL_HELP,
   LEVEL_LABEL,
+  LOCKED_HELP,
   localDay,
   offerLine,
   PRESET_HELP,
@@ -334,13 +335,11 @@ function DialRow({
           {DIAL_LABEL[action]}
         </span>
         <span id={helpId} className="type-caption text-ink-2">
-          {askOnly
-            ? 'Always needs your OK: a new rule changes when clients can book.'
-            : locked
-              ? 'Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake.'
-              : overridden
-                ? 'Waiting for your OK while “Ask me first for everything” is on.'
-                : LEVEL_HELP[level]}
+          {locked
+            ? (LOCKED_HELP[action] ?? 'Always needs your OK.')
+            : overridden
+              ? 'Waiting for your OK while “Ask me first for everything” is on.'
+              : LEVEL_HELP[level]}
         </span>
         {showCount ? (
           <span className="type-caption text-ink-2" data-testid={`count-${action}`}>

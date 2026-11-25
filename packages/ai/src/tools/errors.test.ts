@@ -20,6 +20,7 @@ import {
   TaskNotOpenError,
   UndoRefusedError,
 } from '@pepper/core';
+import { NoShowFeeNotChargeableError } from '@pepper/payments';
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
@@ -61,6 +62,9 @@ const CASES: [unknown, string][] = [
   [new IdempotencyKeyReusedError(), 'conflict'],
   [new UndoRefusedError('slot_taken'), 'not_changeable'],
   [new Error('connection reset at 10.0.0.5 for maria@example.test'), 'internal'],
+  // S68: a no-show fee that can't be charged, whatever the reason.
+  [new NoShowFeeNotChargeableError('not_no_show'), 'not_changeable'],
+  [new NoShowFeeNotChargeableError('payments_off'), 'not_changeable'],
 ];
 
 describe('toolRefusalOf', () => {
@@ -87,6 +91,24 @@ describe('toolRefusalOf', () => {
       { numRuns: 1000 },
     );
   });
+});
+
+it('says in the owner’s words why a no-show fee wasn’t charged (S68, AC-X-139)', () => {
+  const reasons = [
+    'not_no_show',
+    'no_terms',
+    'no_card',
+    'nothing_to_charge',
+    'payments_off',
+    'already_decided',
+  ] as const;
+  for (const reason of reasons) {
+    const { message } = toolRefusalOf(new NoShowFeeNotChargeableError(reason));
+    expect(message).toMatch(/charge/);
+  }
+  expect(toolRefusalOf(new NoShowFeeNotChargeableError('not_no_show')).message).toBe(
+    'That visit isn’t a no-show any more, so I didn’t charge anything.',
+  );
 });
 
 describe('undoRefusalOf', () => {

@@ -25,7 +25,8 @@ const allowedInternalImports = {
   // ADR-0029: the AI's tools are thin adapters over the domain services (core and the modules)
   // and run in their member transactions (db's `withMember`, types); never L3 templates.
   // S56a.2 (ADR-0061): the import mapping suggester calls the imports module's services.
-  'packages/ai': ['contracts', 'core', 'db', 'appointments', 'imports', 'testing'],
+  // S68 (ADR-0068 amendment): the no-show fee card calls the payments module's fee services.
+  'packages/ai': ['contracts', 'core', 'db', 'appointments', 'imports', 'payments', 'testing'],
   'packages/integrations': ['contracts', 'core'],
   'packages/ui': ['contracts'],
   'packages/runtime': ['contracts', 'core', 'db', 'testing'],

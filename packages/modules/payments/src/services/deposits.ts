@@ -36,6 +36,7 @@ import {
 import { DepositsUnavailableError, PaymentNotAuthorizedError } from '../errors.js';
 import { PaymentsProviderError, type PaymentsProvider } from '../provider.js';
 import type { PaymentsDeps } from './accounts.js';
+import { runFeeJob, termsAtBookingIn } from './fees.js';
 
 // Booking page deposits and cards on file (S66, ADR-0068). The order is: after the request's code,
 // `startBookingPayment` makes one customer and one intent per request (Stripe's keys by request);
@@ -235,11 +236,17 @@ export async function attachBookingPaymentIn(
 ): Promise<boolean> {
   const row = await findBookingPaymentByRequest(tx, input.requestId, { lock: true });
   if (row?.status !== 'started') return false;
+  // The terms the client was shown, kept with the payment (S68, AC-X-136).
+  const terms = await termsAtBookingIn(tx, {
+    bookingId: input.bookingId,
+    refundHours: row.refundHours,
+  });
   const moved = await move(tx, row, ['started'], {
     status: row.kind === 'deposit' ? 'booked' : 'card_saved',
     bookingId: input.bookingId,
     bookedAt: input.now,
     refundEndsAt: depositRefundEndsAt(input.startsAt, row.refundHours),
+    ...terms,
   });
   if (moved === undefined) return false;
   if (moved.kind === 'deposit') {
@@ -380,7 +387,7 @@ export async function settleDepositOnCancelIn(
 
 async function queueStep(
   tx: TenantTx,
-  job: OutboxPayment,
+  job: Extract<OutboxPayment, { bookingPaymentId: string }>,
   options: { now: Date; outboxKey: Buffer },
 ): Promise<void> {
   await queuePayment(tx, job, {
@@ -399,6 +406,11 @@ export async function runPaymentJob(
   tenantId: TenantId,
   job: OutboxPayment,
 ): Promise<void> {
+  // A no-show fee's step (S68).
+  if ('bookingFeeId' in job) {
+    await runFeeJob(deps, tenantId, job);
+    return;
+  }
   const row = await withTenant(deps.db, tenantId, (tx) =>
     findBookingPayment(tx, job.bookingPaymentId),
   );

@@ -34,3 +34,31 @@ export class PaymentNotAuthorizedError extends Error {
     this.name = 'PaymentNotAuthorizedError';
   }
 }
+
+/**
+ * A no-show fee can't be charged (S68, AC-X-139): the visit is no longer a no-show, the booking
+ * kept no terms or no card, nothing is left after its deposit, the business can't take charges,
+ * or a fee was already decided. Nothing is charged.
+ */
+export class NoShowFeeNotChargeableError extends Error {
+  constructor(
+    readonly reason:
+      | 'not_no_show'
+      | 'no_terms'
+      | 'no_card'
+      | 'nothing_to_charge'
+      | 'payments_off'
+      | 'already_decided',
+  ) {
+    super(`The no-show fee can’t be charged (${reason})`);
+    this.name = 'NoShowFeeNotChargeableError';
+  }
+}
+
+/** The fee is being charged this moment (S68, AC-X-141): Undo can't decide yet; try again. */
+export class NoShowFeeBusyError extends Error {
+  constructor() {
+    super('The no-show fee is being charged right now');
+    this.name = 'NoShowFeeBusyError';
+  }
+}

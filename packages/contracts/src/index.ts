@@ -9,6 +9,7 @@ export * from './cancellation-policy.js';
 export * from './clients.js';
 export * from './deletion.js';
 export * from './deposits.js';
+export * from './no-show-fees.js';
 export * from './drafts.js';
 export * from './export.js';
 export * from './feed.js';

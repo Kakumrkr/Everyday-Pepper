@@ -50,6 +50,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'message.bulk': 'messages to several clients',
   'message.review_request': 'review requests',
   'message.client': 'messages to a client',
+  'payment.no_show_fee': 'no-show fees',
 };
 
 /** One standing rule and where it is changed. */

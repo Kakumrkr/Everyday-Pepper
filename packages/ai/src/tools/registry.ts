@@ -53,6 +53,7 @@ import { searchMemory } from './catalog/episodes.js';
 import { getFeed } from './catalog/feed.js';
 import { sendRebookingNudge } from './catalog/nudges.js';
 import { sendReviewRequest } from './catalog/review-requests.js';
+import { chargeNoShowFee } from './catalog/no-show-fees.js';
 import { addToWaitlist, sendWaitlistOffers } from './catalog/waitlist.js';
 import { proposeRule } from './catalog/rules.js';
 import { directoryOf, localSlot } from './catalog/shared.js';
@@ -118,6 +119,7 @@ export const SYSTEM_TOOLS: readonly WriteTool[] = [
   sendRebookingNudge,
   sendWaitlistOffers,
   sendReviewRequest,
+  chargeNoShowFee,
 ];
 
 /** The system writes whose proposal carries words a member may edit on the card (S36, S55.2). */
@@ -319,7 +321,8 @@ export async function approvalRefusal(
   const refusal = toolRefusalOf(error);
   // A rebooking email offers its own time (S36), and a review request follows its own visit
   // (S55.2): there is nothing to pick instead.
-  if (DRAFT_TOOLS.has(proposal.tool)) {
+  // A no-show fee charges its own visit's card (S68): nothing to pick instead either.
+  if (DRAFT_TOOLS.has(proposal.tool) || proposal.tool === chargeNoShowFee.name) {
     return {
       code: refusal.code,
       message:

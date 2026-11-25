@@ -24,6 +24,7 @@ import { ForbiddenError, permissionScope, UndoRefusedError } from '@pepper/core'
 import { z } from 'zod';
 import { instantOf } from '../local-time.js';
 import type { Performed, ToolScope, WriteScope, WriteTool } from '../tool.js';
+import { proposeNoShowFeeIn } from '../../drafts/no-show-fees.js';
 import { bookingMemory } from './recall.js';
 import {
   bookingSide,
@@ -446,7 +447,13 @@ export const markNoShow: WriteTool = {
       scope.actor,
       id,
       { status: 'no_show' },
-      domainOptions(scope),
+      {
+        ...domainOptions(scope),
+        // The no-show fee card the client's terms allow (S68, AC-X-137): proposed, never charged.
+        onNoShow: async (tx, booking) => {
+          await proposeNoShowFeeIn(tx, scope.deps, booking.bookingId);
+        },
+      },
     );
     const was = await viewOf(scope, directory, before);
     const now = await viewOf(scope, directory, missed);

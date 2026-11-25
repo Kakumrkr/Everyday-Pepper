@@ -66,6 +66,24 @@ export interface CreateCardSetupInput {
   idempotencyKey: string;
 }
 
+/**
+ * A no-show fee the owner approved (S68, ADR-0068 amendment): charged now to the card the client
+ * kept, without them (`off_session`, confirmed at once), as a destination charge on the business's
+ * behalf like the deposit. A decline or a card that needs the client is a `PaymentsProviderError`
+ * with Stripe's code (`card_declined`, `authentication_required`), not retryable.
+ */
+export interface CreateOffSessionChargeInput {
+  tenantId: TenantId;
+  bookingFeeId: string;
+  accountId: StripeAccountId;
+  customerId: StripeCustomerId;
+  paymentMethodId: string;
+  amountCents: number;
+  /** On the client's statement and receipt: the business and what it is for. */
+  description: string;
+  idempotencyKey: string;
+}
+
 export interface PaymentsProvider {
   readonly provider: PaymentProvider;
   /** Whether the key is live: an event of the other mode changes nothing (AC-X-100). */
@@ -87,6 +105,8 @@ export interface PaymentsProvider {
   /** The whole payment back to the client, the transfer to the business reversed. */
   createRefund(paymentIntentId: string, idempotencyKey: string): Promise<StripeRefund>;
   retrieveRefund(id: string): Promise<StripeRefund>;
+  /** Charges a kept card now, the client not present (S68: an approved no-show fee). */
+  createOffSessionCharge(input: CreateOffSessionChargeInput): Promise<StripePaymentIntent>;
 }
 
 /**

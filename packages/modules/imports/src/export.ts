@@ -19,6 +19,7 @@ import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js'
 const SMS_CONSENTS_FILE = 'text-consents.json';
 const PAYMENTS_FILE = 'payments.json';
 const DEPOSITS_FILE = 'deposits.json';
+const NO_SHOW_FEES_FILE = 'no-show-fees.json';
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -85,6 +86,11 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
       : [`${PAYMENTS_FILE}  Your Stripe account: which one, and where it stood`]),
     ...(data.deposits.length > 0
       ? [`${DEPOSITS_FILE}  Deposits and cards taken on your booking page, and what became of each`]
+      : []),
+    ...(data.noShowFees.length > 0
+      ? [
+          `${NO_SHOW_FEES_FILE}  No-show fees you approved: the policy the client saw, who approved, and the charge`,
+        ]
       : []),
     '',
     // In words, as the app says it ("Eastern Time", "Paris time"; S51.2, AC-W1-44).
@@ -339,6 +345,21 @@ export function buildBusinessExport(
           ...deposit,
           createdAt: at(deposit.createdAt),
           settledAt: deposit.settledAt === null ? null : at(deposit.settledAt),
+        })),
+      ),
+    ]);
+  }
+
+  // No-show fees the owner approved (S68, AC-X-142): what a dispute is answered from.
+  if (data.noShowFees.length > 0) {
+    jsonFiles.push([
+      NO_SHOW_FEES_FILE,
+      json(
+        data.noShowFees.map((fee) => ({
+          ...fee,
+          agreedAt: at(fee.agreedAt),
+          approvedAt: at(fee.approvedAt),
+          chargedAt: fee.chargedAt === null ? null : at(fee.chargedAt),
         })),
       ),
     ]);

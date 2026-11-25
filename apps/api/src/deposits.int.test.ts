@@ -7,6 +7,7 @@ import {
   BookingIdSchema,
   BookingPaymentStartSchema,
   BookingRequestResponseSchema,
+  ActionProposalIdSchema,
   ClientIdSchema,
   PublicBookingResponseSchema,
   PublicBusinessSchema,
@@ -50,6 +51,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { AppModule } from './app.module.js';
 import { BookingsService } from './appointments/bookings.service.js';
 import { loadApiConfig } from './config.js';
+import { AiActionsService } from './chat/ai-actions.service.js';
 import { PaymentsService } from './payments/payments.service.js';
 
 // Deposits through the api against real Postgres and Redis (S66, ADR-0068, AC-X-113…120): the
@@ -174,11 +176,12 @@ function visitor() {
 }
 
 /** Delivers what's queued (emails, captures, refunds), as the worker does. */
-async function deliverQueued(): Promise<void> {
+async function deliverQueued(at: Date = new Date()): Promise<void> {
   const options = {
     key: outboxKeyFrom(OUTBOX_SECRET),
     mailer,
-    clock: systemClock,
+    // A later moment delivers what waits for it (S68: a fee's grace).
+    clock: { now: () => at },
     payments: (database: Database, tenant: TenantId, job: Parameters<typeof runPaymentJob>[2]) =>
       runPaymentJob(
         {
@@ -191,7 +194,7 @@ async function deliverQueued(): Promise<void> {
         job,
       ),
   };
-  for (const due of await listDueOutboxMessages(db, new Date(), 100)) {
+  for (const due of await listDueOutboxMessages(db, at, 100)) {
     await deliverOutboxMessage(db, due, options);
   }
 }
@@ -682,5 +685,116 @@ describe('who pays a deposit (S67, ADR-0068 amendment)', () => {
     expect(again.asked.body).toHaveProperty('confirmed');
     // No code email: the confirmation goes through the outbox.
     expect(mailer.sent.length).toBe(sent);
+  });
+});
+
+describe('the no-show fee by approval (S68, ADR-0068 amendment)', () => {
+  const fee = { kind: 'fixed', amountCents: 2000 } as const;
+
+  /** A paid deposit booking whose visit has started, marked a no-show by the team. */
+  async function missedVisit(daysAhead: number) {
+    const [slot] = await slots(depositServiceId, daysAhead);
+    if (slot === undefined) throw new Error('no free time');
+    const booked = await bookWithDeposit(slot);
+    // As if the visit had happened: an hour long, hours ago (each test's own hour).
+    await withTenant(db, tenantId, (tx) =>
+      tx.execute(
+        sql`UPDATE bookings SET starts_at = now() - make_interval(hours => ${daysAhead * 2}), ends_at = now() - make_interval(hours => ${daysAhead * 2 - 1}) WHERE id = ${booked.bookingId}`,
+      ),
+    );
+    await app.get(BookingsService).changeBooking(owner, BookingIdSchema.parse(booked.bookingId), {
+      status: 'no_show',
+    });
+    return booked;
+  }
+
+  async function feeCards() {
+    const listed = await app.get(AiActionsService).proposals(owner);
+    return listed.proposals.filter((proposal) => proposal.action === 'payment.no_show_fee');
+  }
+
+  async function feeOf(bookingId: string) {
+    const { rows } = await withTenant(db, tenantId, (tx) =>
+      tx.execute<{ status: string; amount: number; sentence: string }>(
+        sql`SELECT status, amount_cents AS amount, policy_sentence AS sentence FROM booking_fees WHERE booking_id = ${bookingId}`,
+      ),
+    );
+    return rows[0];
+  }
+
+  beforeAll(async () => {
+    await updateBookingPage(
+      db,
+      { context: owner },
+      { depositRefundHours: 24, cancellationFees: { lateCancel: { kind: 'none' }, noShow: fee } },
+    );
+  });
+
+  afterAll(async () => {
+    await updateBookingPage(
+      db,
+      { context: owner },
+      { depositRefundHours: 24, cancellationFees: null },
+    );
+  });
+
+  it('AC-X-137/138: the team’s no-show proposes one card with the policy and the rest of the fee', async () => {
+    const { bookingId } = await missedVisit(9);
+    const cards = (await feeCards()).filter((card) => card.after?.['choice'] !== undefined);
+    const card = cards.find((each) => each.summary.includes('$5 no-show fee'));
+    expect(card?.after).toMatchObject({
+      amount: '$5',
+      keptDeposit: '$15',
+      card: 'deposit_card',
+      policy:
+        'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.',
+      choice: 'No-shows may be charged $20 · $15 deposit kept · charge $5 or waive',
+    });
+    expect(card?.canDecide).toBe(true);
+    // A manager sees it but can't charge it.
+    const asManager = await app.get(AiActionsService).proposals({ ...owner, role: 'manager' });
+    expect(asManager.proposals.find((each) => each.id === card?.id)?.canDecide ?? false).toBe(
+      false,
+    );
+    // Proposing charged nothing.
+    expect(await feeOf(bookingId)).toBeUndefined();
+    if (card !== undefined) {
+      await app.get(AiActionsService).reject(owner, ActionProposalIdSchema.parse(card.id));
+    }
+  });
+
+  it('AC-X-139/140/142: only the owner’s OK charges, once, after the grace, and emails a receipt', async () => {
+    const { bookingId } = await missedVisit(10);
+    const card = (await feeCards()).find(
+      (each) => each.status === 'pending' && each.summary.includes('$5'),
+    );
+    if (card === undefined) throw new Error('no fee card');
+    const id = ActionProposalIdSchema.parse(card.id);
+    await expect(
+      app.get(AiActionsService).approve({ ...owner, role: 'manager' }, id, card.fingerprint),
+    ).rejects.toThrow();
+    expect(await feeOf(bookingId)).toBeUndefined();
+    const approved = await app.get(AiActionsService).approve(owner, id, card.fingerprint);
+    expect(approved.kind).toBe('executed');
+    expect(await feeOf(bookingId)).toMatchObject({ status: 'queued', amount: 500 });
+    await deliverQueued();
+    expect((await feeOf(bookingId))?.status).toBe('queued');
+    await deliverQueued(new Date(Date.now() + 61_000));
+    expect((await feeOf(bookingId))?.status).toBe('charged');
+    await deliverQueued(new Date(Date.now() + 61_000));
+    const receipt = mailer.sent.find((message) => message.subject.startsWith('Receipt'));
+    expect(receipt?.subject).toBe('Receipt: $5 missed visit fee from Fade Deposits');
+    expect(receipt?.text).toContain('No-shows may be charged $20.');
+  });
+
+  it('AC-X-139: a waived card charges nothing', async () => {
+    const { bookingId } = await missedVisit(11);
+    const card = (await feeCards()).find(
+      (each) => each.status === 'pending' && each.summary.includes('$5'),
+    );
+    if (card === undefined) throw new Error('no fee card');
+    await app.get(AiActionsService).reject(owner, ActionProposalIdSchema.parse(card.id));
+    await deliverQueued(new Date(Date.now() + 61_000));
+    expect(await feeOf(bookingId)).toBeUndefined();
   });
 });

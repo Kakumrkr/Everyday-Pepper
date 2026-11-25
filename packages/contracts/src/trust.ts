@@ -38,6 +38,7 @@ export const AutonomyActionSchema = z.enum([
   'message.bulk',
   'message.review_request',
   'message.client',
+  'payment.no_show_fee',
 ]);
 export type AutonomyAction = z.infer<typeof AutonomyActionSchema>;
 
@@ -190,6 +191,18 @@ export const AUTONOMY_ACTIONS = {
     allowsAuto: false,
     permission: 'clients.manage',
     undo: UNTIL_SENT,
+  },
+  // A no-show fee charged to the card the client kept (S68, ADR-0068 amendment): money moves, so
+  // a person always says yes (the dial is locked to "ask"), and only owners may (`payments.manage`,
+  // as for the business's Stripe account). Undo for a day: it cancels the charge while it waits
+  // and refunds it once taken.
+  'payment.no_show_fee': {
+    riskTier: 'external_or_irreversible',
+    defaultLevel: 'ask',
+    allowsAuto: false,
+    askOnly: true,
+    permission: 'payments.manage',
+    undo: { kind: 'for', minutes: DAY, notAfterAppointmentStart: false },
   },
 } as const satisfies Record<
   AutonomyAction,

@@ -1,5 +1,6 @@
 import { asc, isNull } from 'drizzle-orm';
 import {
+  bookingFees,
   bookingPayments,
   bookingRules,
   bookings,
@@ -80,6 +81,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   sms_consents: true,
   payment_accounts: true,
   booking_payments: true,
+  booking_fees: true,
   payment_webhook_events:
     'Stripe’s notices to Pepper (S65): delivery records, deleted after 30 days',
   sms_deliveries: 'text delivery state',
@@ -236,6 +238,23 @@ export interface BusinessExportData {
     stripePayment: string;
     createdAt: Date;
     settledAt: Date | null;
+  }[];
+  /**
+   * No-show fees the owner approved (S68, AC-X-142): the dispute record (the sentence the client
+   * was shown, when they agreed, who approved and when), Stripe's ids, no card.
+   */
+  noShowFees: {
+    bookingId: string;
+    amountCents: number;
+    policySentence: string;
+    agreedAt: Date;
+    approvedBy: string;
+    approvedAt: Date;
+    status: string;
+    failureCode: string | null;
+    stripePayment: string | null;
+    stripeRefund: string | null;
+    chargedAt: Date | null;
   }[];
 }
 
@@ -422,6 +441,21 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
         stripePayment: row.intentId,
         createdAt: row.createdAt,
         settledAt: row.settledAt,
+      }),
+    ),
+    noShowFees: (await tx.select().from(bookingFees).orderBy(asc(bookingFees.createdAt))).map(
+      (row) => ({
+        bookingId: row.bookingId,
+        amountCents: row.amountCents,
+        policySentence: row.policySentence,
+        agreedAt: row.agreedAt,
+        approvedBy: row.approvedBy,
+        approvedAt: row.approvedAt,
+        status: row.status,
+        failureCode: row.failureCode,
+        stripePayment: row.intentId,
+        stripeRefund: row.refundId,
+        chargedAt: row.chargedAt,
       }),
     ),
   };

@@ -23,6 +23,7 @@ import {
   type CreateCardSetupInput,
   type CreateCustomerInput,
   type CreateDepositInput,
+  type CreateOffSessionChargeInput,
   type OnboardingLinkInput,
   type PaymentsProvider,
   type ProviderLink,
@@ -193,6 +194,29 @@ export class StripePaymentsProvider implements PaymentsProvider {
 
   retrieveRefund(id: string): Promise<StripeRefund> {
     return this.call(StripeRefundSchema, 'GET', `/v1/refunds/${encodeURIComponent(id)}`);
+  }
+
+  /** An approved no-show fee (S68): the kept card, confirmed now without the client. */
+  createOffSessionCharge(input: CreateOffSessionChargeInput): Promise<StripePaymentIntent> {
+    return this.call(StripePaymentIntentSchema, 'POST', '/v1/payment_intents', {
+      form: {
+        amount: String(input.amountCents),
+        currency: 'usd',
+        customer: input.customerId,
+        payment_method: input.paymentMethodId,
+        off_session: 'true',
+        confirm: 'true',
+        // As the card was kept (no redirects): a server-side confirm needs no return URL.
+        'automatic_payment_methods[enabled]': 'true',
+        'automatic_payment_methods[allow_redirects]': 'never',
+        on_behalf_of: input.accountId,
+        'transfer_data[destination]': input.accountId,
+        description: input.description,
+        'metadata[pepper_tenant]': input.tenantId,
+        'metadata[pepper_fee]': input.bookingFeeId,
+      },
+      idempotencyKey: input.idempotencyKey,
+    });
   }
 
   private async call<T extends z.ZodType>(

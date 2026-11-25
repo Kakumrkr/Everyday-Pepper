@@ -22,7 +22,7 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
 | C10 | Accessibility | 6 | 8 | 8 | 9 | WCAG 2.2 AA on every screen, axe clean, the manual screen-reader check passed, reduced motion honoured |
 | C11 | Security and privacy | 6 | 8 | 9 | 9 | Recovery, verification, MFA, export, deletion, terms and privacy policy; no open high finding; zero data retention on the production AI project |
-| C12 | Market competitiveness | 3 | 7 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
+| C12 | Market competitiveness | 3 | 8 | 6 | 9 | Everything owners rely on daily (SMS, deposits, week view, sync, reports) plus the Pepper-only features |
 | C13 | Switching value | 2 | 8 | 8 | 9 | "We move you": an import from any of the five tools with history, in minutes, undoable |
 | C14 | Pilot readiness | 3 | 3 | 9 | — | Deployed, a sending domain, support the same day, metrics from day one |
 | C15 | Public-launch readiness | 1 | 1 | — | 9 | Billing, a landing page, legal pages, pricing, support, a case study |
@@ -39,7 +39,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 12 · The employee (S56b) | C1 8 · C5 8 · C8 9 (met, S56b: §8) |
 | 13 · Pilot readiness (S60) | the "Pilot gate" column |
 | 14 · SMS (S64) | C12 7 (met in sandbox, S64: §9) |
-| 15 · Deposits (S68) | C12 8 |
+| 15 · Deposits (S68) | C12 8 (met in Stripe's sandbox, S68: §10) |
 | 16 · Calendar + staff (S72) | C6 8 |
 | 17 · Launch gate (S76) | the "Launch gate" column |
 
@@ -75,6 +75,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 2026-11-04 | Phase 11 gate (S51.2) | 6 | 7 | 8 | 8 | 7 | 4 | 7 | 8 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 | 2026-11-06 | Phase 12 gate (S56b) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 | 2026-11-20 | Phase 14 gate (S64) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 7 | 8 | 3 | 1 |
+| 2026-11-25 | Phase 15 gate (S68) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 8 | 8 | 3 | 1 |
 
 ## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
 
@@ -119,3 +120,9 @@ Scored by Claude in S56b from the tests and the recording below; only C1, C5 and
 Scored by Claude in S64 from the tests below; only C12 was scored, the rest carry over. **SMS is built and proven in the sandbox, not live:** going live needs the LLC, a paid provider and 10DLC registration (S64.2, [PCR-012](changes/PCR-012.md)). The score credits what an owner gets the day the switch is on, as earlier gates credited features no owner had used yet; the gap is named below.
 
 - **C12 Market competitiveness 3 → 7.** Texts, the feature owners in the segment rely on most after booking itself, are complete: Twilio behind a port with a sandbox that never leaves the machine (ADR-0065); consent with the words agreed to, STOP/START/HELP answered in the signed webhook's own request, quiet hours, delivery status and GSM-7 segments (AC-X-57…69: contracts `sms.test.ts`, runtime `sms.test.ts`, db and core `sms.int.test.ts`, api `sms.int.test.ts`, `sms-webhook.controller.test.ts`, `twilio-signature.test.ts`); the day-before and same-day reminders and "C" to confirm, with owner settings (AC-X-70…79: appointments `reminders.int.test.ts`, `reminder-texts.int.test.ts`; e2e `texts-settings.spec.ts`, `confirm-by-text.spec.ts`); the booking page's opt-in (e2e `public-booking.spec.ts`). On top, the Pepper-only part competitors don't have: **cards approved or skipped by text** ("Y"/"N" and a single-use code, sender-checked, the exact card shown; ADR-0066, AC-X-80…95: core `approval-texts.int.test.ts`, `member-texts.int.test.ts`, api `sms-approval.int.test.ts`, e2e `approve-by-text.spec.ts`). The client's last text and "Confirmed by text" are on the profile and the visit (AC-X-76…79, `screens.spec.ts`). Not yet 8: no deposits or card on file (Phase 15), no week view or calendar sync (Phase 16), no reports (Phase 17); not yet live (no real carrier has carried a text: 10DLC), and the AI's `send_client_message` doesn't text yet (S64.2).
+
+## 10. Phase 15 gate (S68, 2026-11-25): the evidence
+
+Scored by Claude in S68 from the tests below; only C12 was scored, the rest carry over. **Deposits are built and proven in Stripe's sandbox, not yet against Stripe's test mode:** that run needs the user's test keys, and live charges need the LLC ([PCR-012](changes/PCR-012.md)). As at the Phase 14 gate, the score credits what an owner gets the day the keys are in; the gap is named below.
+
+- **C12 Market competitiveness 7 → 8.** Deposits and cards on file, which owners in the segment rely on daily after booking and texts, are complete. The pieces: Stripe Connect Express behind a port with a sandbox (ADR-0067, AC-X-96…105: payments `stripe.test.ts`, `sandbox.test.ts`, `payments.int.test.ts`, api `payments.int.test.ts`; e2e `payments.spec.ts`). A deposit or card per service, authorized before booking and captured after, refunded by the window and kept after it (ADR-0068, AC-X-111…124: payments `deposits.int.test.ts`, api `deposits.int.test.ts`; e2e `deposits.spec.ts`). Smart deposits, where regulars book with no card (AC-X-125…129). The cancellation policy in every channel (AC-X-130…135). **The no-show fee by approval** (S68, AC-X-136…143): the client's terms are stored when they book, a no-show brings one card with those terms and the fee they allow, and only the owner's tap charges the kept card, once and off-session, with a receipt and a dispute record (payments `fees.int.test.ts`, `stripe.test.ts`, `sandbox.test.ts`; ai `writes.int.test.ts`; api `deposits.int.test.ts`; db `booking-fees.int.test.ts`; e2e `no-show-fee.spec.ts`). Competitors charge no-show fees automatically. Pepper's way, where money never moves without the owner's OK and the card shows the client's own words, is Pepper-only, next to approve-by-text. Not yet 9: no week view or calendar sync (Phase 16) and no reports (Phase 17); no Stripe test-mode or live charge yet (the test keys, the LLC); late-cancel fees aren't offered as cards; a waitlist claim of a deposit service still books without one.

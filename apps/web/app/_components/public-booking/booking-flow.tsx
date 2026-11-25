@@ -818,6 +818,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           <DepositStep
             start={payment}
             timeZone={timeZone}
+            policy={business.cancellationSentence}
             busy={busy}
             onPaid={() => {
               setPaid(true);
