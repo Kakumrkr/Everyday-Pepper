@@ -1,31 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-25 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S69 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S70**
+**Last updated:** 2026-11-25 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S70 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S70.2**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S70 Google Calendar in (busy blocks)**, approved at the brief (user, 2026-11-25: "Start with your recommendations and complete the session successfully"): D-1 split → S70.2 the connect screen, Team status, the reconnect card, the OAuth journey; D-2 each staff member connects their own; D-3 a Google block binds like time off; D-4 poll freeBusy every 5 min, today → +60 days, start/end only; D-5 `calendar.freebusy` only, an expired token keeps the last blocks and asks to reconnect; D-6 `fetch` + Zod, no SDK.
-- Tasks: 1 ACs + ADR-0069 · 2 migration 0085 · 3 contracts + token sealing · 4 provider port, Google adapter, sandbox, fixtures · 5 OAuth routes · 6 worker sync + expiry · 7 availability · 8 week view "Busy (Google)" (top-up) · 9 close.
-- Done: 1 AC-X-152…159, ADR-0069 · 2 migration 0085 (3 tables, forced RLS, `job_scan('calendar')`), db repo + isolation 540 green · 3 contracts `calendar-sync.ts`, audit actions · 4 `@pepper/google-calendar` (port, fetch adapter, sandbox, sealing; services connect/finish/disconnect/read/pass): unit 34, int 24 green.
-- Claude: the token key is HKDF from the outbox key (purpose `pepper/google-calendar-tokens`), no new secret; PKCE sent, the hashed one-time state is the CSRF check (Google documents PKCE for installed apps only).
-- Done: 5 runtime `loadGoogleCalendarConfig` (4 unit), api `GoogleCalendarModule` (connect/callback/status/disconnect/outside-busy; error codes), api int 5 green, api unit 564.
-- Done: 6 worker `Calendar job` (`CALENDAR_POLL_MS`, default 1 min), `calendarProviderFor` shared by api and worker; Compose and `.env.example` sandbox; worker unit green.
-- Done: 7 `slotsFor` reads the busy blocks (planning unit + `outside-busy.int.test.ts` 3: not offered, team booking and move refused).
-- Done: 8 week view "Busy (Google)" (loader, `placedOn`, drop hint "Busy in Google Calendar"); web unit (calendar-week 31, calendar-data 8); e2e week 5 (new journey 3/3 repeated), screens week + new `calendar-week-google-busy-375-*` baselines.
-- Done: 9a `/code-review` (high) 10 findings, all fixed (generation guard so a read from before a reconnect writes nothing; `connected_at`; blocks up to 70 days; an unreadable token → `token_unreadable`, never blocks disconnect/reconnect; state upsert + expired sweep; NULLs first; cap after merging; rate reasons in contracts; a hook dependency); `/security-review`: none ≥ 8. Branch pushed (no PR).
-- 9b `pnpm check` run 1: format (drizzle meta files, now formatted), db unit functions 79.35% (fixed: schema test for the calendar tables, 81.19%), **lint out of memory at 4 GB, also on `origin/main` in this container** (checked in a worktree): an environment limit, not this change.
-- Next: rerun `pnpm check` (lint maybe alone with `NODE_OPTIONS=--max-old-space-size=8192 pnpm lint`, or per package, to get a real lint result; don't change the repo's limit without asking); then `TURBO_SCM_BASE=origin/main pnpm turbo run test:integration --affected`; e2e `calendar-week`, `calendar`, `booking`, `screens` on `e2e-stack.sh`; walkthrough (staff at 375 px: week with "Busy (Google)", drag onto it); PR; close docs (session log, decisions S70, STATUS "Last sessions"; planned row S70.2 = connect screen, Team status, reconnect card, OAuth journey) while CI runs.
+Nothing in progress. Next: **S70.2** (the connect screen; see "Planned sessions").
 
 ## Last sessions
+- **S70 Phase 16 · Google Calendar in (busy blocks) (2026-11-25)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #109](https://github.com/Kakumrkr/Everyday-Pepper/pull/109)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `@pepper/google-calendar` (port, `fetch` + Zod adapter, sandbox, sealed tokens); connect/callback/status/disconnect and `outside-busy` routes; the worker reads freeBusy every 5 minutes; an expired token keeps the busy times and needs reconnecting; `slotsFor` refuses Google busy times like time off; the week view's "Busy (Google)" (top-up). AC-X-152…159.
+  - **Checks:** `pnpm check` green (lint at an 8 GB heap: 4 GB runs out of memory here, also on `main`); affected integration 2,081 green; e2e week/calendar/booking 8, screens 43; review 10 of 10 fixed, security none ≥ 8; walkthrough at 375 px dark and light.
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).
   - **Built:** Day/Week in Calendar; one staff member's week (staff their own first), off hours shaded; drag (a long press on touch) in 15-minute steps with the landing time said aloud and a taken time marked; the drop sheet, never an override; Undo on the receipt. From the review: a manager can't waive the owner's fee card. AC-X-144…151.
   - **Checks:** `pnpm check` green; affected integration 1,039 green; e2e week 4 (12/12 repeated), calendar 1, booking 2, screens 42 twice; review 1 of 7 in this diff fixed + 1 S68 security fix, 5 S66–S68 items for later; security none ≥ 8; walkthrough at 375 px dark (two fixes).
-- **S68 Phase 15 · No-show fee by approval + gate (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the client's terms stored with the booking's payment; a no-show (team or Pepper) proposes one card with their policy sentence and "No-shows may be charged $20 · charge $20 or waive" (top-up), "Charge $20"/"Waive", owners only; the approved charge off-session after a 60 s grace, the receipt email, Undo (cancel or refund), `booking_fees` and `no-show-fees.json`. Phase 15 gate: C12 7 → 8. AC-X-136…143.
-  - **Checks:** `pnpm check` green (3rd run); affected integration 2,009 green; e2e 43 passed + 12 baselines redrawn; review 8 of 8 fixed, security none ≥ 8; walkthrough at 375 px light and dark.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -41,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S70 (user, 2026-11-25):** "Start with your recommendations" (D-1 split → S70.2 the connect screen, Team status, the reconnect card, the OAuth journey; D-2 each staff member connects their own; D-3 binds like time off; D-4 freeBusy every 5 min, start/end only; D-5 `calendar.freebusy` only, an expired token keeps the busy times; D-6 `fetch` + Zod). Full wording in [decisions.md](decisions.md) and [ADR-0069](../adr/0069-google-calendar-busy-times.md).
 - **S69 (user, 2026-11-25):** "Add and let's go with ur recommendations" (D-1 Phase 16 next, [PCR-016](changes/PCR-016.md); D-2 native pointer events; D-3 a drag never overrides; D-4 one staff member's week; additions: drag hints, Undo). Full wording in [decisions.md](decisions.md).
 - **S68 (stored prompt, 2026-11-25):** pre-approved recommendations (D-1 one session; D-2 the fee from the stored terms; D-3 a kept deposit counts; D-4 owners only, ask-only; D-5 Undo a day; D-6 the card in the no-show's transaction). Full wording in [decisions.md](decisions.md).
 - **S67.2 (user, 2026-11-25):** "go ahead, start with your recommendations" (D-1 one session; D-2 the notice is the refund window; D-3 nothing/amount/percent, fees only with payments, "may be charged"; D-4 the old text stays as the owner's note; D-5 the words in contracts). Full wording in [decisions.md](decisions.md).
@@ -119,11 +110,11 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S70 | Google Calendar in (busy blocks) | 16 | Contract + token-expiry tests |
+| S70.2 | Google Calendar on screen: connect/reconnect/disconnect under More → Calendar, status on Team, the "Reconnect" card, the OAuth journey (first real Google run) | 16 | Connect journey e2e; a real testing-mode connect |
 | S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
 | S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
