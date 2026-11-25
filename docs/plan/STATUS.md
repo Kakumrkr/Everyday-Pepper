@@ -7,10 +7,7 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S69 close, CI red on PR #108** (branch `ccr-9cc3cffd-8rt7ne`; all code pushed at `40a1cf1`; the close docs are the local commit(s) on top, not pushed so the next push carries fix + docs in one).
-- CI run 45661020008: **E2E shard 1/3 red** (the aggregator "E2E smoke" red only because of it); other jobs green or still running at the checkpoint. The job's log tail is only `docker compose logs`, so the failing test isn't known yet.
-- Shard 1 runs, per project: mobile `accessibility, approve-by-text, auth, booking, calendar-week, calendar, chat, clients, confirm-by-text, deletion, deposits, export, feed, gallery`; desktop `accessibility, gallery, screens`. Locally (one worker, `CI=1`): `accessibility` 3+3 passed; earlier `calendar-week` 4, `calendar` 1, `booking` 2, `screens` 42 passed.
-- **Next:** run the rest of shard 1 locally like CI (`CI=1 npx playwright test --project=mobile --shard=1/3`, then desktop) on the `e2e-stack.sh` stack, or read the failure from the job log's Playwright section; fix the root cause with a test; push fix + docs once; when green, squash-merge, unsubscribe, cancel the safety-net check-in `trig_0198QAm4y5Wbf9BaNsCD46Q5` (17:57 UTC); give the S70 prompt (top-up: Google busy blocks as "Busy (Google)" on the week view).
+Nothing in progress.
 
 ## Last sessions
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).
