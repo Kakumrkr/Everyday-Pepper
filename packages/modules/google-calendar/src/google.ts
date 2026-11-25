@@ -143,12 +143,15 @@ export class GoogleCalendarProvider implements CalendarProvider {
   private async token(fields: Record<string, string>) {
     const response = await this.call(GOOGLE_TOKEN_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        ...fields,
-        client_id: this.options.clientId,
-        client_secret: this.options.clientSecret,
-      }).toString(),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        // The client in a Basic header (RFC 6749 §2.3.1, which Google accepts), never in the
+        // body: the secret stays out of anything that logs or echoes a form (S70.2).
+        Authorization: `Basic ${Buffer.from(
+          `${encodeURIComponent(this.options.clientId)}:${encodeURIComponent(this.options.clientSecret)}`,
+        ).toString('base64')}`,
+      },
+      body: new URLSearchParams(fields).toString(),
     });
     const body = await jsonOf(response);
     if (!response.ok) {
