@@ -983,6 +983,68 @@ for (const width of WIDTHS) {
 }
 
 for (const width of WIDTHS) {
+  test(`Google Calendar on screen at ${String(width)} px, light and dark (S70.2)`, async ({
+    page,
+  }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const phone = width <= 375;
+    // More → Calendar (AC-X-160…163): not connected, connected through the sandbox's "Google",
+    // then needing to reconnect with Home's card. The owner takes bookings as Dre.
+    const members = MembersResponseSchema.parse(
+      await (await page.request.get('/v1/members')).json(),
+    ).members;
+    await post(
+      page,
+      '/v1/staff',
+      { displayName: 'Dre', userId: members.find((m) => m.role === 'owner')?.userId },
+      StaffMemberSchema,
+    );
+    // The last read moves with the clock ("Read just now", "Read 1 min ago"): masked.
+    const shots = async (name: string): Promise<void> => {
+      for (const scheme of SCHEMES) {
+        await page.goto('/more/calendar');
+        await expect(page.getByTestId('calendar-status')).toBeVisible();
+        await still(page, scheme);
+        await expect.soft(page).toHaveScreenshot(`${name}-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          mask: [page.getByText(/ · Read /)],
+        });
+        if (phone) await expectTapTargets(page, name);
+      }
+    };
+    await shots('more-calendar');
+
+    await page.goto('/more/calendar');
+    await (await hydrated(page.getByRole('button', { name: 'Connect Google Calendar' }))).click();
+    await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
+    await shots('more-calendar-connected');
+
+    // Google refuses the refresh at the connect's first read (`sandbox-expired`).
+    const origin = { origin: new URL(page.url()).origin };
+    const connect = await page.request.post('/v1/calendar/google/connect', { headers: origin });
+    expect(connect.status(), await connect.text()).toBe(200);
+    const back = new URL(CalendarConnectStartSchema.parse(await connect.json()).url);
+    const done = await page.request.post('/v1/calendar/google/callback', {
+      data: { code: 'sandbox-expired', state: back.searchParams.get('state') },
+      headers: origin,
+    });
+    expect(done.status(), await done.text()).toBe(200);
+    await shots('more-calendar-reconnect');
+    for (const scheme of SCHEMES) {
+      await page.goto('/');
+      const card = page.getByTestId('calendar-reconnect-card');
+      await expect(card).toBeVisible();
+      await still(page, scheme);
+      await expect
+        .soft(card)
+        .toHaveScreenshot(`home-calendar-reconnect-${String(width)}-${scheme}.png`, SHOT);
+    }
+  });
+}
+
+for (const width of WIDTHS) {
   test(`Calendar, Clients and a profile at ${String(width)} px, light and dark`, async ({
     page,
   }) => {

@@ -50,6 +50,14 @@ describe('the sandbox', () => {
     await expect(sandbox.refresh(ok.refreshToken)).rejects.toMatchObject({ code: 'invalid_grant' });
   });
 
+  it('sandbox-expired: an access token already run out and a refresh it refuses (S70.2)', async () => {
+    const expired = await sandbox.exchangeCode({ code: 'sandbox-expired', codeVerifier: VERIFIER });
+    expect(expired.expiresAt.getTime()).toBe(NOW);
+    await expect(sandbox.refresh(expired.refreshToken)).rejects.toMatchObject({
+      code: 'invalid_grant',
+    });
+  });
+
   it('refuses a token it did not make', async () => {
     await expect(
       sandbox.freeBusy({ accessToken: 'ya29.real', from: new Date(NOW), to: new Date(NOW + 1) }),

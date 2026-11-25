@@ -13,13 +13,17 @@ import {
 // The sandbox (S70, ADR-0069 §1): Google's flow without Google, for tests and the S70.2
 // journeys. Nothing leaves the machine. Its consent page is the app's own return page, with a
 // code the sandbox understands: `sandbox-ok` connects; `sandbox-expiring` connects with a refresh
-// token Google would refuse at the next read (the testing-mode 7 days, in one step). Every
+// token Google would refuse at the next read (the testing-mode 7 days, in one step);
+// `sandbox-expired` (S70.2) does too with an access token already run out, so the connect's own
+// first read finds it needs reconnecting (the browser journeys' Home card). Every
 // connected calendar is busy one hour a day, 17:00–18:00 UTC (noon in New York in winter).
 
 export const SANDBOX_ACCOUNT_EMAIL = 'calendar@sandbox.test';
 export const SANDBOX_BUSY_HOUR_UTC = 17;
 
 const HOUR_MS = 3_600_000;
+
+const SANDBOX_CODES = new Set(['sandbox-ok', 'sandbox-expiring', 'sandbox-expired']);
 const DAY_MS = 24 * HOUR_MS;
 
 export class SandboxCalendarProvider implements CalendarProvider {
@@ -40,17 +44,17 @@ export class SandboxCalendarProvider implements CalendarProvider {
   }
 
   exchangeCode(input: ExchangeCodeInput): Promise<GrantedTokens> {
-    if (input.code !== 'sandbox-ok' && input.code !== 'sandbox-expiring') {
+    if (!SANDBOX_CODES.has(input.code)) {
       return Promise.reject(new CalendarProviderError('invalid_grant', 400));
     }
     if (input.codeVerifier.length < 43) {
       return Promise.reject(new CalendarProviderError('invalid_grant', 400));
     }
-    const kind = input.code === 'sandbox-expiring' ? 'expiring' : 'ok';
+    const kind = input.code === 'sandbox-ok' ? 'ok' : 'expiring';
     return Promise.resolve({
       refreshToken: `sbx-r-${kind}-${randomBytes(12).toString('hex')}`,
       accessToken: `sbx-a-${randomBytes(12).toString('hex')}`,
-      expiresAt: new Date(this.now() + HOUR_MS),
+      expiresAt: new Date(this.now() + (input.code === 'sandbox-expired' ? 0 : HOUR_MS)),
       scopes: [...GOOGLE_CALENDAR_SCOPES],
       accountEmail: SANDBOX_ACCOUNT_EMAIL,
     });

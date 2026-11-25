@@ -336,6 +336,21 @@ describe('reconnecting and disconnecting (AC-X-155, AC-X-157)', () => {
     ]);
   });
 
+  it('sandbox-expired needs reconnecting from the first read, and a reconnect fixes it (S70.2)', async () => {
+    const { tenantId, deps } = await business();
+    const jo = await linkedStaff(tenantId);
+    const first = await startCalendarConnect(deps, jo.actor);
+    const expired = await completeCalendarConnect(
+      deps,
+      jo.actor,
+      answerOf(first.url, 'sandbox-expired'),
+    );
+    expect(expired.connection?.status).toBe('needs_reconnect');
+    const again = await startCalendarConnect(deps, jo.actor);
+    const fixed = await completeCalendarConnect(deps, jo.actor, answerOf(again.url));
+    expect(fixed.connection?.status).toBe('connected');
+  });
+
   it('disconnect removes the connection and its busy times, then revokes', async () => {
     const { tenantId, deps, sandbox } = await business();
     const jo = await linkedStaff(tenantId);

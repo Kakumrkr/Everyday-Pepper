@@ -6,7 +6,6 @@ import {
   type CalendarConnectionAnswer,
 } from '@pepper/contracts';
 import { Badge, Button, Sheet, SheetFooter } from '@pepper/ui';
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
 import {
@@ -44,7 +43,6 @@ export function CalendarPanel({
   timeZone: string;
   arrival: GoogleArrival | null;
 }) {
-  const router = useRouter();
   const [answer, setAnswer] = useState(initial);
   const [busy, setBusy] = useState<Busy>(arrival?.kind === 'code' ? 'finish' : null);
   const [said, setSaid] = useState<Said | null>(
@@ -59,7 +57,9 @@ export function CalendarPanel({
     // Once per arrival (React runs effects twice in development).
     if (handled.current || arrival === null) return;
     handled.current = true;
-    router.replace(ROUTES.calendarSettings, { scroll: false });
+    // `/google` and the page are two routes: `router.replace` would remount this panel and
+    // drop the answer below, so only the address changes (Next keeps the tree).
+    window.history.replaceState(null, '', ROUTES.calendarSettings);
     if (arrival.kind !== 'code') return;
     void (async () => {
       const result = await sendJson('POST', CALENDAR_CALLBACK_PATH, {
@@ -74,12 +74,11 @@ export function CalendarPanel({
           tone: 'ok',
           text: 'Connected. Pepper won’t book clients over your busy times.',
         });
-        router.refresh();
       } else {
         setSaid({ tone: 'error', text: result.ok ? FALLBACK : result.message });
       }
     })();
-    // Once only: the ref guards it, so `router` needn't be listed.
+    // Once only: the ref guards it.
   }, [arrival]);
 
   useEffect(() => {
@@ -120,7 +119,6 @@ export function CalendarPanel({
         tone: 'ok',
         text: 'Disconnected. Your Google busy times no longer block bookings.',
       });
-      router.refresh();
     } else {
       setSaid({ tone: 'error', text: result.message });
     }
