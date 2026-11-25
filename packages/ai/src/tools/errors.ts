@@ -31,6 +31,7 @@ import {
   TaskNotOpenError,
   UndoRefusedError,
 } from '@pepper/core';
+import { NoShowFeeNotChargeableError } from '@pepper/payments';
 import { ZodError } from 'zod';
 
 // Domain errors as answers the model can act on (playbook S24, ADR-0029): a stable code and one
@@ -85,6 +86,18 @@ const MESSAGE_NOT_SENDABLE = {
   too_late: 'That visit started over an hour ago, so nothing was sent.',
   no_email: 'This client has no email address, so I can’t message them yet.',
 } as const;
+
+/** Why a no-show fee wasn't charged (S68, AC-X-139), in the owner's words. Nothing was charged. */
+const FEE_NOT_CHARGEABLE: Record<NoShowFeeNotChargeableError['reason'], string> = {
+  not_no_show: 'That visit isn’t a no-show any more, so I didn’t charge anything.',
+  no_terms:
+    'That booking was made without a no-show fee in its policy, so I didn’t charge anything.',
+  no_card: 'There is no card kept for that booking any more, so I didn’t charge anything.',
+  nothing_to_charge: 'The fee changed since this card was made, so I didn’t charge anything.',
+  payments_off:
+    'Payments can’t take charges right now, so I didn’t charge anything. Check More → Payments.',
+  already_decided: 'That fee was already decided, so I didn’t charge it again.',
+};
 
 const NOT_FOUND = [
   BookingNotFoundError,
@@ -171,6 +184,9 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
   }
   if (error instanceof NudgeNotSendableError) {
     return { code: 'not_changeable', message: NUDGE_NOT_SENDABLE[error.reason] };
+  }
+  if (error instanceof NoShowFeeNotChargeableError) {
+    return { code: 'not_changeable', message: FEE_NOT_CHARGEABLE[error.reason] };
   }
   if (error instanceof ReviewRequestNotSendableError) {
     return { code: 'not_changeable', message: REVIEW_NOT_SENDABLE[error.reason] };

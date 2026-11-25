@@ -50,7 +50,8 @@ export class ChatModule {
         TurnEventLog,
         RateLimiter,
       ],
-      exports: [AiActionsService],
+      // `ChatService`: the team's no-show proposes the fee card with the AI's deps (S68).
+      exports: [AiActionsService, ChatService],
     };
   }
 }

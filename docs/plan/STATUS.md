@@ -9,7 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S68 · No-show fee by approval + Phase 15 gate** (brief pre-approved by the stored prompt: D-1 one session; D-2 the fee from the terms stored with the booking's payment, none without; D-3 a kept deposit counts toward the fee; D-4 owners only, ask-only `payment.no_show_fee`; D-5 Undo a day: cancels before the charge, refunds after; D-6 the card proposed in the no-show's transaction, team or Pepper).
 Tasks: 1 ACs + ADR · 2 contracts · 3 migration 0084 · 4 payments port/services/worker · 5 ai system tool + hook · 6 card words, receipt email, e2e · 7 C12 gate.
-Done: (none yet). Next: task 1.
+Done: T1 ACs AC-X-136…143 + traceability · T2 contracts (`payment.no_show_fee` ask-only owners, `no-show-fees.ts`, outbox `fee_charge`/`fee_refund`, `payment_method`, audit `payments.fee_changed`) · T3 migration 0084 (`booking_payments.policy_sentence/no_show_fee_cents`, `booking_fees`) · T4 payments (`createOffSessionCharge`, `services/fees.ts`, receipt email) · T5 ai `charge_no_show_fee` + `proposeNoShowFeeIn` (requested by the member who marked it: the proposals' member RLS), the api's team no-show hook, `canDecide` needs the action's permission; eslint: `@pepper/ai` may import `@pepper/payments` (Claude, S68).
+Next: T6 card words/buttons (ui labels, a "Money" Autonomy group), e2e `no-show-fee.spec.ts`; T7 ADR amendment + C12 gate.
 
 ## Last sessions
 - **S67.2 Phase 15 · Cancellation-policy builder (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)). Full entry in [session-log.md](session-log.md).

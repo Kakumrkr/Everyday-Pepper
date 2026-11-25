@@ -6,6 +6,7 @@ import {
   listTimeOff,
 } from '@pepper/appointments';
 import {
+  ActionProposalIdSchema,
   AI_EMAIL_GRACE_SECONDS,
   OutboxEmailSchema,
   OutboxMessageIdSchema,
@@ -23,7 +24,16 @@ import {
   UndoRefusedError,
   type Actor,
 } from '@pepper/core';
-import { findOutboxMessage, withMember, withTenant, type Database } from '@pepper/db';
+import {
+  findOutboxMessage,
+  insertBookingPayment,
+  insertPaymentAccount,
+  moveBookingPayment,
+  withMember,
+  withTenant,
+  type Database,
+} from '@pepper/db';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   approveToolProposal,
@@ -1014,5 +1024,119 @@ describe('send_client_message (AC-W2-5/6)', () => {
     expect(
       await callTool(depsFor(w, w.owner), 'send_client_message', remind(kept.id)),
     ).toMatchObject({ status: 'refused', code: 'not_changeable' });
+  });
+});
+
+describe('the no-show fee card (S68, AC-X-137…139)', () => {
+  /** A ready sandbox account, and `bookingId`'s card kept under a $20 no-show policy. */
+  async function cardKept(w: World, bookingId: string): Promise<void> {
+    await withTenant(db, w.tenantId, async (tx) => {
+      const account = `acct_sandbox${randomBytes(8).toString('hex')}`;
+      await insertPaymentAccount(tx, {
+        provider: 'sandbox',
+        providerAccountId: account,
+        generation: 1,
+        livemode: false,
+        status: 'ready',
+        snapshot: {
+          chargesEnabled: true,
+          payoutsEnabled: true,
+          detailsSubmitted: true,
+          currentlyDue: [],
+          pastDue: [],
+          eventuallyDue: [],
+          pendingVerification: [],
+          currentDeadline: null,
+          disabledReason: null,
+        },
+        syncedAt: new Date(),
+        createdBy: w.owner.context.userId,
+      });
+      const payment = await insertBookingPayment(tx, {
+        requestId: randomUUID(),
+        provider: 'sandbox',
+        livemode: false,
+        kind: 'card',
+        intentId: `seti_sandbox${randomBytes(8).toString('hex')}`,
+        customerId: `cus_sandbox${randomBytes(8).toString('hex')}`,
+        accountId: account,
+        amountCents: 0,
+        refundHours: 24,
+      });
+      if (payment === undefined) throw new Error('payment not stored');
+      await moveBookingPayment(tx, payment.id, ['started'], {
+        status: 'card_saved',
+        bookingId,
+        bookedAt: new Date(),
+        policySentence:
+          'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.',
+        noShowFeeCents: 2000,
+      });
+    });
+  }
+
+  const feeCards = (w: World) =>
+    withTenant(db, w.tenantId, (tx) =>
+      tx.execute<{ id: string; fingerprint: string; status: string }>(
+        "SELECT id, fingerprint, status FROM ai_action_proposals WHERE action = 'payment.no_show_fee'",
+      ),
+    ).then((result) => result.rows);
+
+  it('Pepper’s no-show proposes the card, which only an owner’s OK turns into a charge', async () => {
+    const w = await newWorld(db);
+    const booking = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    await cardKept(w, booking.id);
+    w.clock.set(tuesdayAt('10:20'));
+    done(await callTool(depsFor(w, w.jess), 'mark_no_show', { bookingId: booking.id }));
+    const [card] = await feeCards(w);
+    expect(card?.status).toBe('pending');
+    const fees = () =>
+      withTenant(db, w.tenantId, (tx) =>
+        tx.execute<{ status: string }>('SELECT status FROM booking_fees'),
+      ).then((result) => result.rows);
+    expect(await fees()).toEqual([]);
+    // Staff and managers can't charge it.
+    for (const member of [w.jess, w.manager]) {
+      await expect(
+        approveToolProposal(
+          depsFor(w, member),
+          ActionProposalIdSchema.parse(card?.id),
+          String(card?.fingerprint),
+        ),
+      ).rejects.toThrow();
+    }
+    expect(await fees()).toEqual([]);
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      ActionProposalIdSchema.parse(card?.id),
+      String(card?.fingerprint),
+    );
+    expect(approval.kind).toBe('executed');
+    expect(await fees()).toEqual([{ status: 'queued' }]);
+    // Undo before the grace: cancelled, nothing taken.
+    if (approval.kind !== 'executed') throw new Error('not executed');
+    await undoToolAction(depsFor(w, w.owner), approval.execution.id, 'wrong');
+    expect(await fees()).toEqual([{ status: 'cancelled' }]);
+  });
+
+  it('proposes nothing without a card kept, and a corrected no-show is refused on approval', async () => {
+    const w = await newWorld(db);
+    const plain = await bookOnScreen(w, w.jessStaff, w.maria, '10:00');
+    const kept = await bookOnScreen(w, w.jessStaff, w.sara, '12:00');
+    w.clock.set(tuesdayAt('10:20'));
+    done(await callTool(depsFor(w, w.owner), 'mark_no_show', { bookingId: plain.id }));
+    expect(await feeCards(w)).toEqual([]);
+
+    await cardKept(w, kept.id);
+    w.clock.set(tuesdayAt('12:20'));
+    done(await callTool(depsFor(w, w.owner), 'mark_no_show', { bookingId: kept.id }));
+    const [card] = await feeCards(w);
+    await changeBooking(db, w.owner, kept.id, { status: 'completed', notifyClient: false });
+    const approval = await approveToolProposal(
+      depsFor(w, w.owner),
+      ActionProposalIdSchema.parse(card?.id),
+      String(card?.fingerprint),
+    );
+    expect(approval.kind).not.toBe('executed');
   });
 });

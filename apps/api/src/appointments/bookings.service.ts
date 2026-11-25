@@ -30,12 +30,14 @@ import type {
   WalkInBookingInput,
 } from '@pepper/contracts';
 import type { Actor, TenantContext } from '@pepper/core';
-import type { Database } from '@pepper/db';
+import { proposeNoShowFeeIn } from '@pepper/ai';
+import type { Database, TenantTx } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
 import { Inject, Injectable, Optional } from '@nestjs/common';
 import { PaymentsService } from '../payments/payments.service.js';
 import { BookingEmails } from '../booking-emails/booking-emails.js';
+import { ChatService } from '../chat/chat.service.js';
 
 /**
  * The bookings, availability and waitlist services for a request: binds the database, the
@@ -52,6 +54,8 @@ export class BookingsService {
     private readonly emails: BookingEmails,
     // S66: the team's cancel refunds a paid deposit (AC-X-118); absent while payments are off.
     @Optional() private readonly payments?: PaymentsService,
+    // S68: the team's no-show proposes the fee card the client's terms allow (AC-X-137).
+    @Optional() private readonly chat?: ChatService,
   ) {
     this.db = database.db;
   }
@@ -78,12 +82,24 @@ export class BookingsService {
     });
   }
 
-  changeBooking(tenant: TenantContext, id: BookingId, change: BookingChange): Promise<Booking> {
+  async changeBooking(
+    tenant: TenantContext,
+    id: BookingId,
+    change: BookingChange,
+  ): Promise<Booking> {
+    const noShow = 'status' in change && change.status === 'no_show';
+    const deps =
+      noShow && this.payments?.offered === true ? await this.chat?.toolDeps(tenant) : undefined;
     return changeBooking(this.db, actorOf(tenant), id, change, {
       templateRuleDefaults,
       notify: this.emails.notify,
       onCancelled: this.payments?.teamCancelled(),
       onMoved: this.payments?.teamMoved(),
+      ...(deps !== undefined && {
+        onNoShow: async (tx: TenantTx, booking: { bookingId: string }) => {
+          await proposeNoShowFeeIn(tx, deps, booking.bookingId);
+        },
+      }),
     });
   }
 

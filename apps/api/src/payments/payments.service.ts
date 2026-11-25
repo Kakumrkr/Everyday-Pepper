@@ -163,6 +163,11 @@ export class PaymentsService {
     return readPaymentAccount(bound.deps, actorOf(tenant));
   }
 
+  /** Whether this deployment offers payments at all (S68: only then can a no-show fee be). */
+  get offered(): boolean {
+    return this.bound !== null;
+  }
+
   // ---- Deposits (S66, ADR-0068) ----
 
   /**

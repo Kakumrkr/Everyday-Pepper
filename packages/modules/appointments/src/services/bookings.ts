@@ -393,6 +393,11 @@ export interface ChangeBookingOptions {
   /** Told about the team's move inside its transaction (S66: a deposit's refund window follows). */
   onMoved?:
     ((tx: TenantTx, booking: { bookingId: string; startsAt: Date }) => Promise<void>) | undefined;
+  /**
+   * Told about a visit marked a no-show inside its transaction, whoever marked it (S68: Pepper
+   * proposes the no-show fee card the client's terms allow, AC-X-137; it never charges).
+   */
+  onNoShow?: ((tx: TenantTx, booking: { bookingId: string }) => Promise<void>) | undefined;
 }
 
 /**
@@ -445,6 +450,9 @@ export async function changeBookingIn(
     // A correction of what happened (completed or no-show → cancelled) moves no money.
     if (parsed.status === 'cancelled' && row.status === 'confirmed' && options.onCancelled) {
       await options.onCancelled(tx, { bookingId: row.id, startsAt: row.startsAt });
+    }
+    if (parsed.status === 'no_show' && row.status !== 'no_show' && options.onNoShow) {
+      await options.onNoShow(tx, { bookingId: row.id });
     }
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
       await tellClient(tx, changed, 'cancelled', options.notify);
