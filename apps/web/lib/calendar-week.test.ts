@@ -5,6 +5,7 @@ import {
   dropLabel,
   dropProblem,
   layoutWeek,
+  lineAt,
   minuteAt,
   notWorking,
   startAt,
@@ -214,6 +215,22 @@ describe('layoutWeek', () => {
     expect(layout.days[2]?.blocks).toHaveLength(1);
     expect(layout.startMinute).toBe(0);
     expect(layout.endMinute).toBe(1440);
+  });
+});
+
+describe('lineAt', () => {
+  it("places the now-line with the grid's own hours, so it meets the blocks beside it", () => {
+    // A 7 am booking widens the grid to 7 am – 8 pm (780 minutes); noon is 300 minutes in.
+    const layout = layoutWeek(NY, weekDates(nov25), [
+      { startsAt: '2026-11-25T12:00:00.000Z', endsAt: '2026-11-25T13:00:00.000Z' },
+    ]);
+    expect(lineAt(NY, nov25, '2026-11-25T17:00:00.000Z', layout)).toBeCloseTo((300 / 780) * 100);
+  });
+
+  it('is nothing outside the grid', () => {
+    const layout = { startMinute: 8 * 60, endMinute: 20 * 60 };
+    expect(lineAt(NY, nov25, '2026-11-25T11:00:00.000Z', layout)).toBeNull();
+    expect(lineAt(NY, nov25, '2026-11-26T02:00:00.000Z', layout)).toBeNull();
   });
 });
 

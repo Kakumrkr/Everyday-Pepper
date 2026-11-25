@@ -231,6 +231,22 @@ export function layoutWeek<T extends Timed>(
 }
 
 /**
+ * Where a line for `instant` (the now-line) sits on `date`'s column of a laid-out grid, as a
+ * percentage of its height; `null` when the instant falls outside the grid's hours. Placed with
+ * the grid's own range, so the line meets the blocks beside it.
+ */
+export function lineAt(
+  timeZone: string,
+  date: CivilDate,
+  instant: string,
+  layout: Pick<WeekLayout<Timed>, 'startMinute' | 'endMinute'>,
+): number | null {
+  const minute = minuteOn(timeZone, date, Date.parse(instant));
+  if (minute < layout.startMinute || minute > layout.endMinute) return null;
+  return ((minute - layout.startMinute) / (layout.endMinute - layout.startMinute)) * 100;
+}
+
+/**
  * The minute at a point of the grid (`ratio`: 0 at its top, 1 at its bottom), in steps of
  * `step` minutes, kept on the grid.
  */

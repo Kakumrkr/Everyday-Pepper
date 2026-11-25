@@ -19,6 +19,7 @@ import {
   dropLabel,
   dropProblem,
   layoutWeek,
+  lineAt,
   minuteAt,
   startAt,
   weekdayHeading,
@@ -123,9 +124,8 @@ export function WeekGrid({
   const length = layout.endMinute - layout.startMinute;
   const today = formatDate(todayIn(timeZone, Date.parse(now)));
   const todayIndex = dates.findIndex((date) => formatDate(date) === today);
-  const nowBlock = layoutWeek(timeZone, dates, [{ startsAt: now, endsAt: now }], working).days[
-    todayIndex
-  ]?.blocks[0];
+  const todayDate = dates[todayIndex];
+  const nowTop = todayDate === undefined ? null : lineAt(timeZone, todayDate, now, layout);
   const bookings = useMemo(
     () => entries.filter((entry): entry is BookingEntry => entry.kind === 'booking'),
     [entries],
@@ -551,12 +551,12 @@ export function WeekGrid({
                       </span>
                     </div>
                   )}
-                  {isToday && nowBlock !== undefined ? (
+                  {isToday && nowTop !== null ? (
                     <div
                       aria-hidden="true"
                       data-testid="now-line"
                       className="pointer-events-none absolute inset-x-0 z-10 border-t-2 border-danger"
-                      style={{ top: `${String(nowBlock.top)}%` }}
+                      style={{ top: `${String(nowTop)}%` }}
                     />
                   ) : null}
                 </div>

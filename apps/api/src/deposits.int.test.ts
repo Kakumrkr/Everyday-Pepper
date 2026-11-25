@@ -34,6 +34,7 @@ import {
   insertBooking,
   insertClient,
   listDueOutboxMessages,
+  memberships,
   prepareDatabase,
   users,
   withTenant,
@@ -692,7 +693,7 @@ describe('the no-show fee by approval (S68, ADR-0068 amendment)', () => {
   const fee = { kind: 'fixed', amountCents: 2000 } as const;
 
   /** A paid deposit booking whose visit has started, marked a no-show by the team. */
-  async function missedVisit(daysAhead: number) {
+  async function missedVisit(daysAhead: number, by: TenantContext = owner) {
     const [slot] = await slots(depositServiceId, daysAhead);
     if (slot === undefined) throw new Error('no free time');
     const booked = await bookWithDeposit(slot);
@@ -702,7 +703,7 @@ describe('the no-show fee by approval (S68, ADR-0068 amendment)', () => {
         sql`UPDATE bookings SET starts_at = now() - make_interval(hours => ${daysAhead * 2}), ends_at = now() - make_interval(hours => ${daysAhead * 2 - 1}) WHERE id = ${booked.bookingId}`,
       ),
     );
-    await app.get(BookingsService).changeBooking(owner, BookingIdSchema.parse(booked.bookingId), {
+    await app.get(BookingsService).changeBooking(by, BookingIdSchema.parse(booked.bookingId), {
       status: 'no_show',
     });
     return booked;
@@ -796,5 +797,34 @@ describe('the no-show fee by approval (S68, ADR-0068 amendment)', () => {
     await app.get(AiActionsService).reject(owner, ActionProposalIdSchema.parse(card.id));
     await deliverQueued(new Date(Date.now() + 61_000));
     expect(await feeOf(bookingId)).toBeUndefined();
+  });
+
+  it('AC-X-138: a manager who marked the no-show can’t waive the owner’s card (S69 review)', async () => {
+    const [user] = await db
+      .insert(users)
+      .values({ name: 'Mo', email: 'manager-deposits@example.test' })
+      .returning({ id: users.id });
+    if (user === undefined) throw new Error('no manager');
+    await withTenant(db, tenantId, (tx) =>
+      tx.insert(memberships).values({ tenantId, userId: user.id, role: 'manager' }),
+    );
+    const manager: TenantContext = {
+      tenantId,
+      userId: UserIdSchema.parse(user.id),
+      role: 'manager',
+    };
+    await missedVisit(12, manager);
+    const card = (await feeCards()).find(
+      (each) => each.status === 'pending' && each.summary.includes('$5'),
+    );
+    if (card === undefined) throw new Error('no fee card');
+    const id = ActionProposalIdSchema.parse(card.id);
+    // The one who asked may not decide what only the owner may: not waive, not revise.
+    await expect(app.get(AiActionsService).reject(manager, id)).rejects.toThrow();
+    await expect(
+      app.get(AiActionsService).approve(manager, id, card.fingerprint),
+    ).rejects.toThrow();
+    expect((await feeCards()).find((each) => each.id === card.id)?.status).toBe('pending');
+    await app.get(AiActionsService).reject(owner, id);
   });
 });
