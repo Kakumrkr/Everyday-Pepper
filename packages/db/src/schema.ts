@@ -196,6 +196,11 @@ export const tenants = pgTable(
     depositAudience: text('deposit_audience', { enum: ['everyone', 'new_and_no_show'] })
       .notNull()
       .default('everyone'),
+    // The cancellation policy's costs (S67.2, ADR-0068 amendment): `{ lateCancel, noShow }`,
+    // each nothing, a fixed amount or a percent; NULL: no policy. The notice is
+    // `deposit_refund_hours`. Validated by the contracts' `CancellationFeesSchema` on write and
+    // on read; owners and managers change it with the booking page's settings.
+    cancellationFees: jsonb('cancellation_fees'),
     // When the business is deleted for good (S51.2, ADR-0054): 30 days after the owner asked;
     // NULL: not being deleted. While set, the booking page is closed and no email goes out.
     deletionDueAt: timestamp('deletion_due_at', { withTimezone: true }),
@@ -217,6 +222,10 @@ export const tenants = pgTable(
     check(
       'tenants_deposit_audience_valid',
       sql`${table.depositAudience} IN ('everyone', 'new_and_no_show')`,
+    ),
+    check(
+      'tenants_cancellation_fees_shape',
+      sql`jsonb_typeof(${table.cancellationFees}) = 'object' AND ${table.cancellationFees} ?& array['lateCancel', 'noShow']`,
     ),
     check('tenants_template_id_format', sql`${table.templateId} ~ '^[a-z][a-z0-9-]{0,62}$'`),
     check('tenants_brand_color_format', sql`${table.brandColor} ~ '^#[0-9a-f]{6}$'`),

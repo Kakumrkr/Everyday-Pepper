@@ -35,6 +35,7 @@ const BUSINESS: Business = {
   templateId: 'beauty-salon',
   depositRefundHours: 24,
   depositAudience: 'everyone',
+  cancellationFees: null,
   brandColor: null,
   phone: null,
   publicAddress: null,

@@ -4,6 +4,7 @@ import {
   fromZoned,
   minutesOfDay,
   statusNeedsStart,
+  shortDateTimeWords,
   toZoned,
   type BookingStatus,
   type CivilDate,
@@ -96,17 +97,8 @@ export function timeLabel(timeZone: string, instant: string): string {
   );
 }
 
-/** `Tue, Nov 3, 9:15 AM` on the business's clock. */
-export function dateTimeLabel(timeZone: string, instant: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(instant));
-}
+/** `Tue, Nov 3, 9:15 AM` on the business's clock (the policy's and the emails' own words). */
+export const dateTimeLabel = shortDateTimeWords;
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 

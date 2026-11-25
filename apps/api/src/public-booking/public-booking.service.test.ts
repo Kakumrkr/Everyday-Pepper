@@ -28,6 +28,7 @@ const DETAILS: BookingEmailDetails = {
   startsAt: '2026-11-03T15:00:00.000Z',
   email: 'ana@example.test',
   clientName: 'Ana Ruiz',
+  policy: { sentence: null, note: null },
 };
 const TOKEN = 'q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
 const OPTIONS = { codeKey: Buffer.alloc(32, 1) };

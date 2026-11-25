@@ -82,6 +82,8 @@ export const PublicBusinessSchema = z
     photos: BusinessPhotosSchema,
     /** Who pays the services' deposits (S67, AC-X-128): the menu says "for new clients". */
     depositAudience: DepositAudienceSchema,
+    /** The cancellation policy in Pepper's sentence (S67.2, AC-X-132); `null`: none. */
+    cancellationSentence: z.string().min(1).max(400).nullable(),
     // The phone, public address and cancellation policy the business chose to show (S47).
   })
   .extend(BusinessProfileSchema.shape);

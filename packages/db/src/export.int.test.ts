@@ -128,6 +128,8 @@ describe('readBusinessExport (AC-W1-37)', () => {
       // The deposit settings (S66, S67) go with the business.
       depositRefundHours: 24,
       depositAudience: 'everyone',
+      // And the cancellation policy's costs (S67.2): none until the owner turns it on.
+      cancellationFees: null,
     });
     expect(data.services.map((s) => s.name)).toEqual(['Fade cut']);
     expect(data.staff.map((s) => s.displayName)).toEqual(['Fade Jess']);

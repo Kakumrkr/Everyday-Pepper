@@ -184,6 +184,33 @@ describe('updateBookingPage (PCR-001, ADR-0022)', () => {
     expect(JSON.stringify(changes)).not.toContain('Main St');
   });
 
+  it('turns the cancellation policy on and off, audited once a change (S67.2, AC-X-130)', async () => {
+    const team = await newTeam();
+    const manager = as(team, team.manager, 'manager');
+    const fees = {
+      lateCancel: { kind: 'percent', percent: 50 },
+      noShow: { kind: 'fixed', amountCents: 2000 },
+    } as const;
+    expect(
+      (await updateBookingPage(db, manager, { cancellationFees: fees })).cancellationFees,
+    ).toEqual(fees);
+    // The same costs again change nothing, so nothing is audited.
+    await updateBookingPage(db, manager, { cancellationFees: { ...fees } });
+    expect(
+      (await updateBookingPage(db, manager, { cancellationFees: null })).cancellationFees,
+    ).toBeNull();
+    const entries = await withTenant(db, team.tenantId, (tx) =>
+      listAuditEntries(tx, { limit: 10 }),
+    );
+    expect(entries.filter((e) => e.action === 'tenant.updated').map((e) => e.after)).toEqual([
+      { profileChanged: ['cancellationFees'] },
+      { profileChanged: ['cancellationFees'] },
+    ]);
+    await expect(
+      updateBookingPage(db, as(team, team.staff, 'staff'), { cancellationFees: null }),
+    ).rejects.toBeInstanceOf(ForbiddenError);
+  });
+
   it('sets who pays a deposit and audits it with the profile (S67, AC-X-125)', async () => {
     const team = await newTeam();
     const manager = as(team, team.manager, 'manager');

@@ -19,6 +19,7 @@ const DETAILS: BookingEmailDetails = {
   startsAt: '2026-11-03T15:00:00.000Z',
   email: 'ana@example.test',
   clientName: 'Ana Ruiz',
+  policy: { sentence: null, note: null },
 };
 const CHANGE = {
   bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b1',

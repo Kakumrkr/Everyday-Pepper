@@ -117,6 +117,7 @@ export async function updateCurrentTenantBookingPage(
     cancellationPolicy,
     depositRefundHours,
     depositAudience,
+    cancellationFees,
   } = BookingPageSettingsSchema.parse(settings);
   const [tenant] = await tx
     .update(tenants)
@@ -127,6 +128,7 @@ export async function updateCurrentTenantBookingPage(
       cancellationPolicy,
       depositRefundHours,
       depositAudience,
+      cancellationFees,
     })
     .where(eq(tenants.id, sql`current_tenant_id()`))
     .returning();

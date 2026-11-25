@@ -23,6 +23,7 @@ const DETAILS: BookingEmailDetails = {
   startsAt: '2026-11-17T19:00:00.000Z',
   email: 'ana@example.test',
   clientName: 'Ana Ruiz',
+  policy: { sentence: null, note: null },
 };
 const LINK = `https://app.example.com/book/fades-by-marco/manage#${'a'.repeat(43)}`;
 

@@ -1,12 +1,15 @@
 import { createHash, randomBytes } from 'node:crypto';
 import {
   BookingIdSchema,
+  cancellationSentence,
+  CancellationFeesSchema,
   ClientIdSchema,
   ManageTokenSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
   type BookingId,
   type ManageToken,
+  type PublicBookingDeposit,
 } from '@pepper/contracts';
 import {
   findClient,
@@ -34,6 +37,34 @@ export interface BookingEmailDetails {
   startsAt: string;
   email: string;
   clientName: string;
+  /** The business's cancellation policy (S67.2, AC-X-133): Pepper's sentence and its note. */
+  policy: CancellationPolicyWords;
+  /** The deposit just paid, for the confirmation only (S67.2 top-up, AC-X-134). */
+  deposit?: PublicBookingDeposit | null;
+}
+
+/** The cancellation policy in words: Pepper's sentence and the owner's note; `null`: none. */
+export interface CancellationPolicyWords {
+  sentence: string | null;
+  note: string | null;
+}
+
+/**
+ * The business's policy in Pepper's sentence (S67.2, AC-X-131); `null` without one. A stored
+ * value the contract no longer takes reads as no policy, so a page or an email never fails.
+ */
+export function cancellationSentenceOf(
+  tenant: Pick<Tenant, 'cancellationFees' | 'depositRefundHours'>,
+): string | null {
+  const fees = CancellationFeesSchema.nullable().catch(null).parse(tenant.cancellationFees);
+  return cancellationSentence(fees, tenant.depositRefundHours);
+}
+
+/** The policy the emails carry (AC-X-133). */
+export function policyWordsOf(
+  tenant: Pick<Tenant, 'cancellationFees' | 'depositRefundHours' | 'cancellationPolicy'>,
+): CancellationPolicyWords {
+  return { sentence: cancellationSentenceOf(tenant), note: tenant.cancellationPolicy };
 }
 
 /** A change of a booking that its client is told about by email. */
@@ -92,6 +123,7 @@ export async function emailDetailsOf(
     startsAt: row.startsAt.toISOString(),
     email: client.email ?? '',
     clientName: client.name,
+    policy: policyWordsOf(tenant),
   };
 }
 

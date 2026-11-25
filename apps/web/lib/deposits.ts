@@ -1,9 +1,11 @@
 import {
   DEFAULT_DEPOSIT_REFUND_HOURS,
+  depositPaidLine,
   depositCentsOf,
   depositRuleProblem,
   MAX_DEPOSIT_REFUND_HOURS,
   MIN_DEPOSIT_CENTS,
+  noticeHoursLabel,
   type BookingDeposit,
   type BookingPaymentStart,
   type DepositAudience,
@@ -162,9 +164,8 @@ export function teamDepositLine(deposit: BookingDeposit | null, timeZone: string
   const amount = formatMoney(deposit.amountCents);
   switch (deposit.status) {
     case 'held':
-      return deposit.refundableNow && deposit.refundEndsAt !== null
-        ? `${amount} deposit paid · refundable until ${dateTimeLabel(timeZone, deposit.refundEndsAt)}`
-        : `${amount} deposit paid · no longer refundable`;
+      // The same words as the confirmation email (S67.2, AC-X-134).
+      return depositPaidLine(deposit, timeZone);
     case 'kept':
       return `${amount} deposit kept`;
     case 'refunding':
@@ -186,13 +187,8 @@ export function refundChoices(current: number): number[] {
     .sort((a, b) => a - b);
 }
 
-/** "Up to the start", "2 hours", "24 hours", "2 days", "1 week". */
-export function refundHoursLabel(hours: number): string {
-  if (hours === 0) return 'Up to the start';
-  if (hours === 168) return '1 week';
-  if (hours > 24 && hours % 24 === 0) return `${String(hours / 24)} days`;
-  return hours === 1 ? '1 hour' : `${String(hours)} hours`;
-}
+/** "Up to the start", "2 hours", "24 hours", "2 days", "1 week" (the policy's own words). */
+export const refundHoursLabel = noticeHoursLabel;
 
 /** The window in one sentence for the owner (AC-X-112). */
 export function refundWindowSentence(hours: number = DEFAULT_DEPOSIT_REFUND_HOURS): string {

@@ -281,6 +281,7 @@ describe('team changes tell the client (notifyClient)', () => {
       startsAt: at(3, '10:00'),
       email: 'maria@example.test',
       clientName: 'Maria Lopez',
+      policy: { sentence: null, note: null },
     });
     expect(notice.change.bookingId).toBe(booking.id);
     const managed = await getManagedBooking(db, b.slug, notice.manageToken, { clock: b.clock });

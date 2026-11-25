@@ -87,6 +87,7 @@ const PROFILE_FIELDS = [
   'cancellationPolicy',
   'depositRefundHours',
   'depositAudience',
+  'cancellationFees',
 ] as const;
 
 /**
@@ -108,7 +109,10 @@ export async function updateBookingPage(
     if (before === undefined || after === undefined)
       throw new Error('No tenant in this transaction');
     const colorChanged = before.brandColor !== after.brandColor;
-    const profileChanged = PROFILE_FIELDS.filter((field) => before[field] !== after[field]);
+    // Compared by value: the policy's costs are an object (S67.2).
+    const profileChanged = PROFILE_FIELDS.filter(
+      (field) => JSON.stringify(before[field]) !== JSON.stringify(after[field]),
+    );
     if (colorChanged || profileChanged.length > 0) {
       // The profile's values are not kept (a home address is someone's): only which changed.
       const values = (brandColor: string | null) =>

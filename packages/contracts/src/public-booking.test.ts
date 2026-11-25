@@ -148,6 +148,7 @@ describe('PublicBusinessSchema', () => {
       cancellationPolicy: null,
       photos: { logo: null, cover: null, gallery: [] },
       depositAudience: 'everyone',
+      cancellationSentence: null,
     });
     expect(parsed.brandColor).toBe('#7a3e6c');
     expect(parsed.phone).toBe('+15551234567');

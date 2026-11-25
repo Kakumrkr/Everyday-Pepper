@@ -16,6 +16,7 @@ import {
   UserIdSchema,
   type AvailableSlot,
   type TenantId,
+  shortDateTimeWords,
 } from '@pepper/contracts';
 import {
   createBusiness,
@@ -416,6 +417,52 @@ describe('deposits on the booking page (S66)', () => {
     await deliverQueued();
     expect(await paymentStatus(bookingId)).toBe('kept');
     await updateBookingPage(db, { context: owner }, { depositRefundHours: 24 });
+  });
+
+  it('AC-X-134: the confirmation email says the deposit in the team sheet’s words', async () => {
+    const [slot] = await slots(depositServiceId, 3);
+    if (slot === undefined) throw new Error('no free time');
+    const { booked } = await bookWithDeposit(slot);
+    const refundEndsAt = booked.booking.deposit?.refundEndsAt ?? '';
+    const confirmation = [...mailer.sent]
+      .reverse()
+      .find((m) => m.subject.startsWith("You're booked"));
+    expect(confirmation?.text).toContain(
+      `$15 deposit paid · refundable until ${shortDateTimeWords('UTC', refundEndsAt)}`,
+    );
+  });
+
+  it('AC-X-135: a late cancel and a no-show under a policy with fees move no more money', async () => {
+    const fee = { kind: 'fixed', amountCents: 2000 } as const;
+    await updateBookingPage(
+      db,
+      { context: owner },
+      { depositRefundHours: 168, cancellationFees: { lateCancel: fee, noShow: fee } },
+    );
+    const [late, missed] = await slots(depositServiceId, 4);
+    if (late === undefined || missed === undefined) throw new Error('no free time');
+    const first = await bookWithDeposit(late);
+    await first.client.post('/booking/cancel', { token: first.booked.manageToken }).expect(200);
+    const second = await bookWithDeposit(missed);
+    await withTenant(db, tenantId, (tx) =>
+      tx.execute(sql`UPDATE bookings SET status = 'no_show' WHERE id = ${second.bookingId}`),
+    );
+    await deliverQueued();
+    const { rows } = await withTenant(db, tenantId, (tx) =>
+      tx.execute<{ status: string; amount: number }>(
+        sql`SELECT status, amount_cents AS amount FROM booking_payments WHERE booking_id IN (${first.bookingId}, ${second.bookingId}) ORDER BY created_at`,
+      ),
+    );
+    // The deposits stay what they were (kept, captured); no fee was added or charged.
+    expect(rows).toEqual([
+      { status: 'kept', amount: 1500 },
+      { status: 'captured', amount: 1500 },
+    ]);
+    await updateBookingPage(
+      db,
+      { context: owner },
+      { depositRefundHours: 24, cancellationFees: null },
+    );
   });
 
   it('AC-X-118: the team’s cancel always refunds', async () => {
