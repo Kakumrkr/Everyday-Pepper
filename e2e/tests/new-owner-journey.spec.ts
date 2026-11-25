@@ -177,11 +177,25 @@ test('a new barber is bookable in under 10 minutes; a client books in under 2, a
   clock.type(PHONE);
   await details.getByLabel('Address').fill(ADDRESS);
   clock.type(ADDRESS);
-  await details.getByLabel('Cancellation policy').fill(POLICY);
-  clock.type(POLICY);
   await details.getByRole('button', { name: 'Save details' }).click();
   clock.tap();
   await expect(details.getByText('Saved. Clients see these on your booking page.')).toBeVisible();
+  // The policy Pepper writes from a choice (S67.2): on, with the owner's own line under it.
+  const policy = page
+    .getByRole('region', { name: 'Your booking page' })
+    .getByRole('form', { name: 'Cancellation policy' });
+  await policy
+    .getByRole('radiogroup', { name: 'Cancellation policy' })
+    .getByRole('radio', { name: 'On' })
+    .click();
+  clock.tap();
+  await policy.getByLabel('Anything else (optional)').fill(POLICY);
+  clock.type(POLICY);
+  await policy.getByRole('button', { name: 'Save policy' }).click();
+  clock.tap();
+  await expect(
+    policy.getByText('Saved. Clients see it when they book and in their emails.'),
+  ).toBeVisible();
 
   // 8. Back on Home: the suggestion is gone; copy the link to send to clients.
   clock.step('Copy the booking link');

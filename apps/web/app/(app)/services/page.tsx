@@ -132,14 +132,11 @@ export default async function ServicesPage() {
         brandColor={current.business.brandColor}
         profile={current.business}
         manages={managesPage}
-        deposits={
-          deposits === 'hidden'
-            ? null
-            : {
-                refundHours: current.business.depositRefundHours,
-                audience: current.business.depositAudience,
-              }
-        }
+        deposits={deposits === 'hidden' ? null : { audience: current.business.depositAudience }}
+        policy={{
+          fees: current.business.cancellationFees,
+          noticeHours: current.business.depositRefundHours,
+        }}
       />
       {managesPage ? (
         <PhotosCard

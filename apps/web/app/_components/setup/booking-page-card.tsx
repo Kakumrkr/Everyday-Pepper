@@ -4,12 +4,26 @@ import {
   BusinessSchema,
   CANCELLATION_POLICY_MAX,
   type BusinessProfile,
+  type CancellationFees,
   type DepositAudience,
 } from '@pepper/contracts';
 import { brandTokens, Button, FOCUS_RING, Input, Segmented, Select, Textarea } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useId, useState } from 'react';
-import { profileFields, profileFromFields, type ProfileFields } from '../../../lib/booking-profile';
+import {
+  noteFrom,
+  profileFields,
+  profileFromFields,
+  type ProfileFields,
+} from '../../../lib/booking-profile';
+import {
+  FEE_CHOICES,
+  policyFields,
+  policyFrom,
+  policyPreview,
+  type FeeFields,
+  type PolicyFields,
+} from '../../../lib/cancellation-policy';
 import { sendJson } from '../../../lib/client-api';
 import {
   audienceSentence,
@@ -28,7 +42,8 @@ import { Notice } from '../form-parts';
  * kit since S42.2: a quiet section, since nothing here waits on a decision. Since S47 also the
  * phone, address and cancellation policy clients see there (AC-W8-7), and since S66.2 the
  * deposit refund window (AC-X-112), where the deployment offers payments; since S67 who pays a
- * deposit (AC-X-125).
+ * deposit (AC-X-125). Since S67.2 the cancellation policy Pepper writes from the owner's
+ * choices (AC-X-130), with the refund window as its notice and the owner's note under it.
  */
 export function BookingPageCard({
   slug,
@@ -36,13 +51,16 @@ export function BookingPageCard({
   profile,
   manages,
   deposits = null,
+  policy,
 }: {
   slug: string;
   brandColor: string | null;
   profile: BusinessProfile;
   manages: boolean;
-  /** The refund window (S66.2) and who pays (S67); `null` hides them (payments off here). */
-  deposits?: { refundHours: number; audience: DepositAudience } | null;
+  /** Who pays a deposit (S67); `null` hides it, and the policy's fees (payments off here). */
+  deposits?: { audience: DepositAudience } | null;
+  /** The policy's costs (`null`: off) and its notice, the refund window (S67.2). */
+  policy: { fees: CancellationFees | null; noticeHours: number };
 }) {
   const router = useRouter();
   const [color, setColor] = useState(brandColor ?? brandTokens(null).light.biz);
@@ -110,9 +128,15 @@ export function BookingPageCard({
         ) : null}
         {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
         {manages ? <ProfileForm profile={profile} /> : null}
-        {manages && deposits !== null ? (
-          <DepositsForm hours={deposits.refundHours} audience={deposits.audience} />
+        {manages ? (
+          <CancellationPolicyForm
+            fees={policy.fees}
+            noticeHours={policy.noticeHours}
+            note={profile.cancellationPolicy}
+            payments={deposits !== null}
+          />
         ) : null}
+        {manages && deposits !== null ? <DepositsForm audience={deposits.audience} /> : null}
       </div>
     </section>
   );
@@ -194,14 +218,6 @@ function ProfileForm({ profile }: { profile: BusinessProfile }) {
         placeholder={'12 Main St\nAustin, TX 78701'}
         {...field('publicAddress')}
       />
-      <Textarea
-        label="Cancellation policy"
-        hint="Clients see it before they book and on their confirmation."
-        rows={3}
-        maxLength={CANCELLATION_POLICY_MAX}
-        placeholder="Please cancel or move at least 24 hours ahead."
-        {...field('cancellationPolicy')}
-      />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" variant="secondary" size="sm" busy={busy}>
           Save details
@@ -213,13 +229,11 @@ function ProfileForm({ profile }: { profile: BusinessProfile }) {
 }
 
 /**
- * The business's deposits (AC-X-112, S67 AC-X-125): who pays one, and how long before the start
- * a client may cancel and get it back. Saved together; a booking keeps the window it was made
- * with (ADR-0068).
+ * Who pays a deposit (S67, AC-X-125). The refund window is the cancellation policy's notice
+ * since S67.2 (one setting); a booking keeps the window it was made with (ADR-0068).
  */
-function DepositsForm({ hours, audience }: { hours: number; audience: DepositAudience }) {
+function DepositsForm({ audience }: { audience: DepositAudience }) {
   const router = useRouter();
-  const [value, setValue] = useState(hours);
   const [who, setWho] = useState(audience);
   const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -228,19 +242,15 @@ function DepositsForm({ hours, audience }: { hours: number; audience: DepositAud
   async function save(): Promise<void> {
     setNotice(null);
     setBusy(true);
-    const answer = await sendJson('PUT', '/v1/tenant/booking-page', {
-      depositRefundHours: value,
-      depositAudience: who,
-    });
+    const answer = await sendJson('PUT', '/v1/tenant/booking-page', { depositAudience: who });
     setBusy(false);
     const parsed = answer.ok ? BusinessSchema.safeParse(answer.data) : null;
     if (parsed?.success !== true) {
       setNotice({ tone: 'error', text: answer.ok ? 'Something went wrong.' : answer.message });
       return;
     }
-    setValue(parsed.data.depositRefundHours);
     setWho(parsed.data.depositAudience);
-    setNotice({ tone: 'ok', text: 'Saved. New bookings follow these.' });
+    setNotice({ tone: 'ok', text: 'Saved. New bookings follow this.' });
     router.refresh();
   }
 
@@ -275,19 +285,6 @@ function DepositsForm({ hours, audience }: { hours: number; audience: DepositAud
         />
         <p className="m-0 type-caption text-ink-2">{audienceSentence(who)}</p>
       </div>
-      <Select
-        label="Free cancellation until"
-        hint={refundWindowSentence(value)}
-        name="depositRefundHours"
-        value={String(value)}
-        options={refundChoices(hours).map((choice) => ({
-          value: String(choice),
-          label: choice === 0 ? refundHoursLabel(0) : `${refundHoursLabel(choice)} before`,
-        }))}
-        onChange={(event) => {
-          setValue(Number(event.target.value));
-        }}
-      />
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" variant="secondary" size="sm" busy={busy}>
           Save deposits
@@ -295,5 +292,246 @@ function DepositsForm({ hours, audience }: { hours: number; audience: DepositAud
       </div>
       {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
     </form>
+  );
+}
+
+const POLICY_CHOICES = [
+  { value: 'off', label: 'Off' },
+  { value: 'on', label: 'On' },
+] as const;
+
+/**
+ * The cancellation policy (S67.2, AC-X-130/131): on or off, the notice (the refund window:
+ * shown while the policy is on, or while deposits need it), what a later cancel and a no-show
+ * cost (only where payments are offered: a fee is charged from a card, on the owner's OK in
+ * S68), and the owner's note. Pepper's sentence is shown as clients will read it.
+ */
+function CancellationPolicyForm({
+  fees,
+  noticeHours,
+  note,
+  payments,
+}: {
+  fees: CancellationFees | null;
+  noticeHours: number;
+  note: string | null;
+  payments: boolean;
+}) {
+  const router = useRouter();
+  const [fields, setFields] = useState<PolicyFields>(() => policyFields(fees));
+  const [hours, setHours] = useState(noticeHours);
+  const [noteText, setNoteText] = useState(note ?? '');
+  const [errors, setErrors] = useState<Partial<Record<'lateCancel' | 'noShow' | 'note', string>>>(
+    {},
+  );
+  const [notice, setNotice] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const headingId = useId();
+  const options = { noticeHours: hours, feesOffered: payments, stored: fees };
+  const preview = policyPreview(fields, options);
+
+  async function save(): Promise<void> {
+    setNotice(null);
+    const checked = policyFrom(fields, options);
+    const typedNote = noteFrom(noteText);
+    const found = {
+      ...(checked.ok ? {} : checked.errors),
+      ...(typedNote.ok ? {} : { note: typedNote.message }),
+    };
+    setErrors(found);
+    if (!checked.ok || !typedNote.ok) {
+      const first = Object.keys(found)[0];
+      if (first !== undefined) document.getElementsByName(`policy-${first}`)[0]?.focus();
+      return;
+    }
+    setBusy(true);
+    const answer = await sendJson('PUT', '/v1/tenant/booking-page', {
+      cancellationFees: checked.fees,
+      cancellationPolicy: typedNote.note,
+      ...(fields.on || payments ? { depositRefundHours: hours } : {}),
+    });
+    setBusy(false);
+    const parsed = answer.ok ? BusinessSchema.safeParse(answer.data) : null;
+    if (parsed?.success !== true) {
+      setNotice({ tone: 'error', text: answer.ok ? 'Something went wrong.' : answer.message });
+      return;
+    }
+    setFields(policyFields(parsed.data.cancellationFees));
+    setHours(parsed.data.depositRefundHours);
+    setNoteText(parsed.data.cancellationPolicy ?? '');
+    setNotice({
+      tone: 'ok',
+      text:
+        parsed.data.cancellationFees === null
+          ? 'Saved.'
+          : 'Saved. Clients see it when they book and in their emails.',
+    });
+    router.refresh();
+  }
+
+  const showNotice = fields.on || payments;
+  const showFees = fields.on && payments;
+  return (
+    <form
+      aria-labelledby={headingId}
+      noValidate
+      className="flex flex-col gap-4 border-t border-line pt-4"
+      onSubmit={(event) => {
+        event.preventDefault();
+        void save();
+      }}
+    >
+      <div className="flex flex-col gap-1">
+        <h3 id={headingId} className="m-0 type-subheading text-ink">
+          Cancellation policy
+        </h3>
+        <p className="m-0 type-body text-ink-2">
+          Pick the rules. Pepper writes them for clients on your page and in every email.
+        </p>
+      </div>
+      <Segmented
+        label="Cancellation policy"
+        options={POLICY_CHOICES}
+        value={fields.on ? 'on' : 'off'}
+        onValueChange={(next) => {
+          setFields((current) => ({ ...current, on: next === 'on' }));
+        }}
+      />
+      {showNotice ? (
+        <Select
+          label="Notice to cancel or reschedule"
+          hint={payments ? refundWindowSentence(hours) : undefined}
+          name="depositRefundHours"
+          value={String(hours)}
+          options={refundChoices(noticeHours).map((choice) => ({
+            value: String(choice),
+            label: choice === 0 ? refundHoursLabel(0) : `${refundHoursLabel(choice)} before`,
+          }))}
+          onChange={(event) => {
+            setHours(Number(event.target.value));
+          }}
+        />
+      ) : null}
+      {showFees && hours > 0 ? (
+        <FeeField
+          legend="A later cancel costs"
+          name="policy-lateCancel"
+          fields={fields.lateCancel}
+          error={errors.lateCancel ?? null}
+          onChange={(lateCancel) => {
+            setFields((current) => ({ ...current, lateCancel }));
+          }}
+        />
+      ) : null}
+      {showFees ? (
+        <FeeField
+          legend="A no-show costs"
+          name="policy-noShow"
+          fields={fields.noShow}
+          error={errors.noShow ?? null}
+          onChange={(noShow) => {
+            setFields((current) => ({ ...current, noShow }));
+          }}
+        />
+      ) : null}
+      {fields.on && !payments ? (
+        <p className="m-0 type-caption text-ink-2">
+          Fees for late cancels and no-shows come with payments.
+        </p>
+      ) : null}
+      {preview === null ? null : (
+        <div
+          className="flex flex-col gap-1 rounded-md bg-surface-2 p-3"
+          aria-live="polite"
+          data-testid="policy-preview"
+        >
+          <span className="type-caption text-ink-2">Clients read</span>
+          <p className="m-0 type-body text-ink">{preview}</p>
+        </div>
+      )}
+      {fields.on && showFees ? (
+        <p className="m-0 type-caption text-ink-2">
+          Nothing is charged by itself. Pepper asks you before any fee.
+        </p>
+      ) : null}
+      <Textarea
+        label="Anything else (optional)"
+        hint={fields.on ? 'Shown under the rules above.' : 'Shown to clients as your policy.'}
+        rows={3}
+        maxLength={CANCELLATION_POLICY_MAX}
+        placeholder="Running late? Call us and we’ll fit you in if we can."
+        name="policy-note"
+        value={noteText}
+        error={errors.note}
+        onChange={(event) => {
+          setNoteText(event.target.value);
+        }}
+      />
+      <div className="flex flex-wrap items-center gap-3">
+        <Button type="submit" variant="secondary" size="sm" busy={busy}>
+          Save policy
+        </Button>
+      </div>
+      {notice === null ? null : <Notice tone={notice.tone}>{notice.text}</Notice>}
+    </form>
+  );
+}
+
+/** One cost: nothing, an amount or a percent of the service's price, and its field. */
+function FeeField({
+  legend,
+  name,
+  fields,
+  error,
+  onChange,
+}: {
+  legend: string;
+  name: string;
+  fields: FeeFields;
+  error: string | null;
+  onChange: (fields: FeeFields) => void;
+}) {
+  const headingId = useId();
+  return (
+    <fieldset aria-labelledby={headingId} className="m-0 flex flex-col gap-3 border-0 p-0">
+      <legend id={headingId} className="p-0 type-label text-ink">
+        {legend}
+      </legend>
+      <Segmented
+        label={legend}
+        options={FEE_CHOICES}
+        value={fields.kind}
+        onValueChange={(kind) => {
+          const next = FEE_CHOICES.find((choice) => choice.value === kind)?.value;
+          if (next !== undefined) onChange({ ...fields, kind: next });
+        }}
+      />
+      {fields.kind === 'fixed' ? (
+        <Input
+          label="Fee ($)"
+          name={name}
+          inputMode="decimal"
+          placeholder="20"
+          value={fields.amount}
+          error={error ?? undefined}
+          onChange={(event) => {
+            onChange({ ...fields, amount: event.target.value });
+          }}
+        />
+      ) : null}
+      {fields.kind === 'percent' ? (
+        <Input
+          label="Fee (% of the service price)"
+          name={name}
+          inputMode="numeric"
+          placeholder="50"
+          value={fields.percent}
+          error={error ?? undefined}
+          onChange={(event) => {
+            onChange({ ...fields, percent: event.target.value });
+          }}
+        />
+      ) : null}
+    </fieldset>
   );
 }
