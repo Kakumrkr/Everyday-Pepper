@@ -1,5 +1,5 @@
 import type { CivilDate, CurrentBusinessResponse } from '@pepper/contracts';
-import { cx, EmptyState, Icon } from '@pepper/ui';
+import { EmptyState, Icon } from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
 import { bookableStaff, bookingAbilities, type BookingSetup } from '../../../lib/booking';
@@ -201,8 +201,8 @@ export async function WeekCalendar({
             </p>
           ) : null}
           {details && books ? (
-            <p className={cx('m-0 type-caption text-ink-3')}>
-              Drag a booking to move it (on a phone, press and hold first). Gray hours are outside{' '}
+            <p className="m-0 type-caption text-ink-2">
+              Drag a booking to move it (on a phone, press and hold first). Shaded hours are outside{' '}
               {member.userId === userId ? 'your' : `${member.displayName}’s`} working hours.
             </p>
           ) : null}

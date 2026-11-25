@@ -431,7 +431,7 @@ export function WeekGrid({
                 aria-label={heading.full}
                 data-testid="week-day"
                 data-date={formatDate(day.date)}
-                className="min-w-28 flex-1 border-r border-line last:border-r-0"
+                className="min-w-23 flex-1 border-r border-line last:border-r-0"
               >
                 <h2
                   className="m-0 flex h-14 flex-col items-center justify-center border-b border-line type-label text-ink-2"

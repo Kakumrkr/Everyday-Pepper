@@ -9,11 +9,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S69 Week view + drag to move** (branch `ccr-9cc3cffd-8rt7ne`; decisions at the brief: D-1 Phase 16 next, PCR-016; D-2 native pointer events, no library; D-3 a drag never sends an override; D-4 one staff member's week, staff their own first; additions: off-hours shaded and a taken time marked while dragging, Undo on the receipt). AC-X-144…151.
 - [x] 1. Plan records: PCR-016, CHANGELOG 0.42, playbook, roadmap, AC-X-144…151 and traceability.
-- [ ] 2. Week helpers `apps/web/lib/calendar-week.ts` (unit tests first).
-- [ ] 3. Week data: bookings and busy for one staff member, their hours and time off.
-- [ ] 4. Week view and the Day/Week switch.
-- [ ] 5. Drag, the drop sheet, Undo; `e2e/tests/calendar-week.spec.ts`.
-- [ ] 6. Baselines and tap targets in `screens.spec.ts`; close.
+- [x] 2. Week helpers `apps/web/lib/calendar-week.ts` (unit tests first).
+- [x] 3. Week data: bookings and busy for one staff member, their hours and time off.
+- [x] 4. Week view and the Day/Week switch.
+- [x] 5. Drag, the drop sheet, Undo; `e2e/tests/calendar-week.spec.ts`.
+- [ ] 6. Baselines and tap targets in `screens.spec.ts` (week drawn: `calendar-week-*`, `calendar-week-drag-*`); next: redraw the day view's baselines (the Day/Week switch), review, close. The e2e stack runs by `e2e-stack.sh` (Compose images fail on the proxy CA).
 
 ## Last sessions
 - **S68 Phase 15 · No-show fee by approval + gate (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107)). Full entry in [session-log.md](session-log.md).
