@@ -2,6 +2,11 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.42 — 2026-11-25
+- At the S69 brief (user): **Phase 16 (Calendar + staff) before the rest of Phase 13** ([PCR-016](changes/PCR-016.md)). The domain still waits; S69–S72 come next (Google Calendar in testing mode), then S58a, S57, S58b and S60. S69 adds the drag hints (off-hours shaded, a taken time marked) and Undo on a moved booking. AC-X-144…151.
+
+  **Compatibility:** order only; no tool, prompt or event change; $0 of the AI budget.
+
 ## 0.41 — 2026-11-24
 - At the S67 brief (user): **S67 splits in two** ([PCR-015](changes/PCR-015.md)): S67 (smart deposits: "Who pays a deposit" per business, regulars exempt, the standing read only after the code; the team's sheet shows the deposit) and S67.2 (the cancellation-policy builder, on the booking page and in every email). AC-X-125…129.
 

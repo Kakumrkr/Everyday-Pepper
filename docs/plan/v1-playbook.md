@@ -116,7 +116,7 @@ Goal: Pepper fills the chair and proves it in dollars, with the owner tapping in
 | S56a.2 | **AI-suggested import mapping ("a")** (done S56a.2) | For columns S48's smart mapping misses: column names and masked samples only go to the model, the owner confirms each suggestion; its eval cases on scripted cassettes. Merges S56a's branch first. Built ([ADR-0061](../adr/0061-ai-suggested-import-mapping.md)): `suggest_mapping` on the routine model, checked by the domain; "Use it" on the columns step; the preview's left-out line; the `import_mapping` set (7 cases); AC-W1-46…48. | Every eval set green on the scripted cassettes |
 | S56b | **Record ("b") + phase gate** — Rec (done S56b: $0.81, Phase 12 gate met, scorecard §8) | Merge S56a, probe the changed sets, record once, pass^3 on the gated sets; `KNOWN_REAL_MODEL_MISSES` empty (the two waitlist cases included). Phase cap $3.00. | Every gate met; the scorecard targets met |
 
-### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md); S58a–S60 after Phase 14 by [PCR-011](changes/PCR-011.md) and after Phase 15 by [PCR-012](changes/PCR-012.md))
+### Phase 13 · Pilot readiness (S59–S59.5 with S59.4.2, S58a, S57, S58b, S60; order by [PCR-010](changes/PCR-010.md); S58a–S60 after Phase 14 by [PCR-011](changes/PCR-011.md) after Phase 15 by [PCR-012](changes/PCR-012.md) and after Phase 16 by [PCR-016](changes/PCR-016.md))
 Goal: a real business can run its week on Pepper safely, and nothing breaks unseen. Exit: every category ≥ 8, except staff experience (7) and market competitiveness (6), which reach 8 in Phases 16 and 15.
 
 | # | Target | Built | Done when |
@@ -164,12 +164,12 @@ Goal: no-shows cost the owner nothing, and money never moves without the owner's
 | S67.2 | **Cancellation-policy builder** (done, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)) | The owner picks the notice and what a late cancel or a no-show costs; Pepper writes the sentence, shown on the booking page, the manage page and in the confirmation, reminder, reschedule and cancel emails. | The policy shown in every channel |
 | S68 | **No-show fee by approval + gate** (done, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107); C12 8 in the sandbox) | Charge or waive on a card, never automatic; receipts that hold up in a dispute. Phase gate. | No charge without an approved card, proven by tests |
 
-### Phase 16 · Calendar + staff (S69–S72)
+### Phase 16 · Calendar + staff (S69–S72; before the rest of Phase 13 by [PCR-016](changes/PCR-016.md), Google Calendar in testing mode)
 Goal: staff plan their week in Pepper and their personal calendar blocks bookings. Exit: staff experience 8.
 
 | # | Target | Built | Done when |
 |---|---|---|---|
-| S69 | **Week view + drag to move** | Week view per staff member; drag to move asks whether to tell the client. | Playwright drag journeys; no move without the double-booking check |
+| S69 | **Week view + drag to move** | Week view per staff member (Day/Week in Calendar, one staff member at a time, Monday first); drag to move (a long press on touch) asks whether to tell the client and never overrides the rules. Added at the brief: while dragging, off-hours shaded, the time it would land on said aloud, and a taken time marked before the drop; the moved booking's receipt has Undo. AC-X-144…151. | Playwright drag journeys; no move without the double-booking check |
 | S70 | **Google Calendar in** | OAuth, busy blocks from staff calendars into availability (the old Phase 10). The user starts Google's OAuth verification in Phase 10. | Contract tests; token-expiry scenario |
 | S71 | **Google Calendar out** | Bookings as events, incremental sync, reconciliation. | Conflict and duplicate scenarios |
 | S72 | **Recurring appointments + staff week** | "Every Tue 7 am for 8 weeks", with each date checked; staff's "My week". Phase gate. | Recurrence property tests |

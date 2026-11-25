@@ -1,13 +1,19 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-25 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 done (gate met in the sandbox, S68) → next the first row of Planned sessions (**S58a**, local; S57–S60 need the domain, PCR-012)
+**Last updated:** 2026-11-25 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S69 in progress; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S69 Week view + drag to move** (branch `ccr-9cc3cffd-8rt7ne`; decisions at the brief: D-1 Phase 16 next, PCR-016; D-2 native pointer events, no library; D-3 a drag never sends an override; D-4 one staff member's week, staff their own first; additions: off-hours shaded and a taken time marked while dragging, Undo on the receipt). AC-X-144…151.
+- [x] 1. Plan records: PCR-016, CHANGELOG 0.42, playbook, roadmap, AC-X-144…151 and traceability.
+- [ ] 2. Week helpers `apps/web/lib/calendar-week.ts` (unit tests first).
+- [ ] 3. Week data: bookings and busy for one staff member, their hours and time off.
+- [ ] 4. Week view and the Day/Week switch.
+- [ ] 5. Drag, the drop sheet, Undo; `e2e/tests/calendar-week.spec.ts`.
+- [ ] 6. Baselines and tap targets in `screens.spec.ts`; close.
 
 ## Last sessions
 - **S68 Phase 15 · No-show fee by approval + gate (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107)). Full entry in [session-log.md](session-log.md).
@@ -112,15 +118,15 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
+| S69 | Week view + drag to move | 16 | Drag journeys; double-booking check |
+| S70 | Google Calendar in (busy blocks) | 16 | Contract + token-expiry tests |
+| S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
+| S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
 | S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
 | S64.2 | SMS live (once the LLC, a paid provider and 10DLC exist): live switch, `send_client_message` over SMS ("a"/"b") | 14 | A real text both ways; evals green |
-| S69 | Week view + drag to move | 16 | Drag journeys; double-booking check |
-| S70 | Google Calendar in (busy blocks) | 16 | Contract + token-expiry tests |
-| S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
-| S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
 | S73 | Reports (five numbers) | 17 | Numbers equal fixture sums |
 | S74 | Pepper billing: plans, 30-day trial, dunning | 17 | Test-mode billing journeys |
 | S75 | Landing page + pricing | 17 | Lighthouse ≥ 95 mobile |
