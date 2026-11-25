@@ -399,7 +399,8 @@ export function WeekGrid({
       </p>
       <div
         ref={scroller}
-        className="overflow-x-auto rounded-lg border border-line bg-surface"
+        // Its own stacking context: the sticky hours and the dragged block stay under the tabs.
+        className="isolate overflow-x-auto rounded-lg border border-line bg-surface"
         data-testid="week-grid"
       >
         <div className="flex min-w-fit">
