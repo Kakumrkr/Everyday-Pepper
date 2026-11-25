@@ -1,0 +1,8 @@
+{
+  "access_token": "ya29.a0AfB_byC-test-access-token",
+  "expires_in": 3599,
+  "refresh_token": "1//0g-test-refresh-token",
+  "scope": "https://www.googleapis.com/auth/calendar.freebusy openid https://www.googleapis.com/auth/userinfo.email",
+  "token_type": "Bearer",
+  "id_token": "ID_TOKEN"
+}

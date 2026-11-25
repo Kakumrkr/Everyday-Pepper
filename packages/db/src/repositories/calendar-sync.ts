@@ -16,6 +16,8 @@ import {
   type CalendarBusyBlockRow,
   type CalendarConnectionRow,
   type CalendarConnectStateRow,
+  staffMembers,
+  type StaffMemberRow,
 } from '../schema.js';
 import type { Database } from '../client.js';
 import { withJobScan, type TenantTx } from '../tenant.js';
@@ -58,6 +60,18 @@ export async function takeConnectState(
     .delete(calendarConnectStates)
     .where(eq(calendarConnectStates.stateHash, stateHash))
     .returning();
+  return row;
+}
+
+/** The staff member a membership is linked to, if any (who may connect a calendar). */
+export async function findStaffMemberOfMembership(
+  tx: TenantTx,
+  membershipId: string,
+): Promise<StaffMemberRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(staffMembers)
+    .where(eq(staffMembers.membershipId, Id.parse(membershipId)));
   return row;
 }
 
