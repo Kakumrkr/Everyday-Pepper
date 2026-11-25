@@ -25,6 +25,9 @@ export default defineConfig({
         // The same for the one-tap win-back draft's transaction (S54.2): its words and its
         // first answer are unit-tested in `win-back-words.ts`.
         'src/drafts/win-back.ts',
+        // The no-show fee card's proposal in the no-show's transaction (S68): proven against
+        // Postgres in `tools/writes.int.test.ts`; its words are the contracts' (unit-tested).
+        'src/drafts/no-show-fees.ts',
         // The eval subject and its seeded worlds run the loop on Postgres (evals.int.test.ts).
         'src/evals/subject.ts',
         'src/evals/world.ts',
