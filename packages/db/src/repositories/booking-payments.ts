@@ -111,6 +111,9 @@ export interface BookingPaymentChange {
   capturedAt?: Date;
   settledAt?: Date;
   refundEndsAt?: Date;
+  /** The terms the client was shown (S68, AC-X-136), stored when booked. */
+  policySentence?: string | null;
+  noShowFeeCents?: number | null;
 }
 
 /**
@@ -135,6 +138,8 @@ export async function moveBookingPayment(
       ...(change.capturedAt !== undefined && { capturedAt: change.capturedAt }),
       ...(change.settledAt !== undefined && { settledAt: change.settledAt }),
       ...(change.refundEndsAt !== undefined && { refundEndsAt: change.refundEndsAt }),
+      ...(change.policySentence !== undefined && { policySentence: change.policySentence }),
+      ...(change.noShowFeeCents !== undefined && { noShowFeeCents: change.noShowFeeCents }),
     })
     .where(
       and(

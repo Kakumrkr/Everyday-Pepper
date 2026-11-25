@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { BookingPaymentStatusSchema, DepositRuleSchema } from './deposits.js';
+import { BookingFeeStatusSchema } from './no-show-fees.js';
 import { BusinessExportCountsSchema } from './export.js';
 import { ImportCountsSchema, ImportUndoSchema } from './imports.js';
 import { ServiceIdSchema, StaffMemberIdSchema, WorkingIntervalSchema } from './appointments.js';
@@ -466,6 +467,26 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
           status: BookingPaymentStatusSchema,
           amountCents: z.number().int().min(0),
           bookingId: z.uuid().nullable(),
+        })
+        .strict(),
+    })
+    .strict(),
+  z
+    .object({
+      // A no-show fee moved (S68, AC-X-142): approved (`before` null), charged, declined,
+      // cancelled or refunded; statuses, the amount and Stripe's decline code only.
+      action: z.literal('payments.fee_changed'),
+      entity: entity('booking_fee'),
+      before: z.object({ status: BookingFeeStatusSchema }).strict().nullable(),
+      after: z
+        .object({
+          status: BookingFeeStatusSchema,
+          amountCents: z.number().int().min(0),
+          bookingId: z.uuid(),
+          failureCode: z
+            .string()
+            .regex(/^[a-z0-9_]{1,64}$/)
+            .nullable(),
         })
         .strict(),
     })

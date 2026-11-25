@@ -1523,15 +1523,16 @@ export const pushSubscriptions = pgTable(
 // once written, only a record's status fields may change (triggers in migration 0034).
 
 /**
- * The sixteen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
+ * The seventeen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
  * S37: `waitlist.change`; S55.2: `message.review_request`; S56a: `booking.no_show`,
- * `message.client`).
+ * `message.client`; S68: `payment.no_show_fee`).
  */
 const autonomyActionList = sql.raw(
   "'booking.create', 'booking.move', 'booking.cancel', 'booking.no_show', " +
     "'booking_request.accept', 'time.block', 'client_note.save', 'rule.change', 'task.create', " +
     "'waitlist.change', 'message.confirmation', 'message.rebooking_nudge', " +
-    "'message.waitlist_offer', 'message.bulk', 'message.review_request', 'message.client'",
+    "'message.waitlist_offer', 'message.bulk', 'message.review_request', 'message.client', " +
+    "'payment.no_show_fee'",
 );
 const trustCode = (column: SQLWrapper) => sql`${column} ~ '^[a-z][a-z0-9_.:-]{0,63}$'`;
 const trustJsonSize = (column: SQLWrapper) => sql`octet_length(${column}::text) <= 8192`;
@@ -3841,6 +3842,13 @@ export const bookingPayments = pgTable(
     refundEndsAt: timestamp('refund_ends_at', { withTimezone: true }),
     status: text('status').notNull().default('started'),
     refundId: text('refund_id'),
+    /**
+     * The terms the client was shown, stored when booked (S68, AC-X-136): the cancellation
+     * policy's sentence and the no-show fee it allows in cents. `NULL`: no policy (or none with
+     * a fee) then, so no fee may be charged.
+     */
+    policySentence: text('policy_sentence'),
+    noShowFeeCents: integer('no_show_fee_cents'),
     bookedAt: timestamp('booked_at', { withTimezone: true }),
     capturedAt: timestamp('captured_at', { withTimezone: true }),
     settledAt: timestamp('settled_at', { withTimezone: true }),
@@ -3849,6 +3857,8 @@ export const bookingPayments = pgTable(
   },
   (table) => [
     uniqueIndex('booking_payments_request_unique').on(table.tenantId, table.requestId),
+    // For the fees' tenant-scoped reference (S68).
+    uniqueIndex('booking_payments_tenant_id_unique').on(table.tenantId, table.id),
     uniqueIndex('booking_payments_booking_unique')
       .on(table.tenantId, table.bookingId)
       .where(sql`${table.bookingId} IS NOT NULL`),
@@ -3891,7 +3901,90 @@ export const bookingPayments = pgTable(
       sql`(${table.status} IN ('started', 'voided')) = (${table.bookingId} IS NULL)`,
     ),
     check('booking_payments_refund_format', sql`${table.refundId} ~ '^re_[A-Za-z0-9]{1,100}$'`),
+    check(
+      'booking_payments_no_show_fee',
+      sql`${table.noShowFeeCents} IS NULL OR (${table.noShowFeeCents} BETWEEN 50 AND 10000000 AND ${table.policySentence} IS NOT NULL)`,
+    ),
+    check(
+      'booking_payments_policy_sentence_length',
+      sql`${table.policySentence} IS NULL OR char_length(${table.policySentence}) BETWEEN 1 AND 500`,
+    ),
     tenantIsolation(sql.raw('tenant_id')),
   ],
 );
 export type BookingPaymentRow = typeof bookingPayments.$inferSelect;
+
+/**
+ * A no-show fee the owner approved (S68, ADR-0068 amendment; AC-X-139…142): one per booking, the
+ * record a dispute is answered from: the card's payment it charges, the amount, the policy's
+ * sentence as the client saw it and when they agreed (the booking), who approved and when, and
+ * Stripe's ids. Tenant RLS, forced; never deleted by the services; it goes with the business.
+ */
+export const bookingFees = pgTable(
+  'booking_fees',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    bookingId: uuid('booking_id').notNull(),
+    bookingPaymentId: uuid('booking_payment_id').notNull(),
+    provider: text('provider').notNull(),
+    livemode: boolean('livemode').notNull(),
+    amountCents: integer('amount_cents').notNull(),
+    currency: text('currency').notNull().default('usd'),
+    /** The policy's sentence the client was shown when they booked (`booking_payments`). */
+    policySentence: text('policy_sentence').notNull(),
+    /** When the client agreed to it: the booking's moment. */
+    agreedAt: timestamp('agreed_at', { withTimezone: true }).notNull(),
+    approvedBy: uuid('approved_by').notNull(),
+    approvedAt: timestamp('approved_at', { withTimezone: true }).notNull(),
+    status: text('status').notNull().default('queued'),
+    /** The charge's PaymentIntent, once Stripe was asked. */
+    intentId: text('intent_id'),
+    refundId: text('refund_id'),
+    /** Stripe's code for a decline (`card_declined`, `authentication_required`, …). */
+    failureCode: text('failure_code'),
+    chargedAt: timestamp('charged_at', { withTimezone: true }),
+    settledAt: timestamp('settled_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('booking_fees_booking_unique').on(table.tenantId, table.bookingId),
+    uniqueIndex('booking_fees_intent_unique')
+      .on(table.provider, table.intentId)
+      .where(sql`${table.intentId} IS NOT NULL`),
+    foreignKey({
+      name: 'booking_fees_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }),
+    foreignKey({
+      name: 'booking_fees_payment_fk',
+      columns: [table.tenantId, table.bookingPaymentId],
+      foreignColumns: [bookingPayments.tenantId, bookingPayments.id],
+    }),
+    check('booking_fees_provider_known', sql`${table.provider} IN ('stripe', 'sandbox')`),
+    check(
+      'booking_fees_sandbox_not_live',
+      sql`${table.provider} = 'stripe' OR NOT ${table.livemode}`,
+    ),
+    check('booking_fees_amount', sql`${table.amountCents} BETWEEN 50 AND 10000000`),
+    check('booking_fees_currency', sql`${table.currency} = 'usd'`),
+    check(
+      'booking_fees_policy_sentence_length',
+      sql`char_length(${table.policySentence}) BETWEEN 1 AND 500`,
+    ),
+    check(
+      'booking_fees_status_known',
+      sql`${table.status} IN ('queued', 'charging', 'charged', 'failed', 'cancelled', 'refund_pending', 'refunded', 'refund_failed')`,
+    ),
+    check('booking_fees_intent_format', sql`${table.intentId} ~ '^pi_[A-Za-z0-9]{1,100}$'`),
+    check('booking_fees_refund_format', sql`${table.refundId} ~ '^re_[A-Za-z0-9]{1,100}$'`),
+    check('booking_fees_failure_code', sql`${table.failureCode} ~ '^[a-z0-9_]{1,64}$'`),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type BookingFeeRow = typeof bookingFees.$inferSelect;

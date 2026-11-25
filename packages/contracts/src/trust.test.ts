@@ -70,6 +70,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'message.bulk': 'ask',
       'message.review_request': 'ask',
       'message.client': 'ask',
+      'payment.no_show_fee': 'ask',
     });
   });
 
@@ -77,7 +78,7 @@ describe('AUTONOMY_ACTIONS', () => {
     const locked = Object.entries(AUTONOMY_ACTIONS)
       .filter(([, { allowsAuto }]) => !allowsAuto)
       .map(([action]) => action);
-    expect(locked).toEqual(['rule.change', 'message.bulk']);
+    expect(locked).toEqual(['rule.change', 'message.bulk', 'payment.no_show_fee']);
   });
 
   it('locks learned rules to "ask" (S31, playbook D-10)', () => {
@@ -93,6 +94,13 @@ describe('AUTONOMY_ACTIONS', () => {
     expect(AUTONOMY_ACTIONS['rule.change'].permission).toBe('rules.manage');
   });
 
+  it('locks the no-show fee to "ask", for owners only (S68, AC-X-138)', () => {
+    expect(levelAllowed('payment.no_show_fee', 'ask')).toBe(true);
+    expect(levelAllowed('payment.no_show_fee', 'notify')).toBe(false);
+    expect(levelAllowed('payment.no_show_fee', 'auto')).toBe(false);
+    expect(AUTONOMY_ACTIONS['payment.no_show_fee'].permission).toBe('payments.manage');
+  });
+
   it('gives every action a known permission and an undo window', () => {
     for (const { permission, undo } of Object.values(AUTONOMY_ACTIONS)) {
       expect(PermissionSchema.safeParse(permission).success).toBe(true);
@@ -101,9 +109,16 @@ describe('AUTONOMY_ACTIONS', () => {
   });
 
   it('lets messages be undone only until they are sent, and every write for a while', () => {
-    for (const { riskTier, undo } of Object.values(AUTONOMY_ACTIONS)) {
+    for (const [action, { riskTier, undo }] of Object.entries(AUTONOMY_ACTIONS)) {
+      // A charge is not a message: its Undo cancels it while it waits and refunds it after (S68).
+      if (action === 'payment.no_show_fee') continue;
       expect(undo.kind).toBe(riskTier === 'external_or_irreversible' ? 'until_sent' : 'for');
     }
+    expect(AUTONOMY_ACTIONS['payment.no_show_fee'].undo).toEqual({
+      kind: 'for',
+      minutes: 24 * 60,
+      notAfterAppointmentStart: false,
+    });
     expect(AUTONOMY_ACTIONS['booking.create'].undo).toEqual({
       kind: 'for',
       minutes: 24 * 60,

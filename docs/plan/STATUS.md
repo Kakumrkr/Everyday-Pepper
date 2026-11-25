@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S68 · No-show fee by approval + Phase 15 gate** (brief pre-approved by the stored prompt: D-1 one session; D-2 the fee from the terms stored with the booking's payment, none without; D-3 a kept deposit counts toward the fee; D-4 owners only, ask-only `payment.no_show_fee`; D-5 Undo a day: cancels before the charge, refunds after; D-6 the card proposed in the no-show's transaction, team or Pepper).
+Tasks: 1 ACs + ADR · 2 contracts · 3 migration 0084 · 4 payments port/services/worker · 5 ai system tool + hook · 6 card words, receipt email, e2e · 7 C12 gate.
+Done: (none yet). Next: task 1.
 
 ## Last sessions
 - **S67.2 Phase 15 · Cancellation-policy builder (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)). Full entry in [session-log.md](session-log.md).

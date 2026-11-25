@@ -56,7 +56,8 @@ import { insertConversation, insertMessage, insertTurn } from './repositories/co
 import { insertInvite, withInviteTenant } from './repositories/invites.js';
 import { addMembership, listUserBusinesses } from './repositories/memberships.js';
 import { insertMemoryEpisode, insertMemoryFact } from './repositories/memory.js';
-import { insertBookingPayment } from './repositories/booking-payments.js';
+import { insertBookingFee } from './repositories/booking-fees.js';
+import { insertBookingPayment, moveBookingPayment } from './repositories/booking-payments.js';
 import { insertPaymentAccount } from './repositories/payments.js';
 import { insertRememberedDevice } from './repositories/remembered-devices.js';
 import { listTenantIdsForCleanup } from './repositories/cleanup.js';
@@ -821,6 +822,41 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: 'status = status',
     noDelete: true,
     ownerLookup: 'booking_payment_sweep',
+  },
+  booking_fees: {
+    tenantColumn: 'tenant_id',
+    // A no-show fee the owner approved (S68, AC-X-142): the dispute record, never deleted.
+    seed: async (tx) => {
+      const bookingId = await seedBooking(tx);
+      const payment = await insertBookingPayment(tx, {
+        requestId: newId(),
+        provider: 'sandbox',
+        livemode: false,
+        kind: 'card',
+        intentId: `seti_sandbox${randomBytes(8).toString('hex')}`,
+        customerId: `cus_sandbox${randomBytes(8).toString('hex')}`,
+        accountId: `acct_sandbox${randomBytes(8).toString('hex')}`,
+        amountCents: 0,
+        refundHours: 24,
+      });
+      if (payment === undefined) throw new Error('seed booking payment not stored');
+      await moveBookingPayment(tx, payment.id, ['started'], { status: 'card_saved', bookingId });
+      const row = await insertBookingFee(tx, {
+        bookingId,
+        bookingPaymentId: payment.id,
+        provider: 'sandbox',
+        livemode: false,
+        amountCents: 2000,
+        policySentence: 'No-shows may be charged $20.',
+        agreedAt: new Date('2026-10-01T12:00:00Z'),
+        approvedBy: newId(),
+        approvedAt: new Date('2026-10-21T12:00:00Z'),
+      });
+      if (row === undefined) throw new Error('seed booking fee not stored');
+      return row.id;
+    },
+    touch: 'status = status',
+    noDelete: true,
   },
   booking_texts: {
     tenantColumn: 'tenant_id',

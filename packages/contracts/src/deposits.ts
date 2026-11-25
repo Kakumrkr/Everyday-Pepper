@@ -172,6 +172,7 @@ export const StripeCustomerIdSchema = z.string().regex(/^cus_[A-Za-z0-9]{1,100}$
 export const StripePaymentIntentIdSchema = z.string().regex(/^pi_[A-Za-z0-9]{1,100}$/);
 export const StripeSetupIntentIdSchema = z.string().regex(/^seti_[A-Za-z0-9]{1,100}$/);
 export const StripeRefundIdSchema = z.string().regex(/^re_[A-Za-z0-9]{1,100}$/);
+export const StripePaymentMethodIdSchema = z.string().regex(/^pm_[A-Za-z0-9]{1,100}$/);
 export const StripeIntentIdSchema = z.union([
   StripePaymentIntentIdSchema,
   StripeSetupIntentIdSchema,
@@ -209,6 +210,8 @@ export const StripePaymentIntentSchema = z.object({
     'succeeded',
   ]),
   client_secret: StripeClientSecretSchema.nullable(),
+  /** The card it was paid with, kept on the customer (S68: the no-show fee charges it). */
+  payment_method: StripePaymentMethodIdSchema.nullable().optional(),
   livemode: z.boolean(),
 });
 export type StripePaymentIntent = z.infer<typeof StripePaymentIntentSchema>;
@@ -227,6 +230,7 @@ export const StripeSetupIntentSchema = z.object({
     'succeeded',
   ]),
   client_secret: StripeClientSecretSchema.nullable(),
+  payment_method: StripePaymentMethodIdSchema.nullable().optional(),
   livemode: z.boolean(),
 });
 export type StripeSetupIntent = z.infer<typeof StripeSetupIntentSchema>;
@@ -294,11 +298,13 @@ export type SandboxIntentRequest = z.infer<typeof SandboxIntentRequestSchema>;
 
 /**
  * A `payment` outbox message (ADR-0068 §3–4): capture a booked deposit, or refund (or let go of)
- * a cancelled one. Ids only.
+ * a cancelled one; charge or refund an approved no-show fee (S68). Ids only.
  */
-export const OutboxPaymentSchema = z
-  .object({ kind: z.enum(['capture', 'refund']), bookingPaymentId: z.uuid() })
-  .strict();
+export const OutboxPaymentSchema = z.union([
+  z.object({ kind: z.enum(['capture', 'refund']), bookingPaymentId: z.uuid() }).strict(),
+  /** A no-show fee the owner approved (S68): charge it, or give it back after an Undo. */
+  z.object({ kind: z.enum(['fee_charge', 'fee_refund']), bookingFeeId: z.uuid() }).strict(),
+]);
 export type OutboxPayment = z.infer<typeof OutboxPaymentSchema>;
 
 /**
