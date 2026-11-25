@@ -89,7 +89,7 @@ describe('calendarWords (AC-X-160)', () => {
       disconnect: true,
     });
     expect(words.lines[1]).toBe(
-      'Pepper keeps the busy times it read 3 min ago until you reconnect, so nothing gets booked over them.',
+      'Until you reconnect, Pepper keeps the busy times it last read, so nothing gets booked over them.',
     );
   });
 

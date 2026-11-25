@@ -82,16 +82,12 @@ export function calendarWords(
         };
   }
   if (connection.status === 'needs_reconnect') {
-    const kept =
-      connection.syncedAt === null
-        ? 'Pepper keeps the busy times it has'
-        : `Pepper keeps the busy times it read ${readAgo(connection.syncedAt, timeZone, now)}`;
     return {
       badge: 'Needs reconnecting',
       tone: 'warn',
       lines: [
         `Google stopped letting Pepper read ${connection.accountEmail}.`,
-        `${kept} until you reconnect, so nothing gets booked over them.`,
+        'Until you reconnect, Pepper keeps the busy times it last read, so nothing gets booked over them.',
       ],
       action: 'Reconnect Google Calendar',
       disconnect: true,

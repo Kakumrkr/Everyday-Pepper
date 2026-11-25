@@ -9,8 +9,11 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S70.2 · Google Calendar on screen** (brief approved 2026-11-25: D-1 a Home card worked out from the member's own status, no feed kind; D-2 the real run: the user's own browser, the pasted return address finished in the container, the client secret only through the secure credential form (Basic auth), fallback to S71's start; D-3 Team shows status and last read, never the Google email). AC-X-160…166.
 - [x] T1 ACs + traceability
-- [ ] T2 `GET /v1/calendar/connections` (staff.read, no email) · T3 More → Calendar · T4 the return page · T5 Home card · T6 Team line (top-up) · T7 e2e `calendar-connect` + screens · T8 the real run
-- Next: T2.
+- [x] T2 `GET /v1/calendar/connections` (staff.read, no email; api + module int tests)
+- [x] T3–T6 More → Calendar, the return page (`history.replaceState`, never a remount), the Home card, the Team line; `lib/calendar-connect.ts` (20 unit)
+- [x] T7 e2e `calendar-connect` 3/3; screens: `more-calendar*`, `home-calendar-reconnect-*` new, `more-*`/`team-*` redrawn (noise restored); sandbox `sandbox-expired` code
+- [ ] T8 the real testing-mode run (waiting on the user's Google project); then `/session-close`
+- Next: T8. Lint uncached here: 133 s, peak 4.5 GB (6 GB heap).
 
 ## Last sessions
 - **S70 Phase 16 · Google Calendar in (busy blocks) (2026-11-25)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #109](https://github.com/Kakumrkr/Everyday-Pepper/pull/109)). Full entry in [session-log.md](session-log.md).

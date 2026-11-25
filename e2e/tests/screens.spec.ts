@@ -1034,7 +1034,7 @@ for (const width of WIDTHS) {
     await shots('more-calendar-reconnect');
     for (const scheme of SCHEMES) {
       await page.goto('/');
-      const card = page.getByTestId('calendar-reconnect-card');
+      const card = page.getByRole('region', { name: 'Reconnect your Google Calendar' });
       await expect(card).toBeVisible();
       await still(page, scheme);
       await expect
