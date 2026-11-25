@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S70 Google Calendar in (busy blocks)**, approved at the brief (user, 2026-11-25: "Start with your recommendations and complete the session successfully"): D-1 split → S70.2 the connect screen, Team status, the reconnect card, the OAuth journey; D-2 each staff member connects their own; D-3 a Google block binds like time off; D-4 poll freeBusy every 5 min, today → +60 days, start/end only; D-5 `calendar.freebusy` only, an expired token keeps the last blocks and asks to reconnect; D-6 `fetch` + Zod, no SDK.
+- Tasks: 1 ACs + ADR-0069 · 2 migration 0085 · 3 contracts + token sealing · 4 provider port, Google adapter, sandbox, fixtures · 5 OAuth routes · 6 worker sync + expiry · 7 availability · 8 week view "Busy (Google)" (top-up) · 9 close.
+- Done: (none yet). Next: task 1.
 
 ## Last sessions
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).
