@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S70.2** (the connect screen; see "Planned sessions").
+**S70.2 · Google Calendar on screen** (brief approved 2026-11-25: D-1 a Home card worked out from the member's own status, no feed kind; D-2 the real run: the user's own browser, the pasted return address finished in the container, the client secret only through the secure credential form (Basic auth), fallback to S71's start; D-3 Team shows status and last read, never the Google email). AC-X-160…166.
+- [x] T1 ACs + traceability
+- [ ] T2 `GET /v1/calendar/connections` (staff.read, no email) · T3 More → Calendar · T4 the return page · T5 Home card · T6 Team line (top-up) · T7 e2e `calendar-connect` + screens · T8 the real run
+- Next: T2.
 
 ## Last sessions
 - **S70 Phase 16 · Google Calendar in (busy blocks) (2026-11-25)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #109](https://github.com/Kakumrkr/Everyday-Pepper/pull/109)). Full entry in [session-log.md](session-log.md).
