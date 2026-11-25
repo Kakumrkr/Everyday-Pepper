@@ -254,7 +254,9 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   await page.goto('/services');
   await (await hydrated(window)).selectOption('168');
   await expect(page.getByText(/^Clients who cancel at least a week before/)).toBeVisible();
-  await expect(page.getByTestId('policy-preview')).toContainText('at least a week before your visit');
+  await expect(page.getByTestId('policy-preview')).toContainText(
+    'at least a week before your visit',
+  );
   await page.getByRole('button', { name: 'Save policy' }).click();
   await expect(
     page.getByText('Saved. Clients see it when they book and in their emails.'),

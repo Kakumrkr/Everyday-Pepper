@@ -1505,12 +1505,10 @@ for (const width of WIDTHS) {
     if (phone) await expectTapTargets(page, 'policy-builder');
     for (const scheme of SCHEMES) {
       await still(page, scheme);
-      await expect
-        .soft(policy)
-        .toHaveScreenshot(`policy-builder-${String(width)}-${scheme}.png`, {
-          animations: 'disabled',
-          maxDiffPixelRatio: 0.01,
-        });
+      await expect.soft(policy).toHaveScreenshot(`policy-builder-${String(width)}-${scheme}.png`, {
+        animations: 'disabled',
+        maxDiffPixelRatio: 0.01,
+      });
     }
     await page.emulateMedia({ colorScheme: 'light' });
     await policy.getByRole('button', { name: 'Save policy' }).click();
