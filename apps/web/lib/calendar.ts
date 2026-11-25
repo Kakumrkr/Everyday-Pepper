@@ -16,10 +16,14 @@ const DAY_MINUTES = 1440;
 export const DEFAULT_DAY_START_MINUTE = 8 * 60;
 export const DEFAULT_DAY_END_MINUTE = 20 * 60;
 
+/** The calendar's two views (S69): a day of everyone, or one staff member's week. */
+export type CalendarView = 'day' | 'week';
+
 export interface CalendarParams {
   date: CivilDate;
-  /** Show only this staff member; `null` for everyone. */
+  /** Show only this staff member; `null` for everyone (the week view then picks one). */
   staffMemberId: string | null;
+  view: CalendarView;
 }
 
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -40,7 +44,7 @@ export function readDate(text: string | undefined): CivilDate | null {
   return formatDate(addDays(date, 0)) === text ? date : null;
 }
 
-/** The day and staff filter from the page's query (`?date=YYYY-MM-DD&staff=<id>`). */
+/** The day, staff filter and view from the page's query (`?date=YYYY-MM-DD&staff=<id>&view=week`). */
 export function readCalendarParams(
   query: Record<string, string | string[] | undefined>,
   today: CivilDate,
@@ -51,13 +55,19 @@ export function readCalendarParams(
   return {
     date: readDate(single(query['date'])) ?? today,
     staffMemberId: staff !== undefined && UUID_PATTERN.test(staff) ? staff.toLowerCase() : null,
+    view: single(query['view']) === 'week' ? 'week' : 'day',
   };
 }
 
-/** The calendar page's address for a day and staff filter. */
-export function calendarHref(date: CivilDate, staffMemberId: string | null): string {
+/** The calendar page's address for a day, staff filter and view (the day view by default). */
+export function calendarHref(
+  date: CivilDate,
+  staffMemberId: string | null,
+  view: CalendarView = 'day',
+): string {
   const query = new URLSearchParams({ date: formatDate(date) });
   if (staffMemberId !== null) query.set('staff', staffMemberId);
+  if (view === 'week') query.set('view', 'week');
   return `/calendar?${query.toString()}`;
 }
 
@@ -90,7 +100,7 @@ export interface Timed {
  * are wall-clock hours, so a clock-change day keeps 10 am on the 10 am line. Before the day is
  * 0, after it 1440.
  */
-function minuteOn(timeZone: string, date: CivilDate, instant: number): number {
+export function minuteOn(timeZone: string, date: CivilDate, instant: number): number {
   const local = toZoned(timeZone, instant);
   const order = formatDate(local).localeCompare(formatDate(date));
   if (order < 0) return 0;

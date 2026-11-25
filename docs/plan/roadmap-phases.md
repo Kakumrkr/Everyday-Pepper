@@ -21,7 +21,7 @@ Plan version: **0.33** (see `CHANGELOG.md`; Phases 9–17 from [PCR-007](changes
 | — | **Private pilot** | 3–5 owners, email only, 60 days free | The hypotheses in the playbook §6 measured | runs alongside 14–17 |
 | 14 | SMS | SMS channel with consent and STOP, reminders + confirm by text, approve by text; S61–S64 (gate met in sandbox); live after 10DLC in S64.2 ([PCR-012](changes/PCR-012.md)) | Reminder timing and idempotency; scorecard C12 ≥ 7 | 4 sessions |
 | 15 | Deposits | Stripe Connect Express, deposits and card on file, smart deposits, policy builder, no-show fee by approval; S65–S68, in test mode before the rest of Phase 13 ([PCR-012](changes/PCR-012.md)) | No charge without an approved card; scorecard C12 ≥ 8 | 4 sessions |
-| 16 | Calendar + staff | Week view + drag, Google Calendar in and out (the old Phase 10), recurring appointments, staff week; S69–S72 | Contract tests; conflict + token-expiry scenarios; scorecard C6 ≥ 8 | 4 sessions |
+| 16 | Calendar + staff | Week view + drag, Google Calendar in and out (the old Phase 10), recurring appointments, staff week; S69–S72, before the rest of Phase 13 ([PCR-016](changes/PCR-016.md)) | Contract tests; conflict + token-expiry scenarios; scorecard C6 ≥ 8 | 4 sessions |
 | 17 | Launch gate | Reports, Pepper billing (trial, plans), landing page, final re-record, security review; S73–S76 | Every scorecard category ≥ 9; paid-launch go/no-go | 4 sessions |
 
 **Phases 9–17: 39 sessions (S39–S76, S56 in "a" and "b" halves).** Parallel non-code tasks for the user (parked until needed, P1-6): a cheap neutral domain by Phase 13; the LLC before SMS and Stripe go live (10DLC registration takes weeks); Google OAuth verification started during Phase 10; the brand name and trademark before paid launch.

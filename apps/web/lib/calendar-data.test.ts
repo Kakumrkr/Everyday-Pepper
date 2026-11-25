@@ -6,7 +6,13 @@ import {
   type StaffMember,
 } from '@pepper/contracts';
 import { describe, expect, it, vi } from 'vitest';
-import { loadCalendarDay, MAX_CLIENT_LOOKUPS, seesDetailsOf, visitClient } from './calendar-data';
+import {
+  loadCalendarDay,
+  loadCalendarWeek,
+  MAX_CLIENT_LOOKUPS,
+  seesDetailsOf,
+  visitClient,
+} from './calendar-data';
 
 const T = '2026-11-03T15:00:00.000Z';
 const id = (n: number) => `0199f0a4-7c1e-7d2a-9b3c-${String(n).padStart(12, '0')}`;
@@ -145,6 +151,83 @@ describe('loadCalendarDay', () => {
     expect(day.failed).toBe(true);
     expect(day.bookings).toEqual([]);
     expect(day.staff).toEqual([STAFF]);
+  });
+});
+
+describe('loadCalendarWeek (S69)', () => {
+  const week = { from: '2026-11-02T05:00:00.000Z', to: '2026-11-09T05:00:00.000Z' };
+  const hoursPath = `/v1/staff/${STAFF.id}/hours`;
+  const timeOffPath = `/v1/staff/${STAFF.id}/time-off`;
+  const answers = {
+    ...full([booking(1, id(50))]),
+    [hoursPath]: { intervals: [{ weekday: 2, start: '09:00', end: '17:00' }] },
+    [timeOffPath]: {
+      timeOff: [
+        // Before the week, in it, and after it.
+        {
+          id: id(70),
+          staffMemberId: STAFF.id,
+          startsAt: '2026-10-01T15:00:00.000Z',
+          endsAt: '2026-10-02T15:00:00.000Z',
+          createdAt: T,
+        },
+        {
+          id: id(71),
+          staffMemberId: STAFF.id,
+          startsAt: '2026-11-04T15:00:00.000Z',
+          endsAt: '2026-11-04T17:00:00.000Z',
+          createdAt: T,
+        },
+        {
+          id: id(72),
+          staffMemberId: STAFF.id,
+          startsAt: '2026-11-10T15:00:00.000Z',
+          endsAt: '2026-11-10T17:00:00.000Z',
+          createdAt: T,
+        },
+      ],
+    },
+  };
+
+  it("loads one staff member's week: their visits, hours and time off", async () => {
+    const { options, paths } = api(answers);
+    const loaded = await loadCalendarWeek(options, week, (staff) => staff[0] ?? null);
+    expect(loaded.member).toEqual(STAFF);
+    expect(loaded.bookings.map((b) => b.id)).toEqual([id(101)]);
+    expect(loaded.hours).toEqual([{ weekday: 2, start: '09:00', end: '17:00' }]);
+    expect(loaded.timeOff).toEqual([
+      { startsAt: '2026-11-04T15:00:00.000Z', endsAt: '2026-11-04T17:00:00.000Z' },
+    ]);
+    expect(loaded.failed).toBe(false);
+    // Only that member's bookings and busy times are asked for (AC-X-145).
+    const query = new URLSearchParams({ ...week, staffMemberId: STAFF.id }).toString();
+    expect(paths).toEqual(
+      expect.arrayContaining([`/v1/bookings?${query}`, `/v1/calendar/busy?${query}`]),
+    );
+    expect(paths).toContain(
+      `${timeOffPath}?${new URLSearchParams({ from: week.from }).toString()}`,
+    );
+  });
+
+  it('shades nothing when the hours fail, and says the view is incomplete only for visits', async () => {
+    const { options } = api(answers, [hoursPath]);
+    const loaded = await loadCalendarWeek(options, week, (staff) => staff[0] ?? null);
+    expect(loaded.hours).toBeNull();
+    expect(loaded.failed).toBe(false);
+    const broken = api(answers, ['/v1/calendar/busy']);
+    expect((await loadCalendarWeek(broken.options, week, (staff) => staff[0] ?? null)).failed).toBe(
+      true,
+    );
+  });
+
+  it('asks for no visits without anyone to show', async () => {
+    const { options, paths } = api(answers);
+    const loaded = await loadCalendarWeek(options, week, () => null);
+    expect(loaded.member).toBeNull();
+    expect(loaded.bookings).toEqual([]);
+    expect(
+      paths.filter((p) => !p.startsWith('/v1/staff') && !p.startsWith('/v1/services')),
+    ).toEqual([]);
   });
 });
 

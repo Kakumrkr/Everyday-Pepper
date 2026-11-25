@@ -819,16 +819,20 @@ function checkRecordPermissions(
 }
 
 /**
- * Who may approve, reject or undo: the member it was made for, or one whose role reaches every
- * record of this kind (owners and managers). Staff can't decide on a colleague's proposal.
+ * Who may approve, reject or undo: the member it was made for (when their role may do it at
+ * all), or one whose role reaches every record of this kind (owners and managers). Staff can't
+ * decide on a colleague's proposal.
  */
 function checkDecider(
   member: Actor,
   action: AutonomyAction,
   ...madeFor: readonly (string | null)[]
 ): void {
-  if (madeFor.includes(member.context.userId)) return;
-  if (permissionScope(member.context.role, permissionFor(action)) === 'all') return;
+  const scope = permissionScope(member.context.role, permissionFor(action));
+  // The one it was made for decides it only if their role may do the action at all: a manager
+  // whose no-show proposed the owner's fee card can't waive it (S69 review, AC-X-138).
+  if (scope !== null && madeFor.includes(member.context.userId)) return;
+  if (scope === 'all') return;
   throw new ForbiddenError(permissionFor(action));
 }
 

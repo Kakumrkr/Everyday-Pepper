@@ -13,6 +13,7 @@ import {
   addDays,
   formatDate,
   fromZoned,
+  isoWeekday,
   toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Locator, type Page } from '@playwright/test';
@@ -738,6 +739,119 @@ async function southsideDay(
     );
   }
   return { date: formatDate(day), marcus: marcus.id, audy: audy.id, dre: dre.id };
+}
+
+/**
+ * Dre's week for the week view's pictures (S69): a Wednesday at least a week ahead, so the same
+ * weekdays hold the same visits whatever day the test runs; Dre works Tuesday to Saturday, 9 to
+ * 6 (Sunday and Monday shaded off). Returns the Wednesday.
+ */
+async function southsideWeek(page: Page): Promise<string> {
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  let wednesday = addDays(toZoned(business.timeZone, Date.now()), 7);
+  while (isoWeekday(wednesday) !== 3) wednesday = addDays(wednesday, 1);
+  const at = (days: number, minute: number) =>
+    new Date(fromZoned(business.timeZone, addDays(wednesday, days), minute)).toISOString();
+  const fade = await post(
+    page,
+    '/v1/services',
+    { name: 'Skin fade', durationMinutes: 45 },
+    ServiceSchema,
+  );
+  const beard = await post(
+    page,
+    '/v1/services',
+    { name: 'Beard trim', durationMinutes: 30 },
+    ServiceSchema,
+  );
+  const services = [fade.id, beard.id];
+  const dre = await post(
+    page,
+    '/v1/staff',
+    { displayName: 'Dre', serviceIds: services },
+    StaffMemberSchema,
+  );
+  await post(page, '/v1/staff', { displayName: 'Randy', serviceIds: services }, StaffMemberSchema);
+  const hours = await page.request.put(`/v1/staff/${dre.id}/hours`, {
+    data: {
+      intervals: [2, 3, 4, 5, 6].map((weekday) => ({ weekday, start: '09:00', end: '18:00' })),
+    },
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(hours.ok(), await hours.text()).toBe(true);
+  const marcus = await post(page, '/v1/clients', { name: 'Marcus Bell' }, ClientSchema);
+  const jay = await post(page, '/v1/clients', { name: 'Jay Ortiz' }, ClientSchema);
+  const audy = await post(page, '/v1/clients', { name: 'Audy Kim' }, ClientSchema);
+  const bookings = [
+    { client: marcus.id, service: fade.id, at: at(0, 9 * 60 + 30) },
+    { client: jay.id, service: beard.id, at: at(0, 11 * 60) },
+    { client: audy.id, service: fade.id, at: at(2, 10 * 60) },
+    { client: marcus.id, service: beard.id, at: at(3, 13 * 60) },
+  ];
+  for (const booking of bookings) {
+    await post(
+      page,
+      '/v1/bookings',
+      {
+        clientId: booking.client,
+        serviceId: booking.service,
+        staffMemberId: dre.id,
+        startsAt: booking.at,
+        notifyClient: false,
+      },
+      { parse: (body: unknown) => body },
+    );
+  }
+  return formatDate(wednesday);
+}
+
+for (const width of WIDTHS) {
+  test(`The week view at ${String(width)} px, light and dark`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const date = await southsideWeek(page);
+    const days = ['7', '8', '9', '10', '11', '12', '13'];
+    // The week's dates move with the clock: fixed words in their place (AC-X-151).
+    const fixDates = async () => {
+      await fixedText(page.getByTestId('calendar-week'), 'Dec 7 – 13 · Dre');
+      const headings = page.getByTestId('week-day').locator('h2 > span:last-child');
+      await expect(headings).toHaveCount(7);
+      for (const [index, day] of days.entries()) await fixedText(headings.nth(index), day);
+    };
+    for (const scheme of SCHEMES) {
+      await page.goto(`/calendar?date=${date}&view=week`);
+      await expect(page.getByTestId('booking-block')).toHaveCount(4);
+      await fixDates();
+      await still(page, scheme);
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`calendar-week-${String(width)}-${scheme}.png`, SHOT);
+      if (width <= 375 && scheme === 'light') await expectTapTargets(page, 'the week view');
+
+      // A drag over Jay's visit: the block says where it would land and that it's taken.
+      const block = page.getByRole('button', { name: /^9:30\s?–\s?10:15\sAM/ });
+      await (await hydrated(block)).scrollIntoViewIfNeeded();
+      const box = await block.boundingBox();
+      if (box === null) throw new Error('No block');
+      await page.mouse.move(box.x + box.width / 2, box.y + 10);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y + 16, { steps: 2 });
+      await page.mouse.move(box.x + box.width / 2, box.y + 10 + 88 * 1.5, { steps: 8 });
+      await expect(page.getByTestId('drag-ghost')).toHaveAttribute('data-problem', 'taken');
+      await fixDates();
+      await expect
+        .soft(page)
+        .toHaveScreenshot(`calendar-week-drag-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          fullPage: false,
+        });
+      await page.keyboard.press('Escape');
+      await page.mouse.up();
+    }
+  });
 }
 
 for (const width of WIDTHS) {
