@@ -37,6 +37,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'message.bulk': 'Message to many clients',
   'message.review_request': 'Review request',
   'message.client': 'Message to a client',
+  'payment.no_show_fee': 'No-show fee',
 };
 
 /** Each dial action as the Autonomy page names it (the approved prototype's words). */
@@ -57,6 +58,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'message.bulk': 'One message to more than 10 clients',
   'message.review_request': 'Asking clients for a review after a visit',
   'message.client': 'A message you ask me to send a client (running late, a reminder, a note)',
+  'payment.no_show_fee': 'Charge a no-show the fee your policy allows',
 };
 
 export const LEVEL_LABEL: Record<AutonomyLevel, string> = {
@@ -89,10 +91,33 @@ export const AUTONOMY_GROUPS: readonly {
     description:
       'Emails leave Pepper, so I hold each one for 2 minutes in case you want to undo it.',
     actions: AutonomyActionSchema.options.filter(
-      (action) => AUTONOMY_ACTIONS[action].riskTier === 'external_or_irreversible',
+      (action) =>
+        AUTONOMY_ACTIONS[action].riskTier === 'external_or_irreversible' &&
+        action.startsWith('message.'),
     ),
   },
+  {
+    // S68: money moves only on the owner's OK.
+    title: 'Money',
+    description: 'Charges to a client’s card. I always ask the owner first.',
+    actions: AutonomyActionSchema.options.filter((action) => action.startsWith('payment.')),
+  },
 ];
+
+/**
+ * The card's two buttons (S68): "Charge $20" and "Waive" for a no-show fee, so the owner reads
+ * the money on the button they tap; "Approve" and "Not now" for everything else.
+ */
+export function decisionLabels(
+  action: AutonomyAction,
+  after: ChangeSide | null,
+): { approve: string; reject: string } {
+  if (action === 'payment.no_show_fee') {
+    const amount = after?.['amount'];
+    return { approve: typeof amount === 'string' ? `Charge ${amount}` : 'Charge', reject: 'Waive' };
+  }
+  return { approve: 'Approve', reject: 'Not now' };
+}
 
 const STEP_LABEL: Record<string, string> = {
   find_availability: 'Checked the free times',
@@ -319,6 +344,21 @@ export function changeRows(
       add('Visit', null, span(after, 'time', 'endTime'));
       add('Message', null, text(after, 'message'));
       return rows;
+    case 'payment.no_show_fee': {
+      // `charge_no_show_fee` (S68): the missed visit, the card, the client's own terms and the
+      // choice (the policy's fee, a kept deposit, what is charged now).
+      add('Client', null, text(after, 'clientName'));
+      add('Missed', null, span(after, 'time', 'endTime'));
+      add('Service', null, text(after, 'serviceName'));
+      add(
+        'Card',
+        null,
+        text(after, 'card') === 'deposit_card' ? 'The deposit’s card' : 'Card on file',
+      );
+      add('Their policy', null, text(after, 'policy'));
+      add('Fee', null, text(after, 'choice'));
+      return rows;
+    }
     case 'message.confirmation':
     case 'message.bulk':
       // No tool makes these yet (messages: Phase 8); the summary says it all.

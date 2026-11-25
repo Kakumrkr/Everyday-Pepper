@@ -17,11 +17,17 @@ import { Notice } from '../form-parts';
 export function DepositStep({
   start,
   timeZone,
+  policy = null,
   busy,
   onPaid,
 }: {
   start: BookingPaymentStart;
   timeZone: string;
+  /**
+   * The business's cancellation policy (S67.2), said again where the card is kept (S68): a
+   * no-show fee is charged to this card on the owner's OK, under these words.
+   */
+  policy?: string | null;
   /** While booking after the payment. */
   busy: boolean;
   onPaid: () => Promise<void>;
@@ -36,6 +42,11 @@ export function DepositStep({
             {line}
           </p>
         ))}
+        {policy === null ? null : (
+          <p className="m-0 type-body text-ink-2" data-testid="deposit-policy">
+            {policy}
+          </p>
+        )}
       </div>
       {start.provider === 'sandbox' ? (
         <SandboxCard start={start} button={words.button} busy={busy} onPaid={onPaid} />

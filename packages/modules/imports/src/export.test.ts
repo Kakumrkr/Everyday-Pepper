@@ -97,6 +97,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     smsConsents: [],
     payments: null,
     deposits: [],
+    noShowFees: [],
     ...overrides,
   };
 }
@@ -270,6 +271,31 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       { ...deposit, createdAt: AT.toISOString(), settledAt: AT.toISOString() },
     ]);
     expect(files['README.txt']).toContain('deposits.json');
+  });
+
+  it('writes no-show-fees.json with the terms each fee was charged under (S68, AC-X-142)', () => {
+    expect(Object.keys(unzip(buildBusinessExport(data({}), AT).bytes))).not.toContain(
+      'no-show-fees.json',
+    );
+    const fee = {
+      bookingId: '0190e7a8-0000-7000-8000-000000000001',
+      amountCents: 2000,
+      policySentence: 'No-shows may be charged $20.',
+      agreedAt: AT,
+      approvedBy: '0190e7a8-0000-7000-8000-000000000002',
+      approvedAt: AT,
+      status: 'charged',
+      failureCode: null,
+      stripePayment: 'pi_3Nv0FGQ9RKHgCVdK',
+      stripeRefund: null,
+      chargedAt: AT,
+    };
+    const files = unzip(buildBusinessExport(data({ noShowFees: [fee] }), AT).bytes);
+    const iso = AT.toISOString();
+    expect(JSON.parse(files['no-show-fees.json'] ?? 'null')).toEqual([
+      { ...fee, agreedAt: iso, approvedAt: iso, chargedAt: iso },
+    ]);
+    expect(files['README.txt']).toContain('no-show-fees.json');
   });
 
   it('writes text-consents.json with the words each consent was given to (S61, ADR-0065 §7)', () => {

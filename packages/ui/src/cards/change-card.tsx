@@ -9,6 +9,7 @@ import {
   ACTION_LABEL,
   changeRows,
   clientNameFor,
+  decisionLabels,
   emailLine,
   formatDate,
   keyWords,
@@ -104,7 +105,12 @@ export function ChangeCard(props: ChangeCardProps) {
     notice = null,
   } = props;
   const rows = changeRows(action, before, after);
-  const pill = STATUS[status];
+  const labels = decisionLabels(action, after);
+  // A fee the owner waived says so (S68), not "Turned down".
+  const pill =
+    status === 'rejected' && action === 'payment.no_show_fee'
+      ? { label: 'Waived', tone: 'plain' as const }
+      : STATUS[status];
   const undoText =
     status === 'done' && props.canUndo ? undoLine(props.undoUntil, timeZone, now) : null;
   const decide = status === 'proposed' && props.canDecide;
@@ -160,10 +166,10 @@ export function ChangeCard(props: ChangeCardProps) {
         {decide ? (
           <>
             <Button icon="check" busy={busy} onClick={props.onApprove}>
-              Approve
+              {labels.approve}
             </Button>
             <Button variant="secondary" disabled={busy} onClick={props.onReject}>
-              Not now
+              {labels.reject}
             </Button>
           </>
         ) : null}
@@ -178,10 +184,14 @@ export function ChangeCard(props: ChangeCardProps) {
           </Button>
         )}
       </div>
-      {decide && props.settingsLink !== undefined ? (
+      {decide && props.settingsLink !== undefined && action !== 'payment.no_show_fee' ? (
         <p className="m-0 type-caption text-ink-2">
           Your settings ask me to check with you first. {props.settingsLink}
         </p>
+      ) : null}
+      {/* Money always asks the owner (S68): no setting to change. */}
+      {decide && action === 'payment.no_show_fee' ? (
+        <p className="m-0 type-caption text-ink-2">Nothing is charged until you tap.</p>
       ) : null}
     </article>
   );

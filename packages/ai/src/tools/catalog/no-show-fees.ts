@@ -15,7 +15,7 @@ import {
 } from '@pepper/payments';
 import { z } from 'zod';
 import type { Performed, WriteTool } from '../tool.js';
-import { bookingView, clientNames, directoryOf, when } from './shared.js';
+import { bookingView, clientNames, directoryOf } from './shared.js';
 
 // The no-show fee (S68, ADR-0068 amendment; AC-X-137…141): charges the card a client kept with a
 // booking-page booking the fee their stored terms allow, less a kept deposit, on the owner's OK.
@@ -102,7 +102,8 @@ export const chargeNoShowFee: WriteTool = {
         policy: offer.policySentence,
       },
       inverse: { bookingFeeId: fee.id } satisfies TrustJson,
-      summary: `Charge ${visit.clientName}'s ${amount} no-show fee for the ${visit.serviceName} with ${visit.staffName}, ${when(visit.date, visit.time)}.`,
+      // The visit's day and time are the card's own rows, in the business's words.
+      summary: `Charge ${visit.clientName}'s ${amount} no-show fee for the missed ${visit.serviceName.toLowerCase()} with ${visit.staffName}.`,
       facts: [{ kind: 'visit_started', ref: null, value: { date: visit.date, time: visit.time } }],
       // A client's own name came from outside the team (the booking page).
       untrustedText: true,
