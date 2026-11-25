@@ -203,7 +203,8 @@ export async function WeekCalendar({
           {details && books ? (
             <p className="m-0 type-caption text-ink-2">
               Drag a booking to move it (on a phone, press and hold first). Shaded hours are outside{' '}
-              {member.userId === userId ? 'your' : `${member.displayName}’s`} working hours.
+              {member.userId === userId ? 'your' : `${member.displayName}’s`} working hours
+              {week.outside.length > 0 ? ' or busy in Google Calendar' : ''}.
             </p>
           ) : null}
           <WeekGrid
@@ -213,6 +214,7 @@ export async function WeekCalendar({
             tone={STAFF_TONE_CLASSES[staffTone(filterable, member.id)].block}
             entries={entries}
             off={notWorking(timeZone, dates, week.hours, week.timeOff)}
+            outside={week.outside}
             working={week.hours === null ? [] : workingSpans(timeZone, dates, week.hours)}
             now={new Date().toISOString()}
             setup={books && details ? setup : null}

@@ -14,7 +14,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Done: 5 runtime `loadGoogleCalendarConfig` (4 unit), api `GoogleCalendarModule` (connect/callback/status/disconnect/outside-busy; error codes), api int 5 green, api unit 564.
 - Done: 6 worker `Calendar job` (`CALENDAR_POLL_MS`, default 1 min), `calendarProviderFor` shared by api and worker; Compose and `.env.example` sandbox; worker unit green.
 - Done: 7 `slotsFor` reads the busy blocks (planning unit + `outside-busy.int.test.ts` 3: not offered, team booking and move refused).
-- Next: task 8 week view "Busy (Google)" (top-up).
+- Done: 8 week view "Busy (Google)" (loader, `placedOn`, drop hint "Busy in Google Calendar"); web unit (calendar-week 31, calendar-data 8); e2e week 5 (new journey 3/3 repeated), screens week + new `calendar-week-google-busy-375-*` baselines.
+- Next: task 9 close (`/code-review`, `/security-review`, tier 3, walkthrough, PR).
 
 ## Last sessions
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).

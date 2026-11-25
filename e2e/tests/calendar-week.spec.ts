@@ -1,6 +1,8 @@
 import {
   addDays,
   BookingSchema,
+  CalendarConnectionAnswerSchema,
+  CalendarConnectStartSchema,
   ClientSchema,
   CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
@@ -29,7 +31,8 @@ import {
 // The week view and drag to move (S69, AC-X-144…151) through the real stack: one staff
 // member's week, their off hours shaded; a booking dragged with a mouse or, on a phone, after a
 // long press; the drop asks once, the api decides (a taken time is refused), the client is
-// emailed when ticked, and Undo moves it back. A colleague's week is busy times only.
+// emailed when ticked, and Undo moves it back. A colleague's week is busy times only. A Google
+// busy time shows as "Busy (Google)" and is refused like time off (S70, AC-X-156, AC-X-159).
 
 test.beforeEach(async ({ context }) => {
   await ownClientAddress(context);
@@ -279,6 +282,73 @@ test('a drop on a taken time is marked, then refused by the api with the nearest
     day(page, s.tuesday).getByRole('button', { name: /^10:00\s?–\s?11:00\sAM/ }),
   ).toBeVisible();
   await expect(day(page, s.tuesday).getByTestId('booking-block')).toHaveCount(2);
+});
+
+test('a Google busy time shows on the week as "Busy (Google)", is marked before a drop, and the api refuses it', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  await onboardOwner(page);
+  const s = await salon(page);
+  // The owner takes bookings too, as Ana, and connects her Google Calendar through the api
+  // (the sandbox: busy 17:00–18:00 UTC every day). S70.2 builds the screen.
+  const members = MembersResponseSchema.parse(
+    await (await page.request.get('/v1/members')).json(),
+  ).members;
+  const ownerUser = members.find((member) => member.role === 'owner')?.userId ?? null;
+  const ana = await addStaff(page, s, 'Ana', ownerUser);
+  const started = await callApi(
+    page,
+    'POST',
+    '/v1/calendar/google/connect',
+    {},
+    CalendarConnectStartSchema,
+    200,
+  );
+  const back = new URL(started.url);
+  await callApi(
+    page,
+    'POST',
+    '/v1/calendar/google/callback',
+    { code: back.searchParams.get('code'), state: back.searchParams.get('state') },
+    CalendarConnectionAnswerSchema,
+    200,
+  );
+  await book(page, s, ana, { name: 'Maria Lopez' }, 10 * 60);
+  // Where the sandbox's 17:00 UTC falls on that Tuesday here (noon in winter, 1 pm in summer).
+  const dayStart = fromZoned(s.timeZone, s.tuesday, 0);
+  const busyMinute =
+    (Date.UTC(s.tuesday.year, s.tuesday.month - 1, s.tuesday.day, 17) - dayStart) / 60_000;
+  const hourOf = (minute: number) => `${String(((Math.floor(minute / 60) + 11) % 12) + 1)}:00\\sPM`;
+  const busyText = new RegExp(`${hourOf(busyMinute)} to ${hourOf(busyMinute + 60)}`);
+
+  await page.goto(`/calendar?date=${formatDate(s.tuesday)}&view=week&staff=${ana}`);
+  const google = day(page, s.tuesday).getByTestId('google-busy');
+  await expect(google).toHaveCount(1);
+  await expect(google).toContainText('Busy (Google)');
+  await expect(google).toContainText(busyText);
+  // Times only: nothing of the event or the account shows.
+  await expect(page.getByText('calendar@sandbox.test')).toHaveCount(0);
+  await expect(page.getByText(/busy in Google Calendar\./)).toBeVisible();
+  // It never opens or drags.
+  await expect(page.locator('[data-draggable]')).toHaveCount(1);
+
+  // A drag onto it is marked before the drop (AC-X-159); the api refuses it (AC-X-156).
+  const block = day(page, s.tuesday).getByTestId('booking-block');
+  await hydrated(block);
+  await mouseDrag(page, block, s.tuesday, busyMinute - 10 * 60);
+  const ghost = page.getByTestId('drag-ghost');
+  await expect(ghost).toHaveAttribute('data-problem', 'google');
+  await expect(ghost).toContainText('Busy in Google Calendar');
+  await page.mouse.up();
+  const dialog = sheet(page);
+  await dialog.getByRole('button', { name: 'Move', exact: true }).click();
+  await expect(dialog.getByRole('region', { name: 'That time is taken' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Keep it where it was' }).click();
+  await expect(dialog).toBeHidden();
+  await expect(day(page, s.tuesday).getByTestId('booking-block')).toHaveAccessibleName(
+    /^10:00\s?–\s?11:00\sAM/,
+  );
 });
 
 test("a staff member opens on their own week; a colleague's week is busy times only, nothing drags", async ({

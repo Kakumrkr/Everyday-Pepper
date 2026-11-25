@@ -1,5 +1,7 @@
 import {
   BookingsResponseSchema,
+  CalendarConnectStartSchema,
+  MembersResponseSchema,
   SupportCreatedSchema,
   SupportScreenshotSchema,
   SupportSavedReplyListSchema,
@@ -853,6 +855,47 @@ for (const width of WIDTHS) {
     }
   });
 }
+
+test('A Google busy time on the week view at 375 px, light and dark (S70 top-up)', async ({
+  page,
+}) => {
+  test.setTimeout(120_000);
+  await page.setViewportSize({ width: 375, height: 900 });
+  await onboardOwner(page, { business: 'Southside Cuts' });
+  // The owner takes bookings as Dre and connects their Google Calendar (the sandbox: one busy
+  // hour a day). Only the block is photographed: its hour moves with the clock and the season.
+  const members = MembersResponseSchema.parse(
+    await (await page.request.get('/v1/members')).json(),
+  ).members;
+  const dre = await post(
+    page,
+    '/v1/staff',
+    { displayName: 'Dre', userId: members.find((m) => m.role === 'owner')?.userId },
+    StaffMemberSchema,
+  );
+  const origin = { origin: new URL(page.url()).origin };
+  const connect = await page.request.post('/v1/calendar/google/connect', { headers: origin });
+  expect(connect.status(), await connect.text()).toBe(200);
+  const back = new URL(CalendarConnectStartSchema.parse(await connect.json()).url);
+  const done = await page.request.post('/v1/calendar/google/callback', {
+    data: { code: back.searchParams.get('code'), state: back.searchParams.get('state') },
+    headers: origin,
+  });
+  expect(done.status(), await done.text()).toBe(200);
+  const tenant = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const tomorrow = addDays(toZoned(tenant.business.timeZone, Date.now()), 1);
+  for (const scheme of SCHEMES) {
+    await page.goto(`/calendar?date=${formatDate(tomorrow)}&view=week&staff=${dre.id}`);
+    const block = page
+      .locator(`[data-testid="week-day"][data-date="${formatDate(tomorrow)}"]`)
+      .getByTestId('google-busy');
+    await expect(block).toHaveCount(1);
+    await still(page, scheme);
+    await partShot(page, block, `calendar-week-google-busy-375-${scheme}.png`);
+  }
+});
 
 for (const width of WIDTHS) {
   test(`Cards to your phone at ${String(width)} px, light and dark`, async ({ page }) => {

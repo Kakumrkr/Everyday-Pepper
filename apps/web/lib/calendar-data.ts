@@ -1,6 +1,7 @@
 import {
   BookingsResponseSchema,
   BusyResponseSchema,
+  OutsideBusyResponseSchema,
   ClientNamesResponseSchema,
   MAX_CLIENT_NAMES,
   ServicesResponseSchema,
@@ -75,12 +76,17 @@ export interface CalendarWeek extends CalendarDay {
   hours: WorkingInterval[] | null;
   /** Their time off in the week. */
   timeOff: Timed[];
+  /**
+   * When their Google Calendar says they're busy in the week (S70, AC-X-159): times only. Empty
+   * when none is connected, or the read failed (the api still refuses those times).
+   */
+  outside: Timed[];
 }
 
 /**
  * Everything the week view shows (S69, AC-X-144…146): the team and services first, then for the
- * one staff member `pick` chooses, their bookings, busy times, working hours and time off in
- * [from, to), in parallel. Only that member's visits are asked for, so a busy team's week stays
+ * one staff member `pick` chooses, their bookings, busy times, working hours, time off and
+ * Google busy times (S70) in [from, to), in parallel. Only that member's visits are asked for, so a busy team's week stays
  * under the api's list limit.
  */
 export async function loadCalendarWeek(
@@ -109,15 +115,21 @@ export async function loadCalendarWeek(
       failed: staff === null || services === null,
       hours: null,
       timeOff: [],
+      outside: [],
     };
   }
   const path = `/v1/staff/${encodeURIComponent(member.id)}`;
-  const [visits, hours, timeOff] = await Promise.all([
+  const [visits, hours, timeOff, outside] = await Promise.all([
     loadVisits(options, range, member.id),
     loadJson(`${path}/hours`, WeeklyHoursSchema, options),
     loadJson(
       `${path}/time-off?${new URLSearchParams({ from: range.from }).toString()}`,
       TimeOffResponseSchema,
+      options,
+    ),
+    loadJson(
+      `/v1/calendar/outside-busy?${new URLSearchParams({ ...range, staffMemberId: member.id }).toString()}`,
+      OutsideBusyResponseSchema,
       options,
     ),
   ]);
@@ -129,6 +141,7 @@ export async function loadCalendarWeek(
     timeOff: (timeOff?.timeOff ?? [])
       .filter((entry) => entry.startsAt < range.to && entry.endsAt > range.from)
       .map(({ startsAt, endsAt }) => ({ startsAt, endsAt })),
+    outside: (outside?.busy ?? []).map(({ startsAt, endsAt }) => ({ startsAt, endsAt })),
   };
 }
 
