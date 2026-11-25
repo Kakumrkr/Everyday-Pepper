@@ -1,6 +1,7 @@
 import {
   ServicesResponseSchema,
   StaffResponseSchema,
+  TeamCalendarConnectionsSchema,
   WeeklyHoursSchema,
   type StaffMember,
 } from '@pepper/contracts';
@@ -10,6 +11,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { requiredStep, ROUTES } from '../../../lib/account';
 import { activeStaffTone, type StaffTone } from '../../../lib/calendar';
+import { CALENDAR_CONNECTIONS_PATH, teamCalendarLine } from '../../../lib/calendar-connect';
 import { hoursSummary } from '../../../lib/setup';
 import { BookableStaff } from '../../_components/setup/bookable-staff';
 import { StaffToneDot } from '../../_components/staff-tone';
@@ -46,14 +48,21 @@ export default async function TeamPage() {
 
   const { permissions } = current;
   const canSeeTeam = permissions.includes('members.read');
-  const [members, invites, staffAnswer, servicesAnswer] = await Promise.all([
+  const readsStaff = permissions.includes('staff.read');
+  const [members, invites, staffAnswer, servicesAnswer, calendars] = await Promise.all([
     canSeeTeam ? currentMembers() : null,
     canSeeTeam ? currentInvites() : null,
-    permissions.includes('staff.read') ? currentJson('/v1/staff', StaffResponseSchema) : null,
+    readsStaff ? currentJson('/v1/staff', StaffResponseSchema) : null,
     permissions.includes('services.read')
       ? currentJson('/v1/services', ServicesResponseSchema)
       : null,
+    // Each staff member's Google Calendar in words (S70.2, AC-X-164); `null` when it is off
+    // in this deployment or can't be read, and then the rows say nothing about calendars.
+    readsStaff ? currentJson(CALENDAR_CONNECTIONS_PATH, TeamCalendarConnectionsSchema) : null,
   ]);
+  const calendarOf = new Map(
+    (calendars?.connections ?? []).map((connection) => [connection.staffMemberId, connection]),
+  );
   const staff = staffAnswer?.staff ?? [];
   const services = servicesAnswer?.services ?? [];
   const hours = await Promise.all(
@@ -94,6 +103,11 @@ export default async function TeamPage() {
                 tone={activeStaffTone(staff, member.id)}
                 isMe={member.userId === me}
                 hours={hours[index] ?? null}
+                calendar={
+                  calendars === null
+                    ? null
+                    : teamCalendarLine(calendarOf.get(member.id), current.business.timeZone)
+                }
                 serviceNames={services
                   .filter((service) => member.serviceIds.some((id) => id === service.id))
                   .map((service) => service.name)}
@@ -127,12 +141,15 @@ function StaffRow({
   tone,
   isMe,
   hours,
+  calendar,
   serviceNames,
 }: {
   member: StaffMember;
   tone: StaffTone | null;
   isMe: boolean;
   hours: { intervals: { weekday: number; start: string; end: string }[] } | null;
+  /** Their Google Calendar in words (AC-X-164); `null`: calendars aren't shown here. */
+  calendar: ReturnType<typeof teamCalendarLine> | null;
   serviceNames: string[];
 }) {
   const summary = hours === null ? null : hoursSummary(hours);
@@ -162,6 +179,17 @@ function StaffRow({
           <span className="type-caption text-ink-2">
             {serviceNames.length === 0 ? 'No services yet' : serviceNames.join(', ')}
           </span>
+          {calendar === null ? null : (
+            <span
+              className={cx(
+                'type-caption',
+                calendar.tone === 'warn' ? 'font-semibold text-warn' : 'text-ink-2',
+              )}
+              data-testid="staff-calendar"
+            >
+              {calendar.text}
+            </span>
+          )}
         </span>
         <Icon name="right" className="text-ink-3" />
       </Link>

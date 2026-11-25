@@ -13,9 +13,11 @@ import {
   loadInvites,
   loadJson,
   loadMembers,
+  loadCalendarConnection,
   loadPaymentAccount,
   loadPublicBusiness,
   type Account,
+  type CalendarConnectionRead,
   type PaymentsRead,
   type PublicPage,
 } from '../../lib/account';
@@ -86,6 +88,11 @@ export async function currentJson<T extends z.ZodType>(
 /** Where the active business's payments stand (S65.2); More and the page share it. */
 export const currentPayments = cache(async (): Promise<PaymentsRead> => {
   return loadPaymentAccount(await callOptions());
+});
+
+/** The member's own Google Calendar (S70.2); More, its page and Home share one read. */
+export const currentCalendar = cache(async (): Promise<CalendarConnectionRead> => {
+  return loadCalendarConnection(await callOptions());
 });
 
 /**

@@ -13,10 +13,18 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requiredStep } from '../../lib/account';
 import { BUSINESS_DELETION_PATH, deletionDayLabel } from '../../lib/deletion';
+import { needsReconnect } from '../../lib/calendar-connect';
 import { offersImport } from '../../lib/imports';
 import { MORE_HREF } from '../../lib/nav';
-import { currentAccount, currentBusiness, currentJson, currentMembers } from '../_server/account';
+import {
+  currentAccount,
+  currentBusiness,
+  currentCalendar,
+  currentJson,
+  currentMembers,
+} from '../_server/account';
 import { AiActivity } from '../_components/chat/ai-activity';
+import { ReconnectCard } from '../_components/calendar-connect/reconnect-card';
 import { HomeDeletionLine } from '../_components/deletion/home-deletion-line';
 import { BriefingCard } from '../_components/feed/briefing-card';
 import { FeedCard } from '../_components/feed/feed-card';
@@ -64,7 +72,7 @@ export default async function HomePage() {
         currentJson('/v1/ai/actions', AiActionsResponseSchema),
       ])
     : [null, null];
-  const [setup, feed, imports, deletion, proof] = await Promise.all([
+  const [setup, feed, imports, deletion, proof, calendar] = await Promise.all([
     current?.permissions.includes('settings.manage') === true
       ? currentJson('/v1/setup', SetupReviewSchema)
       : null,
@@ -86,6 +94,8 @@ export default async function HomePage() {
     current?.permissions.includes('settings.manage') === true
       ? currentJson('/v1/proof', ProofResponseSchema)
       : null,
+    // The member's own Google Calendar, for the reconnect card (S70.2, AC-X-163).
+    current?.permissions.includes('calendar.read') === true ? currentCalendar() : null,
   ]);
   const deletionDueAt = deletion?.dueAt ?? null;
   return (
@@ -109,6 +119,9 @@ export default async function HomePage() {
           canKeep={current.permissions.includes('business.delete')}
         />
       )}
+      {current !== null && calendar?.state === 'on' && needsReconnect(calendar.answer) ? (
+        <ReconnectCard />
+      ) : null}
       {current === null ? (
         <EmptyState
           icon="home"

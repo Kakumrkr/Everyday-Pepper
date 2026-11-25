@@ -14,6 +14,7 @@ import {
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { HELP_PATH } from '../../../lib/help';
+import { calendarSummary } from '../../../lib/calendar-connect';
 import { paymentsSummary } from '../../../lib/payments';
 import { REMINDER_SETTINGS_PATH, remindersSummary } from '../../../lib/reminder-settings';
 import { PRIVACY_PATH } from '@pepper/contracts';
@@ -26,6 +27,7 @@ import { MailingAddressSetting } from '../../_components/feed/mailing-address-se
 import {
   currentAccount,
   currentBusiness,
+  currentCalendar,
   currentJson,
   currentPayments,
   currentSupportUnread,
@@ -57,13 +59,16 @@ export default async function MorePage() {
   const readsCalendar = current?.permissions.includes('calendar.read') === true;
   // Payments (S65.2): owners and managers, unless payments are off in this deployment.
   const readsPayments = current?.permissions.includes('payments.read') === true;
-  const [businessDeletion, accountDeletion, support, reminders, payments] = await Promise.all([
-    current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
-    currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
-    current === null ? null : currentSupportUnread(),
-    readsCalendar ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema) : null,
-    readsPayments ? currentPayments() : null,
-  ]);
+  // Google Calendar (S70.2): whoever reads the calendar, unless it is off in this deployment.
+  const [businessDeletion, accountDeletion, support, reminders, payments, calendar] =
+    await Promise.all([
+      current === null ? null : currentJson(BUSINESS_DELETION_PATH, DeletionStatusSchema),
+      currentJson(ACCOUNT_DELETION_PATH, DeletionStatusSchema),
+      current === null ? null : currentSupportUnread(),
+      readsCalendar ? currentJson(REMINDER_SETTINGS_PATH, ReminderSettingsViewSchema) : null,
+      readsPayments ? currentPayments() : null,
+      readsCalendar ? currentCalendar() : null,
+    ]);
   const unread = support ?? 0;
   const timeZone = current?.business.timeZone ?? 'UTC';
   const businessDueAt = businessDeletion?.dueAt ?? null;
@@ -142,6 +147,25 @@ export default async function MorePage() {
           )}
         </List>
       </section>
+      {calendar === null || calendar.state === 'off' ? null : (
+        <section aria-labelledby="more-calendar">
+          <h2 id="more-calendar" className="m-0 mb-1 type-heading">
+            Your calendar
+          </h2>
+          <List>
+            <ListRow
+              title={<HelpTitle icon="calendar">Google Calendar</HelpTitle>}
+              meta={
+                calendar.state === 'on'
+                  ? calendarSummary(calendar.answer, timeZone)
+                  : 'Keep your own plans from being booked over'
+              }
+              href={ROUTES.calendarSettings}
+              renderLink={kitLink}
+            />
+          </List>
+        </section>
+      )}
       {readsCalendar ? (
         <section aria-labelledby="more-clients">
           <h2 id="more-clients" className="m-0 mb-1 type-heading">
@@ -231,7 +255,7 @@ function HelpTitle({
   icon,
   children,
 }: {
-  icon: 'help' | 'chat' | 'activity' | 'lock' | 'card';
+  icon: 'help' | 'chat' | 'activity' | 'lock' | 'card' | 'calendar';
   children: string;
 }) {
   return (
