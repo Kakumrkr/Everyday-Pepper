@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S67.2 · Cancellation-policy builder** (brief approved 2026-11-25: "go ahead with your recommendations": D-1 one session; D-2 the notice is the refund window; D-3 nothing / fixed / percent, fees only with payments, "may be charged"; D-4 the old free text stays as the owner's note; D-5 the words in `@pepper/contracts`).
+- Design: `tenants.cancellation_fees` jsonb (null = policy off), `{ lateCancel, noShow }`, each `none | fixed | percent`; the deposit's "kept after the window" stays in the deposit words (not a fee choice). Public business gains `cancellationSentence`; `BookingEmailDetails` gains `policy` and `deposit`.
+- T1 ACs AC-X-130…135 (done) · T2 contracts words · T3 db/core/api/export · T4 emails + top-up · T5 settings builder · T6 public pages + e2e · T7 ADR-0068 amendment.
+- Next: T2.
 
 ## Last sessions
 - **S67 Phase 15 · Smart deposits (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PCR-015](changes/PCR-015.md), [PR #105](https://github.com/Kakumrkr/Everyday-Pepper/pull/105)). Full entry in [session-log.md](session-log.md).
