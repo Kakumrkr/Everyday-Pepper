@@ -112,7 +112,8 @@ async function bookAndPay(
   expect(confirmation).toMatch(
     /\$15 deposit paid · (refundable until \w{3}, \w{3} \d{1,2}, \d{1,2}:\d{2} (AM|PM)|no longer refundable)/,
   );
-  expect(confirmation).toContain(`Cancellation policy:\n${policy}`);
+  // Mailpit's text keeps the mail's line ends; compare the words.
+  expect(confirmation.replace(/\s+/g, ' ')).toContain(`Cancellation policy: ${policy}`);
   const link = /(https?:\/\/\S+\/book\/\S+\/manage#[A-Za-z0-9_-]{43})/.exec(confirmation)?.[1];
   expect(link).toBeDefined();
   const url = new URL(link ?? '');
@@ -141,7 +142,7 @@ async function buildPolicy(page: Page): Promise<void> {
   ).click();
   const noShow = policy.getByRole('radiogroup', { name: 'A no-show costs' });
   await noShow.getByRole('radio', { name: 'Amount' }).click();
-  await policy.getByLabel('Fee ($)').fill('20');
+  await policy.getByLabel('No-show fee ($)').fill('20');
   await expect(policy.getByTestId('policy-preview')).toContainText(POLICY_SENTENCE);
   await policy.getByRole('button', { name: 'Save policy' }).click();
   await expect(
@@ -252,7 +253,8 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   // A week's window: a cancel two days ahead is late, and the page says so before it.
   await page.goto('/services');
   await (await hydrated(window)).selectOption('168');
-  await expect(page.getByText(/at least a week before/)).toBeVisible();
+  await expect(page.getByText(/^Clients who cancel at least a week before/)).toBeVisible();
+  await expect(page.getByTestId('policy-preview')).toContainText('at least a week before your visit');
   await page.getByRole('button', { name: 'Save policy' }).click();
   await expect(
     page.getByText('Saved. Clients see it when they book and in their emails.'),

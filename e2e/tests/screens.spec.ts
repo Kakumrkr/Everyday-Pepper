@@ -1498,7 +1498,7 @@ for (const width of WIDTHS) {
       .getByRole('radiogroup', { name: 'A no-show costs' })
       .getByRole('radio', { name: 'Amount' })
       .click();
-    await policy.getByLabel('Fee ($)').fill('20');
+    await policy.getByLabel('No-show fee ($)').fill('20');
     await expect(policy.getByTestId('policy-preview')).toContainText(
       'No-shows may be charged $20.',
     );

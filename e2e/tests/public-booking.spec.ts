@@ -267,15 +267,12 @@ test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered p
   await details.getByLabel('Address').fill('12 Main St\nAustin, TX 78701');
   await details.getByRole('button', { name: 'Save details' }).click();
   await expect(details.getByText('Saved. Clients see these on your booking page.')).toBeVisible();
-  // S67.2: the policy built from choices (no fees without payments), with the owner's note.
+  // S67.2: the policy built from choices (the notice alone, no fees), with the owner's note.
   const policy = card.getByRole('form', { name: 'Cancellation policy' });
   await policy
     .getByRole('radiogroup', { name: 'Cancellation policy' })
     .getByRole('radio', { name: 'On' })
     .click();
-  await expect(
-    policy.getByText('Fees for late cancels and no-shows come with payments.'),
-  ).toBeVisible();
   await policy.getByLabel('Anything else (optional)').fill('Running late? Call us.');
   await policy.getByRole('button', { name: 'Save policy' }).click();
   await expect(
@@ -315,9 +312,9 @@ test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered p
   await client.getByRole('button', { name: 'Confirm booking' }).click();
   await expect(client.getByRole('heading', { name: /You’re booked, Rae/ })).toBeVisible();
   await expect(client.getByTestId('cancellation-policy')).toBeVisible();
-  // AC-X-133: the confirmation email ends with the same policy.
-  await expect(emailTo(email, 'booked at')).resolves.toContain(
-    'Cancellation policy:\nPlease cancel or reschedule at least 24 hours before your visit.\nRunning late? Call us.',
+  // AC-X-133: the confirmation email ends with the same policy (compared by its words).
+  expect((await emailTo(email, 'booked at')).replace(/\s+/g, ' ')).toContain(
+    'Cancellation policy: Please cancel or reschedule at least 24 hours before your visit. Running late? Call us.',
   );
   const cookies = await client.context().cookies();
   expect(cookies.find((cookie) => cookie.name === 'pepper_device')).toMatchObject({

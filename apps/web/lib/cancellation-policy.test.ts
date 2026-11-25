@@ -29,7 +29,7 @@ describe('one cost’s fields', () => {
     expect(feeFrom({ ...fixed, amount: '100001' })).toMatchObject({ ok: false });
     const percent = { kind: 'percent', amount: '', percent: '50' } as const;
     expect(feeFrom(percent)).toEqual({ ok: true, fee: { kind: 'percent', percent: 50 } });
-    for (const bad of ['', '0', '101', '2.5']) {
+    for (const bad of ['', '0', '101', '2.5', '1e2', '0x32', '-5']) {
       expect(feeFrom({ ...percent, percent: bad })).toMatchObject({ ok: false });
     }
   });
@@ -68,14 +68,14 @@ describe('the policy to save', () => {
     });
   });
 
-  it('keeps stored costs where fees aren’t offered', () => {
+  it('keeps no fee where fees aren’t offered, even one stored before (review)', () => {
     const stored = { lateCancel: twenty, noShow: twenty };
     const options = { noticeHours: 24, feesOffered: false, stored };
-    expect(policyFrom({ ...policyFields(null), on: true }, options)).toEqual({
-      ok: true,
-      fees: stored,
-    });
-    expect(policyPreview({ ...policyFields(null), on: true }, options)).toContain('$20');
+    const fields = policyFields(stored);
+    expect(policyFrom(fields, options)).toEqual({ ok: true, fees: NO_CANCELLATION_FEES });
+    expect(policyPreview(fields, options)).toBe(
+      'Please cancel or reschedule at least 24 hours before your visit.',
+    );
   });
 });
 

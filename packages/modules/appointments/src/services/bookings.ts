@@ -734,7 +734,9 @@ async function tellClient(
   const email = await emailDetailsOf(tx, tenant, row);
   if (email.email === '') return;
   if (kind === 'cancelled') {
-    await notify(tx, { kind, email, change: changeOf(row) });
+    // The business cancelled, so its policy's costs aren't the client's to read (S67.2 review).
+    const policy = { sentence: null, note: null };
+    await notify(tx, { kind, email: { ...email, policy }, change: changeOf(row) });
     return;
   }
   const link = newManageToken();

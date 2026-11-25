@@ -51,8 +51,10 @@ export function feeFrom(fields: FeeFields): FeeCheck {
     }
     return { ok: true, fee: { kind: 'fixed', amountCents: cents } };
   }
-  const percent = Number(fields.percent.trim());
-  if (fields.percent.trim() === '' || !Number.isInteger(percent) || percent < 1 || percent > 100) {
+  // Digits only: `Number` would also take "1e2" or "0x32" (review).
+  const typed = fields.percent.trim();
+  const percent = Number(typed);
+  if (!/^\d{1,3}$/.test(typed) || percent < 1 || percent > 100) {
     return { ok: false, message: 'Enter a whole percent from 1 to 100.' };
   }
   return { ok: true, fee: { kind: 'percent', percent } };
@@ -79,14 +81,15 @@ export type PolicyCheck =
 
 /**
  * The terms to save (`null`: off). A notice of 0 has no late cancel, so its fee is dropped; where
- * fees aren't offered (payments off) the stored costs are kept as they are (`stored`).
+ * fees aren't offered (payments off) none is kept, so clients are never told of a fee the owner
+ * can't see or charge (review).
  */
 export function policyFrom(
   fields: PolicyFields,
   options: { noticeHours: number; feesOffered: boolean; stored: CancellationFees | null },
 ): PolicyCheck {
   if (!fields.on) return { ok: true, fees: null };
-  if (!options.feesOffered) return { ok: true, fees: options.stored ?? NO_CANCELLATION_FEES };
+  if (!options.feesOffered) return { ok: true, fees: NO_CANCELLATION_FEES };
   const errors: Partial<Record<'lateCancel' | 'noShow', string>> = {};
   const late: FeeCheck =
     options.noticeHours === 0 ? { ok: true, fee: { kind: 'none' } } : feeFrom(fields.lateCancel);
@@ -106,9 +109,7 @@ export function policyPreview(
   options: { noticeHours: number; feesOffered: boolean; stored: CancellationFees | null },
 ): string | null {
   if (!fields.on) return null;
-  if (!options.feesOffered) {
-    return cancellationSentence(options.stored ?? NO_CANCELLATION_FEES, options.noticeHours);
-  }
+  if (!options.feesOffered) return cancellationSentence(NO_CANCELLATION_FEES, options.noticeHours);
   const fee = (f: FeeFields): CancellationFee => {
     const checked = feeFrom(f);
     return checked.ok ? checked.fee : { kind: 'none' };

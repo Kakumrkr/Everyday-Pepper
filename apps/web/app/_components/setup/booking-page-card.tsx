@@ -415,6 +415,7 @@ function CancellationPolicyForm({
       {showFees && hours > 0 ? (
         <FeeField
           legend="A later cancel costs"
+          noun="Late cancel fee"
           name="policy-lateCancel"
           fields={fields.lateCancel}
           error={errors.lateCancel ?? null}
@@ -426,6 +427,7 @@ function CancellationPolicyForm({
       {showFees ? (
         <FeeField
           legend="A no-show costs"
+          noun="No-show fee"
           name="policy-noShow"
           fields={fields.noShow}
           error={errors.noShow ?? null}
@@ -480,12 +482,15 @@ function CancellationPolicyForm({
 /** One cost: nothing, an amount or a percent of the service's price, and its field. */
 function FeeField({
   legend,
+  noun,
   name,
   fields,
   error,
   onChange,
 }: {
   legend: string;
+  /** The field's own label, so the two costs' fields differ (review). */
+  noun: string;
   name: string;
   fields: FeeFields;
   error: string | null;
@@ -508,7 +513,7 @@ function FeeField({
       />
       {fields.kind === 'fixed' ? (
         <Input
-          label="Fee ($)"
+          label={`${noun} ($)`}
           name={name}
           inputMode="decimal"
           placeholder="20"
@@ -521,7 +526,7 @@ function FeeField({
       ) : null}
       {fields.kind === 'percent' ? (
         <Input
-          label="Fee (% of the service price)"
+          label={`${noun} (% of the service price)`}
           name={name}
           inputMode="numeric"
           placeholder="50"
