@@ -1,27 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-25 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S69 in progress; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain)
+**Last updated:** 2026-11-25 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S69 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S70**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S69 Week view + drag to move** (branch `ccr-9cc3cffd-8rt7ne`; decisions at the brief: D-1 Phase 16 next, PCR-016; D-2 native pointer events, no library; D-3 a drag never sends an override; D-4 one staff member's week, staff their own first; additions: off-hours shaded and a taken time marked while dragging, Undo on the receipt). AC-X-144…151.
-- [x] 1. Plan records: PCR-016, CHANGELOG 0.42, playbook, roadmap, AC-X-144…151 and traceability.
-- [x] 2. Week helpers `apps/web/lib/calendar-week.ts` (unit tests first).
-- [x] 3. Week data: bookings and busy for one staff member, their hours and time off.
-- [x] 4. Week view and the Day/Week switch.
-- [x] 5. Drag, the drop sheet, Undo; `e2e/tests/calendar-week.spec.ts`.
-- [ ] 6. Baselines and tap targets in `screens.spec.ts` (week drawn: `calendar-week-*`, `calendar-week-drag-*`); next: redraw the day view's baselines (the Day/Week switch), review, close. The e2e stack runs by `e2e-stack.sh` (Compose images fail on the proxy CA).
+Nothing in progress.
 
 ## Last sessions
+- **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).
+  - **Built:** Day/Week in Calendar; one staff member's week (staff their own first), off hours shaded; drag (a long press on touch) in 15-minute steps with the landing time said aloud and a taken time marked; the drop sheet, never an override; Undo on the receipt. From the review: a manager can't waive the owner's fee card. AC-X-144…151.
+  - **Checks:** `pnpm check` green; affected integration 1,039 green; e2e week 4 (12/12 repeated), calendar 1, booking 2, screens 42 twice; review 1 of 7 in this diff fixed + 1 S68 security fix, 5 S66–S68 items for later; security none ≥ 8; walkthrough at 375 px dark (two fixes).
 - **S68 Phase 15 · No-show fee by approval + gate (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107)). Full entry in [session-log.md](session-log.md).
   - **Built:** the client's terms stored with the booking's payment; a no-show (team or Pepper) proposes one card with their policy sentence and "No-shows may be charged $20 · charge $20 or waive" (top-up), "Charge $20"/"Waive", owners only; the approved charge off-session after a 60 s grace, the receipt email, Undo (cancel or refund), `booking_fees` and `no-show-fees.json`. Phase 15 gate: C12 7 → 8. AC-X-136…143.
   - **Checks:** `pnpm check` green (3rd run); affected integration 2,009 green; e2e 43 passed + 12 baselines redrawn; review 8 of 8 fixed, security none ≥ 8; walkthrough at 375 px light and dark.
-- **S67.2 Phase 15 · Cancellation-policy builder (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the policy in booking page settings (notice = the refund window; a later cancel and a no-show cost nothing, an amount or a percent; the owner's note), Pepper's one sentence from `@pepper/contracts` on the booking and manage pages and in the confirmation, reminder, reschedule and cancel emails; the confirmation's deposit line (top-up). AC-X-130…135.
-  - **Checks:** `pnpm check` green (a format fix); affected integration 1,982 green; e2e 14 + screens 39 passed; review 6 of 7 fixed, security none ≥ 8; walkthrough at 375 px.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -37,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S69 (user, 2026-11-25):** "Add and let's go with ur recommendations" (D-1 Phase 16 next, [PCR-016](changes/PCR-016.md); D-2 native pointer events; D-3 a drag never overrides; D-4 one staff member's week; additions: drag hints, Undo). Full wording in [decisions.md](decisions.md).
 - **S68 (stored prompt, 2026-11-25):** pre-approved recommendations (D-1 one session; D-2 the fee from the stored terms; D-3 a kept deposit counts; D-4 owners only, ask-only; D-5 Undo a day; D-6 the card in the no-show's transaction). Full wording in [decisions.md](decisions.md).
 - **S67.2 (user, 2026-11-25):** "go ahead, start with your recommendations" (D-1 one session; D-2 the notice is the refund window; D-3 nothing/amount/percent, fees only with payments, "may be charged"; D-4 the old text stays as the owner's note; D-5 the words in contracts). Full wording in [decisions.md](decisions.md).
 - **S67 (user, 2026-11-24):** "go with the recommended options" (D-1 split → S67.2 the policy builder, [PCR-015](changes/PCR-015.md); D-2 one setting per business; D-3 fixed definitions: a visit that has ended, a no-show in 12 months). Full wording in [decisions.md](decisions.md).
@@ -105,7 +100,7 @@ Older ones (S25–S33) are in [decisions.md](decisions.md).
 
 ## Waiting on the user
 Raised by Claude at the brief of the session named.
-1. **During Phase 10 (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks; needed in S70).
+1. **Before the pilot (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks). S70–S71 build in Google's testing mode (PCR-016); real owners connecting calendars need it.
 2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
 3. **By S57 (Phase 13, after S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
@@ -114,11 +109,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S69 | Week view + drag to move | 16 | Drag journeys; double-booking check |
 | S70 | Google Calendar in (busy blocks) | 16 | Contract + token-expiry tests |
 | S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
 | S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
