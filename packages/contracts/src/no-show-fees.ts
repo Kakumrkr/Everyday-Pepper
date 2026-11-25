@@ -1,5 +1,10 @@
 import { z } from 'zod';
-import { feeWords, moneyWords, type CancellationFee } from './cancellation-policy.js';
+import {
+  feeWords,
+  MAX_CANCELLATION_FEE_CENTS,
+  moneyWords,
+  type CancellationFee,
+} from './cancellation-policy.js';
 import { MIN_DEPOSIT_CENTS } from './deposits.js';
 
 // The no-show fee by approval (S68, ADR-0068 amendment). The terms a client was shown are stored
@@ -30,14 +35,19 @@ export const NO_SHOW_FEE_GRACE_SECONDS = 60;
 
 /**
  * The no-show fee the policy allows for a booking, in cents (AC-X-136): a fixed fee, or the
- * percent of the booked starting price (rounded to the cent); `null` with no fee, or a percent
- * of a visit with no price.
+ * percent of the booked starting price (rounded to the cent, at most the largest fixed fee);
+ * `null` with no fee, a percent of a visit with no price, or one under $0.50.
  */
 export function noShowFeeCents(fee: CancellationFee, priceFromCents: number | null): number | null {
   if (fee.kind === 'none') return null;
   if (fee.kind === 'fixed') return fee.amountCents;
   if (priceFromCents === null || priceFromCents <= 0) return null;
-  return Math.round((priceFromCents * fee.percent) / 100);
+  const cents = Math.min(
+    Math.round((priceFromCents * fee.percent) / 100),
+    MAX_CANCELLATION_FEE_CENTS,
+  );
+  // Under Stripe's smallest charge there is nothing a card could take (review).
+  return cents >= MIN_DEPOSIT_CENTS ? cents : null;
 }
 
 /**

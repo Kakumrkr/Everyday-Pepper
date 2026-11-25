@@ -14,6 +14,9 @@ describe('the no-show fee (S68)', () => {
     expect(noShowFeeCents({ kind: 'percent', percent: 33 }, 1001)).toBe(330);
     expect(noShowFeeCents({ kind: 'percent', percent: 50 }, null)).toBeNull();
     expect(noShowFeeCents({ kind: 'percent', percent: 50 }, 0)).toBeNull();
+    // Under $0.50 nothing can be charged (review: the row's check would refuse the booking).
+    expect(noShowFeeCents({ kind: 'percent', percent: 10 }, 400)).toBeNull();
+    expect(noShowFeeCents({ kind: 'percent', percent: 100 }, 20_000_000)).toBe(10_000_000);
     expect(noShowFeeCents({ kind: 'none' }, 4500)).toBeNull();
   });
 

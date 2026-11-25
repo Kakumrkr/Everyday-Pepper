@@ -76,9 +76,14 @@ class CountingSandbox extends SandboxPaymentsProvider {
     this.charges.push(input);
     return super.createOffSessionCharge(input);
   }
-  override createRefund(id: string, key: string) {
+  /** Stripe answers the next refund `pending` (it settles when read again). */
+  pendingOnce = false;
+  override async createRefund(id: string, key: string) {
     this.refunds += 1;
-    return super.createRefund(id, key);
+    const refund = await super.createRefund(id, key);
+    if (!this.pendingOnce) return refund;
+    this.pendingOnce = false;
+    return { ...refund, status: 'pending' as const };
   }
 }
 
@@ -471,5 +476,51 @@ describe('no-show fees (S68)', () => {
         }),
       ),
     ).rejects.toBeInstanceOf(NoShowFeeBusyError);
+  });
+
+  it('charges nothing when the no-show was taken back after the OK (review)', async () => {
+    const business = await newBusiness();
+    const bookingId = await bookedWithCard(business);
+    await markNoShow(business.tenantId, bookingId);
+    await approve(business, bookingId, 2000);
+    await withTenant(db, business.tenantId, (tx) =>
+      tx.execute(`UPDATE bookings SET status = 'confirmed' WHERE id = '${bookingId}'`),
+    );
+    await runQueuedFeeJobs(business);
+    expect(business.sandbox.charges).toHaveLength(0);
+    expect(
+      await withTenant(db, business.tenantId, (tx) => findBookingFeeByBooking(tx, bookingId)),
+    ).toMatchObject({ status: 'cancelled' });
+  });
+
+  it('reads a refund Stripe left pending again until it settles (review)', async () => {
+    const business = await newBusiness();
+    const bookingId = await bookedWithCard(business);
+    await markNoShow(business.tenantId, bookingId);
+    const fee = await approve(business, bookingId, 2000);
+    await runQueuedFeeJobs(business);
+    await withTenant(db, business.tenantId, (tx) =>
+      undoNoShowFeeIn(tx, business.owner, {
+        bookingFeeId: fee.id,
+        now: business.clock.now(),
+        outboxKey,
+      }),
+    );
+    business.sandbox.pendingOnce = true;
+    const job = { kind: 'fee_refund' as const, bookingFeeId: fee.id };
+    // Pending: kept with its id, and the outbox asks again.
+    await expect(runPaymentJob(business.deps, business.tenantId, job)).rejects.toMatchObject({
+      retryable: true,
+    });
+    const pending = await withTenant(db, business.tenantId, (tx) =>
+      findBookingFeeByBooking(tx, bookingId),
+    );
+    expect(pending).toMatchObject({ status: 'refund_pending' });
+    expect(pending?.refundId).toMatch(/^re_/);
+    await runPaymentJob(business.deps, business.tenantId, job);
+    expect(business.sandbox.refunds).toBe(1);
+    expect(
+      await withTenant(db, business.tenantId, (tx) => findBookingFeeByBooking(tx, bookingId)),
+    ).toMatchObject({ status: 'refunded' });
   });
 });

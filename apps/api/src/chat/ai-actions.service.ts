@@ -419,11 +419,12 @@ export class AiActionsService {
     };
   }
 
-  /** Whether the member's role reaches every record of this kind (owners and managers). */
+  /** Whether the member's role may do this kind of action at all (their own records at least). */
   private mayDo(actor: Actor, action: AutonomyAction): boolean {
     return permissionScope(actor.context.role, AUTONOMY_ACTIONS[action].permission) !== null;
   }
 
+  /** Whether the member's role reaches every record of this kind (owners and managers). */
   private reachesAll(actor: Actor, action: AutonomyAction): boolean {
     return permissionScope(actor.context.role, AUTONOMY_ACTIONS[action].permission) === 'all';
   }

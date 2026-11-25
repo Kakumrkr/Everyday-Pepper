@@ -34,7 +34,7 @@ import { proposeNoShowFeeIn } from '@pepper/ai';
 import type { Database, TenantTx } from '@pepper/db';
 import { currentRequestContext, DATABASE } from '@pepper/runtime';
 import { templateRuleDefaults } from '@pepper/templates';
-import { Inject, Injectable, Optional } from '@nestjs/common';
+import { Inject, Injectable, Logger, Optional } from '@nestjs/common';
 import { PaymentsService } from '../payments/payments.service.js';
 import { BookingEmails } from '../booking-emails/booking-emails.js';
 import { ChatService } from '../chat/chat.service.js';
@@ -48,6 +48,7 @@ import { ChatService } from '../chat/chat.service.js';
 @Injectable()
 export class BookingsService {
   private readonly db: Database;
+  private readonly logger = new Logger(BookingsService.name);
 
   constructor(
     @Inject(DATABASE) database: { db: Database },
@@ -97,7 +98,14 @@ export class BookingsService {
       onMoved: this.payments?.teamMoved(),
       ...(deps !== undefined && {
         onNoShow: async (tx: TenantTx, booking: { bookingId: string }) => {
-          await proposeNoShowFeeIn(tx, deps, booking.bookingId);
+          await proposeNoShowFeeIn(tx, deps, booking.bookingId, {
+            // Its name only: an error's message can hold a client's details.
+            onUnexpected: (error) => {
+              this.logger.error(
+                `No-show fee card not made: ${error instanceof Error ? error.name : 'unknown'}`,
+              );
+            },
+          });
         },
       }),
     });

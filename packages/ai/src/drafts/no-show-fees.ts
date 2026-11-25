@@ -1,7 +1,7 @@
 import { UserIdSchema, type ActionProposal } from '@pepper/contracts';
 import { proposeForBusiness, type Actor } from '@pepper/core';
 import { listMemberships, type TenantTx } from '@pepper/db';
-import { noShowFeeOfferIn } from '@pepper/payments';
+import { NoShowFeeNotChargeableError, noShowFeeOfferIn } from '@pepper/payments';
 import { chargeNoShowFee } from '../tools/catalog/no-show-fees.js';
 import { writeRunner } from '../tools/runner.js';
 import type { ToolDeps } from '../tools/tool.js';
@@ -21,6 +21,13 @@ export async function proposeNoShowFeeIn(
   tx: TenantTx,
   deps: ToolDeps,
   bookingId: string,
+  options: {
+    /**
+     * Told about a failure that isn't the domain refusing the card (a bug, the database), so the
+     * app can log it (review: never silently lost); the no-show stands either way.
+     */
+    onUnexpected?: (error: unknown) => void;
+  } = {},
 ): Promise<ActionProposal | null> {
   const offer = await noShowFeeOfferIn(tx, bookingId);
   if (typeof offer === 'string') return null;
@@ -61,7 +68,9 @@ export async function proposeNoShowFeeIn(
         { clock: deps.clock, requestedBy: deps.actor },
       ),
     );
-  } catch {
+  } catch (error) {
+    // The domain refusing the card (the visit or the card changed) is an answer, not a failure.
+    if (!(error instanceof NoShowFeeNotChargeableError)) options.onUnexpected?.(error);
     return null;
   }
 }

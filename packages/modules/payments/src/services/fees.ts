@@ -241,7 +241,17 @@ export async function runFeeJob(
   job: { kind: 'fee_charge' | 'fee_refund'; bookingFeeId: string },
 ): Promise<void> {
   const row = await withTenant(deps.db, tenantId, (tx) => findBookingFee(tx, job.bookingFeeId));
-  if (row === undefined || !isOurs(row, deps.provider)) return;
+  if (row === undefined) return;
+  if (!isOurs(row, deps.provider)) {
+    // Made by another deployment's provider (the sandbox before Stripe): nothing can be asked,
+    // so a fee waiting for its charge is closed as declined, not left waiting (review).
+    if (job.kind === 'fee_charge') {
+      await withTenant(deps.db, tenantId, (tx) =>
+        fail(tx, row, ['queued', 'charging'], 'payments_off', deps),
+      );
+    }
+    return;
+  }
   if (job.kind === 'fee_charge') await charge(deps, tenantId, row);
   else await refund(deps, tenantId, row);
 }
@@ -258,10 +268,23 @@ async function charge(deps: JobDeps, tenantId: TenantId, queued: BookingFeeRow):
     move(tx, queued, ['queued', 'charging'], { status: 'charging' }),
   );
   if (row === undefined) return;
-  const payment = await withTenant(deps.db, tenantId, (tx) =>
-    findBookingPayment(tx, row.bookingPaymentId),
-  );
-  if (payment === undefined) return;
+  // Read again before Stripe is asked (review): a no-show taken back or corrected since the OK,
+  // or a card given back, is charged nothing; the fee is cancelled.
+  const still = await withTenant(deps.db, tenantId, async (tx) => {
+    const booking = await findBooking(tx, BookingIdSchema.parse(row.bookingId));
+    const payment = await findBookingPayment(tx, row.bookingPaymentId);
+    if (
+      booking?.status !== 'no_show' ||
+      payment === undefined ||
+      !CARD_KEPT.has(BookingPaymentStatusSchema.parse(payment.status))
+    ) {
+      await move(tx, row, ['charging'], { status: 'cancelled', settledAt: deps.clock.now() });
+      return undefined;
+    }
+    return payment;
+  });
+  if (still === undefined) return;
+  const payment = still;
   const intent =
     payment.kind === 'deposit'
       ? await deps.provider.retrievePaymentIntent(payment.intentId)
@@ -307,26 +330,39 @@ async function charge(deps: JobDeps, tenantId: TenantId, queued: BookingFeeRow):
       if (done !== undefined) await sendReceipt(tx, done, { outboxKey: deps.outboxKey, now });
       return;
     }
-    const failed = await move(tx, row, ['charging'], {
-      status: 'failed',
-      failureCode: outcome.code,
-      settledAt: now,
-    });
-    if (failed !== undefined) {
-      await tellOwners(tx, failed, 'declined', { outboxKey: deps.outboxKey, now });
-    }
+    await fail(tx, row, ['charging'], outcome.code, deps);
   });
 }
 
+/** A fee that couldn't be charged: recorded with its code, and the owners told, once. */
+async function fail(
+  tx: TenantTx,
+  row: BookingFeeRow,
+  from: readonly BookingFeeStatus[],
+  code: string,
+  deps: Pick<JobDeps, 'clock' | 'outboxKey'>,
+): Promise<void> {
+  const now = deps.clock.now();
+  const failed = await move(tx, row, from, { status: 'failed', failureCode: code, settledAt: now });
+  if (failed !== undefined) {
+    await tellOwners(tx, failed, 'declined', { outboxKey: deps.outboxKey, now });
+  }
+}
+
 async function refund(deps: JobDeps, tenantId: TenantId, row: BookingFeeRow): Promise<void> {
-  if (row.status !== 'refund_pending' || row.refundId !== null || row.intentId === null) return;
+  if (row.status !== 'refund_pending' || row.intentId === null) return;
   let answered: { id: string | null; status: string };
-  try {
-    answered = await deps.provider.createRefund(row.intentId, `pepper-fee-refund-${row.id}`);
-  } catch (error) {
-    // Refused for good (refunded in Stripe's dashboard, disputed): recorded and told.
-    if (!(error instanceof PaymentsProviderError) || error.retryable) throw error;
-    answered = { id: null, status: 'failed' };
+  if (row.refundId !== null) {
+    // Asked before and Stripe said pending: read where it stands now (review).
+    answered = await deps.provider.retrieveRefund(row.refundId);
+  } else {
+    try {
+      answered = await deps.provider.createRefund(row.intentId, `pepper-fee-refund-${row.id}`);
+    } catch (error) {
+      // Refused for good (refunded in Stripe's dashboard, disputed): recorded and told.
+      if (!(error instanceof PaymentsProviderError) || error.retryable) throw error;
+      answered = { id: null, status: 'failed' };
+    }
   }
   const now = deps.clock.now();
   const refundId = answered.id === null ? {} : { refundId: answered.id };
@@ -342,13 +378,17 @@ async function refund(deps: JobDeps, tenantId: TenantId, row: BookingFeeRow): Pr
       }
       return;
     }
-    // Card refunds settle at once; one Stripe leaves pending stays `refund_pending` with its id.
     await move(tx, row, ['refund_pending'], {
       status: answered.status === 'succeeded' ? 'refunded' : 'refund_pending',
       ...refundId,
       ...(answered.status === 'succeeded' && { settledAt: now }),
     });
   });
+  // Card refunds settle at once; one Stripe leaves pending keeps its id, and the outbox asks
+  // again with its backoff (and alerts when it gives up), so it is never left unread (review).
+  if (answered.status !== 'succeeded') {
+    throw new PaymentsProviderError(null, 'refund_pending', null, true);
+  }
 }
 
 /**

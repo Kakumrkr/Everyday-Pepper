@@ -318,6 +318,8 @@ describe('StripePaymentsProvider: deposits and cards (S66, ADR-0068 §3)', () =>
       payment_method: 'pm_1Nv0HdQ9RKHgCVdKcard',
       off_session: 'true',
       confirm: 'true',
+      'automatic_payment_methods[enabled]': 'true',
+      'automatic_payment_methods[allow_redirects]': 'never',
       on_behalf_of: ACCOUNT,
       'transfer_data[destination]': ACCOUNT,
       description: 'Sunny Cuts · missed visit',

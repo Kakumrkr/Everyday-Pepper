@@ -206,6 +206,9 @@ export class StripePaymentsProvider implements PaymentsProvider {
         payment_method: input.paymentMethodId,
         off_session: 'true',
         confirm: 'true',
+        // As the card was kept (no redirects): a server-side confirm needs no return URL.
+        'automatic_payment_methods[enabled]': 'true',
+        'automatic_payment_methods[allow_redirects]': 'never',
         on_behalf_of: input.accountId,
         'transfer_data[destination]': input.accountId,
         description: input.description,
