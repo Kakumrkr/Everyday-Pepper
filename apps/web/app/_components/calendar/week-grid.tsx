@@ -82,7 +82,7 @@ export function WeekGrid({
   dates,
   member,
   tone,
-  entries,
+  entries: given,
   off,
   working,
   now,
@@ -114,6 +114,20 @@ export function WeekGrid({
   const [pending, setPending] = useState<PendingMove | null>(null);
   const [done, setDone] = useState<Done | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  // A move the api made, shown at once until the refreshed week arrives (new `entries`).
+  const [placed, setPlaced] = useState<{ for: CalendarEntry[]; made: MadeMove } | null>(null);
+  const entries = useMemo(() => {
+    if (placed?.for !== given) return given;
+    const { made } = placed;
+    const minutes = Date.parse(made.move.from.endsAt) - Date.parse(made.move.from.startsAt);
+    return given.flatMap((entry) => {
+      if (entry.kind !== 'booking' || entry.id !== made.move.bookingId) return [entry];
+      // Moved to someone else: off this week's grid.
+      if (made.staffMemberId !== member.id) return [];
+      const endsAt = new Date(Date.parse(made.startsAt) + minutes).toISOString();
+      return [{ ...entry, startsAt: made.startsAt, endsAt }];
+    });
+  }, [given, member.id, placed]);
 
   const offFlat = useMemo(() => off.flat(), [off]);
   const layout = useMemo(
@@ -355,6 +369,15 @@ export function WeekGrid({
         undoUntil: null,
         back: true,
       });
+      setPlaced({
+        for: given,
+        made: {
+          move: back,
+          startsAt: move.from.startsAt,
+          staffMemberId: move.from.staffMemberId,
+          notified: false,
+        },
+      });
       router.refresh();
       return;
     }
@@ -581,6 +604,7 @@ export function WeekGrid({
               ? { made, undoUntil: null, back: true }
               : { made, undoUntil: Date.now() + UNDO_MS, back: false },
           );
+          setPlaced({ for: given, made });
           router.refresh();
         }}
       />
