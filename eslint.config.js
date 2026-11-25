@@ -45,6 +45,8 @@ const allowedInternalImports = {
     'imports',
     // S65 (ADR-0067): the business's Stripe account and Stripe's webhook.
     'payments',
+    // S70 (ADR-0069): connecting a staff member's Google Calendar.
+    'google-calendar',
     'templates',
   ],
   // S31 (ADR-0037): the episode job summarises and embeds through the AI package's ports.
@@ -63,6 +65,8 @@ const allowedInternalImports = {
     'imports',
     // S66: the deposits' captures, refunds and sweep (ADR-0068).
     'payments',
+    // S70 (ADR-0069): the read of staff members' Google busy times.
+    'google-calendar',
     'templates',
   ],
   'apps/web': ['contracts', 'ui'],

@@ -5,9 +5,11 @@ import {
   loadOutboxSecret,
   loadPushPublicKey,
   loadServiceConfig,
+  loadGoogleCalendarConfig,
   loadPaymentsConfig,
   loadSmsConfig,
   type MailConfig,
+  type GoogleCalendarConfig,
   type PaymentsConfig,
   type ServiceConfig,
 } from '@pepper/runtime/instrument';
@@ -129,6 +131,11 @@ export interface ApiConfig extends ServiceConfig {
    * development machine; anywhere else the sandbox means off). `null`: off, every route 404.
    */
   payments: PaymentsConfig | null;
+  /**
+   * Google Calendar (S70, ADR-0069): Google, or the sandbox where the scripted model may run;
+   * `null`: off, every calendar connection route 404.
+   */
+  googleCalendar: GoogleCalendarConfig | null;
 }
 
 /**
@@ -154,6 +161,10 @@ export function loadApiConfig(env: NodeJS.ProcessEnv): ApiConfig {
       loadPaymentsConfig('api', env),
       scriptedAllowed(service.environment, env['NODE_ENV']),
     ),
+    googleCalendar: sandboxOnlyInTests(
+      loadGoogleCalendarConfig('api', env),
+      scriptedAllowed(service.environment, env['NODE_ENV']),
+    ),
   };
 }
 
@@ -173,6 +184,15 @@ function smsOf(
 function paymentsOf(payments: PaymentsConfig | null, testsMayRun: boolean): PaymentsConfig | null {
   if (payments?.provider === 'sandbox' && !testsMayRun) return null;
   return payments;
+}
+
+/** The calendar sandbox, like the payments one, only where tests run (AC-X-158). */
+function sandboxOnlyInTests(
+  config: GoogleCalendarConfig | null,
+  testsMayRun: boolean,
+): GoogleCalendarConfig | null {
+  if (config?.provider === 'sandbox' && !testsMayRun) return null;
+  return config;
 }
 
 function loadSupport(

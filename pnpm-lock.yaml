@@ -74,6 +74,9 @@ importers:
       '@pepper/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pepper/google-calendar':
+        specifier: workspace:*
+        version: link:../../packages/modules/google-calendar
       '@pepper/imports':
         specifier: workspace:*
         version: link:../../packages/modules/imports
@@ -226,6 +229,9 @@ importers:
       '@pepper/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@pepper/google-calendar':
+        specifier: workspace:*
+        version: link:../../packages/modules/google-calendar
       '@pepper/imports':
         specifier: workspace:*
         version: link:../../packages/modules/imports

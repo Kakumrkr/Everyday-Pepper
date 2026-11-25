@@ -36,6 +36,14 @@ import {
   PaymentNotAuthorizedError,
   PaymentsRejectedError,
 } from '@pepper/payments';
+import {
+  CalendarConnectRefusedError,
+  CalendarNotConnectedError,
+  CalendarNotLinkedError,
+  CalendarProviderError,
+  CalendarScopeMissingError,
+  SealedTokenError,
+} from '@pepper/google-calendar';
 import type {
   ApiErrorCode,
   SlotUnavailable,
@@ -224,6 +232,13 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [PaymentNotNeededError, ConflictException, 'payment_not_needed'],
   [PaymentRequiredError, PaymentRequiredException, 'payment_required'],
   [PaymentNotAuthorizedError, PaymentRequiredException, 'payment_required'],
+  // Google Calendar (S70, ADR-0069): Google's own words never reach the member.
+  [CalendarNotLinkedError, ConflictException, 'calendar_not_linked'],
+  [CalendarConnectRefusedError, BadRequestException, 'calendar_connect_invalid'],
+  [CalendarScopeMissingError, ConflictException, 'calendar_scope_missing'],
+  [CalendarNotConnectedError, NotFoundException, 'calendar_not_connected'],
+  [CalendarProviderError, ServiceUnavailableException, 'calendar_unavailable'],
+  [SealedTokenError, ServiceUnavailableException, 'calendar_unavailable'],
 ];
 
 /** 413: the body is over the limit (Nest has no exception class for it under this name). */

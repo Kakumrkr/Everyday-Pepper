@@ -333,3 +333,50 @@ export function loadPaymentsConfig(
     livemode: /^(sk|rk)_live_/.test(stripe.STRIPE_SECRET_KEY),
   };
 }
+
+const GoogleCalendarEnvSchema = z.object({
+  /**
+   * Where staff members' busy times come from (S70, ADR-0069 §1): `off` (the default: every
+   * calendar connection route is 404 and nothing is read), `sandbox` (nothing leaves the
+   * machine) or `google`.
+   */
+  GOOGLE_CALENDAR_PROVIDER: z.enum(['off', 'sandbox', 'google']).default('off'),
+});
+
+/** With `GOOGLE_CALENDAR_PROVIDER=google`, the OAuth client Google Cloud shows. */
+const GoogleEnvSchema = z.object({
+  GOOGLE_CLIENT_ID: z
+    .string()
+    .regex(
+      /^[0-9]{6,30}-[a-z0-9]{10,64}\.apps\.googleusercontent\.com$/,
+      'Use the client ID Google Cloud shows (…apps.googleusercontent.com)',
+    ),
+  /** A secret; never logged. */
+  GOOGLE_CLIENT_SECRET: z
+    .string()
+    .regex(/^[A-Za-z0-9_-]{16,128}$/, 'Use the client secret Google Cloud shows'),
+});
+
+export type GoogleCalendarConfig =
+  { provider: 'sandbox' } | { provider: 'google'; clientId: string; clientSecret: string };
+
+/**
+ * Reads the Google Calendar settings; `null` when off. With Google, a missing or malformed
+ * client stops the process naming the variable (never its value). Never log the result: it
+ * carries the secret.
+ */
+export function loadGoogleCalendarConfig(
+  service: NestServiceName,
+  env: NodeJS.ProcessEnv,
+): GoogleCalendarConfig | null {
+  const present = Object.fromEntries(Object.entries(env).filter(([, value]) => value !== ''));
+  const { GOOGLE_CALENDAR_PROVIDER } = loadEnv(service, GoogleCalendarEnvSchema, present);
+  if (GOOGLE_CALENDAR_PROVIDER === 'off') return null;
+  if (GOOGLE_CALENDAR_PROVIDER === 'sandbox') return { provider: 'sandbox' };
+  const google = loadEnv(service, GoogleEnvSchema, present);
+  return {
+    provider: 'google',
+    clientId: google.GOOGLE_CLIENT_ID,
+    clientSecret: google.GOOGLE_CLIENT_SECRET,
+  };
+}
