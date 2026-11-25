@@ -14,6 +14,7 @@ import {
   findCurrentTenant,
   findService,
   listBookingRules,
+  listBusyBlocksBetween,
   listOccupancy,
   listStaffMembers,
   listTimeOffBetween,
@@ -29,7 +30,7 @@ import { ServiceNotFoundError, StaffMemberNotFoundError } from '../errors.js';
 import { rowsToRules } from '../mapping.js';
 
 // When a service can be booked (ADR-0016, ADR-0017): the availability engine over the stored
-// hours, time off, booking rules and the occupied time of active bookings. Everyone in the
+// hours, time off, Google busy times (S70), booking rules and the occupied time of active bookings. Everyone in the
 // business may ask (`calendar.read`): occupied times carry no booking details, so staff get
 // the same answer as owners. Booking itself re-runs the same check under a lock.
 
@@ -119,6 +120,8 @@ export async function slotsFor(tx: TenantTx, search: SlotSearch): Promise<Slot[]
     search.templateRuleDefaults?.(TemplateIdSchema.nullable().parse(tenant.templateId)) ?? {};
   const hours = await listWorkingHoursOf(tx, ids);
   const timeOff = await listTimeOffBetween(tx, ids, around);
+  // Google busy times (S70, ADR-0069 §6): every path that offers or checks a time comes here.
+  const busy = await listBusyBlocksBetween(tx, ids, around);
   const occupancy = await listOccupancy(tx, { ...around, staffMemberIds: ids });
   return availableSlots({
     timeZone: tenant.timeZone,
@@ -131,6 +134,7 @@ export async function slotsFor(tx: TenantTx, search: SlotSearch): Promise<Slot[]
         staff: s,
         hours,
         timeOff,
+        busy,
         occupancy,
         rules,
         templateDefaults,

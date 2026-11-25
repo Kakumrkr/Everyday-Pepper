@@ -13,7 +13,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - Claude: the token key is HKDF from the outbox key (purpose `pepper/google-calendar-tokens`), no new secret; PKCE sent, the hashed one-time state is the CSRF check (Google documents PKCE for installed apps only).
 - Done: 5 runtime `loadGoogleCalendarConfig` (4 unit), api `GoogleCalendarModule` (connect/callback/status/disconnect/outside-busy; error codes), api int 5 green, api unit 564.
 - Done: 6 worker `Calendar job` (`CALENDAR_POLL_MS`, default 1 min), `calendarProviderFor` shared by api and worker; Compose and `.env.example` sandbox; worker unit green.
-- Next: task 7 availability (`slotsFor` reads the busy blocks).
+- Done: 7 `slotsFor` reads the busy blocks (planning unit + `outside-busy.int.test.ts` 3: not offered, team booking and move refused).
+- Next: task 8 week view "Busy (Google)" (top-up).
 
 ## Last sessions
 - **S69 Phase 16 · Week view + drag to move (2026-11-25)** ([PCR-016](changes/PCR-016.md), [PR #108](https://github.com/Kakumrkr/Everyday-Pepper/pull/108)). Full entry in [session-log.md](session-log.md).
