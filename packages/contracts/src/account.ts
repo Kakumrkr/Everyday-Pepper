@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { CancellationFeesSchema } from './cancellation-policy.js';
 import { DepositAudienceSchema, DepositRefundHoursSchema } from './deposits.js';
 import { MailingAddressSchema } from './drafts.js';
 import { normalizePhone } from './clients.js';
@@ -250,6 +251,8 @@ export const BusinessSchema = z
     depositRefundHours: DepositRefundHoursSchema,
     /** Who pays the services' deposits (S67, AC-X-125). */
     depositAudience: DepositAudienceSchema,
+    /** The cancellation policy's costs (S67.2, AC-X-130); `null`: no policy. */
+    cancellationFees: CancellationFeesSchema.nullable(),
   })
   .extend(BusinessProfileSchema.shape);
 export type Business = z.infer<typeof BusinessSchema>;
@@ -263,6 +266,7 @@ export const BookingPageSettingsSchema = z
     brandColor: BrandColorSchema.nullable(),
     depositRefundHours: DepositRefundHoursSchema,
     depositAudience: DepositAudienceSchema,
+    cancellationFees: CancellationFeesSchema.nullable(),
   })
   .extend(BusinessProfileSchema.shape)
   .partial()

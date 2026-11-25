@@ -263,7 +263,7 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
           </Button>
         </section>
       )}
-      {business.cancellationPolicy === null ? null : <Policy text={business.cancellationPolicy} />}
+      <Policy business={business} />
       <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
     </div>
   );

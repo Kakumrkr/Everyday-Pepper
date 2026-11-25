@@ -59,6 +59,7 @@ describe('CurrentBusinessResponseSchema', () => {
         brandColor: '#7a3e6c',
         depositRefundHours: 24,
         depositAudience: 'everyone',
+        cancellationFees: null,
         phone: null,
         publicAddress: null,
         cancellationPolicy: null,

@@ -20,6 +20,7 @@ const details: BookingEmailDetails = {
   startsAt: '2026-11-04T19:00:00.000Z', // 2:00 PM in New York
   email: 'maria@example.com',
   clientName: 'Maria Lopez',
+  policy: { sentence: null, note: null },
 };
 
 const at = (iso: string) => new Date(iso);

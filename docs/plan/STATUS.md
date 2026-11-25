@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-24 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S67.2** (S67 done)
+**Last updated:** 2026-11-25 · **Plan version:** 0.41 ([PCR-015](changes/PCR-015.md)) · **Current phase:** 15 — Deposits in Stripe test mode, before the rest of Phase 13 (PCR-012: S58a–S60 wait for the domain) → next **S68** (S67.2 done)
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,12 +10,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Nothing in progress.
 
 ## Last sessions
+- **S67.2 Phase 15 · Cancellation-policy builder (2026-11-25)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)). Full entry in [session-log.md](session-log.md).
+  - **Built:** the policy in booking page settings (notice = the refund window; a later cancel and a no-show cost nothing, an amount or a percent; the owner's note), Pepper's one sentence from `@pepper/contracts` on the booking and manage pages and in the confirmation, reminder, reschedule and cancel emails; the confirmation's deposit line (top-up). AC-X-130…135.
+  - **Checks:** `pnpm check` green (a format fix); affected integration 1,982 green; e2e 14 + screens 39 passed; review 6 of 7 fixed, security none ≥ 8; walkthrough at 375 px.
 - **S67 Phase 15 · Smart deposits (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md) amendment, [PCR-015](changes/PCR-015.md), [PR #105](https://github.com/Kakumrkr/Everyday-Pepper/pull/105)). Full entry in [session-log.md](session-log.md).
   - **Built:** "Who pays a deposit" per business (Everyone / New and no-shows); a regular books with no card step, read only after the code and again at confirm; the menu, settings, sheet and Services row say who pays; the team's booking sheet shows the deposit in one line (top-up), its Cancel says the deposit goes back. AC-X-125…129.
   - **Checks:** `pnpm check` green (2nd run); affected integration green (1 fixture fixed); e2e 54 passed; review 3 of 4 fixed, security none ≥ 8; walkthrough at 375 px.
-- **S66.2 Phase 15 · Deposits on screen (2026-11-24)** ([ADR-0068](../adr/0068-deposits-and-refunds.md), [PR #104](https://github.com/Kakumrkr/Everyday-Pepper/pull/104)). Full entry in [session-log.md](session-log.md).
-  - **Built:** the deposit on the service sheet and the refund window; the payment step with the terms in words and Stripe's field (sandbox test card); the manage page says what a cancel does to the deposit (top-up). AC-X-121…124.
-  - **Checks:** `pnpm check` green; affected integration green (one wall-clock test fixed); e2e 54 passed; review 4 of 4 fixed, security none ≥ 8; walkthrough at 375 px.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -31,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S67.2 (user, 2026-11-25):** "go ahead, start with your recommendations" (D-1 one session; D-2 the notice is the refund window; D-3 nothing/amount/percent, fees only with payments, "may be charged"; D-4 the old text stays as the owner's note; D-5 the words in contracts). Full wording in [decisions.md](decisions.md).
 - **S67 (user, 2026-11-24):** "go with the recommended options" (D-1 split → S67.2 the policy builder, [PCR-015](changes/PCR-015.md); D-2 one setting per business; D-3 fixed definitions: a visit that has ended, a no-show in 12 months). Full wording in [decisions.md](decisions.md).
 - **S66.2 (user, 2026-11-24):** "go ahead with your recommendations" (D-1 one session; D-2 `@stripe/stripe-js` only; D-3 a percent shows its dollars; D-4 CI normally, the repo is public); the weekly scheduled CI run explained (minutes used up, no runner). Full wording in [decisions.md](decisions.md).
 - **S66 (user, 2026-11-22):** "Go ahead with your recommendations and complete the session" (D-1 split → S66.2; D-2 destination charges; D-3 a rule per service; D-4 the window, 24 h; D-5 authorize then book; D-6 sandbox); "continue with your recommendation" (the refund window stored, [PCR-014](changes/PCR-014.md)). Full wording in [decisions.md](decisions.md).
@@ -106,11 +107,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, M1–M2 and P1 are done (Phases 0–12 and 14 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, M1–M2 and P1 are done (Phases 0–12 and 14 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S67.2 | Cancellation-policy builder: on the booking page and in every email | 15 | Policy in every channel |
 | S68 | No-show fee by approval card; **Phase 15 gate** | 15 | No charge without approval; C12 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |

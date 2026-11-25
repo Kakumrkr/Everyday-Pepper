@@ -17,6 +17,7 @@ import {
   deliverOutboxMessage,
   ManualClock,
   outboxKeyFrom,
+  updateBookingPage,
   type Actor,
   type EmailMessage,
   type Mailer,
@@ -281,6 +282,7 @@ describe('team changes tell the client (notifyClient)', () => {
       startsAt: at(3, '10:00'),
       email: 'maria@example.test',
       clientName: 'Maria Lopez',
+      policy: { sentence: null, note: null },
     });
     expect(notice.change.bookingId).toBe(booking.id);
     const managed = await getManagedBooking(db, b.slug, notice.manageToken, { clock: b.clock });
@@ -328,6 +330,35 @@ describe('team changes tell the client (notifyClient)', () => {
     await changeBooking(db, b.owner, second.id, { status: 'no_show' }, { clock: b.clock, notify });
     expect(notices.map((n) => [n.kind, n.change.bookingId, 'manageToken' in n])).toEqual([
       ['cancelled', first.id, false],
+    ]);
+  });
+
+  it('a team cancel carries no policy; a team booking carries it (S67.2, AC-X-133)', async () => {
+    const b = await newBusiness();
+    await updateBookingPage(db, b.owner, {
+      cancellationFees: {
+        lateCancel: { kind: 'none' },
+        noShow: { kind: 'fixed', amountCents: 2000 },
+      },
+    });
+    const { notices, notify } = recorder();
+    const booking = await createBooking(db, b.owner, input(b, at(3, '10:00')), {
+      clock: b.clock,
+      notify,
+    });
+    await changeBooking(
+      db,
+      b.owner,
+      booking.id,
+      { status: 'cancelled' },
+      { clock: b.clock, notify },
+    );
+    expect(notices.map((n) => [n.kind, n.email.policy.sentence])).toEqual([
+      [
+        'confirmed',
+        'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.',
+      ],
+      ['cancelled', null],
     ]);
   });
 

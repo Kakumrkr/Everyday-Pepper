@@ -132,12 +132,33 @@ describe('brand color', () => {
     await update({ brandColor: null, publicAddress: null, cancellationPolicy: null });
   });
 
+  it('stores the cancellation policy’s costs, and clears them (S67.2, AC-X-130)', async () => {
+    const update = (settings: Parameters<typeof updateCurrentTenantBookingPage>[1]) =>
+      withTenant(db, tenant, (tx) => updateCurrentTenantBookingPage(tx, settings));
+    const fees = {
+      lateCancel: { kind: 'none' },
+      noShow: { kind: 'percent', percent: 50 },
+    } as const;
+    expect((await update({ cancellationFees: fees }))?.cancellationFees).toEqual(fees);
+    expect((await update({ phone: null }))?.cancellationFees).toEqual(fees);
+    expect((await update({ cancellationFees: null }))?.cancellationFees).toBeNull();
+    // A shape the contract refuses never reaches the database.
+    await expect(
+      update({
+        cancellationFees: { lateCancel: { kind: 'deposit' }, noShow: fees.noShow },
+      } as never),
+    ).rejects.toThrow();
+  });
+
   it('the database refuses a malformed phone, address or policy (S47)', async () => {
     for (const statement of [
       `UPDATE tenants SET phone = '555-1234'`,
       `UPDATE tenants SET public_address = 'x'`,
       `UPDATE tenants SET cancellation_policy = ''`,
       `UPDATE tenants SET cancellation_policy = repeat('a', 601)`,
+      // The policy's costs are an object with both (S67.2).
+      `UPDATE tenants SET cancellation_fees = '[]'::jsonb`,
+      `UPDATE tenants SET cancellation_fees = '{"lateCancel": {"kind": "none"}}'::jsonb`,
     ]) {
       const error = await withTenant(db, tenant, (tx) => tx.execute(statement)).catch(
         (e: unknown) => e,

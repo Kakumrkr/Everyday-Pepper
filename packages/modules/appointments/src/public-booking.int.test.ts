@@ -217,6 +217,8 @@ describe('getPublicBusiness', () => {
       phone: null,
       publicAddress: null,
       cancellationPolicy: null,
+      // No policy until the owner turns one on (S67.2).
+      cancellationSentence: null,
       // No photos until the owner adds them (S47.2).
       photos: { logo: null, cover: null, gallery: [] },
       // Everyone pays a deposit until the owner chooses otherwise (S67).
@@ -256,6 +258,25 @@ describe('getPublicBusiness', () => {
       cancellationPolicy: 'Cancel 24 hours ahead.',
     });
     expect(JSON.stringify(business)).not.toContain('Home Lane');
+  });
+
+  it('writes the policy the owner built on the page (S67.2, AC-X-132)', async () => {
+    const p = await newPage();
+    await updateBookingPage(db, p.owner, {
+      cancellationFees: {
+        lateCancel: { kind: 'none' },
+        noShow: { kind: 'fixed', amountCents: 2000 },
+      },
+      cancellationPolicy: 'Running late? Call us.',
+    });
+    const business = await getPublicBusiness(db, p.slug);
+    expect(business).toMatchObject({
+      cancellationSentence:
+        'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.',
+      cancellationPolicy: 'Running late? Call us.',
+    });
+    await updateBookingPage(db, p.owner, { cancellationFees: null });
+    expect((await getPublicBusiness(db, p.slug)).cancellationSentence).toBeNull();
   });
 
   it('hides a service that is not bookable', async () => {
@@ -947,6 +968,42 @@ describe('notices (ADR-0024: emails queued with the change)', () => {
     expect(new Set(notices.map((n) => n.change.at.getTime())).size).toBe(3);
     expect(notices[0]?.email).toMatchObject({ email: 'ana@example.test', clientName: 'Ana Ruiz' });
     expect(inTenant).toEqual([p.tenantId, p.tenantId, p.tenantId]);
+  });
+
+  it('carries the policy to each change’s email, a late cancel included (S67.2, AC-X-133)', async () => {
+    const p = await newPage();
+    const fee = { kind: 'fixed', amountCents: 2000 } as const;
+    await updateBookingPage(db, p.owner, {
+      cancellationFees: { lateCancel: fee, noShow: fee },
+      cancellationPolicy: 'Running late? Call us.',
+    });
+    const notices: BookingNotice[] = [];
+    const notify: BookingNotify = (_tx, notice) => {
+      notices.push(notice);
+      return Promise.resolve();
+    };
+    const asked = await request(p);
+    const confirmed = await confirmBookingRequest(
+      db,
+      p.slug,
+      asked.requestId,
+      { code: asked.code },
+      { codeKey: KEY, clock: p.clock, notify },
+    );
+    await rescheduleManagedBooking(db, p.slug, confirmed.manageToken, tue('14:00'), {
+      clock: p.clock,
+      notify,
+    });
+    // Inside the notice: a late cancel's email says the policy as well.
+    p.clock.set(tue('13:00'));
+    await cancelManagedBooking(db, p.slug, confirmed.manageToken, { clock: p.clock, notify });
+    const policy = {
+      sentence:
+        'Please cancel or reschedule at least 24 hours before your visit. Later cancels and no-shows may be charged $20.',
+      note: 'Running late? Call us.',
+    };
+    expect(notices.map((n) => n.email.policy)).toEqual([policy, policy, policy]);
+    expect(notices[0]?.email.deposit).toBeNull();
   });
 
   it('rolls the change back when notify fails, so no email is sent for it', async () => {

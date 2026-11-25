@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatPhone, profileFields, profileFromFields } from './booking-profile';
+import { formatPhone, noteFrom, profileFields, profileFromFields } from './booking-profile';
 
 describe('the booking page profile form (S47, AC-W8-7)', () => {
   it('sends each field in its stored form, and empty ones as not shown', () => {
@@ -7,20 +7,18 @@ describe('the booking page profile form (S47, AC-W8-7)', () => {
       profileFromFields({
         phone: '(555) 123-4567',
         publicAddress: ' 12 Main St \n Austin, TX 78701',
-        cancellationPolicy: '   ',
       }),
     ).toEqual({
       ok: true,
       profile: {
         phone: '+15551234567',
         publicAddress: '12 Main St\nAustin, TX 78701',
-        cancellationPolicy: null,
       },
     });
   });
 
   it('names what to fix under each field that is not right', () => {
-    const answer = profileFromFields({ phone: '12', publicAddress: 'x', cancellationPolicy: 'ok' });
+    const answer = profileFromFields({ phone: '12', publicAddress: 'x' });
     expect(answer).toEqual({
       ok: false,
       errors: {
@@ -33,7 +31,16 @@ describe('the booking page profile form (S47, AC-W8-7)', () => {
   it('fills the form from the stored profile', () => {
     expect(
       profileFields({ phone: '+15551234567', publicAddress: null, cancellationPolicy: 'Thanks' }),
-    ).toEqual({ phone: '(555) 123-4567', publicAddress: '', cancellationPolicy: 'Thanks' });
+    ).toEqual({ phone: '(555) 123-4567', publicAddress: '' });
+  });
+
+  it('checks the cancellation note, saved with the policy (S67.2)', () => {
+    expect(noteFrom('  ')).toEqual({ ok: true, note: null });
+    expect(noteFrom(' Running   late? Call us. ')).toEqual({
+      ok: true,
+      note: 'Running late? Call us.',
+    });
+    expect(noteFrom('a'.repeat(601))).toMatchObject({ ok: false });
   });
 
   it('shows a US phone the way people write it, and others as stored', () => {

@@ -1,0 +1,2 @@
+ALTER TABLE "tenants" ADD COLUMN "cancellation_fees" jsonb;--> statement-breakpoint
+ALTER TABLE "tenants" ADD CONSTRAINT "tenants_cancellation_fees_shape" CHECK (jsonb_typeof("tenants"."cancellation_fees") = 'object' AND "tenants"."cancellation_fees" ?& array['lateCancel', 'noShow']);

@@ -265,9 +265,19 @@ test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered p
   await expect(details.getByLabel('Phone')).toHaveAttribute('aria-invalid', 'true');
   await details.getByLabel('Phone').fill('(512) 555-0142');
   await details.getByLabel('Address').fill('12 Main St\nAustin, TX 78701');
-  await details.getByLabel('Cancellation policy').fill('Please cancel at least 24 hours ahead.');
   await details.getByRole('button', { name: 'Save details' }).click();
   await expect(details.getByText('Saved. Clients see these on your booking page.')).toBeVisible();
+  // S67.2: the policy built from choices (the notice alone, no fees), with the owner's note.
+  const policy = card.getByRole('form', { name: 'Cancellation policy' });
+  await policy
+    .getByRole('radiogroup', { name: 'Cancellation policy' })
+    .getByRole('radio', { name: 'On' })
+    .click();
+  await policy.getByLabel('Anything else (optional)').fill('Running late? Call us.');
+  await policy.getByRole('button', { name: 'Save policy' }).click();
+  await expect(
+    policy.getByText('Saved. Clients see it when they book and in their emails.'),
+  ).toBeVisible();
 
   // The client sees them; every step they enter is counted with a visit id and the step only.
   const client = await anotherPerson(browser, baseURL);
@@ -286,7 +296,10 @@ test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered p
   await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
   await client.getByRole('button', { name: /Anyone available/ }).click();
   await pickTime(client, 1);
-  await expect(client.getByTestId('cancellation-policy')).toContainText('24 hours ahead');
+  await expect(client.getByTestId('policy-sentence')).toHaveText(
+    'Please cancel or reschedule at least 24 hours before your visit.',
+  );
+  await expect(client.getByTestId('cancellation-policy')).toContainText('Running late? Call us.');
   await client.getByLabel('Full name').fill('Rae Kim');
   await client.getByLabel('Email').fill(email);
   await client.getByRole('button', { name: 'Send my code' }).click();
@@ -299,6 +312,10 @@ test('AC-W8-7/8/9: the page shows the contact details and policy, a remembered p
   await client.getByRole('button', { name: 'Confirm booking' }).click();
   await expect(client.getByRole('heading', { name: /You’re booked, Rae/ })).toBeVisible();
   await expect(client.getByTestId('cancellation-policy')).toBeVisible();
+  // AC-X-133: the confirmation email ends with the same policy (compared by its words).
+  expect((await emailTo(email, 'booked at')).replace(/\s+/g, ' ')).toContain(
+    'Cancellation policy: Please cancel or reschedule at least 24 hours before your visit. Running late? Call us.',
+  );
   const cookies = await client.context().cookies();
   expect(cookies.find((cookie) => cookie.name === 'pepper_device')).toMatchObject({
     httpOnly: true,

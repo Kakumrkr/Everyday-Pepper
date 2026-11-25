@@ -665,9 +665,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                 </p>
               </div>
             ) : null}
-            {business.cancellationPolicy === null ? null : (
-              <Policy text={business.cancellationPolicy} />
-            )}
+            <Policy business={business} />
             <p className="m-0 type-caption text-ink-2">
               We only use your details for this appointment and messages about it.
             </p>
@@ -858,9 +856,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           >
             Reschedule or cancel
           </a>
-          {business.cancellationPolicy === null ? null : (
-            <Policy text={business.cancellationPolicy} />
-          )}
+          <Policy business={business} />
           {withoutCode || remember ? (
             <ForgetDevice slug={slug} forgotten={forgotten} onForgotten={setForgotten} />
           ) : null}
@@ -922,8 +918,18 @@ export function ForgetDevice({
   );
 }
 
-/** The business's cancellation policy in its own words (S47, AC-W8-7), before and after booking. */
-export function Policy({ text }: { text: string }) {
+/**
+ * The business's cancellation policy, before and after booking and on the manage page: Pepper's
+ * sentence from the owner's choices (S67.2, AC-X-132), then the owner's own note (S47,
+ * AC-W8-7). Nothing when there is neither.
+ */
+export function Policy({
+  business,
+}: {
+  business: Pick<PublicBusiness, 'cancellationSentence' | 'cancellationPolicy'>;
+}) {
+  const { cancellationSentence: sentence, cancellationPolicy: note } = business;
+  if (sentence === null && note === null) return null;
   return (
     <section
       aria-label="Cancellation policy"
@@ -931,7 +937,14 @@ export function Policy({ text }: { text: string }) {
       data-testid="cancellation-policy"
     >
       <h2 className="m-0 type-label text-ink">Cancellation policy</h2>
-      <p className="m-0 whitespace-pre-line type-body text-ink-2">{text}</p>
+      {sentence === null ? null : (
+        <p className="m-0 type-body text-ink" data-testid="policy-sentence">
+          {sentence}
+        </p>
+      )}
+      {note === null ? null : (
+        <p className="m-0 whitespace-pre-line type-body text-ink-2">{note}</p>
+      )}
     </section>
   );
 }

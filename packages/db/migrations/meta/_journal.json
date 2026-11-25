@@ -582,6 +582,13 @@
       "when": 1795542092512,
       "tag": "0082_s67_deposit_audience",
       "breakpoints": true
+    },
+    {
+      "idx": 83,
+      "version": "7",
+      "when": 1795568380493,
+      "tag": "0083_s67_2_cancellation_fees",
+      "breakpoints": true
     }
   ]
 }

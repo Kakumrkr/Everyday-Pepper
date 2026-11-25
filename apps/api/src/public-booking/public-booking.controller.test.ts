@@ -47,6 +47,7 @@ const BUSINESS: PublicBusiness = {
   phone: '+15551234567',
   publicAddress: null,
   cancellationPolicy: 'Cancel 24 hours ahead.',
+  cancellationSentence: null,
   services: [],
   staff: [],
   photos: { logo: null, cover: null, gallery: [] },

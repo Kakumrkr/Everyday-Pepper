@@ -75,6 +75,7 @@ async function bookAndPay(
   slug: string,
   day: number,
   refund: RegExp,
+  policy: string,
 ) {
   const client = await anotherPerson(browser, baseURL);
   const email = `${unique('deposit')}@example.test`;
@@ -107,12 +108,46 @@ async function bookAndPay(
   await expect(client.getByRole('heading', { name: /You’re booked, Bea/ })).toBeVisible();
 
   const confirmation = await emailTo(email, 'booked at');
+  // AC-X-134: the email says the deposit in the team sheet's words; AC-X-133: and the policy.
+  expect(confirmation).toMatch(
+    /\$15 deposit paid · (refundable until \w{3}, \w{3} \d{1,2}, \d{1,2}:\d{2} (AM|PM)|no longer refundable)/,
+  );
+  // Mailpit's text keeps the mail's line ends; compare the words.
+  expect(confirmation.replace(/\s+/g, ' ')).toContain(`Cancellation policy: ${policy}`);
   const link = /(https?:\/\/\S+\/book\/\S+\/manage#[A-Za-z0-9_-]{43})/.exec(confirmation)?.[1];
   expect(link).toBeDefined();
   const url = new URL(link ?? '');
   await client.goto(url.pathname + url.hash);
   await expect(client.getByRole('heading', { name: 'Your booking' })).toBeVisible();
+  // AC-X-132: the manage page says the policy too.
+  await expect(client.getByTestId('policy-sentence')).toHaveText(policy);
   return client;
+}
+
+/** The policy the owner builds below (S67.2): a day's notice, $20 for a no-show. */
+const POLICY_SENTENCE =
+  'Please cancel or reschedule at least 24 hours before your visit. No-shows may be charged $20.';
+
+/** The owner turns the cancellation policy on with a $20 no-show fee (S67.2, AC-X-130/131). */
+async function buildPolicy(page: Page): Promise<void> {
+  const policy = page
+    .getByRole('region', { name: 'Your booking page' })
+    .getByRole('form', { name: 'Cancellation policy' });
+  await (
+    await hydrated(
+      policy
+        .getByRole('radiogroup', { name: 'Cancellation policy' })
+        .getByRole('radio', { name: 'On' }),
+    )
+  ).click();
+  const noShow = policy.getByRole('radiogroup', { name: 'A no-show costs' });
+  await noShow.getByRole('radio', { name: 'Amount' }).click();
+  await policy.getByLabel('No-show fee ($)').fill('20');
+  await expect(policy.getByTestId('policy-preview')).toContainText(POLICY_SENTENCE);
+  await policy.getByRole('button', { name: 'Save policy' }).click();
+  await expect(
+    policy.getByText('Saved. Clients see it when they book and in their emails.'),
+  ).toBeVisible();
 }
 
 test('an owner asks a $15 deposit; a client pays it, and cancelling in time gives it back while a late cancel keeps it', async ({
@@ -143,14 +178,16 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
     'Deposit $15',
   );
 
-  // AC-X-112: the window, 24 hours to start with, said in a sentence.
-  const window = page.getByRole('combobox', { name: 'Free cancellation until' });
+  // AC-X-112: the window, 24 hours to start with, said in a sentence; since S67.2 it is the
+  // cancellation policy's notice, and the policy is built from it.
+  const window = page.getByRole('combobox', { name: 'Notice to cancel or reschedule' });
   await expect(window).toHaveValue('24');
   await expect(
     page.getByText(
       'Clients who cancel at least 24 hours before get their deposit back. Later, it’s kept.',
     ),
   ).toBeVisible();
+  await buildPolicy(page);
 
   // In time (three days ahead, a 24-hour window): the page says the $15 comes back.
   const early = await bookAndPay(
@@ -159,6 +196,7 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
     slug,
     3,
     /Cancel by .+ and you get the \$15 back\. After that, it’s kept\./,
+    POLICY_SENTENCE,
   );
   await expect(early.getByTestId('deposit-status')).toContainText(
     /You paid a \$15 deposit\. Cancel by .+ to get it back\./,
@@ -215,9 +253,14 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
   // A week's window: a cancel two days ahead is late, and the page says so before it.
   await page.goto('/services');
   await (await hydrated(window)).selectOption('168');
-  await expect(page.getByText(/at least a week before/)).toBeVisible();
-  await page.getByRole('button', { name: 'Save deposits' }).click();
-  await expect(page.getByText('Saved. New bookings follow these.')).toBeVisible();
+  await expect(page.getByText(/^Clients who cancel at least a week before/)).toBeVisible();
+  await expect(page.getByTestId('policy-preview')).toContainText(
+    'at least a week before your visit',
+  );
+  await page.getByRole('button', { name: 'Save policy' }).click();
+  await expect(
+    page.getByText('Saved. Clients see it when they book and in their emails.'),
+  ).toBeVisible();
 
   const late = await bookAndPay(
     browser,
@@ -225,6 +268,7 @@ test('an owner asks a $15 deposit; a client pays it, and cancelling in time give
     slug,
     2,
     /Your visit is soon, so the \$15 is kept if you cancel\./,
+    POLICY_SENTENCE.replace('24 hours', 'a week'),
   );
   await (await hydrated(late.getByRole('button', { name: 'Cancel booking' }))).click();
   await expect(late.getByTestId('cancel-deposit')).toHaveText(
@@ -290,7 +334,7 @@ test('with "New and no-shows", a regular books with no card, and the menu says w
     ),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Save deposits' }).click();
-  await expect(page.getByText('Saved. New bookings follow these.')).toBeVisible();
+  await expect(page.getByText('Saved. New bookings follow this.')).toBeVisible();
   // AC-X-128: the service sheet says it too.
   await (await hydrated(page.getByRole('button', { name: 'Edit Haircut' }))).click();
   await expect(

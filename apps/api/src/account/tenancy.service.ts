@@ -8,6 +8,7 @@ import {
   type TenantId,
   type UserBusiness,
   type UserId,
+  CancellationFeesSchema,
 } from '@pepper/contracts';
 import { seedBusinessIn } from '@pepper/appointments';
 import { createBusiness, updateBookingPage, type TenantContext } from '@pepper/core';
@@ -97,12 +98,15 @@ function toBusiness(tenant: {
   cancellationPolicy: string | null;
   depositRefundHours: number;
   depositAudience: string;
+  cancellationFees: unknown;
 }): Business {
   const { id, name, slug, timeZone, locale, templateId, brandColor } = tenant;
   const { phone, publicAddress, cancellationPolicy, depositRefundHours, depositAudience } = tenant;
   return BusinessSchema.parse({
     ...{ id, name, slug, timeZone, locale, templateId, brandColor, depositRefundHours },
     depositAudience,
+    // A stored value the contract no longer takes reads as no policy, never a failed page.
+    cancellationFees: CancellationFeesSchema.nullable().catch(null).parse(tenant.cancellationFees),
     ...{ phone, publicAddress, cancellationPolicy },
   });
 }

@@ -117,10 +117,11 @@ const TenantChangeSchema = z.union([
             'cancellationPolicy',
             'depositRefundHours',
             'depositAudience',
+            'cancellationFees',
           ]),
         )
         .min(1)
-        .max(5),
+        .max(6),
     })
     .strict(),
 ]);

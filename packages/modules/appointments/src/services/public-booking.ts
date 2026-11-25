@@ -138,7 +138,9 @@ import { noteFirstBookingIn } from './activation.js';
 import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availability.js';
 import {
   changeOf,
+  cancellationSentenceOf,
   emailDetailsOf,
+  policyWordsOf,
   manageTokenHash,
   newManageToken,
   type BookingEmailDetails,
@@ -299,6 +301,7 @@ export async function getPublicBusiness(
         phone: tenant.phone,
         publicAddress: tenant.publicAddress,
         cancellationPolicy: tenant.cancellationPolicy,
+        cancellationSentence: cancellationSentenceOf(tenant),
         depositAudience: tenant.depositAudience,
         photos: await businessPhotosIn(tx),
         services: services
@@ -454,6 +457,7 @@ export async function requestBooking(
           startsAt: new Date(start).toISOString(),
           email: request.email,
           clientName: request.name,
+          policy: policyWordsOf(tenant),
         },
       };
     });
@@ -658,6 +662,8 @@ export async function confirmBookingRequest(
         startsAt: booking.startsAt,
         email: request.email,
         clientName: client.name,
+        policy: policyWordsOf(tenant),
+        deposit: booking.deposit,
       };
       await options.notify?.(tx, {
         kind: 'confirmed',
@@ -752,6 +758,7 @@ export async function requestWaitlistJoin(
         startsAt: new Date(dayStart).toISOString(),
         email: request.email,
         clientName: request.name,
+        policy: policyWordsOf(tenant),
       },
     };
   });
@@ -1469,6 +1476,8 @@ export async function offerEmailDetails(
     startsAt: offer.startsAt.toISOString(),
     email: client.email,
     clientName: client.name,
+    // An offer's emails carry no policy: the claim's confirmation does (AC-X-133).
+    policy: { sentence: null, note: null },
   };
 }
 

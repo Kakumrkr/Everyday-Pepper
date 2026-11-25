@@ -254,7 +254,11 @@ async function southsideMenu(page: Page): Promise<string> {
     expect(hours.ok(), await hours.text()).toBe(true);
   }
   const color = await page.request.put('/v1/tenant/booking-page', {
-    data: { brandColor: '#145a55' },
+    // A day's notice, no fees (no payments here): the pages show Pepper's sentence (S67.2).
+    data: {
+      brandColor: '#145a55',
+      cancellationFees: { lateCancel: { kind: 'none' }, noShow: { kind: 'none' } },
+    },
     headers: { origin: new URL(page.url()).origin },
   });
   expect(color.ok(), await color.text()).toBe(true);
@@ -1481,6 +1485,36 @@ for (const width of WIDTHS) {
     await shots('deposit-sheet', { fullPage: false });
     await sheet.getByRole('button', { name: 'Save' }).click();
     await expect(sheet).toBeHidden();
+
+    // The cancellation-policy builder (S67.2, AC-X-130/131): on, a $20 no-show, Pepper's sentence.
+    const policy = page
+      .getByRole('region', { name: 'Your booking page' })
+      .getByRole('form', { name: 'Cancellation policy' });
+    await policy
+      .getByRole('radiogroup', { name: 'Cancellation policy' })
+      .getByRole('radio', { name: 'On' })
+      .click();
+    await policy
+      .getByRole('radiogroup', { name: 'A no-show costs' })
+      .getByRole('radio', { name: 'Amount' })
+      .click();
+    await policy.getByLabel('No-show fee ($)').fill('20');
+    await expect(policy.getByTestId('policy-preview')).toContainText(
+      'No-shows may be charged $20.',
+    );
+    if (phone) await expectTapTargets(page, 'policy-builder');
+    for (const scheme of SCHEMES) {
+      await still(page, scheme);
+      await expect.soft(policy).toHaveScreenshot(`policy-builder-${String(width)}-${scheme}.png`, {
+        animations: 'disabled',
+        maxDiffPixelRatio: 0.01,
+      });
+    }
+    await page.emulateMedia({ colorScheme: 'light' });
+    await policy.getByRole('button', { name: 'Save policy' }).click();
+    await expect(
+      policy.getByText('Saved. Clients see it when they book and in their emails.'),
+    ).toBeVisible();
 
     // A client books the skin fade three days ahead: the terms, then the (sandbox's) card.
     await page.goto(`/book/${slug}`);

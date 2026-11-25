@@ -1,3 +1,4 @@
+import { depositPaidLine } from '@pepper/contracts';
 import type { EmailMessage } from '@pepper/core';
 import type { BookingEmailDetails } from './services/notices.js';
 
@@ -25,6 +26,33 @@ export function formatWhen(startsAt: string, timeZone: string): string {
 function what(details: BookingEmailDetails): string {
   const staff = details.staffName === null ? '' : ` with ${details.staffName}`;
   return `${details.serviceName}${staff}, ${formatWhen(details.startsAt, details.timeZone)}`;
+}
+
+/**
+ * The business's cancellation policy at the end of an email (S67.2, AC-X-133): Pepper's sentence,
+ * then the owner's note; nothing when there is neither.
+ */
+function policyLines(details: BookingEmailDetails): string[] {
+  const { sentence, note } = details.policy;
+  if (sentence === null && note === null) return [];
+  return [
+    '',
+    'Cancellation policy:',
+    ...(sentence === null ? [] : [sentence]),
+    ...(note === null ? [] : [note]),
+  ];
+}
+
+/**
+ * The deposit under the booking in its confirmation (S67.2 top-up, AC-X-134): the team sheet's
+ * words for a paid one, or that a kept card costs nothing now; nothing without one.
+ */
+function depositLines(details: BookingEmailDetails): string[] {
+  const deposit = details.deposit;
+  if (deposit?.status !== 'held') return [];
+  return deposit.kind === 'card'
+    ? ['Card on file. Nothing is charged now.']
+    : [depositPaidLine(deposit, details.timeZone)];
 }
 
 export function codeEmail(
@@ -93,9 +121,11 @@ export function confirmationEmail(details: BookingEmailDetails, manageUrl: strin
       '',
       `You're booked at ${details.businessName}:`,
       `${what(details)}.`,
+      ...depositLines(details),
       '',
       'To reschedule or cancel, use this link (it is just for you, so keep it private):',
       manageUrl,
+      ...policyLines(details),
     ].join('\n'),
   };
 }
@@ -112,6 +142,7 @@ export function rescheduledEmail(details: BookingEmailDetails, manageUrl: string
       '',
       'To change it again or cancel:',
       manageUrl,
+      ...policyLines(details),
     ].join('\n'),
   };
 }
@@ -127,6 +158,7 @@ export function cancelledEmail(details: BookingEmailDetails): EmailMessage {
       `${what(details)}.`,
       '',
       'We hope to see you another time.',
+      ...policyLines(details),
     ].join('\n'),
   };
 }
@@ -157,6 +189,7 @@ export function reminderEmail(
             'To reschedule or cancel, use this link (it is just for you, so keep it private):',
             link,
           ]),
+      ...policyLines(details),
     ].join('\n'),
   };
 }
