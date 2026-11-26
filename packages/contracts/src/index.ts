@@ -5,6 +5,7 @@ export * from './appointments.js';
 export * from './audit.js';
 export * from './chat.js';
 export * from './bookings.js';
+export * from './booking-series.js';
 export * from './cancellation-policy.js';
 export * from './clients.js';
 export * from './deletion.js';

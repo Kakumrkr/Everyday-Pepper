@@ -164,7 +164,7 @@ Goal: no-shows cost the owner nothing, and money never moves without the owner's
 | S67.2 | **Cancellation-policy builder** (done, [PR #106](https://github.com/Kakumrkr/Everyday-Pepper/pull/106)) | The owner picks the notice and what a late cancel or a no-show costs; Pepper writes the sentence, shown on the booking page, the manage page and in the confirmation, reminder, reschedule and cancel emails. | The policy shown in every channel |
 | S68 | **No-show fee by approval + gate** (done, [PR #107](https://github.com/Kakumrkr/Everyday-Pepper/pull/107); C12 8 in the sandbox) | Charge or waive on a card, never automatic; receipts that hold up in a dispute. Phase gate. | No charge without an approved card, proven by tests |
 
-### Phase 16 · Calendar + staff (S69–S72; before the rest of Phase 13 by [PCR-016](changes/PCR-016.md), Google Calendar in testing mode)
+### Phase 16 · Calendar + staff (S69–S72.2; before the rest of Phase 13 by [PCR-016](changes/PCR-016.md), Google Calendar in testing mode)
 Goal: staff plan their week in Pepper and their personal calendar blocks bookings. Exit: staff experience 8.
 
 | # | Target | Built | Done when |
@@ -174,7 +174,8 @@ Goal: staff plan their week in Pepper and their personal calendar blocks booking
 | S70.2 | **Google Calendar on screen** (split from S70, ADR-0069) | More → Calendar: connect, reconnect, disconnect; the status on Team; the "Reconnect" feed card when a token expires; the OAuth journey and the first run against real Google in testing mode. | Connect journey e2e; a real testing-mode connect |
 | S71 | **Google Calendar out** (split at the brief, ADR-0069 §10) | Bookings written as events in a separate "Pepper bookings" calendar (`calendar.app.created`, in the same consent), kept in step by a trigger on `bookings` and the worker's write pass; one event per booking; the grant writes the next 60 days; disconnect deletes the calendar; the booking sheet's "Also in Google Calendar" (top-up). AC-X-167…174. | Duplicate scenarios (retry, lost answer, two workers, an older change) green |
 | S71.2 | **Google Calendar reconciliation** (split from S71, ADR-0069 §11) | Read "Pepper bookings" back with sync tokens (a 410 means a full read again); a Pepper event moved or deleted in Google is put back (Pepper is the source of truth) with a feed note; conflict scenarios; service and client renames rewrite events; the old event left in a calendar that needed reconnecting is removed. Top-up: the sheet's "Changed in Google, kept as booked in Pepper". AC-X-175…180. Carried to a session with the user: the real testing-mode run of the write path (console: `calendar.app.created` under Data Access; check that a reconnect keeps the new grant). | Conflict scenarios; a real write in testing mode |
-| S72 | **Recurring appointments + staff week** | "Every Tue 7 am for 8 weeks", with each date checked; staff's "My week". Phase gate. | Recurrence property tests |
+| S72 | **Recurring appointments** (split at the brief) | "Every Tue 7 am for 8 weeks", each date checked by the same rules as one booking; a preview books the free dates and lists the taken ones with an alternative; cancel "this visit" or "this and following"; one client email with every date. Top-up: the week view's "kept" dot. Chat booking a series later (needs a recording). | Recurrence property tests |
+| S72.2 | **Staff's "My week" + gate** (split from S72) | Staff's "My week"; Phase 16 gate. | My-week journey; C6 ≥ 8 |
 
 ### Phase 17 · Launch gate (S73–S76)
 Goal: Pepper can charge owners and be found. Exit: every category ≥ 9; public-launch readiness 9.

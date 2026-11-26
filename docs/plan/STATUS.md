@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S72** (recurring appointments + staff week; the Phase 16 gate). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+**S72 Recurring appointments** (split at the brief: "My week" and the Phase 16 gate → S72.2). Decisions (user, 2026-11-26, "go ahead with your recommendations"): D-1 split; D-2 preview, book the free dates, list the taken ones with an alternative; D-3 cancel "this visit" / "this and following", move one at a time; D-4 one client email listing the dates. Top-up: the week view's "kept" dot (S71.2 retro).
+Tasks: 1 ACs + ADR-0070 · 2 date expansion + property tests · 3 migration 0088 `booking_series` · 4 domain preview/create/cancel scopes · 5 API · 6 series email · 7 web Repeat + "Visit 3 of 8" · 8 top-up kept dot.
+Done: 1 ACs AC-X-181…188 + ADR-0070; 2 `seriesStarts` + schemas in contracts (property tests green). Next: task 3 (migration 0088).
 
 ## Last sessions
 - **S71.2 Phase 16 · Google Calendar reconciliation (2026-11-26, scheduled run)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §11, [PR #112](https://github.com/Kakumrkr/Everyday-Pepper/pull/112)). Full entry in [session-log.md](session-log.md).
@@ -117,7 +119,8 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
+| S72 | Recurring appointments (split at the brief) | 16 | Recurrence property tests |
+| S72.2 | Staff's "My week"; **Phase 16 gate** | 16 | My-week journey; C6 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |

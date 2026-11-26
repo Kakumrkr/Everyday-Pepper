@@ -17,6 +17,10 @@ import { UtcDateTimeSchema } from './time.js';
 export const BookingIdSchema = z.uuid().toLowerCase().brand<'BookingId'>();
 export type BookingId = z.infer<typeof BookingIdSchema>;
 
+/** A series of recurring visits (S72, ADR-0070): a lowercased UUID. */
+export const BookingSeriesIdSchema = z.uuid().toLowerCase().brand<'BookingSeriesId'>();
+export type BookingSeriesId = z.infer<typeof BookingSeriesIdSchema>;
+
 /**
  * - `confirmed`: booked (every booking starts here; AI bookings wait as proposals, and the
  *   booking page verifies the email before creating one, so there is no "pending").
@@ -139,6 +143,8 @@ export const BookingSchema = z.object({
   overridden: z.boolean(),
   /** When the client confirmed it by text ("C", S62); `null`: not by them. */
   clientConfirmedAt: UtcDateTimeSchema.nullable().optional(),
+  /** The series of recurring visits it is part of (S72); `null`: a single booking. */
+  seriesId: BookingSeriesIdSchema.nullable().optional(),
   createdAt: UtcDateTimeSchema,
   updatedAt: UtcDateTimeSchema,
 });
