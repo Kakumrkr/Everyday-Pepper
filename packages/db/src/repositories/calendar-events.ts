@@ -5,7 +5,7 @@ import {
   type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
-import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   bookings,
@@ -466,22 +466,4 @@ export async function releaseEventSyncLease(
         eq(calendarEventSyncs.leasedUntil, leased.leasedUntil),
       ),
     );
-}
-
-/** Whether Pepper put a booking back over a change made in Google since `since` (the sheet). */
-export async function wasKeptOverGoogleSince(
-  tx: TenantTx,
-  bookingId: string,
-  since: Date,
-): Promise<boolean> {
-  const [row] = await tx
-    .select({ id: calendarEventSyncs.id })
-    .from(calendarEventSyncs)
-    .where(
-      and(
-        eq(calendarEventSyncs.bookingId, Id.parse(bookingId)),
-        gt(calendarEventSyncs.keptAt, since),
-      ),
-    );
-  return row !== undefined;
 }

@@ -1,6 +1,7 @@
 import {
   BookingCalendarStateSchema,
   BookingIdSchema,
+  CALENDAR_KEPT_SHOWN_DAYS,
   CALENDAR_WRITE_LEASE_MS,
   CALENDAR_WRITE_MAX_BACKOFF_MS,
   PEPPER_CALENDAR_NAME,
@@ -29,6 +30,7 @@ import {
   storeBookingsCalendar,
   withMember,
   withTenant,
+  type BookingEventSource,
   type CalendarConnectionRow,
   type CalendarEventSyncRow,
   type EventPlacement,
@@ -45,6 +47,8 @@ import { SealedTokenError } from './tokens.js';
 // (AC-X-169). Pepper is the source of truth: the event is written as the booking is now. No
 // database transaction is open across a call to Google.
 
+const DAY_MS = 86_400_000;
+
 /** Bookings written in one pass of the worker, at most. */
 const WRITES_PER_PASS = 200;
 
@@ -53,6 +57,17 @@ export type CalendarWriteOutcome = 'written' | 'skipped' | 'failed' | 'waiting';
 /** The first word of a client's name, for the event (D-3): never the rest, a phone or an email. */
 export function firstNameOf(name: string): string {
   return name.trim().split(/\s+/u)[0] ?? '';
+}
+
+/** The event a booking shows as it is now (D-3): what is written, and what a read-back expects. */
+export function eventBodyOf(source: BookingEventSource) {
+  return calendarEventBodyOf({
+    bookingId: source.id,
+    serviceName: source.serviceName,
+    clientFirstName: source.clientDeleted ? '' : firstNameOf(source.clientName),
+    startsAt: source.startsAt,
+    endsAt: source.endsAt,
+  });
 }
 
 /** A write that can't go out until the member reconnects: tried again in an hour, or at once on reconnecting. */
@@ -102,16 +117,7 @@ export async function writeBookingEvent(
       target,
       previous,
       timeZone: tenant?.timeZone ?? 'UTC',
-      event:
-        source === undefined || target === undefined
-          ? null
-          : calendarEventBodyOf({
-              bookingId: source.id,
-              serviceName: source.serviceName,
-              clientFirstName: source.clientDeleted ? '' : firstNameOf(source.clientName),
-              startsAt: source.startsAt,
-              endsAt: source.endsAt,
-            }),
+      event: source === undefined || target === undefined ? null : eventBodyOf(source),
     };
   });
   if (plan === undefined) return 'skipped';
@@ -325,7 +331,7 @@ export async function runDueCalendarWrites(deps: CalendarDeps): Promise<Calendar
  * booking the member may see (RLS: staff see their own), else `undefined` (404).
  */
 export async function readBookingCalendarState(
-  deps: Pick<CalendarDeps, 'db'>,
+  deps: Pick<CalendarDeps, 'db' | 'clock'>,
   actor: Actor,
   bookingId: BookingId,
 ): Promise<BookingCalendarState | undefined> {
@@ -337,8 +343,13 @@ export async function readBookingCalendarState(
     const sync = await findCalendarEventSyncOfBooking(tx, id);
     if (sync === undefined) return BookingCalendarStateSchema.parse({ state: 'none' });
     if (sync.syncedVersion === sync.version) {
+      if (sync.eventConnectionId === null)
+        return BookingCalendarStateSchema.parse({ state: 'none' });
+      // Put back over a change made in Google lately (S71.2 top-up, AC-X-180): the sheet says so.
+      const since = new Date(deps.clock.now().getTime() - CALENDAR_KEPT_SHOWN_DAYS * DAY_MS);
       return BookingCalendarStateSchema.parse({
-        state: sync.eventConnectionId === null ? 'none' : 'written',
+        state: 'written',
+        ...(sync.keptAt !== null && sync.keptAt > since && { keptOverGoogle: true }),
       });
     }
     // Waiting: only while the staff member's calendar takes bookings (else it is being removed).

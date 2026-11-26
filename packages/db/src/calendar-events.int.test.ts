@@ -31,7 +31,6 @@ import {
   releaseEventSyncLease,
   requeueSettledEventSync,
   storeEventsReadCursor,
-  wasKeptOverGoogleSince,
   findBookingEventSource,
   findCalendarEventSyncOfBooking,
   listDueCalendarEventSyncs,
@@ -574,15 +573,13 @@ describe('putting Pepper back (S71.2, AC-X-176, AC-X-177)', () => {
       const booking = await book(tx, jo.staffMemberId, '2099-03-02T15:00:00Z');
       const row = await written(tx, booking.id, jo.connection?.id ?? '', 'cal-1');
       expect(isSettled(row, NOW)).toBe(true);
-      expect(await wasKeptOverGoogleSince(tx, booking.id, new Date(NOW.getTime() - 1))).toBe(false);
+      expect(row.keptAt).toBeNull();
 
       expect(await requeueSettledEventSync(tx, row, NOW, true)).toBe(true);
       const queued = await findCalendarEventSyncOfBooking(tx, booking.id);
       expect(queued).toMatchObject({ version: row.version + 1, keptAt: NOW });
       if (queued === undefined) throw new Error('gone');
       expect(isSettled(queued, NOW)).toBe(false);
-      expect(await wasKeptOverGoogleSince(tx, booking.id, new Date(NOW.getTime() - 1))).toBe(true);
-      expect(await wasKeptOverGoogleSince(tx, booking.id, NOW)).toBe(false);
       // A second read of the same change finds it queued already: nothing more.
       expect(await requeueSettledEventSync(tx, row, NOW, true)).toBe(false);
       // A row being written isn't touched either.
