@@ -312,7 +312,7 @@ Links each requirement to its design and tests. Test columns are filled in as ph
 | AC-X-186 Visit N of M on the sheet; cancel this or following | ADR-0070 | 16 | S72: api `bookings.controller.test.ts`; appointments `booking-series.int.test.ts`; e2e `booking-series.spec.ts` |
 | AC-X-187 "Repeat" in the new-booking sheet with the checked dates | ADR-0070 | 16 | S72: e2e `booking-series.spec.ts`; `screens.spec.ts` |
 | AC-X-188 Week view marks bookings kept over Google | ADR-0070 | 16 | S72: api `calendar-sync.int.test.ts`; web `booking.test.ts` (`bookingBlockName`); walkthrough (a kept row set in the stack's Postgres: the state can't be made through the api) |
-| AC-X-189 "Day · Week · My week" for members linked to a staff member; staff open on My week | ADR-0070 | 16 | S72.2: web `calendar-week.test.ts`; e2e `my-week.spec.ts` |
+| AC-X-189 "Day · Week · My week" for members linked to a staff member; staff open on My week | ADR-0070 | 16 | S72.2: web `calendar.test.ts`, `my-week.test.ts` (`ownStaffMember`); e2e `my-week.spec.ts` |
 | AC-X-190 My week: the member's own week day by day, a visit opens its sheet | ADR-0070 | 16 | S72.2: web `my-week.test.ts`; e2e `my-week.spec.ts`; `screens.spec.ts` |
 | AC-X-191 My week's header: visits, hours booked, days off | ADR-0070 | 16 | S72.2: web `my-week.test.ts` |
 | AC-X-192 My week empty and free days | ADR-0070 | 16 | S72.2: web `my-week.test.ts`; `screens.spec.ts` |

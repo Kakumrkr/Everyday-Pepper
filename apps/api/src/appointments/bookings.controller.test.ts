@@ -164,7 +164,7 @@ const bookings = {
   series: vi.fn(() => Promise.resolve(SERIES)),
   cancelFollowing: vi.fn(() => Promise.resolve({ bookings: [CANCELLED] })),
   visitNumbers: vi.fn(() =>
-    Promise.resolve({ visits: [{ bookingId: BOOKING_ID, number: 2, of: 8 }] }),
+    Promise.resolve({ visits: [{ bookingId: BOOKING_ID, number: 2, of: 8 }], truncated: false }),
   ),
 };
 
@@ -504,6 +504,7 @@ describe('recurring appointments (S72)', () => {
     const path = `/v1/calendar/visit-numbers?from=${FROM}&to=${TO}&staffMemberId=${STAFF_ID}`;
     expect((await get(path).expect(200)).body).toEqual({
       visits: [{ bookingId: BOOKING_ID, number: 2, of: 8 }],
+      truncated: false,
     });
     expect(bookings.visitNumbers).toHaveBeenCalledWith(context(), {
       from: FROM,

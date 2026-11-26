@@ -318,12 +318,13 @@ export async function listVisitNumbers(
   requirePermission(actor, 'bookings.read');
   const { from, to, staffMemberId } = BusyQuerySchema.parse(query);
   return withMember(db, actor.context, async (tx) => {
-    const inRange = await listSeriesVisitsStarting(tx, {
+    const found = await listSeriesVisitsStarting(tx, {
       from: new Date(from),
       to: new Date(to),
-      limit: VISIT_NUMBERS_MAX,
+      limit: VISIT_NUMBERS_MAX + 1,
       ...(staffMemberId !== undefined && { staffMemberId }),
     });
+    const inRange = found.slice(0, VISIT_NUMBERS_MAX);
     const seriesIds = [
       ...new Set(inRange.flatMap((row) => (row.seriesId === null ? [] : [row.seriesId]))),
     ].map((id) => BookingSeriesIdSchema.parse(id));
@@ -339,7 +340,10 @@ export async function listVisitNumbers(
         row.seriesId === null ? null : visitNumber(bySeries.get(row.seriesId) ?? [], row.id);
       return place === null ? [] : [{ bookingId: row.id, ...place }];
     });
-    return VisitNumbersResponseSchema.parse({ visits });
+    return VisitNumbersResponseSchema.parse({
+      visits,
+      truncated: found.length > VISIT_NUMBERS_MAX,
+    });
   });
 }
 

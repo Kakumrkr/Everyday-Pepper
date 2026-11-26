@@ -48,7 +48,7 @@ export function readDate(text: string | undefined): CivilDate | null {
 
 /**
  * The day, staff filter and view from the page's query (`?date=YYYY-MM-DD&staff=<id>&view=week`).
- * A bare `/calendar` (no date, no view) opens on `fallback` (staff: My week, AC-X-189); every
+ * A bare `/calendar` (no date, view or staff) opens on `fallback` (staff: My week, AC-X-189); every
  * link inside the calendar carries a date, so the day view stays the day. An unknown view is the
  * day.
  */
@@ -60,7 +60,8 @@ export function readCalendarParams(
   const single = (value: string | string[] | undefined) =>
     typeof value === 'string' ? value : undefined;
   const staff = single(query['staff']);
-  const bare = query['view'] === undefined && query['date'] === undefined;
+  const bare =
+    query['view'] === undefined && query['date'] === undefined && query['staff'] === undefined;
   const view = bare ? fallback : single(query['view']);
   return {
     date: readDate(single(query['date'])) ?? today,

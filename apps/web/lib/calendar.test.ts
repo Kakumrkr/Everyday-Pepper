@@ -88,6 +88,7 @@ describe('readCalendarParams', () => {
   it('opens a bare /calendar on the fallback, and any dated link on its own view (AC-X-189)', () => {
     expect(readCalendarParams({}, nov3, 'my-week').view).toBe('my-week');
     expect(readCalendarParams({ date: '2026-12-01' }, nov3, 'my-week').view).toBe('day');
+    expect(readCalendarParams({ staff: STAFF_ID }, nov3, 'my-week').view).toBe('day');
     expect(readCalendarParams({ view: 'week' }, nov3, 'my-week').view).toBe('week');
     expect(calendarHref(nov3, null, 'my-week')).toBe('/calendar?date=2026-11-03&view=my-week');
   });

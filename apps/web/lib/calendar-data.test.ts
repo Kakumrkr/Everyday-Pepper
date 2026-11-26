@@ -148,7 +148,10 @@ describe('loadCalendarDay', () => {
   it('reads every series visit’s "2 of 8" at once, and leaves it out when unread (AC-X-194)', async () => {
     const { options, paths } = api({
       ...full([booking(1, id(50))]),
-      '/v1/calendar/visit-numbers': { visits: [{ bookingId: id(101), number: 2, of: 8 }] },
+      '/v1/calendar/visit-numbers': {
+        visits: [{ bookingId: id(101), number: 2, of: 8 }],
+        truncated: false,
+      },
     });
     const day = await loadCalendarDay(options, range);
     expect([...day.visits]).toEqual([[id(101), { number: 2, of: 8 }]]);

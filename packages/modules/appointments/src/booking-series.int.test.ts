@@ -568,7 +568,10 @@ describe('listVisitNumbers (AC-X-193)', () => {
     );
     await bookOne(b, tue(14, 1)); // not in a series: never numbered
     const week = await listVisitNumbers(db, b.owner, weekOf());
-    expect(week.visits).toEqual([{ bookingId: second.id, number: 1, of: 3 }]);
+    expect(week).toEqual({
+      visits: [{ bookingId: second.id, number: 1, of: 3 }],
+      truncated: false,
+    });
     const later = await listVisitNumbers(db, b.owner, { from: tue(0, 1), to: tue(0, 4) });
     expect(later.visits.map((v) => [v.bookingId, v.number, v.of])).toEqual([
       [second.id, 1, 3],

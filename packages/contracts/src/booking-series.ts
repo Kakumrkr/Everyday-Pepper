@@ -185,5 +185,7 @@ export type VisitNumber = z.infer<typeof VisitNumberSchema>;
  */
 export const VisitNumbersResponseSchema = z.object({
   visits: z.array(VisitNumberSchema).max(VISIT_NUMBERS_MAX),
+  /** More series visits start in the range after the last one (see `VISIT_NUMBERS_MAX`). */
+  truncated: z.boolean(),
 });
 export type VisitNumbersResponse = z.infer<typeof VisitNumbersResponseSchema>;
