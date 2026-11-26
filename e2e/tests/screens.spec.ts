@@ -18,6 +18,7 @@ import {
   formatDate,
   fromZoned,
   isoWeekday,
+  parseDate,
   toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Locator, type Page } from '@playwright/test';
@@ -1370,6 +1371,69 @@ for (const width of WIDTHS) {
     }
   });
 }
+
+// "Repeat" in the new-booking sheet (S72, AC-X-187) at 375 px: every date checked, a taken one
+// with the nearest free times. The dates move with today, so they are masked; the layout,
+// badges and words are what the picture holds.
+test('the new-booking sheet repeating every week at 375 px, light and dark', async ({ page }) => {
+  test.setTimeout(180_000);
+  await page.setViewportSize({ width: 375, height: 900 });
+  await onboardOwner(page, { business: 'Southside Cuts' });
+  const { date, dre, audy } = await southsideDay(page);
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  const services = ServicesResponseSchema.parse(
+    await (await page.request.get('/v1/services')).json(),
+  ).services;
+  // Two weeks on, Dre is taken at noon.
+  await post(
+    page,
+    '/v1/bookings',
+    {
+      clientId: audy,
+      serviceId: services.find((service) => service.name === 'Skin fade')?.id,
+      staffMemberId: dre,
+      startsAt: new Date(
+        fromZoned(business.timeZone, addDays(parseDate(date), 14), 12 * 60),
+      ).toISOString(),
+      notifyClient: false,
+    },
+    { parse: (body: unknown) => body },
+  );
+  const dialog = page.getByRole('dialog');
+  for (const scheme of SCHEMES) {
+    await page.goto(`/calendar?date=${date}`);
+    await (await hydrated(page.getByRole('button', { name: 'New booking', exact: true }))).click();
+    await dialog.getByLabel('Name or email').fill('Marcus');
+    await dialog.getByRole('button', { name: 'Search' }).click();
+    await dialog.getByRole('button', { name: /Marcus Bell/ }).click();
+    await dialog.getByTestId('free-times').getByRole('button', { name: '12:00 PM' }).click();
+    await dialog.getByLabel('Repeat').selectOption({ label: 'Every week' });
+    await dialog.getByLabel('For').selectOption({ label: '4 visits' });
+    await expect(dialog.getByTestId('series-summary')).toHaveText('3 of 4 dates are free.');
+    // Nothing in the sheet runs past the screen's edge (D12: two selects side by side did).
+    const right = await dialog.evaluate((root) =>
+      Math.max(...Array.from(root.querySelectorAll('*'), (el) => el.getBoundingClientRect().right)),
+    );
+    expect(right).toBeLessThanOrEqual(375);
+    await expectActionAtTheBottom(page, 'Book 3 visits');
+    await expectTapTargets(page, 'the repeat dates');
+    await dialog.getByTestId('series-dates').scrollIntoViewIfNeeded();
+    await still(page, scheme);
+    await expect.soft(page).toHaveScreenshot(`new-booking-repeat-375-${scheme}.png`, {
+      ...SHOT,
+      fullPage: false,
+      mask: [
+        dialog.getByTestId('series-date-when'),
+        dialog.getByTestId('series-dates').getByRole('button'),
+        dialog.getByLabel('Day', { exact: true }),
+        page.getByTestId('calendar-day'),
+      ],
+    });
+    await page.keyboard.press('Escape');
+  }
+});
 
 for (const width of WIDTHS) {
   test(`Autonomy, What I know and Waitlist at ${String(width)} px, light and dark`, async ({

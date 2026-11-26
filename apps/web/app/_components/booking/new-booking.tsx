@@ -220,8 +220,9 @@ function NewBookingForm({
   }
 
   return (
-    <div className="grid gap-5">
-      <section aria-label="Client" className="grid gap-2">
+    // One column that never grows past the sheet (`grid-cols-1` is minmax(0, 1fr)).
+    <div className="grid grid-cols-1 gap-5">
+      <section aria-label="Client" className="grid min-w-0 grid-cols-1 gap-2">
         <h3 className="m-0 type-subheading text-ink">Client</h3>
         <ClientPicker
           managesClients={abilities.managesClients}

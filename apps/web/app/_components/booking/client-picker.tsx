@@ -159,7 +159,8 @@ function ChosenCard({
   onChange: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-md bg-surface-2 px-4 py-3">
+    // `min-w-0`: a long email truncates instead of widening the sheet past a phone's screen.
+    <div className="flex min-w-0 items-center gap-3 rounded-md bg-surface-2 px-4 py-3">
       <Avatar name={name} />
       <div className="min-w-0 flex-1">
         <p className="m-0 truncate type-body font-semibold text-ink" data-testid="chosen-client">

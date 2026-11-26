@@ -29,7 +29,9 @@ export function RepeatPicker({
   onChange: (next: RepeatChoice) => void;
 }) {
   return (
-    <div className="grid grid-cols-2 gap-2">
+    // Stacked on a phone: a select is as wide as its longest option, so two side by side
+    // would push the sheet wider than a 375 px screen.
+    <div className="grid gap-3 sm:grid-cols-2 sm:gap-2">
       <Select
         label="Repeat"
         name="repeat"
@@ -137,7 +139,7 @@ export function SeriesDates({
         {preview.visits.map((visit, index) => (
           <li key={visit.startsAt} className="grid gap-2 py-2" data-testid="series-date">
             <div className="flex min-h-11 items-center justify-between gap-3">
-              <span className="type-body tabular-nums text-ink">
+              <span className="type-body tabular-nums text-ink" data-testid="series-date-when">
                 {dateTimeLabel(timeZone, visit.startsAt)}
               </span>
               {visit.free ? (
