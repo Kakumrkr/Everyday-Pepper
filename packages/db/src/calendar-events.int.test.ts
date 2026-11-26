@@ -9,6 +9,8 @@ import {
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
+  UserIdSchema,
+  UtcDateTimeSchema,
   type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
@@ -22,6 +24,14 @@ import { insertBooking, moveBooking, setBookingStatus } from './repositories/boo
 import {
   claimCalendarEventSync,
   clearBookingsCalendar,
+  eventsReadCursorOf,
+  findCalendarEventSyncsOfBookings,
+  isSettled,
+  leaseEventSyncForStray,
+  releaseEventSyncLease,
+  requeueSettledEventSync,
+  storeEventsReadCursor,
+  wasKeptOverGoogleSince,
   findBookingEventSource,
   findCalendarEventSyncOfBooking,
   listDueCalendarEventSyncs,
@@ -33,6 +43,7 @@ import {
 } from './repositories/calendar-events.js';
 import { findCalendarConnection, saveCalendarConnection } from './repositories/calendar-sync.js';
 import { deleteClientRow, insertClient } from './repositories/clients.js';
+import { listOpenFeedItems, writeCalendarKeptNote } from './repositories/feed.js';
 import { addMembership } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
 import { withMember, withTenant, type TenantTx } from './tenant.js';
@@ -61,7 +72,7 @@ async function staffWith(tx: TenantTx, writesBookings: boolean | null) {
     membershipId: membership.id,
   });
   const staffMemberId = StaffMemberIdSchema.parse(staff.id);
-  if (writesBookings === null) return { staffMemberId, connection: undefined };
+  if (writesBookings === null) return { staffMemberId, connection: undefined, userId };
   const connection = await saveCalendarConnection(
     tx,
     {
@@ -391,6 +402,8 @@ describe('the grant and the bookings calendar (AC-X-170, AC-X-171)', () => {
       expect(source).toEqual({
         id: row.id,
         staffMemberId: jo.staffMemberId,
+        serviceId: row.serviceId,
+        clientId: row.clientId,
         status: 'confirmed',
         startsAt: new Date('2026-12-02T15:00:00Z'),
         endsAt: new Date('2026-12-02T15:45:00Z'),
@@ -443,6 +456,7 @@ describe('the rows carry no client data (AC-X-174)', () => {
       'event_calendar_id',
       'event_connection_id',
       'id',
+      'kept_at',
       'last_error',
       'leased_until',
       'synced_version',
@@ -450,5 +464,188 @@ describe('the rows carry no client data (AC-X-174)', () => {
       'updated_at',
       'version',
     ]);
+  });
+});
+
+/** Writes a booking's row at its version into `calendarId`, as the worker would. */
+async function written(tx: TenantTx, bookingId: string, connectionId: string, calendarId: string) {
+  const claimed = await claimCalendarEventSync(tx, bookingId, NOW, LEASE);
+  if (claimed === undefined) throw new Error('not claimed');
+  await recordCalendarEventWritten(tx, claimed, { connectionId, calendarId });
+  const row = await findCalendarEventSyncOfBooking(tx, bookingId);
+  if (row === undefined) throw new Error('no row');
+  return row;
+}
+
+describe('renames rewrite events (S71.2, AC-X-178)', () => {
+  it("raises the versions of a renamed service's and client's bookings that haven't ended", async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const jo = await staffWith(tx, true);
+      const connectionId = jo.connection?.id ?? '';
+      const soon = await book(tx, jo.staffMemberId, '2099-03-02T15:00:00Z');
+      const past = await book(tx, jo.staffMemberId, '2020-03-02T15:00:00Z');
+      // The past booking shares the upcoming one's service and client.
+      await tx.execute(sql`UPDATE bookings SET service_id = ${soon.serviceId},
+        client_id = ${soon.clientId} WHERE id = ${past.id}`);
+      const before = {
+        soon: (await written(tx, soon.id, connectionId, 'cal-1')).version,
+        past: (await written(tx, past.id, connectionId, 'cal-1')).version,
+      };
+
+      await tx.execute(sql`UPDATE services SET name = 'Skin fade' WHERE id = ${soon.serviceId}`);
+      expect(await versionOf(tx, soon.id)).toBe(before.soon + 1);
+      expect(await versionOf(tx, past.id)).toBe(before.past);
+
+      await tx.execute(sql`UPDATE clients SET name = 'Ana Ruiz' WHERE id = ${soon.clientId}`);
+      expect(await versionOf(tx, soon.id)).toBe(before.soon + 2);
+      expect(await versionOf(tx, past.id)).toBe(before.past);
+
+      // Anything else about them changes nothing.
+      await tx.execute(sql`UPDATE services SET duration_minutes = 50 WHERE id = ${soon.serviceId}`);
+      await tx.execute(sql`UPDATE clients SET name = 'Ana Ruiz', phone = '+15555550199'
+        WHERE id = ${soon.clientId}`);
+      expect(await versionOf(tx, soon.id)).toBe(before.soon + 2);
+      expect((await findCalendarEventSyncOfBooking(tx, soon.id))?.dueAt).toBeNull();
+    });
+  });
+});
+
+describe('the read-back cursor (S71.2, AC-X-175)', () => {
+  it('keeps the tokens for the generation and calendar they were read with only', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const jo = await staffWith(tx, true);
+      const connection = jo.connection;
+      if (connection === undefined) throw new Error('no connection');
+      expect(await storeBookingsCalendar(tx, connection, 'cal-1')).toBe('cal-1');
+      // Nothing read yet: the whole calendar.
+      const fresh = await findCalendarConnection(tx, connection.id);
+      if (fresh === undefined) throw new Error('gone');
+      expect(eventsReadCursorOf(fresh, 'cal-1')).toEqual({ syncToken: null, pageToken: null });
+
+      const readAt = new Date('2026-12-01T12:05:00Z');
+      expect(
+        await storeEventsReadCursor(
+          tx,
+          fresh,
+          'cal-1',
+          { syncToken: 'sync-1', pageToken: null },
+          readAt,
+        ),
+      ).toBe(true);
+      const read = await findCalendarConnection(tx, connection.id);
+      if (read === undefined) throw new Error('gone');
+      expect(eventsReadCursorOf(read, 'cal-1')).toEqual({ syncToken: 'sync-1', pageToken: null });
+      expect(read.eventsReadAt).toEqual(readAt);
+      // Another calendar (made again) starts over.
+      expect(eventsReadCursorOf(read, 'cal-2')).toEqual({ syncToken: null, pageToken: null });
+      // A read under an old generation, or of a calendar the connection no longer has, keeps nothing.
+      expect(
+        await storeEventsReadCursor(
+          tx,
+          { id: connection.id, generation: connection.generation + 1 },
+          'cal-1',
+          { syncToken: 'sync-old', pageToken: null },
+          null,
+        ),
+      ).toBe(false);
+      expect(
+        await storeEventsReadCursor(tx, read, 'cal-2', { syncToken: 'x', pageToken: null }, null),
+      ).toBe(false);
+      // A reconnect (a new generation) starts over.
+      await tx.execute(sql`UPDATE calendar_connections SET generation = generation + 1
+        WHERE id = ${connection.id}`);
+      const reconnected = await findCalendarConnection(tx, connection.id);
+      if (reconnected === undefined) throw new Error('gone');
+      expect(eventsReadCursorOf(reconnected, 'cal-1')).toEqual({
+        syncToken: null,
+        pageToken: null,
+      });
+    });
+  });
+});
+
+describe('putting Pepper back (S71.2, AC-X-176, AC-X-177)', () => {
+  it('queues a settled booking again only at the version read, and marks it kept', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const jo = await staffWith(tx, true);
+      const booking = await book(tx, jo.staffMemberId, '2099-03-02T15:00:00Z');
+      const row = await written(tx, booking.id, jo.connection?.id ?? '', 'cal-1');
+      expect(isSettled(row, NOW)).toBe(true);
+      expect(await wasKeptOverGoogleSince(tx, booking.id, new Date(NOW.getTime() - 1))).toBe(false);
+
+      expect(await requeueSettledEventSync(tx, row, NOW, true)).toBe(true);
+      const queued = await findCalendarEventSyncOfBooking(tx, booking.id);
+      expect(queued).toMatchObject({ version: row.version + 1, keptAt: NOW });
+      if (queued === undefined) throw new Error('gone');
+      expect(isSettled(queued, NOW)).toBe(false);
+      expect(await wasKeptOverGoogleSince(tx, booking.id, new Date(NOW.getTime() - 1))).toBe(true);
+      expect(await wasKeptOverGoogleSince(tx, booking.id, NOW)).toBe(false);
+      // A second read of the same change finds it queued already: nothing more.
+      expect(await requeueSettledEventSync(tx, row, NOW, true)).toBe(false);
+      // A row being written isn't touched either.
+      const claimed = await claimCalendarEventSync(tx, booking.id, NOW, LEASE);
+      if (claimed === undefined) throw new Error('not claimed');
+      expect(await requeueSettledEventSync(tx, claimed, NOW, false)).toBe(false);
+    });
+  });
+
+  it('holds a row while a stray copy is removed, never over a writer', async () => {
+    const tenant = await business();
+    await withTenant(db, tenant, async (tx) => {
+      const jo = await staffWith(tx, true);
+      const booking = await book(tx, jo.staffMemberId, '2099-03-02T15:00:00Z');
+      const row = await written(tx, booking.id, jo.connection?.id ?? '', 'cal-1');
+      const rows = await findCalendarEventSyncsOfBookings(tx, [booking.id, newId()]);
+      expect([...rows.keys()]).toEqual([booking.id]);
+
+      const held = await leaseEventSyncForStray(tx, row.id, NOW, LEASE);
+      expect(held?.leasedUntil).toEqual(new Date(NOW.getTime() + LEASE));
+      expect(await leaseEventSyncForStray(tx, row.id, NOW, LEASE)).toBeUndefined();
+      // A change meanwhile can't be claimed by a writer until the lease is given back.
+      await setBookingStatus(tx, BookingIdSchema.parse(booking.id), 'cancelled');
+      expect(await claimCalendarEventSync(tx, booking.id, NOW, LEASE)).toBeUndefined();
+      if (held === undefined) throw new Error('not held');
+      await releaseEventSyncLease(tx, held);
+      expect((await claimCalendarEventSync(tx, booking.id, NOW, LEASE))?.version).toBe(
+        row.version + 1,
+      );
+    });
+  });
+
+  it('writes one note per booking, to its staff member and owners, never a colleague', async () => {
+    const tenant = await business();
+    const { jo, ben, booking } = await withTenant(db, tenant, async (tx) => {
+      const jo = await staffWith(tx, true);
+      const ben = await staffWith(tx, null);
+      const booking = await book(tx, jo.staffMemberId, '2099-03-02T15:00:00Z');
+      const note = {
+        bookingId: booking.id,
+        staffMemberId: jo.staffMemberId,
+        clientId: booking.clientId,
+        serviceId: booking.serviceId,
+        day: '2099-03-02',
+        payload: {
+          change: 'moved' as const,
+          startsAt: UtcDateTimeSchema.parse('2099-03-02T15:00:00.000Z'),
+        },
+        expiresAt: new Date('2099-03-05T00:00:00Z'),
+      };
+      await writeCalendarKeptNote(tx, note);
+      await writeCalendarKeptNote(tx, { ...note, payload: { ...note.payload, change: 'deleted' } });
+      return { jo, ben, booking };
+    });
+    const seen = async (userId: string) =>
+      withMember(db, { tenantId: tenant, userId: UserIdSchema.parse(userId) }, (tx) =>
+        listOpenFeedItems(tx, NOW),
+      );
+    const own = await seen(jo.userId);
+    expect(own.filter((item) => item.kind === 'calendar_kept')).toMatchObject([
+      { bookingId: booking.id, payload: { change: 'deleted' } },
+    ]);
+    const colleague = await seen(ben.userId);
+    expect(colleague.filter((item) => item.kind === 'calendar_kept')).toEqual([]);
   });
 });

@@ -5,7 +5,7 @@ import {
   type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
-import { and, asc, eq, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, inArray, isNull, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   bookings,
@@ -213,6 +213,8 @@ export async function findCalendarEventSyncOfBooking(
 export interface BookingEventSource {
   id: string;
   staffMemberId: string;
+  serviceId: string;
+  clientId: string;
   status: string;
   startsAt: Date;
   endsAt: Date;
@@ -230,6 +232,8 @@ export async function findBookingEventSource(
     .select({
       id: bookings.id,
       staffMemberId: bookings.staffMemberId,
+      serviceId: bookings.serviceId,
+      clientId: bookings.clientId,
       status: bookings.status,
       startsAt: bookings.startsAt,
       endsAt: bookings.endsAt,
@@ -294,4 +298,190 @@ export async function clearBookingsCalendar(
       ),
     );
   await forgetCalendarEvents(tx, connectionId, calendarId);
+}
+
+// ---- Reading "Pepper bookings" back (S71.2, ADR-0069 §11) ----
+
+/** Where the read-back of a connection's "Pepper bookings" stands: tokens to go on from. */
+export interface EventsReadCursor {
+  /** Google's sync token after the last full read; `null`: read the whole calendar. */
+  syncToken: string | null;
+  /** A read that stopped part-way goes on from this page; `null`: none. */
+  pageToken: string | null;
+}
+
+const Token = z.string().min(1).max(4096);
+
+/**
+ * The cursor to read `calendarId` with (AC-X-175): the stored one only when it was read with the
+ * connection's current generation and this calendar, else none (a reconnect, a calendar made
+ * again: the whole calendar is read again).
+ */
+export function eventsReadCursorOf(
+  connection: Pick<
+    CalendarConnectionRow,
+    | 'generation'
+    | 'eventsSyncToken'
+    | 'eventsPageToken'
+    | 'eventsSyncGeneration'
+    | 'eventsSyncCalendarId'
+  >,
+  calendarId: string,
+): EventsReadCursor {
+  if (
+    connection.eventsSyncGeneration !== connection.generation ||
+    connection.eventsSyncCalendarId !== calendarId
+  ) {
+    return { syncToken: null, pageToken: null };
+  }
+  return { syncToken: connection.eventsSyncToken, pageToken: connection.eventsPageToken };
+}
+
+/**
+ * Keeps where a read of `calendarId` got to (AC-X-175), unless the member reconnected or the
+ * calendar changed meanwhile (then nothing is kept and the next read starts again). `readAt`
+ * marks a read that reached the end. Answers whether it was kept.
+ */
+export async function storeEventsReadCursor(
+  tx: TenantTx,
+  claimed: Pick<CalendarConnectionRow, 'id' | 'generation'>,
+  calendarId: string,
+  cursor: EventsReadCursor,
+  readAt: Date | null,
+): Promise<boolean> {
+  const stored = await tx
+    .update(calendarConnections)
+    .set({
+      eventsSyncToken: cursor.syncToken === null ? null : Token.parse(cursor.syncToken),
+      eventsPageToken: cursor.pageToken === null ? null : Token.parse(cursor.pageToken),
+      eventsSyncGeneration: claimed.generation,
+      eventsSyncCalendarId: z.string().min(1).max(1024).parse(calendarId),
+      ...(readAt !== null && { eventsReadAt: readAt }),
+    })
+    .where(
+      and(
+        eq(calendarConnections.id, Id.parse(claimed.id)),
+        eq(calendarConnections.generation, claimed.generation),
+        eq(calendarConnections.bookingsCalendarId, calendarId),
+      ),
+    )
+    .returning({ id: calendarConnections.id });
+  return stored.length > 0;
+}
+
+/** The sync rows of these bookings (the business's only), by booking id. */
+export async function findCalendarEventSyncsOfBookings(
+  tx: TenantTx,
+  bookingIds: readonly string[],
+): Promise<Map<string, CalendarEventSyncRow>> {
+  if (bookingIds.length === 0) return new Map();
+  const ids = z
+    .array(Id)
+    .max(2500)
+    .parse([...new Set(bookingIds)]);
+  const rows = await tx
+    .select()
+    .from(calendarEventSyncs)
+    .where(inArray(calendarEventSyncs.bookingId, ids));
+  return new Map(rows.map((row) => [row.bookingId, row]));
+}
+
+/** A row written at its version and not being written now: what Google shows should match it. */
+export function isSettled(row: CalendarEventSyncRow, now: Date): boolean {
+  return (
+    row.syncedVersion === row.version &&
+    row.dueAt === null &&
+    (row.leasedUntil === null || row.leasedUntil.getTime() <= now.getTime())
+  );
+}
+
+/**
+ * Queues a settled booking to be written again (AC-X-176: Pepper's version put back), only if it
+ * is still at the version the read saw and nobody is writing it; `kept` marks that it was put back
+ * over a change made in Google. Answers whether it was queued.
+ */
+export async function requeueSettledEventSync(
+  tx: TenantTx,
+  seen: Pick<CalendarEventSyncRow, 'id' | 'version'>,
+  now: Date,
+  kept: boolean,
+): Promise<boolean> {
+  const queued = await tx
+    .update(calendarEventSyncs)
+    .set({
+      version: sql`${calendarEventSyncs.version} + 1`,
+      dueAt: null,
+      attempts: 0,
+      lastError: null,
+      ...(kept && { keptAt: now }),
+    })
+    .where(
+      and(
+        eq(calendarEventSyncs.id, Id.parse(seen.id)),
+        eq(calendarEventSyncs.version, Version.parse(seen.version)),
+        eq(calendarEventSyncs.syncedVersion, Version.parse(seen.version)),
+        or(isNull(calendarEventSyncs.leasedUntil), lte(calendarEventSyncs.leasedUntil, now)),
+      ),
+    )
+    .returning({ id: calendarEventSyncs.id });
+  return queued.length > 0;
+}
+
+/**
+ * Holds a booking's row while a stray copy of its event is removed (AC-X-177), so no write puts
+ * the event into that calendar meanwhile: a lease taken only if no one holds one, whatever the
+ * version. `undefined`: someone is writing it (the stray waits for the next read).
+ */
+export async function leaseEventSyncForStray(
+  tx: TenantTx,
+  rowId: string,
+  now: Date,
+  leaseMs: number,
+): Promise<CalendarEventSyncRow | undefined> {
+  const [row] = await tx
+    .update(calendarEventSyncs)
+    .set({ leasedUntil: new Date(now.getTime() + z.number().int().min(1).parse(leaseMs)) })
+    .where(
+      and(
+        eq(calendarEventSyncs.id, Id.parse(rowId)),
+        or(isNull(calendarEventSyncs.leasedUntil), lte(calendarEventSyncs.leasedUntil, now)),
+      ),
+    )
+    .returning();
+  return row;
+}
+
+/** Gives back a lease taken by `leaseEventSyncForStray` (only that one: matched by its end). */
+export async function releaseEventSyncLease(
+  tx: TenantTx,
+  leased: Pick<CalendarEventSyncRow, 'id' | 'leasedUntil'>,
+): Promise<void> {
+  if (leased.leasedUntil === null) return;
+  await tx
+    .update(calendarEventSyncs)
+    .set({ leasedUntil: null })
+    .where(
+      and(
+        eq(calendarEventSyncs.id, Id.parse(leased.id)),
+        eq(calendarEventSyncs.leasedUntil, leased.leasedUntil),
+      ),
+    );
+}
+
+/** Whether Pepper put a booking back over a change made in Google since `since` (the sheet). */
+export async function wasKeptOverGoogleSince(
+  tx: TenantTx,
+  bookingId: string,
+  since: Date,
+): Promise<boolean> {
+  const [row] = await tx
+    .select({ id: calendarEventSyncs.id })
+    .from(calendarEventSyncs)
+    .where(
+      and(
+        eq(calendarEventSyncs.bookingId, Id.parse(bookingId)),
+        gt(calendarEventSyncs.keptAt, since),
+      ),
+    );
+  return row !== undefined;
 }
