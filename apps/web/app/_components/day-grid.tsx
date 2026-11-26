@@ -186,6 +186,18 @@ export function CalendarBlock({
   className?: string | undefined;
 }) {
   const time = timeRange(timeZone, entry.startsAt, entry.endsAt);
+  // "2/8" leads the second line, so a narrow column keeps the client's name whole; the block's
+  // name says "visit 2 of 8" (AC-X-194).
+  const visit =
+    entry.kind === 'booking' && entry.visit ? (
+      <span
+        className="mr-1 rounded-pill bg-surface px-1 tabular-nums text-ink-2"
+        aria-hidden="true"
+        data-testid="booking-visit-number"
+      >
+        {entry.visit.number}/{entry.visit.of}
+      </span>
+    ) : null;
   const position = { top: `${top.toString()}%`, height: `${height.toString()}%` };
   if (entry.kind === 'busy') {
     return (
@@ -219,21 +231,11 @@ export function CalendarBlock({
           // A 30-minute block has room for two lines only: the tick shows it; the block's name says it.
           <Icon name="check" className="size-3 shrink-0 text-ok" />
         ) : null}
-        {entry.visit ? (
-          // "2/8": the block's name says "visit 2 of 8" (AC-X-194).
-          <span
-            className="ml-auto shrink-0 rounded-pill bg-surface px-1 type-caption font-normal tabular-nums text-ink-2"
-            aria-hidden="true"
-            data-testid="booking-visit-number"
-          >
-            {entry.visit.number}/{entry.visit.of}
-          </span>
-        ) : null}
         {entry.keptOverGoogle === true ? (
           // The sheet's words on hover; the block's name says them to a screen reader, and a tap
           // opens the sheet, which says them too (AC-X-180).
           <span
-            className={cx('size-2 shrink-0 rounded-full bg-info', !entry.visit && 'ml-auto')}
+            className="ml-auto size-2 shrink-0 rounded-full bg-info"
             title={KEPT_OVER_GOOGLE}
             data-testid="booking-kept-mark"
           />
@@ -241,12 +243,16 @@ export function CalendarBlock({
       </span>
       {roomy ? (
         <>
-          <span className="block truncate">{entry.service}</span>
+          <span className="block truncate">
+            {visit}
+            {entry.service}
+          </span>
           <span className="block truncate text-ink-2 tabular-nums">{time}</span>
         </>
       ) : (
         // Two lines fit a 30-minute block (44 px): who, then when and what.
         <span className="block truncate text-ink-2">
+          {visit}
           <span className="tabular-nums">{time}</span> · {entry.service}
         </span>
       )}
