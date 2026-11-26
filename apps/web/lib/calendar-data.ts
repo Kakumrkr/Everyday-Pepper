@@ -8,6 +8,7 @@ import {
   ServicesResponseSchema,
   StaffResponseSchema,
   TimeOffResponseSchema,
+  VisitNumbersResponseSchema,
   WeeklyHoursSchema,
   type Booking,
   type BusyTime,
@@ -28,6 +29,12 @@ export interface VisitClient {
   deleted: boolean;
 }
 
+/** A series visit's place in its series: visit `number` of `of` (S72.2). */
+export interface VisitPlace {
+  number: number;
+  of: number;
+}
+
 export interface CalendarDay {
   staff: StaffMember[];
   services: Service[];
@@ -37,6 +44,11 @@ export interface CalendarDay {
   busy: BusyTime[];
   /** Client names by id, for the bookings shown (S50.2: one `GET /v1/clients/names`). */
   clientNames: Map<string, VisitClient>;
+  /**
+   * "2 of 8" by booking id for the visits of a series (S72.2, AC-X-194), read for the range at
+   * once; empty when it couldn't be loaded (the blocks then just leave it out).
+   */
+  visits: ReadonlyMap<string, VisitPlace>;
   /** Some answer stopped at the api's limit (`MAX_LIST_ITEMS`). */
   truncated: boolean;
   /** Something could not be loaded: the view is incomplete. */
@@ -117,6 +129,7 @@ export async function loadCalendarWeek(
       bookings: [],
       busy: [],
       clientNames: new Map(),
+      visits: new Map(),
       truncated: false,
       failed: staff === null || services === null,
       hours: null,
@@ -163,14 +176,17 @@ async function loadVisits(
   options: ApiCallOptions,
   range: { from: string; to: string },
   staffMemberId: string | null,
-): Promise<Pick<CalendarDay, 'bookings' | 'busy' | 'clientNames' | 'truncated' | 'failed'>> {
+): Promise<
+  Pick<CalendarDay, 'bookings' | 'busy' | 'clientNames' | 'visits' | 'truncated' | 'failed'>
+> {
   const query = new URLSearchParams({
     ...range,
     ...(staffMemberId === null ? {} : { staffMemberId }),
   }).toString();
-  const [bookings, busy] = await Promise.all([
+  const [bookings, busy, visits] = await Promise.all([
     loadJson(`/v1/bookings?${query}`, BookingsResponseSchema, options),
     loadJson(`/v1/calendar/busy?${query}`, BusyResponseSchema, options),
+    loadJson(`/v1/calendar/visit-numbers?${query}`, VisitNumbersResponseSchema, options),
   ]);
   const shown = (bookings?.bookings ?? []).filter((booking) => booking.status !== 'cancelled');
   const clientIds = [...new Set(shown.map((booking) => booking.clientId))].slice(
@@ -193,6 +209,9 @@ async function loadVisits(
         client.id,
         { name: client.name, deleted: client.deleted },
       ]),
+    ),
+    visits: new Map(
+      (visits?.visits ?? []).map(({ bookingId, number, of }) => [bookingId, { number, of }]),
     ),
     truncated: bookings?.truncated === true || busy?.truncated === true,
     failed: bookings === null || busy === null,

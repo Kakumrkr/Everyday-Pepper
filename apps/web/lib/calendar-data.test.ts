@@ -145,6 +145,19 @@ describe('loadCalendarDay', () => {
     expect(empty.paths.filter((p) => p.startsWith('/v1/clients'))).toEqual([]);
   });
 
+  it('reads every series visit’s "2 of 8" at once, and leaves it out when unread (AC-X-194)', async () => {
+    const { options, paths } = api({
+      ...full([booking(1, id(50))]),
+      '/v1/calendar/visit-numbers': { visits: [{ bookingId: id(101), number: 2, of: 8 }] },
+    });
+    const day = await loadCalendarDay(options, range);
+    expect([...day.visits]).toEqual([[id(101), { number: 2, of: 8 }]]);
+    expect(paths.filter((p) => p.startsWith('/v1/calendar/visit-numbers'))).toHaveLength(1);
+    const unread = await loadCalendarDay(api(full([booking(1, id(50))])).options, range);
+    expect(unread.visits.size).toBe(0);
+    expect(unread.failed).toBe(false);
+  });
+
   it('marks the view as failed when an answer is missing', async () => {
     const { options } = api(full([]), ['/v1/bookings']);
     const day = await loadCalendarDay(options, range);

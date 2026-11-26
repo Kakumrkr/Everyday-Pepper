@@ -131,7 +131,8 @@ export function confirmedByText(booking: {
 
 /**
  * What a booking's block on the calendar is called (its accessible name): when, what and who,
- * then what its marks show: confirmed by text (S62), kept over a Google change (S72, AC-X-188).
+ * then what its marks show: its place in a series (S72.2, AC-X-194), confirmed by text (S62),
+ * kept over a Google change (S72, AC-X-188).
  */
 export function bookingBlockName(
   timeZone: string,
@@ -143,9 +144,12 @@ export function bookingBlockName(
     status: BookingStatus;
     clientConfirmedAt?: string | null | undefined;
     keptOverGoogle?: boolean | undefined;
+    visit?: { number: number; of: number } | null | undefined;
   },
 ): string {
+  const { visit } = booking;
   const marks = [
+    ...(visit ? [`visit ${String(visit.number)} of ${String(visit.of)}`] : []),
     ...(confirmedByText(booking) === null ? [] : ['confirmed by text']),
     // "changed in Google, …": only the sentence's first letter lowered, never the names.
     ...(booking.keptOverGoogle === true

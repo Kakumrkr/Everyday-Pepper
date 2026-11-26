@@ -279,4 +279,15 @@ describe('bookingBlockName (S72, AC-X-188)', () => {
       'Google',
     );
   });
+
+  it('says a series visit’s place first among its marks (S72.2, AC-X-194)', () => {
+    expect(
+      bookingBlockName('America/New_York', {
+        ...block,
+        visit: { number: 2, of: 8 },
+        clientConfirmedAt: '2026-11-30T15:00:00.000Z',
+      }),
+    ).toMatch(/Maria Lopez, visit 2 of 8, confirmed by text$/);
+    expect(bookingBlockName('America/New_York', { ...block, visit: null })).not.toContain('visit');
+  });
 });

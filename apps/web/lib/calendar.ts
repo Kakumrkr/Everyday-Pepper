@@ -17,7 +17,9 @@ export const DEFAULT_DAY_START_MINUTE = 8 * 60;
 export const DEFAULT_DAY_END_MINUTE = 20 * 60;
 
 /** The calendar's two views (S69): a day of everyone, or one staff member's week. */
-export type CalendarView = 'day' | 'week';
+/** Day, one staff member's week (S69), or the member's own week as a list (S72.2). */
+export type CalendarView = 'day' | 'week' | 'my-week';
+const VIEWS: readonly CalendarView[] = ['day', 'week', 'my-week'];
 
 export interface CalendarParams {
   date: CivilDate;
@@ -44,18 +46,26 @@ export function readDate(text: string | undefined): CivilDate | null {
   return formatDate(addDays(date, 0)) === text ? date : null;
 }
 
-/** The day, staff filter and view from the page's query (`?date=YYYY-MM-DD&staff=<id>&view=week`). */
+/**
+ * The day, staff filter and view from the page's query (`?date=YYYY-MM-DD&staff=<id>&view=week`).
+ * A bare `/calendar` (no date, no view) opens on `fallback` (staff: My week, AC-X-189); every
+ * link inside the calendar carries a date, so the day view stays the day. An unknown view is the
+ * day.
+ */
 export function readCalendarParams(
   query: Record<string, string | string[] | undefined>,
   today: CivilDate,
+  fallback: CalendarView = 'day',
 ): CalendarParams {
   const single = (value: string | string[] | undefined) =>
     typeof value === 'string' ? value : undefined;
   const staff = single(query['staff']);
+  const bare = query['view'] === undefined && query['date'] === undefined;
+  const view = bare ? fallback : single(query['view']);
   return {
     date: readDate(single(query['date'])) ?? today,
     staffMemberId: staff !== undefined && UUID_PATTERN.test(staff) ? staff.toLowerCase() : null,
-    view: single(query['view']) === 'week' ? 'week' : 'day',
+    view: VIEWS.find((one) => one === view) ?? 'day',
   };
 }
 
@@ -67,7 +77,7 @@ export function calendarHref(
 ): string {
   const query = new URLSearchParams({ date: formatDate(date) });
   if (staffMemberId !== null) query.set('staff', staffMemberId);
-  if (view === 'week') query.set('view', 'week');
+  if (view !== 'day') query.set('view', view);
   return `/calendar?${query.toString()}`;
 }
 

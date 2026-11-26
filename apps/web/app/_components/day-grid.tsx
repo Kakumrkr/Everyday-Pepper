@@ -1,6 +1,7 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
 import { cx, Icon } from '@pepper/ui';
-import { confirmedByText, type BookingSetup } from '../../lib/booking';
+import { bookingBlockName, confirmedByText, type BookingSetup } from '../../lib/booking';
+import type { VisitPlace } from '../../lib/calendar-data';
 import { KEPT_OVER_GOOGLE } from '../../lib/calendar-connect';
 import { hourLabel, layoutDay, staffTone, timeRange } from '../../lib/calendar';
 import { STAFF_TONE_CLASSES } from './staff-tone';
@@ -25,6 +26,8 @@ export type CalendarEntry =
       seriesId?: string | null;
       /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
       keptOverGoogle?: boolean;
+      /** Its place in its series, "2 of 8" (S72.2 top-up, AC-X-194); absent outside one. */
+      visit?: VisitPlace | null;
     }
   | { kind: 'busy'; startsAt: string; endsAt: string };
 
@@ -216,11 +219,21 @@ export function CalendarBlock({
           // A 30-minute block has room for two lines only: the tick shows it; the block's name says it.
           <Icon name="check" className="size-3 shrink-0 text-ok" />
         ) : null}
+        {entry.visit ? (
+          // "2/8": the block's name says "visit 2 of 8" (AC-X-194).
+          <span
+            className="ml-auto shrink-0 rounded-pill bg-surface px-1 type-caption font-normal tabular-nums text-ink-2"
+            aria-hidden="true"
+            data-testid="booking-visit-number"
+          >
+            {entry.visit.number}/{entry.visit.of}
+          </span>
+        ) : null}
         {entry.keptOverGoogle === true ? (
           // The sheet's words on hover; the block's name says them to a screen reader, and a tap
           // opens the sheet, which says them too (AC-X-180).
           <span
-            className="ml-auto size-2 shrink-0 rounded-full bg-info"
+            className={cx('size-2 shrink-0 rounded-full bg-info', !entry.visit && 'ml-auto')}
             title={KEPT_OVER_GOOGLE}
             data-testid="booking-kept-mark"
           />
@@ -259,7 +272,7 @@ export function CalendarBlock({
   return (
     <article
       data-testid="booking-block"
-      aria-label={`${time}, ${entry.service} with ${entry.client}`}
+      aria-label={bookingBlockName(timeZone, entry)}
       className={className}
       style={style}
     >
