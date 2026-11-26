@@ -142,7 +142,7 @@ export function CalendarPanel({
               open={confirming}
               onOpenChange={setConfirming}
               title="Disconnect Google Calendar?"
-              description="Your Google busy times will stop blocking bookings, and Google will be asked to forget Pepper. You can connect again any time."
+              description={words.disconnectNote}
               trigger={
                 <Button variant="secondary" block disabled={busy !== null}>
                   Disconnect

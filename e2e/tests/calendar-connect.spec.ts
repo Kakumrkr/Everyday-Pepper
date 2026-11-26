@@ -1,9 +1,17 @@
 import {
+  addDays,
+  BookingCalendarStateSchema,
+  BookingSchema,
   CalendarConnectionAnswerSchema,
   CalendarConnectStartSchema,
+  ClientSchema,
+  CurrentBusinessResponseSchema,
+  formatDate,
+  fromZoned,
   MembersResponseSchema,
   ServiceSchema,
   StaffMemberSchema,
+  toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
 import { callApi, hydrated, onboardOwner } from './helpers.js';
@@ -14,6 +22,13 @@ import { callApi, hydrated, onboardOwner } from './helpers.js';
 
 /** The owner takes bookings too, as a staff member linked to their own login. */
 async function ownerTakesBookings(page: Page, displayName = 'Ana'): Promise<string> {
+  return (await ownerStaff(page, displayName)).staffMemberId;
+}
+
+async function ownerStaff(
+  page: Page,
+  displayName = 'Ana',
+): Promise<{ staffMemberId: string; serviceId: string }> {
   const service = await callApi(
     page,
     'POST',
@@ -32,7 +47,21 @@ async function ownerTakesBookings(page: Page, displayName = 'Ana'): Promise<stri
     { displayName, serviceIds: [service.id], userId },
     StaffMemberSchema,
   );
-  return staff.id;
+  // Every day, all day: any time a week ahead is bookable.
+  await callApi(
+    page,
+    'PUT',
+    `/v1/staff/${staff.id}/hours`,
+    {
+      intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+        weekday,
+        start: '08:00',
+        end: '20:00',
+      })),
+    },
+    { parse: (body: unknown) => body },
+  );
+  return { staffMemberId: staff.id, serviceId: service.id };
 }
 
 /** Connects through the api with a sandbox code the consent page never sends. */
@@ -186,4 +215,80 @@ test('Google’s return page says what went wrong and connects nothing', async (
   ).toBeVisible();
   await expect(page).toHaveURL(/\/more\/calendar$/);
   await expect(status(page)).toContainText('Not connected');
+});
+
+test('a booking says "Also in Google Calendar" once Pepper has written it there (S71, AC-X-168, AC-X-173)', async ({
+  page,
+}) => {
+  test.setTimeout(150_000);
+  await onboardOwner(page);
+  const { staffMemberId, serviceId } = await ownerStaff(page);
+  await page.goto('/more/calendar');
+  await hydrated(status(page));
+  await page.getByRole('button', { name: 'Connect Google Calendar' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
+  // The bookings permission was given: More → Calendar says where they go (AC-X-167).
+  await expect(status(page)).toContainText('Your bookings are added to “Pepper bookings”');
+
+  const { timeZone } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  ).business;
+  const date = addDays(toZoned(timeZone, Date.now()), 7);
+  const client = await callApi(page, 'POST', '/v1/clients', { name: 'Maria Lopez' }, ClientSchema);
+  const booking = await callApi(
+    page,
+    'POST',
+    '/v1/bookings',
+    {
+      clientId: client.id,
+      serviceId,
+      staffMemberId,
+      startsAt: new Date(fromZoned(timeZone, date, 11 * 60)).toISOString(),
+      notifyClient: false,
+    },
+    BookingSchema,
+  );
+
+  // The worker writes it within its next pass (every 10 s in CI, a minute by default).
+  await expect
+    .poll(
+      async () =>
+        BookingCalendarStateSchema.parse(
+          await (await page.request.get(`/v1/calendar/bookings/${booking.id}`)).json(),
+        ).state,
+      { timeout: 100_000, intervals: [2_000] },
+    )
+    .toBe('written');
+  await page.goto(`/calendar?date=${formatDate(date)}`);
+  const block = page.getByTestId('booking-block');
+  await hydrated(block);
+  await block.click();
+  await expect(page.getByTestId('booking-google-calendar')).toHaveText('Also in Google Calendar');
+
+  // Disconnecting says the calendar is deleted too (AC-X-172).
+  await page.goto('/more/calendar');
+  await hydrated(status(page));
+  await page.getByRole('button', { name: 'Disconnect' }).click();
+  await expect(page.getByRole('dialog', { name: 'Disconnect Google Calendar?' })).toContainText(
+    'delete the “Pepper bookings” calendar',
+  );
+});
+
+test('a member who gave busy times only is offered to add bookings (S71, AC-X-167)', async ({
+  page,
+}) => {
+  await onboardOwner(page);
+  await ownerTakesBookings(page);
+  await connectWithCode(page, 'sandbox-busy-only');
+  await page.goto('/more/calendar');
+  await hydrated(status(page));
+  await expect(status(page)).toContainText('Connected');
+  await expect(status(page)).toContainText('Your bookings aren’t added to Google Calendar');
+  // The same consent again, this time with the bookings permission.
+  await page.getByRole('button', { name: 'Add bookings to Google Calendar' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
+  await expect(status(page)).toContainText('Your bookings are added to “Pepper bookings”');
+  await expect(page.getByRole('button', { name: 'Add bookings to Google Calendar' })).toHaveCount(
+    0,
+  );
 });

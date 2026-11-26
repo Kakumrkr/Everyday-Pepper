@@ -1,9 +1,11 @@
 'use client';
 
 import {
+  BookingCalendarStateSchema,
   BookingDepositAnswerSchema,
   BookingSchema,
   type AvailableSlot,
+  type BookingCalendarState,
   type BookingDeposit,
   type BookingChange,
   type BookingStatus,
@@ -25,6 +27,7 @@ import {
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
 import { fetchJson, sendJson } from '../../../lib/client-api';
+import { bookingCalendarLine, bookingCalendarPath } from '../../../lib/calendar-connect';
 import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
@@ -131,6 +134,9 @@ function BookingDetails({
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
   const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
   const deposit = teamDepositLine(depositRead, timeZone);
+  const inGoogle = bookingCalendarLine(
+    useBookingCalendarState(booking.id, `${booking.status} ${booking.startsAt}`),
+  );
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -204,6 +210,18 @@ function BookingDetails({
                 value: (
                   <span className="tabular-nums" data-testid="booking-deposit">
                     {deposit}
+                  </span>
+                ),
+              },
+            ]),
+        ...(inGoogle === null
+          ? []
+          : [
+              {
+                label: 'Calendar',
+                value: (
+                  <span className="text-ink-2" data-testid="booking-google-calendar">
+                    {inGoogle}
                   </span>
                 ),
               },
@@ -480,4 +498,26 @@ function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | 
     };
   }, [bookingId, reads]);
   return deposit;
+}
+
+/**
+ * Whether the booking is in Google Calendar (S71 top-up, AC-X-173), read when the sheet opens and
+ * again after the booking changes (`version`: its status and time); `null` while loading, with
+ * Google Calendar off here, or when it can't be read (the sheet then says nothing about it).
+ */
+function useBookingCalendarState(
+  bookingId: string,
+  version: string,
+): BookingCalendarState['state'] | null {
+  const [state, setState] = useState<BookingCalendarState['state'] | null>(null);
+  useEffect(() => {
+    let current = true;
+    void fetchJson(bookingCalendarPath(bookingId), BookingCalendarStateSchema).then((answer) => {
+      if (current) setState(answer.ok ? answer.data.state : null);
+    });
+    return () => {
+      current = false;
+    };
+  }, [bookingId, version]);
+  return state;
 }
