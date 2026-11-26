@@ -31,7 +31,7 @@ const item = {
 };
 
 describe('feed kinds', () => {
-  it('writes every insight type from the insights pass, and the briefing besides (S38a)', () => {
+  it('writes every insight type from the insights pass, the briefing and the calendar note besides (S38a, S71.2)', () => {
     expect(InsightTypeSchema.options).toContain('staff_overload');
     expect(FeedInsightKindSchema.options).toEqual([
       'schedule_gaps',
@@ -43,7 +43,11 @@ describe('feed kinds', () => {
     expect([...FeedInsightKindSchema.options].sort()).toEqual(
       [...InsightTypeSchema.options].sort(),
     );
-    expect(FeedKindSchema.options).toEqual([...FeedInsightKindSchema.options, 'daily_briefing']);
+    expect(FeedKindSchema.options).toEqual([
+      ...FeedInsightKindSchema.options,
+      'daily_briefing',
+      'calendar_kept',
+    ]);
   });
 });
 
