@@ -1,8 +1,10 @@
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import {
   GOOGLE_CALENDAR_SCOPES,
   GOOGLE_EVENTS_SCOPE,
+  calendarEventBodyOf,
   type CalendarEventBody,
+  type GoogleListedEvent,
 } from '@pepper/contracts';
 import {
   CalendarProviderError,
@@ -11,7 +13,9 @@ import {
   type ConsentUrlInput,
   type CreateCalendarInput,
   type EventInput,
+  type EventPage,
   type EventRef,
+  type ListEventsInput,
   type ExchangeCodeInput,
   type FreeBusyInput,
   type GrantedTokens,
@@ -27,6 +31,10 @@ import {
 // `sandbox-busy-only` (S71) connects as a member who unticked the bookings permission. Calendars
 // and events Pepper writes (S71) are kept in memory, per provider, as Google keeps them: an id
 // is taken once, and a deleted event keeps its id (cancelled) until it is written again.
+// From S71.2 it lists them as Google does: every change gets the next number, a sync token
+// names the number read up to, pages hold `pageSize` events, and `expireSyncTokens` makes every
+// token given so far answer 410. `changeInGoogle` and `addOwnEvent` are what a member does in
+// Google (tests).
 
 export const SANDBOX_ACCOUNT_EMAIL = 'calendar@sandbox.test';
 export const SANDBOX_BUSY_HOUR_UTC = 17;
@@ -44,6 +52,10 @@ const SANDBOX_CODES = new Set([
 export interface SandboxEvent {
   body: CalendarEventBody;
   status: 'confirmed' | 'cancelled';
+  /** The change number it was last changed at. */
+  changed: number;
+  /** What a member changed in Google over Pepper's body, until Pepper writes it again. */
+  inGoogle?: Partial<Pick<GoogleListedEvent, 'summary' | 'start' | 'end'>>;
 }
 const DAY_MS = 24 * HOUR_MS;
 
@@ -51,6 +63,13 @@ export class SandboxCalendarProvider implements CalendarProvider {
   readonly name = 'sandbox' as const;
   private readonly revoked = new Set<string>();
   private calendarCount = 0;
+  private changeCount = 0;
+  /** Tokens name the epoch they were given in; `expireSyncTokens` starts a new one. */
+  private epoch = 0;
+  /** Events per page of `listEvents`. */
+  pageSize = 250;
+  /** Calls to `listEvents` (tests). */
+  listCalls = 0;
   /** Calendars Pepper made, by id: their events by id. Tests read it. */
   readonly calendars = new Map<string, Map<string, SandboxEvent>>();
 
@@ -138,7 +157,7 @@ export class SandboxCalendarProvider implements CalendarProvider {
     return this.authorized(input.accessToken, () => {
       const events = this.calendarOf(input.calendarId);
       if (events.has(input.event.id)) return 'exists' as const;
-      events.set(input.event.id, { body: input.event, status: 'confirmed' });
+      events.set(input.event.id, { body: input.event, status: 'confirmed', changed: this.next() });
       return 'created' as const;
     });
   }
@@ -147,7 +166,11 @@ export class SandboxCalendarProvider implements CalendarProvider {
     return this.authorized(input.accessToken, () => {
       const events = this.calendars.get(input.calendarId);
       if (events?.has(input.event.id) !== true) return 'missing' as const;
-      events.set(input.event.id, { body: input.event, status: input.event.status });
+      events.set(input.event.id, {
+        body: input.event,
+        status: input.event.status,
+        changed: this.next(),
+      });
       return 'updated' as const;
     });
   }
@@ -155,11 +178,92 @@ export class SandboxCalendarProvider implements CalendarProvider {
   deleteEvent(input: EventRef): Promise<void> {
     return this.authorized(input.accessToken, () => {
       const event = this.calendars.get(input.calendarId)?.get(input.eventId);
-      if (event !== undefined) event.status = 'cancelled';
+      if (event !== undefined && event.status !== 'cancelled') {
+        event.status = 'cancelled';
+        event.changed = this.next();
+      }
     });
   }
 
-  /** The events of a calendar that aren't cancelled (tests). */
+  listEvents(input: ListEventsInput): Promise<EventPage | 'sync_expired'> {
+    return this.authorized(input.accessToken, () => {
+      this.listCalls += 1;
+      const events = this.calendarOf(input.calendarId);
+      const sync =
+        input.syncToken === null ? null : /^sbx-sync-(\d+)-(\d+)$/u.exec(input.syncToken);
+      const page =
+        input.pageToken === null ? null : /^sbx-page-(\d+)-(\d+)-(\d+)$/u.exec(input.pageToken);
+      const epoch = String(this.epoch);
+      if (
+        (input.syncToken !== null && sync?.[1] !== epoch) ||
+        (input.pageToken !== null && page?.[1] !== epoch)
+      ) {
+        return 'sync_expired' as const;
+      }
+      const since = sync?.[2] === undefined ? 0 : Number(sync[2]);
+      const upTo = page?.[2] === undefined ? this.changeCount : Number(page[2]);
+      const offset = page?.[3] === undefined ? 0 : Number(page[3]);
+      const changed = [...events.entries()]
+        .filter(([, event]) => event.changed > since && event.changed <= upTo)
+        .sort(([, a], [, b]) => a.changed - b.changed);
+      const slice = changed.slice(offset, offset + this.pageSize);
+      const more = offset + this.pageSize < changed.length;
+      return {
+        events: slice.map(([id, event]) => listed(id, event)),
+        nextPageToken: more
+          ? `sbx-page-${epoch}-${String(upTo)}-${String(offset + this.pageSize)}`
+          : null,
+        nextSyncToken: more ? null : `sbx-sync-${epoch}-${String(upTo)}`,
+      };
+    });
+  }
+
+  /** A member changes or deletes a Pepper event in Google (tests). */
+  changeInGoogle(
+    calendarId: string,
+    eventId: string,
+    change: SandboxEvent['inGoogle'] | 'delete',
+  ): void {
+    const event = this.calendars.get(calendarId)?.get(eventId);
+    if (event === undefined) throw new Error(`No event ${eventId} in ${calendarId}`);
+    if (change === 'delete') event.status = 'cancelled';
+    else event.inGoogle = { ...event.inGoogle, ...change };
+    event.changed = this.next();
+  }
+
+  /** A member adds an event of their own to "Pepper bookings" (tests). */
+  addOwnEvent(calendarId: string, eventId: string, summary: string): void {
+    const body = calendarEventBodyOf({
+      bookingId: randomUUID(),
+      serviceName: summary,
+      clientFirstName: '',
+      startsAt: new Date(this.now()),
+      endsAt: new Date(this.now() + HOUR_MS),
+    });
+    this.calendarOf(calendarId).set(eventId, {
+      body: { ...body, id: eventId },
+      status: 'confirmed',
+      changed: this.next(),
+    });
+  }
+
+  /** Every sync and page token given so far answers 410 (Google's token expiry, tests). */
+  expireSyncTokens(): void {
+    this.epoch += 1;
+  }
+
+  /** The event as a member would see it in Google now (tests). */
+  seenInGoogle(calendarId: string, eventId: string): GoogleListedEvent | undefined {
+    const event = this.calendars.get(calendarId)?.get(eventId);
+    return event === undefined ? undefined : listed(eventId, event);
+  }
+
+  private next(): number {
+    this.changeCount += 1;
+    return this.changeCount;
+  }
+
+  /** The events of a calendar that aren't cancelled (tests): Pepper's bodies as last written. */
   liveEvents(calendarId: string): CalendarEventBody[] {
     return [...(this.calendars.get(calendarId)?.values() ?? [])]
       .filter((event) => event.status === 'confirmed')
@@ -182,4 +286,16 @@ export class SandboxCalendarProvider implements CalendarProvider {
       return Promise.reject(error instanceof Error ? error : new Error(String(error)));
     }
   }
+}
+
+/** An event as `events.list` gives it: Pepper's body with what a member changed over it. */
+function listed(id: string, event: SandboxEvent): GoogleListedEvent {
+  if (event.status === 'cancelled') return { id, status: 'cancelled' };
+  return {
+    id,
+    status: 'confirmed',
+    summary: event.inGoogle?.summary ?? event.body.summary,
+    start: event.inGoogle?.start ?? { dateTime: event.body.start.dateTime },
+    end: event.inGoogle?.end ?? { dateTime: event.body.end.dateTime },
+  };
 }
