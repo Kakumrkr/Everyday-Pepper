@@ -1,5 +1,6 @@
 import {
   ApiErrorSchema,
+  CalendarConnectionAnswerSchema,
   CurrentBusinessResponseSchema,
   InvitesResponseSchema,
   MembersResponseSchema,
@@ -7,6 +8,7 @@ import {
   PaymentAccountAnswerSchema,
   PublicBusinessSchema,
   roleRequiresMfa,
+  type CalendarConnectionAnswer,
   type CurrentBusinessResponse,
   type Invite,
   type MeResponse,
@@ -98,6 +100,31 @@ export async function loadPaymentAccount(options: ApiCallOptions): Promise<Payme
   return parsed.success ? { state: 'on', account: parsed.data } : { state: 'unavailable' };
 }
 
+/** Where the member's Google Calendar stands (S70.2): their connection, off here, or no answer. */
+export type CalendarConnectionRead =
+  { state: 'on'; answer: CalendarConnectionAnswer } | { state: 'off' } | { state: 'unavailable' };
+
+/**
+ * `GET /v1/calendar/google` (AC-X-160): `off` only for the api's own 404 `calendar_off`, so a
+ * failing api never hides the page; anything else unreadable is `unavailable`.
+ */
+export async function loadCalendarConnection(
+  options: ApiCallOptions,
+): Promise<CalendarConnectionRead> {
+  const response = await getJson('/v1/calendar/google', options);
+  if (response === null) return { state: 'unavailable' };
+  const body: unknown = await response.json().catch(() => undefined);
+  if (response.status === 404) {
+    const refusal = ApiErrorSchema.safeParse(body);
+    return refusal.success && refusal.data.code === 'calendar_off'
+      ? { state: 'off' }
+      : { state: 'unavailable' };
+  }
+  if (response.status !== 200) return { state: 'unavailable' };
+  const parsed = CalendarConnectionAnswerSchema.safeParse(body);
+  return parsed.success ? { state: 'on', answer: parsed.data } : { state: 'unavailable' };
+}
+
 /** A JSON body from the api, or `null` if the api refuses, fails or answers something else. */
 export async function loadJson<T extends z.ZodType>(
   path: string,
@@ -141,6 +168,8 @@ export const ROUTES = {
   yourData: '/more/data',
   /** Texts and reminders to clients (S62.2, AC-X-77). */
   textsAndReminders: '/more/texts',
+  /** The member's own Google Calendar (S70.2, ADR-0069); Google returns to `/google` below it. */
+  calendarSettings: '/more/calendar',
   /** Payments through Stripe (S65.2, ADR-0067): owners and managers. */
   payments: '/more/payments',
   /** Deleting the business (S51.2, ADR-0054): owners only. */

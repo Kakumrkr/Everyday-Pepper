@@ -4,6 +4,7 @@ import type {
   CalendarConnectionAnswer,
   CalendarConnectStart,
   OutsideBusyTime,
+  TeamCalendarConnections,
 } from '@pepper/contracts';
 import { systemClock, type Actor, type Clock, type TenantContext } from '@pepper/core';
 import type { Database } from '@pepper/db';
@@ -14,6 +15,7 @@ import {
   disconnectCalendar,
   listOutsideBusy,
   readOwnCalendar,
+  readTeamCalendars,
   startCalendarConnect,
   type CalendarDeps,
 } from '@pepper/google-calendar';
@@ -51,6 +53,11 @@ export class GoogleCalendarService {
 
   async own(tenant: TenantContext): Promise<CalendarConnectionAnswer> {
     return readOwnCalendar(this.on(), actorOf(tenant));
+  }
+
+  /** The Team list's calendar states (AC-X-165); 404 `calendar_off` when off. */
+  async team(tenant: TenantContext, limit: number): Promise<TeamCalendarConnections> {
+    return readTeamCalendars(this.on(), actorOf(tenant), limit);
   }
 
   async connect(tenant: TenantContext): Promise<CalendarConnectStart> {

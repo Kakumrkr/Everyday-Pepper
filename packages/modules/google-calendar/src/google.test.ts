@@ -5,6 +5,7 @@ import {
   GOOGLE_REVOKE_URL,
   GOOGLE_TOKEN_URL,
   GoogleCalendarProvider,
+  formEncoded,
 } from './google.js';
 import { CalendarProviderError } from './provider.js';
 
@@ -13,6 +14,7 @@ import { CalendarProviderError } from './provider.js';
 
 const CLIENT_ID = '1234-test.apps.googleusercontent.com';
 const SECRET = 'GOCSPX-test-secret';
+const BASIC = `Basic ${Buffer.from(`${CLIENT_ID}:${SECRET}`).toString('base64')}`;
 const REDIRECT = 'https://app.pepper.test/more/calendar/google';
 const NOW = Date.parse('2026-12-01T12:00:00Z');
 
@@ -102,6 +104,13 @@ describe('the consent URL', () => {
   });
 });
 
+describe('formEncoded (RFC 6749 Appendix B)', () => {
+  it('encodes as a form does, not as a URI component', () => {
+    expect(formEncoded("a b!'()*~:")).toBe('a+b%21%27%28%29*%7E%3A');
+    expect(formEncoded('GOCSPX-abc_123')).toBe('GOCSPX-abc_123');
+  });
+});
+
 describe('the code exchange', () => {
   it('posts the code, the verifier and the client to the token endpoint', async () => {
     const { fetch, seen } = stub([200, withIdToken(CLAIMS)]);
@@ -116,9 +125,9 @@ describe('the code exchange', () => {
       code: '4/0Ab-code',
       code_verifier: 'v'.repeat(43),
       redirect_uri: REDIRECT,
-      client_id: CLIENT_ID,
-      client_secret: SECRET,
     });
+    // The client goes in a Basic header (RFC 6749 §2.3.1), never in the body (S70.2).
+    expect(seen[0]?.headers['Authorization']).toBe(BASIC);
     expect(granted).toEqual({
       refreshToken: '1//0g-test-refresh-token',
       accessToken: 'ya29.a0AfB_byC-test-access-token',
@@ -174,9 +183,8 @@ describe('the refresh (AC-X-155)', () => {
     expect(Object.fromEntries(new URLSearchParams(seen[0]?.body))).toEqual({
       grant_type: 'refresh_token',
       refresh_token: '1//0g-test-refresh-token',
-      client_id: CLIENT_ID,
-      client_secret: SECRET,
     });
+    expect(seen[0]?.headers['Authorization']).toBe(BASIC);
   });
 
   it('says invalid_grant when Google refused the refresh token (testing mode’s 7 days)', async () => {

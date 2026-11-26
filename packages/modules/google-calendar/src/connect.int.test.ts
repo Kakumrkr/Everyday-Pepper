@@ -30,6 +30,7 @@ import {
   completeCalendarConnect,
   disconnectCalendar,
   readOwnCalendar,
+  readTeamCalendars,
   startCalendarConnect,
   type CalendarDeps,
 } from './services.js';
@@ -259,6 +260,50 @@ describe('connecting a calendar (AC-X-152)', () => {
   });
 });
 
+describe('the Team list (S70.2, AC-X-165)', () => {
+  it("lists the business's connections by staff member, without the email, up to the limit", async () => {
+    const { tenantId, owner, deps } = await business();
+    const jo = await linkedStaff(tenantId, 'Jo');
+    const sam = await linkedStaff(tenantId, 'Sam');
+    await linkedStaff(tenantId, 'Kai');
+    for (const member of [jo, sam]) {
+      const { url } = await startCalendarConnect(deps, member.actor);
+      await completeCalendarConnect(deps, member.actor, answerOf(url));
+    }
+
+    const team = await readTeamCalendars(deps, owner, 50);
+    expect(team.connections.map((c) => c.staffMemberId).sort()).toEqual(
+      [jo.staffMemberId, sam.staffMemberId].sort(),
+    );
+    expect(team.connections[0]).toEqual({
+      staffMemberId: team.connections[0]?.staffMemberId,
+      provider: 'sandbox',
+      status: 'connected',
+      syncedAt: START.toISOString(),
+      connectedAt: expect.any(String) as string,
+    });
+    expect(JSON.stringify(team)).not.toContain(SANDBOX_ACCOUNT_EMAIL);
+    // A colleague reads the same list; the limit holds.
+    expect(await readTeamCalendars(deps, jo.actor, 50)).toEqual(team);
+    expect(team.truncated).toBe(false);
+    const cut = await readTeamCalendars(deps, owner, 1);
+    expect(cut.connections).toHaveLength(1);
+    expect(cut.truncated).toBe(true);
+  });
+
+  it("never lists another business's connections", async () => {
+    const first = await business();
+    const jo = await linkedStaff(first.tenantId);
+    const { url } = await startCalendarConnect(first.deps, jo.actor);
+    await completeCalendarConnect(first.deps, jo.actor, answerOf(url));
+    const other = await business();
+    expect(await readTeamCalendars(other.deps, other.owner, 50)).toEqual({
+      connections: [],
+      truncated: false,
+    });
+  });
+});
+
 describe('tokens (AC-X-153)', () => {
   it('are never stored, audited or answered in the clear', async () => {
     const { tenantId, deps, sandbox } = await business();
@@ -295,6 +340,21 @@ describe('reconnecting and disconnecting (AC-X-155, AC-X-157)', () => {
       { provider: 'sandbox', staffMemberId: jo.staffMemberId, reconnected: true },
       { provider: 'sandbox', staffMemberId: jo.staffMemberId, reconnected: false },
     ]);
+  });
+
+  it('sandbox-expired needs reconnecting from the first read, and a reconnect fixes it (S70.2)', async () => {
+    const { tenantId, deps } = await business();
+    const jo = await linkedStaff(tenantId);
+    const first = await startCalendarConnect(deps, jo.actor);
+    const expired = await completeCalendarConnect(
+      deps,
+      jo.actor,
+      answerOf(first.url, 'sandbox-expired'),
+    );
+    expect(expired.connection?.status).toBe('needs_reconnect');
+    const again = await startCalendarConnect(deps, jo.actor);
+    const fixed = await completeCalendarConnect(deps, jo.actor, answerOf(again.url));
+    expect(fixed.connection?.status).toBe('connected');
   });
 
   it('disconnect removes the connection and its busy times, then revokes', async () => {

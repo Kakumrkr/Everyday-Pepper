@@ -144,6 +144,21 @@ export const CalendarConnectionAnswerSchema = z.object({
 });
 export type CalendarConnectionAnswer = z.infer<typeof CalendarConnectionAnswerSchema>;
 
+/**
+ * One staff member's calendar as their colleagues see it on the Team list (S70.2, AC-X-164,
+ * AC-X-165): the state and when it was last read, never the Google account's email.
+ */
+export const TeamCalendarConnectionSchema = CalendarConnectionSchema.omit({ accountEmail: true });
+export type TeamCalendarConnection = z.infer<typeof TeamCalendarConnectionSchema>;
+
+/** `GET /v1/calendar/connections`: the business's connections, one per staff member at most. */
+export const TeamCalendarConnectionsSchema = z.object({
+  connections: z.array(TeamCalendarConnectionSchema).max(MAX_LIST_ITEMS),
+  /** More connections than one answer holds: the list says nothing rather than guess. */
+  truncated: z.boolean(),
+});
+export type TeamCalendarConnections = z.infer<typeof TeamCalendarConnectionsSchema>;
+
 /** `POST /v1/calendar/google/connect`: where to send the member (Google's consent page). */
 export const CalendarConnectStartSchema = z.object({ url: z.url().max(4000) });
 export type CalendarConnectStart = z.infer<typeof CalendarConnectStartSchema>;

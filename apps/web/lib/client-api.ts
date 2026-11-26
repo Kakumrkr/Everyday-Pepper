@@ -121,6 +121,16 @@ const MESSAGES: Record<string, string> = {
   payments_unavailable: 'Stripe isn’t answering right now. Try again in a few minutes.',
   payments_not_onboarded: 'Finish with Stripe first. The dashboard opens once your details are in.',
   payments_off: 'Payments aren’t on for Pepper yet.',
+  // Google Calendar (S70.2, AC-X-161): what each refusal means and what to do next.
+  calendar_off: 'Google Calendar isn’t on for Pepper yet.',
+  calendar_not_linked:
+    'Your login isn’t linked to a staff member yet. The owner can link it on Team.',
+  calendar_connect_invalid:
+    'That Google link was already used or ran out. Tap Connect to try again.',
+  calendar_scope_missing:
+    'Google didn’t share your busy times. Tap Connect and allow Pepper to see when you’re busy.',
+  calendar_not_connected: 'Your Google Calendar is already disconnected.',
+  calendar_unavailable: 'Google didn’t answer. Try again in a minute.',
 };
 
 /** The api's error code in a refusal's body (ours, or Better Auth's `EMAIL_NOT_VERIFIED`…). */

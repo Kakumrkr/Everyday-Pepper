@@ -216,6 +216,8 @@ services:
     image: pepper-web:dev
     environment:
       API_INTERNAL_URL: http://api:4000
+      # The origin the api checks, for the calls the web server makes itself (Google's return).
+      AUTH_BASE_URL: ${AUTH_BASE_URL:-http://localhost:3000}
       # The component gallery at /dev/gallery (S40): CI's screenshot run sets 1; off otherwise.
       PEPPER_GALLERY: ${PEPPER_GALLERY:-0}
       # Idle connections stay open longer than clients and proxies reuse them (Node's default

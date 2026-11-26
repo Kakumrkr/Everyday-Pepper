@@ -114,7 +114,22 @@ export async function findCalendarConnection(
   return row;
 }
 
-/** The connections of these staff members (the team page's status), by staff member. */
+/**
+ * The business's connections (the Team list's status, S70.2), by staff member, at most `limit`.
+ * RLS keeps it to the business's rows.
+ */
+export async function listCalendarConnections(
+  tx: TenantTx,
+  limit: number,
+): Promise<CalendarConnectionRow[]> {
+  return tx
+    .select()
+    .from(calendarConnections)
+    .orderBy(asc(calendarConnections.staffMemberId))
+    .limit(limit);
+}
+
+/** The connections of these staff members, by staff member. */
 export async function listCalendarConnectionsOf(
   tx: TenantTx,
   staffMemberIds: readonly StaffMemberId[],
