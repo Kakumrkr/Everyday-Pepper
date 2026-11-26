@@ -8,9 +8,9 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 
 ## In progress
 **S71 Google Calendar out** (brief approved 2026-11-26: "start with your recommendations": D-1 split, S71.2 = sync-token read-back, reconciliation, conflicts; D-2 a separate "Pepper bookings" calendar, `calendar.app.created`; D-3 service + client first name, private, no contact details; D-4 the next 60 days on the grant). AC-X-167…174. Design: a per-booking sync row kept by a trigger on `bookings` (every write path), written by the worker's calendar pass; event id from the booking id.
-- [x] T1 ACs + traceability
-- [ ] T2 contracts · T3 migration 0086 + repository · T4 port/adapter/sandbox · T5 write pass · T6 grant/backfill/disconnect · T7 Calendar screen · T8 sheet line (top-up) · T9 real write (user's browser)
-- Next: T2. Open: none.
+- [x] T1 ACs + traceability · [x] T2 contracts · [x] T3 migration 0086 + repository (db int 12 + isolation/export/deletion 622 green)
+- [ ] T4 port/adapter/sandbox · T5 write pass · T6 grant/backfill/disconnect · T7 Calendar screen · T8 sheet line (top-up) · T9 real write (user's browser)
+- Next: T4. Open: none.
 
 ## Last sessions
 - **S70.2 Phase 16 · Google Calendar on screen (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #110](https://github.com/Kakumrkr/Everyday-Pepper/pull/110)). Full entry in [session-log.md](session-log.md).
