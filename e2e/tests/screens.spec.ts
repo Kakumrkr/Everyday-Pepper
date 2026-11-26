@@ -1000,6 +1000,11 @@ test('A Google busy time on the week view at 375 px, light and dark (S70 top-up)
       .locator(`[data-testid="week-day"][data-date="${formatDate(tomorrow)}"]`)
       .getByTestId('google-busy');
     await expect(block).toHaveCount(1);
+    // Mid-screen, clear of the phone's fixed tabs: the header's height (S72.2's My week) and the
+    // clock's hour move the block, and the tabs would cover it near the bottom.
+    await block.evaluate((element) => {
+      element.scrollIntoView({ block: 'center' });
+    });
     await still(page, scheme);
     await partShot(page, block, `calendar-week-google-busy-375-${scheme}.png`);
   }

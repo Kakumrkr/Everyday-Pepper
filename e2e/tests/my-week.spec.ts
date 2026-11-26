@@ -190,6 +190,8 @@ test('a staff member’s Calendar opens on My week: their visits by day, a regul
     .getByRole('navigation', { name: 'View' })
     .getByRole('link', { name: 'Week', exact: true })
     .click();
+  await expect(priya).toHaveURL(/view=week/);
+  await expect(priya.getByTestId('week-day')).toHaveCount(7);
   await expect(priya.getByTestId('booking-visit-number')).toHaveText('2/4');
   await priya.goto(`/calendar?date=${formatDate(addDays(s.tuesday, 7))}&view=my-week`);
   await priya.getByRole('link', { name: 'Next week' }).click();
