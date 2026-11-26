@@ -65,6 +65,9 @@ export interface FeedOptions {
   morningHourOf?: (templateId: TemplateId | null) => number;
 }
 
+/** Kinds that tell of something done, not suggest: shown in the quiet start and while paused. */
+const INFORMING_KINDS: ReadonlySet<string> = new Set(['calendar_kept']);
+
 /** The member's feed: suggestions (none while paused), switches and the ask-once question. */
 export async function getFeed(
   db: Database,
@@ -84,11 +87,13 @@ export async function getFeed(
   return withMember(db, actor.context, async (tx) => {
     const stored = await readFeedSettings(tx);
     const history = await historyRead;
-    // Kinds turned off are left out by the query, so they never take the feed's places.
+    // Kinds turned off are left out by the query, so they never take the feed's places. Paused
+    // or quiet, only the notes that inform stay (S71.2: a booking kept over a Google change).
+    const open = await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
     const rows =
       stored.suggestionsPaused || !history
-        ? []
-        : await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
+        ? open.filter((row) => INFORMING_KINDS.has(row.kind))
+        : open;
     const suggestions = await priced(
       tx,
       rows.flatMap((row) => toFeedItem(row) ?? []),
