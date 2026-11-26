@@ -14,6 +14,7 @@ import {
   toZoned,
   type CivilDate,
 } from '@pepper/contracts';
+import { AxeBuilder } from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 import { anotherPerson, callApi, hydrated, onboardOwner, signUp, unique } from './helpers.js';
 
@@ -162,6 +163,20 @@ test('a staff member’s Calendar opens on My week: their visits by day, a regul
   await expect(priya.getByText('Dan Cole')).toHaveCount(0);
   // Nothing wider than the phone.
   expect(await priya.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+
+  // No serious or critical axe finding, light and dark (DESIGN.md §7).
+  for (const colorScheme of ['light', 'dark'] as const) {
+    await priya.emulateMedia({ colorScheme, reducedMotion: 'reduce' });
+    const { violations } = await new AxeBuilder({ page: priya })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'])
+      .analyze();
+    expect(
+      violations
+        .filter(({ impact }) => impact === 'serious' || impact === 'critical')
+        .map(({ id }) => `${colorScheme}: ${id}`),
+    ).toEqual([]);
+  }
+  await priya.emulateMedia({ colorScheme: 'light' });
 
   // A row opens its booking sheet (AC-X-190).
   await (await hydrated(row)).click();
