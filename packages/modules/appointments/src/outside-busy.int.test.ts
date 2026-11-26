@@ -96,6 +96,7 @@ async function googleBusy(b: Business, start: string, end: string): Promise<void
         accessTokenExpiresAt: new Date(NOW),
         createdBy: b.jessUser,
         connectedAt: new Date(NOW),
+        writesBookings: false,
       },
       false,
     );

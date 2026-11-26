@@ -63,6 +63,7 @@ async function connected(tx: TenantTx) {
       accessTokenExpiresAt: new Date('2026-12-01T13:00:00Z'),
       createdBy: userId,
       connectedAt: new Date('2026-12-01T12:00:00Z'),
+      writesBookings: false,
     },
     false,
   );
@@ -248,6 +249,7 @@ describe('calendar connections', () => {
           accessTokenExpiresAt: new Date(),
           createdBy: userId,
           connectedAt: reconnectedAt,
+          writesBookings: false,
         },
         true,
       );
@@ -342,6 +344,7 @@ describe('calendar connections', () => {
           accessTokenExpiresAt: new Date(),
           createdBy: userId,
           connectedAt: new Date(),
+          writesBookings: false,
         },
         false,
       ).catch((e: unknown) => e);

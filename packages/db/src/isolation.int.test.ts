@@ -871,6 +871,20 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'ends_at = ends_at',
   },
+  calendar_event_syncs: {
+    tenantColumn: 'tenant_id',
+    // A booking written to Google Calendar (S71, ADR-0069 §10): queued by the trigger on
+    // bookings, read across businesses by the sync's scan (ids only).
+    seed: async (tx) => {
+      const bookingId = await seedBooking(tx);
+      await tx.execute(
+        sql`INSERT INTO calendar_event_syncs (id, booking_id) VALUES (gen_random_uuid(), ${bookingId})`,
+      );
+      return rowId(tx, 'calendar_event_syncs', 'booking_id', bookingId);
+    },
+    touch: 'attempts = attempts',
+    jobScan: "((current_tenant_id() IS NULL) AND current_job_scan('calendar'::text))",
+  },
   booking_fees: {
     tenantColumn: 'tenant_id',
     // A no-show fee the owner approved (S68, AC-X-142): the dispute record, never deleted.
@@ -1424,6 +1438,7 @@ async function seedCalendarConnection(tx: TenantTx) {
       accessTokenExpiresAt: new Date(Date.now() + 3_600_000),
       createdBy: userId,
       connectedAt: new Date(),
+      writesBookings: false,
     },
     false,
   );
