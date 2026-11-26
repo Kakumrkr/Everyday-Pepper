@@ -854,6 +854,64 @@ export const clients = pgTable(
  * is kept in `booking_occupancy` by a trigger (migration 0017), which also holds the exclusion
  * constraint against double booking. Staff reach only their own staff member's bookings.
  */
+/**
+ * A series of recurring visits (S72, ADR-0070): what was asked (the staff member, every how many
+ * weeks, the start times) and its idempotency key. Each visit is an ordinary booking with
+ * `series_id`; nothing reads the rule after booking. Staff reach only their own staff
+ * member's series, as their bookings. No client or service: those are the visits' own (a
+ * merge or a deletion of a client changes the bookings, never this row).
+ */
+export const bookingSeries = pgTable(
+  'booking_series',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    staffMemberId: uuid('staff_member_id').notNull(),
+    everyWeeks: integer('every_weeks').notNull(),
+    requestedStarts: timestamp('requested_starts', { withTimezone: true }).array().notNull(),
+    idempotencyKey: text('idempotency_key'),
+    // Who asked; NULL once their account is deleted.
+    createdByUserId: uuid('created_by_user_id').references(() => users.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('booking_series_tenant_id_id_unique').on(table.tenantId, table.id),
+    uniqueIndex('booking_series_tenant_idempotency_key_unique').on(
+      table.tenantId,
+      table.idempotencyKey,
+    ),
+    index('booking_series_staff_member_idx').on(table.tenantId, table.staffMemberId),
+    index('booking_series_created_by_user_id_idx').on(table.createdByUserId),
+    check('booking_series_every_weeks_range', sql`${table.everyWeeks} BETWEEN 1 AND 4`),
+    check(
+      'booking_series_requested_starts_count',
+      sql`cardinality(${table.requestedStarts}) BETWEEN 2 AND 26`,
+    ),
+    check(
+      'booking_series_idempotency_key_format',
+      sql`${table.idempotencyKey} ~ '^[A-Za-z0-9_-]{8,100}$'`,
+    ),
+    foreignKey({
+      name: 'booking_series_staff_member_fk',
+      columns: [table.tenantId, table.staffMemberId],
+      foreignColumns: [staffMembers.tenantId, staffMembers.id],
+    }),
+    tenantIsolation(sql.raw('tenant_id')),
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: ownStaffMember(sql.raw('staff_member_id')),
+      withCheck: ownStaffMember(sql.raw('staff_member_id')),
+    }),
+  ],
+);
+export type BookingSeriesRow = typeof bookingSeries.$inferSelect;
+
 export const bookings = pgTable(
   'bookings',
   {
@@ -886,10 +944,20 @@ export const bookings = pgTable(
     // The import that brought it (S49, ADR-0050; `source` import); an undo removes it while
     // unchanged. No foreign key, as for `import_rows.client_id`.
     importBatchId: uuid('import_batch_id'),
+    // The series of recurring visits it is part of (S72, ADR-0070); NULL: a single booking.
+    seriesId: uuid('series_id'),
     ...timestamps,
   },
   (table) => [
     unique('bookings_tenant_id_id_unique').on(table.tenantId, table.id),
+    index('bookings_series_idx')
+      .on(table.tenantId, table.seriesId, table.startsAt)
+      .where(sql`${table.seriesId} IS NOT NULL`),
+    foreignKey({
+      name: 'bookings_series_fk',
+      columns: [table.tenantId, table.seriesId],
+      foreignColumns: [bookingSeries.tenantId, bookingSeries.id],
+    }),
     index('bookings_import_batch_idx')
       .on(table.tenantId, table.importBatchId)
       .where(sql`${table.importBatchId} IS NOT NULL`),

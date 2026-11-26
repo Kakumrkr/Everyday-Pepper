@@ -44,6 +44,7 @@ import { insertBookingManageLink, insertBookingText } from './repositories/booki
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
+import { insertBookingSeries } from './repositories/booking-series.js';
 import {
   deleteClientRow,
   findClient,
@@ -413,6 +414,24 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     touch: "status = 'cancelled'",
     // Which booking a client's "C" confirms (S62, `sms_confirm_target`).
     ownerLookup: 'sms_confirm_lookup',
+    memberScope: [
+      { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
+    ],
+  },
+  booking_series: {
+    tenantColumn: 'tenant_id',
+    // A series of recurring visits (S72, ADR-0070): staff reach their own staff member's only.
+    seed: async (tx) => {
+      const series = await insertBookingSeries(tx, {
+        staffMemberId: await seedStaff(tx),
+        everyWeeks: 1,
+        requestedStarts: [new Date('2026-12-01T14:00:00Z'), new Date('2026-12-08T14:00:00Z')],
+        idempotencyKey: null,
+        createdBy: null,
+      });
+      return series.id;
+    },
+    touch: 'every_weeks = every_weeks',
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],

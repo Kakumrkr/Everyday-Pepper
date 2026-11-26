@@ -11,6 +11,7 @@ export * from './repositories/booking-funnel.js';
 export * from './repositories/business-export.js';
 export * from './repositories/business-photos.js';
 export * from './repositories/bookings.js';
+export * from './repositories/booking-series.js';
 export * from './repositories/waitlist.js';
 export * from './repositories/cleanup.js';
 export * from './repositories/clients.js';
