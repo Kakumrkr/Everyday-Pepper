@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S58a** (operate, local: backups and restore drill, rate limits, load test, Sentry/OTel). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+**P2 · Plan Phase 18, the AI layer (prose only, [PCR-017](changes/PCR-017.md)).** The user approved the brief's recommendations (2026-11-26): D-1 Phase 18 next, S58a–S60 jump ahead the day the domain is bought; D-2 S73 Reports into Phase 18; D-3 S86 after the pilot; D-4 waitlist offers by text on a new consent wording, regulars by email; D-5 a $1.50 cap from Phase 12's unspent; D-6 S80 "client texts kept", the classifier evals in S81a.
+- Tasks: 1 PCR-017 · 2 playbook · 3 roadmap, scorecard §2–§3, risks · 4 decisions, ai-budget, CHANGELOG · 5 STATUS, session log · 6 the Claude Doc · 7 tier 0 checks, PR, merge.
+- Done: 1 PCR-017. Next: task 2 (playbook).
 
 ## Last sessions
 - **S72.2 Phase 16 · Staff's "My week" + the gate (2026-11-26)** ([PR #114](https://github.com/Kakumrkr/Everyday-Pepper/pull/114)). Full entry in [session-log.md](session-log.md).
