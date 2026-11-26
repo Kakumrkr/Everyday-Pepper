@@ -859,6 +859,111 @@ for (const width of WIDTHS) {
   });
 }
 
+/**
+ * The owner's own week as Dre for My week's pictures (S72.2): Marcus every week for 4 from a
+ * Wednesday at least a week ahead, and the week after it shown, so Marcus is "2/4"; Jay and Audy
+ * once that week; Dre works Tuesday to Saturday, 9 to 6. Returns the shown week's Wednesday.
+ */
+async function ownWeek(page: Page): Promise<string> {
+  const { business } = CurrentBusinessResponseSchema.parse(
+    await (await page.request.get('/v1/tenant')).json(),
+  );
+  let wednesday = addDays(toZoned(business.timeZone, Date.now()), 7);
+  while (isoWeekday(wednesday) !== 3) wednesday = addDays(wednesday, 1);
+  const at = (days: number, minute: number) =>
+    new Date(fromZoned(business.timeZone, addDays(wednesday, days), minute)).toISOString();
+  const fade = await post(
+    page,
+    '/v1/services',
+    { name: 'Skin fade', durationMinutes: 45 },
+    ServiceSchema,
+  );
+  const members = MembersResponseSchema.parse(
+    await (await page.request.get('/v1/members')).json(),
+  ).members;
+  const dre = await post(
+    page,
+    '/v1/staff',
+    {
+      displayName: 'Dre',
+      serviceIds: [fade.id],
+      userId: members.find((m) => m.role === 'owner')?.userId,
+    },
+    StaffMemberSchema,
+  );
+  const hours = await page.request.put(`/v1/staff/${dre.id}/hours`, {
+    data: {
+      intervals: [2, 3, 4, 5, 6].map((weekday) => ({ weekday, start: '09:00', end: '18:00' })),
+    },
+    headers: { origin: new URL(page.url()).origin },
+  });
+  expect(hours.ok(), await hours.text()).toBe(true);
+  const marcus = await post(page, '/v1/clients', { name: 'Marcus Bell' }, ClientSchema);
+  const jay = await post(page, '/v1/clients', { name: 'Jay Ortiz' }, ClientSchema);
+  const audy = await post(page, '/v1/clients', { name: 'Audy Kim' }, ClientSchema);
+  await post(
+    page,
+    '/v1/bookings/series',
+    {
+      clientId: marcus.id,
+      serviceId: fade.id,
+      staffMemberId: dre.id,
+      everyWeeks: 1,
+      startsAts: [0, 7, 14, 21].map((days) => at(days, 9 * 60 + 30)),
+      notifyClient: false,
+    },
+    { parse: (body: unknown) => body },
+  );
+  for (const booking of [
+    { client: jay.id, at: at(7, 11 * 60) },
+    { client: audy.id, at: at(9, 10 * 60) },
+  ]) {
+    await post(
+      page,
+      '/v1/bookings',
+      {
+        clientId: booking.client,
+        serviceId: fade.id,
+        staffMemberId: dre.id,
+        startsAt: booking.at,
+        notifyClient: false,
+      },
+      { parse: (body: unknown) => body },
+    );
+  }
+  return formatDate(addDays(wednesday, 7));
+}
+
+for (const width of WIDTHS) {
+  test(`My week at ${String(width)} px, light and dark (S72.2)`, async ({ page }) => {
+    test.setTimeout(150_000);
+    await page.setViewportSize({ width, height: 900 });
+    await onboardOwner(page, { business: 'Southside Cuts' });
+    const date = await ownWeek(page);
+    for (const scheme of SCHEMES) {
+      await page.goto(`/calendar?date=${date}&view=my-week`);
+      await expect(page.getByTestId('booking-block')).toHaveCount(3);
+      await expect(page.getByTestId('booking-visit-number')).toHaveText('2/4');
+      await expect(page.getByTestId('my-week-summary')).toHaveText(
+        '3 visits · 2 h 15 booked · Mon, Sun off',
+      );
+      // The week's dates move with the clock: fixed words in their place.
+      await fixedText(page.getByTestId('calendar-week'), 'Dec 14 – 20');
+      const headings = page.getByTestId('my-week-day').locator('h2 > a');
+      await expect(headings).toHaveCount(7);
+      for (const [index, day] of ['14', '15', '16', '17', '18', '19', '20'].entries()) {
+        const weekday = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index] ?? '';
+        await fixedText(headings.nth(index), `${weekday} ${day}`);
+      }
+      await still(page, scheme);
+      const wide = await page.evaluate(() => document.documentElement.scrollWidth);
+      expect(wide, 'My week scrolls sideways').toBeLessThanOrEqual(width);
+      await expect.soft(page).toHaveScreenshot(`my-week-${String(width)}-${scheme}.png`, SHOT);
+      if (width <= 375 && scheme === 'light') await expectTapTargets(page, 'My week');
+    }
+  });
+}
+
 test('A Google busy time on the week view at 375 px, light and dark (S70 top-up)', async ({
   page,
 }) => {
@@ -895,6 +1000,11 @@ test('A Google busy time on the week view at 375 px, light and dark (S70 top-up)
       .locator(`[data-testid="week-day"][data-date="${formatDate(tomorrow)}"]`)
       .getByTestId('google-busy');
     await expect(block).toHaveCount(1);
+    // Mid-screen, clear of the phone's fixed tabs: the header's height (S72.2's My week) and the
+    // clock's hour move the block, and the tabs would cover it near the bottom.
+    await block.evaluate((element) => {
+      element.scrollIntoView({ block: 'center' });
+    });
     await still(page, scheme);
     await partShot(page, block, `calendar-week-google-busy-375-${scheme}.png`);
   }

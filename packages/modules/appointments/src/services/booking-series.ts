@@ -3,10 +3,14 @@ import {
   BookingSeriesIdSchema,
   BookingSeriesInputSchema,
   BookingSeriesPreviewInputSchema,
+  BusyQuerySchema,
   CancelFollowingInputSchema,
   TemplateIdSchema,
   UtcDateTimeSchema,
+  VISIT_NUMBERS_MAX,
+  VisitNumbersResponseSchema,
   seriesStarts,
+  visitNumber,
   type AvailableSlot,
   type Booking,
   type BookingId,
@@ -16,12 +20,14 @@ import {
   type BookingSeriesPreview,
   type BookingSeriesPreviewInput,
   type BookingSeriesResult,
+  type BusyQuery,
   type CancelFollowingInput,
   type CancelFollowingResult,
   type ClientId,
   type ServiceId,
   type SkippedVisit,
   type UserId,
+  type VisitNumbersResponse,
 } from '@pepper/contracts';
 import { requirePermission, systemClock, type Actor } from '@pepper/core';
 import {
@@ -35,7 +41,9 @@ import {
   findStaffMember,
   insertBooking,
   insertBookingSeries,
+  listKeptVisitsOfSeries,
   listSeriesBookings,
+  listSeriesVisitsStarting,
   listBookingRules,
   setBookingManageTokenHash,
   setBookingSeriesSkipped,
@@ -293,6 +301,49 @@ export async function getSeries(
     if (series === undefined) throw new BookingNotFoundError();
     const bookings = (await listSeriesBookings(tx, id)).map(toBooking);
     return { id, everyWeeks: series.everyWeeks, bookings };
+  });
+}
+
+/**
+ * "2 of 8" for every series visit starting in the range (S72.2, AC-X-193), in one read for the
+ * calendar's blocks: each visit's place among its series' visits that aren't cancelled. Under
+ * the member scope (AC-W9-1) staff number only their own visits; a visit of the series moved to a
+ * colleague is not theirs to see, so it isn't counted for them.
+ */
+export async function listVisitNumbers(
+  db: Database,
+  actor: Actor,
+  query: BusyQuery,
+): Promise<VisitNumbersResponse> {
+  requirePermission(actor, 'bookings.read');
+  const { from, to, staffMemberId } = BusyQuerySchema.parse(query);
+  return withMember(db, actor.context, async (tx) => {
+    const found = await listSeriesVisitsStarting(tx, {
+      from: new Date(from),
+      to: new Date(to),
+      limit: VISIT_NUMBERS_MAX + 1,
+      ...(staffMemberId !== undefined && { staffMemberId }),
+    });
+    const inRange = found.slice(0, VISIT_NUMBERS_MAX);
+    const seriesIds = [
+      ...new Set(inRange.flatMap((row) => (row.seriesId === null ? [] : [row.seriesId]))),
+    ].map((id) => BookingSeriesIdSchema.parse(id));
+    const bySeries = new Map<string, { id: string; startsAt: string; status: string }[]>();
+    for (const row of await listKeptVisitsOfSeries(tx, seriesIds)) {
+      if (row.seriesId === null) continue;
+      const visits = bySeries.get(row.seriesId) ?? [];
+      visits.push({ id: row.id, startsAt: row.startsAt.toISOString(), status: row.status });
+      bySeries.set(row.seriesId, visits);
+    }
+    const visits = inRange.flatMap((row) => {
+      const place =
+        row.seriesId === null ? null : visitNumber(bySeries.get(row.seriesId) ?? [], row.id);
+      return place === null ? [] : [{ bookingId: row.id, ...place }];
+    });
+    return VisitNumbersResponseSchema.parse({
+      visits,
+      truncated: found.length > VISIT_NUMBERS_MAX,
+    });
   });
 }
 

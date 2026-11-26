@@ -62,6 +62,8 @@ export interface BookingSummary {
   seriesId?: string | null;
   /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
   keptOverGoogle?: boolean;
+  /** Its place in its series, "2 of 8" (S72.2 top-up, AC-X-194). */
+  visit?: { number: number; of: number } | null;
 }
 
 /**

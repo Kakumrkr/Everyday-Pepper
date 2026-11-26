@@ -1,6 +1,7 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
 import { cx, Icon } from '@pepper/ui';
-import { confirmedByText, type BookingSetup } from '../../lib/booking';
+import { bookingBlockName, confirmedByText, type BookingSetup } from '../../lib/booking';
+import type { VisitPlace } from '../../lib/calendar-data';
 import { KEPT_OVER_GOOGLE } from '../../lib/calendar-connect';
 import { hourLabel, layoutDay, staffTone, timeRange } from '../../lib/calendar';
 import { STAFF_TONE_CLASSES } from './staff-tone';
@@ -25,6 +26,8 @@ export type CalendarEntry =
       seriesId?: string | null;
       /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
       keptOverGoogle?: boolean;
+      /** Its place in its series, "2 of 8" (S72.2 top-up, AC-X-194); absent outside one. */
+      visit?: VisitPlace | null;
     }
   | { kind: 'busy'; startsAt: string; endsAt: string };
 
@@ -183,6 +186,18 @@ export function CalendarBlock({
   className?: string | undefined;
 }) {
   const time = timeRange(timeZone, entry.startsAt, entry.endsAt);
+  // "2/8" leads the second line, so a narrow column keeps the client's name whole; the block's
+  // name says "visit 2 of 8" (AC-X-194).
+  const visit =
+    entry.kind === 'booking' && entry.visit ? (
+      <span
+        className="mr-1 rounded-pill bg-surface px-1 tabular-nums text-ink-2"
+        aria-hidden="true"
+        data-testid="booking-visit-number"
+      >
+        {entry.visit.number}/{entry.visit.of}
+      </span>
+    ) : null;
   const position = { top: `${top.toString()}%`, height: `${height.toString()}%` };
   if (entry.kind === 'busy') {
     return (
@@ -228,12 +243,16 @@ export function CalendarBlock({
       </span>
       {roomy ? (
         <>
-          <span className="block truncate">{entry.service}</span>
+          <span className="block truncate">
+            {visit}
+            {entry.service}
+          </span>
           <span className="block truncate text-ink-2 tabular-nums">{time}</span>
         </>
       ) : (
         // Two lines fit a 30-minute block (44 px): who, then when and what.
         <span className="block truncate text-ink-2">
+          {visit}
           <span className="tabular-nums">{time}</span> · {entry.service}
         </span>
       )}
@@ -259,7 +278,7 @@ export function CalendarBlock({
   return (
     <article
       data-testid="booking-block"
-      aria-label={`${time}, ${entry.service} with ${entry.client}`}
+      aria-label={bookingBlockName(timeZone, entry)}
       className={className}
       style={style}
     >

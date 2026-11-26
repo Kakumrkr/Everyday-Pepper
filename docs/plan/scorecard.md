@@ -16,7 +16,7 @@ The fifteen categories Pepper is judged by, from the launch-readiness review of 
 | C3 | Friendly UX | 6 | 8 | 9 | 9 | No dead ends, no jargon; every screen has one clear next step; owners describe it as "easy" without prompting |
 | C4 | Mobile usability | 6 | 8 | 9 | 9 | Every flow done one-thumbed at 375 px in under 90 seconds; screenshot tests at 3 widths × 2 themes |
 | C5 | Owner experience | 5 | 8 | 8 | 9 | The day's work is a card board of one-tap decisions ranked by dollars; the trust controls are easy to find |
-| C6 | Staff experience | 4 | 4 | 7 | 9 | Staff see their day and week, add walk-ins, and their personal calendar blocks bookings |
+| C6 | Staff experience | 4 | 8 | 7 | 9 | Staff see their day and week, add walk-ins, and their personal calendar blocks bookings |
 | C7 | Customer booking | 5 | 7 | 8 | 9 | Booking in < 60 s on a phone; contact details, policy and the business's brand on the page; drop-off ≤ 15% at any step |
 | C8 | AI trust and safety | 8 | 9 | 9 | 10 | 100% pass^3 on the safety sets; every action explained and undoable; the owner can see exactly what Pepper said to whom |
 | C9 | Reliability | 6 | 6 | 8 | 9 | Deployed, monitored, backed up with a passed restore drill, SLOs met under load, 30 days with no unseen error |
@@ -40,7 +40,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 13 · Pilot readiness (S60) | the "Pilot gate" column |
 | 14 · SMS (S64) | C12 7 (met in sandbox, S64: §9) |
 | 15 · Deposits (S68) | C12 8 (met in Stripe's sandbox, S68: §10) |
-| 16 · Calendar + staff (S72) | C6 8 |
+| 16 · Calendar + staff (S72.2) | C6 8 (met, S72.2: §11) |
 | 17 · Launch gate (S76) | the "Launch gate" column |
 
 ## 3. Pilot metrics (instrumented from Phase 10, on a page from S59)
@@ -76,6 +76,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 2026-11-06 | Phase 12 gate (S56b) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 3 | 8 | 3 | 1 |
 | 2026-11-20 | Phase 14 gate (S64) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 7 | 8 | 3 | 1 |
 | 2026-11-25 | Phase 15 gate (S68) | 8 | 7 | 8 | 8 | 8 | 4 | 7 | 9 | 6 | 8 | 8 | 8 | 8 | 3 | 1 |
+| 2026-11-26 | Phase 16 gate (S72.2) | 8 | 7 | 8 | 8 | 8 | 8 | 7 | 9 | 6 | 8 | 8 | 8 | 8 | 3 | 1 |
 
 ## 5. Phase 9 gate (S43.2, 2026-10-28): the evidence
 
@@ -126,3 +127,16 @@ Scored by Claude in S64 from the tests below; only C12 was scored, the rest carr
 Scored by Claude in S68 from the tests below; only C12 was scored, the rest carry over. **Deposits are built and proven in Stripe's sandbox, not yet against Stripe's test mode:** that run needs the user's test keys, and live charges need the LLC ([PCR-012](changes/PCR-012.md)). As at the Phase 14 gate, the score credits what an owner gets the day the keys are in; the gap is named below.
 
 - **C12 Market competitiveness 7 → 8.** Deposits and cards on file, which owners in the segment rely on daily after booking and texts, are complete. The pieces: Stripe Connect Express behind a port with a sandbox (ADR-0067, AC-X-96…105: payments `stripe.test.ts`, `sandbox.test.ts`, `payments.int.test.ts`, api `payments.int.test.ts`; e2e `payments.spec.ts`). A deposit or card per service, authorized before booking and captured after, refunded by the window and kept after it (ADR-0068, AC-X-111…124: payments `deposits.int.test.ts`, api `deposits.int.test.ts`; e2e `deposits.spec.ts`). Smart deposits, where regulars book with no card (AC-X-125…129). The cancellation policy in every channel (AC-X-130…135). **The no-show fee by approval** (S68, AC-X-136…143): the client's terms are stored when they book, a no-show brings one card with those terms and the fee they allow, and only the owner's tap charges the kept card, once and off-session, with a receipt and a dispute record (payments `fees.int.test.ts`, `stripe.test.ts`, `sandbox.test.ts`; ai `writes.int.test.ts`; api `deposits.int.test.ts`; db `booking-fees.int.test.ts`; e2e `no-show-fee.spec.ts`). Competitors charge no-show fees automatically. Pepper's way, where money never moves without the owner's OK and the card shows the client's own words, is Pepper-only, next to approve-by-text. Not yet 9: no week view or calendar sync (Phase 16) and no reports (Phase 17); no Stripe test-mode or live charge yet (the test keys, the LLC); late-cancel fees aren't offered as cards; a waitlist claim of a deposit service still books without one.
+
+## 11. Phase 16 gate (S72.2, 2026-11-26): the evidence
+
+Scored by Claude in S72.2 from the tests below; only C6 was scored, the rest carry over (C12 stays 8: the week view and calendar sync were the gaps it named, but reports are still missing, Phase 17). Google Calendar runs in Google's testing mode ([PCR-016](changes/PCR-016.md)): the read side has run against real Google with the user's test account (S70.2, AC-X-166); the write and read-back sides are proven against the sandbox only.
+
+- **C6 Staff experience 4 → 8.** Each part of "what 10 looks like" is built and tested for a staff login:
+  - **Their day.** The day view shows their own column in full and colleagues' as busy times only, enforced by the api and RLS (AC-W9-1; db isolation suite, e2e `booking.spec.ts`).
+  - **Their week.** The week view opens on their own week, they drag their own bookings with the double-booking check, and a colleague's week is busy times only (S69, AC-X-144…151: e2e `calendar-week.spec.ts`). **My week** (S72.2, AC-X-189…194) opens a bare Calendar on their own week as a phone list. It shows each day's hours or "Off", time off, Google busy times and their visits (each opening its sheet), under a line like "3 visits · 2 h 15 booked · Mon, Sun off". A regular's visit says "2/4" on its block in every view, read for the week in one request that never counts a colleague's visits (appointments `booking-series.int.test.ts`, api `bookings.controller.test.ts`, web `my-week.test.ts`, `booking.test.ts`, e2e `my-week.spec.ts`, `screens.spec.ts` `my-week-*` at 3 widths × 2 themes).
+  - **Walk-ins.** "New client" in their Book sheet books a walk-in for themselves (S50.2, AC-W1-34; e2e `booking.spec.ts`). Repeat visits are booked for themselves only (S72, AC-X-184).
+  - **Their personal calendar blocks bookings.** Each staff member connects their own Google Calendar (S70.2, AC-X-160…163). Its busy times block their bookable time on every path, the booking page, offers and the waitlist included (S70, AC-X-156, AC-X-159; google-calendar contract and token-expiry tests). This ran for real in testing mode (AC-X-166). Their bookings are written to a "Pepper bookings" calendar and kept in step (S71–S71.2, AC-X-167…180).
+  - Their devices get a push when a client books, moves or cancels with them on the booking page (ADR-0026, `team-pushes.ts`). Their Home cards, chat, notes and tasks are scoped to what is theirs (`feed.read`, `notes`, `tasks` STAFF_OWN, `packages/core/src/permissions.ts`).
+  - **Not yet 9:** no staff member has used it yet (the pilot). Google's OAuth verification hasn't started, so outside test users can't connect, and testing mode needs weekly reconnects ("Waiting on the user" 1). The write and read-back haven't run against real Google. Staff get no text when a client books them (pushes only). A visit of a series moved to a colleague isn't counted in a staff member's "2 of 8" (RLS: not theirs to see).
+

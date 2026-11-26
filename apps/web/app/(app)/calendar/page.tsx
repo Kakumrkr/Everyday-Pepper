@@ -20,7 +20,15 @@ import { NewBooking } from '../../_components/booking/new-booking';
 import { ARROW_LINK, DAY_LINK, SEGMENT, ViewSwitch } from '../../_components/calendar/calendar-nav';
 import { DayGrid, type CalendarColumn } from '../../_components/day-grid';
 import { kitLink } from '../../_components/kit-link';
-import { currentAccount, currentBusiness, currentCalendarDay } from '../../_server/account';
+import { weekRange } from '../../../lib/calendar-week';
+import { ownStaffMember } from '../../../lib/my-week';
+import {
+  currentAccount,
+  currentBusiness,
+  currentCalendarDay,
+  currentCalendarWeek,
+} from '../../_server/account';
+import { MyWeek, myWeekHref } from './my-week';
 import { WeekCalendar } from './week-calendar';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +56,30 @@ export default async function CalendarPage({
 
   const { timeZone } = current.business;
   const today = todayIn(timeZone, Date.now());
-  const { date, staffMemberId, view } = readCalendarParams(await searchParams, today);
+  const userId = account.me.user.id;
+  // Staff open on their own week (S72.2, AC-X-189); a member linked to no staff member sees Day.
+  const { date, staffMemberId, view } = readCalendarParams(
+    await searchParams,
+    today,
+    current.role === 'staff' ? 'my-week' : 'day',
+  );
+  if (view === 'my-week') {
+    const week = await currentCalendarWeek(weekRange(timeZone, date), (staff) =>
+      ownStaffMember(staff, userId),
+    );
+    const { member } = week;
+    if (member !== null) {
+      return (
+        <MyWeek
+          current={current}
+          userId={userId}
+          date={date}
+          today={today}
+          week={{ ...week, member }}
+        />
+      );
+    }
+  }
   if (view === 'week') {
     return (
       <WeekCalendar
@@ -62,7 +93,6 @@ export default async function CalendarPage({
   }
   const day = await currentCalendarDay(dayRange(timeZone, date));
   const services = new Map(day.services.map((service) => [service.id, service.name]));
-  const userId = account.me.user.id;
 
   const columns: CalendarColumn[] = columnsFor(day.staff, staffMemberId).map((member) => {
     if (!seesDetailsOf(current.role, userId, member)) {
@@ -89,6 +119,7 @@ export default async function CalendarPage({
           overridden: booking.overridden,
           clientConfirmedAt: booking.clientConfirmedAt ?? null,
           seriesId: booking.seriesId ?? null,
+          visit: day.visits.get(booking.id) ?? null,
         })),
     };
   });
@@ -122,6 +153,7 @@ export default async function CalendarPage({
             hrefs={{
               day: calendarHref(date, staffMemberId),
               week: calendarHref(date, staffMemberId, 'week'),
+              'my-week': myWeekHref(ownStaffMember(day.staff, userId) !== null, date),
             }}
           />
           {books ? <NewBooking setup={setup} date={formatDate(date)} /> : null}

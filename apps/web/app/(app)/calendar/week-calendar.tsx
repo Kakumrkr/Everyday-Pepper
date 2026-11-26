@@ -20,7 +20,9 @@ import { WeekGrid } from '../../_components/calendar/week-grid';
 import type { CalendarEntry } from '../../_components/day-grid';
 import { kitLink } from '../../_components/kit-link';
 import { STAFF_TONE_CLASSES } from '../../_components/staff-tone';
+import { ownStaffMember } from '../../../lib/my-week';
 import { currentCalendarWeek } from '../../_server/account';
+import { myWeekHref } from './my-week';
 
 /**
  * The calendar's week view (S69, AC-X-144…151): one staff member's Monday to Sunday, staff on
@@ -81,6 +83,7 @@ export async function WeekCalendar({
               clientConfirmedAt: booking.clientConfirmedAt ?? null,
               seriesId: booking.seriesId ?? null,
               keptOverGoogle: week.kept.has(booking.id),
+              visit: week.visits.get(booking.id) ?? null,
             }))
         : week.busy
             .filter((busy) => busy.staffMemberId === member.id)
@@ -105,6 +108,7 @@ export async function WeekCalendar({
             hrefs={{
               day: calendarHref(thisWeek ? today : weekStart(date), memberId),
               week: calendarHref(date, memberId, 'week'),
+              'my-week': myWeekHref(ownStaffMember(week.staff, userId) !== null, date),
             }}
           />
           {books ? (
