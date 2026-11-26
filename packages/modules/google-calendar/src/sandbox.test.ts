@@ -186,3 +186,43 @@ describe("the sandbox's read-back (S71.2)", () => {
     ).rejects.toMatchObject({ code: 'not_found' });
   });
 });
+
+describe("the sandbox's pages (S71.2 review)", () => {
+  it('skips no event when one changes between two pages', async () => {
+    const sandbox = new SandboxCalendarProvider(REDIRECT, () => NOW);
+    const accessToken = 'sbx-a-test';
+    const { id: calendarId } = await sandbox.createCalendar({
+      accessToken,
+      name: 'Pepper bookings',
+      timeZone: 'UTC',
+    });
+    const ids: string[] = [];
+    for (const n of [1, 2, 3, 4, 5]) {
+      const event = calendarEventBodyOf({
+        bookingId: `0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4b0${String(n)}`,
+        serviceName: 'Cut',
+        clientFirstName: '',
+        startsAt: new Date(NOW),
+        endsAt: new Date(NOW + 1),
+      });
+      ids.push(event.id);
+      await sandbox.insertEvent({ accessToken, calendarId, event });
+    }
+    sandbox.pageSize = 2;
+    const read = async (syncToken: string | null, pageToken: string | null) => {
+      const page = await sandbox.listEvents({ accessToken, calendarId, syncToken, pageToken });
+      if (page === 'sync_expired') throw new Error('expired');
+      return page;
+    };
+    const first = await read(null, null);
+    sandbox.changeInGoogle(calendarId, ids[2] ?? '', { summary: 'Moved on' });
+    // The rest of this read (4 and 5): the changed event moved past it.
+    const second = await read(null, first.nextPageToken);
+    expect(second.nextPageToken).toBeNull();
+    // It comes with the next sync, so none is skipped.
+    const later = await read(second.nextSyncToken, null);
+    expect(later.events.map((e) => e.id)).toEqual([ids[2]]);
+    const seen = [first, second, later].flatMap((page) => page.events.map((e) => e.id));
+    expect(new Set(seen)).toEqual(new Set(ids));
+  });
+});

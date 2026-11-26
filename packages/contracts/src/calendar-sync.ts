@@ -227,7 +227,9 @@ export function bookingIdOfCalendarEvent(eventId: string): string | null {
   const match = /^pepper([0-9a-f]{32})$/u.exec(eventId);
   if (match?.[1] === undefined) return null;
   const hex = match[1];
-  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  // Only a real UUID is a booking's: anything else looking like one is the member's own event.
+  return z.uuid().safeParse(id).success ? id : null;
 }
 
 /** What was done in Google to a Pepper event, compared with what Pepper wrote (AC-X-176). */

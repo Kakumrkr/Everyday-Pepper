@@ -420,8 +420,8 @@ export async function readCalendar(
     );
     if (!stored) return 'skipped';
     // Then "Pepper bookings" read back (S71.2, ADR-0069 §11): its own failures wait for the next
-    // read and never undo the busy times just stored.
-    await reconcileBookingsCalendar(deps, tenantId, claimed);
+    // read and never mark the busy times just stored as failed (Google's are recorded by it).
+    await reconcileBookingsCalendar(deps, tenantId, claimed).catch(() => undefined);
     return 'read';
   } catch (error) {
     if (error instanceof SealedTokenError) {

@@ -12,6 +12,7 @@ import {
 } from '@pepper/contracts';
 import {
   clearBookingsCalendar,
+  databaseNow,
   eventsReadCursorOf,
   findBookingEventSource,
   findCalendarConnection,
@@ -90,6 +91,9 @@ export async function reconcileBookingsCalendar(
   try {
     result.outcome = await withAccessToken(deps, tenantId, connection, async (accessToken) => {
       for (let pages = 0; pages < CALENDAR_EVENT_PAGES_PER_READ; pages += 1) {
+        // The database's time before Google answers: a row written after it may already be newer
+        // than what this page shows, so it isn't judged by this page.
+        const askedAt = await withTenant(deps.db, tenantId, databaseNow);
         const page = await deps.provider.listEvents({ accessToken, calendarId, ...cursor });
         if (page === 'sync_expired') {
           // Google forgot where Pepper was: the whole calendar again, once.
@@ -100,19 +104,25 @@ export async function reconcileBookingsCalendar(
         }
         const now = deps.clock.now();
         const strays = await withTenant(deps.db, tenantId, async (tx) => {
-          const handled = await reconcilePage(tx, connection, calendarId, page.events, now);
+          const handled = await reconcilePage(tx, connection, calendarId, page.events, {
+            now,
+            askedAt,
+          });
           result.kept += handled.kept;
           return handled.strays;
         });
-        for (const stray of strays) {
-          try {
+        try {
+          for (const stray of strays) {
             await deps.provider.deleteEvent({ accessToken, calendarId, eventId: stray.eventId });
             result.removed += 1;
-          } finally {
-            const held = stray.held;
-            if (held !== null) {
-              await withTenant(deps.db, tenantId, (tx) => releaseEventSyncLease(tx, held));
-            }
+          }
+        } finally {
+          // Every lease this page took is given back, whether or not each delete went through.
+          const held = strays.flatMap((stray) => (stray.held === null ? [] : [stray.held]));
+          if (held.length > 0) {
+            await withTenant(deps.db, tenantId, async (tx) => {
+              for (const row of held) await releaseEventSyncLease(tx, row);
+            });
           }
         }
         const next: EventsReadCursor =
@@ -165,8 +175,9 @@ async function reconcilePage(
   connection: CalendarConnectionRow,
   calendarId: string,
   events: readonly GoogleListedEvent[],
-  now: Date,
+  at: { now: Date; askedAt: Date },
 ): Promise<{ strays: Stray[]; kept: number }> {
+  const { now, askedAt } = at;
   const ours = events.flatMap((event) => {
     const bookingId = bookingIdOfCalendarEvent(event.id);
     // Not a Pepper id: the member's own event in this calendar, left alone (D-3).
@@ -187,10 +198,13 @@ async function reconcilePage(
       if (live) strays.push({ eventId: event.id, held: null });
       continue;
     }
+    // Written after Google answered: this page may show it as it was before; the next read judges.
+    if (row.updatedAt.getTime() >= askedAt.getTime()) continue;
     if (row.eventConnectionId !== connection.id || row.eventCalendarId !== calendarId) {
-      // Its booking's event is elsewhere (or nowhere): this copy is a leftover. Held while it is
-      // removed, so no write puts the booking here meanwhile; a row being written waits.
-      if (live) {
+      // Its booking's event is elsewhere (or nowhere): this copy is a leftover, unless a write
+      // still on its way belongs here (an insert whose answer was lost left no placement).
+      // Held while it is removed, so no write puts the booking here meanwhile.
+      if (live && !(await writeOnItsWayHere(tx, row, connection, now))) {
         const held = await leaseEventSyncForStray(tx, row.id, now, CALENDAR_WRITE_LEASE_MS);
         if (held !== undefined) strays.push({ eventId: event.id, held });
       }
@@ -208,6 +222,8 @@ async function reconcilePage(
       if (live) await requeueSettledEventSync(tx, row, now, false);
       continue;
     }
+    // A visit that has ended keeps its event as it was (renames don't rewrite it either).
+    if (source.endsAt.getTime() <= now.getTime()) continue;
     const change = calendarEventChangeOf(eventBodyOf(source), event);
     if (change === null) continue;
     if (!(await requeueSettledEventSync(tx, row, now, true))) continue;
@@ -224,4 +240,23 @@ async function reconcilePage(
     });
   }
   return { strays, kept };
+}
+
+/**
+ * A write not yet settled whose booking belongs to this connection's staff member: it will put
+ * the event here (AC-X-177: the read-back never removes what a write is putting there).
+ */
+async function writeOnItsWayHere(
+  tx: TenantTx,
+  row: CalendarEventSyncRow,
+  connection: CalendarConnectionRow,
+  now: Date,
+): Promise<boolean> {
+  if (isSettled(row, now)) return false;
+  const source = await findBookingEventSource(tx, row.bookingId);
+  return (
+    source !== undefined &&
+    source.status !== 'cancelled' &&
+    source.staffMemberId === connection.staffMemberId
+  );
 }

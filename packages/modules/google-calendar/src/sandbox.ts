@@ -202,17 +202,18 @@ export class SandboxCalendarProvider implements CalendarProvider {
       }
       const since = sync?.[2] === undefined ? 0 : Number(sync[2]);
       const upTo = page?.[2] === undefined ? this.changeCount : Number(page[2]);
-      const offset = page?.[3] === undefined ? 0 : Number(page[3]);
+      // Pages go on after the last change number given, never by position: an event changed
+      // between two pages moves past `upTo` and comes with the next sync, none is skipped.
+      const after = Math.max(since, page?.[3] === undefined ? 0 : Number(page[3]));
       const changed = [...events.entries()]
-        .filter(([, event]) => event.changed > since && event.changed <= upTo)
+        .filter(([, event]) => event.changed > after && event.changed <= upTo)
         .sort(([, a], [, b]) => a.changed - b.changed);
-      const slice = changed.slice(offset, offset + this.pageSize);
-      const more = offset + this.pageSize < changed.length;
+      const slice = changed.slice(0, this.pageSize);
+      const more = this.pageSize < changed.length;
+      const last = slice.at(-1)?.[1].changed ?? after;
       return {
         events: slice.map(([id, event]) => listed(id, event)),
-        nextPageToken: more
-          ? `sbx-page-${epoch}-${String(upTo)}-${String(offset + this.pageSize)}`
-          : null,
+        nextPageToken: more ? `sbx-page-${epoch}-${String(upTo)}-${String(last)}` : null,
         nextSyncToken: more ? null : `sbx-sync-${epoch}-${String(upTo)}`,
       };
     });

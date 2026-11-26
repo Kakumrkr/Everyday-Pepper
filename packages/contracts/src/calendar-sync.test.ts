@@ -234,6 +234,8 @@ describe('reading "Pepper bookings" back (S71.2)', () => {
     expect(bookingIdOfCalendarEvent('dentist123')).toBeNull();
     expect(bookingIdOfCalendarEvent(`${calendarEventIdOf(bookingId)}_20261201`)).toBeNull();
     expect(bookingIdOfCalendarEvent('pepper0F8E3C1A2B4D4E6F8A9B1C2D3E4F5A6B')).toBeNull();
+    // Shaped like one, not a UUID (its version and variant digits): not Pepper's.
+    expect(bookingIdOfCalendarEvent(`pepper${'a'.repeat(32)}`)).toBeNull();
   });
 
   it('finds the event as Pepper wrote it unchanged, whatever its offset (AC-X-176)', () => {

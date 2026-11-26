@@ -29,7 +29,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { readBookingCalendarState, writeBookingEvent } from './events.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './int-support.js';
-import type { ListEventsInput } from './provider.js';
+import { CalendarProviderError, type ListEventsInput } from './provider.js';
 import { reconcileBookingsCalendar } from './reconcile.js';
 import { SandboxCalendarProvider } from './sandbox.js';
 import {
@@ -55,14 +55,24 @@ class Watched extends SandboxCalendarProvider {
   deletedEvents: string[] = [];
   /** Runs during the next stray delete, as if a write were trying to claim the row meanwhile. */
   duringDelete: (() => Promise<void>) | null = null;
+  /** Runs after the next page is read and before it is answered (a write racing the read). */
+  afterList: (() => Promise<void>) | null = null;
+  /** The next deletes fail with this. */
+  deleteFails: CalendarProviderError[] = [];
 
-  override listEvents(input: ListEventsInput) {
+  override async listEvents(input: ListEventsInput) {
     this.lists.push(input);
-    return super.listEvents(input);
+    const page = await super.listEvents(input);
+    const after = this.afterList;
+    this.afterList = null;
+    if (after !== null) await after();
+    return page;
   }
 
   override async deleteEvent(input: Parameters<SandboxCalendarProvider['deleteEvent']>[0]) {
     this.deletedEvents.push(input.eventId);
+    const failure = this.deleteFails.shift();
+    if (failure !== undefined) throw failure;
     const during = this.duringDelete;
     this.duringDelete = null;
     if (during !== null) await during();
@@ -438,12 +448,23 @@ describe('stray events (AC-X-177)', () => {
   it('holds the booking while removing a stray, so a write waits for it', async () => {
     const b = await aBusiness();
     const jo = await written(b, 'Jo');
-    // A leftover copy of the booking's event in Jo's calendar, its row pointing elsewhere.
+    const sam = await aStaffMember(b, 'Sam');
+    await connect(b, sam.actor);
+    // The booking is Sam's and written there; a leftover copy is still in Jo's calendar.
     await run(
       b,
-      (q) => `UPDATE calendar_event_syncs SET event_calendar_id = 'elsewhere'
-      WHERE booking_id = ${q(jo.bookingId)}`,
+      (q) =>
+        `UPDATE bookings SET staff_member_id = ${q(sam.staffMemberId)} WHERE id = ${q(jo.bookingId)}`,
     );
+    await run(
+      b,
+      () => `UPDATE calendar_connections SET status = 'needs_reconnect'
+        WHERE staff_member_id = '${StaffMemberIdSchema.parse(jo.staffMemberId)}'`,
+    );
+    expect(await write(b, jo.bookingId)).toBe('written');
+    await run(b, () => `UPDATE calendar_connections SET status = 'connected'`);
+    const samCalendar = (await syncOf(b, jo.bookingId))?.eventCalendarId ?? '';
+    // A change to Sam's booking is due while Jo's calendar is read.
     await run(
       b,
       (q) => `UPDATE bookings SET starts_at = starts_at + interval '1 hour',
@@ -453,16 +474,84 @@ describe('stray events (AC-X-177)', () => {
     b.provider.duringDelete = async () => {
       claimedMeanwhile = await write(b, jo.bookingId);
     };
+    await run(b, () => `UPDATE calendar_connections SET events_sync_token = NULL`);
     await readBack(b, jo.staffMemberId);
     expect(b.provider.deletedEvents).toEqual([jo.eventId]);
     expect(claimedMeanwhile).toBe('skipped');
-    // Given back after: the write goes out and puts the booking where it belongs.
+    expect(b.provider.seenInGoogle(jo.calendarId, jo.eventId)?.status).toBe('cancelled');
+    // Given back after: the write goes out to Sam's calendar.
     expect((await syncOf(b, jo.bookingId))?.leasedUntil).toBeNull();
     expect(await write(b, jo.bookingId)).toBe('written');
-    expect(b.provider.seenInGoogle(jo.calendarId, jo.eventId)).toMatchObject({
+    expect(b.provider.seenInGoogle(samCalendar, jo.eventId)).toMatchObject({
       status: 'confirmed',
       start: { dateTime: '2026-12-02T16:00:00.000Z' },
     });
+  });
+
+  it('gives back every lease of a page when removing a stray fails', async () => {
+    const b = await aBusiness();
+    const jo = await written(b, 'Jo');
+    const second = await book(b, jo.staffMemberId, '2026-12-03T15:00:00Z', 'Beard trim');
+    await write(b, second.bookingId);
+    // Both rows point elsewhere: both copies in Jo's calendar are leftovers.
+    await run(b, () => `UPDATE calendar_event_syncs SET event_calendar_id = 'elsewhere'`);
+    b.provider.deleteFails = [new CalendarProviderError('rate_limited', 429)];
+    await readBack(b, jo.staffMemberId);
+    for (const id of [jo.bookingId, second.bookingId]) {
+      expect((await syncOf(b, id))?.leasedUntil).toBeNull();
+    }
+  });
+
+  it('never removes an event a write is putting there (an insert whose answer was lost)', async () => {
+    const b = await aBusiness();
+    const jo = await written(b, 'Jo');
+    // The insert reached Google but Pepper never heard: no placement, a retry waiting.
+    await run(
+      b,
+      (q) => `UPDATE calendar_event_syncs SET event_connection_id = NULL, event_calendar_id = NULL,
+        version = version + 1, due_at = now() + interval '1 minute', attempts = 1
+        WHERE booking_id = ${q(jo.bookingId)}`,
+    );
+    await readBack(b, jo.staffMemberId);
+    expect(b.provider.deletedEvents).toEqual([]);
+    expect(b.provider.seenInGoogle(jo.calendarId, jo.eventId)?.status).toBe('confirmed');
+  });
+});
+
+describe('what the read-back leaves alone (S71.2 review)', () => {
+  it('judges no row written after Google answered: a move in Pepper racing the read', async () => {
+    const b = await aBusiness();
+    const jo = await written(b);
+    await readBack(b, jo.staffMemberId);
+    b.provider.changeInGoogle(jo.calendarId, jo.eventId, { summary: 'Skin fade · Ana ' });
+    // While the page is on its way: moved in Pepper and written (the page shows the old time).
+    b.provider.afterList = async () => {
+      await run(
+        b,
+        (q) => `UPDATE bookings SET starts_at = starts_at + interval '1 hour',
+        ends_at = ends_at + interval '1 hour' WHERE id = ${q(jo.bookingId)}`,
+      );
+      await write(b, jo.bookingId);
+    };
+    await readBack(b, jo.staffMemberId);
+    expect(await notes(b)).toEqual([]);
+    expect((await syncOf(b, jo.bookingId))?.keptAt).toBeNull();
+  });
+
+  it('keeps a visit that has ended as it was, even read whole after a rename', async () => {
+    const b = await aBusiness();
+    // Ended by both the test's clock and the database's (the rename trigger reads the latter).
+    const jo = await written(b, 'Jo', '2026-01-05T15:00:00Z');
+    await run(
+      b,
+      () => `UPDATE services SET name = 'Beard trim'
+      WHERE id = '${ServiceIdSchema.parse(jo.serviceId)}'`,
+    );
+    b.provider.changeInGoogle(jo.calendarId, jo.eventId, 'delete');
+    await run(b, () => `UPDATE calendar_connections SET events_sync_token = NULL`);
+    await readBack(b, jo.staffMemberId);
+    expect(await notes(b)).toEqual([]);
+    expect((await syncOf(b, jo.bookingId))?.keptAt).toBeNull();
   });
 });
 

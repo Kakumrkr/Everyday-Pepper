@@ -467,3 +467,12 @@ export async function releaseEventSyncLease(
       ),
     );
 }
+
+/**
+ * The database's clock for this transaction: what `updated_at` is stamped with. The read-back
+ * takes it before asking Google, so a row written after Google answered is told apart (S71.2).
+ */
+export async function databaseNow(tx: TenantTx): Promise<Date> {
+  const result = await tx.execute(sql`SELECT now() AS now`);
+  return z.coerce.date().parse((result.rows[0] as { now: unknown } | undefined)?.now);
+}
