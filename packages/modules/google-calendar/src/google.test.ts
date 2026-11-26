@@ -1,6 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { calendarEventBodyOf } from '@pepper/contracts';
 import {
+  GOOGLE_CALENDARS_URL,
   GOOGLE_FREEBUSY_URL,
   GOOGLE_REVOKE_URL,
   GOOGLE_TOKEN_URL,
@@ -54,7 +56,8 @@ function stub(...answers: [number, unknown][]): { fetch: typeof fetch; seen: See
     });
     const [status, answer] = answers[Math.min(seen.length - 1, answers.length - 1)] ?? [500, {}];
     return Promise.resolve(
-      new Response(JSON.stringify(answer), {
+      // A 204 (a delete) has no body.
+      new Response(status === 204 ? null : JSON.stringify(answer), {
         status,
         headers: { 'Content-Type': 'application/json' },
       }),
@@ -79,7 +82,7 @@ const withIdToken = (claims: Record<string, unknown>) => ({
 });
 
 describe('the consent URL', () => {
-  it('asks offline for the email and free/busy only, with the state and PKCE', () => {
+  it('asks offline for the email, free/busy and the bookings calendar, with the state and PKCE', () => {
     const url = new URL(
       provider(stub().fetch).consentUrl({
         state: 's'.repeat(43),
@@ -92,7 +95,8 @@ describe('the consent URL', () => {
       client_id: CLIENT_ID,
       redirect_uri: REDIRECT,
       response_type: 'code',
-      scope: 'openid email https://www.googleapis.com/auth/calendar.freebusy',
+      scope:
+        'openid email https://www.googleapis.com/auth/calendar.freebusy https://www.googleapis.com/auth/calendar.app.created',
       access_type: 'offline',
       prompt: 'consent',
       include_granted_scopes: 'true',
@@ -267,5 +271,139 @@ describe('revoke', () => {
     await expect(provider(stub([503, {}]).fetch).revoke('t')).rejects.toMatchObject({
       code: 'unavailable',
     });
+  });
+});
+
+// Google Calendar out (S71, ADR-0069 §10, AC-X-167…170, AC-X-174): the calendar Pepper makes and
+// its events. Shapes from Calendar's v3 reference (read 2026-11-26).
+describe('the bookings calendar and its events', () => {
+  const CALENDAR =
+    'c_0f9d8a7b6c5e4d3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f@group.calendar.google.com';
+  const event = calendarEventBodyOf({
+    bookingId: '0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b',
+    serviceName: 'Skin fade',
+    clientFirstName: 'Ana',
+    startsAt: new Date('2026-12-01T15:00:00Z'),
+    endsAt: new Date('2026-12-01T15:45:00Z'),
+  });
+  const eventUrl = `${GOOGLE_CALENDARS_URL}/${encodeURIComponent(CALENDAR)}/events/${event.id}`;
+
+  it('makes "Pepper bookings" in the business\'s time zone and keeps its id', async () => {
+    const { fetch, seen } = stub([200, fixture('calendar-created')]);
+    const made = await provider(fetch).createCalendar({
+      accessToken: 'ya29.a',
+      name: 'Pepper bookings',
+      timeZone: 'America/New_York',
+    });
+    expect(made).toEqual({ id: CALENDAR });
+    expect(seen[0]).toMatchObject({
+      url: GOOGLE_CALENDARS_URL,
+      method: 'POST',
+      headers: { Authorization: 'Bearer ya29.a', 'Content-Type': 'application/json' },
+    });
+    expect(JSON.parse(seen[0]?.body ?? '')).toEqual({
+      summary: 'Pepper bookings',
+      timeZone: 'America/New_York',
+    });
+    await expect(
+      provider(stub([200, { summary: 'no id' }]).fetch).createCalendar({
+        accessToken: 'a',
+        name: 'Pepper bookings',
+        timeZone: 'UTC',
+      }),
+    ).rejects.toMatchObject({ code: 'bad_response' });
+  });
+
+  it('inserts the event with its own id; "already exists" is an answer, not a failure', async () => {
+    const { fetch, seen } = stub([200, fixture('event-written')]);
+    expect(
+      await provider(fetch).insertEvent({ accessToken: 'a', calendarId: CALENDAR, event }),
+    ).toBe('created');
+    expect(seen[0]?.url).toBe(`${GOOGLE_CALENDARS_URL}/${encodeURIComponent(CALENDAR)}/events`);
+    expect(JSON.parse(seen[0]?.body ?? '')).toEqual(JSON.parse(JSON.stringify(event)));
+    expect(
+      await provider(stub([409, fixture('error-409-duplicate')]).fetch).insertEvent({
+        accessToken: 'a',
+        calendarId: CALENDAR,
+        event,
+      }),
+    ).toBe('exists');
+  });
+
+  it('says not_found when the calendar is gone, and refuses an answer about another event', async () => {
+    await expect(
+      provider(stub([404, fixture('error-404')]).fetch).insertEvent({
+        accessToken: 'a',
+        calendarId: CALENDAR,
+        event,
+      }),
+    ).rejects.toMatchObject({ code: 'not_found' });
+    await expect(
+      provider(stub([200, { id: 'pepperother', status: 'confirmed' }]).fetch).insertEvent({
+        accessToken: 'a',
+        calendarId: CALENDAR,
+        event,
+      }),
+    ).rejects.toMatchObject({ code: 'bad_response' });
+  });
+
+  it('patches the event by id; a missing one says so', async () => {
+    const { fetch, seen } = stub([200, fixture('event-written')]);
+    expect(
+      await provider(fetch).patchEvent({ accessToken: 'a', calendarId: CALENDAR, event }),
+    ).toBe('updated');
+    expect(seen[0]).toMatchObject({ url: eventUrl, method: 'PATCH' });
+    for (const [status, body] of [
+      [404, fixture('error-404')],
+      [410, fixture('error-410-deleted')],
+    ] as const) {
+      expect(
+        await provider(stub([status, body]).fetch).patchEvent({
+          accessToken: 'a',
+          calendarId: CALENDAR,
+          event,
+        }),
+      ).toBe('missing');
+    }
+  });
+
+  it('deletes an event or the calendar; one already gone is fine', async () => {
+    const { fetch, seen } = stub([204, {}]);
+    await provider(fetch).deleteEvent({
+      accessToken: 'a',
+      calendarId: CALENDAR,
+      eventId: event.id,
+    });
+    expect(seen[0]).toMatchObject({ url: eventUrl, method: 'DELETE' });
+    await provider(stub([410, fixture('error-410-deleted')]).fetch).deleteEvent({
+      accessToken: 'a',
+      calendarId: CALENDAR,
+      eventId: event.id,
+    });
+    await provider(stub([404, fixture('error-404')]).fetch).deleteCalendar({
+      accessToken: 'a',
+      calendarId: CALENDAR,
+    });
+  });
+
+  it('maps a 401, a rate limit and a 5xx as the read does', async () => {
+    const write = (status: number, body: unknown) =>
+      provider(stub([status, body]).fetch).patchEvent({
+        accessToken: 'a',
+        calendarId: CALENDAR,
+        event,
+      });
+    await expect(write(401, fixture('error-401'))).rejects.toMatchObject({ code: 'unauthorized' });
+    await expect(write(403, fixture('error-403-rate'))).rejects.toMatchObject({
+      code: 'rate_limited',
+    });
+    await expect(write(503, {})).rejects.toMatchObject({ code: 'unavailable' });
+    await expect(
+      provider(stub([500, {}]).fetch).deleteEvent({
+        accessToken: 'a',
+        calendarId: CALENDAR,
+        eventId: event.id,
+      }),
+    ).rejects.toMatchObject({ code: 'unavailable' });
   });
 });

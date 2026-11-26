@@ -2,6 +2,10 @@ import 'reflect-metadata';
 import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
 import {
+  BookingCalendarStateSchema,
+  ClientIdSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
   CalendarConnectionAnswerSchema,
   CalendarConnectStartSchema,
   OutsideBusyResponseSchema,
@@ -11,6 +15,9 @@ import {
 } from '@pepper/contracts';
 import {
   addMembership,
+  insertBooking,
+  insertClient,
+  insertService,
   insertStaffMember,
   newId,
   prepareDatabase,
@@ -273,6 +280,71 @@ describe('Google Calendar with the sandbox (AC-X-152, AC-X-157, AC-X-159)', () =
   });
 });
 
+/** A booking of `staffMemberId` tomorrow, made as any path would. */
+async function bookingOf(tenantId: string, staffMemberId: string): Promise<string> {
+  return withTenant(database.db, TenantIdSchema.parse(tenantId), async (tx) => {
+    const client = await insertClient(tx, {
+      name: 'Maria Lopez',
+      email: `maria-${newId()}@example.test`,
+      phone: null,
+      source: 'team',
+    });
+    const service = await insertService(tx, {
+      name: `Fade ${newId().slice(-6)}`,
+      category: null,
+      durationMinutes: 45,
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
+      priceFromCents: null,
+      priceToCents: null,
+      active: true,
+    });
+    const start = new Date(Date.now() + 86_400_000);
+    const row = await insertBooking(tx, {
+      clientId: ClientIdSchema.parse(client.id),
+      serviceId: ServiceIdSchema.parse(service.id),
+      staffMemberId: StaffMemberIdSchema.parse(staffMemberId),
+      startsAt: start,
+      endsAt: new Date(start.getTime() + 45 * 60_000),
+      bufferBeforeMinutes: 0,
+      bufferAfterMinutes: 0,
+      priceFromCents: null,
+      priceToCents: null,
+      source: 'team',
+      overridden: false,
+      idempotencyKey: null,
+      createdBy: null,
+    });
+    return row.id;
+  });
+}
+
+describe("a booking's place in Google Calendar (S71, AC-X-167, AC-X-173)", () => {
+  it('connects with the bookings permission and says a new booking is on its way', async () => {
+    const { tenantId, owner, jess, staffMemberId } = await business(sandboxServer);
+    const answer = CalendarConnectionAnswerSchema.parse(JSON.parse(await connect(jess)));
+    expect(answer.connection?.writesBookings).toBe(true);
+    const bookingId = await bookingOf(tenantId, staffMemberId);
+    for (const b of [owner, jess]) {
+      const state = await b.get(`/v1/calendar/bookings/${bookingId}`).expect(200);
+      expect(BookingCalendarStateSchema.parse(state.body)).toEqual({ state: 'pending' });
+    }
+    // Another business sees nothing of it.
+    const other = await business(sandboxServer);
+    const hidden = await other.owner.get(`/v1/calendar/bookings/${bookingId}`).expect(404);
+    expect((hidden.body as { code: string }).code).toBe('booking_not_found');
+    await owner.get('/v1/calendar/bookings/not-an-id').expect(400);
+  });
+
+  it('says none for a staff member without a calendar', async () => {
+    const { tenantId, owner, staffMemberId } = await business(sandboxServer);
+    const bookingId = await bookingOf(tenantId, staffMemberId);
+    expect((await owner.get(`/v1/calendar/bookings/${bookingId}`).expect(200)).body).toEqual({
+      state: 'none',
+    });
+  });
+});
+
 describe('Google Calendar off (AC-X-158)', () => {
   it('every connection route is 404; stored busy times still read (none)', async () => {
     const { jess } = await business(offServer);
@@ -282,6 +354,7 @@ describe('Google Calendar off (AC-X-158)', () => {
       () => jess.post('/v1/calendar/google/connect'),
       () => jess.post('/v1/calendar/google/callback', { code: 'x', state: 'A'.repeat(43) }),
       () => jess.delete('/v1/calendar/google'),
+      () => jess.get(`/v1/calendar/bookings/${newId()}`),
     ];
     for (const call of calls) {
       const response = await call().expect(404);

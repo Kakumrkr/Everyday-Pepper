@@ -1,4 +1,6 @@
+export * from './access.js';
 export * from './errors.js';
+export * from './events.js';
 export * from './google.js';
 export * from './provider.js';
 export * from './provider-for.js';

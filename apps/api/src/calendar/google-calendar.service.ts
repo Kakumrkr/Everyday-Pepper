@@ -1,4 +1,6 @@
 import type {
+  BookingCalendarState,
+  BookingId,
   BusyQuery,
   CalendarConnectComplete,
   CalendarConnectionAnswer,
@@ -14,6 +16,7 @@ import {
   completeCalendarConnect,
   disconnectCalendar,
   listOutsideBusy,
+  readBookingCalendarState,
   readOwnCalendar,
   readTeamCalendars,
   startCalendarConnect,
@@ -73,6 +76,14 @@ export class GoogleCalendarService {
 
   async disconnect(tenant: TenantContext): Promise<void> {
     await disconnectCalendar(this.on(), actorOf(tenant));
+  }
+
+  /** A booking's place in Google Calendar (AC-X-173); `undefined`: not the member's to see. */
+  async bookingState(
+    tenant: TenantContext,
+    bookingId: BookingId,
+  ): Promise<BookingCalendarState | undefined> {
+    return readBookingCalendarState(this.on(), actorOf(tenant), bookingId);
   }
 
   async outsideBusy(

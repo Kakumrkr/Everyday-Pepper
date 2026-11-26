@@ -1,4 +1,6 @@
 import {
+  BookingCalendarStateSchema,
+  BookingIdSchema,
   BusyQuerySchema,
   CalendarConnectCompleteSchema,
   CalendarConnectionAnswerSchema,
@@ -6,6 +8,7 @@ import {
   MAX_LIST_ITEMS,
   OutsideBusyResponseSchema,
   TeamCalendarConnectionsSchema,
+  type BookingCalendarState,
   type CalendarConnectionAnswer,
   type CalendarConnectStart,
   type OutsideBusyResponse,
@@ -19,12 +22,15 @@ import {
   Get,
   HttpCode,
   Module,
+  NotFoundException,
+  Param,
   Post,
   Query,
   UseGuards,
   type DynamicModule,
 } from '@nestjs/common';
-import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
+import { z } from 'zod';
+import { apiError, CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
 import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { parseBody } from '../http/zod-body.js';
@@ -37,6 +43,8 @@ import {
 // Google Calendar (S70, ADR-0069, AC-X-152…159). Every member may connect their own staff
 // member's calendar (`calendar.read`, which everyone has); nobody connects someone else's. Off:
 // the connection routes are 404 `calendar_off`.
+
+const BookingParamsSchema = z.object({ bookingId: BookingIdSchema });
 
 /** Each connect asks Google once or twice; a member needs a handful at most. */
 const MEMBER_CALLS: RateLimit = { name: 'calendar-connect', max: 20, windowSeconds: 600 };
@@ -102,6 +110,23 @@ export class GoogleCalendarController {
   @RequirePermission('calendar.read')
   async disconnect(@CurrentTenant() tenant: TenantContext): Promise<void> {
     await answering(() => this.calendar.disconnect(tenant));
+  }
+
+  /**
+   * 200 whether a booking is in Google Calendar, for its sheet (S71 top-up, AC-X-173):
+   * `written`, `pending` or `none`; 404 `booking_not_found` for a booking the member can't see
+   * (another business's, or a colleague's for staff); 404 off.
+   */
+  @Get('bookings/:bookingId')
+  @RequirePermission('calendar.read')
+  async bookingState(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+  ): Promise<BookingCalendarState> {
+    const { bookingId } = parseBody(BookingParamsSchema, params);
+    const state = await answering(() => this.calendar.bookingState(tenant, bookingId));
+    if (state === undefined) throw new NotFoundException(apiError('booking_not_found'));
+    return BookingCalendarStateSchema.parse(state);
   }
 
   /**
