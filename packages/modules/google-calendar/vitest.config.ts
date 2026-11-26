@@ -8,11 +8,15 @@ export default defineConfig({
       provider: 'v8',
       include: ['src/**/*.ts'],
       // The services run the pure rules (unit-tested here) inside database transactions; they
-      // are proven against real Postgres by the integration tests (`pnpm test:integration`).
+      // are proven against real Postgres by the integration tests (`pnpm test:integration`):
+      // the connect and read (`services.ts`), and from S71 the token use shared by reads and
+      // writes (`access.ts`) and the bookings' write pass (`events.ts`, `events.int.test.ts`).
       exclude: [
         'src/**/*.test.ts',
         'src/index.ts',
         'src/services.ts',
+        'src/access.ts',
+        'src/events.ts',
         'src/fixtures/**',
         'src/int-support.ts',
       ],

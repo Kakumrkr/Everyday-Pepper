@@ -258,7 +258,7 @@ describe('Google Calendar (S70, ADR-0069)', () => {
     }
   });
 
-  it('keeps a booking\'s Google Calendar write as ids and versions, scanned by the sync only (S71)', () => {
+  it("keeps a booking's Google Calendar write as ids and versions, scanned by the sync only (S71)", () => {
     expect(getTableConfig(calendarEventSyncs).policies.map((p) => [p.name, p.for])).toEqual([
       ['tenant_isolation', 'all'],
       ['job_scan', 'select'],

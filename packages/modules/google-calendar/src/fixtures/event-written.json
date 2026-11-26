@@ -20,7 +20,9 @@
   "visibility": "private",
   "iCalUID": "pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a5b@google.com",
   "sequence": 0,
-  "extendedProperties": { "private": { "pepperBookingId": "0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" } },
+  "extendedProperties": {
+    "private": { "pepperBookingId": "0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" }
+  },
   "reminders": { "useDefault": true },
   "eventType": "default"
 }

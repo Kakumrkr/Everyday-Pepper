@@ -188,9 +188,7 @@ describe('Google Calendar out (S71)', () => {
       'https://www.googleapis.com/auth/calendar.app.created',
     );
     expect(GOOGLE_CALENDAR_SCOPES).not.toContain('https://www.googleapis.com/auth/calendar');
-    expect(GOOGLE_CALENDAR_SCOPES).not.toContain(
-      'https://www.googleapis.com/auth/calendar.events',
-    );
+    expect(GOOGLE_CALENDAR_SCOPES).not.toContain('https://www.googleapis.com/auth/calendar.events');
   });
 
   it('backs off 1, 2, 4… minutes up to an hour', () => {
@@ -201,10 +199,12 @@ describe('Google Calendar out (S71)', () => {
   });
 
   it('parses an event answer and refuses a bad one', () => {
-    expect(GoogleEventResourceSchema.parse({ id: 'pepperabc', status: 'confirmed', x: 1 })).toEqual({
-      id: 'pepperabc',
-      status: 'confirmed',
-    });
+    expect(GoogleEventResourceSchema.parse({ id: 'pepperabc', status: 'confirmed', x: 1 })).toEqual(
+      {
+        id: 'pepperabc',
+        status: 'confirmed',
+      },
+    );
     expect(GoogleEventResourceSchema.safeParse({ status: 'confirmed' }).success).toBe(false);
   });
 });

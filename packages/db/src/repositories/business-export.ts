@@ -92,7 +92,8 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
     'staff members’ Google Calendar links (S70): sealed sign-in tokens, never exported',
   calendar_connect_states: 'one-time Google sign-in states (10 minutes; hashes and sealed values)',
   calendar_busy_blocks: 'busy times copied from Google Calendar, which still holds them',
-  calendar_event_syncs: 'which bookings are written to Google Calendar (S71): ids and versions only',
+  calendar_event_syncs:
+    'which bookings are written to Google Calendar (S71): ids and versions only',
 };
 
 /** What a business's export holds, as read. */
