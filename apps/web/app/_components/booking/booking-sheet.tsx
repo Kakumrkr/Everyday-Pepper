@@ -135,7 +135,10 @@ function BookingDetails({
   const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
   const deposit = teamDepositLine(depositRead, timeZone);
   const inGoogle = bookingCalendarLine(
-    useBookingCalendarState(booking.id, `${booking.status} ${booking.startsAt}`),
+    useBookingCalendarState(
+      booking.id,
+      `${booking.status} ${booking.startsAt} ${booking.staffMemberId}`,
+    ),
   );
 
   async function change(body: BookingChange): Promise<void> {
@@ -500,10 +503,15 @@ function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | 
   return deposit;
 }
 
+/** How often an open sheet asks again while the booking is on its way to Google, and how many times. */
+const CALENDAR_STATE_POLL_MS = 10_000;
+const CALENDAR_STATE_POLLS = 12;
+
 /**
  * Whether the booking is in Google Calendar (S71 top-up, AC-X-173), read when the sheet opens and
- * again after the booking changes (`version`: its status and time); `null` while loading, with
- * Google Calendar off here, or when it can't be read (the sheet then says nothing about it).
+ * again after the booking changes (`version`: its status, time and staff member), and every 10 s
+ * while it is on its way (two minutes at most); `null` while loading, with Google Calendar off
+ * here, or when it can't be read (the sheet then says nothing about it).
  */
 function useBookingCalendarState(
   bookingId: string,
@@ -512,11 +520,25 @@ function useBookingCalendarState(
   const [state, setState] = useState<BookingCalendarState['state'] | null>(null);
   useEffect(() => {
     let current = true;
-    void fetchJson(bookingCalendarPath(bookingId), BookingCalendarStateSchema).then((answer) => {
-      if (current) setState(answer.ok ? answer.data.state : null);
-    });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Another booking or a change: never the last one's answer meanwhile.
+    setState(null);
+    const read = (polls: number): void => {
+      void fetchJson(bookingCalendarPath(bookingId), BookingCalendarStateSchema).then((answer) => {
+        if (!current) return;
+        const next = answer.ok ? answer.data.state : null;
+        setState(next);
+        if (next === 'pending' && polls > 0) {
+          timer = setTimeout(() => {
+            read(polls - 1);
+          }, CALENDAR_STATE_POLL_MS);
+        }
+      });
+    };
+    read(CALENDAR_STATE_POLLS);
     return () => {
       current = false;
+      clearTimeout(timer);
     };
   }, [bookingId, version]);
   return state;

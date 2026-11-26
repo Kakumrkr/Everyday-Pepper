@@ -21,6 +21,8 @@ export const CalendarSyncErrorSchema = z.enum([
   'rate_limited',
   'unavailable',
   'not_found',
+  /** Google refused the call for a missing permission (a 403 that isn't a rate limit, S71). */
+  'forbidden',
   'bad_response',
   /** The sealed token can't be opened (the key changed): only a reconnect helps. */
   'token_unreadable',
@@ -259,11 +261,11 @@ export type CalendarConnectComplete = z.infer<typeof CalendarConnectCompleteSche
 
 /**
  * `GET /v1/calendar/bookings/:id` (S71 top-up, AC-X-173): whether a booking is in Google
- * Calendar: `written`, `pending` (waiting for the worker or a retry), or `none` (its staff
- * member's calendar doesn't take bookings).
+ * Calendar: `written`, `pending` (waiting for the worker or a retry), `waiting` (until its
+ * staff member reconnects their calendar), or `none` (their calendar doesn't take bookings).
  */
 export const BookingCalendarStateSchema = z.object({
-  state: z.enum(['written', 'pending', 'none']),
+  state: z.enum(['written', 'pending', 'waiting', 'none']),
 });
 export type BookingCalendarState = z.infer<typeof BookingCalendarStateSchema>;
 

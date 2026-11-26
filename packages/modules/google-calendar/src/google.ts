@@ -320,6 +320,9 @@ function apiErrorCode(status: number, body: unknown): CalendarSyncError {
     const reasons = parsed.success ? (parsed.data.error.errors ?? []) : [];
     if (reasons.some((e) => GoogleRateLimitReasonSchema.safeParse(e.reason).success))
       return 'rate_limited';
+    // Any other 403 on Calendar: the grant lacks the permission (S71: a calendar not Pepper's,
+    // or a scope unticked); trying again with the same grant won't help.
+    return 'forbidden';
   }
   return statusCode(status);
 }

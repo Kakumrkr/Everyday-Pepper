@@ -2,6 +2,7 @@ import {
   BookingCalendarStateSchema,
   BookingIdSchema,
   CALENDAR_WRITE_LEASE_MS,
+  CALENDAR_WRITE_MAX_BACKOFF_MS,
   PEPPER_CALENDAR_NAME,
   StaffMemberIdSchema,
   calendarEventBodyOf,
@@ -107,7 +108,7 @@ export async function writeBookingEvent(
           : calendarEventBodyOf({
               bookingId: source.id,
               serviceName: source.serviceName,
-              clientFirstName: firstNameOf(source.clientName),
+              clientFirstName: source.clientDeleted ? '' : firstNameOf(source.clientName),
               startsAt: source.startsAt,
               endsAt: source.endsAt,
             }),
@@ -121,6 +122,8 @@ export async function writeBookingEvent(
       ? null
       : { connectionId: claimed.eventConnectionId, calendarId: claimed.eventCalendarId };
   let failing: CalendarConnectionRow | undefined;
+  /** The "Pepper bookings" being written to, once known (made in this pass, or stored). */
+  let writingTo: string | null = null;
   try {
     // 1. Out of a calendar it no longer belongs in (cancelled, removed, another staff member, or
     //    a calendar that isn't the connection's now).
@@ -131,15 +134,27 @@ export async function writeBookingEvent(
     ) {
       if (previous?.id === placement.connectionId) {
         failing = previous;
-        if (previous.status !== 'connected') throw new WaitingForReconnect();
-        const from = placement;
-        await withAccessToken(deps, tenantId, previous, (accessToken) =>
-          deps.provider.deleteEvent({
-            accessToken,
-            calendarId: from.calendarId,
-            eventId: calendarEventIdOf(bookingId),
-          }),
-        );
+        if (previous.status === 'connected') {
+          const from = placement;
+          await withAccessToken(deps, tenantId, previous, (accessToken) =>
+            deps.provider
+              .deleteEvent({
+                accessToken,
+                calendarId: from.calendarId,
+                eventId: calendarEventIdOf(bookingId),
+              })
+              .catch((error: unknown) => {
+                // This grant can't remove it (a permission taken back): nothing more to try.
+                if (error instanceof CalendarProviderError && error.code === 'forbidden') return;
+                throw error;
+              }),
+          );
+        } else if (target === undefined) {
+          // Removing it waits for that member to reconnect (a cancel shouldn't stay in Google).
+          throw new WaitingForReconnect();
+        }
+        // Else it moved to another staff member's calendar: that write never waits on someone
+        // else's reconnect; the old event is left where it is (S71.2's reconciliation).
       }
       // A connection removed meanwhile took its calendar with it (AC-X-172).
       placement = null;
@@ -155,7 +170,17 @@ export async function writeBookingEvent(
           target.bookingsCalendarId ??
           (await bookingsCalendarOf(deps, tenantId, target, accessToken, plan.timeZone));
         if (calendarId === null) return null;
-        await upsertEvent(deps, { accessToken, calendarId, event }, placement !== null);
+        writingTo = calendarId;
+        try {
+          await upsertEvent(deps, { accessToken, calendarId, event }, placement !== null);
+        } catch (error) {
+          // The calendar is gone in Google: asked to delete it too, in case it was only hidden
+          // from this call, so a calendar made again never leaves a second one behind.
+          if (error instanceof CalendarProviderError && error.code === 'not_found') {
+            await deps.provider.deleteCalendar({ accessToken, calendarId }).catch(() => undefined);
+          }
+          throw error;
+        }
         return calendarId;
       });
       // `null`: reconnected meanwhile, so this grant is the old one; tried again with the new.
@@ -163,12 +188,10 @@ export async function writeBookingEvent(
       placement = { connectionId: target.id, calendarId: written };
     }
 
-    await withTenant(deps.db, tenantId, (tx) =>
-      recordCalendarEventWritten(tx, claimed, placement),
-    );
+    await withTenant(deps.db, tenantId, (tx) => recordCalendarEventWritten(tx, claimed, placement));
     return 'written';
   } catch (error) {
-    return failedWrite(deps, tenantId, claimed, failing, placement, error);
+    return failedWrite(deps, tenantId, claimed, failing, placement, writingTo, error);
   }
 }
 
@@ -193,9 +216,7 @@ async function bookingsCalendarOf(
   );
   // Another worker's calendar won (or none, after a reconnect): this one is removed again.
   if (kept !== made.id) {
-    await deps.provider
-      .deleteCalendar({ accessToken, calendarId: made.id })
-      .catch(() => undefined);
+    await deps.provider.deleteCalendar({ accessToken, calendarId: made.id }).catch(() => undefined);
   }
   return kept;
 }
@@ -223,6 +244,7 @@ async function failedWrite(
   claimed: CalendarEventSyncRow,
   connection: CalendarConnectionRow | undefined,
   placement: EventPlacement | null,
+  writingTo: string | null,
   error: unknown,
 ): Promise<CalendarWriteOutcome> {
   const now = deps.clock.now();
@@ -234,16 +256,27 @@ async function failedWrite(
         : error instanceof CalendarProviderError
           ? error.code
           : 'bad_response';
-  let retryAt = new Date(now.getTime() + calendarWriteBackoffMs(claimed.attempts + 1));
+  // Waiting for a reconnect, or refused for a permission: no use trying again soon.
+  const stuck =
+    error instanceof WaitingForReconnect ||
+    code === 'forbidden' ||
+    code === 'invalid_grant' ||
+    code === 'token_unreadable';
+  let retryAt = new Date(
+    now.getTime() +
+      (stuck ? CALENDAR_WRITE_MAX_BACKOFF_MS : calendarWriteBackoffMs(claimed.attempts + 1)),
+  );
   if (connection !== undefined && !(error instanceof WaitingForReconnect)) {
-    if (code === 'not_found' && connection.bookingsCalendarId !== null) {
-      // "Pepper bookings" deleted in Google (AC-X-170): forgotten, made again at once.
-      const calendarId = connection.bookingsCalendarId;
+    if (code === 'not_found' && writingTo !== null) {
+      // "Pepper bookings" deleted in Google (AC-X-170): forgotten, made again at once the first
+      // time; after that with the backoff, so a Google that keeps answering 404 can't make one
+      // calendar after another.
+      const calendarId = writingTo;
       await withTenant(deps.db, tenantId, (tx) =>
         clearBookingsCalendar(tx, connection.id, calendarId),
       );
       if (placement?.calendarId === calendarId) placement = null;
-      retryAt = now;
+      if (claimed.attempts === 0) retryAt = now;
     } else if (code === 'invalid_grant' || code === 'token_unreadable') {
       // The connection needs reconnecting (audited once); the write waits for it (AC-X-170).
       await recordConnectionFailure(deps, tenantId, connection, code);
@@ -313,8 +346,10 @@ export async function readBookingCalendarState(
       booking.status === 'cancelled'
         ? undefined
         : await findCalendarConnectionOfStaff(tx, StaffMemberIdSchema.parse(booking.staffMemberId));
+    if (connection?.writesBookings !== true)
+      return BookingCalendarStateSchema.parse({ state: 'none' });
     return BookingCalendarStateSchema.parse({
-      state: connection?.writesBookings === true ? 'pending' : 'none',
+      state: connection.status === 'connected' ? 'pending' : 'waiting',
     });
   });
 }

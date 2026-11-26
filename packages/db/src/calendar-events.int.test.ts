@@ -32,10 +32,10 @@ import {
   wakeCalendarEventSyncs,
 } from './repositories/calendar-events.js';
 import { findCalendarConnection, saveCalendarConnection } from './repositories/calendar-sync.js';
-import { insertClient } from './repositories/clients.js';
+import { deleteClientRow, insertClient } from './repositories/clients.js';
 import { addMembership } from './repositories/memberships.js';
 import { createTenant } from './repositories/tenants.js';
-import { withTenant, type TenantTx } from './tenant.js';
+import { withMember, withTenant, type TenantTx } from './tenant.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 let database: TestDatabase;
@@ -188,7 +188,12 @@ describe('the trigger on bookings (AC-X-168)', () => {
       const row = await book(tx, jo.staffMemberId, '2026-12-02T15:00:00Z');
       const claimed = await claimCalendarEventSync(tx, row.id, NOW, LEASE);
       if (claimed === undefined) throw new Error('not claimed');
-      await recordCalendarEventFailure(tx, claimed, 'unavailable', new Date('2026-12-01T13:00:00Z'));
+      await recordCalendarEventFailure(
+        tx,
+        claimed,
+        'unavailable',
+        new Date('2026-12-01T13:00:00Z'),
+      );
       expect(await listDue(tx, NOW)).not.toContain(row.id);
       await tx.execute(sql`UPDATE bookings SET status = 'completed' WHERE id = ${row.id}`);
       expect(await findCalendarEventSyncOfBooking(tx, row.id)).toMatchObject({
@@ -202,9 +207,9 @@ describe('the trigger on bookings (AC-X-168)', () => {
 
 /** The due bookings of the transaction's business, through the job's scan. */
 async function listDue(tx: TenantTx, now: Date): Promise<string[]> {
-  const [tenant] = (
-    await tx.execute(sql`SELECT current_tenant_id() AS id`)
-  ).rows as { id: string }[];
+  const [tenant] = (await tx.execute(sql`SELECT current_tenant_id() AS id`)).rows as {
+    id: string;
+  }[];
   return (await listDueCalendarEventSyncs(db, now, 1000))
     .filter((due) => due.tenantId === tenant?.id)
     .map((due) => due.bookingId);
@@ -279,7 +284,12 @@ describe('claiming and writing (AC-X-169, AC-X-170)', () => {
       const row = await book(tx, jo.staffMemberId, '2026-12-02T15:00:00Z');
       const claimed = await claimCalendarEventSync(tx, row.id, NOW, LEASE);
       if (claimed === undefined) throw new Error('not claimed');
-      await recordCalendarEventFailure(tx, claimed, 'invalid_grant', new Date('2026-12-01T13:00:00Z'));
+      await recordCalendarEventFailure(
+        tx,
+        claimed,
+        'invalid_grant',
+        new Date('2026-12-01T13:00:00Z'),
+      );
       await wakeCalendarEventSyncs(tx);
       expect(await claimCalendarEventSync(tx, row.id, NOW, LEASE)).toBeDefined();
     });
@@ -386,8 +396,37 @@ describe('the grant and the bookings calendar (AC-X-170, AC-X-171)', () => {
         endsAt: new Date('2026-12-02T15:45:00Z'),
         serviceName: 'Skin fade',
         clientName: 'Ana María Lopez',
+        clientDeleted: false,
       });
       expect(await findBookingEventSource(tx, newId())).toBeUndefined();
+    });
+  });
+});
+
+describe('a deleted client (ADR-0051)', () => {
+  it("queues their visits' events again, to be written without their name", async () => {
+    const tenantId = await business();
+    const ownerId = await insertUser(db);
+    const { bookingId, clientId } = await withTenant(db, tenantId, async (tx) => {
+      await addMembership(tx, { userId: ownerId, role: 'owner' });
+      const jo = await staffWith(tx, true);
+      const row = await book(tx, jo.staffMemberId, '2026-11-20T15:00:00Z');
+      const claimed = await claimCalendarEventSync(tx, row.id, NOW, LEASE);
+      if (claimed === undefined) throw new Error('not claimed');
+      await recordCalendarEventWritten(tx, claimed, {
+        connectionId: jo.connection?.id ?? '',
+        calendarId: 'cal-a',
+      });
+      return { bookingId: row.id, clientId: ClientIdSchema.parse(row.clientId) };
+    });
+    // Only owners and managers delete clients.
+    await withMember(db, { tenantId, userId: ownerId }, async (tx) => {
+      expect(await deleteClientRow(tx, clientId, NOW)).toMatchObject({ deleted: true });
+      expect(await findCalendarEventSyncOfBooking(tx, bookingId)).toMatchObject({
+        version: 2,
+        syncedVersion: 1,
+      });
+      expect(await findBookingEventSource(tx, bookingId)).toMatchObject({ clientDeleted: true });
     });
   });
 });
@@ -396,22 +435,20 @@ describe('the rows carry no client data (AC-X-174)', () => {
   it('holds ids, versions and times only', async () => {
     const columns = await db.execute(sql`SELECT column_name FROM information_schema.columns
       WHERE table_name = 'calendar_event_syncs' ORDER BY column_name`);
-    expect((columns.rows as { column_name: string }[]).map((c) => c.column_name)).toEqual(
-      [
-        'attempts',
-        'booking_id',
-        'created_at',
-        'due_at',
-        'event_calendar_id',
-        'event_connection_id',
-        'id',
-        'last_error',
-        'leased_until',
-        'synced_version',
-        'tenant_id',
-        'updated_at',
-        'version',
-      ],
-    );
+    expect((columns.rows as { column_name: string }[]).map((c) => c.column_name)).toEqual([
+      'attempts',
+      'booking_id',
+      'created_at',
+      'due_at',
+      'event_calendar_id',
+      'event_connection_id',
+      'id',
+      'last_error',
+      'leased_until',
+      'synced_version',
+      'tenant_id',
+      'updated_at',
+      'version',
+    ]);
   });
 });

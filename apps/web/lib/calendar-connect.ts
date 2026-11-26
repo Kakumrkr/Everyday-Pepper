@@ -30,7 +30,15 @@ export function bookingCalendarPath(bookingId: string): string {
 export function bookingCalendarLine(state: BookingCalendarState['state'] | null): string | null {
   if (state === 'written') return 'Also in Google Calendar';
   if (state === 'pending') return 'Adding to Google Calendar…';
+  if (state === 'waiting') return 'Waiting for Google Calendar to be reconnected';
   return null;
+}
+
+/** What More → Calendar says once disconnected (AC-X-172): what went with it. */
+export function disconnectedNote(writesBookings: boolean): string {
+  return writesBookings
+    ? `Disconnected. Your Google busy times no longer block bookings, and Google was asked to delete ${BOOKINGS_CALENDAR}.`
+    : 'Disconnected. Your Google busy times no longer block bookings.';
 }
 
 /** Where Pepper writes bookings in the member's Google account (S71, D-2). */
@@ -69,11 +77,7 @@ export interface CalendarWords {
   tone: BadgeTone;
   lines: string[];
   /** The main action, or `null` when there is none (connected, or nothing to connect for). */
-  action:
-    | 'Connect Google Calendar'
-    | 'Reconnect Google Calendar'
-    | 'Add bookings to Google'
-    | null;
+  action: 'Connect Google Calendar' | 'Reconnect Google Calendar' | 'Add bookings to Google' | null;
   /** Whether Disconnect is offered. */
   disconnect: boolean;
   /** What the Disconnect confirm says will happen (AC-X-172). */

@@ -9,6 +9,7 @@ import {
   CALENDAR_CONNECT_PATH,
   CALENDAR_GOOGLE_PATH,
   calendarWords,
+  disconnectedNote,
   outcomeNote,
   type GoogleOutcome,
 } from '../../../lib/calendar-connect';
@@ -88,11 +89,11 @@ export function CalendarPanel({
     setConfirming(false);
     // Already gone is what the member wanted too; any other refusal (off here) is said.
     if (result.ok || errorCodeOf(result.body) === 'calendar_not_connected') {
-      setAnswer((last) => ({ ...last, connection: null }));
       setSaid({
         tone: 'ok',
-        text: 'Disconnected. Your Google busy times no longer block bookings.',
+        text: disconnectedNote(answer.connection?.writesBookings === true),
       });
+      setAnswer((last) => ({ ...last, connection: null }));
     } else {
       setSaid({ tone: 'error', text: result.message });
     }

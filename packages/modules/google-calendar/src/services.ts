@@ -27,6 +27,7 @@ import { auditActorOf, requirePermission, type Actor, type Clock } from '@pepper
 import {
   appendAuditEntry,
   claimCalendarConnection,
+  clearBookingsCalendar,
   deleteCalendarConnection,
   findCalendarConnectionOfStaff,
   findMembership,
@@ -251,7 +252,7 @@ export async function completeCalendarConnect(
 
   // The bookings permission is optional on Google's page (AC-X-167): without it, busy times only.
   const writesBookings = granted.scopes.includes(GOOGLE_EVENTS_SCOPE);
-  const { saved, replaced } = await withMember(deps.db, actor.context, async (tx) => {
+  const { saved, replaced, oldCalendar } = await withMember(deps.db, actor.context, async (tx) => {
     const staffMemberId = StaffMemberIdSchema.parse(linked.staffMemberId);
     const existing = await findCalendarConnectionOfStaff(tx, staffMemberId);
     const id = existing?.id ?? newId();
@@ -277,6 +278,16 @@ export async function completeCalendarConnect(
       },
       existing !== undefined,
     );
+    // The old "Pepper bookings" goes when bookings no longer go there: the permission unticked,
+    // or another Google account (whose calendar is another). Its events are forgotten here and
+    // the calendar deleted with the old grant below, before that grant is revoked.
+    const oldCalendar =
+      existing?.bookingsCalendarId !== undefined &&
+      existing.bookingsCalendarId !== null &&
+      (!writesBookings || existing.accountEmail !== granted.accountEmail)
+        ? existing.bookingsCalendarId
+        : null;
+    if (oldCalendar !== null) await clearBookingsCalendar(tx, id, oldCalendar);
     if (writesBookings) {
       // The grant (AC-X-171): the next 60 days' bookings are written, and whatever waited for a
       // reconnect goes out at the worker's next pass (AC-X-170).
@@ -301,10 +312,18 @@ export async function completeCalendarConnect(
         },
       },
     });
-    return { saved: stored, replaced: previous === granted.refreshToken ? null : previous };
+    return {
+      saved: stored,
+      replaced: previous === granted.refreshToken ? null : previous,
+      oldCalendar,
+    };
   });
-  // The grant this one replaced is no use to anyone now.
-  if (replaced !== null) await deps.provider.revoke(replaced).catch(() => undefined);
+  // The old grant deletes the calendar it wrote (AC-X-172's promise, on a reconnect too), then
+  // is no use to anyone.
+  if (replaced !== null) {
+    if (oldCalendar !== null) await deleteCalendarWith(deps, replaced, oldCalendar);
+    await deps.provider.revoke(replaced).catch(() => undefined);
+  }
   // The first read now, so the busy times block bookings from the start; a failure waits for
   // the worker's next pass.
   await readCalendar(deps, actor.context.tenantId, saved.id, { force: true }).catch(
@@ -350,13 +369,20 @@ export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Prom
   });
   const { token, calendarId } = removed;
   if (token === null) return;
-  if (calendarId !== null) {
-    await deps.provider
-      .refresh(token)
-      .then(({ accessToken }) => deps.provider.deleteCalendar({ accessToken, calendarId }))
-      .catch(() => undefined);
-  }
+  if (calendarId !== null) await deleteCalendarWith(deps, token, calendarId);
   await deps.provider.revoke(token).catch(() => undefined);
+}
+
+/** Asks Google to delete "Pepper bookings" with a grant about to be revoked; best-effort. */
+async function deleteCalendarWith(
+  deps: CalendarDeps,
+  refreshToken: string,
+  calendarId: string,
+): Promise<void> {
+  await deps.provider
+    .refresh(refreshToken)
+    .then(({ accessToken }) => deps.provider.deleteCalendar({ accessToken, calendarId }))
+    .catch(() => undefined);
 }
 
 export type CalendarReadOutcome = 'read' | 'skipped' | 'failed' | 'needs_reconnect';

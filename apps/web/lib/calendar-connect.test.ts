@@ -4,6 +4,7 @@ import {
   bookingCalendarLine,
   bookingCalendarPath,
   calendarSummary,
+  disconnectedNote,
   calendarWords,
   finishGoogleReturn,
   googleArrival,
@@ -150,10 +151,20 @@ describe('calendarWords for bookings in Google Calendar (S71, AC-X-167, AC-X-172
   });
 });
 
+describe('disconnectedNote (AC-X-172)', () => {
+  it('says the bookings calendar went too, when there was one', () => {
+    expect(disconnectedNote(true)).toContain('Google was asked to delete “Pepper bookings”');
+    expect(disconnectedNote(false)).toBe(
+      'Disconnected. Your Google busy times no longer block bookings.',
+    );
+  });
+});
+
 describe('bookingCalendarLine (S71 top-up, AC-X-173)', () => {
   it('says the booking is in Google Calendar, on its way, or nothing', () => {
     expect(bookingCalendarLine('written')).toBe('Also in Google Calendar');
     expect(bookingCalendarLine('pending')).toBe('Adding to Google Calendar…');
+    expect(bookingCalendarLine('waiting')).toBe('Waiting for Google Calendar to be reconnected');
     expect(bookingCalendarLine('none')).toBeNull();
     expect(bookingCalendarLine(null)).toBeNull();
     expect(bookingCalendarPath('a/b')).toBe('/v1/calendar/bookings/a%2Fb');

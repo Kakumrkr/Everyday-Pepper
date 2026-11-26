@@ -490,6 +490,11 @@ export async function deleteClientRow(
   await tx.execute(
     sql`UPDATE bookings SET manage_token_hash = NULL WHERE client_id = ${clientId} AND manage_token_hash IS NOT NULL`,
   );
+  // Their visits' events in staff members' Google Calendars are written again, without their
+  // name (S71, ADR-0069 §10): the trigger on bookings doesn't see a change to the client.
+  await tx.execute(sql`
+    UPDATE calendar_event_syncs SET version = version + 1, due_at = NULL, attempts = 0
+    WHERE booking_id IN (SELECT id FROM bookings WHERE client_id = ${clientId})`);
   // The import keeps its row count, not the person: no details, no link, no matching hash.
   await tx.execute(sql`
     UPDATE import_rows SET cells = NULL, name = NULL, email = NULL, phone = NULL,

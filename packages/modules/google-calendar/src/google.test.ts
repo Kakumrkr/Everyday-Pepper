@@ -398,6 +398,10 @@ describe('the bookings calendar and its events', () => {
       code: 'rate_limited',
     });
     await expect(write(503, {})).rejects.toMatchObject({ code: 'unavailable' });
+    // Any other 403: the grant lacks the permission; not worth trying again soon.
+    await expect(
+      write(403, { error: { code: 403, errors: [{ reason: 'insufficientPermissions' }] } }),
+    ).rejects.toMatchObject({ code: 'forbidden' });
     await expect(
       provider(stub([500, {}]).fetch).deleteEvent({
         accessToken: 'a',

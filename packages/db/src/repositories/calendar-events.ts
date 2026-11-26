@@ -218,6 +218,8 @@ export interface BookingEventSource {
   endsAt: Date;
   serviceName: string;
   clientName: string;
+  /** The client was deleted (ADR-0051): the event names nobody. */
+  clientDeleted: boolean;
 }
 
 export async function findBookingEventSource(
@@ -233,6 +235,7 @@ export async function findBookingEventSource(
       endsAt: bookings.endsAt,
       serviceName: services.name,
       clientName: clients.name,
+      clientDeleted: sql<boolean>`${clients.deletedAt} IS NOT NULL`,
     })
     .from(bookings)
     .innerJoin(

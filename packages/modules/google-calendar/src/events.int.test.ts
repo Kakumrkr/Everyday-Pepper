@@ -11,10 +11,13 @@ import {
   type BookingId,
   type StaffMemberId,
   type TenantId,
+  type UserId,
 } from '@pepper/contracts';
 import { createBusiness, ManualClock, outboxKeyFrom, type Actor } from '@pepper/core';
 import {
   addMembership,
+  deleteClientRow,
+  findBooking,
   findCalendarEventSyncOfBooking,
   insertBooking,
   insertClient,
@@ -22,6 +25,7 @@ import {
   insertStaffMember,
   listAuditEntries,
   newId,
+  withMember,
   withTenant,
   type Database,
   type TenantTx,
@@ -113,6 +117,7 @@ class Scripted extends SandboxCalendarProvider {
 
 interface Business {
   tenantId: TenantId;
+  ownerId: UserId;
   clock: ManualClock;
   provider: Scripted;
   deps: CalendarDeps;
@@ -130,6 +135,7 @@ async function aBusiness(): Promise<Business> {
   const provider = new Scripted(REDIRECT, () => clock.now().getTime());
   return {
     tenantId: TenantIdSchema.parse(tenant.id),
+    ownerId,
     clock,
     provider,
     deps: { db, provider, tokenKey: calendarTokenKeyFrom(outboxKeyFrom('y'.repeat(40))), clock },
@@ -421,7 +427,10 @@ describe('failures (AC-X-170)', () => {
     expect(await write(b, second)).toBe('waiting');
     const audit = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 20 }));
     expect(audit.filter((a) => a.action === 'calendar.connection_changed')).toHaveLength(1);
-    expect(await readBookingCalendarState(b.deps, jo.actor, id)).toEqual({ state: 'pending' });
+    expect(await readBookingCalendarState(b.deps, jo.actor, id)).toEqual({ state: 'waiting' });
+    // Waiting isn't retried every minute: an hour, or at once on reconnecting.
+    b.clock.advanceBy(10 * MINUTE);
+    expect(await write(b, id)).toBe('skipped');
 
     // Reconnecting makes both due at once.
     b.provider.refreshFails = null;
@@ -495,5 +504,100 @@ describe("the sheet's state (AC-X-173)", () => {
     const other = await aBusiness();
     const kim = await aStaffMember(other, 'Kim');
     expect(await readBookingCalendarState(other.deps, kim.actor, id)).toBeUndefined();
+  });
+});
+
+describe('the review of S71', () => {
+  it('a reconnect without the bookings permission deletes "Pepper bookings" with the old grant', async () => {
+    const b = await aBusiness();
+    const jo = await aStaffMember(b);
+    await connect(b, jo.actor);
+    const id = await book(b, jo.staffMemberId, '2026-12-02T15:00:00Z');
+    await write(b, id);
+    const calendarId = (await syncOf(b, id))?.eventCalendarId ?? '';
+    const answer = await connect(b, jo.actor, 'sandbox-busy-only');
+    expect(answer.connection?.writesBookings).toBe(false);
+    expect(b.provider.deletedCalendars).toEqual([calendarId]);
+    expect(b.provider.calendars.has(calendarId)).toBe(false);
+    // Nothing is left pointing at it: a change is done at once, with no retries.
+    await change(
+      b,
+      (q) => `UPDATE bookings SET starts_at = '2026-12-02T16:00:00Z',
+      ends_at = '2026-12-02T16:45:00Z' WHERE id = ${q(id)}`,
+    );
+    expect(await write(b, id)).toBe('written');
+    expect(await syncOf(b, id)).toMatchObject({ eventConnectionId: null, attempts: 0 });
+    expect(await readBookingCalendarState(b.deps, jo.actor, id)).toEqual({ state: 'none' });
+  });
+
+  it("a booking moved off a calendar that needs reconnecting still reaches the new staff member's", async () => {
+    const b = await aBusiness();
+    const jo = await aStaffMember(b, 'Jo');
+    const sam = await aStaffMember(b, 'Sam');
+    await connect(b, jo.actor);
+    await connect(b, sam.actor);
+    const id = await book(b, jo.staffMemberId, '2026-12-02T15:00:00Z');
+    await write(b, id);
+    // Jo's grant is refused.
+    await withTenant(db, b.tenantId, (tx) =>
+      tx.execute(
+        `UPDATE calendar_connections SET status = 'needs_reconnect', access_token_sealed = NULL,
+          access_token_expires_at = NULL WHERE staff_member_id = '${jo.staffMemberId}'`,
+      ),
+    );
+    await change(
+      b,
+      (q) => `UPDATE bookings SET staff_member_id = ${q(sam.staffMemberId)} WHERE id = ${q(id)}`,
+    );
+    expect(await write(b, id)).toBe('written');
+    const samCalendar = (await syncOf(b, id))?.eventCalendarId ?? '';
+    expect(b.provider.liveEvents(samCalendar).map((e) => e.id)).toEqual([calendarEventIdOf(id)]);
+  });
+
+  it('a calendar Google keeps answering 404 for is made again once at once, then with the backoff', async () => {
+    const b = await aBusiness();
+    const jo = await aStaffMember(b);
+    await connect(b, jo.actor);
+    const id = await book(b, jo.staffMemberId, '2026-12-02T15:00:00Z');
+    b.provider.writeFails = [
+      new CalendarProviderError('not_found', 404),
+      new CalendarProviderError('not_found', 404),
+    ];
+    expect(await write(b, id)).toBe('failed');
+    expect(b.provider.deletedCalendars).toHaveLength(1);
+    // Once at once…
+    expect(await write(b, id)).toBe('failed');
+    expect(b.provider.calendarsMade).toBe(2);
+    // …then not again until the backoff.
+    expect(await write(b, id)).toBe('skipped');
+    b.clock.advanceBy(2 * MINUTE);
+    expect(await write(b, id)).toBe('written');
+    expect(b.provider.calendarsMade).toBe(3);
+  });
+
+  it("writes a deleted client's visit without their name (ADR-0051)", async () => {
+    const b = await aBusiness();
+    const jo = await aStaffMember(b);
+    await connect(b, jo.actor);
+    // A past visit: a client with upcoming ones can't be deleted.
+    const id = await book(b, jo.staffMemberId, '2026-11-30T15:00:00Z');
+    await write(b, id);
+    expect(b.provider.allLive().map((e) => e.summary)).toEqual([expect.stringMatching(/ · Ana$/u)]);
+    // Only owners and managers delete clients.
+    const owner = { tenantId: b.tenantId, userId: b.ownerId, role: 'owner' as const };
+    await withMember(db, owner, async (tx) => {
+      const booking = await findBooking(tx, id);
+      if (booking === undefined) throw new Error('no booking');
+      const deleted = await deleteClientRow(
+        tx,
+        ClientIdSchema.parse(booking.clientId),
+        b.clock.now(),
+      );
+      expect(deleted).toMatchObject({ deleted: true });
+    });
+    expect(await write(b, id)).toBe('written');
+    expect(b.provider.allLive().map((e) => e.summary)).toEqual([
+      expect.stringMatching(/^Skin fade \w+$/u),
+    ]);
   });
 });
