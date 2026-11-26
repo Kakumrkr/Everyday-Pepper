@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S72.2 Phase 16 · Staff's "My week" + the gate** (user, 2026-11-26: "start with your recommendations": D-1 a third Calendar switch Day · Week · My week for members linked to a staff member, the phone default for staff; D-2 one week-scoped read of visit numbers; D-3 totals: visits, booked hours, days off, no money; D-4 C6 scored honestly, the phase stays open below 8). Branch `claude/staff-my-week-visit-counts-ircle9`.
 Tasks: 1 ACs (AC-X-189…194) · 2 `GET /v1/calendar/series-visits` · 3 "2 of 8" on blocks · 4 My week screen · 5 e2e + screens · 6 the C6 gate.
-Done: 1 ACs; 2 visit-numbers read (appointments int 2, api controller 29); 3 "2/8" on blocks; 4 My week screen (web unit 651). Next: task 5 (e2e `my-week.spec.ts`, screens baselines).
+Done: 1 ACs; 2 visit-numbers read (appointments int 2, api controller 29); 3 "2/8" on blocks; 4 My week screen (web unit 651); 5 e2e `my-week.spec.ts` 1 + `screens` `my-week-*` 6 baselines (day links made 44 px). Next: task 6 (C6 gate), then `/session-close`.
 
 ## Last sessions
 - **S72 Phase 16 · Recurring appointments (2026-11-26)** ([ADR-0070](../adr/0070-recurring-appointments.md), [PR #113](https://github.com/Kakumrkr/Everyday-Pepper/pull/113)). Full entry in [session-log.md](session-log.md).
