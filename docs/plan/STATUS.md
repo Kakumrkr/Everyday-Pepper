@@ -1,26 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-26 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S70.2 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S71**
+**Last updated:** 2026-11-26 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S71 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S71.2**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S71 Google Calendar out** (brief approved 2026-11-26: "start with your recommendations": D-1 split, S71.2 = sync-token read-back, reconciliation, conflicts; D-2 a separate "Pepper bookings" calendar, `calendar.app.created`; D-3 service + client first name, private, no contact details; D-4 the next 60 days on the grant). AC-X-167…174. Design: a per-booking sync row kept by a trigger on `bookings` (every write path), written by the worker's calendar pass; event id from the booking id.
-- [x] T1 ACs + traceability · [x] T2 contracts · [x] T3 migration 0086 + repository (db int 12 + isolation/export/deletion 622 green)
-- [x] T4 port/adapter/sandbox (unit 47) · [x] T5 write pass + worker · [x] T6 grant/backfill/disconnect + `GET /v1/calendar/bookings/:id` (module int 41, api int 8)
-- [ ] T7 Calendar screen · T8 sheet line (top-up) · T9 real write (user's browser)
-- Next: T7 (web: `writesBookings` on More → Calendar, the disconnect copy), then T8. Open: none.
+Nothing in progress. Next: **S71.2** (Google Calendar reconciliation; see "Planned sessions").
 
 ## Last sessions
+- **S71 Phase 16 · Google Calendar out (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §10, PR to come). Full entry in [session-log.md](session-log.md).
+  - **Built:** bookings written as events in a separate "Pepper bookings" calendar (`calendar.app.created`, optional in the same consent); `calendar_event_syncs` kept by a trigger on `bookings` (every write path), written by the worker's calendar pass; one event per booking (id from the booking, 409 → patch); the next 60 days on the grant; disconnect and a reconnect without the permission delete the calendar; the booking sheet's "Also in Google Calendar" (top-up). AC-X-167…174.
+  - **Checks:** `pnpm check` green; review 9 of 9 fixed, security none; e2e calendar-connect 5, screens' Google test 3 (baselines redrawn); walkthrough at 375 px (one label shortened). Not run against real Google yet (S71.2).
 - **S70.2 Phase 16 · Google Calendar on screen (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #110](https://github.com/Kakumrkr/Everyday-Pepper/pull/110)). Full entry in [session-log.md](session-log.md).
   - **Built:** More → Calendar (connect, reconnect, disconnect with a confirm); Google's return as a route handler (finished on the server, 303 with the outcome); Home's reconnect card for the member's own calendar; the Team line (top-up) from `GET /v1/calendar/connections`; the adapter's Basic client; the first real Google connect in testing mode (PKCE accepted). AC-X-160…166.
   - **Checks:** `pnpm check` green; affected integration 2,085; e2e connect/team/week 12, screens 46; review 8 of 8 fixed, security none ≥ 8; walkthrough at 375 px dark (one copy fix).
-- **S70 Phase 16 · Google Calendar in (busy blocks) (2026-11-25)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #109](https://github.com/Kakumrkr/Everyday-Pepper/pull/109)). Full entry in [session-log.md](session-log.md).
-  - **Built:** `@pepper/google-calendar` (port, `fetch` + Zod adapter, sandbox, sealed tokens); connect/callback/status/disconnect and `outside-busy` routes; the worker reads freeBusy every 5 minutes; an expired token keeps the busy times and needs reconnecting; `slotsFor` refuses Google busy times like time off; the week view's "Busy (Google)" (top-up). AC-X-152…159.
-  - **Checks:** `pnpm check` green; lint's heap 4 → 6 GB (CI run 1 ran out of memory at 4 GB; peak 5.2 GB); affected integration 2,081 green; e2e week/calendar/booking 8, screens 43; review 10 of 10 fixed, security none ≥ 8; walkthrough at 375 px dark and light.
-
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
 - **Session standard (user, P1):** the M2 workflow plus playbook §3: owner value first, a scorecard gate per phase, a product walkthrough at every close (375 px, light and dark, screenshots in the PR), one top-up per session and a three-line retro carried into the next prompt, skills by kind of session (playbook §4).
@@ -35,6 +30,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S71 (user, 2026-11-26):** "You can start with your recommendations and complete the session successfully" (D-1 split → S71.2 read-back, reconciliation, conflicts; D-2 a "Pepper bookings" calendar, `calendar.app.created`; D-3 service + first name, private; D-4 60 days on the grant); the user asked whether a scheduled task can run S71.2 alone. Full wording in [decisions.md](decisions.md) and [ADR-0069](../adr/0069-google-calendar-busy-times.md) §10.
 - **S70.2 (user, 2026-11-25/26):** "Yeah, sure. Let's start it" (D-1 a Home card from the member's status, no feed kind; D-2 the real run through the user's browser, the secret only via the secure form; D-3 Team shows status, never the email). Full wording in [decisions.md](decisions.md); the run in [ADR-0069](../adr/0069-google-calendar-busy-times.md).
 - **S70 (user, 2026-11-25):** "Start with your recommendations" (D-1 split → S70.2 the connect screen, Team status, the reconnect card, the OAuth journey; D-2 each staff member connects their own; D-3 binds like time off; D-4 freeBusy every 5 min, start/end only; D-5 `calendar.freebusy` only, an expired token keeps the busy times; D-6 `fetch` + Zod). Full wording in [decisions.md](decisions.md) and [ADR-0069](../adr/0069-google-calendar-busy-times.md).
 - **S69 (user, 2026-11-25):** "Add and let's go with ur recommendations" (D-1 Phase 16 next, [PCR-016](changes/PCR-016.md); D-2 native pointer events; D-3 a drag never overrides; D-4 one staff member's week; additions: drag hints, Undo). Full wording in [decisions.md](decisions.md).
@@ -115,11 +111,11 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S71 | Google Calendar out, incremental sync | 16 | Conflict + duplicate scenarios |
+| S71.2 | Google Calendar reconciliation: sync-token read-back, Pepper's version put back, conflicts, renames; the real testing-mode write | 16 | Conflict scenarios; a real write |
 | S72 | Recurring appointments, staff week; **Phase 16 gate** | 16 | Recurrence property tests; C6 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
