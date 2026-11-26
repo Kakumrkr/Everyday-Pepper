@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-26 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 13 (Phase 16 closed at S72.2, C6 8; S57–S60 need the domain) → next **S58a**
+**Last updated:** 2026-11-26 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → next **S77**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **P2 · Plan Phase 18, the AI layer (prose only, [PCR-017](changes/PCR-017.md)).** The user approved the brief's recommendations (2026-11-26): D-1 Phase 18 next, S58a–S60 jump ahead the day the domain is bought; D-2 S73 Reports into Phase 18; D-3 S86 after the pilot; D-4 waitlist offers by text on a new consent wording, regulars by email; D-5 a $1.50 cap from Phase 12's unspent; D-6 S80 "client texts kept", the classifier evals in S81a.
 - Tasks: 1 PCR-017 · 2 playbook · 3 roadmap, scorecard §2–§3, risks · 4 decisions, ai-budget, CHANGELOG · 5 STATUS, session log · 6 the Claude Doc · 7 tier 0 checks, PR, merge.
-- Done: 1 PCR-017 · 2 playbook · 3 roadmap, scorecard §2–§3, R17 · 4 decisions, ai-budget Phase 18, CHANGELOG 0.43. Next: task 5 (STATUS, session log).
+- Done: 1 PCR-017 · 2 playbook · 3 roadmap, scorecard §2–§3, R17 · 4 decisions, ai-budget Phase 18, CHANGELOG 0.43 · 5 STATUS planned sessions, header, waiting 3 and 5 · 6 the Claude Doc brought in line (rev 25). Next: task 7 (close: tier 0 checks, session log, PR, merge).
 
 ## Last sessions
 - **S72.2 Phase 16 · Staff's "My week" + the gate (2026-11-26)** ([PR #114](https://github.com/Kakumrkr/Everyday-Pepper/pull/114)). Full entry in [session-log.md](session-log.md).
@@ -110,23 +110,37 @@ Older ones (S25–S33) are in [decisions.md](decisions.md).
 Raised by Claude at the brief of the session named.
 1. **Before the pilot (raised at the S45 brief, still open):** start Google's OAuth verification for the Calendar scopes (it takes weeks). S70–S71 build in Google's testing mode (PCR-016); real owners connecting calendars need it. S71/S71.2's write and read-back still need a real run with the user: list `calendar.app.created` under the Google Cloud project's Data Access, reconnect to grant it, check a booking reaches "Pepper bookings", a move there is put back, and a reconnect keeps the new grant. S70.2 connected the user's own test account (the OAuth client in the user's Google Cloud project; its secret saved only as the cloud environment's secret for `oauth2.googleapis.com`).
 2. **Before the pilot (S60):** S56b recorded with the session's key (the user enrolled in the free daily tokens); still to confirm: the key is the `pepper-dev-evals` project's, and a production project exists. Originally: create the two OpenAI projects (`pepper-dev-evals` with data sharing on, production with sharing off), check the free daily token limits on the dashboard (Data Controls → Sharing), and set the hard limit to the $10 V1 budget.
-3. **By S57 (Phase 13, after S58a, PCR-010):** buy a cheap neutral domain for the pilot; create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
+3. **By S57 (Phase 13, after S58a, PCR-010):** buy a cheap neutral domain for the pilot (the day it is bought, S58a, S57, S58b and S60 go next, PCR-017); create a free Sentry project and a Grafana Cloud stack (`SENTRY_DSN`, `OTEL_EXPORTER_OTLP_*`).
 4. **Before the pilot (S60), by hand:** the 5-minute VoiceOver/NVDA check; a push test on a real iPhone; confirm the OWASP LLM/Agentic Top 10 2026 titles; zero data retention on the production OpenAI project (L2, L8); the backup retention for deleted memory (L7); 3–5 pilot owners from the target segment.
-5. **Before S66 (S65 built on fixtures and the sandbox):** sign up for a free Stripe account and stay in test mode (no business details needed yet); S66 confirms the adapter against it. **Before SMS and Stripe go live (S64.2, after Phase 15):** form the LLC, pay for an SMS provider (Twilio) and register 10DLC (4–8 weeks), then activate the Stripe account.
+5. **Before S66 (S65 built on fixtures and the sandbox):** sign up for a free Stripe account and stay in test mode (no business details needed yet); S66 confirms the adapter against it. **Before SMS and Stripe go live (S64.2, after Phase 15):** form the LLC, pay for an SMS provider (Twilio) and register 10DLC (4–8 weeks), then activate the Stripe account. The 10DLC campaign must name what Phase 18 adds: waitlist offers the client asked for (S79) and replies to a client's own texts (S80–S82); texting offers to regulars would need a marketing campaign (not planned, PCR-017).
 
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, M1–M2 and P1 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+
+**The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
+| S77 | Visit risk with reasons (rules, owners and managers only) | 18 | Every confirmed visit in the next 14 days has a band and reasons |
+| S78 | Confirm or release (may split at its brief) | 18 | No release without the owner's tap; the race test |
+| S79 | Waitlist offers by text (sandbox, `sms-consent-v3`) | 18 | A v3 client with no email is offered by text |
+| S80 | Client texts kept (routed to one business, an owner card with Reply) | 18 | A text two businesses fit is stored in neither; isolation 100% |
+| S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
+| S81b | Client texts understood ("b", Rec) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
+| S82a | Answers from the shop's facts ("a") | 18 | Green on scripted cassettes |
+| S82b | Answers from the shop's facts ("b", Rec) | 18 | "Must not invent" 100% pass^3 |
+| S83 | Day re-planner | 18 | No proposal breaks a booking rule (property test) |
+| S84 | Due dates that fit each client | 18 | Fixtures for regular, irregular and two-visit clients |
+| S85 | Quiet-week plan | 18 | The forecast checked against past weeks |
+| S73 | Reports: five numbers and Phase 18's (moved from Phase 17) | 18 | Numbers equal fixture sums |
+| S87 | Phase 18 gate ($1.50 cap) | 18 | C1, C5, C12 at 9; C8 9 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
 | S58b | Operate on the VPS: restore drill, alerts, load test, uptime check | 13 | Restore drill passes; SLOs met |
 | S60 | Security review, manual checks, **pilot gate** → 🚦 pilot starts | 13 | Scorecard pilot column met |
 | S64.2 | SMS live (once the LLC, a paid provider and 10DLC exist): live switch, `send_client_message` over SMS ("a"/"b") | 14 | A real text both ways; evals green |
-| S73 | Reports (five numbers) | 17 | Numbers equal fixture sums |
 | S74 | Pepper billing: plans, 30-day trial, dunning | 17 | Test-mode billing journeys |
 | S75 | Landing page + pricing | 17 | Lighthouse ≥ 95 mobile |
 | S76 | Final re-record ($1.50), security review, **launch gate** | 17 | Every category ≥ 9; go/no-go |
