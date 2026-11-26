@@ -70,7 +70,6 @@ const SeriesStartsSchema = z
 /** `POST /v1/bookings/series/preview`: the repeat's dates, each checked; nothing is booked. */
 export const BookingSeriesPreviewInputSchema = z
   .object({
-    clientId: ClientIdSchema,
     serviceId: ServiceIdSchema,
     staffMemberId: StaffMemberIdSchema,
     /** The first visit. */
@@ -85,12 +84,16 @@ export const SeriesVisitPreviewSchema = z.object({
   startsAt: UtcDateTimeSchema,
   endsAt: UtcDateTimeSchema,
   free: z.boolean(),
+  /** Not free because it is further ahead than the business takes bookings. */
+  tooFarAhead: z.boolean(),
   alternatives: z.array(AvailableSlotSchema),
 });
 export type SeriesVisitPreview = z.infer<typeof SeriesVisitPreviewSchema>;
 
 export const BookingSeriesPreviewSchema = z.object({
   visits: z.array(SeriesVisitPreviewSchema).max(SERIES_MAX_VISITS),
+  /** How far ahead the staff member takes bookings (the "maximum advance" rule), in days. */
+  maximumAdvanceDays: z.number().int().positive(),
 });
 export type BookingSeriesPreview = z.infer<typeof BookingSeriesPreviewSchema>;
 

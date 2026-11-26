@@ -238,6 +238,21 @@ async function bookIn(
     throw error;
   }
   await noteFirstBookingIn(tx);
+  await recordCreated(tx, actor, row, now);
+  await requestInsights(tx);
+  if (request.notifyClient && options.notify) {
+    await tellClient(tx, row, 'confirmed', options.notify);
+  }
+  return toBooking(row);
+}
+
+/** Audits a booking just made and plans its reminder (each visit of a series too, S72). */
+export async function recordCreated(
+  tx: TenantTx,
+  actor: Actor,
+  row: BookingRow,
+  now: number,
+): Promise<void> {
   await appendAuditEntry(tx, {
     actor: auditActorOf(actor),
     change: {
@@ -249,11 +264,6 @@ async function bookIn(
     requestId: actor.requestId,
   });
   await keepReminderInStep(tx, row, now);
-  await requestInsights(tx);
-  if (request.notifyClient && options.notify) {
-    await tellClient(tx, row, 'confirmed', options.notify);
-  }
-  return toBooking(row);
 }
 
 /** One booking. Staff reach only their own (`BookingNotFoundError` otherwise). */
@@ -597,7 +607,7 @@ function requireOverride(actor: Actor): void {
 }
 
 /** Locks the staff member and checks the actor may book them (staff: only their own). */
-async function lockStaff(
+export async function lockStaff(
   tx: TenantTx,
   actor: Actor,
   staffMemberId: StaffMemberId,
@@ -673,7 +683,7 @@ export async function isBookable(tx: TenantTx, search: BookableSearch): Promise<
 export type OpenTransaction = <T>(work: (tx: TenantTx) => Promise<T>) => Promise<T>;
 
 /** The time is not free: the error carries the nearest times that are, read in `tx`. */
-async function unavailable(
+export async function unavailable(
   tx: TenantTx,
   search: AlternativesSearch,
 ): Promise<SlotUnavailableError> {
@@ -684,7 +694,7 @@ async function unavailable(
  * Runs one write in a savepoint: a refused write (an overlap, a taken key) rolls back only
  * itself, so the caller's transaction (the trust layer's) stays usable.
  */
-function inSavepoint<T>(tx: TenantTx, work: (savepoint: TenantTx) => Promise<T>): Promise<T> {
+export function inSavepoint<T>(tx: TenantTx, work: (savepoint: TenantTx) => Promise<T>): Promise<T> {
   return tx.transaction(work);
 }
 

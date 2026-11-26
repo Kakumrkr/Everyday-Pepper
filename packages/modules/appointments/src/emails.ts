@@ -130,6 +130,60 @@ export function confirmationEmail(details: BookingEmailDetails, manageUrl: strin
   };
 }
 
+/** "Haircut with Dre" (no time): the service of every visit of a series. */
+function service(details: BookingEmailDetails): string {
+  const staff = details.staffName === null ? '' : ` with ${details.staffName}`;
+  return `${details.serviceName}${staff}`;
+}
+
+/**
+ * A series' one confirmation (S72, D-4, AC-X-185): every booked visit, each with its own
+ * reschedule/cancel link (each link changes that visit only).
+ */
+export function seriesConfirmationEmail(
+  details: BookingEmailDetails,
+  visits: readonly { startsAt: string; manageUrl: string }[],
+): EmailMessage {
+  return {
+    to: details.email,
+    subject: `You're booked at ${details.businessName}: ${String(visits.length)} visits`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `You're booked at ${details.businessName} for ${service(details)}, ${String(visits.length)} visits:`,
+      ...visits.flatMap((visit) => [
+        '',
+        formatWhen(visit.startsAt, details.timeZone),
+        `To reschedule or cancel this visit: ${visit.manageUrl}`,
+      ]),
+      '',
+      'The links are just for you, so keep them private.',
+      ...policyLines(details),
+    ].join('\n'),
+  };
+}
+
+/** The visits of a series the business cancelled ("this and following", AC-X-185). */
+export function seriesCancelledEmail(
+  details: BookingEmailDetails,
+  visits: readonly { startsAt: string }[],
+): EmailMessage {
+  const one = visits.length === 1;
+  return {
+    to: details.email,
+    subject: `${one ? 'A visit' : `${String(visits.length)} visits`} at ${details.businessName} ${one ? 'is' : 'are'} cancelled`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `${one ? 'This visit' : 'These visits'} at ${details.businessName} for ${service(details)} ${one ? 'is' : 'are'} cancelled:`,
+      ...visits.map((visit) => formatWhen(visit.startsAt, details.timeZone)),
+      '',
+      'We hope to see you another time.',
+      ...policyLines(details),
+    ].join('\n'),
+  };
+}
+
 export function rescheduledEmail(details: BookingEmailDetails, manageUrl: string): EmailMessage {
   return {
     to: details.email,

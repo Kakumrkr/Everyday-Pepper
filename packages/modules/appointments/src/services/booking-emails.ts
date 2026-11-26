@@ -12,8 +12,11 @@ import {
   confirmationEmail,
   manageUrl,
   rescheduledEmail,
+  seriesCancelledEmail,
+  seriesConfirmationEmail,
   waitlistTakenEmail,
 } from '../emails.js';
+import type { SeriesNotice } from './booking-series.js';
 import { confirmationText, optInText } from '../texts.js';
 import type { BookingEmailDetails, BookingNotice } from './notices.js';
 import { reminderSettingsOf, textableNumber } from './reminders.js';
@@ -61,6 +64,36 @@ export async function queueBookingEmail(
     dedupeKey: OutboxDedupeKeySchema.parse(
       `booking.${notice.kind}:${bookingId}:${String(at.getTime())}`,
     ),
+    now: new Date(now + (options.holdSeconds ?? 0) * 1000),
+  });
+}
+
+/**
+ * Queues a series' one email (S72, D-4): its confirmation, or "this and following" cancelled.
+ * Returns its outbox id, or `undefined` when this one was already queued.
+ */
+export async function queueSeriesEmail(
+  tx: TenantTx,
+  notice: SeriesNotice,
+  options: BookingEmailOptions,
+): Promise<OutboxMessageId | undefined> {
+  if (notice.email.email === '') return undefined;
+  const message =
+    notice.kind === 'series_confirmed'
+      ? seriesConfirmationEmail(
+          notice.email,
+          notice.visits.map((visit) => ({
+            startsAt: visit.startsAt,
+            manageUrl: manageUrl(options.baseUrl, notice.email.slug, visit.manageToken),
+          })),
+        )
+      : seriesCancelledEmail(notice.email, notice.visits);
+  // One a series, and one a "this and following" from a visit (a visit is cancelled once).
+  const subject = notice.kind === 'series_confirmed' ? notice.seriesId : notice.fromBookingId;
+  const now = (options.clock ?? systemClock).now().getTime();
+  return queueEmail(tx, message, {
+    key: options.outboxKey,
+    dedupeKey: OutboxDedupeKeySchema.parse(`booking.${notice.kind}:${subject}`),
     now: new Date(now + (options.holdSeconds ?? 0) * 1000),
   });
 }

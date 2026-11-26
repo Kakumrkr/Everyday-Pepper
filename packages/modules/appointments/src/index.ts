@@ -13,6 +13,7 @@ export * from './services/booking-emails.js';
 export * from './services/confirm-by-text.js';
 export * from './services/reminder-settings.js';
 export * from './services/bookings.js';
+export * from './services/booking-series.js';
 export * from './services/business-photos.js';
 export * from './services/hours.js';
 export * from './services/import-visits.js';
