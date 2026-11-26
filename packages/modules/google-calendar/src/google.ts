@@ -148,7 +148,7 @@ export class GoogleCalendarProvider implements CalendarProvider {
         // The client in a Basic header (RFC 6749 §2.3.1, which Google accepts), never in the
         // body: the secret stays out of anything that logs or echoes a form (S70.2).
         Authorization: `Basic ${Buffer.from(
-          `${encodeURIComponent(this.options.clientId)}:${encodeURIComponent(this.options.clientSecret)}`,
+          `${formEncoded(this.options.clientId)}:${formEncoded(this.options.clientSecret)}`,
         ).toString('base64')}`,
       },
       body: new URLSearchParams(fields).toString(),
@@ -227,4 +227,9 @@ function apiErrorCode(status: number, body: unknown): CalendarSyncError {
       return 'rate_limited';
   }
   return statusCode(status);
+}
+
+/** One value as `application/x-www-form-urlencoded` encodes it (RFC 6749 §2.3.1, Appendix B). */
+export function formEncoded(value: string): string {
+  return new URLSearchParams({ v: value }).toString().slice(2);
 }

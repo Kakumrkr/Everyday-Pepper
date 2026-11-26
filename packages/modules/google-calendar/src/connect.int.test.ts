@@ -285,7 +285,10 @@ describe('the Team list (S70.2, AC-X-165)', () => {
     expect(JSON.stringify(team)).not.toContain(SANDBOX_ACCOUNT_EMAIL);
     // A colleague reads the same list; the limit holds.
     expect(await readTeamCalendars(deps, jo.actor, 50)).toEqual(team);
-    expect((await readTeamCalendars(deps, owner, 1)).connections).toHaveLength(1);
+    expect(team.truncated).toBe(false);
+    const cut = await readTeamCalendars(deps, owner, 1);
+    expect(cut.connections).toHaveLength(1);
+    expect(cut.truncated).toBe(true);
   });
 
   it("never lists another business's connections", async () => {
@@ -294,7 +297,10 @@ describe('the Team list (S70.2, AC-X-165)', () => {
     const { url } = await startCalendarConnect(first.deps, jo.actor);
     await completeCalendarConnect(first.deps, jo.actor, answerOf(url));
     const other = await business();
-    expect(await readTeamCalendars(other.deps, other.owner, 50)).toEqual({ connections: [] });
+    expect(await readTeamCalendars(other.deps, other.owner, 50)).toEqual({
+      connections: [],
+      truncated: false,
+    });
   });
 });
 

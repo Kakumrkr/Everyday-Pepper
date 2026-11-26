@@ -57,7 +57,8 @@ export default async function TeamPage() {
       ? currentJson('/v1/services', ServicesResponseSchema)
       : null,
     // Each staff member's Google Calendar in words (S70.2, AC-X-164); `null` when it is off
-    // in this deployment or can't be read, and then the rows say nothing about calendars.
+    // in this deployment or can't be read (or is cut short), and then the rows say nothing
+    // about calendars rather than guess.
     readsStaff ? currentJson(CALENDAR_CONNECTIONS_PATH, TeamCalendarConnectionsSchema) : null,
   ]);
   const calendarOf = new Map(
@@ -104,7 +105,7 @@ export default async function TeamPage() {
                 isMe={member.userId === me}
                 hours={hours[index] ?? null}
                 calendar={
-                  calendars === null
+                  calendars === null || calendars.truncated
                     ? null
                     : teamCalendarLine(calendarOf.get(member.id), current.business.timeZone)
                 }

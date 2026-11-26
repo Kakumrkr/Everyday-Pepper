@@ -154,6 +154,8 @@ export type TeamCalendarConnection = z.infer<typeof TeamCalendarConnectionSchema
 /** `GET /v1/calendar/connections`: the business's connections, one per staff member at most. */
 export const TeamCalendarConnectionsSchema = z.object({
   connections: z.array(TeamCalendarConnectionSchema).max(MAX_LIST_ITEMS),
+  /** More connections than one answer holds: the list says nothing rather than guess. */
+  truncated: z.boolean(),
 });
 export type TeamCalendarConnections = z.infer<typeof TeamCalendarConnectionsSchema>;
 

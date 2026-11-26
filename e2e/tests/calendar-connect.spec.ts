@@ -87,6 +87,14 @@ test('a member connects their Google Calendar from More, sees it on Team, and di
   await expect(status(page)).toContainText('calendar@sandbox.test · Read just now');
   await expect(page.getByRole('button', { name: 'Connect Google Calendar' })).toHaveCount(0);
 
+  // Back to the return page's entry never sends Google's spent code again (the review).
+  await page.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'More' }).click();
+  await expect(page).toHaveURL(/\/more$/);
+  await page.goBack();
+  await expect(page).toHaveURL(/\/more\/calendar$/);
+  await expect(status(page)).toContainText('Connected');
+  await expect(page.getByRole('alert').filter({ hasText: 'already used' })).toHaveCount(0);
+
   // More says it in a few words; Team says it for each staff member, never the email (AC-X-164).
   await page.goto('/more');
   await expect(page.getByRole('link', { name: /Google Calendar/ })).toContainText(
@@ -172,11 +180,9 @@ test('Google’s return page says what went wrong and connects nothing', async (
   const state = new URL(started.url).searchParams.get('state') ?? '';
   await page.goto(`/more/calendar/google?code=refused&state=${state}`);
   await expect(
-    page
-      .getByRole('alert')
-      .filter({
-        hasText: 'That Google link was already used or ran out. Tap Connect to try again.',
-      }),
+    page.getByRole('alert').filter({
+      hasText: 'That Google link was already used or ran out. Tap Connect to try again.',
+    }),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/more\/calendar$/);
   await expect(status(page)).toContainText('Not connected');

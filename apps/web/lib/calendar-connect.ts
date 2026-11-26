@@ -1,9 +1,12 @@
-import type {
-  CalendarConnection,
-  CalendarConnectionAnswer,
-  TeamCalendarConnection,
+import { z } from 'zod';
+import {
+  CalendarConnectCompleteSchema,
+  type CalendarConnection,
+  type CalendarConnectionAnswer,
+  type TeamCalendarConnection,
 } from '@pepper/contracts';
 import type { BadgeTone } from '@pepper/ui';
+import { errorCodeOf, messageFor } from './client-api';
 
 // The words of Google Calendar on screen (S70.2, AC-X-160…164, ADR-0069): More → Calendar,
 // Google's return page, the Home card and the Team list. The api decides the status; these only
@@ -105,6 +108,12 @@ export function calendarWords(
   };
 }
 
+/** The More row's line for a member with nothing connected. */
+export const CONNECT_PITCH = 'Keep your own plans from being booked over';
+
+/** The More row's line when the calendar can't be read just now. */
+export const CALENDAR_UNREAD = 'Couldn’t load it just now';
+
 /** The More row's line under "Google Calendar". */
 export function calendarSummary(
   answer: CalendarConnectionAnswer,
@@ -113,7 +122,7 @@ export function calendarSummary(
 ): string {
   const { connection } = answer;
   if (connection === null) {
-    return answer.canConnect ? 'Keep your own plans from being booked over' : 'Not linked to you';
+    return answer.canConnect ? CONNECT_PITCH : 'Not linked to you';
   }
   return connection.status === 'needs_reconnect'
     ? 'Needs reconnecting'
@@ -137,8 +146,10 @@ export function teamCalendarLine(
 /** What Google's return page was given (AC-X-161). */
 export type GoogleArrival =
   | { kind: 'code'; code: string; state: string }
-  /** The member said no at Google, or Google sent an error. */
+  /** The member said no at Google (`access_denied`). */
   | { kind: 'declined' }
+  /** Google sent another error (an admin's policy, a scope it refused, Google failing). */
+  | { kind: 'failed' }
   /** Opened with nothing usable (a reload after the address was cleaned, a broken link). */
   | { kind: 'none' };
 
@@ -146,17 +157,119 @@ function one(value: string | string[] | undefined): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-/** Google's return: `?code&state` once the member agrees, `?error=access_denied` if not. */
+/**
+ * Google's return: `?code&state` once the member agrees, `?error=access_denied` if not, another
+ * `error` when Google couldn't finish. The code and state are checked like the api checks them
+ * (`CalendarConnectCompleteSchema`) before anything is sent.
+ */
 export function googleArrival(
   params: Record<string, string | string[] | undefined>,
 ): GoogleArrival {
-  const code = one(params['code']);
-  const state = one(params['state']);
-  if (one(params['error']) !== undefined) return { kind: 'declined' };
-  if (code !== undefined && code.length > 0 && state !== undefined && state.length > 0) {
-    return { kind: 'code', code, state };
+  const error = one(params['error']);
+  if (error !== undefined)
+    return error === 'access_denied' ? { kind: 'declined' } : { kind: 'failed' };
+  const parsed = CalendarConnectCompleteSchema.safeParse({
+    code: one(params['code']),
+    state: one(params['state']),
+  });
+  return parsed.success ? { kind: 'code', ...parsed.data } : { kind: 'none' };
+}
+
+/**
+ * How Google's return ended (AC-X-161), carried to More → Calendar as `?google=`: connected,
+ * the member said no, Google failed, or the api's refusal.
+ */
+export const GoogleOutcomeSchema = z.enum([
+  'connected',
+  'declined',
+  'failed',
+  'calendar_connect_invalid',
+  'calendar_scope_missing',
+  'calendar_unavailable',
+  'calendar_not_linked',
+  'calendar_off',
+]);
+export type GoogleOutcome = z.infer<typeof GoogleOutcomeSchema>;
+
+/** The `?google=` of More → Calendar, or `null` for none or anything else. */
+export function googleOutcomeOf(value: string | string[] | undefined): GoogleOutcome | null {
+  const parsed = GoogleOutcomeSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
+/** What More → Calendar says at the top for how Google's return ended. */
+export function outcomeNote(outcome: GoogleOutcome | null): {
+  tone: 'ok' | 'error';
+  text: string;
+} | null {
+  switch (outcome) {
+    case null:
+      return null;
+    case 'connected':
+      return { tone: 'ok', text: 'Connected. Pepper won’t book clients over your busy times.' };
+    case 'declined':
+      return { tone: 'error', text: 'Nothing was connected: Google says you didn’t allow it.' };
+    case 'failed':
+      return {
+        tone: 'error',
+        text: 'Google couldn’t finish connecting your calendar. Try again in a minute. If your Google account is a work one, its admin may need to allow Pepper.',
+      };
+    case 'calendar_connect_invalid':
+    case 'calendar_scope_missing':
+    case 'calendar_unavailable':
+    case 'calendar_not_linked':
+    case 'calendar_off':
+      return { tone: 'error', text: messageFor(400, { code: outcome }) };
   }
-  return { kind: 'none' };
+}
+
+/** How the web server calls the api for the member (their cookie, the app's origin). */
+export interface ReturnCall {
+  apiBaseUrl: string;
+  /** Pepper's public origin: the api refuses a call from any other. */
+  origin: string;
+  cookie: string | null;
+  forwardedFor: string | null;
+  fetch?: typeof globalThis.fetch;
+}
+
+/**
+ * Google's return (S70.2, AC-X-161, ADR-0069): finishes the connect on the server, once, with
+ * what Google sent, and says how it ended. The code never reaches the page's script, and the
+ * return address is never an entry the browser's Back can bring back.
+ */
+export async function finishGoogleReturn(
+  params: Record<string, string | string[] | undefined>,
+  call: ReturnCall,
+): Promise<GoogleOutcome | null> {
+  const arrival = googleArrival(params);
+  if (arrival.kind === 'none') return null;
+  if (arrival.kind !== 'code') return arrival.kind;
+  const headers: Record<string, string> = {
+    'content-type': 'application/json',
+    origin: call.origin,
+  };
+  if (call.cookie !== null) headers['cookie'] = call.cookie;
+  if (call.forwardedFor !== null) headers['x-forwarded-for'] = call.forwardedFor;
+  let response: Response;
+  try {
+    response = await (call.fetch ?? globalThis.fetch)(
+      new URL(CALENDAR_CALLBACK_PATH, call.apiBaseUrl),
+      {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ code: arrival.code, state: arrival.state }),
+        cache: 'no-store',
+        // The api exchanges the code and reads the calendar once before it answers.
+        signal: AbortSignal.timeout(20_000),
+      },
+    );
+  } catch {
+    return 'calendar_unavailable';
+  }
+  if (response.status === 200) return 'connected';
+  const code = errorCodeOf(await response.json().catch(() => undefined));
+  return googleOutcomeOf(code) ?? 'failed';
 }
 
 /** Whether Home shows "Reconnect your Google Calendar" (AC-X-163): the member's own only. */

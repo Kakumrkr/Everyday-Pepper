@@ -14,7 +14,7 @@ import {
 import { TextLink } from '../../_components/auth-page';
 import { appNav, type NavItem } from '../../../lib/nav';
 import { HELP_PATH } from '../../../lib/help';
-import { calendarSummary } from '../../../lib/calendar-connect';
+import { CALENDAR_UNREAD, calendarSummary } from '../../../lib/calendar-connect';
 import { paymentsSummary } from '../../../lib/payments';
 import { REMINDER_SETTINGS_PATH, remindersSummary } from '../../../lib/reminder-settings';
 import { PRIVACY_PATH } from '@pepper/contracts';
@@ -158,7 +158,7 @@ export default async function MorePage() {
               meta={
                 calendar.state === 'on'
                   ? calendarSummary(calendar.answer, timeZone)
-                  : 'Keep your own plans from being booked over'
+                  : CALENDAR_UNREAD
               }
               href={ROUTES.calendarSettings}
               renderLink={kitLink}

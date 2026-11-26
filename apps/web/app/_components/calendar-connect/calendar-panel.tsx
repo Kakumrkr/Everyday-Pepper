@@ -1,21 +1,18 @@
 'use client';
 
-import {
-  CalendarConnectionAnswerSchema,
-  CalendarConnectStartSchema,
-  type CalendarConnectionAnswer,
-} from '@pepper/contracts';
+import { CalendarConnectStartSchema, type CalendarConnectionAnswer } from '@pepper/contracts';
 import { Badge, Button, Sheet, SheetFooter } from '@pepper/ui';
+import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { ROUTES } from '../../../lib/account';
 import {
-  CALENDAR_CALLBACK_PATH,
   CALENDAR_CONNECT_PATH,
   CALENDAR_GOOGLE_PATH,
   calendarWords,
-  type GoogleArrival,
+  outcomeNote,
+  type GoogleOutcome,
 } from '../../../lib/calendar-connect';
-import { sendJson } from '../../../lib/client-api';
+import { errorCodeOf, sendJson } from '../../../lib/client-api';
 import { Notice } from '../form-parts';
 
 const FALLBACK = 'Something went wrong. Try again.';
@@ -26,60 +23,37 @@ interface Said {
   text: string;
 }
 
-type Busy = 'connect' | 'finish' | 'disconnect' | null;
+type Busy = 'connect' | 'disconnect' | null;
 
 /**
  * The member's own Google Calendar (S70.2, AC-X-160…162): where it stands, Connect or
- * Reconnect (Google's consent page), and Disconnect behind a confirm. Back from Google
- * (`arrival`), it finishes the connect once, then cleans the address so a reload or a shared
- * link never sends the code again.
+ * Reconnect (Google's consent page), and Disconnect behind a confirm. Coming from Google's
+ * return (`outcome`, finished on the server), it says how that ended and cleans the address so
+ * a reload doesn't say it again.
  */
 export function CalendarPanel({
   initial,
   timeZone,
-  arrival,
+  outcome,
 }: {
   initial: CalendarConnectionAnswer;
   timeZone: string;
-  arrival: GoogleArrival | null;
+  outcome: GoogleOutcome | null;
 }) {
+  const router = useRouter();
   const [answer, setAnswer] = useState(initial);
-  const [busy, setBusy] = useState<Busy>(arrival?.kind === 'code' ? 'finish' : null);
-  const [said, setSaid] = useState<Said | null>(
-    arrival?.kind === 'declined'
-      ? { tone: 'error', text: 'Nothing was connected: Google says you didn’t allow it.' }
-      : null,
-  );
+  const [busy, setBusy] = useState<Busy>(null);
+  const [said, setSaid] = useState<Said | null>(() => outcomeNote(outcome));
   const [confirming, setConfirming] = useState(false);
   const handled = useRef(false);
 
   useEffect(() => {
-    // Once per arrival (React runs effects twice in development).
-    if (handled.current || arrival === null) return;
+    // Once (React runs effects twice in development); the same page, so nothing remounts.
+    if (handled.current || outcome === null) return;
     handled.current = true;
-    // `/google` and the page are two routes: `router.replace` would remount this panel and
-    // drop the answer below, so only the address changes (Next keeps the tree).
-    window.history.replaceState(null, '', ROUTES.calendarSettings);
-    if (arrival.kind !== 'code') return;
-    void (async () => {
-      const result = await sendJson('POST', CALENDAR_CALLBACK_PATH, {
-        code: arrival.code,
-        state: arrival.state,
-      });
-      setBusy(null);
-      const parsed = result.ok ? CalendarConnectionAnswerSchema.safeParse(result.data) : null;
-      if (parsed?.success === true) {
-        setAnswer(parsed.data);
-        setSaid({
-          tone: 'ok',
-          text: 'Connected. Pepper won’t book clients over your busy times.',
-        });
-      } else {
-        setSaid({ tone: 'error', text: result.ok ? FALLBACK : result.message });
-      }
-    })();
-    // Once only: the ref guards it.
-  }, [arrival]);
+    router.replace(ROUTES.calendarSettings, { scroll: false });
+    // Once only: the ref guards it, so `router` needn't be listed.
+  }, [outcome]);
 
   useEffect(() => {
     // Back from Google's page with the browser's back button: the page comes back as it was
@@ -112,8 +86,8 @@ export function CalendarPanel({
     const result = await sendJson('DELETE', CALENDAR_GOOGLE_PATH, undefined);
     setBusy(null);
     setConfirming(false);
-    // Already gone is what the member wanted too.
-    if (result.ok || result.status === 404) {
+    // Already gone is what the member wanted too; any other refusal (off here) is said.
+    if (result.ok || errorCodeOf(result.body) === 'calendar_not_connected') {
       setAnswer((last) => ({ ...last, connection: null }));
       setSaid({
         tone: 'ok',
@@ -128,11 +102,6 @@ export function CalendarPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      {busy === 'finish' ? (
-        <p className="m-0 rounded-md bg-info-soft px-4 py-3 type-body text-ink" role="status">
-          Finishing with Google…
-        </p>
-      ) : null}
       {said === null ? null : <Notice tone={said.tone}>{said.text}</Notice>}
 
       <section

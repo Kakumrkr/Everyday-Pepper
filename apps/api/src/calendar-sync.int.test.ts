@@ -205,6 +205,7 @@ describe('Google Calendar with the sandbox (AC-X-152, AC-X-157, AC-X-159)', () =
     const { owner, jess, staffMemberId } = await business(sandboxServer);
     expect((await owner.get('/v1/calendar/connections').expect(200)).body).toEqual({
       connections: [],
+      truncated: false,
     });
     await connect(jess);
     const listed = await owner.get('/v1/calendar/connections').expect(200);
@@ -223,6 +224,7 @@ describe('Google Calendar with the sandbox (AC-X-152, AC-X-157, AC-X-159)', () =
     const other = await business(sandboxServer);
     expect((await other.owner.get('/v1/calendar/connections').expect(200)).body).toEqual({
       connections: [],
+      truncated: false,
     });
   });
 

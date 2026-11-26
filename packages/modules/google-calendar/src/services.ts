@@ -140,7 +140,8 @@ export async function readOwnCalendar(
 
 /**
  * The business's calendars for the Team list (S70.2, AC-X-164, AC-X-165): each staff member's
- * state and last read, never the account's email. Needs `staff.read`, like the list it sits on.
+ * state and last read, never the account's email, at most `limit` (`truncated` past it). Needs
+ * `staff.read`, like the list it sits on.
  */
 export async function readTeamCalendars(
   deps: Pick<CalendarDeps, 'db'>,
@@ -148,9 +149,14 @@ export async function readTeamCalendars(
   limit: number,
 ): Promise<TeamCalendarConnections> {
   requirePermission(actor, 'staff.read');
-  const rows = await withMember(deps.db, actor.context, (tx) => listCalendarConnections(tx, limit));
+  const rows = await withMember(deps.db, actor.context, (tx) =>
+    listCalendarConnections(tx, limit + 1),
+  );
   // The schema has no `accountEmail`: parsing strips it.
-  return TeamCalendarConnectionsSchema.parse({ connections: rows.map(toCalendarConnection) });
+  return TeamCalendarConnectionsSchema.parse({
+    connections: rows.slice(0, limit).map(toCalendarConnection),
+    truncated: rows.length > limit,
+  });
 }
 
 /**

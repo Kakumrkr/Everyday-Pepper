@@ -1,16 +1,16 @@
 import { redirect } from 'next/navigation';
 import { ROUTES } from '../../../lib/account';
-import type { GoogleArrival } from '../../../lib/calendar-connect';
+import type { GoogleOutcome } from '../../../lib/calendar-connect';
 import { currentAccount, currentBusiness, currentCalendar } from '../../_server/account';
 import { CalendarPanel } from './calendar-panel';
 
 /**
  * More → Calendar (S70.2, AC-X-160…162, ADR-0069): the member's own Google Calendar in words,
- * and Google's return page (`/more/calendar/google`) is the same page with what Google sent.
+ * with how Google's return ended when it comes from there (`outcome`).
  * Everyone who reads the calendar opens it; only the member linked to a staff member connects
  * (the api says so in `canConnect`). Off in this deployment, it goes back to More.
  */
-export async function CalendarSettings({ arrival }: { arrival: GoogleArrival | null }) {
+export async function CalendarSettings({ outcome }: { outcome: GoogleOutcome | null }) {
   const account = await currentAccount();
   if (account.state !== 'signed-in') return null;
   const current = await currentBusiness();
@@ -34,7 +34,7 @@ export async function CalendarSettings({ arrival }: { arrival: GoogleArrival | n
         <CalendarPanel
           initial={calendar.answer}
           timeZone={current.business.timeZone}
-          arrival={arrival}
+          outcome={outcome}
         />
       )}
     </div>

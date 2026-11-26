@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   calendarSummary,
   calendarWords,
+  finishGoogleReturn,
   googleArrival,
+  googleOutcomeOf,
   needsReconnect,
+  outcomeNote,
   readAgo,
   teamCalendarLine,
 } from './calendar-connect';
@@ -148,23 +151,32 @@ describe('teamCalendarLine (AC-X-164)', () => {
 });
 
 describe('googleArrival (AC-X-161)', () => {
+  const STATE = 's'.repeat(43);
+
   it('a code and a state', () => {
-    expect(googleArrival({ code: '4/abc', state: 's'.repeat(43), scope: 'x' })).toEqual({
+    expect(googleArrival({ code: '4/abc', state: STATE, scope: 'x' })).toEqual({
       kind: 'code',
       code: '4/abc',
-      state: 's'.repeat(43),
+      state: STATE,
     });
   });
 
   it('the member said no, even with a state', () => {
-    expect(googleArrival({ error: 'access_denied', state: 's' })).toEqual({ kind: 'declined' });
+    expect(googleArrival({ error: 'access_denied', state: STATE })).toEqual({ kind: 'declined' });
   });
 
-  it('nothing usable', () => {
+  it('another Google error is not the member saying no', () => {
+    expect(googleArrival({ error: 'admin_policy_enforced' })).toEqual({ kind: 'failed' });
+    expect(googleArrival({ error: 'server_error', state: STATE })).toEqual({ kind: 'failed' });
+  });
+
+  it('nothing usable: checked like the api checks it', () => {
     expect(googleArrival({})).toEqual({ kind: 'none' });
-    expect(googleArrival({ code: '', state: 's' })).toEqual({ kind: 'none' });
-    expect(googleArrival({ code: ['a', 'b'], state: 's' })).toEqual({ kind: 'none' });
+    expect(googleArrival({ code: '', state: STATE })).toEqual({ kind: 'none' });
+    expect(googleArrival({ code: ['a', 'b'], state: STATE })).toEqual({ kind: 'none' });
     expect(googleArrival({ code: 'a' })).toEqual({ kind: 'none' });
+    expect(googleArrival({ code: 'a', state: 'short' })).toEqual({ kind: 'none' });
+    expect(googleArrival({ code: 'x'.repeat(2049), state: STATE })).toEqual({ kind: 'none' });
   });
 });
 
@@ -174,5 +186,109 @@ describe('needsReconnect (AC-X-163)', () => {
     expect(needsReconnect(answer(null))).toBe(false);
     expect(needsReconnect(answer(connection()))).toBe(false);
     expect(needsReconnect(answer(connection({ status: 'needs_reconnect' })))).toBe(true);
+  });
+});
+
+describe('outcomeNote and googleOutcomeOf (AC-X-161)', () => {
+  it('says how the return ended, with what to do next', () => {
+    expect(outcomeNote('connected')).toEqual({
+      tone: 'ok',
+      text: 'Connected. Pepper won’t book clients over your busy times.',
+    });
+    expect(outcomeNote('declined')?.text).toBe(
+      'Nothing was connected: Google says you didn’t allow it.',
+    );
+    expect(outcomeNote('failed')?.text).toContain('Google couldn’t finish connecting');
+    expect(outcomeNote('calendar_connect_invalid')).toEqual({
+      tone: 'error',
+      text: 'That Google link was already used or ran out. Tap Connect to try again.',
+    });
+    expect(outcomeNote(null)).toBeNull();
+  });
+
+  it('reads only a known outcome from the address', () => {
+    expect(googleOutcomeOf('connected')).toBe('connected');
+    expect(googleOutcomeOf('calendar_scope_missing')).toBe('calendar_scope_missing');
+    expect(googleOutcomeOf('<script>')).toBeNull();
+    expect(googleOutcomeOf(['connected', 'x'])).toBeNull();
+    expect(googleOutcomeOf(undefined)).toBeNull();
+  });
+});
+
+describe('finishGoogleReturn (AC-X-161)', () => {
+  const STATE = 's'.repeat(43);
+  const CALL = {
+    apiBaseUrl: 'http://api:4000',
+    origin: 'https://app.pepper.test',
+    cookie: 'pepper.session=abc',
+    forwardedFor: '203.0.113.9',
+  };
+
+  interface Seen {
+    url: string;
+    method: string | undefined;
+    headers: unknown;
+    body: string;
+  }
+
+  function api(status: number, body: unknown) {
+    const seen: Seen[] = [];
+    const fetch: typeof globalThis.fetch = (url, init) => {
+      seen.push({
+        url: url instanceof URL ? url.href : typeof url === 'string' ? url : url.url,
+        method: init?.method,
+        headers: init?.headers,
+        body: typeof init?.body === 'string' ? init.body : '',
+      });
+      return Promise.resolve(new Response(JSON.stringify(body), { status }));
+    };
+    return { fetch, seen };
+  }
+
+  it('posts the code and state once, as the member, from the app’s origin', async () => {
+    const { fetch, seen } = api(200, { canConnect: true, connection: null });
+    expect(await finishGoogleReturn({ code: '4/abc', state: STATE }, { ...CALL, fetch })).toBe(
+      'connected',
+    );
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.url).toBe('http://api:4000/v1/calendar/google/callback');
+    expect(seen[0]?.method).toBe('POST');
+    expect(seen[0]?.headers).toMatchObject({
+      origin: 'https://app.pepper.test',
+      cookie: 'pepper.session=abc',
+      'x-forwarded-for': '203.0.113.9',
+    });
+    expect(JSON.parse(seen[0]?.body ?? '')).toEqual({ code: '4/abc', state: STATE });
+  });
+
+  it('says the api’s refusal, or "failed" for one it doesn’t know', async () => {
+    const refused = api(400, { code: 'calendar_connect_invalid', message: 'x' });
+    expect(
+      await finishGoogleReturn({ code: 'a', state: STATE }, { ...CALL, fetch: refused.fetch }),
+    ).toBe('calendar_connect_invalid');
+    const odd = api(500, { code: 'internal' });
+    expect(
+      await finishGoogleReturn({ code: 'a', state: STATE }, { ...CALL, fetch: odd.fetch }),
+    ).toBe('failed');
+  });
+
+  it('an api that doesn’t answer is "Google didn’t answer", try again', async () => {
+    const fetch: typeof globalThis.fetch = () => Promise.reject(new Error('down'));
+    expect(await finishGoogleReturn({ code: 'a', state: STATE }, { ...CALL, fetch })).toBe(
+      'calendar_unavailable',
+    );
+  });
+
+  it('sends nothing for a refusal at Google or an empty address', async () => {
+    const { fetch, seen } = api(200, {});
+    expect(await finishGoogleReturn({ error: 'access_denied' }, { ...CALL, fetch })).toBe(
+      'declined',
+    );
+    expect(await finishGoogleReturn({ error: 'admin_policy_enforced' }, { ...CALL, fetch })).toBe(
+      'failed',
+    );
+    expect(await finishGoogleReturn({}, { ...CALL, fetch })).toBeNull();
+    expect(await finishGoogleReturn({ code: 'a', state: 'bad' }, { ...CALL, fetch })).toBeNull();
+    expect(seen).toHaveLength(0);
   });
 });

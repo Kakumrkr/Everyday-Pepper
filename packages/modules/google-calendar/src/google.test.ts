@@ -5,6 +5,7 @@ import {
   GOOGLE_REVOKE_URL,
   GOOGLE_TOKEN_URL,
   GoogleCalendarProvider,
+  formEncoded,
 } from './google.js';
 import { CalendarProviderError } from './provider.js';
 
@@ -13,7 +14,7 @@ import { CalendarProviderError } from './provider.js';
 
 const CLIENT_ID = '1234-test.apps.googleusercontent.com';
 const SECRET = 'GOCSPX-test-secret';
-const BASIC = `Basic ${Buffer.from(`${encodeURIComponent(CLIENT_ID)}:${encodeURIComponent(SECRET)}`).toString('base64')}`;
+const BASIC = `Basic ${Buffer.from(`${CLIENT_ID}:${SECRET}`).toString('base64')}`;
 const REDIRECT = 'https://app.pepper.test/more/calendar/google';
 const NOW = Date.parse('2026-12-01T12:00:00Z');
 
@@ -100,6 +101,13 @@ describe('the consent URL', () => {
       code_challenge_method: 'S256',
       login_hint: 'jo@gmail.com',
     });
+  });
+});
+
+describe('formEncoded (RFC 6749 Appendix B)', () => {
+  it('encodes as a form does, not as a URI component', () => {
+    expect(formEncoded("a b!'()*~:")).toBe('a+b%21%27%28%29*%7E%3A');
+    expect(formEncoded('GOCSPX-abc_123')).toBe('GOCSPX-abc_123');
   });
 });
 
