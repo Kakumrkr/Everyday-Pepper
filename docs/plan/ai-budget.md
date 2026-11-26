@@ -17,14 +17,15 @@ Policy: [Phase 6 playbook §4](phase-6-playbook.md) (user, S22; confirmed for S2
 
 The OpenAI dashboard's usage page is the final word on money; this ledger is computed from the token counts the API reported, at the listed prices.
 
-## V1 (Phases 9–17): $10 on top of the $3.80 spent (P1, user, 2026-10-26)
+## V1 (Phases 9–18): $10 on top of the $3.80 spent (P1, user, 2026-10-26; Phase 18 added in P2, [PCR-017](changes/PCR-017.md))
 
 Policy ([V1 playbook](v1-playbook.md) §8, P1-7):
 - **Caps:**
   - Phase 12 (S56b) $3.00
+  - Phase 18 (S81b, S82b, S87) $1.50, from Phase 12's unspent $2.19 (P2)
   - Phase 17 (S76) $1.50
   - reserve $5.50 for a fix round in a "b" half
-  - no real calls in Phases 9–11 or 13–16
+  - no real calls in Phases 9–11 or 13–16, nor in Phase 18 outside S81b, S82b and S87
 - **The runner's total stop** rose from $4.50 to the new total ($13.80) in S56a (`CUMULATIVE_STOP_USD`, the ledger's budget), with the Phase 12 ($3.00) and Phase 17 ($1.50) caps in `PHASE_CAPS_USD`. A test fails on a real-looking email address or phone number in the eval fixtures (`fixtures-privacy.test.ts`).
 - **Two OpenAI projects** (the user creates them before S56b):
   - `pepper-dev-evals`, with **data sharing on** for the free daily tokens. Eval cases and fixtures only, all made up: no real client, owner or business data ever reaches it. S56a adds a test that fails on real-looking phone numbers and email addresses in eval fixtures.
@@ -94,6 +95,19 @@ Runs labelled `P12` (`EVAL_PHASE=12`: `record.sh` defaults to 7, so the phase is
   - Full recording, 272 cases: **$0.3210** (1895–2030 and 2031–2052; the eval database stopped at part 115 and parts 115–136 were run again). Every gate met; `waitlist` 12/12, so `KNOWN_REAL_MODEL_MISSES` is empty.
   - pass^3 trials 2–3 on drafts, feed_safety, safety, permissions, memory_delete, memory_safety, autonomy, memory_recall, episodic, scheduling and import_mapping, 186 cases, plus `lr-blackout`'s stale trials: **$0.3513** (2053–2233; 15 OpenAI 500/503/cancelled trials re-run). Every pass^3 set at 100%.
   - After the code review: `import_mapping` pass^3 again, 8 cases with the new client-list case: **$0.0072** (2234–2236); 7/8 at pass^3 (`mapping-born-is-a-birthday` left "Born" empty in one trial), gate 0.8 met.
+
+## Phase 18 ($1.50 cap; P2, [PCR-017](changes/PCR-017.md))
+
+The user set the cap at the P2 brief (2026-11-26, D-5). It comes from Phase 12's unspent $2.19, so the reserve stays $5.50 and the V1 total stays $10. The runner's $13.80 stop doesn't change. With all phases at $4.6097, $9.19 is left under it.
+
+- **Runs** are labelled `P18` (`EVAL_PHASE=18`, set by hand as in S56b). S81a adds `18: 1.5` to `PHASE_CAPS_USD` (`packages/ai/src/evals/ledger.ts`) with its ledger test. Until then the runner refuses any Phase 18 run ("Phase 18 has no OpenAI budget").
+- **Expected spend: $0.60–$1.00.** S56b measured about $0.001 a case: a 272-case recording cost $0.32 and 186 cases × 2 pass^3 trials cost $0.35.
+  - S81b, about $0.25: probe `client_replies` (~80 cases), one fix round, pass^3 on its hostile and "no" cases.
+  - S82b, about $0.20: probe `client_answers`, pass^3 on "must not invent".
+  - S87, about $0.40: re-record what went stale, pass^3 on the gated sets.
+- **Why the chat suite should stay fresh.** S81 and S82 are separate calls with their own instructions, like `write_draft` and the import suggester. The chat tools and the agent's instructions don't change, so the 272 recorded chat cases keep replaying for free. A session that has to change them says so at its brief, with a new estimate.
+- **The guards don't change:** the run cap ($1.50 unless `--max-cost`), the phase cap and the $13.80 stop. The worst-case estimate runs 100–1000× above actual spend. `--phase-estimate-ok` or `--max-cost` stays the user's call at each "b" brief.
+- **No training on shop data** (user: "never", P2). Development evals use made-up data on `pepper-dev-evals` (`fixtures-privacy.test.ts` covers every new set). Production keeps data sharing off with zero retention.
 
 ## Ledger
 
