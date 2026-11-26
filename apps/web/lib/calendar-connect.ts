@@ -101,7 +101,7 @@ export function calendarWords(
     tone: 'ok',
     lines: [
       `${connection.accountEmail} · ${capitalized(readLine(connection, timeZone, now))}`,
-      'Pepper reads when you’re busy every 5 minutes and won’t book clients over it.',
+      'Pepper checks your busy times every 5 minutes and won’t book clients over them.',
     ],
     action: null,
     disconnect: true,
