@@ -2,6 +2,18 @@
 
 Plan versions use `MAJOR.MINOR`: MINOR for approved PCRs that keep compatibility; MAJOR for scope or architecture changes.
 
+## 0.43 — 2026-11-26
+- In planning session P2 (user): **Phase 18, the AI layer, before Phase 17** ([PCR-017](changes/PCR-017.md)), from the user's draft "Pepper AI layer: session-by-session build plan". S77–S85, S73 and S87 (S81 and S82 in "a" and "b"):
+  - visit risk with reasons, confirm or release;
+  - waitlist offers by text on `sms-consent-v3`;
+  - client texts kept, read and answered from the shop's facts;
+  - a day re-planner, due dates per client, a quiet-week plan;
+  - Reports (S73, moved from Phase 17) and the gate (C1, C5, C12 to 9).
+
+  S86, the learned model, waits for the pilot. The day the domain is bought, S58a–S60 go next. Phase 18's cap is $1.50, from Phase 12's unspent. No training on shop data ("never").
+
+  **Compatibility:** plan only; Phase 17 becomes S74–S76; no tool, prompt or event change in P2; $0 of the AI budget in P2.
+
 ## 0.42 — 2026-11-25
 - At the S69 brief (user): **Phase 16 (Calendar + staff) before the rest of Phase 13** ([PCR-016](changes/PCR-016.md)). The domain still waits; S69–S72 come next (Google Calendar in testing mode), then S58a, S57, S58b and S60. S69 adds the drag hints (off-hours shaded, a taken time marked) and Undo on a moved booking. AC-X-144…151.
 

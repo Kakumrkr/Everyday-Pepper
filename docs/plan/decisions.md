@@ -573,3 +573,21 @@ Every decision the user made in chat, and the defaults Claude chose that the use
 - **S72.2 (user, 2026-11-26):** "/session-brief S72.2: Staff's "My week" + the Phase 16 gate (C6 ≥ 8). Top-up: "My week" shows each repeating visit's "2 of 8" on its block, so a staff member sees their regulars at a glance", then after the brief "Sure, let's start with your recommendations and complete the session successfully." Taken: **D-1** a third Calendar switch Day · Week · My week for members linked to a staff member, staff opening a bare Calendar on My week (not a nav item or a Home card); **D-2** one week-scoped read of visit numbers (`GET /v1/calendar/visit-numbers`), not a field on every booking nor a fetch per series; **D-3** the header's totals are visits, hours booked and days off, no money; **D-4** C6 scored from the evidence, the phase left open below 8 (it reached 8).
   - **Claude (in the code):** only a bare `/calendar` (no date, view or staff) takes the staff default, so every dated link stays on its view; a member linked to no staff member asking for My week sees Day; visit numbers count the visits the member may see (RLS), so a visit moved to a colleague isn't counted for staff; the read returns at most 500 visits with `truncated`; "2/8" leads the block's second line so a narrow week column keeps the client's name (found in the walkthrough); the day headings link to their day at 44 px.
 
+- **P2 (user, 2026-11-26):** "This session is for you gonna just work on the plan and improvisations to the plan… Draft Plan for next phase: [the Claude Doc "Pepper AI layer: session-by-session build plan"] Lets make it best. By the end of the session merge to main and tell me how to start next session", then after the brief "Sure, go ahead with your recommendations and complete the session successfully." Taken ([PCR-017](changes/PCR-017.md)):
+  - **D-1** Phase 18 next; the day the domain is bought, S58a, S57, S58b and S60 go next and the pilot runs alongside the rest of Phase 18.
+  - **D-2** S73 Reports moves into Phase 18, just before the gate, with Phase 18's numbers. Without it C1 and C12 can't honestly reach 9.
+  - **D-3** S86, the per-shop learned risk model, waits until after the pilot (about 500 visits and 30 misses a shop); S78's holdback switch stays.
+  - **D-4** waitlist offers by text only on a new wording, `sms-consent-v3`; regulars' offers stay email (marketing texts need their own opt-in and a marketing 10DLC campaign).
+  - **D-5** a Phase 18 cap of $1.50 from Phase 12's unspent $2.19; reserve $5.50 and the $10 V1 total unchanged.
+  - **D-6** S80 becomes "Client texts kept" (no model); the classifier eval support moves into S81a; S81 and S82 each keep their own "b".
+  - **No training on shop data,** the user's rule as the draft records it: "never". The model is never trained or fine-tuned on a business's data; development evals use made-up data only; production keeps data sharing off with zero retention.
+  - **Claude (in PCR-017 and the playbook):**
+    - a free text is routed to one business through an id-only definer function, else stored nowhere (one shared sender);
+    - a release needs "Ask clients to confirm" on, with its line shown to the client, and refunds a deposit in full;
+    - risk is for owners and managers only;
+    - a session without "Rec" keeps chat tools and instructions unchanged, new writes as system tools;
+    - AI answers by text carry the disclosure;
+    - the quiet-week forecast uses Pepper's own bookings only;
+    - S78 and S81a may split at their briefs;
+    - five pilot metrics for the AI layer in scorecard §3 (the top-up);
+    - S72.2's carried top-up kept on S58a's row.

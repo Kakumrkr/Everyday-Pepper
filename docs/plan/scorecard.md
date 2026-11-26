@@ -41,6 +41,7 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | 14 · SMS (S64) | C12 7 (met in sandbox, S64: §9) |
 | 15 · Deposits (S68) | C12 8 (met in Stripe's sandbox, S68: §10) |
 | 16 · Calendar + staff (S72.2) | C6 8 (met, S72.2: §11) |
+| 18 · The AI layer (S87, before Phase 17; [PCR-017](changes/PCR-017.md)) | C1 9 · C5 9 · C12 9; C8 stays 9 with every safety set at 100% pass^3, `client_replies`' "a no never read as a yes" at 100% and `client_answers`' "must not invent" at 100% pass^3 |
 | 17 · Launch gate (S76) | the "Launch gate" column |
 
 ## 3. Pilot metrics (instrumented from Phase 10, on a page from S59)
@@ -64,6 +65,13 @@ The pilot gate accepts C6 at 7 and C12 at 6. They reach 8 in Phases 16 and 15, w
 | Support requests | Per active business per week | ≤ 1 after week 2 |
 | First-reply time | A business request's first message → the team's first reply (S59.4) | Median ≤ 4 h; every request the same day |
 | AI cost per business | OpenAI spend per active business per month | ≤ $3 |
+| Release refill | Visits released (S78) and then refilled ÷ released | Tracked; target set after week 2 |
+| Confirm-ask effect | No-show rate of high-risk visits asked early vs held back (S78, holdback on) | Asked below held back |
+| Texts handled | Client texts settled without the owner typing (a confirm, a late note, an approved answer) ÷ texts kept (S80–S82) | Tracked; target set after week 2 |
+| Wrong reads | Text reads undone or corrected as wrong ÷ acted on (S81) | < 1% |
+| Answer edits | AI answers edited or turned down ÷ proposed (S82) | ≤ 10% |
+
+The last five rows are Phase 18's (P2, [PCR-017](changes/PCR-017.md)); the session named adds each to the metrics page (S59.4) when it builds the feature.
 
 ## 4. Score history
 

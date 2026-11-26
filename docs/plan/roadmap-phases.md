@@ -1,6 +1,6 @@
 # Roadmap & Implementation Phases
 
-Plan version: **0.33** (see `CHANGELOG.md`; Phases 9–17 from [PCR-007](changes/PCR-007.md), session by session in the [V1 playbook](v1-playbook.md)). Builder: solo + Claude Code. Each phase is approved by the user before it starts; each ends with CI green and its exit criteria proven by automated tests.
+Plan version: **0.43** (see `CHANGELOG.md`; Phases 9–17 from [PCR-007](changes/PCR-007.md), Phase 18 from [PCR-017](changes/PCR-017.md), session by session in the [V1 playbook](v1-playbook.md)). Builder: solo + Claude Code. Each phase is approved by the user before it starts; each ends with CI green and its exit criteria proven by automated tests.
 
 | # | Phase | Deliverables | Exit criteria | Est. |
 |---|---|---|---|---|
@@ -22,9 +22,10 @@ Plan version: **0.33** (see `CHANGELOG.md`; Phases 9–17 from [PCR-007](changes
 | 14 | SMS | SMS channel with consent and STOP, reminders + confirm by text, approve by text; S61–S64 (gate met in sandbox); live after 10DLC in S64.2 ([PCR-012](changes/PCR-012.md)) | Reminder timing and idempotency; scorecard C12 ≥ 7 | 4 sessions |
 | 15 | Deposits | Stripe Connect Express, deposits and card on file, smart deposits, policy builder, no-show fee by approval; S65–S68, in test mode before the rest of Phase 13 ([PCR-012](changes/PCR-012.md)) | No charge without an approved card; scorecard C12 ≥ 8 | 4 sessions |
 | 16 | Calendar + staff | Week view + drag, Google Calendar in and out (the old Phase 10), recurring appointments, staff week; S69–S72, before the rest of Phase 13 ([PCR-016](changes/PCR-016.md)) | Contract tests; conflict + token-expiry scenarios; scorecard C6 ≥ 8 | 4 sessions |
-| 17 | Launch gate | Reports, Pepper billing (trial, plans), landing page, final re-record, security review; S73–S76 | Every scorecard category ≥ 9; paid-launch go/no-go | 4 sessions |
+| 17 | Launch gate | Pepper billing (trial, plans), landing page, final re-record, security review; S74–S76, after Phase 18 (Reports moved to Phase 18, [PCR-017](changes/PCR-017.md)) | Every scorecard category ≥ 9; paid-launch go/no-go | 3 sessions |
+| 18 | The AI layer | Visit risk with reasons, confirm or release, waitlist offers by text, client texts kept, read and answered from the shop's facts, a day re-planner, due dates per client, a quiet-week plan, Reports (S73); S77–S85, S73, S87, before Phase 17 and, until the domain is bought, before the rest of Phase 13 ([PCR-017](changes/PCR-017.md)) | Scorecard C1, C5, C12 ≥ 9, C8 stays 9 (safety sets 100% pass^3) | 13 sessions (S81, S82 in "a" and "b") |
 
-**Phases 9–17: 39 sessions (S39–S76, S56 in "a" and "b" halves).** Parallel non-code tasks for the user (parked until needed, P1-6): a cheap neutral domain by Phase 13; the LLC before SMS and Stripe go live (10DLC registration takes weeks); Google OAuth verification started during Phase 10; the brand name and trademark before paid launch.
+**Phases 9–18:** P1 planned 39 sessions for Phases 9–17 (S39–S76); splits at the briefs made it 61 from S39 through S72.2. Still to come as planned: Phase 18 (13), the rest of Phase 13 (4), S64.2 (1) and Phase 17 (3): about 21 sessions, likely about 25 with splits. Parallel non-code tasks for the user (parked until needed, P1-6): a cheap neutral domain by Phase 13; the LLC before SMS and Stripe go live (10DLC registration takes weeks); Google OAuth verification started during Phase 10; the brand name and trademark before paid launch.
 
 ## Post-V1
 V1.1 booking-page layouts, Goals, two-way chat by text → after PMF the mini-website on the owner's own domain, booth-rental shops, clinical studios → V2 voice, Classes & Memberships, Spanish → V3 Quotes & Jobs, Orders, AWS. See `../product/v1-scope.md`.
