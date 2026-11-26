@@ -3,6 +3,7 @@ import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import {
   AvailableSlotSchema,
   BookingSchema,
+  BookingIdSchema,
   BookingSeriesIdSchema,
   IdempotencyKeySchema,
 } from './bookings.js';
@@ -18,6 +19,9 @@ import { addDays, fromZoned, toZoned } from './zoned-time.js';
 export const SERIES_MAX_EVERY_WEEKS = 4;
 export const SERIES_MIN_VISITS = 2;
 export const SERIES_MAX_VISITS = 26;
+
+/** At most this many visits numbered in one read (more than a busy 62 days of one chair). */
+export const VISIT_NUMBERS_MAX = 500;
 
 const EveryWeeksSchema = z.number().int().min(1).max(SERIES_MAX_EVERY_WEEKS);
 
@@ -166,3 +170,20 @@ export function visitNumber(
   const index = kept.findIndex((booking) => booking.id === bookingId);
   return index === -1 ? null : { number: index + 1, of: kept.length };
 }
+
+/** One series visit's place in its series ("2 of 8"), for the calendar's blocks (S72.2). */
+export const VisitNumberSchema = z.object({
+  bookingId: BookingIdSchema,
+  number: z.number().int().min(1).max(SERIES_MAX_VISITS),
+  of: z.number().int().min(1).max(SERIES_MAX_VISITS),
+});
+export type VisitNumber = z.infer<typeof VisitNumberSchema>;
+
+/**
+ * `GET /v1/calendar/visit-numbers` (S72.2, AC-X-193): every series visit starting in the range,
+ * not cancelled, with its place among its series' visits the member may see, in one request.
+ */
+export const VisitNumbersResponseSchema = z.object({
+  visits: z.array(VisitNumberSchema).max(VISIT_NUMBERS_MAX),
+});
+export type VisitNumbersResponse = z.infer<typeof VisitNumbersResponseSchema>;

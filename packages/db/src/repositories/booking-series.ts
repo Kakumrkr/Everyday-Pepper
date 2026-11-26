@@ -4,7 +4,7 @@ import {
   type StaffMemberId,
   type UserId,
 } from '@pepper/contracts';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq, gte, inArray, isNotNull, lt, ne } from 'drizzle-orm';
 import { z } from 'zod';
 import { isUniqueViolation } from '../errors.js';
 import { bookingSeries, bookings, type BookingRow, type BookingSeriesRow } from '../schema.js';
@@ -99,5 +99,51 @@ export async function listSeriesBookings(tx: TenantTx, id: BookingSeriesId): Pro
     .select()
     .from(bookings)
     .where(eq(bookings.seriesId, Id.parse(id)))
+    .orderBy(asc(bookings.startsAt), asc(bookings.id));
+}
+
+/**
+ * The series visits that aren't cancelled starting in [from, to), optionally of one staff member,
+ * earliest first (S72.2, AC-X-193); at most `limit`.
+ */
+export async function listSeriesVisitsStarting(
+  tx: TenantTx,
+  options: { from: Date; to: Date; staffMemberId?: StaffMemberId; limit: number },
+): Promise<BookingRow[]> {
+  const conditions = [
+    isNotNull(bookings.seriesId),
+    ne(bookings.status, 'cancelled'),
+    lt(bookings.startsAt, options.to),
+    gte(bookings.startsAt, options.from),
+  ];
+  if (options.staffMemberId !== undefined) {
+    conditions.push(eq(bookings.staffMemberId, Id.parse(options.staffMemberId)));
+  }
+  return tx
+    .select()
+    .from(bookings)
+    .where(and(...conditions))
+    .orderBy(asc(bookings.startsAt), asc(bookings.id))
+    .limit(options.limit);
+}
+
+/** The visits of these series that aren't cancelled, earliest first (S72.2). */
+export async function listKeptVisitsOfSeries(
+  tx: TenantTx,
+  ids: readonly BookingSeriesId[],
+): Promise<BookingRow[]> {
+  if (ids.length === 0) return [];
+  return tx
+    .select()
+    .from(bookings)
+    .where(
+      and(
+        inArray(
+          bookings.seriesId,
+          ids.map((id) => Id.parse(id)),
+        ),
+        ne(bookings.status, 'cancelled'),
+      ),
+    )
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
 }

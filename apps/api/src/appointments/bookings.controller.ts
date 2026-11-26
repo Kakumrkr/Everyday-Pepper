@@ -25,6 +25,7 @@ import {
   type BusyResponse,
   type WaitlistEntry,
   type WaitlistOffersResponse,
+  type VisitNumbersResponse,
   type WaitlistResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
@@ -198,6 +199,20 @@ export class BookingsController {
       await answering(() => this.bookings.busy(tenant, parsed, MAX_LIST_ITEMS + 1)),
     );
     return { busy, truncated };
+  }
+
+  /**
+   * Each series visit starting in [from, to) (at most 62 days) with its "2 of 8" (S72.2,
+   * AC-X-193), in one request for the calendar's blocks; only bookings the member may see.
+   */
+  @Get('calendar/visit-numbers')
+  @RequirePermission('bookings.read')
+  visitNumbers(
+    @CurrentTenant() tenant: TenantContext,
+    @Query() query: unknown,
+  ): Promise<VisitNumbersResponse> {
+    const parsed = parseBody(BusyQuerySchema, query);
+    return answering(() => this.bookings.visitNumbers(tenant, parsed));
   }
 
   /**

@@ -37,6 +37,7 @@ import {
   cancelFollowing,
   createSeries,
   getSeries,
+  listVisitNumbers,
   previewSeries,
   type SeriesNotice,
 } from './services/booking-series.js';
@@ -538,6 +539,67 @@ describe('cancelFollowing (AC-X-186)', () => {
     );
     expect(moved.seriesId).toBe(result.seriesId);
     expect((await getBooking(db, b.owner, second.id)).startsAt).toBe(tue(10, 1));
+  });
+});
+
+describe('listVisitNumbers (AC-X-193)', () => {
+  const weekOf = (staffMemberId?: StaffMember['id']) => ({
+    from: tue(0, 1),
+    to: tue(0, 2),
+    ...(staffMemberId !== undefined && { staffMemberId }),
+  });
+
+  it('numbers the week’s series visits among those not cancelled, in one read', async () => {
+    const b = await newBusiness();
+    const result = await createSeries(
+      db,
+      b.owner,
+      seriesOf(b, [tue(10), tue(10, 1), tue(10, 2), tue(10, 3)], { notifyClient: false }),
+      { clock: b.clock },
+    );
+    const [first, second, third] = result.bookings;
+    if (!first || !second || !third) throw new Error('four visits');
+    await changeBooking(
+      db,
+      b.owner,
+      first.id,
+      { status: 'cancelled', notifyClient: false },
+      { clock: b.clock },
+    );
+    await bookOne(b, tue(14, 1)); // not in a series: never numbered
+    const week = await listVisitNumbers(db, b.owner, weekOf());
+    expect(week.visits).toEqual([{ bookingId: second.id, number: 1, of: 3 }]);
+    const later = await listVisitNumbers(db, b.owner, { from: tue(0, 1), to: tue(0, 4) });
+    expect(later.visits.map((v) => [v.bookingId, v.number, v.of])).toEqual([
+      [second.id, 1, 3],
+      [third.id, 2, 3],
+      [result.bookings[3]?.id, 3, 3],
+    ]);
+  });
+
+  it('gives staff their own visits only; a colleague’s are never counted or returned', async () => {
+    const b = await newBusiness();
+    const jess = await createSeries(
+      db,
+      b.owner,
+      seriesOf(b, [tue(10), tue(10, 1)], { notifyClient: false }),
+      { clock: b.clock },
+    );
+    await createSeries(
+      db,
+      b.owner,
+      seriesOf(b, [tue(12), tue(12, 1)], { staffMemberId: b.marco.id, notifyClient: false }),
+      { clock: b.clock },
+    );
+    const own = jess.bookings[1]?.id;
+    expect((await listVisitNumbers(db, b.staff, weekOf())).visits).toEqual([
+      { bookingId: own, number: 2, of: 2 },
+    ]);
+    expect((await listVisitNumbers(db, b.staff, weekOf(b.marco.id))).visits).toEqual([]);
+    expect((await listVisitNumbers(db, b.owner, weekOf())).visits).toHaveLength(2);
+    // Another business sees none of them.
+    const other = await newBusiness();
+    expect((await listVisitNumbers(db, other.owner, weekOf())).visits).toEqual([]);
   });
 });
 

@@ -163,6 +163,9 @@ const bookings = {
   createSeries: vi.fn(() => Promise.resolve(SERIES_RESULT)),
   series: vi.fn(() => Promise.resolve(SERIES)),
   cancelFollowing: vi.fn(() => Promise.resolve({ bookings: [CANCELLED] })),
+  visitNumbers: vi.fn(() =>
+    Promise.resolve({ visits: [{ bookingId: BOOKING_ID, number: 2, of: 8 }] }),
+  ),
 };
 
 @Global()
@@ -497,8 +500,23 @@ describe('recurring appointments (S72)', () => {
     await send('post', `/v1/bookings/${BOOKING_ID}/cancel-following`, { scope: 'all' }).expect(400);
   });
 
+  it('numbers a week’s series visits in one request (AC-X-193)', async () => {
+    const path = `/v1/calendar/visit-numbers?from=${FROM}&to=${TO}&staffMemberId=${STAFF_ID}`;
+    expect((await get(path).expect(200)).body).toEqual({
+      visits: [{ bookingId: BOOKING_ID, number: 2, of: 8 }],
+    });
+    expect(bookings.visitNumbers).toHaveBeenCalledWith(context(), {
+      from: FROM,
+      to: TO,
+      staffMemberId: STAFF_ID,
+    });
+    await get(`/v1/calendar/visit-numbers?from=${FROM}&to=2027-01-05T05:00:00.000Z`).expect(400);
+    await get(`/v1/calendar/visit-numbers?from=${FROM}&to=${TO}&extra=1`).expect(400);
+  });
+
   it('staff reach the series routes like any booking route', async () => {
     role = 'staff';
+    await get(`/v1/calendar/visit-numbers?from=${FROM}&to=${TO}`).expect(200);
     await get(`/v1/bookings/series/${SERIES_ID}`).expect(200);
     await send('post', '/v1/bookings/series/preview', previewBody).expect(200);
   });

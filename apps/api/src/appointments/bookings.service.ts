@@ -4,6 +4,7 @@ import {
   changeBooking,
   createSeries,
   getSeries,
+  listVisitNumbers,
   previewSeries,
   changeWaitlistEntry,
   createBooking,
@@ -33,6 +34,7 @@ import type {
   CancelFollowingResult,
   BusyQuery,
   BusyTime,
+  VisitNumbersResponse,
   WaitlistChange,
   WaitlistEntry,
   WaitlistEntryId,
@@ -141,6 +143,11 @@ export class BookingsService {
 
   series(tenant: TenantContext, id: BookingSeriesId): Promise<BookingSeries> {
     return getSeries(this.db, actorOf(tenant), id);
+  }
+
+  /** "2 of 8" for the series visits of a range (S72.2, AC-X-193). */
+  visitNumbers(tenant: TenantContext, query: BusyQuery): Promise<VisitNumbersResponse> {
+    return listVisitNumbers(this.db, actorOf(tenant), query);
   }
 
   /** This visit and the later ones of its series (S72, D-3): each cancel as the team's. */
