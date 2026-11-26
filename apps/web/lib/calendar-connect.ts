@@ -34,6 +34,16 @@ export function bookingCalendarLine(state: BookingCalendarState['state'] | null)
   return null;
 }
 
+/**
+ * The sheet's second line (S71.2 top-up, AC-X-180): Pepper put the booking back over a change
+ * made in Google lately, so staff know why their edit there didn't stick.
+ */
+export function keptOverGoogleLine(answer: BookingCalendarState | null): string | null {
+  return answer?.state === 'written' && answer.keptOverGoogle === true
+    ? 'Changed in Google, kept as booked in Pepper'
+    : null;
+}
+
 /** What More → Calendar says once disconnected (AC-X-172): what went with it. */
 export function disconnectedNote(writesBookings: boolean): string {
   return writesBookings

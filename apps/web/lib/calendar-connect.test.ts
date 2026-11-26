@@ -2,6 +2,7 @@ import type { CalendarConnection, CalendarConnectionAnswer } from '@pepper/contr
 import { describe, expect, it } from 'vitest';
 import {
   bookingCalendarLine,
+  keptOverGoogleLine,
   bookingCalendarPath,
   calendarSummary,
   disconnectedNote,
@@ -168,6 +169,17 @@ describe('bookingCalendarLine (S71 top-up, AC-X-173)', () => {
     expect(bookingCalendarLine('none')).toBeNull();
     expect(bookingCalendarLine(null)).toBeNull();
     expect(bookingCalendarPath('a/b')).toBe('/v1/calendar/bookings/a%2Fb');
+  });
+});
+
+describe('keptOverGoogleLine (S71.2 top-up, AC-X-180)', () => {
+  it('says a change made in Google was put back, only once written again', () => {
+    expect(keptOverGoogleLine({ state: 'written', keptOverGoogle: true })).toBe(
+      'Changed in Google, kept as booked in Pepper',
+    );
+    expect(keptOverGoogleLine({ state: 'written' })).toBeNull();
+    expect(keptOverGoogleLine({ state: 'pending', keptOverGoogle: true })).toBeNull();
+    expect(keptOverGoogleLine(null)).toBeNull();
   });
 });
 
