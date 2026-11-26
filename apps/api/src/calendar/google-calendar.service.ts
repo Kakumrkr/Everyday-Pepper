@@ -15,6 +15,7 @@ import {
   calendarTokenKeyFrom,
   completeCalendarConnect,
   disconnectCalendar,
+  listKeptBookings,
   listOutsideBusy,
   readBookingCalendarState,
   readOwnCalendar,
@@ -84,6 +85,11 @@ export class GoogleCalendarService {
     bookingId: BookingId,
   ): Promise<BookingCalendarState | undefined> {
     return readBookingCalendarState(this.on(), actorOf(tenant), bookingId);
+  }
+
+  /** The bookings kept over a Google change lately, for the week view (AC-X-188); 404 off. */
+  async keptBookings(tenant: TenantContext, query: BusyQuery, limit: number): Promise<BookingId[]> {
+    return listKeptBookings(this.on(), actorOf(tenant), query, limit);
   }
 
   async outsideBusy(

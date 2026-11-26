@@ -5,12 +5,14 @@ import {
   CalendarConnectCompleteSchema,
   CalendarConnectionAnswerSchema,
   CalendarConnectStartSchema,
+  KeptBookingsResponseSchema,
   MAX_LIST_ITEMS,
   OutsideBusyResponseSchema,
   TeamCalendarConnectionsSchema,
   type BookingCalendarState,
   type CalendarConnectionAnswer,
   type CalendarConnectStart,
+  type KeptBookingsResponse,
   type OutsideBusyResponse,
   type TeamCalendarConnections,
 } from '@pepper/contracts';
@@ -127,6 +129,22 @@ export class GoogleCalendarController {
     const state = await answering(() => this.calendar.bookingState(tenant, bookingId));
     if (state === undefined) throw new NotFoundException(apiError('booking_not_found'));
     return BookingCalendarStateSchema.parse(state);
+  }
+
+  /**
+   * 200 the bookings starting in [from, to) (at most 62 days) that Pepper kept over a change made
+   * in Google in the last 7 days (S72 top-up, AC-X-188), for the week view's mark; only bookings
+   * the member may see; 404 off.
+   */
+  @Get('kept')
+  @RequirePermission('calendar.read')
+  async kept(
+    @CurrentTenant() tenant: TenantContext,
+    @Query() query: unknown,
+  ): Promise<KeptBookingsResponse> {
+    const parsed = parseBody(BusyQuerySchema, query);
+    const ids = await answering(() => this.calendar.keptBookings(tenant, parsed, MAX_LIST_ITEMS));
+    return KeptBookingsResponseSchema.parse({ bookingIds: ids });
   }
 
   /**

@@ -5,7 +5,7 @@ import {
   type StaffMemberId,
   type TenantId,
 } from '@pepper/contracts';
-import { and, asc, eq, inArray, isNull, lte, or, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, gte, inArray, isNotNull, isNull, lt, lte, or, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import {
   bookings,
@@ -207,6 +207,36 @@ export async function findCalendarEventSyncOfBooking(
     .from(calendarEventSyncs)
     .where(eq(calendarEventSyncs.bookingId, Id.parse(bookingId)));
   return row;
+}
+
+/**
+ * The bookings starting in [from, to) whose event Pepper put back over a change made in Google
+ * after `since` and that are written as they are (S72 top-up, AC-X-188): at most `limit`,
+ * earliest first. Only the bookings the transaction may see (RLS on `bookings`: staff their own).
+ */
+export async function listKeptBookingIds(
+  tx: TenantTx,
+  query: { from: Date; to: Date; since: Date; staffMemberId?: StaffMemberId; limit: number },
+): Promise<string[]> {
+  const rows = await tx
+    .select({ bookingId: calendarEventSyncs.bookingId })
+    .from(calendarEventSyncs)
+    .innerJoin(bookings, eq(bookings.id, calendarEventSyncs.bookingId))
+    .where(
+      and(
+        gt(calendarEventSyncs.keptAt, query.since),
+        eq(calendarEventSyncs.syncedVersion, calendarEventSyncs.version),
+        isNotNull(calendarEventSyncs.eventConnectionId),
+        lt(bookings.startsAt, query.to),
+        gte(bookings.startsAt, query.from),
+        ...(query.staffMemberId === undefined
+          ? []
+          : [eq(bookings.staffMemberId, Id.parse(query.staffMemberId))]),
+      ),
+    )
+    .orderBy(asc(bookings.startsAt), asc(bookings.id))
+    .limit(z.number().int().min(1).max(1000).parse(query.limit));
+  return rows.map((row) => row.bookingId);
 }
 
 /** What a booking's event shows, read when it is written (D-3); `undefined`: the booking is gone. */

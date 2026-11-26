@@ -1,5 +1,6 @@
 import {
   TenantIdSchema,
+  OutboxMessageIdSchema,
   type BookingSeriesInput,
   type Client,
   type MembershipRole,
@@ -13,6 +14,8 @@ import {
   createClient,
   ForbiddenError,
   ManualClock,
+  openOutboxContent,
+  outboxKeyFrom,
   type Actor,
 } from '@pepper/core';
 import {
@@ -37,6 +40,7 @@ import {
   previewSeries,
   type SeriesNotice,
 } from './services/booking-series.js';
+import { queueSeriesEmail } from './services/booking-emails.js';
 import { changeBooking, createBooking, getBooking, listBookings } from './services/bookings.js';
 import { replaceWorkingHours } from './services/hours.js';
 import { replaceBookingRules } from './services/rules.js';
@@ -370,6 +374,52 @@ describe('createSeries (AC-X-183)', () => {
       return rows[0]?.n;
     });
     expect(hashes).toBe(3);
+  });
+});
+
+describe('the series email in the outbox (AC-X-185)', () => {
+  const outboxKey = outboxKeyFrom('an-integration-test-outbox-secret-32+');
+  const emailOptions = { baseUrl: 'https://app.test', outboxKey };
+
+  async function emails(
+    tenantId: TenantId,
+  ): Promise<{ to: string; subject: string; text: string }[]> {
+    const rows = await withTenant(db, tenantId, (tx) =>
+      tx.execute<{ id: string; payload: Buffer }>(
+        `SELECT id, payload FROM outbox_messages WHERE type = 'email' ORDER BY created_at, id`,
+      ),
+    );
+    return rows.rows.map(
+      (row) =>
+        JSON.parse(
+          openOutboxContent(outboxKey, OutboxMessageIdSchema.parse(row.id), row.payload).toString(
+            'utf8',
+          ),
+        ) as { to: string; subject: string; text: string },
+    );
+  }
+
+  it('queues one sealed email with every visit, and one for "this and following"', async () => {
+    const b = await newBusiness();
+    const notify = (tx: Parameters<typeof queueSeriesEmail>[0], notice: SeriesNotice) =>
+      queueSeriesEmail(tx, notice, emailOptions).then(() => undefined);
+    const input = seriesOf(b, [tue(10), tue(10, 1), tue(10, 2)], {
+      idempotencyKey: 'series-mail-1',
+    });
+    const result = await createSeries(db, b.owner, input, { clock: b.clock, notify });
+    // A retry queues nothing more.
+    await createSeries(db, b.owner, input, { clock: b.clock, notify });
+    const [confirmation] = await emails(b.tenantId);
+    expect(await emails(b.tenantId)).toHaveLength(1);
+    expect(confirmation?.to).toBe('maria@example.test');
+    expect(confirmation?.subject).toBe("You're booked at Juniper Hair Studio: 3 visits");
+    expect(confirmation?.text.match(/https:\/\/app\.test\/\S+/g)).toHaveLength(3);
+    const second = result.bookings[1];
+    if (second === undefined) throw new Error('three visits');
+    await cancelFollowing(db, b.owner, second.id, {}, { clock: b.clock, notify });
+    const all = await emails(b.tenantId);
+    expect(all).toHaveLength(2);
+    expect(all[1]?.subject).toBe('2 visits at Juniper Hair Studio are cancelled');
   });
 });
 
