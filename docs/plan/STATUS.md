@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S71.2** (Google Calendar reconciliation; see "Planned sessions").
+**S71.2 Google Calendar reconciliation** (scheduled run, decisions pre-approved by the stored prompt: D-1 one session; D-2 the read-back inside the 5-minute busy read; D-3 events Pepper didn't make left alone; D-4 a `calendar_kept` feed note to the staff member, 3 days; D-5 renames rewrite bookings not yet ended). The real testing-mode run is carried (no browser or Google secret in a scheduled run).
+- Tasks: T1 ACs · T2 contracts · T3 migration 0087 + repository · T4 `listEvents` (adapter, sandbox) · T5 reconcile + conflict scenarios · T6 feed card words, sheet line, ai `get_feed` case.
+- Done: T1 AC-X-175…180; T2 contracts (event list, `calendarEventChangeOf`, `calendar_kept`, `keptOverGoogle`), feed words. Next: T3 migration 0087.
 
 ## Last sessions
 - **S71 Phase 16 · Google Calendar out (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §10, [PR #111](https://github.com/Kakumrkr/Everyday-Pepper/pull/111)). Full entry in [session-log.md](session-log.md).

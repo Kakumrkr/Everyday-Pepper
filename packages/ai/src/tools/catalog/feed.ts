@@ -58,6 +58,11 @@ function detailsOf(scope: ToolScope, item: FeedItem): Record<string, TrustJson> 
     }
     case 'daily_briefing':
       return briefingDetails(scope, item.payload);
+    case 'calendar_kept': {
+      // S71.2: a change made in Google to this booking's event was put back (Pepper decides).
+      const booking = at(item.payload.startsAt);
+      return { changeInGoogle: item.payload.change, booking: `${booking.date} ${booking.time}` };
+    }
   }
 }
 

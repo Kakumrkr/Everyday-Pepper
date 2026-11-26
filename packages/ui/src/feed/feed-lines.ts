@@ -17,6 +17,7 @@ export const FEED_KIND_NOUN: Record<FeedKind, string> = {
   staff_overload: 'busy weeks',
   waitlist_match: 'freed times for the waitlist',
   daily_briefing: 'daily briefings',
+  calendar_kept: 'bookings kept over Google Calendar changes',
 };
 
 const count = (n: number, one: string, many = `${one}s`) => `${String(n)} ${n === 1 ? one : many}`;
@@ -139,6 +140,24 @@ export function feedLine(item: FeedItem, timeZone: string, now: number): FeedLin
     case 'daily_briefing': {
       const { title, lines } = briefingLines(item.payload, timeZone);
       return { title, why: lines.join(' ') };
+    }
+    case 'calendar_kept': {
+      // S71.2 (AC-X-176): Pepper is the source of truth; the note says what it undid and where.
+      const { change, startsAt } = item.payload;
+      const when = formatInstant(startsAt, timeZone);
+      const booking =
+        item.names.client === null ? `The ${when} booking` : `${item.names.client}'s ${when}`;
+      const whose = item.names.staff === null ? 'Google Calendar' : `${staff}'s Google Calendar`;
+      const done =
+        change === 'deleted'
+          ? `It was deleted in ${whose}`
+          : change === 'moved'
+            ? `It was moved in ${whose}`
+            : `Its title was changed in ${whose}`;
+      return {
+        title: `${booking} is kept as booked`,
+        why: `${done}, so Pepper put it back. Move or cancel bookings in Pepper, where the client can be told.`,
+      };
     }
   }
 }
