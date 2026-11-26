@@ -1,23 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-26 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S71.2 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S72**
+**Last updated:** 2026-11-26 · **Plan version:** 0.42 ([PCR-016](changes/PCR-016.md)) · **Current phase:** 16 (S72 done; Phase 16 before the rest of Phase 13 by PCR-016; S57–S60 need the domain) → next **S72.2**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S72 Recurring appointments** (split at the brief: "My week" and the Phase 16 gate → S72.2). Decisions (user, 2026-11-26, "go ahead with your recommendations"): D-1 split; D-2 preview, book the free dates, list the taken ones with an alternative; D-3 cancel "this visit" / "this and following", move one at a time; D-4 one client email listing the dates. Top-up: the week view's "kept" dot (S71.2 retro).
-Tasks: 1 ACs + ADR-0070 · 2 date expansion + property tests · 3 migration 0088 `booking_series` · 4 domain preview/create/cancel scopes · 5 API · 6 series email · 7 web Repeat + "Visit 3 of 8" · 8 top-up kept dot.
-Done: 1 ACs AC-X-181…188 + ADR-0070; 2 `seriesStarts` + schemas in contracts (property tests green). 3 migration 0088 `booking_series` + `bookings.series_id`, repository, isolation entry (db series + isolation green). 4+6 domain `previewSeries`/`createSeries`/`getSeries`/`cancelFollowing` + series emails (appointments series 13 + bookings 55 int green; preview marks dates past the booking window, `tooFarAhead`). 5 API `POST /v1/bookings/series/preview`, `POST /v1/bookings/series`, `GET /v1/bookings/series/:id`, `POST /v1/bookings/:id/cancel-following` (controller 28 green). 8a `GET /v1/calendar/kept` (api calendar-sync int 9 green; outbox email test in appointments). 7 web: Repeat in the new-booking sheet (preview list, tap a nearby time, booked summary), "Repeats: Visit N of M" and "Just this visit / This and following" on the booking sheet (web unit 645 green; e2e still to write). 8b the week dot (`bookingBlockName`); e2e `booking-series.spec.ts` + `new-booking-repeat-375` light/dark (16 mobile journeys green). Found and fixed: a client with a long email widened the new-booking sheet past 375 px (the chosen-client row, older than S72; `min-w-0` + one-column grid, guarded in the screenshot test). Next: `/session-close` (review, `pnpm check`, integration, specs, walkthrough).
+Nothing in progress. Next: **S72.2** (staff's "My week" and the Phase 16 gate, C6 ≥ 8). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
 
 ## Last sessions
+- **S72 Phase 16 · Recurring appointments (2026-11-26)** ([ADR-0070](../adr/0070-recurring-appointments.md), [PR #113](https://github.com/Kakumrkr/Everyday-Pepper/pull/113)). Full entry in [session-log.md](session-log.md).
+  - **Built:** "Repeat" in the new-booking sheet (every 1–4 weeks, 2–26 visits, each date checked, a nearby time tapped for a taken one); each visit an ordinary booking with `series_id` (`booking_series`, migration 0088); "Visit 3 of 8" and cancel "this and following" on the sheet; one client email; the week view's "kept" dot (top-up, `GET /v1/calendar/kept`). AC-X-181…188.
+  - **Checks:** `pnpm check` green; affected integration 26/26 tasks; e2e 21 + screens 47; review 4 bugs + 3 nits fixed, security none ≥ 8; walkthrough at 375 px light (fixed on the way: a long email widened the new-booking sheet).
 - **S71.2 Phase 16 · Google Calendar reconciliation (2026-11-26, scheduled run)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §11, [PR #112](https://github.com/Kakumrkr/Everyday-Pepper/pull/112)). Full entry in [session-log.md](session-log.md).
   - **Built:** "Pepper bookings" read back with sync tokens in resumable pages (410 or a reconnect reads all); a Pepper event moved, deleted or edited in Google put back, with a `calendar_kept` note on Home and "Changed in Google, kept as booked in Pepper" on the sheet (top-up); strays removed under the row's lease; renames rewrite upcoming events (migration 0087); a deleted calendar remade by the read. AC-X-175…180.
   - **Checks:** `pnpm check` green; affected integration 2,147; e2e 11 + screens 46; review 8 of 8 fixed, security none ≥ 8; walkthrough at 375 px dark (one fix: the note shows in the quiet start). Not run against real Google (no browser or secret in a scheduled run).
-- **S71 Phase 16 · Google Calendar out (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §10, [PR #111](https://github.com/Kakumrkr/Everyday-Pepper/pull/111)). Full entry in [session-log.md](session-log.md).
-  - **Built:** bookings written as events in a separate "Pepper bookings" calendar (`calendar.app.created`, optional in the same consent); `calendar_event_syncs` kept by a trigger on `bookings` (every write path), written by the worker's calendar pass; one event per booking (id from the booking, 409 → patch); the next 60 days on the grant; disconnect and a reconnect without the permission delete the calendar; the booking sheet's "Also in Google Calendar" (top-up). AC-X-167…174.
-  - **Checks:** `pnpm check` green; review 9 of 9 fixed, security none; e2e calendar-connect 5, screens' Google test 3 (baselines redrawn); walkthrough at 375 px (one label shortened). Not run against real Google yet (S71.2).
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -33,6 +31,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S72 (user, 2026-11-26):** "Go ahead with your recommendations and start the session and complete successfully" (D-1 split → S72.2 "My week" + the gate; D-2 preview, book the free dates, a nearby time for a taken one; D-3 cancel this or following, move one at a time; D-4 one email). Full wording in [decisions.md](decisions.md) and [ADR-0070](../adr/0070-recurring-appointments.md).
 - **S71.2 (stored prompt, 2026-11-26):** pre-approved recommendations (D-1 one session; D-2 inside the busy read; D-3 others' events left alone; D-4 a `calendar_kept` note, 3 days; D-5 renames of bookings not ended). Full wording in [decisions.md](decisions.md) and [ADR-0069](../adr/0069-google-calendar-busy-times.md) §11.
 - **S71 (user, 2026-11-26):** "You can start with your recommendations and complete the session successfully" (D-1 split → S71.2 read-back, reconciliation, conflicts; D-2 a "Pepper bookings" calendar, `calendar.app.created`; D-3 service + first name, private; D-4 60 days on the grant); the user asked whether a scheduled task can run S71.2 alone. Full wording in [decisions.md](decisions.md) and [ADR-0069](../adr/0069-google-calendar-busy-times.md) §10.
 - **S70.2 (user, 2026-11-25/26):** "Yeah, sure. Let's start it" (D-1 a Home card from the member's status, no feed kind; D-2 the real run through the user's browser, the secret only via the secure form; D-3 Team shows status, never the email). Full wording in [decisions.md](decisions.md); the run in [ADR-0069](../adr/0069-google-calendar-busy-times.md).
@@ -115,11 +114,10 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, M1–M2 and P1 are done (Phases 0–12, 14 and 15 (in sandbox): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S72 | Recurring appointments (split at the brief) | 16 | Recurrence property tests |
 | S72.2 | Staff's "My week"; **Phase 16 gate** | 16 | My-week journey; C6 ≥ 8 |
 | S58a | Operate, local: backups + restore drill, rate limits, load test, Sentry/OTel wired | 13 | Restore drill passes locally |
 | S57 | Deploy (once the domain is bought): VPS, TLS, Resend + SPF/DKIM/DMARC, inbound mail on, runbook | 13 | Mail-tester ≥ 9/10; HTTPS live |
