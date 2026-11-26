@@ -1,15 +1,22 @@
 'use client';
 
-import { BookingSchema, type AvailableSlot } from '@pepper/contracts';
+import {
+  BookingSchema,
+  BookingSeriesResultSchema,
+  type AvailableSlot,
+  type BookingSeriesResult,
+} from '@pepper/contracts';
 import { Button, buttonStyle, Icon, Select, Sheet, SheetFooter } from '@pepper/ui';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { bookableStaff, bookingRequest, type BookingSetup } from '../../../lib/booking';
+import { bookedLines, bookLabel, visitsToBook, withPick } from '../../../lib/booking-series';
 import { sendJson } from '../../../lib/client-api';
 import { ClientPicker, type ChosenClient, type PickedClient } from './client-picker';
 import { NotifyClient } from './notify-client';
 import { alternativesOf, Refusal } from './refusal';
 import { Notice } from '../form-parts';
+import { NO_REPEAT, RepeatPicker, SeriesDates, useSeriesPreview } from './repeat-visits';
 import { TimePicker } from './time-picker';
 
 /**
@@ -19,7 +26,9 @@ import { TimePicker } from './time-picker';
  * tap or a retried request books once. The client gets a confirmation email with their
  * reschedule/cancel link unless the team unticks it (ADR-0025). On the kit (S42.2): Book sits
  * in the sheet's footer, within thumb reach (D3). "Book again" from an import's times taken
- * (S50, AC-W1-33) opens it at once with the visit's service and staff member chosen.
+ * (S50, AC-W1-33) opens it at once with the visit's service and staff member chosen. "Repeat"
+ * (S72, AC-X-187) checks every date of a regular's visits, books the free ones (and a nearby
+ * time tapped for a taken one) in one go, and emails the client once with every date.
  */
 export function NewBooking({
   setup,
@@ -117,10 +126,54 @@ function NewBookingForm({
   );
   const [busy, setBusy] = useState(false);
   const [notifyClient, setNotifyClient] = useState(true);
+  const [repeat, setRepeatChoice] = useState(NO_REPEAT);
+  // A time picked for a date that isn't free, by the date's place in the repeat.
+  const [picks, setPicks] = useState<Record<number, string>>({});
+  const [booked, setBooked] = useState<BookingSeriesResult | null>(null);
+  // A walk-in isn't a client until booked: they come back as a client for a repeat.
+  const repeats = repeat.everyWeeks > 0 && client !== null && !('walkIn' in client);
+  const { preview, error: previewError } = useSeriesPreview({
+    serviceId,
+    staffMemberId,
+    startsAt,
+    repeat: repeats ? repeat : NO_REPEAT,
+  });
+  const visits = preview === null ? [] : visitsToBook(preview, picks);
 
   if (services.length === 0) {
     return (
       <p className="m-0 type-body text-ink-2">Add a service first; then you can book it here.</p>
+    );
+  }
+
+  async function bookSeries(): Promise<void> {
+    if (client === null || 'walkIn' in client) return;
+    setBusy(true);
+    const answer = await sendJson('POST', '/v1/bookings/series', {
+      clientId: client.client.id,
+      ...(client.contact !== undefined && { clientContact: client.contact }),
+      serviceId,
+      staffMemberId,
+      everyWeeks: repeat.everyWeeks,
+      startsAts: visits,
+      idempotencyKey,
+      notifyClient,
+    });
+    setBusy(false);
+    const result = answer.ok ? BookingSeriesResultSchema.safeParse(answer.data) : null;
+    if (result?.success === true) {
+      router.refresh();
+      // Every date booked: done. Some taken meanwhile: say which before closing.
+      if (result.data.skipped.length === 0) onDone();
+      else setBooked(result.data);
+      return;
+    }
+    setError(
+      alternativesOf(answer) !== null
+        ? 'None of these dates can be booked any more. Pick another time.'
+        : answer.ok
+          ? 'Something went wrong.'
+          : answer.message,
     );
   }
 
@@ -143,7 +196,28 @@ function NewBookingForm({
     setError(alternatives === null ? (answer.ok ? 'Something went wrong.' : answer.message) : null);
   }
 
-  const ready = client !== null && staffMemberId !== '' && startsAt !== null;
+  const ready =
+    client !== null &&
+    staffMemberId !== '' &&
+    startsAt !== null &&
+    (!repeats || visits.length >= 2);
+
+  if (booked !== null) {
+    return (
+      <div className="grid gap-4" data-testid="series-booked">
+        {bookedLines(booked, timeZone).map((line) => (
+          <p key={line} className="m-0 type-body text-ink" role="status">
+            {line}
+          </p>
+        ))}
+        <SheetFooter>
+          <Button block size="lg" onClick={onDone}>
+            Done
+          </Button>
+        </SheetFooter>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-5">
@@ -205,8 +279,37 @@ function NewBookingForm({
               onChange={(at) => {
                 setStartsAt(at);
                 setRefused(null);
+                setPicks({});
               }}
             />
+            {client !== null && 'walkIn' in client ? null : (
+              <RepeatPicker
+                value={repeat}
+                onChange={(next) => {
+                  setRepeatChoice(next);
+                  setPicks({});
+                  setError(null);
+                }}
+              />
+            )}
+            {repeats && startsAt !== null ? (
+              <SeriesDates
+                timeZone={timeZone}
+                preview={preview}
+                error={previewError}
+                count={repeat.count}
+                picks={picks}
+                onPick={(index, at) => {
+                  setPicks((current) => withPick(current, index, at));
+                }}
+              />
+            ) : null}
+            {repeats && preview !== null && visits.length < 2 ? (
+              <p className="m-0 type-body text-ink-2" role="status">
+                Fewer than two of these dates can be booked. Pick another time, or choose “Doesn’t
+                repeat” to book one visit.
+              </p>
+            ) : null}
           </>
         )}
       </section>
@@ -218,11 +321,13 @@ function NewBookingForm({
         </p>
       ) : (
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
-          Email the client a confirmation
+          {repeats
+            ? 'Email the client one confirmation with every date'
+            : 'Email the client a confirmation'}
         </NotifyClient>
       )}
 
-      {refused === null || client === null ? null : (
+      {refused === null || client === null || repeats ? null : (
         <Refusal
           timeZone={timeZone}
           alternatives={refused.alternatives}
@@ -261,10 +366,11 @@ function NewBookingForm({
           disabled={!ready}
           busy={busy}
           onClick={() => {
-            if (startsAt !== null) void book(startsAt);
+            if (repeats) void bookSeries();
+            else if (startsAt !== null) void book(startsAt);
           }}
         >
-          {busy ? 'Booking…' : 'Book'}
+          {busy ? 'Booking…' : repeats ? bookLabel(visits.length) : 'Book'}
         </Button>
       </SheetFooter>
     </div>

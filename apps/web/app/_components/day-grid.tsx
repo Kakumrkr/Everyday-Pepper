@@ -20,6 +20,8 @@ export type CalendarEntry =
       overridden: boolean;
       /** When the client replied C to a reminder (S62); `null` until then, or once moved. */
       clientConfirmedAt: string | null;
+      /** The series of recurring visits it is part of (S72); `null`: a single booking. */
+      seriesId?: string | null;
     }
   | { kind: 'busy'; startsAt: string; endsAt: string };
 

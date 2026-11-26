@@ -79,6 +79,7 @@ export async function WeekCalendar({
               status: booking.status,
               overridden: booking.overridden,
               clientConfirmedAt: booking.clientConfirmedAt ?? null,
+              seriesId: booking.seriesId ?? null,
             }))
         : week.busy
             .filter((busy) => busy.staffMemberId === member.id)
