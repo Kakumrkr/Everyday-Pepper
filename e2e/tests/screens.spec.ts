@@ -961,6 +961,21 @@ for (const width of WIDTHS) {
       for (const scheme of SCHEMES) {
         await page.goto('/more/payments');
         await expect(page.getByTestId('payments-status')).toBeVisible();
+        // A masked date line kept to one full-width line: its length moves with the day, and a
+        // longer one rewrapped and moved everything under it (S71's close, a 1280 px run).
+        for (const line of mask) {
+          await line.evaluateAll((elements) => {
+            for (const element of elements) {
+              if (!(element instanceof HTMLElement)) continue;
+              Object.assign(element.style, {
+                display: 'block',
+                width: '100%',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+              });
+            }
+          });
+        }
         await still(page, scheme);
         await expect
           .soft(page)
