@@ -4,19 +4,23 @@ import {
   BookingCalendarStateSchema,
   BookingDepositAnswerSchema,
   BookingSchema,
+  BookingSeriesSchema,
+  CancelFollowingResultSchema,
   type AvailableSlot,
+  type BookingSeries,
   type BookingCalendarState,
   type BookingDeposit,
   type BookingChange,
   type BookingStatus,
 } from '@pepper/contracts';
-import { Button, cx, DetailTable, Select, Sheet, SheetFooter } from '@pepper/ui';
+import { Button, cx, DetailTable, Segmented, Select, Sheet, SheetFooter } from '@pepper/ui';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   bookableStaff,
   bookingActions,
+  bookingBlockName,
   confirmedByText,
   dateTimeLabel,
   localParts,
@@ -25,7 +29,7 @@ import {
   type BookingSetup,
 } from '../../../lib/booking';
 import { ROUTES } from '../../../lib/account';
-import { timeRange } from '../../../lib/calendar';
+import { laterVisits, seriesLine } from '../../../lib/booking-series';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import {
   bookingCalendarLine,
@@ -54,6 +58,10 @@ export interface BookingSummary {
   overridden: boolean;
   /** When the client replied C to a reminder (S62); `null` until then, or once moved. */
   clientConfirmedAt: string | null;
+  /** The series of recurring visits it is part of (S72); `null` or absent: a single booking. */
+  seriesId?: string | null;
+  /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
+  keptOverGoogle?: boolean;
 }
 
 /**
@@ -95,7 +103,7 @@ export function BookingSheet({
         <button
           type="button"
           data-testid="booking-block"
-          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}${confirmedByText(booking) === null ? '' : ', confirmed by text'}`}
+          aria-label={bookingBlockName(timeZone, booking)}
           className={cx(className, 'cursor-pointer text-left font-normal')}
           style={style}
         >
@@ -144,6 +152,26 @@ function BookingDetails({
   );
   const inGoogle = bookingCalendarLine(calendarAnswer?.state ?? null);
   const keptOverGoogle = keptOverGoogleLine(calendarAnswer);
+  const series = useBookingSeries(booking.seriesId ?? null);
+  const repeats = series === null ? null : seriesLine(series, booking.id);
+  const later = series === null ? [] : laterVisits(series, booking);
+  const [cancelScope, setCancelScope] = useState<'this' | 'following'>('this');
+
+  async function cancelFollowing(): Promise<void> {
+    setBusy(true);
+    const answer = await sendJson(
+      'POST',
+      `/v1/bookings/${encodeURIComponent(booking.id)}/cancel-following`,
+      { notifyClient },
+    );
+    setBusy(false);
+    if (answer.ok && CancelFollowingResultSchema.safeParse(answer.data).success) {
+      onDone();
+      router.refresh();
+      return;
+    }
+    setError(answer.ok ? 'Something went wrong.' : answer.message);
+  }
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -187,6 +215,18 @@ function BookingDetails({
             </span>
           ),
         },
+        ...(repeats === null
+          ? []
+          : [
+              {
+                label: 'Repeats',
+                value: (
+                  <span className="tabular-nums" data-testid="booking-series">
+                    {repeats}
+                  </span>
+                ),
+              },
+            ]),
         {
           label: 'Status',
           value: <span data-testid="booking-status">{STATUS_LABELS[booking.status]}</span>,
@@ -254,16 +294,39 @@ function BookingDetails({
     return (
       <div className="grid gap-4">
         {summary}
-        <p className="m-0 type-body font-semibold">
-          Cancel this booking? The time becomes free again.
-        </p>
+        {later.length === 0 ? (
+          <p className="m-0 type-body font-semibold">
+            Cancel this booking? The time becomes free again.
+          </p>
+        ) : (
+          <>
+            <Segmented
+              label="Which visits"
+              options={[
+                { value: 'this', label: 'Just this visit' },
+                { value: 'following', label: `This and following (${String(later.length + 1)})` },
+              ]}
+              value={cancelScope}
+              onValueChange={(value) => {
+                setCancelScope(value === 'following' ? 'following' : 'this');
+              }}
+            />
+            <p className="m-0 type-body font-semibold" data-testid="booking-cancel-scope">
+              {cancelScope === 'this'
+                ? 'Cancel this visit? The later ones stay booked.'
+                : `Cancel this visit and the ${String(later.length)} after it? Their times become free again.`}
+            </p>
+          </>
+        )}
         {teamCancelDepositWords(depositRead) === null ? null : (
           <p className="m-0 type-body text-ink-2" data-testid="booking-cancel-deposit">
             {teamCancelDepositWords(depositRead)}
           </p>
         )}
         <NotifyClient checked={notifyClient} onChange={setNotifyClient}>
-          Email the client that it is cancelled
+          {cancelScope === 'following' && later.length > 0
+            ? 'Email the client one note with the cancelled dates'
+            : 'Email the client that it is cancelled'}
         </NotifyClient>
         <SheetFooter>
           {error === null ? null : <Notice tone="error">{error}</Notice>}
@@ -272,9 +335,14 @@ function BookingDetails({
             size="lg"
             variant="danger"
             busy={busy}
-            onClick={() => void change({ status: 'cancelled', notifyClient })}
+            onClick={() => {
+              if (cancelScope === 'following' && later.length > 0) void cancelFollowing();
+              else void change({ status: 'cancelled', notifyClient });
+            }}
           >
-            Cancel booking
+            {cancelScope === 'following' && later.length > 0
+              ? `Cancel ${String(later.length + 1)} visits`
+              : 'Cancel booking'}
           </Button>
           <Button
             block
@@ -510,6 +578,28 @@ function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | 
     };
   }, [bookingId, reads]);
   return deposit;
+}
+
+/**
+ * The booking's series (S72, AC-X-186), read when the sheet opens: "Visit 3 of 8" and the later
+ * visits "This and following" cancels; `null` for a single booking, while loading, or when it
+ * can't be read (the sheet then offers the single cancel only).
+ */
+function useBookingSeries(seriesId: string | null): BookingSeries | null {
+  const [series, setSeries] = useState<BookingSeries | null>(null);
+  useEffect(() => {
+    if (seriesId === null) return;
+    let current = true;
+    void fetchJson(`/v1/bookings/series/${encodeURIComponent(seriesId)}`, BookingSeriesSchema).then(
+      (answer) => {
+        if (current && answer.ok) setSeries(answer.data);
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [seriesId]);
+  return seriesId === null ? null : series;
 }
 
 /** How often an open sheet asks again while the booking is on its way to Google, and how many times. */

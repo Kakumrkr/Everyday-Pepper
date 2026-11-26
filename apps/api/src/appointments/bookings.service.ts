@@ -1,6 +1,10 @@
 import {
   addToWaitlist,
+  cancelFollowing,
   changeBooking,
+  createSeries,
+  getSeries,
+  previewSeries,
   changeWaitlistEntry,
   createBooking,
   createWalkInBooking,
@@ -18,7 +22,15 @@ import type {
   BookingChange,
   BookingId,
   BookingInput,
+  BookingSeries,
+  BookingSeriesId,
+  BookingSeriesInput,
+  BookingSeriesPreview,
+  BookingSeriesPreviewInput,
+  BookingSeriesResult,
   BookingsQuery,
+  CancelFollowingInput,
+  CancelFollowingResult,
   BusyQuery,
   BusyTime,
   WaitlistChange,
@@ -108,6 +120,39 @@ export class BookingsService {
           });
         },
       }),
+    });
+  }
+
+  /** Every date of a repeat, checked; nothing booked (S72, AC-X-182). */
+  previewSeries(
+    tenant: TenantContext,
+    input: BookingSeriesPreviewInput,
+  ): Promise<BookingSeriesPreview> {
+    return previewSeries(this.db, actorOf(tenant), input, { templateRuleDefaults });
+  }
+
+  /** Books the free dates of a series, with one email to the client (S72, AC-X-183). */
+  createSeries(tenant: TenantContext, input: BookingSeriesInput): Promise<BookingSeriesResult> {
+    return createSeries(this.db, actorOf(tenant), input, {
+      templateRuleDefaults,
+      notify: this.emails.notifySeries,
+    });
+  }
+
+  series(tenant: TenantContext, id: BookingSeriesId): Promise<BookingSeries> {
+    return getSeries(this.db, actorOf(tenant), id);
+  }
+
+  /** This visit and the later ones of its series (S72, D-3): each cancel as the team's. */
+  cancelFollowing(
+    tenant: TenantContext,
+    id: BookingId,
+    input: CancelFollowingInput,
+  ): Promise<CancelFollowingResult> {
+    return cancelFollowing(this.db, actorOf(tenant), id, input, {
+      templateRuleDefaults,
+      notify: this.emails.notifySeries,
+      onCancelled: this.payments?.teamCancelled(),
     });
   }
 

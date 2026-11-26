@@ -1,10 +1,12 @@
 import {
   queueBookingEmail,
   queueBookingText,
+  queueSeriesEmail,
   queueWaitlistTakenEmail,
   type BookingEmailOptions,
   type BookingNotice,
   type BookingNotify,
+  type SeriesNotify,
   type WaitlistTakenNotify,
 } from '@pepper/appointments';
 import type { TenantTx } from '@pepper/db';
@@ -31,6 +33,11 @@ export class BookingEmails {
   readonly notify: BookingNotify = async (tx: TenantTx, notice: BookingNotice) => {
     await queueBookingEmail(tx, notice, this.options);
     await queueBookingText(tx, notice, this.options);
+  };
+
+  /** Queues a series' one email (S72, D-4): its confirmation or "this and following" cancelled. */
+  readonly notifySeries: SeriesNotify = async (tx, notice) => {
+    await queueSeriesEmail(tx, notice, this.options);
   };
 
   /** Queues the "that time has been taken" email to a waitlist client (S37). */

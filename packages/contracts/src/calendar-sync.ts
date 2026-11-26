@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { StaffMemberIdSchema } from './appointments.js';
-import { MAX_LIST_ITEMS } from './bookings.js';
+import { BookingIdSchema, MAX_LIST_ITEMS } from './bookings.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // Google Calendar in (S70, ADR-0069): a staff member's Google busy times block their bookable
@@ -341,6 +341,17 @@ export const BookingCalendarStateSchema = z.object({
   keptOverGoogle: z.literal(true).optional(),
 });
 export type BookingCalendarState = z.infer<typeof BookingCalendarStateSchema>;
+
+/**
+ * `GET /v1/calendar/kept?from&to[&staffMemberId]` (S72 top-up, AC-X-188): the bookings starting
+ * in the range whose event Pepper put back over a change made in Google in the last
+ * `CALENDAR_KEPT_SHOWN_DAYS`, so the week view marks them in one request. Only bookings the
+ * member may see.
+ */
+export const KeptBookingsResponseSchema = z.object({
+  bookingIds: z.array(BookingIdSchema).max(MAX_LIST_ITEMS),
+});
+export type KeptBookingsResponse = z.infer<typeof KeptBookingsResponseSchema>;
 
 /** One busy time from a staff member's outside calendar: when, never what (ADR-0069 §4). */
 export const OutsideBusyTimeSchema = z.object({

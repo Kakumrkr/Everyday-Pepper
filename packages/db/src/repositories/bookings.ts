@@ -58,6 +58,8 @@ export interface NewBooking {
   createdBy: UserId | null;
   /** SHA-256 (hex) of the client's reschedule/cancel link token (booking page, ADR-0022). */
   manageTokenHash?: string | null;
+  /** The series of recurring visits it is part of (S72, ADR-0070). */
+  seriesId?: string | null;
 }
 
 /**
@@ -84,6 +86,8 @@ export async function insertBooking(tx: TenantTx, input: NewBooking): Promise<Bo
       input.manageTokenHash === undefined || input.manageTokenHash === null
         ? null
         : TokenHashSchema.parse(input.manageTokenHash),
+    seriesId:
+      input.seriesId === undefined || input.seriesId === null ? null : Id.parse(input.seriesId),
   };
   return bookingWrite(async () => {
     const [row] = await tx.insert(bookings).values(values).returning();

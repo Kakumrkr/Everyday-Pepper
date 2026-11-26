@@ -7,6 +7,8 @@ import {
   manageUrl,
   reminderEmail,
   rescheduledEmail,
+  seriesCancelledEmail,
+  seriesConfirmationEmail,
   waitlistCodeEmail,
 } from './emails.js';
 import type { BookingEmailDetails } from './services/notices.js';
@@ -158,5 +160,39 @@ describe('the cancellation policy and the deposit (S67.2, AC-X-133, AC-X-134)', 
     expect(confirmationEmail({ ...DETAILS, deposit: null }, LINK).text).not.toContain('deposit');
     // Only the confirmation says it.
     expect(rescheduledEmail({ ...DETAILS, deposit }, LINK).text).not.toContain('deposit');
+  });
+});
+
+describe('the series emails (S72, AC-X-185)', () => {
+  const visits = [
+    { startsAt: '2026-11-03T15:00:00.000Z', manageUrl: 'https://app.test/b/juniper/manage#one' },
+    { startsAt: '2026-11-10T15:00:00.000Z', manageUrl: 'https://app.test/b/juniper/manage#two' },
+  ];
+
+  it('lists every visit with its own link, and the policy', () => {
+    const policy = { sentence: 'Cancel at least 24 hours before.', note: null };
+    const email = seriesConfirmationEmail({ ...DETAILS, policy }, visits);
+    expect(email.to).toBe('ana@example.test');
+    expect(email.subject).toBe("You're booked at Juniper Hair Studio: 2 visits");
+    expect(email.text).toContain('for Haircut with Jess, 2 visits:');
+    expect(email.text).toContain(
+      'Tuesday, November 3 at 10:00 AM\nTo reschedule or cancel this visit: https://app.test/b/juniper/manage#one',
+    );
+    expect(email.text).toContain(
+      'Tuesday, November 10 at 10:00 AM\nTo reschedule or cancel this visit: https://app.test/b/juniper/manage#two',
+    );
+    expect(email.text).toContain('Cancel at least 24 hours before.');
+  });
+
+  it('lists the cancelled visits, one or many', () => {
+    const many = seriesCancelledEmail(DETAILS, visits);
+    expect(many.subject).toBe('2 visits at Juniper Hair Studio are cancelled');
+    expect(many.text).toContain(
+      'Tuesday, November 3 at 10:00 AM\nTuesday, November 10 at 10:00 AM',
+    );
+    expect(many.text).not.toContain('manage');
+    expect(seriesCancelledEmail(DETAILS, visits.slice(0, 1)).subject).toBe(
+      'A visit at Juniper Hair Studio is cancelled',
+    );
   });
 });

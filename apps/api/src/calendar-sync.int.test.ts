@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import { Writable } from 'node:stream';
 import {
   BookingCalendarStateSchema,
+  KeptBookingsResponseSchema,
   ClientIdSchema,
   ServiceIdSchema,
   StaffMemberIdSchema,
@@ -345,6 +346,61 @@ describe("a booking's place in Google Calendar (S71, AC-X-167, AC-X-173)", () =>
   });
 });
 
+describe('the week view\'s "kept" mark (S72 top-up, AC-X-188)', () => {
+  it('lists the bookings kept over Google lately, only those the member may see', async () => {
+    const { tenantId, owner, jess, staffMemberId } = await business(sandboxServer);
+    await connect(jess);
+    const colleague = await withTenant(database.db, tenantId, async (tx) => {
+      const dre = await insertStaffMember(tx, {
+        displayName: 'Dre',
+        color: '#2a7230',
+        active: true,
+        membershipId: null,
+      });
+      return dre.id;
+    });
+    // `bookingOf` books tomorrow at this time: each one is moved on an hour before the next.
+    const later = (id: string, hours: number) =>
+      withTenant(database.db, tenantId, (tx) =>
+        tx.execute(sql`UPDATE bookings SET starts_at = starts_at + make_interval(hours => ${hours}),
+          ends_at = ends_at + make_interval(hours => ${hours}) WHERE id = ${id}`),
+      );
+    const kept = await bookingOf(tenantId, staffMemberId);
+    await later(kept, 3);
+    const longAgo = await bookingOf(tenantId, staffMemberId);
+    await later(longAgo, 2);
+    const notKept = await bookingOf(tenantId, staffMemberId);
+    await later(notKept, 1);
+    const colleagues = await bookingOf(tenantId, colleague);
+    // As the write pass leaves them: written, and when Pepper last put each back.
+    await withTenant(database.db, tenantId, async (tx) => {
+      await tx.execute(sql`
+        INSERT INTO calendar_event_syncs (id, tenant_id, booking_id, version)
+          VALUES (${newId()}, ${tenantId}, ${colleagues}, 1)
+        ON CONFLICT DO NOTHING`);
+      await tx.execute(sql`
+        UPDATE calendar_event_syncs s SET synced_version = s.version, event_calendar_id = 'pepper-cal',
+          event_connection_id = (SELECT id FROM calendar_connections LIMIT 1),
+          kept_at = CASE WHEN s.booking_id = ${longAgo} THEN now() - interval '8 days'
+                         WHEN s.booking_id = ${notKept} THEN NULL ELSE now() END`);
+    });
+    const from = new Date().toISOString();
+    const to = new Date(Date.now() + 7 * 86_400_000).toISOString();
+    const read = async (b: Browser, extra = '') =>
+      KeptBookingsResponseSchema.parse(
+        (await b.get(`/v1/calendar/kept?from=${from}&to=${to}${extra}`).expect(200)).body,
+      ).bookingIds;
+    expect((await read(owner)).sort()).toEqual([kept, colleagues].sort());
+    // Staff see their own bookings only (RLS on bookings).
+    expect(await read(jess)).toEqual([kept]);
+    expect(await read(owner, `&staffMemberId=${colleague}`)).toEqual([colleagues]);
+    // Another business sees nothing; a range without its end is refused.
+    const other = await business(sandboxServer);
+    expect(await read(other.owner)).toEqual([]);
+    await owner.get(`/v1/calendar/kept?from=${from}`).expect(400);
+  });
+});
+
 describe('Google Calendar off (AC-X-158)', () => {
   it('every connection route is 404; stored busy times still read (none)', async () => {
     const { jess } = await business(offServer);
@@ -355,6 +411,7 @@ describe('Google Calendar off (AC-X-158)', () => {
       () => jess.post('/v1/calendar/google/callback', { code: 'x', state: 'A'.repeat(43) }),
       () => jess.delete('/v1/calendar/google'),
       () => jess.get(`/v1/calendar/bookings/${newId()}`),
+      () => jess.get(`/v1/calendar/kept${WEEK}`),
     ];
     for (const call of calls) {
       const response = await call().expect(404);

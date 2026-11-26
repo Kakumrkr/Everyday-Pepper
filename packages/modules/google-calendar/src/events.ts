@@ -1,6 +1,7 @@
 import {
   BookingCalendarStateSchema,
   BookingIdSchema,
+  BusyQuerySchema,
   CALENDAR_KEPT_SHOWN_DAYS,
   CALENDAR_WRITE_LEASE_MS,
   CALENDAR_WRITE_MAX_BACKOFF_MS,
@@ -11,6 +12,7 @@ import {
   calendarWriteBackoffMs,
   type BookingCalendarState,
   type BookingId,
+  type BusyQuery,
   type CalendarSyncError,
   type TenantId,
 } from '@pepper/contracts';
@@ -25,6 +27,7 @@ import {
   findCalendarEventSyncOfBooking,
   findCurrentTenant,
   listDueCalendarEventSyncs,
+  listKeptBookingIds,
   recordCalendarEventFailure,
   recordCalendarEventWritten,
   storeBookingsCalendar,
@@ -324,6 +327,31 @@ export async function runDueCalendarWrites(deps: CalendarDeps): Promise<Calendar
     else if (outcome === 'waiting') totals.waiting += 1;
   }
   return totals;
+}
+
+/**
+ * The bookings starting in the range that Pepper kept over a change made in Google lately (S72
+ * top-up, AC-X-188), for the week view's mark; only bookings the member may see (RLS).
+ */
+export async function listKeptBookings(
+  deps: Pick<CalendarDeps, 'db' | 'clock'>,
+  actor: Actor,
+  query: BusyQuery,
+  limit: number,
+): Promise<BookingId[]> {
+  requirePermission(actor, 'calendar.read');
+  const { from, to, staffMemberId } = BusyQuerySchema.parse(query);
+  const since = new Date(deps.clock.now().getTime() - CALENDAR_KEPT_SHOWN_DAYS * DAY_MS);
+  const ids = await withMember(deps.db, actor.context, (tx) =>
+    listKeptBookingIds(tx, {
+      from: new Date(from),
+      to: new Date(to),
+      since,
+      limit,
+      ...(staffMemberId !== undefined && { staffMemberId }),
+    }),
+  );
+  return ids.map((id) => BookingIdSchema.parse(id));
 }
 
 /**

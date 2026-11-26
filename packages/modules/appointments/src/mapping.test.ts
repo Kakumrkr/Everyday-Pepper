@@ -236,6 +236,7 @@ const bookingRow: BookingRow = {
   idempotencyKey: 'ai-run-0001',
   manageTokenHash: null,
   importBatchId: null,
+  seriesId: null,
   createdByUserId: USER,
   createdAt: CREATED,
   updatedAt: UPDATED,
@@ -258,6 +259,7 @@ describe('bookings', () => {
       source: 'team',
       overridden: false,
       clientConfirmedAt: null,
+      seriesId: null,
       createdAt: '2026-10-17T12:00:00.000Z',
       updatedAt: '2026-10-17T12:05:00.000Z',
     });
