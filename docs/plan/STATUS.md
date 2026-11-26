@@ -12,8 +12,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T2 `GET /v1/calendar/connections` (staff.read, no email; api + module int tests)
 - [x] T3–T6 More → Calendar, the return page (`history.replaceState`, never a remount), the Home card, the Team line; `lib/calendar-connect.ts` (20 unit)
 - [x] T7 e2e `calendar-connect` 3/3; screens: `more-calendar*`, `home-calendar-reconnect-*` new, `more-*`/`team-*` redrawn (noise restored); sandbox `sandbox-expired` code
-- [ ] T8 the real testing-mode run (waiting on the user's Google project); then `/session-close`
-- Next: T8. Lint uncached here: 133 s, peak 4.5 GB (6 GB heap).
+- [x] T8 the real run (2026-11-26): connect with PKCE + Basic client, a read stored one busy hour, disconnect 204 (ADR-0069 "Built in S70.2")
+- Next: `/session-close`. Lint uncached here: 133 s, peak 4.5 GB (6 GB heap).
 
 ## Last sessions
 - **S70 Phase 16 · Google Calendar in (busy blocks) (2026-11-25)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #109](https://github.com/Kakumrkr/Everyday-Pepper/pull/109)). Full entry in [session-log.md](session-log.md).
