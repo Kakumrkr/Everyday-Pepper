@@ -505,6 +505,8 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
           provider: CalendarProviderSchema,
           staffMemberId: z.uuid(),
           reconnected: z.boolean(),
+          /** Google gave the "Pepper bookings" permission (S71); absent on earlier entries. */
+          writesBookings: z.boolean().optional(),
         })
         .strict(),
     })

@@ -1,4 +1,5 @@
 import type {
+  CalendarEventBody,
   CalendarProvider as CalendarProviderName,
   CalendarSyncError,
 } from '@pepper/contracts';
@@ -43,6 +44,26 @@ export interface FreeBusyInput {
   to: Date;
 }
 
+export interface CreateCalendarInput {
+  accessToken: string;
+  /** "Pepper bookings". */
+  name: string;
+  /** The business's IANA time zone, for how Google shows the calendar's events. */
+  timeZone: string;
+}
+
+export interface EventInput {
+  accessToken: string;
+  calendarId: string;
+  event: CalendarEventBody;
+}
+
+export interface EventRef {
+  accessToken: string;
+  calendarId: string;
+  eventId: string;
+}
+
 export interface CalendarProvider {
   readonly name: CalendarProviderName;
   /** Google's consent page for this connect. */
@@ -53,6 +74,20 @@ export interface CalendarProvider {
   freeBusy(input: FreeBusyInput): Promise<{ start: string; end: string }[]>;
   /** Asks Google to forget the grant; a token already gone is not an error. */
   revoke(token: string): Promise<void>;
+  /** Makes a calendar in the account (S71: "Pepper bookings"); answers its id. */
+  createCalendar(input: CreateCalendarInput): Promise<{ id: string }>;
+  /** Deletes a calendar Pepper made; one already gone is not an error. */
+  deleteCalendar(input: { accessToken: string; calendarId: string }): Promise<void>;
+  /**
+   * Adds the event with its own id. `exists`: the calendar has an event with that id already
+   * (written before, or deleted and kept by Google): nothing was changed. A missing calendar is
+   * `not_found`.
+   */
+  insertEvent(input: EventInput): Promise<'created' | 'exists'>;
+  /** Changes the event to `event` (status included). `missing`: no event with that id. */
+  patchEvent(input: EventInput): Promise<'updated' | 'missing'>;
+  /** Removes the event; one already gone, or its calendar, is not an error. */
+  deleteEvent(input: EventRef): Promise<void>;
 }
 
 /**

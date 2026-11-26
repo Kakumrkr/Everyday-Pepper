@@ -1,6 +1,8 @@
 import {
   GOOGLE_CALENDAR_SCOPES,
   GoogleApiErrorSchema,
+  GoogleCalendarResourceSchema,
+  GoogleEventResourceSchema,
   GoogleFreeBusyResponseSchema,
   GoogleIdTokenClaimsSchema,
   GoogleRateLimitReasonSchema,
@@ -13,14 +15,19 @@ import {
   type AccessToken,
   type CalendarProvider,
   type ConsentUrlInput,
+  type CreateCalendarInput,
+  type EventInput,
+  type EventRef,
   type ExchangeCodeInput,
   type FreeBusyInput,
   type GrantedTokens,
 } from './provider.js';
 
-// Google's OAuth 2.0 web-server flow and Calendar's freeBusy (S70, ADR-0069 §1–3), coded from
+// Google's OAuth 2.0 web-server flow, Calendar's freeBusy (S70, ADR-0069 §1–3) and, from S71, a
+// calendar Pepper makes and its events (§10), coded from
 // developers.google.com (read 2026-11-25): `accounts.google.com/o/oauth2/v2/auth`,
-// `oauth2.googleapis.com/token` and `/revoke`, `www.googleapis.com/calendar/v3/freeBusy`. Form
+// `oauth2.googleapis.com/token` and `/revoke`, `www.googleapis.com/calendar/v3/freeBusy`; and
+// (read 2026-11-26) `calendars` insert/delete, `calendars/{id}/events` insert/patch/delete. Form
 // bodies to the OAuth endpoints, JSON to Calendar, a timeout on every call, every answer parsed.
 // No token, code or Google text ever goes into an error or a log.
 
@@ -28,6 +35,8 @@ export const GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
 export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 export const GOOGLE_REVOKE_URL = 'https://oauth2.googleapis.com/revoke';
 export const GOOGLE_FREEBUSY_URL = 'https://www.googleapis.com/calendar/v3/freeBusy';
+/** calendars.insert (S71); a calendar and its events are under it, by id. */
+export const GOOGLE_CALENDARS_URL = 'https://www.googleapis.com/calendar/v3/calendars';
 
 const TIMEOUT_MS = 15_000;
 
@@ -140,6 +149,84 @@ export class GoogleCalendarProvider implements CalendarProvider {
     );
   }
 
+  async createCalendar(input: CreateCalendarInput): Promise<{ id: string }> {
+    const response = await this.call(GOOGLE_CALENDARS_URL, {
+      method: 'POST',
+      headers: this.json(input.accessToken),
+      body: JSON.stringify({ summary: input.name, timeZone: input.timeZone }),
+    });
+    const body = await jsonOf(response);
+    if (!response.ok)
+      throw new CalendarProviderError(apiErrorCode(response.status, body), response.status);
+    const parsed = GoogleCalendarResourceSchema.safeParse(body);
+    if (!parsed.success) throw new CalendarProviderError('bad_response');
+    return { id: parsed.data.id };
+  }
+
+  async deleteCalendar(input: { accessToken: string; calendarId: string }): Promise<void> {
+    const response = await this.call(calendarUrl(input.calendarId), {
+      method: 'DELETE',
+      headers: this.json(input.accessToken),
+    });
+    if (response.ok || response.status === 404 || response.status === 410) return;
+    throw new CalendarProviderError(
+      apiErrorCode(response.status, await jsonOf(response)),
+      response.status,
+    );
+  }
+
+  async insertEvent(input: EventInput): Promise<'created' | 'exists'> {
+    const response = await this.call(`${calendarUrl(input.calendarId)}/events`, {
+      method: 'POST',
+      headers: this.json(input.accessToken),
+      body: JSON.stringify(input.event),
+    });
+    const body = await jsonOf(response);
+    // 409 `duplicate`: "The requested identifier already exists."
+    if (response.status === 409) return 'exists';
+    if (!response.ok)
+      throw new CalendarProviderError(apiErrorCode(response.status, body), response.status);
+    this.sameEvent(body, input.event.id);
+    return 'created';
+  }
+
+  async patchEvent(input: EventInput): Promise<'updated' | 'missing'> {
+    const response = await this.call(eventUrl(input.calendarId, input.event.id), {
+      method: 'PATCH',
+      headers: this.json(input.accessToken),
+      body: JSON.stringify(input.event),
+    });
+    const body = await jsonOf(response);
+    if (response.status === 404 || response.status === 410) return 'missing';
+    if (!response.ok)
+      throw new CalendarProviderError(apiErrorCode(response.status, body), response.status);
+    this.sameEvent(body, input.event.id);
+    return 'updated';
+  }
+
+  async deleteEvent(input: EventRef): Promise<void> {
+    const response = await this.call(eventUrl(input.calendarId, input.eventId), {
+      method: 'DELETE',
+      headers: this.json(input.accessToken),
+    });
+    // 410: deleted already; 404: no such event, or its calendar is gone. Both are what was asked.
+    if (response.ok || response.status === 404 || response.status === 410) return;
+    throw new CalendarProviderError(
+      apiErrorCode(response.status, await jsonOf(response)),
+      response.status,
+    );
+  }
+
+  private json(accessToken: string): Record<string, string> {
+    return { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' };
+  }
+
+  /** Google's answer names the event Pepper wrote, or it isn't the answer it should be. */
+  private sameEvent(body: unknown, id: string): void {
+    const parsed = GoogleEventResourceSchema.safeParse(body);
+    if (!parsed.success || parsed.data.id !== id) throw new CalendarProviderError('bad_response');
+  }
+
   private async token(fields: Record<string, string>) {
     const response = await this.call(GOOGLE_TOKEN_URL, {
       method: 'POST',
@@ -202,6 +289,14 @@ export class GoogleCalendarProvider implements CalendarProvider {
   }
 }
 
+function calendarUrl(calendarId: string): string {
+  return `${GOOGLE_CALENDARS_URL}/${encodeURIComponent(calendarId)}`;
+}
+
+function eventUrl(calendarId: string, eventId: string): string {
+  return `${calendarUrl(calendarId)}/events/${encodeURIComponent(eventId)}`;
+}
+
 async function jsonOf(response: Response): Promise<unknown> {
   try {
     return await response.json();
@@ -225,6 +320,9 @@ function apiErrorCode(status: number, body: unknown): CalendarSyncError {
     const reasons = parsed.success ? (parsed.data.error.errors ?? []) : [];
     if (reasons.some((e) => GoogleRateLimitReasonSchema.safeParse(e.reason).success))
       return 'rate_limited';
+    // Any other 403 on Calendar: the grant lacks the permission (S71: a calendar not Pepper's,
+    // or a scope unticked); trying again with the same grant won't help.
+    return 'forbidden';
   }
   return statusCode(status);
 }

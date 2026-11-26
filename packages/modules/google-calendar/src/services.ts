@@ -6,6 +6,8 @@ import {
   CalendarConnectCompleteSchema,
   CalendarConnectionAnswerSchema,
   CalendarConnectStartSchema,
+  CALENDAR_WRITE_BACKFILL_DAYS,
+  GOOGLE_EVENTS_SCOPE,
   GOOGLE_FREEBUSY_SCOPE,
   OutsideBusyTimeSchema,
   StaffMemberIdSchema,
@@ -25,21 +27,23 @@ import { auditActorOf, requirePermission, type Actor, type Clock } from '@pepper
 import {
   appendAuditEntry,
   claimCalendarConnection,
+  clearBookingsCalendar,
   deleteCalendarConnection,
   findCalendarConnectionOfStaff,
   findMembership,
   findStaffMemberOfMembership,
+  forgetCalendarEvents,
   listAllBusyBlocksBetween,
   listBusyBlocksBetween,
   listCalendarConnections,
   listDueCalendarConnections,
   newId,
-  recordCalendarFailure,
+  queueUpcomingBookingSyncs,
   replaceConnectState,
   saveCalendarConnection,
-  storeAccessToken,
   storeCalendarRead,
   takeConnectState,
+  wakeCalendarEventSyncs,
   withMember,
   withTenant,
   type CalendarConnectionRow,
@@ -52,6 +56,7 @@ import {
   CalendarNotLinkedError,
   CalendarScopeMissingError,
 } from './errors.js';
+import { recordConnectionFailure, withAccessToken } from './access.js';
 import { CalendarProviderError, type CalendarProvider } from './provider.js';
 import {
   codeChallengeOf,
@@ -87,8 +92,6 @@ export interface CalendarDeps {
 const DAY_MS = 86_400_000;
 /** How far back busy times are kept: the week view still shows this week's. */
 const READ_BACK_MS = 7 * DAY_MS;
-/** An access token this close to its expiry is refreshed before the read. */
-const EXPIRY_MARGIN_MS = 60_000;
 /** Connections read in one pass of the worker, at most. */
 const READS_PER_PASS = 200;
 
@@ -114,6 +117,7 @@ export function toCalendarConnection(row: CalendarConnectionRow): CalendarConnec
     syncedAt:
       row.syncedAt === null ? null : (row.syncedAt.toISOString() as CalendarConnection['syncedAt']),
     connectedAt: row.connectedAt.toISOString() as CalendarConnection['connectedAt'],
+    writesBookings: row.writesBookings,
   };
 }
 
@@ -246,7 +250,9 @@ export async function completeCalendarConnect(
     throw new CalendarScopeMissingError();
   }
 
-  const { saved, replaced } = await withMember(deps.db, actor.context, async (tx) => {
+  // The bookings permission is optional on Google's page (AC-X-167): without it, busy times only.
+  const writesBookings = granted.scopes.includes(GOOGLE_EVENTS_SCOPE);
+  const { saved, replaced, oldCalendar } = await withMember(deps.db, actor.context, async (tx) => {
     const staffMemberId = StaffMemberIdSchema.parse(linked.staffMemberId);
     const existing = await findCalendarConnectionOfStaff(tx, staffMemberId);
     const id = existing?.id ?? newId();
@@ -268,9 +274,29 @@ export async function completeCalendarConnect(
         accessTokenExpiresAt: granted.expiresAt,
         createdBy: actor.context.userId,
         connectedAt: deps.clock.now(),
+        writesBookings,
       },
       existing !== undefined,
     );
+    // The old "Pepper bookings" goes when bookings no longer go there: the permission unticked,
+    // or another Google account (whose calendar is another). Its events are forgotten here and
+    // the calendar deleted with the old grant below, before that grant is revoked.
+    const oldCalendar =
+      existing?.bookingsCalendarId !== undefined &&
+      existing.bookingsCalendarId !== null &&
+      (!writesBookings || existing.accountEmail !== granted.accountEmail)
+        ? existing.bookingsCalendarId
+        : null;
+    if (oldCalendar !== null) await clearBookingsCalendar(tx, id, oldCalendar);
+    if (writesBookings) {
+      // The grant (AC-X-171): the next 60 days' bookings are written, and whatever waited for a
+      // reconnect goes out at the worker's next pass (AC-X-170).
+      await queueUpcomingBookingSyncs(tx, staffMemberId, {
+        from: now,
+        to: new Date(now.getTime() + CALENDAR_WRITE_BACKFILL_DAYS * DAY_MS),
+      });
+      await wakeCalendarEventSyncs(tx);
+    }
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
       requestId: actor.requestId,
@@ -278,13 +304,26 @@ export async function completeCalendarConnect(
         action: 'calendar.connected',
         entity: { type: 'calendar_connection', id },
         before: null,
-        after: { provider: deps.provider.name, staffMemberId, reconnected: existing !== undefined },
+        after: {
+          provider: deps.provider.name,
+          staffMemberId,
+          reconnected: existing !== undefined,
+          writesBookings,
+        },
       },
     });
-    return { saved: stored, replaced: previous === granted.refreshToken ? null : previous };
+    return {
+      saved: stored,
+      replaced: previous === granted.refreshToken ? null : previous,
+      oldCalendar,
+    };
   });
-  // The grant this one replaced is no use to anyone now.
-  if (replaced !== null) await deps.provider.revoke(replaced).catch(() => undefined);
+  // The old grant deletes the calendar it wrote (AC-X-172's promise, on a reconnect too), then
+  // is no use to anyone.
+  if (replaced !== null) {
+    if (oldCalendar !== null) await deleteCalendarWith(deps, replaced, oldCalendar);
+    await deps.provider.revoke(replaced).catch(() => undefined);
+  }
   // The first read now, so the busy times block bookings from the start; a failure waits for
   // the worker's next pass.
   await readCalendar(deps, actor.context.tenantId, saved.id, { force: true }).catch(
@@ -294,12 +333,13 @@ export async function completeCalendarConnect(
 }
 
 /**
- * Disconnects the member's own calendar (AC-X-157): the connection and its busy times go in one
- * transaction, then Google is asked to revoke the grant (a failure there changes nothing).
+ * Disconnects the member's own calendar (AC-X-157, AC-X-172): the connection and its busy times
+ * go in one transaction, and Pepper stops writing bookings; then Google is asked to delete the
+ * "Pepper bookings" calendar and to revoke the grant (a failure there changes nothing).
  */
 export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Promise<void> {
   requirePermission(actor, 'calendar.read');
-  const refreshToken = await withMember(deps.db, actor.context, async (tx) => {
+  const removed = await withMember(deps.db, actor.context, async (tx) => {
     const linked = await linkedOf(tx, actor);
     if (linked === undefined) throw new CalendarNotLinkedError();
     const row = await findCalendarConnectionOfStaff(
@@ -310,6 +350,8 @@ export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Prom
     // An unreadable token (the key changed) never keeps a member from disconnecting.
     const token = openedOrNull(deps.tokenKey, row.id, 'refresh', row.refreshTokenSealed);
     await deleteCalendarConnection(tx, row.id);
+    // Its events go with the calendar: their bookings are in no calendar now.
+    await forgetCalendarEvents(tx, row.id, null);
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
       requestId: actor.requestId,
@@ -323,9 +365,24 @@ export async function disconnectCalendar(deps: CalendarDeps, actor: Actor): Prom
         after: null,
       },
     });
-    return token;
+    return { token, calendarId: row.bookingsCalendarId };
   });
-  if (refreshToken !== null) await deps.provider.revoke(refreshToken).catch(() => undefined);
+  const { token, calendarId } = removed;
+  if (token === null) return;
+  if (calendarId !== null) await deleteCalendarWith(deps, token, calendarId);
+  await deps.provider.revoke(token).catch(() => undefined);
+}
+
+/** Asks Google to delete "Pepper bookings" with a grant about to be revoked; best-effort. */
+async function deleteCalendarWith(
+  deps: CalendarDeps,
+  refreshToken: string,
+  calendarId: string,
+): Promise<void> {
+  await deps.provider
+    .refresh(refreshToken)
+    .then(({ accessToken }) => deps.provider.deleteCalendar({ accessToken, calendarId }))
+    .catch(() => undefined);
 }
 
 export type CalendarReadOutcome = 'read' | 'skipped' | 'failed' | 'needs_reconnect';
@@ -347,56 +404,19 @@ export async function readCalendar(
     claimCalendarConnection(tx, connectionId, now, CALENDAR_SYNC_EVERY_MS, options.force ?? false),
   );
   if (claimed === undefined) return 'skipped';
-  let fresh: { accessToken: string; expiresAt: Date } | null = null;
   const window = {
     from: new Date(now.getTime() - READ_BACK_MS),
     to: new Date(now.getTime() + CALENDAR_SYNC_DAYS * DAY_MS),
   };
 
   try {
-    const refreshToken = openToken(
-      deps.tokenKey,
-      claimed.id,
-      'refresh',
-      claimed.refreshTokenSealed,
+    const busy = await withAccessToken(deps, tenantId, claimed, (accessToken) =>
+      deps.provider.freeBusy({ accessToken, ...window }),
     );
-    let access =
-      claimed.accessTokenSealed !== null &&
-      claimed.accessTokenExpiresAt !== null &&
-      claimed.accessTokenExpiresAt.getTime() - EXPIRY_MARGIN_MS > now.getTime()
-        ? openToken(deps.tokenKey, claimed.id, 'access', claimed.accessTokenSealed)
-        : null;
-    if (access === null) {
-      fresh = await deps.provider.refresh(refreshToken);
-      access = fresh.accessToken;
-    }
-    let busy;
-    try {
-      busy = await deps.provider.freeBusy({ accessToken: access, ...window });
-    } catch (error) {
-      // A stored token Google no longer takes: refresh once and ask again.
-      if (
-        !(error instanceof CalendarProviderError) ||
-        error.code !== 'unauthorized' ||
-        fresh !== null
-      ) {
-        throw error;
-      }
-      fresh = await deps.provider.refresh(refreshToken);
-      busy = await deps.provider.freeBusy({ accessToken: fresh.accessToken, ...window });
-    }
     const blocks = busyBlocksOf(busy, { from: window.from.getTime(), to: window.to.getTime() });
-    const stored = await withTenant(deps.db, tenantId, async (tx) => {
-      if (fresh !== null) {
-        await storeAccessToken(
-          tx,
-          claimed,
-          sealToken(deps.tokenKey, claimed.id, 'access', fresh.accessToken),
-          fresh.expiresAt,
-        );
-      }
-      return storeCalendarRead(tx, claimed, blocks, now);
-    });
+    const stored = await withTenant(deps.db, tenantId, (tx) =>
+      storeCalendarRead(tx, claimed, blocks, now),
+    );
     return stored ? 'read' : 'skipped';
   } catch (error) {
     if (error instanceof SealedTokenError) {
@@ -418,22 +438,8 @@ async function failed(
   claimed: { id: string; generation: number },
   code: CalendarSyncError,
 ): Promise<CalendarReadOutcome> {
-  const { id } = claimed;
-  return withTenant(deps.db, tenantId, async (tx) => {
-    const moved = await recordCalendarFailure(tx, claimed, code);
-    if (moved !== undefined && moved.before !== moved.after) {
-      await appendAuditEntry(tx, {
-        actor: { kind: 'system' },
-        change: {
-          action: 'calendar.connection_changed',
-          entity: { type: 'calendar_connection', id },
-          before: { status: moved.before === 'needs_reconnect' ? 'needs_reconnect' : 'connected' },
-          after: { status: moved.after === 'needs_reconnect' ? 'needs_reconnect' : 'connected' },
-        },
-      });
-    }
-    return moved?.after === 'needs_reconnect' ? 'needs_reconnect' : 'failed';
-  });
+  const after = await recordConnectionFailure(deps, tenantId, claimed, code);
+  return after === 'needs_reconnect' ? 'needs_reconnect' : 'failed';
 }
 
 export interface CalendarPassResult {

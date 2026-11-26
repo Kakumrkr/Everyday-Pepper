@@ -179,6 +179,9 @@ services:
       # Deposits' captures, refunds and sweep (S66, ADR-0068): the api's provider.
       PAYMENTS_PROVIDER: ${PAYMENTS_PROVIDER:-sandbox}
       GOOGLE_CALENDAR_PROVIDER: ${GOOGLE_CALENDAR_PROVIDER:-sandbox}
+      # How often the calendar job looks for calendars to read and bookings to write (S70, S71);
+      # 60 s by default, faster for the journeys.
+      CALENDAR_POLL_MS: ${CALENDAR_POLL_MS:-}
       # Episodes (S31, ADR-0037): summaries of quiet conversations, with the routine model and
       # the embedding model. Off unless the key and OPENAI_MODEL_EMBEDDING are set (as for the api).
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}

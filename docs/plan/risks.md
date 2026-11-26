@@ -8,7 +8,7 @@
 | R4 | Prompt injection via notes/imports/websites/calendar | Med | High | Untrusted-data labelling, tenant-bound tools, gated external actions, injection evals | Eng |
 | R5 | Email-only reminders less effective → no-shows | High | Med | SMS in V1 (Phase 14, PCR-007) through the channel-agnostic outbox; the pilot is told "email only" until 10DLC is approved | Product |
 | R6 | No deposits in V1 — weaker no-show protection | High | Med | Deposits, card on file and fees by approval in V1 (Phase 15, PCR-007); smart deposits keep regulars unasked | Product |
-| R7 | Google Calendar sync conflicts/duplicates | Med | Med | Clear source of truth, sync tokens, idempotent upserts, reconciliation | Eng |
+| R7 | Google Calendar sync conflicts/duplicates | Med | Med | Clear source of truth, sync tokens, idempotent upserts, reconciliation. S71: Pepper is the source of truth; one event per booking (id from the booking, 409 → patch), a per-booking version so an older change never overwrites a newer one; duplicates covered by tests. Conflicts and read-back with sync tokens: S71.2 | Eng |
 | R8 | Google OAuth verification / company formation delays | Med | Med | Parked by the user (P1-6): a neutral pilot domain by Phase 13; the LLC before SMS and Stripe go live; Google verification started in Phase 10. SMS and Stripe are built in sandbox so code never waits on paperwork | User |
 | R9 | Onboarding extraction inaccurate | Med | Med | Always review before commit, fixture-based accuracy tests, manual fallback | Eng |
 | R10 | Switching resistance (owners on competitor tools) | High | High | Zero-setup + CSV import, free export, month-to-month, clear differentiators | Product |

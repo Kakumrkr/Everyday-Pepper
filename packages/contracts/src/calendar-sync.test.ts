@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   busyBlocksOf,
+  calendarEventBodyOf,
+  calendarEventIdOf,
+  calendarWriteBackoffMs,
+  GOOGLE_CALENDAR_SCOPES,
+  GoogleEventResourceSchema,
   CalendarConnectCompleteSchema,
   GoogleFreeBusyResponseSchema,
   GoogleIdTokenClaimsSchema,
@@ -123,5 +128,83 @@ describe("Google's answers", () => {
     expect(
       CalendarConnectCompleteSchema.parse({ code: 'c', state: 'A'.repeat(43) }).state,
     ).toHaveLength(43);
+  });
+});
+
+describe('Google Calendar out (S71)', () => {
+  const bookingId = '0193A1B2-C3D4-7E5F-8A9B-0C1D2E3F4A5B';
+
+  it('names one event per booking, in base32hex, the same every time (AC-X-169)', () => {
+    const id = calendarEventIdOf(bookingId);
+    expect(id).toBe('pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a5b');
+    expect(id).toMatch(/^[0-9a-v]{5,1024}$/);
+    expect(calendarEventIdOf(bookingId.toLowerCase())).toBe(id);
+    expect(() => calendarEventIdOf('not-a-uuid')).toThrow();
+  });
+
+  it('writes the service and the first name only, private (AC-X-168, D-3)', () => {
+    const body = calendarEventBodyOf({
+      bookingId,
+      serviceName: ' Skin\nfade ',
+      clientFirstName: 'Ana',
+      startsAt: new Date('2026-12-01T15:00:00Z'),
+      endsAt: new Date('2026-12-01T15:45:00Z'),
+    });
+    expect(body).toMatchObject({
+      id: calendarEventIdOf(bookingId),
+      status: 'confirmed',
+      summary: 'Skin fade · Ana',
+      start: { dateTime: '2026-12-01T15:00:00.000Z' },
+      end: { dateTime: '2026-12-01T15:45:00.000Z' },
+      visibility: 'private',
+      transparency: 'opaque',
+    });
+    expect(Object.keys(body).sort()).toEqual(
+      [
+        'description',
+        'end',
+        'extendedProperties',
+        'id',
+        'start',
+        'status',
+        'summary',
+        'transparency',
+        'visibility',
+      ].sort(),
+    );
+    expect(
+      calendarEventBodyOf({
+        bookingId,
+        serviceName: '',
+        clientFirstName: '  ',
+        startsAt: new Date(0),
+        endsAt: new Date(1),
+      }).summary,
+    ).toBe('Appointment');
+  });
+
+  it('asks for the bookings calendar alongside free/busy (AC-X-167)', () => {
+    expect(GOOGLE_CALENDAR_SCOPES).toContain(
+      'https://www.googleapis.com/auth/calendar.app.created',
+    );
+    expect(GOOGLE_CALENDAR_SCOPES).not.toContain('https://www.googleapis.com/auth/calendar');
+    expect(GOOGLE_CALENDAR_SCOPES).not.toContain('https://www.googleapis.com/auth/calendar.events');
+  });
+
+  it('backs off 1, 2, 4… minutes up to an hour', () => {
+    expect([1, 2, 3, 7, 8, 50].map(calendarWriteBackoffMs)).toEqual([
+      60_000, 120_000, 240_000, 3_600_000, 3_600_000, 3_600_000,
+    ]);
+    expect(calendarWriteBackoffMs(0)).toBe(60_000);
+  });
+
+  it('parses an event answer and refuses a bad one', () => {
+    expect(GoogleEventResourceSchema.parse({ id: 'pepperabc', status: 'confirmed', x: 1 })).toEqual(
+      {
+        id: 'pepperabc',
+        status: 'confirmed',
+      },
+    );
+    expect(GoogleEventResourceSchema.safeParse({ status: 'confirmed' }).success).toBe(false);
   });
 });

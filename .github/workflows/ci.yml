@@ -230,6 +230,7 @@ jobs:
           DEPLOYMENT_ENVIRONMENT: ci
           INSIGHTS_POLL_MS: '10000'
           DRAFTS_POLL_MS: '10000'
+          CALENDAR_POLL_MS: '10000'
           # The component gallery, for its screenshot tests (S40, e2e/tests/gallery.spec.ts).
           PEPPER_GALLERY: '1'
 

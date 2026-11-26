@@ -23,7 +23,8 @@ export async function CalendarSettings({ outcome }: { outcome: GoogleOutcome | n
       <header className="flex flex-col gap-1">
         <h1 className="m-0 type-display">Calendar</h1>
         <p className="m-0 type-body text-ink-2">
-          Your Google Calendar’s busy times keep clients from booking over your own plans.
+          Your Google Calendar keeps clients from booking over your own plans, and shows your
+          bookings.
         </p>
       </header>
       {calendar.state === 'unavailable' ? (

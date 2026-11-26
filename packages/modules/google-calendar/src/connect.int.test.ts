@@ -147,6 +147,7 @@ describe('connecting a calendar (AC-X-152)', () => {
         status: 'connected',
         syncedAt: START.toISOString(),
         connectedAt: expect.any(String) as string,
+        writesBookings: true,
       },
     });
     const blocks = await withTenant(db, tenantId, (tx) =>
@@ -159,7 +160,12 @@ describe('connecting a calendar (AC-X-152)', () => {
     const audit = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 10 }));
     expect(audit.map((a) => [a.action, a.after])).toContainEqual([
       'calendar.connected',
-      { provider: 'sandbox', staffMemberId: jo.staffMemberId, reconnected: false },
+      {
+        provider: 'sandbox',
+        staffMemberId: jo.staffMemberId,
+        reconnected: false,
+        writesBookings: true,
+      },
     ]);
   });
 
@@ -281,6 +287,7 @@ describe('the Team list (S70.2, AC-X-165)', () => {
       status: 'connected',
       syncedAt: START.toISOString(),
       connectedAt: expect.any(String) as string,
+      writesBookings: true,
     });
     expect(JSON.stringify(team)).not.toContain(SANDBOX_ACCOUNT_EMAIL);
     // A colleague reads the same list; the limit holds.
@@ -337,8 +344,18 @@ describe('reconnecting and disconnecting (AC-X-155, AC-X-157)', () => {
     expect(sandbox.revokes).toHaveLength(1);
     const audit = await withTenant(db, tenantId, (tx) => listAuditEntries(tx, { limit: 10 }));
     expect(audit.filter((a) => a.action === 'calendar.connected').map((a) => a.after)).toEqual([
-      { provider: 'sandbox', staffMemberId: jo.staffMemberId, reconnected: true },
-      { provider: 'sandbox', staffMemberId: jo.staffMemberId, reconnected: false },
+      {
+        provider: 'sandbox',
+        staffMemberId: jo.staffMemberId,
+        reconnected: true,
+        writesBookings: true,
+      },
+      {
+        provider: 'sandbox',
+        staffMemberId: jo.staffMemberId,
+        reconnected: false,
+        writesBookings: true,
+      },
     ]);
   });
 

@@ -21,19 +21,31 @@ export const CalendarSyncErrorSchema = z.enum([
   'rate_limited',
   'unavailable',
   'not_found',
+  /** Google refused the call for a missing permission (a 403 that isn't a rate limit, S71). */
+  'forbidden',
   'bad_response',
   /** The sealed token can't be opened (the key changed): only a reconnect helps. */
   'token_unreadable',
 ]);
 export type CalendarSyncError = z.infer<typeof CalendarSyncErrorSchema>;
 
-/** The only Google scopes Pepper asks for in S70: who the account is, and free/busy times. */
+export const GOOGLE_FREEBUSY_SCOPE = 'https://www.googleapis.com/auth/calendar.freebusy';
+/**
+ * A calendar Pepper makes in the account and the events on it (S71, D-2): never the member's
+ * other calendars. Optional on Google's page: without it the connection reads busy times only.
+ */
+export const GOOGLE_EVENTS_SCOPE = 'https://www.googleapis.com/auth/calendar.app.created';
+
+/**
+ * The only Google scopes Pepper asks for: who the account is, free/busy times (S70) and the
+ * "Pepper bookings" calendar (S71), in one consent.
+ */
 export const GOOGLE_CALENDAR_SCOPES = [
   'openid',
   'email',
-  'https://www.googleapis.com/auth/calendar.freebusy',
+  GOOGLE_FREEBUSY_SCOPE,
+  GOOGLE_EVENTS_SCOPE,
 ] as const;
-export const GOOGLE_FREEBUSY_SCOPE = 'https://www.googleapis.com/auth/calendar.freebusy';
 
 /** How far ahead busy times are read (D-4): today and the next 60 days. */
 export const CALENDAR_SYNC_DAYS = 60;
@@ -43,6 +55,65 @@ export const CALENDAR_SYNC_EVERY_MS = 5 * 60_000;
 export const CALENDAR_CONNECT_TTL_MS = 10 * 60_000;
 /** At most this many busy times are kept from one read, the soonest (a 15-minute grid's worth). */
 export const MAX_BUSY_BLOCKS_PER_READ = 6000;
+
+// ---- Google Calendar out (S71, ADR-0069 §10) ----
+
+/** The calendar Pepper makes in the staff member's account and writes bookings into (D-2). */
+export const PEPPER_CALENDAR_NAME = 'Pepper bookings';
+/** On the grant, bookings starting in the next this many days are written (D-4). */
+export const CALENDAR_WRITE_BACKFILL_DAYS = 60;
+/** How long one write pass holds a booking's row: no other worker writes it meanwhile. */
+export const CALENDAR_WRITE_LEASE_MS = 2 * 60_000;
+/** The longest wait between two tries of a failing write. */
+export const CALENDAR_WRITE_MAX_BACKOFF_MS = 60 * 60_000;
+
+/** When a failing write is tried again: 1, 2, 4… minutes after its `attempts`-th try, at most an hour. */
+export function calendarWriteBackoffMs(attempts: number): number {
+  const exponent = Math.min(Math.max(attempts, 1) - 1, 10);
+  return Math.min(60_000 * 2 ** exponent, CALENDAR_WRITE_MAX_BACKOFF_MS);
+}
+
+/**
+ * The Google event id of a booking (AC-X-169): base32hex (`0-9a-v`), from the booking's UUID, so
+ * every write of one booking names the same event and a retry can never make a second.
+ */
+export function calendarEventIdOf(bookingId: string): string {
+  const hex = z.uuid().parse(bookingId).toLowerCase().replaceAll('-', '');
+  return `pepper${hex}`;
+}
+
+/** What a booking's event says (D-3): the service and the client's first name, never contact details. */
+export interface BookingEventFacts {
+  bookingId: string;
+  serviceName: string;
+  /** The client's first name only; empty when unknown. */
+  clientFirstName: string;
+  startsAt: Date;
+  endsAt: Date;
+}
+
+/** The body Pepper sends for a booking's event (events.insert/patch), private and opaque. */
+export function calendarEventBodyOf(facts: BookingEventFacts) {
+  const service = oneLine(facts.serviceName, 120) || 'Appointment';
+  const client = oneLine(facts.clientFirstName, 60);
+  return {
+    id: calendarEventIdOf(facts.bookingId),
+    // A booking deleted in Google and written again comes back (its id is kept, cancelled).
+    status: 'confirmed' as const,
+    summary: client === '' ? service : `${service} · ${client}`,
+    description: 'Booked in Pepper. Change it in Pepper: changes made here aren’t kept.',
+    start: { dateTime: facts.startsAt.toISOString() },
+    end: { dateTime: facts.endsAt.toISOString() },
+    visibility: 'private' as const,
+    transparency: 'opaque' as const,
+    extendedProperties: { private: { pepperBookingId: facts.bookingId.toLowerCase() } },
+  };
+}
+export type CalendarEventBody = ReturnType<typeof calendarEventBodyOf>;
+
+function oneLine(text: string, max: number): string {
+  return text.replace(/\s+/g, ' ').trim().slice(0, max);
+}
 
 // ---- Google's answers (developers.google.com, read 2026-11-25) ----
 
@@ -103,6 +174,17 @@ export const GoogleFreeBusyResponseSchema = z.object({
 });
 export type GoogleFreeBusyResponse = z.infer<typeof GoogleFreeBusyResponseSchema>;
 
+/** calendars.insert's answer: Pepper keeps only the new calendar's id. */
+export const GoogleCalendarResourceSchema = z.object({
+  id: z.string().min(1).max(1024),
+});
+
+/** events.insert/patch's answer: the event's id (Pepper's own) and its status. */
+export const GoogleEventResourceSchema = z.object({
+  id: z.string().min(1).max(1024),
+  status: z.enum(['confirmed', 'tentative', 'cancelled']).optional(),
+});
+
 /** Calendar's 403 reasons that mean a rate limit, like its 429. */
 export const GoogleRateLimitReasonSchema = z.enum([
   'rateLimitExceeded',
@@ -133,6 +215,8 @@ export const CalendarConnectionSchema = z.object({
   /** The last read of the busy times that worked; `null` before the first. */
   syncedAt: UtcDateTimeSchema.nullable(),
   connectedAt: UtcDateTimeSchema,
+  /** Google gave the "Pepper bookings" permission: bookings are written there (S71, AC-X-167). */
+  writesBookings: z.boolean(),
 });
 export type CalendarConnection = z.infer<typeof CalendarConnectionSchema>;
 
@@ -174,6 +258,16 @@ export const CalendarConnectCompleteSchema = z
   })
   .strict();
 export type CalendarConnectComplete = z.infer<typeof CalendarConnectCompleteSchema>;
+
+/**
+ * `GET /v1/calendar/bookings/:id` (S71 top-up, AC-X-173): whether a booking is in Google
+ * Calendar: `written`, `pending` (waiting for the worker or a retry), `waiting` (until its
+ * staff member reconnects their calendar), or `none` (their calendar doesn't take bookings).
+ */
+export const BookingCalendarStateSchema = z.object({
+  state: z.enum(['written', 'pending', 'waiting', 'none']),
+});
+export type BookingCalendarState = z.infer<typeof BookingCalendarStateSchema>;
 
 /** One busy time from a staff member's outside calendar: when, never what (ADR-0069 §4). */
 export const OutsideBusyTimeSchema = z.object({

@@ -10,6 +10,7 @@ import {
   bookingFunnelEvents,
   businessPhotos,
   calendarBusyBlocks,
+  calendarEventSyncs,
   calendarConnections,
   calendarConnectStates,
   emailSuppressions,
@@ -255,6 +256,17 @@ describe('Google Calendar (S70, ADR-0069)', () => {
     for (const table of [calendarConnectStates, calendarBusyBlocks]) {
       expect(getTableConfig(table).policies.map((p) => p.name)).toEqual(['tenant_isolation']);
     }
+  });
+
+  it("keeps a booking's Google Calendar write as ids and versions, scanned by the sync only (S71)", () => {
+    expect(getTableConfig(calendarEventSyncs).policies.map((p) => [p.name, p.for])).toEqual([
+      ['tenant_isolation', 'all'],
+      ['job_scan', 'select'],
+    ]);
+    // No foreign key to the booking: a removed booking still has its event to remove.
+    expect(foreignKeys(calendarEventSyncs)).toEqual([
+      { from: ['tenant_id'], to: 'tenants(id)', onDelete: 'cascade' },
+    ]);
   });
 });
 

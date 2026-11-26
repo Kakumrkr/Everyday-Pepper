@@ -160,6 +160,8 @@ export interface ConnectionTokens {
   createdBy: string;
   /** Now: when it was connected (a reconnect moves it). */
   connectedAt: Date;
+  /** Google gave the "Pepper bookings" permission this time (S71, AC-X-167). */
+  writesBookings: boolean;
 }
 
 /**
@@ -185,11 +187,18 @@ export async function saveCalendarConnection(
     attemptedAt: null,
     connectedAt: input.connectedAt,
     createdBy: Id.parse(input.createdBy),
+    writesBookings: input.writesBookings,
   };
   const [row] = existing
     ? await tx
         .update(calendarConnections)
-        .set({ ...values, generation: sql`${calendarConnections.generation} + 1` })
+        .set({
+          ...values,
+          generation: sql`${calendarConnections.generation} + 1`,
+          // Another Google account has another "Pepper bookings" calendar (S71): made again.
+          bookingsCalendarId: sql`CASE WHEN ${calendarConnections.accountEmail} = ${input.accountEmail}
+            THEN ${calendarConnections.bookingsCalendarId} END`,
+        })
         .where(
           and(
             eq(calendarConnections.id, Id.parse(input.id)),

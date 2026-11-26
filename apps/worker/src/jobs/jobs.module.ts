@@ -17,6 +17,7 @@ import {
 import {
   calendarTokenKeyFrom,
   runDueCalendarReads,
+  runDueCalendarWrites,
   type CalendarProvider,
 } from '@pepper/google-calendar';
 import {
@@ -41,7 +42,8 @@ import { Periodic } from './periodic.js';
 export interface JobsOptions {
   /**
    * The calendar job (S70, ADR-0069 §7): staff members' Google busy times read every 5 minutes,
-   * each due calendar looked for every `pollMs`; absent or `null`: Google Calendar is off.
+   * and (S71, §10) the bookings queued for Google Calendar written; each due calendar and booking
+   * looked for every `pollMs`; absent or `null`: Google Calendar is off.
    */
   calendar?: { provider: CalendarProvider; pollMs: number } | null;
   /** Seals the reminder emails it queues (`outboxKeyFrom(OUTBOX_SECRET)`). */
@@ -298,17 +300,28 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
             'Calendar job',
             calendar.pollMs,
             async () => {
-              const result = await runDueCalendarReads({
+              const deps = {
                 db,
                 clock,
                 provider: calendar.provider,
                 tokenKey: calendarTokenKeyFrom(options.key),
-              });
-              // Counts only: never a calendar, an account or a busy time.
+              };
+              const result = await runDueCalendarReads(deps);
+              // Counts only: never a calendar, an account, a busy time or a booking.
               if (result.read > 0) this.logger.log(`Calendar: ${String(result.read)} read`);
               if (result.failed > 0 || result.needsReconnect > 0) {
                 this.logger.warn(
                   `Calendar: ${String(result.failed)} failed, ${String(result.needsReconnect)} need reconnecting`,
+                );
+              }
+              // Bookings out (S71, ADR-0069 §10): each queued booking written within a pass.
+              const writes = await runDueCalendarWrites(deps);
+              if (writes.written > 0) {
+                this.logger.log(`Calendar: ${String(writes.written)} bookings written`);
+              }
+              if (writes.failed > 0 || writes.waiting > 0) {
+                this.logger.warn(
+                  `Calendar: ${String(writes.failed)} writes failed, ${String(writes.waiting)} waiting for a reconnect`,
                 );
               }
             },

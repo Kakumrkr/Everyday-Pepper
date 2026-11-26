@@ -1,7 +1,10 @@
 import type { CalendarConnection, CalendarConnectionAnswer } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  bookingCalendarLine,
+  bookingCalendarPath,
   calendarSummary,
+  disconnectedNote,
   calendarWords,
   finishGoogleReturn,
   googleArrival,
@@ -25,6 +28,7 @@ function connection(over: Partial<CalendarConnection> = {}): CalendarConnection 
     status: 'connected',
     syncedAt: '2026-11-25T14:57:00.000Z' as CalendarConnection['syncedAt'],
     connectedAt: '2026-11-20T10:00:00.000Z' as CalendarConnection['connectedAt'],
+    writesBookings: true,
     ...over,
   };
 }
@@ -102,10 +106,68 @@ describe('calendarWords (AC-X-160)', () => {
       answer(null, false),
       answer(connection()),
       answer(connection({ status: 'needs_reconnect', syncedAt: null })),
+      answer(connection({ writesBookings: false })),
     ]) {
       const text = JSON.stringify(calendarWords(a, NY, NOW));
       expect(text).not.toMatch(/token|sync|oauth|invalid_grant|tenant|needs_reconnect/i);
     }
+  });
+});
+
+describe('calendarWords for bookings in Google Calendar (S71, AC-X-167, AC-X-172)', () => {
+  it('says where bookings go, and the disconnect deletes that calendar', () => {
+    const words = calendarWords(answer(connection()), NY, NOW);
+    expect(words.lines[2]).toBe('Your bookings are added to “Pepper bookings” in Google Calendar.');
+    expect(words.disconnectNote).toContain('delete the “Pepper bookings” calendar');
+    expect(calendarWords(answer(null), NY, NOW).lines.join(' ')).toContain(
+      'adds your bookings to a calendar of its own, “Pepper bookings”',
+    );
+  });
+
+  it('busy times only: says bookings aren’t added and offers to add them', () => {
+    const words = calendarWords(answer(connection({ writesBookings: false })), NY, NOW);
+    expect(words).toMatchObject({
+      badge: 'Connected',
+      action: 'Add bookings to Google',
+      disconnect: true,
+    });
+    expect(words.lines[2]).toBe(
+      'Your bookings aren’t added to Google Calendar: Google wasn’t given that permission.',
+    );
+    expect(words.disconnectNote).not.toContain('Pepper bookings');
+  });
+
+  it('needs reconnecting: bookings wait for it', () => {
+    const words = calendarWords(answer(connection({ status: 'needs_reconnect' })), NY, NOW);
+    expect(words.lines[2]).toBe(
+      'New and changed bookings reach Google Calendar once you reconnect.',
+    );
+    const busyOnly = calendarWords(
+      answer(connection({ status: 'needs_reconnect', writesBookings: false })),
+      NY,
+      NOW,
+    );
+    expect(busyOnly.lines).toHaveLength(2);
+  });
+});
+
+describe('disconnectedNote (AC-X-172)', () => {
+  it('says the bookings calendar went too, when there was one', () => {
+    expect(disconnectedNote(true)).toContain('Google was asked to delete “Pepper bookings”');
+    expect(disconnectedNote(false)).toBe(
+      'Disconnected. Your Google busy times no longer block bookings.',
+    );
+  });
+});
+
+describe('bookingCalendarLine (S71 top-up, AC-X-173)', () => {
+  it('says the booking is in Google Calendar, on its way, or nothing', () => {
+    expect(bookingCalendarLine('written')).toBe('Also in Google Calendar');
+    expect(bookingCalendarLine('pending')).toBe('Adding to Google Calendar…');
+    expect(bookingCalendarLine('waiting')).toBe('Waiting for Google Calendar to be reconnected');
+    expect(bookingCalendarLine('none')).toBeNull();
+    expect(bookingCalendarLine(null)).toBeNull();
+    expect(bookingCalendarPath('a/b')).toBe('/v1/calendar/bookings/a%2Fb');
   });
 });
 
@@ -131,6 +193,7 @@ describe('teamCalendarLine (AC-X-164)', () => {
       status: c.status,
       syncedAt: c.syncedAt,
       connectedAt: c.connectedAt,
+      writesBookings: c.writesBookings,
     };
     expect(teamCalendarLine(shown, NY, NOW)).toEqual({
       text: 'Google Calendar · read 3 min ago',

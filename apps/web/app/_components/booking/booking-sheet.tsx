@@ -1,9 +1,11 @@
 'use client';
 
 import {
+  BookingCalendarStateSchema,
   BookingDepositAnswerSchema,
   BookingSchema,
   type AvailableSlot,
+  type BookingCalendarState,
   type BookingDeposit,
   type BookingChange,
   type BookingStatus,
@@ -25,6 +27,7 @@ import {
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
 import { fetchJson, sendJson } from '../../../lib/client-api';
+import { bookingCalendarLine, bookingCalendarPath } from '../../../lib/calendar-connect';
 import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
@@ -131,6 +134,12 @@ function BookingDetails({
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
   const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
   const deposit = teamDepositLine(depositRead, timeZone);
+  const inGoogle = bookingCalendarLine(
+    useBookingCalendarState(
+      booking.id,
+      `${booking.status} ${booking.startsAt} ${booking.staffMemberId}`,
+    ),
+  );
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -204,6 +213,18 @@ function BookingDetails({
                 value: (
                   <span className="tabular-nums" data-testid="booking-deposit">
                     {deposit}
+                  </span>
+                ),
+              },
+            ]),
+        ...(inGoogle === null
+          ? []
+          : [
+              {
+                label: 'Calendar',
+                value: (
+                  <span className="text-ink-2" data-testid="booking-google-calendar">
+                    {inGoogle}
                   </span>
                 ),
               },
@@ -480,4 +501,45 @@ function useBookingDeposit(bookingId: string, reads: boolean): BookingDeposit | 
     };
   }, [bookingId, reads]);
   return deposit;
+}
+
+/** How often an open sheet asks again while the booking is on its way to Google, and how many times. */
+const CALENDAR_STATE_POLL_MS = 10_000;
+const CALENDAR_STATE_POLLS = 12;
+
+/**
+ * Whether the booking is in Google Calendar (S71 top-up, AC-X-173), read when the sheet opens and
+ * again after the booking changes (`version`: its status, time and staff member), and every 10 s
+ * while it is on its way (two minutes at most); `null` while loading, with Google Calendar off
+ * here, or when it can't be read (the sheet then says nothing about it).
+ */
+function useBookingCalendarState(
+  bookingId: string,
+  version: string,
+): BookingCalendarState['state'] | null {
+  const [state, setState] = useState<BookingCalendarState['state'] | null>(null);
+  useEffect(() => {
+    let current = true;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    // Another booking or a change: never the last one's answer meanwhile.
+    setState(null);
+    const read = (polls: number): void => {
+      void fetchJson(bookingCalendarPath(bookingId), BookingCalendarStateSchema).then((answer) => {
+        if (!current) return;
+        const next = answer.ok ? answer.data.state : null;
+        setState(next);
+        if (next === 'pending' && polls > 0) {
+          timer = setTimeout(() => {
+            read(polls - 1);
+          }, CALENDAR_STATE_POLL_MS);
+        }
+      });
+    };
+    read(CALENDAR_STATE_POLLS);
+    return () => {
+      current = false;
+      clearTimeout(timer);
+    };
+  }, [bookingId, version]);
+  return state;
 }

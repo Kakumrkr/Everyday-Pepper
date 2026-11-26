@@ -4035,6 +4035,13 @@ export const calendarConnections = pgTable(
     attemptedAt: timestamp('attempted_at', { withTimezone: true }),
     /** Why the last try failed (`rate_limited`, `unavailable`, `invalid_grant`…); `NULL` when it worked. */
     lastError: text('last_error'),
+    /**
+     * Google gave the "Pepper bookings" permission (`calendar.app.created`, S71): the staff
+     * member's bookings are written there. Set by each connect from what Google granted.
+     */
+    writesBookings: boolean('writes_bookings').notNull().default(false),
+    /** The id of the "Pepper bookings" calendar Pepper made in the account; `NULL` until made. */
+    bookingsCalendarId: text('bookings_calendar_id'),
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -4069,11 +4076,71 @@ export const calendarConnections = pgTable(
       'calendar_connections_access_token_pair',
       sql`(${table.accessTokenSealed} IS NULL) = (${table.accessTokenExpiresAt} IS NULL)`,
     ),
+    check(
+      'calendar_connections_bookings_calendar_length',
+      sql`char_length(${table.bookingsCalendarId}) BETWEEN 1 AND 1024`,
+    ),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('calendar'),
   ],
 );
 export type CalendarConnectionRow = typeof calendarConnections.$inferSelect;
+
+/**
+ * A booking's place in Google Calendar (S71, ADR-0069 §10): one row per booking whose staff
+ * member's calendar takes bookings, kept by a trigger on `bookings` (migration 0086) on every
+ * write, whatever the path. `version` rises with each change; the worker writes the booking as
+ * it is then and records the version it wrote, so the row is due while the two differ. Where
+ * the event now is (`event_connection_id`, `event_calendar_id`) lets a change of staff member or a
+ * cancel remove it. No client data and no token: the worker reads the booking when it writes. No
+ * foreign key to the booking: a removed booking still has its event to remove.
+ */
+export const calendarEventSyncs = pgTable(
+  'calendar_event_syncs',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    bookingId: uuid('booking_id').notNull(),
+    version: integer('version').notNull().default(1),
+    /** The version last written to Google; `NULL` before the first write. */
+    syncedVersion: integer('synced_version'),
+    /** The connection whose calendar holds the event now; `NULL`: in no calendar. */
+    eventConnectionId: uuid('event_connection_id'),
+    eventCalendarId: text('event_calendar_id'),
+    /** `NULL`: due now; else the next try after a failure. */
+    dueAt: timestamp('due_at', { withTimezone: true }),
+    /** A worker is writing it until then. */
+    leasedUntil: timestamp('leased_until', { withTimezone: true }),
+    attempts: integer('attempts').notNull().default(0),
+    lastError: text('last_error'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('calendar_event_syncs_booking_unique').on(table.tenantId, table.bookingId),
+    index('calendar_event_syncs_due_idx')
+      .on(table.dueAt)
+      .where(sql`${table.syncedVersion} IS DISTINCT FROM ${table.version}`),
+    index('calendar_event_syncs_connection_idx').on(table.tenantId, table.eventConnectionId),
+    check('calendar_event_syncs_version_range', sql`${table.version} >= 1`),
+    check('calendar_event_syncs_attempts_range', sql`${table.attempts} >= 0`),
+    check('calendar_event_syncs_error_format', sql`${table.lastError} ~ '^[a-z_]{1,64}$'`),
+    check(
+      'calendar_event_syncs_event_pair',
+      sql`(${table.eventConnectionId} IS NULL) = (${table.eventCalendarId} IS NULL)`,
+    ),
+    check(
+      'calendar_event_syncs_calendar_length',
+      sql`char_length(${table.eventCalendarId}) BETWEEN 1 AND 1024`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+    jobScan('calendar'),
+  ],
+);
+export type CalendarEventSyncRow = typeof calendarEventSyncs.$inferSelect;
 
 /**
  * One "Connect Google Calendar" in flight (S70, ADR-0069 §3): the hash of the `state` sent to

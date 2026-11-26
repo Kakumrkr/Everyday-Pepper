@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import {
   CalendarConnectCompleteSchema,
+  type BookingCalendarState,
   type CalendarConnection,
   type CalendarConnectionAnswer,
   type TeamCalendarConnection,
@@ -16,6 +17,32 @@ export const CALENDAR_GOOGLE_PATH = '/v1/calendar/google';
 export const CALENDAR_CONNECT_PATH = '/v1/calendar/google/connect';
 export const CALENDAR_CALLBACK_PATH = '/v1/calendar/google/callback';
 export const CALENDAR_CONNECTIONS_PATH = '/v1/calendar/connections';
+
+/** A booking's place in Google Calendar (S71 top-up, AC-X-173). */
+export function bookingCalendarPath(bookingId: string): string {
+  return `/v1/calendar/bookings/${encodeURIComponent(bookingId)}`;
+}
+
+/**
+ * The booking sheet's Google Calendar line (AC-X-173): said once the booking is written there,
+ * or while it is on its way; nothing when its staff member's calendar doesn't take bookings.
+ */
+export function bookingCalendarLine(state: BookingCalendarState['state'] | null): string | null {
+  if (state === 'written') return 'Also in Google Calendar';
+  if (state === 'pending') return 'Adding to Google Calendar…';
+  if (state === 'waiting') return 'Waiting for Google Calendar to be reconnected';
+  return null;
+}
+
+/** What More → Calendar says once disconnected (AC-X-172): what went with it. */
+export function disconnectedNote(writesBookings: boolean): string {
+  return writesBookings
+    ? `Disconnected. Your Google busy times no longer block bookings, and Google was asked to delete ${BOOKINGS_CALENDAR}.`
+    : 'Disconnected. Your Google busy times no longer block bookings.';
+}
+
+/** Where Pepper writes bookings in the member's Google account (S71, D-2). */
+const BOOKINGS_CALENDAR = '“Pepper bookings”';
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -50,10 +77,16 @@ export interface CalendarWords {
   tone: BadgeTone;
   lines: string[];
   /** The main action, or `null` when there is none (connected, or nothing to connect for). */
-  action: 'Connect Google Calendar' | 'Reconnect Google Calendar' | null;
+  action: 'Connect Google Calendar' | 'Reconnect Google Calendar' | 'Add bookings to Google' | null;
   /** Whether Disconnect is offered. */
   disconnect: boolean;
+  /** What the Disconnect confirm says will happen (AC-X-172). */
+  disconnectNote: string;
 }
+
+const DISCONNECT_BUSY =
+  'Your Google busy times will stop blocking bookings, and Google will be asked to forget Pepper. You can connect again any time.';
+const DISCONNECT_BOOKINGS = `Your Google busy times will stop blocking bookings, Google will be asked to delete the ${BOOKINGS_CALENDAR} calendar and to forget Pepper. You can connect again any time.`;
 
 export function calendarWords(
   answer: CalendarConnectionAnswer,
@@ -68,10 +101,11 @@ export function calendarWords(
           tone: 'neutral',
           lines: [
             'Connect your Google Calendar and Pepper won’t book clients over your own plans.',
-            'Pepper sees only when you’re busy, never what the event is.',
+            `Pepper sees only when you’re busy, never what the event is, and adds your bookings to a calendar of its own, ${BOOKINGS_CALENDAR}.`,
           ],
           action: 'Connect Google Calendar',
           disconnect: false,
+          disconnectNote: DISCONNECT_BUSY,
         }
       : {
           badge: 'Not linked',
@@ -82,8 +116,10 @@ export function calendarWords(
           ],
           action: null,
           disconnect: false,
+          disconnectNote: DISCONNECT_BUSY,
         };
   }
+  const disconnectNote = connection.writesBookings ? DISCONNECT_BOOKINGS : DISCONNECT_BUSY;
   if (connection.status === 'needs_reconnect') {
     return {
       badge: 'Needs reconnecting',
@@ -91,21 +127,39 @@ export function calendarWords(
       lines: [
         `Google stopped letting Pepper read ${connection.accountEmail}.`,
         'Until you reconnect, Pepper keeps the busy times it last read, so nothing gets booked over them.',
+        ...(connection.writesBookings
+          ? ['New and changed bookings reach Google Calendar once you reconnect.']
+          : []),
       ],
       action: 'Reconnect Google Calendar',
       disconnect: true,
+      disconnectNote,
     };
   }
-  return {
-    badge: 'Connected',
-    tone: 'ok',
-    lines: [
-      `${connection.accountEmail} · ${capitalized(readLine(connection, timeZone, now))}`,
-      'Pepper checks your busy times every 5 minutes and won’t book clients over them.',
-    ],
-    action: null,
-    disconnect: true,
-  };
+  const read = [
+    `${connection.accountEmail} · ${capitalized(readLine(connection, timeZone, now))}`,
+    'Pepper checks your busy times every 5 minutes and won’t book clients over them.',
+  ];
+  return connection.writesBookings
+    ? {
+        badge: 'Connected',
+        tone: 'ok',
+        lines: [...read, `Your bookings are added to ${BOOKINGS_CALENDAR} in Google Calendar.`],
+        action: null,
+        disconnect: true,
+        disconnectNote,
+      }
+    : {
+        badge: 'Connected',
+        tone: 'ok',
+        lines: [
+          ...read,
+          'Your bookings aren’t added to Google Calendar: Google wasn’t given that permission.',
+        ],
+        action: 'Add bookings to Google',
+        disconnect: true,
+        disconnectNote,
+      };
 }
 
 /** The More row's line for a member with nothing connected. */
