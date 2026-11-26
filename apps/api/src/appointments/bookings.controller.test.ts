@@ -10,6 +10,10 @@ import {
   AvailabilityResponseSchema,
   AvailableSlotSchema,
   BookingIdSchema,
+  BookingSeriesIdSchema,
+  BookingSeriesPreviewSchema,
+  BookingSeriesResultSchema,
+  BookingSeriesSchema,
   BookingsResponseSchema,
   BusyResponseSchema,
   ClientIdSchema,
@@ -81,6 +85,39 @@ const SLOT = AvailableSlotSchema.parse({
   startsAt: '2026-11-03T20:15:00.000Z',
   endsAt: '2026-11-03T21:15:00.000Z',
 });
+const SERIES_ID = BookingSeriesIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f70819d');
+const SERIES_BOOKING: Booking = { ...BOOKING, seriesId: SERIES_ID };
+const CANCELLED: Booking = { ...SERIES_BOOKING, status: 'cancelled' };
+const PREVIEW = BookingSeriesPreviewSchema.parse({
+  visits: [
+    {
+      startsAt: BOOKING.startsAt,
+      endsAt: BOOKING.endsAt,
+      free: true,
+      tooFarAhead: false,
+      alternatives: [],
+    },
+    {
+      startsAt: '2026-11-10T15:00:00.000Z',
+      endsAt: '2026-11-10T16:00:00.000Z',
+      free: false,
+      tooFarAhead: false,
+      alternatives: [SLOT],
+    },
+  ],
+  maximumAdvanceDays: 90,
+});
+const SERIES_RESULT = BookingSeriesResultSchema.parse({
+  seriesId: SERIES_ID,
+  everyWeeks: 1,
+  bookings: [SERIES_BOOKING],
+  skipped: [{ startsAt: '2026-11-10T15:00:00.000Z', alternatives: [SLOT] }],
+});
+const SERIES = BookingSeriesSchema.parse({
+  id: SERIES_ID,
+  everyWeeks: 1,
+  bookings: [SERIES_BOOKING],
+});
 const WINDOWS = [{ date: '2026-11-05', start: '09:00', end: '12:00' }];
 const ENTRY: WaitlistEntry = {
   id: ENTRY_ID,
@@ -122,6 +159,10 @@ const bookings = {
   addToWaitlist: vi.fn((): Promise<WaitlistEntry> => Promise.resolve(ENTRY)),
   changeWaitlistEntry: vi.fn((): Promise<WaitlistEntry> => Promise.resolve(ENTRY)),
   waitlistOffers: vi.fn(() => Promise.resolve([])),
+  previewSeries: vi.fn(() => Promise.resolve(PREVIEW)),
+  createSeries: vi.fn(() => Promise.resolve(SERIES_RESULT)),
+  series: vi.fn(() => Promise.resolve(SERIES)),
+  cancelFollowing: vi.fn(() => Promise.resolve({ bookings: [CANCELLED] })),
 };
 
 @Global()
@@ -380,6 +421,86 @@ describe('booking', () => {
     expect(response.status).toBe(403);
     expect(code(response.body)).toBe('forbidden_origin');
     expect(bookings.changeBooking).not.toHaveBeenCalled();
+  });
+});
+
+describe('recurring appointments (S72)', () => {
+  const previewBody = {
+    serviceId: SERVICE_ID,
+    staffMemberId: STAFF_ID,
+    startsAt: newBooking.startsAt,
+    repeat: { everyWeeks: 1, count: 2 },
+  };
+  const series = {
+    clientId: CLIENT_ID,
+    serviceId: SERVICE_ID,
+    staffMemberId: STAFF_ID,
+    everyWeeks: 1,
+    startsAts: ['2026-11-03T15:00:00.000Z', '2026-11-10T15:00:00.000Z'],
+  };
+
+  it('previews a repeat (200, nothing booked) and books a series (201) (AC-X-182, AC-X-183)', async () => {
+    expect(
+      (await send('post', '/v1/bookings/series/preview', previewBody).expect(200)).body,
+    ).toEqual(PREVIEW);
+    expect(bookings.previewSeries).toHaveBeenCalledWith(context(), previewBody);
+    expect((await send('post', '/v1/bookings/series', series).expect(201)).body).toEqual(
+      SERIES_RESULT,
+    );
+    expect(bookings.createSeries).toHaveBeenCalledWith(context(), {
+      ...series,
+      notifyClient: true,
+    });
+  });
+
+  it('refuses an override, an unknown field, a rule out of range or dates out of order (400)', async () => {
+    for (const body of [
+      { ...series, override: true },
+      { ...series, startsAts: [...series.startsAts].reverse() },
+      { ...series, everyWeeks: 5 },
+    ]) {
+      await send('post', '/v1/bookings/series', body).expect(400);
+    }
+    await send('post', '/v1/bookings/series/preview', {
+      ...previewBody,
+      repeat: { everyWeeks: 1, count: 27 },
+    }).expect(400);
+    expect(bookings.createSeries).not.toHaveBeenCalled();
+    expect(bookings.previewSeries).not.toHaveBeenCalled();
+  });
+
+  it('409 when no date is free, 403 when staff book a colleague (AC-X-184)', async () => {
+    bookings.createSeries.mockRejectedValueOnce(new SlotUnavailableError([SLOT]));
+    const refused = await send('post', '/v1/bookings/series', series).expect(409);
+    expect(SlotUnavailableSchema.parse(refused.body).alternatives).toEqual([SLOT]);
+    role = 'staff';
+    bookings.createSeries.mockRejectedValueOnce(new ForbiddenError('bookings.manage'));
+    expect(code((await send('post', '/v1/bookings/series', series).expect(403)).body)).toBe(
+      'forbidden',
+    );
+  });
+
+  it('reads a series and cancels this visit and the following ones (AC-X-186)', async () => {
+    expect((await get(`/v1/bookings/series/${SERIES_ID}`).expect(200)).body).toEqual(SERIES);
+    expect(bookings.series).toHaveBeenCalledWith(context(), SERIES_ID);
+    bookings.series.mockRejectedValueOnce(new BookingNotFoundError());
+    expect(code((await get(`/v1/bookings/series/${SERIES_ID}`).expect(404)).body)).toBe(
+      'booking_not_found',
+    );
+    await get('/v1/bookings/series/not-a-uuid').expect(400);
+    expect(
+      (await send('post', `/v1/bookings/${BOOKING_ID}/cancel-following`, {}).expect(200)).body,
+    ).toEqual({ bookings: [CANCELLED] });
+    expect(bookings.cancelFollowing).toHaveBeenCalledWith(context(), BOOKING_ID, {
+      notifyClient: true,
+    });
+    await send('post', `/v1/bookings/${BOOKING_ID}/cancel-following`, { scope: 'all' }).expect(400);
+  });
+
+  it('staff reach the series routes like any booking route', async () => {
+    role = 'staff';
+    await get(`/v1/bookings/series/${SERIES_ID}`).expect(200);
+    await send('post', '/v1/bookings/series/preview', previewBody).expect(200);
   });
 });
 

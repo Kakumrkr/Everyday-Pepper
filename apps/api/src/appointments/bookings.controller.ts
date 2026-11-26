@@ -3,7 +3,11 @@ import {
   BookingChangeSchema,
   BookingIdSchema,
   BookingInputSchema,
+  BookingSeriesIdSchema,
+  BookingSeriesInputSchema,
+  BookingSeriesPreviewInputSchema,
   BookingsQuerySchema,
+  CancelFollowingInputSchema,
   BusyQuerySchema,
   MAX_LIST_ITEMS,
   WaitlistChangeSchema,
@@ -13,14 +17,28 @@ import {
   WalkInBookingInputSchema,
   type AvailabilityResponse,
   type Booking,
+  type BookingSeries,
+  type BookingSeriesPreview,
+  type BookingSeriesResult,
   type BookingsResponse,
+  type CancelFollowingResult,
   type BusyResponse,
   type WaitlistEntry,
   type WaitlistOffersResponse,
   type WaitlistResponse,
 } from '@pepper/contracts';
 import type { TenantContext } from '@pepper/core';
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { z } from 'zod';
 import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
 import { answering } from '../http/domain-errors.js';
@@ -29,6 +47,7 @@ import { BookingsService } from './bookings.service.js';
 
 const BookingParamsSchema = z.object({ bookingId: BookingIdSchema });
 const WaitlistParamsSchema = z.object({ entryId: WaitlistEntryIdSchema });
+const SeriesParamsSchema = z.object({ seriesId: BookingSeriesIdSchema });
 
 /**
  * Bookings, the team's busy times, availability and the waitlist of the active business
@@ -89,6 +108,62 @@ export class BookingsController {
   createWalkIn(@CurrentTenant() tenant: TenantContext, @Body() body: unknown): Promise<Booking> {
     const input = parseBody(WalkInBookingInputSchema, body);
     return answering(() => this.bookings.createWalkInBooking(tenant, input));
+  }
+
+  /**
+   * A repeat's dates, each checked as one booking would be (S72, ADR-0070): free, or not with the
+   * nearest free times and whether it is past the booking window. Nothing is booked. 403 when
+   * staff ask about someone else.
+   */
+  @Post('bookings/series/preview')
+  @HttpCode(200)
+  @RequirePermission('bookings.manage')
+  previewSeries(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<BookingSeriesPreview> {
+    const input = parseBody(BookingSeriesPreviewInputSchema, body);
+    return answering(() => this.bookings.previewSeries(tenant, input));
+  }
+
+  /**
+   * Books a series (S72): 201 the booked visits and the skipped dates with alternatives (or, for
+   * a retried `idempotencyKey`, the first answer). 409 `slot_unavailable` when no date is free,
+   * or `idempotency_key_reused`; 403 when staff book someone else.
+   */
+  @Post('bookings/series')
+  @RequirePermission('bookings.manage')
+  createSeries(
+    @CurrentTenant() tenant: TenantContext,
+    @Body() body: unknown,
+  ): Promise<BookingSeriesResult> {
+    const input = parseBody(BookingSeriesInputSchema, body);
+    return answering(() => this.bookings.createSeries(tenant, input));
+  }
+
+  /** A series' visits, earliest first, any status; 404 `booking_not_found`. */
+  @Get('bookings/series/:seriesId')
+  @RequirePermission('bookings.read')
+  series(@CurrentTenant() tenant: TenantContext, @Param() params: unknown): Promise<BookingSeries> {
+    const { seriesId } = parseBody(SeriesParamsSchema, params);
+    return answering(() => this.bookings.series(tenant, seriesId));
+  }
+
+  /**
+   * Cancels this visit and the later confirmed visits of its series (S72, D-3); a booking outside
+   * a series alone. The refusals of a cancel by `PATCH /v1/bookings/:id`.
+   */
+  @Post('bookings/:bookingId/cancel-following')
+  @HttpCode(200)
+  @RequirePermission('bookings.manage')
+  cancelFollowing(
+    @CurrentTenant() tenant: TenantContext,
+    @Param() params: unknown,
+    @Body() body: unknown,
+  ): Promise<CancelFollowingResult> {
+    const { bookingId } = parseBody(BookingParamsSchema, params);
+    const input = parseBody(CancelFollowingInputSchema, body);
+    return answering(() => this.bookings.cancelFollowing(tenant, bookingId, input));
   }
 
   /**
