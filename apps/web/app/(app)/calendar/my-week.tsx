@@ -182,11 +182,11 @@ export function MyWeek({
               data-testid="my-week-day"
               aria-current={isToday ? 'date' : undefined}
             >
-              <div className="flex min-w-0 items-baseline justify-between gap-3 border-0 border-b border-solid border-line pb-1">
-                <h2 className="m-0 flex min-w-0 items-baseline gap-2 type-subheading">
+              <div className="flex min-w-0 items-center justify-between gap-3 border-0 border-b border-solid border-line">
+                <h2 className="m-0 flex min-w-0 items-center gap-2 type-subheading">
                   <Link
                     href={calendarHref(day.date, null)}
-                    className="truncate text-ink no-underline hover:underline"
+                    className="inline-flex min-h-11 min-w-0 items-center truncate text-ink no-underline hover:underline"
                     aria-label={`${heading.full}, open the day`}
                   >
                     {heading.weekday} {heading.day}

@@ -166,7 +166,10 @@ test('an owner drags a booking in the week view: the time it lands on, keep it, 
 
   // Day to Week: the address says so, the first staff member is shown (AC-X-144).
   await page.goto(`/calendar?date=${formatDate(s.tuesday)}`);
-  await page.getByRole('navigation', { name: 'View' }).getByRole('link', { name: 'Week' }).click();
+  await page
+    .getByRole('navigation', { name: 'View' })
+    .getByRole('link', { name: 'Week', exact: true })
+    .click();
   await expect(page).toHaveURL(/view=week/);
   await expect(
     page.getByRole('navigation', { name: 'Staff' }).getByRole('link', { name: 'Jess' }),
