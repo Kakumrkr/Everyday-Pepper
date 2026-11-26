@@ -1,6 +1,7 @@
 import type { Permission, StaffMember } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  bookingBlockName,
   confirmedByText,
   availabilityPath,
   bookableStaff,
@@ -251,5 +252,31 @@ describe('confirmedByText (AC-X-79)', () => {
     expect(confirmedByText({ status: 'confirmed' })).toBeNull();
     expect(confirmedByText({ status: 'completed', clientConfirmedAt: at })).toBeNull();
     expect(confirmedByText({ status: 'cancelled', clientConfirmedAt: at })).toBeNull();
+  });
+});
+
+describe('bookingBlockName (S72, AC-X-188)', () => {
+  const block = {
+    startsAt: '2026-12-01T15:00:00.000Z',
+    endsAt: '2026-12-01T16:00:00.000Z',
+    service: 'Haircut',
+    client: 'Maria Lopez',
+    status: 'confirmed' as const,
+  };
+
+  it('says when, what and who, then its marks', () => {
+    expect(bookingBlockName('America/New_York', block)).toMatch(
+      /^10:00\s?–\s?11:00\sAM, Haircut with Maria Lopez$/,
+    );
+    expect(
+      bookingBlockName('America/New_York', {
+        ...block,
+        clientConfirmedAt: '2026-11-30T15:00:00.000Z',
+        keptOverGoogle: true,
+      }),
+    ).toMatch(/Maria Lopez, confirmed by text, changed in Google, kept as booked in Pepper$/);
+    expect(bookingBlockName('America/New_York', { ...block, keptOverGoogle: false })).not.toContain(
+      'Google',
+    );
   });
 });

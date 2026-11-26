@@ -20,6 +20,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   bookableStaff,
   bookingActions,
+  bookingBlockName,
   confirmedByText,
   dateTimeLabel,
   localParts,
@@ -29,12 +30,10 @@ import {
 } from '../../../lib/booking';
 import { ROUTES } from '../../../lib/account';
 import { laterVisits, seriesLine } from '../../../lib/booking-series';
-import { timeRange } from '../../../lib/calendar';
 import { fetchJson, sendJson } from '../../../lib/client-api';
 import {
   bookingCalendarLine,
   bookingCalendarPath,
-  KEPT_OVER_GOOGLE,
   keptOverGoogleLine,
 } from '../../../lib/calendar-connect';
 import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
@@ -104,7 +103,7 @@ export function BookingSheet({
         <button
           type="button"
           data-testid="booking-block"
-          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}${confirmedByText(booking) === null ? '' : ', confirmed by text'}${booking.keptOverGoogle === true ? `, ${KEPT_OVER_GOOGLE.toLowerCase()}` : ''}`}
+          aria-label={bookingBlockName(timeZone, booking)}
           className={cx(className, 'cursor-pointer text-left font-normal')}
           style={style}
         >

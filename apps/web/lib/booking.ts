@@ -15,7 +15,8 @@ import {
   type WalkInClient,
   WalkInClientSchema,
 } from '@pepper/contracts';
-import { dayRange } from './calendar';
+import { dayRange, timeRange } from './calendar';
+import { KEPT_OVER_GOOGLE } from './calendar-connect';
 
 // The booking screens (S15): who can be booked, the times to offer and what a booking sheet
 // may do. Everything here is pure; the screens call the api, which decides (AC-W9-1).
@@ -126,6 +127,35 @@ export function confirmedByText(booking: {
   clientConfirmedAt?: string | null | undefined;
 }): string | null {
   return booking.status === 'confirmed' ? (booking.clientConfirmedAt ?? null) : null;
+}
+
+/**
+ * What a booking's block on the calendar is called (its accessible name): when, what and who,
+ * then what its marks show: confirmed by text (S62), kept over a Google change (S72, AC-X-188).
+ */
+export function bookingBlockName(
+  timeZone: string,
+  booking: {
+    startsAt: string;
+    endsAt: string;
+    service: string;
+    client: string;
+    status: BookingStatus;
+    clientConfirmedAt?: string | null | undefined;
+    keptOverGoogle?: boolean | undefined;
+  },
+): string {
+  const marks = [
+    ...(confirmedByText(booking) === null ? [] : ['confirmed by text']),
+    // "changed in Google, …": only the sentence's first letter lowered, never the names.
+    ...(booking.keptOverGoogle === true
+      ? [`${KEPT_OVER_GOOGLE.charAt(0).toLowerCase()}${KEPT_OVER_GOOGLE.slice(1)}`]
+      : []),
+  ];
+  return [
+    `${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}`,
+    ...marks,
+  ].join(', ');
 }
 
 /** A booking's status in words. */
