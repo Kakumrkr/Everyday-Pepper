@@ -293,7 +293,5 @@ test('a member who gave busy times only is offered to add bookings (S71, AC-X-16
   await page.getByRole('button', { name: 'Add bookings to Google' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
   await expect(status(page)).toContainText('Your bookings are added to “Pepper bookings”');
-  await expect(page.getByRole('button', { name: 'Add bookings to Google' })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole('button', { name: 'Add bookings to Google' })).toHaveCount(0);
 });
