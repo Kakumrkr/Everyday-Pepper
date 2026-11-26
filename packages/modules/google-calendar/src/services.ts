@@ -57,6 +57,7 @@ import {
   CalendarScopeMissingError,
 } from './errors.js';
 import { recordConnectionFailure, withAccessToken } from './access.js';
+import { reconcileBookingsCalendar } from './reconcile.js';
 import { CalendarProviderError, type CalendarProvider } from './provider.js';
 import {
   codeChallengeOf,
@@ -417,7 +418,11 @@ export async function readCalendar(
     const stored = await withTenant(deps.db, tenantId, (tx) =>
       storeCalendarRead(tx, claimed, blocks, now),
     );
-    return stored ? 'read' : 'skipped';
+    if (!stored) return 'skipped';
+    // Then "Pepper bookings" read back (S71.2, ADR-0069 §11): its own failures wait for the next
+    // read and never mark the busy times just stored as failed (Google's are recorded by it).
+    await reconcileBookingsCalendar(deps, tenantId, claimed).catch(() => undefined);
+    return 'read';
   } catch (error) {
     if (error instanceof SealedTokenError) {
       // The key changed: no token of this connection opens again; only a reconnect helps.

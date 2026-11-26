@@ -2,6 +2,7 @@ import type {
   CalendarEventBody,
   CalendarProvider as CalendarProviderName,
   CalendarSyncError,
+  GoogleListedEvent,
 } from '@pepper/contracts';
 
 // The calendar port (S70, ADR-0069 §1): what the services ask of Google. `GoogleCalendarProvider`
@@ -64,6 +65,24 @@ export interface EventRef {
   eventId: string;
 }
 
+export interface ListEventsInput {
+  accessToken: string;
+  calendarId: string;
+  /** The sync token of the last full read: only what changed since; `null`: every event. */
+  syncToken: string | null;
+  /** The next page of a read that stopped part-way; `null`: the first page. */
+  pageToken: string | null;
+}
+
+/** One page of `events.list` (S71.2): deleted events included, as Google lists them. */
+export interface EventPage {
+  events: GoogleListedEvent[];
+  /** More pages follow: go on with this. */
+  nextPageToken: string | null;
+  /** The last page: the token to read only later changes with. */
+  nextSyncToken: string | null;
+}
+
 export interface CalendarProvider {
   readonly name: CalendarProviderName;
   /** Google's consent page for this connect. */
@@ -88,6 +107,12 @@ export interface CalendarProvider {
   patchEvent(input: EventInput): Promise<'updated' | 'missing'>;
   /** Removes the event; one already gone, or its calendar, is not an error. */
   deleteEvent(input: EventRef): Promise<void>;
+  /**
+   * A page of the calendar's events, or of those changed since `syncToken` (S71.2, ADR-0069 §11).
+   * `sync_expired`: Google's 410, the token (or the page token) is no longer good: read everything
+   * again. A missing calendar is `not_found`.
+   */
+  listEvents(input: ListEventsInput): Promise<EventPage | 'sync_expired'>;
 }
 
 /**

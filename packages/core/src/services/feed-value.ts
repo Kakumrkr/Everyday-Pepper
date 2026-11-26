@@ -67,6 +67,7 @@ export function feedValueCents(
     }
     case 'staff_overload':
     case 'daily_briefing':
+    case 'calendar_kept':
       return null;
   }
 }

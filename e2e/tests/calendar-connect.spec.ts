@@ -222,7 +222,7 @@ test('Google’s return page says what went wrong and connects nothing', async (
   await expect(status(page)).toContainText('Not connected');
 });
 
-test('a booking says "Also in Google Calendar" once Pepper has written it there (S71, AC-X-168, AC-X-173)', async ({
+test('a booking says "Also in Google Calendar" once Pepper has written it there (S71, AC-X-168, AC-X-173; S71.2 AC-X-180)', async ({
   page,
 }) => {
   test.setTimeout(150_000);
@@ -269,6 +269,19 @@ test('a booking says "Also in Google Calendar" once Pepper has written it there 
   await hydrated(block);
   await block.click();
   await expect(page.getByTestId('booking-google-calendar')).toHaveText('Also in Google Calendar');
+  await expect(page.getByTestId('booking-google-kept')).toHaveCount(0);
+
+  // Put back over a change made in Google (S71.2 top-up, AC-X-180): the sheet says why. The
+  // worker's sandbox can't be reached from the browser, so its answer is given here.
+  await page.route(`**/v1/calendar/bookings/${booking.id}`, (route) =>
+    route.fulfill({ json: { state: 'written', keptOverGoogle: true } }),
+  );
+  await page.keyboard.press('Escape');
+  await block.click();
+  await expect(page.getByTestId('booking-google-kept')).toHaveText(
+    'Changed in Google, kept as booked in Pepper',
+  );
+  await page.unroute(`**/v1/calendar/bookings/${booking.id}`);
 
   // Disconnecting says the calendar is deleted too (AC-X-172).
   await page.goto('/more/calendar');

@@ -185,6 +185,74 @@ export const GoogleEventResourceSchema = z.object({
   status: z.enum(['confirmed', 'tentative', 'cancelled']).optional(),
 });
 
+// ---- Reading "Pepper bookings" back (S71.2, ADR-0069 §11) ----
+
+/** Pages of changed events read from one calendar in one read, at most; the rest resume next time. */
+export const CALENDAR_EVENT_PAGES_PER_READ = 10;
+/** A note that Pepper put a booking back lasts this long on Home. */
+export const CALENDAR_KEPT_NOTE_DAYS = 3;
+/** The booking sheet says the booking was kept over a change in Google for this long. */
+export const CALENDAR_KEPT_SHOWN_DAYS = 7;
+
+const GoogleEventTimeSchema = z.object({
+  dateTime: GoogleDateTimeSchema.optional(),
+  /** An all-day event's day: never Pepper's, so a Pepper event made all-day was changed. */
+  date: z.iso.date().optional(),
+});
+
+/**
+ * One event of `events.list`: Pepper reads its id, status, times and title only (unknown fields
+ * are dropped here, so a description, place or guests a member typed are never kept). A deleted
+ * event may come with its id and status alone.
+ */
+export const GoogleListedEventSchema = z.object({
+  id: z.string().min(1).max(1024),
+  status: z.enum(['confirmed', 'tentative', 'cancelled']).optional(),
+  summary: z.string().max(8192).optional(),
+  start: GoogleEventTimeSchema.optional(),
+  end: GoogleEventTimeSchema.optional(),
+});
+export type GoogleListedEvent = z.infer<typeof GoogleListedEventSchema>;
+
+/** `events.list`'s answer: one page, and either the next page's token or, at the end, a sync token. */
+export const GoogleEventListSchema = z.object({
+  items: z.array(GoogleListedEventSchema).max(2500).default([]),
+  nextPageToken: z.string().min(1).max(4096).optional(),
+  nextSyncToken: z.string().min(1).max(4096).optional(),
+});
+export type GoogleEventList = z.infer<typeof GoogleEventListSchema>;
+
+/** The booking a Pepper event id names (`calendarEventIdOf`'s inverse); `null`: not Pepper's. */
+export function bookingIdOfCalendarEvent(eventId: string): string | null {
+  const match = /^pepper([0-9a-f]{32})$/u.exec(eventId);
+  if (match?.[1] === undefined) return null;
+  const hex = match[1];
+  const id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+  // Only a real UUID is a booking's: anything else looking like one is the member's own event.
+  return z.uuid().safeParse(id).success ? id : null;
+}
+
+/** What was done in Google to a Pepper event, compared with what Pepper wrote (AC-X-176). */
+export type CalendarEventChange = 'moved' | 'deleted' | 'edited';
+
+/**
+ * How a Pepper event as Google lists it differs from the body Pepper would write now: deleted,
+ * moved (another start or end, or made all-day), edited (another title, or not confirmed), or
+ * `null` when it is as Pepper wrote it. Pure: the read-back and its tests share it.
+ */
+export function calendarEventChangeOf(
+  expected: Pick<CalendarEventBody, 'summary' | 'start' | 'end'>,
+  seen: GoogleListedEvent,
+): CalendarEventChange | null {
+  if (seen.status === 'cancelled') return 'deleted';
+  const sameInstant = (time: GoogleListedEvent['start'], iso: string) =>
+    time?.dateTime !== undefined && Date.parse(time.dateTime) === Date.parse(iso);
+  if (!sameInstant(seen.start, expected.start.dateTime)) return 'moved';
+  if (!sameInstant(seen.end, expected.end.dateTime)) return 'moved';
+  if (seen.status === 'tentative' || (seen.summary ?? '') !== expected.summary) return 'edited';
+  return null;
+}
+
 /** Calendar's 403 reasons that mean a rate limit, like its 429. */
 export const GoogleRateLimitReasonSchema = z.enum([
   'rateLimitExceeded',
@@ -266,6 +334,11 @@ export type CalendarConnectComplete = z.infer<typeof CalendarConnectCompleteSche
  */
 export const BookingCalendarStateSchema = z.object({
   state: z.enum(['written', 'pending', 'waiting', 'none']),
+  /**
+   * A change made in Google to its event was put back in the last 7 days (S71.2 top-up,
+   * AC-X-180): the sheet says "Changed in Google, kept as booked in Pepper". Only when true.
+   */
+  keptOverGoogle: z.literal(true).optional(),
 });
 export type BookingCalendarState = z.infer<typeof BookingCalendarStateSchema>;
 

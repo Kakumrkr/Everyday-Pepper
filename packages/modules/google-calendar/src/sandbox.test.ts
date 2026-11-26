@@ -119,3 +119,110 @@ describe("the sandbox's calendars (S71)", () => {
     expect(granted.scopes).toContain('https://www.googleapis.com/auth/calendar.freebusy');
   });
 });
+
+describe("the sandbox's read-back (S71.2)", () => {
+  const event = (n: number) =>
+    calendarEventBodyOf({
+      bookingId: `0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a${String(n).padStart(2, '0')}`,
+      serviceName: 'Skin fade',
+      clientFirstName: 'Ana',
+      startsAt: new Date('2026-12-01T15:00:00Z'),
+      endsAt: new Date('2026-12-01T15:45:00Z'),
+    });
+
+  it('lists every event, then only changes, in pages, with a token that expires', async () => {
+    const sandbox = new SandboxCalendarProvider(REDIRECT, () => NOW);
+    const accessToken = 'sbx-a-test';
+    const { id: calendarId } = await sandbox.createCalendar({
+      accessToken,
+      name: 'Pepper bookings',
+      timeZone: 'UTC',
+    });
+    for (const n of [1, 2, 3])
+      await sandbox.insertEvent({ accessToken, calendarId, event: event(n) });
+    sandbox.pageSize = 2;
+    const read = (syncToken: string | null, pageToken: string | null) =>
+      sandbox.listEvents({ accessToken, calendarId, syncToken, pageToken });
+
+    const first = await read(null, null);
+    if (first === 'sync_expired') throw new Error('expired');
+    expect(first.events.map((e) => e.id)).toEqual([event(1).id, event(2).id]);
+    expect(first.nextSyncToken).toBeNull();
+    // An insert meanwhile isn't in this read's pages: it comes with the next sync.
+    await sandbox.insertEvent({ accessToken, calendarId, event: event(4) });
+    const last = await read(null, first.nextPageToken);
+    if (last === 'sync_expired') throw new Error('expired');
+    expect(last.events.map((e) => e.id)).toEqual([event(3).id]);
+    expect(last.nextPageToken).toBeNull();
+
+    sandbox.changeInGoogle(calendarId, event(2).id, {
+      start: { dateTime: '2026-12-01T16:00:00Z' },
+    });
+    await sandbox.deleteEvent({ accessToken, calendarId, eventId: event(3).id });
+    const changes = await read(last.nextSyncToken, null);
+    if (changes === 'sync_expired') throw new Error('expired');
+    expect(changes.events).toEqual([
+      expect.objectContaining({ id: event(4).id, status: 'confirmed' }),
+      expect.objectContaining({ id: event(2).id, start: { dateTime: '2026-12-01T16:00:00Z' } }),
+    ]);
+    const more = await read(last.nextSyncToken, changes.nextPageToken);
+    if (more === 'sync_expired') throw new Error('expired');
+    expect(more.events).toEqual([{ id: event(3).id, status: 'cancelled' }]);
+
+    // Pepper writing it again clears the member's change.
+    await sandbox.patchEvent({ accessToken, calendarId, event: event(2) });
+    expect(sandbox.seenInGoogle(calendarId, event(2).id)?.start).toEqual({
+      dateTime: event(2).start.dateTime,
+    });
+
+    sandbox.expireSyncTokens();
+    expect(await read(more.nextSyncToken, null)).toBe('sync_expired');
+    expect(await read(null, changes.nextPageToken)).toBe('sync_expired');
+    const again = await read(null, null);
+    if (again === 'sync_expired') throw new Error('expired');
+    expect(again.events).toHaveLength(2);
+    await expect(
+      sandbox.listEvents({ accessToken, calendarId: 'gone', syncToken: null, pageToken: null }),
+    ).rejects.toMatchObject({ code: 'not_found' });
+  });
+});
+
+describe("the sandbox's pages (S71.2 review)", () => {
+  it('skips no event when one changes between two pages', async () => {
+    const sandbox = new SandboxCalendarProvider(REDIRECT, () => NOW);
+    const accessToken = 'sbx-a-test';
+    const { id: calendarId } = await sandbox.createCalendar({
+      accessToken,
+      name: 'Pepper bookings',
+      timeZone: 'UTC',
+    });
+    const ids: string[] = [];
+    for (const n of [1, 2, 3, 4, 5]) {
+      const event = calendarEventBodyOf({
+        bookingId: `0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4b0${String(n)}`,
+        serviceName: 'Cut',
+        clientFirstName: '',
+        startsAt: new Date(NOW),
+        endsAt: new Date(NOW + 1),
+      });
+      ids.push(event.id);
+      await sandbox.insertEvent({ accessToken, calendarId, event });
+    }
+    sandbox.pageSize = 2;
+    const read = async (syncToken: string | null, pageToken: string | null) => {
+      const page = await sandbox.listEvents({ accessToken, calendarId, syncToken, pageToken });
+      if (page === 'sync_expired') throw new Error('expired');
+      return page;
+    };
+    const first = await read(null, null);
+    sandbox.changeInGoogle(calendarId, ids[2] ?? '', { summary: 'Moved on' });
+    // The rest of this read (4 and 5): the changed event moved past it.
+    const second = await read(null, first.nextPageToken);
+    expect(second.nextPageToken).toBeNull();
+    // It comes with the next sync, so none is skipped.
+    const later = await read(second.nextSyncToken, null);
+    expect(later.events.map((e) => e.id)).toEqual([ids[2]]);
+    const seen = [first, second, later].flatMap((page) => page.events.map((e) => e.id));
+    expect(new Set(seen)).toEqual(new Set(ids));
+  });
+});

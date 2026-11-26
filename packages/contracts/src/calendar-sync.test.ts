@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import {
+  bookingIdOfCalendarEvent,
   busyBlocksOf,
+  calendarEventChangeOf,
+  GoogleEventListSchema,
   calendarEventBodyOf,
   calendarEventIdOf,
   calendarWriteBackoffMs,
@@ -206,5 +209,75 @@ describe('Google Calendar out (S71)', () => {
       },
     );
     expect(GoogleEventResourceSchema.safeParse({ status: 'confirmed' }).success).toBe(false);
+  });
+});
+
+describe('reading "Pepper bookings" back (S71.2)', () => {
+  const bookingId = '0f8e3c1a-2b4d-4e6f-8a9b-1c2d3e4f5a6b';
+  const expected = calendarEventBodyOf({
+    bookingId,
+    serviceName: 'Haircut',
+    clientFirstName: 'Sam',
+    startsAt: new Date('2026-12-01T15:00:00Z'),
+    endsAt: new Date('2026-12-01T16:00:00Z'),
+  });
+  const seen = {
+    id: expected.id,
+    status: 'confirmed' as const,
+    summary: expected.summary,
+    start: { dateTime: '2026-12-01T10:00:00-05:00' },
+    end: { dateTime: '2026-12-01T11:00:00-05:00' },
+  };
+
+  it('turns a Pepper event id back into its booking, and nothing else (AC-X-177)', () => {
+    expect(bookingIdOfCalendarEvent(calendarEventIdOf(bookingId))).toBe(bookingId);
+    expect(bookingIdOfCalendarEvent('dentist123')).toBeNull();
+    expect(bookingIdOfCalendarEvent(`${calendarEventIdOf(bookingId)}_20261201`)).toBeNull();
+    expect(bookingIdOfCalendarEvent('pepper0F8E3C1A2B4D4E6F8A9B1C2D3E4F5A6B')).toBeNull();
+    // Shaped like one, not a UUID (its version and variant digits): not Pepper's.
+    expect(bookingIdOfCalendarEvent(`pepper${'a'.repeat(32)}`)).toBeNull();
+  });
+
+  it('finds the event as Pepper wrote it unchanged, whatever its offset (AC-X-176)', () => {
+    expect(calendarEventChangeOf(expected, seen)).toBeNull();
+  });
+
+  it('names a delete, a move and an edit made in Google (AC-X-176)', () => {
+    expect(calendarEventChangeOf(expected, { id: seen.id, status: 'cancelled' })).toBe('deleted');
+    expect(
+      calendarEventChangeOf(expected, {
+        ...seen,
+        start: { dateTime: '2026-12-01T11:00:00-05:00' },
+      }),
+    ).toBe('moved');
+    expect(
+      calendarEventChangeOf(expected, { ...seen, end: { dateTime: '2026-12-01T12:00:00-05:00' } }),
+    ).toBe('moved');
+    expect(
+      calendarEventChangeOf(expected, {
+        ...seen,
+        start: { date: '2026-12-01' },
+        end: { date: '2026-12-02' },
+      }),
+    ).toBe('moved');
+    expect(calendarEventChangeOf(expected, { ...seen, summary: 'Lunch' })).toBe('edited');
+    expect(calendarEventChangeOf(expected, { ...seen, status: 'tentative' })).toBe('edited');
+  });
+
+  it('parses a page of events, keeping only what Pepper reads (AC-X-180)', () => {
+    const page = GoogleEventListSchema.parse({
+      kind: 'calendar#events',
+      items: [{ ...seen, description: 'call 555-0100', location: 'Home', attendees: [] }],
+      nextSyncToken: 'sync-1',
+    });
+    expect(page.items[0]).toEqual(seen);
+    expect(page.nextSyncToken).toBe('sync-1');
+    expect(GoogleEventListSchema.parse({}).items).toEqual([]);
+    expect(GoogleEventListSchema.safeParse({ items: [{ status: 'confirmed' }] }).success).toBe(
+      false,
+    );
+    expect(
+      GoogleEventListSchema.safeParse({ items: Array.from({ length: 2501 }, () => seen) }).success,
+    ).toBe(false);
   });
 });

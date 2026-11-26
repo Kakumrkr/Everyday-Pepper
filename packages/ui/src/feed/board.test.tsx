@@ -249,4 +249,24 @@ describe('the grouped card (AC-W4-3)', () => {
     expect(screen.getByRole('link', { name: 'Open your calendar' })).toBeTruthy();
     expect(screen.queryByText('All clear.')).toBeNull();
   });
+
+  it('shows a calendar note in the quiet start, never a suggestion (S71.2, AC-X-176)', () => {
+    const kept: BoardItem = {
+      ...FeedItemSchema.parse({
+        ...base,
+        id: id(),
+        day: '2026-11-03',
+        kind: 'calendar_kept',
+        payload: { change: 'moved', startsAt: '2026-11-03T15:00:00.000Z' },
+        subjects: { ...noSubjects, staffMemberId: RANDY },
+        names: { staff: 'Randy', client: 'Sam', service: 'Haircut' },
+      }),
+      valueCents: null,
+    };
+    setup([kept, gap(RANDY, 'Randy', '2026-11-04', 120, 9000)], { quiet: true });
+    const cards = screen.getAllByTestId('feed-suggestion');
+    expect(cards).toHaveLength(1);
+    expect(cards[0]?.textContent).toContain("Sam's Tue, Nov 3, 10:00 am is kept as booked");
+    expect(screen.getByTestId('feed-quiet').textContent).toContain('Quiet for now.');
+  });
 });

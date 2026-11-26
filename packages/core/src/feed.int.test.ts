@@ -4,6 +4,7 @@ import {
   ServiceIdSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
+  UtcDateTimeSchema,
   type FeedItemId,
   type MembershipRole,
   type TenantId,
@@ -18,6 +19,7 @@ import {
   listAuditEntries,
   syncFeedItems,
   withTenant,
+  writeCalendarKeptNote,
   type Database,
   type FeedCandidate,
   readMorningDueAt,
@@ -192,6 +194,63 @@ describe('the card board (S52, ADR-0043)', () => {
     const quiet = await getFeed(db, ana(), { clock });
     expect(quiet).toMatchObject({ suggestions: [], hasBookingHistory: false });
     expect((await getFeed(db, jessActor(), { clock })).suggestions).toEqual([]);
+
+    // A note that only informs shows in the quiet start (S71.2): a booking kept over Google.
+    const keptBooking = await withTenant(db, tenantId, async (tx) => {
+      const service = await insertService(tx, {
+        name: 'Beard trim',
+        category: null,
+        durationMinutes: 30,
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: null,
+        priceToCents: null,
+        active: true,
+      });
+      const client = await insertClient(tx, {
+        name: 'Sam',
+        email: null,
+        phone: null,
+        source: 'team',
+      });
+      const row = await insertBooking(tx, {
+        clientId: ClientIdSchema.parse(client.id),
+        serviceId: ServiceIdSchema.parse(service.id),
+        staffMemberId: StaffMemberIdSchema.parse(benStaff),
+        startsAt: new Date('2026-11-05T14:00:00Z'),
+        endsAt: new Date('2026-11-05T14:30:00Z'),
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: null,
+        priceToCents: null,
+        source: 'team',
+        overridden: false,
+        idempotencyKey: null,
+        createdBy: null,
+      });
+      await writeCalendarKeptNote(tx, {
+        bookingId: row.id,
+        staffMemberId: benStaff,
+        clientId: client.id,
+        serviceId: service.id,
+        day: '2026-11-05',
+        payload: { change: 'moved', startsAt: UtcDateTimeSchema.parse('2026-11-05T14:00:00.000Z') },
+        expiresAt: new Date('2026-11-05T15:00:00Z'),
+      });
+      return row;
+    });
+    const informed = await getFeed(db, ana(), { clock });
+    expect(informed.suggestions.map((item) => [item.kind, item.subjects.bookingId])).toEqual([
+      ['calendar_kept', keptBooking.id],
+    ]);
+    // Read, so the board below starts as it did.
+    await closeFeedItem(
+      db,
+      ana(),
+      FeedItemIdSchema.parse(informed.suggestions[0]?.id),
+      { outcome: 'done' },
+      { clock },
+    );
 
     await firstVisit();
     const board = await getFeed(db, ana(), { clock });

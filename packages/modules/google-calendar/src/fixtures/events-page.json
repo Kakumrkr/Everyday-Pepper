@@ -1,0 +1,49 @@
+{
+  "kind": "calendar#events",
+  "etag": "\"p33c9vq2t2e2ia0g\"",
+  "summary": "Pepper bookings",
+  "updated": "2026-11-26T12:30:00.112Z",
+  "timeZone": "America/New_York",
+  "accessRole": "owner",
+  "defaultReminders": [],
+  "nextPageToken": "CigKGjBxbWRsZDd0aGs5aGVvcXJrN2ZhZTA4bDNxGAEggICA6tPRkpkZGg0IABIAGMDP29bhkvYC",
+  "items": [
+    {
+      "kind": "calendar#event",
+      "etag": "\"3417365512224000\"",
+      "id": "pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a5b",
+      "status": "confirmed",
+      "htmlLink": "https://www.google.com/calendar/event?eid=cGVwcGVy",
+      "created": "2026-11-26T12:00:00.000Z",
+      "updated": "2026-11-26T12:20:00.112Z",
+      "summary": "Skin fade · Ana",
+      "description": "Booked in Pepper. Change it in Pepper: changes made here aren’t kept.",
+      "location": "Back room",
+      "attendees": [{ "email": "ana@example.com" }],
+      "creator": { "email": "jo.barber@gmail.com" },
+      "start": { "dateTime": "2026-12-01T11:00:00-05:00", "timeZone": "America/New_York" },
+      "end": { "dateTime": "2026-12-01T11:45:00-05:00", "timeZone": "America/New_York" },
+      "transparency": "opaque",
+      "visibility": "private",
+      "iCalUID": "pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a5b@google.com",
+      "sequence": 1,
+      "extendedProperties": {
+        "private": { "pepperBookingId": "0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b" }
+      },
+      "reminders": { "useDefault": true },
+      "eventType": "default"
+    },
+    {
+      "kind": "calendar#event",
+      "etag": "\"3417365512225000\"",
+      "id": "2j4kd8v0q6m1p3rteu5o7c9b1a",
+      "status": "confirmed",
+      "created": "2026-11-26T12:25:00.000Z",
+      "updated": "2026-11-26T12:25:00.112Z",
+      "summary": "Lunch",
+      "start": { "date": "2026-12-02" },
+      "end": { "date": "2026-12-03" },
+      "eventType": "default"
+    }
+  ]
+}

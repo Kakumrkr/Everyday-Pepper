@@ -396,3 +396,31 @@ describe('DailyBriefing', () => {
     expect(container.textContent).toBe('');
   });
 });
+
+describe('the S71.2 calendar note (AC-X-176)', () => {
+  const kept = (
+    change: 'moved' | 'deleted' | 'edited',
+    names: { staff: string | null; client: string | null; service: string | null } = noNames,
+  ) =>
+    FeedItemSchema.parse({
+      ...base,
+      id: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700301',
+      day: '2026-11-03',
+      kind: 'calendar_kept',
+      payload: { change, startsAt: '2026-11-03T15:00:00.000Z' },
+      subjects: { ...noSubjects, staffMemberId: STAFF, clientId: CLIENT },
+      names,
+    });
+
+  it('says what was undone in whose calendar, and where to change it', () => {
+    expect(feedLine(kept('moved', { ...noNames, staff: 'Jess', client: 'Sam' }), NY, NOW)).toEqual({
+      title: "Sam's Tue, Nov 3, 10:00 am is kept as booked",
+      why: "It was moved in Jess's Google Calendar, so Pepper put it back. Move or cancel bookings in Pepper, where the client can be told.",
+    });
+    expect(feedLine(kept('deleted'), NY, NOW)).toEqual({
+      title: 'The Tue, Nov 3, 10:00 am booking is kept as booked',
+      why: 'It was deleted in Google Calendar, so Pepper put it back. Move or cancel bookings in Pepper, where the client can be told.',
+    });
+    expect(feedLine(kept('edited'), NY, NOW).why).toMatch(/^Its title was changed in Google/u);
+  });
+});

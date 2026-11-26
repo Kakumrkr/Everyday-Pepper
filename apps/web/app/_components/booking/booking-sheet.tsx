@@ -27,7 +27,11 @@ import {
 import { ROUTES } from '../../../lib/account';
 import { timeRange } from '../../../lib/calendar';
 import { fetchJson, sendJson } from '../../../lib/client-api';
-import { bookingCalendarLine, bookingCalendarPath } from '../../../lib/calendar-connect';
+import {
+  bookingCalendarLine,
+  bookingCalendarPath,
+  keptOverGoogleLine,
+} from '../../../lib/calendar-connect';
 import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
 import { VisitNotes } from '../memory/visit-notes';
 import { NotifyClient } from './notify-client';
@@ -134,12 +138,12 @@ function BookingDetails({
   const actions = bookingActions(booking, now, abilities.correctsOutcomes);
   const depositRead = useBookingDeposit(booking.id, abilities.readsPayments);
   const deposit = teamDepositLine(depositRead, timeZone);
-  const inGoogle = bookingCalendarLine(
-    useBookingCalendarState(
-      booking.id,
-      `${booking.status} ${booking.startsAt} ${booking.staffMemberId}`,
-    ),
+  const calendarAnswer = useBookingCalendarState(
+    booking.id,
+    `${booking.status} ${booking.startsAt} ${booking.staffMemberId}`,
   );
+  const inGoogle = bookingCalendarLine(calendarAnswer?.state ?? null);
+  const keptOverGoogle = keptOverGoogleLine(calendarAnswer);
 
   async function change(body: BookingChange): Promise<void> {
     setBusy(true);
@@ -225,6 +229,11 @@ function BookingDetails({
                 value: (
                   <span className="text-ink-2" data-testid="booking-google-calendar">
                     {inGoogle}
+                    {keptOverGoogle === null ? null : (
+                      <span className="block type-caption" data-testid="booking-google-kept">
+                        {keptOverGoogle}
+                      </span>
+                    )}
                   </span>
                 ),
               },
@@ -513,11 +522,8 @@ const CALENDAR_STATE_POLLS = 12;
  * while it is on its way (two minutes at most); `null` while loading, with Google Calendar off
  * here, or when it can't be read (the sheet then says nothing about it).
  */
-function useBookingCalendarState(
-  bookingId: string,
-  version: string,
-): BookingCalendarState['state'] | null {
-  const [state, setState] = useState<BookingCalendarState['state'] | null>(null);
+function useBookingCalendarState(bookingId: string, version: string): BookingCalendarState | null {
+  const [state, setState] = useState<BookingCalendarState | null>(null);
   useEffect(() => {
     let current = true;
     let timer: ReturnType<typeof setTimeout> | undefined;
@@ -526,9 +532,9 @@ function useBookingCalendarState(
     const read = (polls: number): void => {
       void fetchJson(bookingCalendarPath(bookingId), BookingCalendarStateSchema).then((answer) => {
         if (!current) return;
-        const next = answer.ok ? answer.data.state : null;
+        const next = answer.ok ? answer.data : null;
         setState(next);
-        if (next === 'pending' && polls > 0) {
+        if (next?.state === 'pending' && polls > 0) {
           timer = setTimeout(() => {
             read(polls - 1);
           }, CALENDAR_STATE_POLL_MS);

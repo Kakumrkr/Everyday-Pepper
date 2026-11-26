@@ -4,6 +4,7 @@ export * from './events.js';
 export * from './google.js';
 export * from './provider.js';
 export * from './provider-for.js';
+export * from './reconcile.js';
 export * from './sandbox.js';
 export * from './services.js';
 export * from './tokens.js';

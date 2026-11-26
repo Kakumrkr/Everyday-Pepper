@@ -1,4 +1,6 @@
 import {
+  CalendarKeptPayloadSchema,
+  type CalendarKeptPayload,
   DEFAULT_FEED_SETTINGS,
   FEED_SNOOZE_DAYS,
   FeedInsightKindSchema,
@@ -862,4 +864,49 @@ export async function hasBookingHistory(tx: TenantTx, now: Date): Promise<boolea
     .where(and(lt(bookings.startsAt, now), ne(bookings.status, 'cancelled')))
     .limit(1);
   return row !== undefined;
+}
+
+// ---------------------------------------------------------------------------------------------
+// The calendar's note (S71.2, ADR-0069 §11, AC-X-176): a change made in Google to a Pepper
+// booking was put back. Addressed to the booking's staff member (owners and managers see it too);
+// one per booking and its day: a later change while it is open updates it, a dismissed one stays
+// dismissed. Ids and the change only; the names are read with it.
+
+const CALENDAR_KEPT = 'calendar_kept';
+
+export interface CalendarKeptNote {
+  bookingId: string;
+  staffMemberId: string;
+  clientId: string;
+  serviceId: string;
+  /** The booking's local day. */
+  day: string;
+  payload: CalendarKeptPayload;
+  expiresAt: Date;
+}
+
+export async function writeCalendarKeptNote(tx: TenantTx, note: CalendarKeptNote): Promise<void> {
+  const bookingId = Id.parse(note.bookingId);
+  const day = LocalDateSchema.parse(note.day);
+  const subjectKey = `booking:${bookingId}`;
+  await tx
+    .insert(feedItems)
+    .values({
+      kind: CALENDAR_KEPT,
+      subjectKey,
+      day,
+      dedupeKey: `${CALENDAR_KEPT}:${subjectKey}:${day}`,
+      audienceStaffId: Id.parse(note.staffMemberId),
+      staffMemberId: Id.parse(note.staffMemberId),
+      clientId: Id.parse(note.clientId),
+      serviceId: Id.parse(note.serviceId),
+      bookingId,
+      payload: CalendarKeptPayloadSchema.parse(note.payload),
+      expiresAt: note.expiresAt,
+    })
+    .onConflictDoUpdate({
+      target: [feedItems.tenantId, feedItems.dedupeKey],
+      set: { payload: sql`excluded.payload`, expiresAt: sql`excluded.expires_at` },
+      setWhere: sql`${feedItems.status} = 'suggestion'`,
+    });
 }

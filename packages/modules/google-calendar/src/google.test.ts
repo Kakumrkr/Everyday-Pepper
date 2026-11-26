@@ -411,3 +411,87 @@ describe('the bookings calendar and its events', () => {
     ).rejects.toMatchObject({ code: 'unavailable' });
   });
 });
+
+describe('reading "Pepper bookings" back (S71.2, AC-X-175, AC-X-180)', () => {
+  const CALENDAR = 'c_0f9d@group.calendar.google.com';
+  const listUrl = `${GOOGLE_CALENDARS_URL}/${encodeURIComponent(CALENDAR)}/events`;
+
+  it('reads every event the first time, deleted ones too, keeping only what Pepper reads', async () => {
+    const { fetch, seen } = stub([200, fixture('events-page')]);
+    const page = await provider(fetch).listEvents({
+      accessToken: 'ya29.a',
+      calendarId: CALENDAR,
+      syncToken: null,
+      pageToken: null,
+    });
+    expect(seen[0]).toMatchObject({
+      url: `${listUrl}?showDeleted=true&maxResults=250`,
+      method: 'GET',
+      headers: { Authorization: 'Bearer ya29.a' },
+    });
+    if (page === 'sync_expired') throw new Error('expired');
+    expect(page.nextSyncToken).toBeNull();
+    expect(page.nextPageToken).toMatch(/^Cig/u);
+    expect(page.events).toEqual([
+      {
+        id: 'pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a5b',
+        status: 'confirmed',
+        summary: 'Skin fade · Ana',
+        start: { dateTime: '2026-12-01T11:00:00-05:00' },
+        end: { dateTime: '2026-12-01T11:45:00-05:00' },
+      },
+      {
+        id: '2j4kd8v0q6m1p3rteu5o7c9b1a',
+        status: 'confirmed',
+        summary: 'Lunch',
+        start: { date: '2026-12-02' },
+        end: { date: '2026-12-03' },
+      },
+    ]);
+    // Nothing a member typed beyond the title is kept: no description, place or guests.
+    expect(JSON.stringify(page.events)).not.toMatch(/Back room|ana@example|Booked in Pepper/u);
+  });
+
+  it('goes on with the sync and page tokens, and ends with the next sync token', async () => {
+    const { fetch, seen } = stub([200, fixture('events-last')]);
+    const page = await provider(fetch).listEvents({
+      accessToken: 'a',
+      calendarId: CALENDAR,
+      syncToken: 'CPD=',
+      pageToken: 'Cig+/',
+    });
+    expect(new URL(seen[0]?.url ?? '').searchParams.get('syncToken')).toBe('CPD=');
+    expect(new URL(seen[0]?.url ?? '').searchParams.get('pageToken')).toBe('Cig+/');
+    expect(page).toEqual({
+      events: [{ id: 'pepper0193a1b2c3d47e5f8a9b0c1d2e3f4a6c', status: 'cancelled' }],
+      nextPageToken: null,
+      nextSyncToken: 'CPDAlvWDx70CEPDAlvWDx70CGAU=',
+    });
+  });
+
+  it("answers Google's 410 as a full read needed, and the rest as failures", async () => {
+    const input = { accessToken: 'a', calendarId: CALENDAR, syncToken: 'old', pageToken: null };
+    expect(await provider(stub([410, fixture('error-410-sync')]).fetch).listEvents(input)).toBe(
+      'sync_expired',
+    );
+    await expect(
+      provider(stub([404, fixture('error-404')]).fetch).listEvents(input),
+    ).rejects.toMatchObject({ code: 'not_found' });
+    await expect(
+      provider(stub([401, fixture('error-401')]).fetch).listEvents(input),
+    ).rejects.toMatchObject({ code: 'unauthorized' });
+    await expect(
+      provider(stub([403, fixture('error-403-rate')]).fetch).listEvents(input),
+    ).rejects.toMatchObject({ code: 'rate_limited' });
+    // A page that names neither what follows nor a sync token, or both, isn't Google's answer.
+    for (const bad of [
+      { items: [] },
+      { items: [], nextPageToken: 'p', nextSyncToken: 's' },
+      { items: [{ status: 'confirmed' }], nextSyncToken: 's' },
+    ]) {
+      await expect(provider(stub([200, bad]).fetch).listEvents(input)).rejects.toBeInstanceOf(
+        CalendarProviderError,
+      );
+    }
+  });
+});

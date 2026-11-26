@@ -2237,7 +2237,7 @@ export const feedItems = pgTable(
     index('feed_items_action_proposal_idx').on(table.tenantId, table.actionProposalId),
     check(
       'feed_items_kind_known',
-      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match', 'daily_briefing')`,
+      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match', 'daily_briefing', 'calendar_kept')`,
     ),
     check(
       'feed_items_status_known',
@@ -4042,6 +4042,17 @@ export const calendarConnections = pgTable(
     writesBookings: boolean('writes_bookings').notNull().default(false),
     /** The id of the "Pepper bookings" calendar Pepper made in the account; `NULL` until made. */
     bookingsCalendarId: text('bookings_calendar_id'),
+    /**
+     * Reading "Pepper bookings" back (S71.2, ADR-0069 §11): Google's sync token after the last
+     * full page, and the page token of a read that stopped part-way; both hold for the generation
+     * and the calendar they were read with only (else the whole calendar is read again).
+     */
+    eventsSyncToken: text('events_sync_token'),
+    eventsPageToken: text('events_page_token'),
+    eventsSyncGeneration: integer('events_sync_generation'),
+    eventsSyncCalendarId: text('events_sync_calendar_id'),
+    /** The last read of "Pepper bookings" that worked. */
+    eventsReadAt: timestamp('events_read_at', { withTimezone: true }),
     createdBy: uuid('created_by').references(() => users.id, { onDelete: 'set null' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -4080,6 +4091,10 @@ export const calendarConnections = pgTable(
       'calendar_connections_bookings_calendar_length',
       sql`char_length(${table.bookingsCalendarId}) BETWEEN 1 AND 1024`,
     ),
+    check(
+      'calendar_connections_events_tokens_length',
+      sql`char_length(${table.eventsSyncToken}) BETWEEN 1 AND 4096 AND char_length(${table.eventsPageToken}) BETWEEN 1 AND 4096 AND char_length(${table.eventsSyncCalendarId}) BETWEEN 1 AND 1024`,
+    ),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('calendar'),
   ],
@@ -4116,6 +4131,8 @@ export const calendarEventSyncs = pgTable(
     leasedUntil: timestamp('leased_until', { withTimezone: true }),
     attempts: integer('attempts').notNull().default(0),
     lastError: text('last_error'),
+    /** When Pepper last put its version back over a change made in Google (S71.2, AC-X-176). */
+    keptAt: timestamp('kept_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },

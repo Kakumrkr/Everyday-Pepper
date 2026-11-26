@@ -34,10 +34,15 @@ export const FeedInsightKindSchema = InsightTypeSchema.extract([
 export type FeedInsightKind = z.infer<typeof FeedInsightKindSchema>;
 
 /**
- * Every kind a feed item can be: the insights pass's, and the daily briefing (S38a, ADR-0042),
- * which the morning pass writes once a day and which only informs.
+ * Every kind a feed item can be: the insights pass's, the daily briefing (S38a, ADR-0042),
+ * which the morning pass writes once a day and which only informs, and the calendar's note
+ * (S71.2, ADR-0069 §11) that a change made in Google to a Pepper booking was put back.
  */
-export const FeedKindSchema = z.enum([...FeedInsightKindSchema.options, 'daily_briefing']);
+export const FeedKindSchema = z.enum([
+  ...FeedInsightKindSchema.options,
+  'daily_briefing',
+  'calendar_kept',
+]);
 export type FeedKind = z.infer<typeof FeedKindSchema>;
 
 /**
@@ -148,6 +153,19 @@ export const DailyBriefingPayloadSchema = z
   .strict();
 export type DailyBriefingPayload = z.infer<typeof DailyBriefingPayloadSchema>;
 
+/**
+ * A Pepper booking changed in Google Calendar and put back as booked (S71.2, AC-X-176): what
+ * was done to its event there (`moved`, `deleted`, or `edited`: its title), and the booking's
+ * time in Pepper. Names come from the item's subjects, as for every kind.
+ */
+export const CalendarKeptPayloadSchema = z
+  .object({
+    change: z.enum(['moved', 'deleted', 'edited']),
+    startsAt: UtcDateTimeSchema,
+  })
+  .strict();
+export type CalendarKeptPayload = z.infer<typeof CalendarKeptPayloadSchema>;
+
 /** What an item says, by kind. */
 export const FeedInsightSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('schedule_gaps'), payload: ScheduleGapsPayloadSchema }),
@@ -156,6 +174,7 @@ export const FeedInsightSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('staff_overload'), payload: StaffOverloadPayloadSchema }),
   z.object({ kind: z.literal('waitlist_match'), payload: WaitlistMatchPayloadSchema }),
   z.object({ kind: z.literal('daily_briefing'), payload: DailyBriefingPayloadSchema }),
+  z.object({ kind: z.literal('calendar_kept'), payload: CalendarKeptPayloadSchema }),
 ]);
 export type FeedInsight = z.infer<typeof FeedInsightSchema>;
 

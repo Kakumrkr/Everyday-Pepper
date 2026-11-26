@@ -2,6 +2,7 @@ import {
   GOOGLE_CALENDAR_SCOPES,
   GoogleApiErrorSchema,
   GoogleCalendarResourceSchema,
+  GoogleEventListSchema,
   GoogleEventResourceSchema,
   GoogleFreeBusyResponseSchema,
   GoogleIdTokenClaimsSchema,
@@ -17,8 +18,10 @@ import {
   type ConsentUrlInput,
   type CreateCalendarInput,
   type EventInput,
+  type EventPage,
   type EventRef,
   type ExchangeCodeInput,
+  type ListEventsInput,
   type FreeBusyInput,
   type GrantedTokens,
 } from './provider.js';
@@ -39,6 +42,8 @@ export const GOOGLE_FREEBUSY_URL = 'https://www.googleapis.com/calendar/v3/freeB
 export const GOOGLE_CALENDARS_URL = 'https://www.googleapis.com/calendar/v3/calendars';
 
 const TIMEOUT_MS = 15_000;
+/** Events asked for per page of `events.list` (Google's default is 250, its most 2500). */
+const EVENTS_PAGE = 250;
 
 export interface GoogleOptions {
   clientId: string;
@@ -215,6 +220,39 @@ export class GoogleCalendarProvider implements CalendarProvider {
       apiErrorCode(response.status, await jsonOf(response)),
       response.status,
     );
+  }
+
+  async listEvents(input: ListEventsInput): Promise<EventPage | 'sync_expired'> {
+    // events.list (read 2026-11-26): deleted events too, so a delete in Google is seen; a sync
+    // token can't go with time bounds, so none are sent on any read.
+    const query = new URLSearchParams({ showDeleted: 'true', maxResults: String(EVENTS_PAGE) });
+    if (input.syncToken !== null) query.set('syncToken', input.syncToken);
+    if (input.pageToken !== null) query.set('pageToken', input.pageToken);
+    const response = await this.call(
+      `${calendarUrl(input.calendarId)}/events?${query.toString()}`,
+      {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${input.accessToken}` },
+      },
+    );
+    const body = await jsonOf(response);
+    // 410 `fullSyncRequired`: the token is too old (or the page token): start again.
+    if (response.status === 410) return 'sync_expired';
+    if (!response.ok)
+      throw new CalendarProviderError(apiErrorCode(response.status, body), response.status);
+    const parsed = GoogleEventListSchema.safeParse(body);
+    // A page names what follows it: the next page, or the token for later changes.
+    if (
+      !parsed.success ||
+      (parsed.data.nextPageToken === undefined) === (parsed.data.nextSyncToken === undefined)
+    ) {
+      throw new CalendarProviderError('bad_response');
+    }
+    return {
+      events: parsed.data.items,
+      nextPageToken: parsed.data.nextPageToken ?? null,
+      nextSyncToken: parsed.data.nextSyncToken ?? null,
+    };
   }
 
   private json(accessToken: string): Record<string, string> {

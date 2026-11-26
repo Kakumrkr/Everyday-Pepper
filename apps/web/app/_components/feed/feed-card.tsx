@@ -34,6 +34,9 @@ function actionFor(item: FeedItem): FeedAction | null {
           };
     case 'waitlist_match':
       return { label: 'Open the waitlist', href: ROUTES.waitlist };
+    // S71.2: the booking's day, where it can be moved or cancelled.
+    case 'calendar_kept':
+      return { label: 'Open the calendar', href: day(item.day) };
     // Shown on its own card (`BriefingCard`), never as a suggestion.
     case 'daily_briefing':
       return null;

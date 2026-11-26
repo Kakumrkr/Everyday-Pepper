@@ -86,6 +86,11 @@ export function FeedSuggestions({
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const shown = boardOf(items.filter((item) => !closed.has(item.id)));
+  // Notes that only inform (S71.2: a booking kept over a Google Calendar change) show even in the
+  // quiet start and while paused: they tell of something done, not a suggestion.
+  const informing = shown.filter(
+    (card) => card.type === 'single' && card.item.kind === 'calendar_kept',
+  );
 
   const close = async (item: FeedItem, outcome: 'dismissed' | 'done') => {
     setError(null);
@@ -131,6 +136,36 @@ export function FeedSuggestions({
     setBusy(false);
     if (failed !== null) setError(failed);
   };
+
+  const cardList = (cards: readonly BoardCard[]) => (
+    <ul className="m-0 flex list-none flex-col gap-3 p-0">
+      {cards.map((card) =>
+        card.type === 'single' ? (
+          <li key={card.key}>
+            <SingleCard
+              item={card.item}
+              valueCents={card.valueCents}
+              timeZone={timeZone}
+              now={now}
+              action={actionFor(card.item)}
+              renderAction={renderAction}
+              onClose={(outcome) => void close(card.item, outcome)}
+            />
+          </li>
+        ) : (
+          <li key={card.key}>
+            <GroupCard
+              card={card}
+              actionFor={actionFor}
+              renderLink={renderLink}
+              onFollow={(item) => void close(item, 'done')}
+              onDismissAll={() => void dismissAll(card)}
+            />
+          </li>
+        ),
+      )}
+    </ul>
+  );
 
   return (
     <section aria-labelledby={headingId} className="flex flex-col gap-3">
@@ -217,55 +252,35 @@ export function FeedSuggestions({
         </div>
       ) : null}
       {settings.suggestionsPaused ? (
-        <EmptyState
-          title="Suggestions are paused."
-          text="I won't add new ones. Requests that need your OK still show."
-        />
+        <>
+          {informing.length > 0 ? cardList(informing) : null}
+          <EmptyState
+            title="Suggestions are paused."
+            text="I won't add new ones. Requests that need your OK still show."
+          />
+        </>
       ) : quiet ? (
-        <div
-          className="flex flex-col items-start gap-2 rounded-lg bg-surface-2 px-5 py-4"
-          data-testid="feed-quiet"
-        >
-          <p className="m-0 type-body text-ink-2">
-            <strong className="text-ink">Quiet for now.</strong> Once clients start booking, I'll
-            show you what's worth the most here: open time to fill, regulars who are due and freed
-            times for your waitlist.
-          </p>
-          {quietAction}
-        </div>
+        <>
+          {informing.length > 0 ? cardList(informing) : null}
+          <div
+            className="flex flex-col items-start gap-2 rounded-lg bg-surface-2 px-5 py-4"
+            data-testid="feed-quiet"
+          >
+            <p className="m-0 type-body text-ink-2">
+              <strong className="text-ink">Quiet for now.</strong> Once clients start booking, I'll
+              show you what's worth the most here: open time to fill, regulars who are due and freed
+              times for your waitlist.
+            </p>
+            {quietAction}
+          </div>
+        </>
       ) : shown.length === 0 ? (
         <EmptyState
           title="All clear."
           text="I look for open gaps, regulars who are due and days that are too full every hour, and again after every booking change."
         />
       ) : (
-        <ul className="m-0 flex list-none flex-col gap-3 p-0">
-          {shown.map((card) =>
-            card.type === 'single' ? (
-              <li key={card.key}>
-                <SingleCard
-                  item={card.item}
-                  valueCents={card.valueCents}
-                  timeZone={timeZone}
-                  now={now}
-                  action={actionFor(card.item)}
-                  renderAction={renderAction}
-                  onClose={(outcome) => void close(card.item, outcome)}
-                />
-              </li>
-            ) : (
-              <li key={card.key}>
-                <GroupCard
-                  card={card}
-                  actionFor={actionFor}
-                  renderLink={renderLink}
-                  onFollow={(item) => void close(item, 'done')}
-                  onDismissAll={() => void dismissAll(card)}
-                />
-              </li>
-            ),
-          )}
-        </ul>
+        cardList(shown)
       )}
       {footer}
     </section>
