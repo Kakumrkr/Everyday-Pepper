@@ -1,5 +1,5 @@
 {
-  "id": "0652f541-68c1-465b-bcb5-b7a99125f8c4",
+  "id": "47b6aa66-6618-4057-8ca1-0dbd239492a1",
   "prevId": "46b4f5b9-128a-422a-a731-d80a537f4e55",
   "version": "7",
   "dialect": "postgresql",
@@ -2850,6 +2850,13 @@
           "primaryKey": false,
           "notNull": true
         },
+        "skipped_starts": {
+          "name": "skipped_starts",
+          "type": "timestamp with time zone[]",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'{}'"
+        },
         "idempotency_key": {
           "name": "idempotency_key",
           "type": "text",
@@ -3009,6 +3016,10 @@
         "booking_series_every_weeks_range": {
           "name": "booking_series_every_weeks_range",
           "value": "\"booking_series\".\"every_weeks\" BETWEEN 1 AND 4"
+        },
+        "booking_series_skipped_starts_count": {
+          "name": "booking_series_skipped_starts_count",
+          "value": "cardinality(\"booking_series\".\"skipped_starts\") <= 26"
         },
         "booking_series_requested_starts_count": {
           "name": "booking_series_requested_starts_count",

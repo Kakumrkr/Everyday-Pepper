@@ -326,6 +326,36 @@ describe('createSeries (AC-X-183)', () => {
     ).rejects.toBeInstanceOf(IdempotencyKeyReusedError);
   });
 
+  it('refuses the key with another client, service or rule; a retry answers what was skipped', async () => {
+    const b = await newBusiness();
+    await bookOne(b, tue(10, 1));
+    const input = seriesOf(b, [tue(10), tue(10, 1), tue(10, 2)], {
+      idempotencyKey: 'series-retry-2',
+      notifyClient: false,
+    });
+    const first = await createSeries(db, b.owner, input, { clock: b.clock });
+    expect(first.skipped.map((s) => s.startsAt)).toEqual([tue(10, 1)]);
+    const dan = await createClient(db, b.owner, { name: 'Dan Cole' });
+    for (const other of [{ clientId: dan.id }, { everyWeeks: 2 }]) {
+      await expect(
+        createSeries(db, b.owner, { ...input, ...other }, { clock: b.clock }),
+      ).rejects.toBeInstanceOf(IdempotencyKeyReusedError);
+    }
+    // A visit moved since: the retry still says only the date that wasn't free was skipped.
+    const [visit] = first.bookings;
+    if (visit === undefined) throw new Error('a visit');
+    await changeBooking(
+      db,
+      b.owner,
+      visit.id,
+      { startsAt: tue(14), notifyClient: false },
+      { clock: b.clock },
+    );
+    const again = await createSeries(db, b.owner, input, { clock: b.clock });
+    expect(again.skipped.map((s) => s.startsAt)).toEqual([tue(10, 1)]);
+    expect(again.bookings.map((x) => x.startsAt).sort()).toEqual([tue(14), tue(10, 2)].sort());
+  });
+
   it('lets staff book a series for themselves only (AC-X-184)', async () => {
     const b = await newBusiness();
     // Staff reach a client they have a booking with.

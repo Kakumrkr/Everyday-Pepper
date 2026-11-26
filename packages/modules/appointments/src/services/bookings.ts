@@ -694,7 +694,10 @@ export async function unavailable(
  * Runs one write in a savepoint: a refused write (an overlap, a taken key) rolls back only
  * itself, so the caller's transaction (the trust layer's) stays usable.
  */
-export function inSavepoint<T>(tx: TenantTx, work: (savepoint: TenantTx) => Promise<T>): Promise<T> {
+export function inSavepoint<T>(
+  tx: TenantTx,
+  work: (savepoint: TenantTx) => Promise<T>,
+): Promise<T> {
   return tx.transaction(work);
 }
 

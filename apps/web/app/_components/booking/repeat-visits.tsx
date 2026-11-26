@@ -5,6 +5,7 @@ import { Badge, Select, Skeleton, TimeChip } from '@pepper/ui';
 import { useEffect, useState } from 'react';
 import { dateTimeLabel } from '../../../lib/booking';
 import {
+  canPick,
   DEFAULT_VISITS,
   notFreeLine,
   REPEAT_OPTIONS,
@@ -162,6 +163,8 @@ export function SeriesDates({
                         key={slot.startsAt}
                         time={dateTimeLabel(timeZone, slot.startsAt)}
                         selected={picks[index] === slot.startsAt}
+                        // A time within a day of another visit can't join the series.
+                        disabled={!canPick(preview, picks, index, slot.startsAt)}
                         onSelect={() => {
                           onPick(index, picks[index] === slot.startsAt ? null : slot.startsAt);
                         }}

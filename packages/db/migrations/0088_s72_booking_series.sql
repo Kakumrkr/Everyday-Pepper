@@ -1,17 +1,20 @@
 -- Recurring appointments (S72, ADR-0070): a series of ordinary bookings. `booking_series` keeps
--- what was asked (the staff member, every how many weeks, the start times) and the series'
--- idempotency key; each visit is a booking with `series_id`.
+-- what was asked (the staff member, every how many weeks, the start times), the dates that
+-- weren't free (a retry's answer) and the series' idempotency key; each visit is a booking with
+-- `series_id`.
 CREATE TABLE "booking_series" (
 	"id" uuid PRIMARY KEY NOT NULL,
 	"tenant_id" uuid DEFAULT current_tenant_id() NOT NULL,
 	"staff_member_id" uuid NOT NULL,
 	"every_weeks" integer NOT NULL,
 	"requested_starts" timestamp with time zone[] NOT NULL,
+	"skipped_starts" timestamp with time zone[] DEFAULT '{}' NOT NULL,
 	"idempotency_key" text,
 	"created_by_user_id" uuid,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "booking_series_tenant_id_id_unique" UNIQUE("tenant_id","id"),
 	CONSTRAINT "booking_series_every_weeks_range" CHECK ("booking_series"."every_weeks" BETWEEN 1 AND 4),
+	CONSTRAINT "booking_series_skipped_starts_count" CHECK (cardinality("booking_series"."skipped_starts") <= 26),
 	CONSTRAINT "booking_series_requested_starts_count" CHECK (cardinality("booking_series"."requested_starts") BETWEEN 2 AND 26),
 	CONSTRAINT "booking_series_idempotency_key_format" CHECK ("booking_series"."idempotency_key" ~ '^[A-Za-z0-9_-]{8,100}$')
 );

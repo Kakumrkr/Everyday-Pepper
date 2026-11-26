@@ -38,6 +38,7 @@ import {
   listSeriesBookings,
   listBookingRules,
   setBookingManageTokenHash,
+  setBookingSeriesSkipped,
   withMember,
   type BookingRow,
   type BookingSeriesRow,
@@ -187,12 +188,19 @@ export async function createSeries(
       if (key === null) return undefined;
       const existing = await findBookingSeriesByIdempotencyKey(tx, key);
       if (existing === undefined) return undefined;
+      // The same request: the staff member, rule and times asked, and the visits' client and
+      // service (a series keeps neither: they are its visits', and a series has one at least).
+      const visits = await listSeriesBookings(tx, BookingSeriesIdSchema.parse(existing.id));
       const same =
         existing.staffMemberId === request.staffMemberId &&
+        existing.everyWeeks === request.everyWeeks &&
         existing.requestedStarts.length === starts.length &&
-        existing.requestedStarts.every((start, index) => start.getTime() === starts[index]);
+        existing.requestedStarts.every((start, index) => start.getTime() === starts[index]) &&
+        visits.every(
+          (visit) => visit.clientId === request.clientId && visit.serviceId === request.serviceId,
+        );
       if (!same) throw new IdempotencyKeyReusedError();
-      return resultOf(tx, existing);
+      return resultOf(existing, visits);
     };
     const earlier = await retried();
     if (earlier !== undefined) return earlier;
@@ -251,6 +259,11 @@ export async function createSeries(
       // Rolls the series back with the transaction.
       throw new SlotUnavailableError(skipped[0]?.alternatives ?? []);
     }
+    await setBookingSeriesSkipped(
+      tx,
+      BookingSeriesIdSchema.parse(series.id),
+      skipped.map((visit) => new Date(visit.startsAt)),
+    );
     await noteFirstBookingIn(tx);
     for (const row of booked) await recordCreated(tx, actor, row, now);
     await requestInsights(tx);
@@ -371,18 +384,19 @@ async function bookVisit(
   }
 }
 
-/** A retry's answer: the series' visits as booked, and the asked dates it has no visit at. */
-async function resultOf(tx: TenantTx, series: BookingSeriesRow): Promise<BookingSeriesResult> {
-  const seriesId = BookingSeriesIdSchema.parse(series.id);
-  const rows = await listSeriesBookings(tx, seriesId);
-  const bookedAt = new Set(rows.map((row) => row.startsAt.getTime()));
+/**
+ * A retry's answer: the series' visits as they are now, and the dates that weren't free when it
+ * was booked (kept on the series; their alternatives are not read again).
+ */
+function resultOf(series: BookingSeriesRow, visits: BookingRow[]): BookingSeriesResult {
   return {
-    seriesId,
+    seriesId: BookingSeriesIdSchema.parse(series.id),
     everyWeeks: series.everyWeeks,
-    bookings: rows.map(toBooking),
-    skipped: series.requestedStarts
-      .filter((start) => !bookedAt.has(start.getTime()))
-      .map((start) => ({ startsAt: iso(start.getTime()), alternatives: [] })),
+    bookings: visits.map(toBooking),
+    skipped: series.skippedStarts.map((start) => ({
+      startsAt: iso(start.getTime()),
+      alternatives: [],
+    })),
   };
 }
 

@@ -9,6 +9,7 @@ import { dateTimeLabel } from './booking';
 import {
   bookedLines,
   bookLabel,
+  canPick,
   everyLabel,
   laterVisits,
   notFreeLine,
@@ -80,6 +81,23 @@ describe('visitsToBook', () => {
       '2026-12-08T13:00:00.000Z',
       tue(2),
     ]);
+  });
+});
+
+describe('canPick', () => {
+  it('refuses a time within a day of another visit to book, a free date or another pick', () => {
+    // Taken date 1's alternative an hour after it: a day from both neighbours.
+    expect(canPick(preview, {}, 1, '2026-12-08T13:00:00.000Z')).toBe(true);
+    // Within a day of the free date after it (tue(2)).
+    expect(canPick(preview, {}, 1, '2026-12-14T20:00:00.000Z')).toBe(false);
+    // The same time picked for the other taken date already.
+    expect(canPick(preview, { 3: '2026-12-08T13:00:00.000Z' }, 1, '2026-12-08T13:00:00.000Z')).toBe(
+      false,
+    );
+    // Its own pick doesn't count against itself.
+    expect(canPick(preview, { 1: '2026-12-08T13:00:00.000Z' }, 1, '2026-12-08T13:00:00.000Z')).toBe(
+      true,
+    );
   });
 });
 

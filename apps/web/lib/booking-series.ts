@@ -51,6 +51,23 @@ export function visitsToBook(
   return starts.sort((a, b) => Date.parse(a) - Date.parse(b));
 }
 
+const DAY_MS = 86_400_000;
+
+/**
+ * Whether `startsAt` can be picked for the date at `index`: at least a day from every other
+ * visit to book (the free dates and the other picks), as the api asks of a series.
+ */
+export function canPick(
+  preview: BookingSeriesPreview,
+  picks: Readonly<Record<number, string>>,
+  index: number,
+  startsAt: string,
+): boolean {
+  const others = visitsToBook(preview, withPick(picks, index, null));
+  const at = Date.parse(startsAt);
+  return others.every((other) => Math.abs(Date.parse(other) - at) >= DAY_MS);
+}
+
 /** The picks with `at` chosen for the date at `index` (`null`: that date left out again). */
 export function withPick(
   picks: Readonly<Record<number, string>>,

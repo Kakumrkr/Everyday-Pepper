@@ -57,6 +57,18 @@ export async function insertBookingSeries(
   }
 }
 
+/** Records the asked start times that weren't free, for a retry's answer. */
+export async function setBookingSeriesSkipped(
+  tx: TenantTx,
+  id: BookingSeriesId,
+  skipped: Date[],
+): Promise<void> {
+  await tx
+    .update(bookingSeries)
+    .set({ skippedStarts: skipped })
+    .where(eq(bookingSeries.id, Id.parse(id)));
+}
+
 /** The series with this id, if the transaction may see it. */
 export async function findBookingSeries(
   tx: TenantTx,

@@ -849,12 +849,6 @@ export const clients = pgTable(
 );
 
 /**
- * A booking (ADR-0017): a client's appointment for a service with a staff member, with a copy
- * of the service's duration (`ends_at`), buffers and price when it was made. Its occupied time
- * is kept in `booking_occupancy` by a trigger (migration 0017), which also holds the exclusion
- * constraint against double booking. Staff reach only their own staff member's bookings.
- */
-/**
  * A series of recurring visits (S72, ADR-0070): what was asked (the staff member, every how many
  * weeks, the start times) and its idempotency key. Each visit is an ordinary booking with
  * `series_id`; nothing reads the rule after booking. Staff reach only their own staff
@@ -872,6 +866,11 @@ export const bookingSeries = pgTable(
     staffMemberId: uuid('staff_member_id').notNull(),
     everyWeeks: integer('every_weeks').notNull(),
     requestedStarts: timestamp('requested_starts', { withTimezone: true }).array().notNull(),
+    // The asked start times that weren't free when the series was booked: a retry's answer.
+    skippedStarts: timestamp('skipped_starts', { withTimezone: true })
+      .array()
+      .notNull()
+      .default(sql`'{}'`),
     idempotencyKey: text('idempotency_key'),
     // Who asked; NULL once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
@@ -888,6 +887,7 @@ export const bookingSeries = pgTable(
     index('booking_series_staff_member_idx').on(table.tenantId, table.staffMemberId),
     index('booking_series_created_by_user_id_idx').on(table.createdByUserId),
     check('booking_series_every_weeks_range', sql`${table.everyWeeks} BETWEEN 1 AND 4`),
+    check('booking_series_skipped_starts_count', sql`cardinality(${table.skippedStarts}) <= 26`),
     check(
       'booking_series_requested_starts_count',
       sql`cardinality(${table.requestedStarts}) BETWEEN 2 AND 26`,
@@ -912,6 +912,12 @@ export const bookingSeries = pgTable(
 );
 export type BookingSeriesRow = typeof bookingSeries.$inferSelect;
 
+/**
+ * A booking (ADR-0017): a client's appointment for a service with a staff member, with a copy
+ * of the service's duration (`ends_at`), buffers and price when it was made. Its occupied time
+ * is kept in `booking_occupancy` by a trigger (migration 0017), which also holds the exclusion
+ * constraint against double booking. Staff reach only their own staff member's bookings.
+ */
 export const bookings = pgTable(
   'bookings',
   {

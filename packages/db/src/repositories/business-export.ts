@@ -47,8 +47,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   audit_log: 'Pepper’s record of changes, kept for the business’s safety',
   usage_meters: 'Pepper’s own usage counters',
   booking_occupancy: 'derived from bookings (the time each one holds)',
-  booking_series:
-    'how a series of recurring visits was asked for (S72); each visit is in bookings',
+  booking_series: 'how a series of recurring visits was asked for (S72); each visit is in bookings',
   waitlist_matches: 'Pepper’s working state for waitlist offers',
   waitlist_offers: 'offers sent; the outcome is on the waitlist entry and the booking',
   booking_verifications: 'one-time sign-in codes for the booking page',
