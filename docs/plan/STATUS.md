@@ -10,7 +10,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Nothing in progress. Next: **S71.2** (Google Calendar reconciliation; see "Planned sessions").
 
 ## Last sessions
-- **S71 Phase 16 · Google Calendar out (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §10, PR to come). Full entry in [session-log.md](session-log.md).
+- **S71 Phase 16 · Google Calendar out (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md) §10, [PR #111](https://github.com/Kakumrkr/Everyday-Pepper/pull/111)). Full entry in [session-log.md](session-log.md).
   - **Built:** bookings written as events in a separate "Pepper bookings" calendar (`calendar.app.created`, optional in the same consent); `calendar_event_syncs` kept by a trigger on `bookings` (every write path), written by the worker's calendar pass; one event per booking (id from the booking, 409 → patch); the next 60 days on the grant; disconnect and a reconnect without the permission delete the calendar; the booking sheet's "Also in Google Calendar" (top-up). AC-X-167…174.
   - **Checks:** `pnpm check` green; review 9 of 9 fixed, security none; e2e calendar-connect 5, screens' Google test 3 (baselines redrawn); walkthrough at 375 px (one label shortened). Not run against real Google yet (S71.2).
 - **S70.2 Phase 16 · Google Calendar on screen (2026-11-26)** ([ADR-0069](../adr/0069-google-calendar-busy-times.md), [PR #110](https://github.com/Kakumrkr/Everyday-Pepper/pull/110)). Full entry in [session-log.md](session-log.md).
