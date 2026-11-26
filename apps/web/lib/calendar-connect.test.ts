@@ -127,7 +127,7 @@ describe('calendarWords for bookings in Google Calendar (S71, AC-X-167, AC-X-172
     const words = calendarWords(answer(connection({ writesBookings: false })), NY, NOW);
     expect(words).toMatchObject({
       badge: 'Connected',
-      action: 'Add bookings to Google Calendar',
+      action: 'Add bookings to Google',
       disconnect: true,
     });
     expect(words.lines[2]).toBe(

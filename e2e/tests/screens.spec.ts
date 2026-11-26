@@ -1,4 +1,6 @@
 import {
+  BookingCalendarStateSchema,
+  BookingSchema,
   BookingsResponseSchema,
   CalendarConnectStartSchema,
   MembersResponseSchema,
@@ -995,10 +997,20 @@ for (const width of WIDTHS) {
     const members = MembersResponseSchema.parse(
       await (await page.request.get('/v1/members')).json(),
     ).members;
-    await post(
+    const fade = await post(
+      page,
+      '/v1/services',
+      { name: 'Skin fade', durationMinutes: 45 },
+      ServiceSchema,
+    );
+    const dre = await post(
       page,
       '/v1/staff',
-      { displayName: 'Dre', userId: members.find((m) => m.role === 'owner')?.userId },
+      {
+        displayName: 'Dre',
+        serviceIds: [fade.id],
+        userId: members.find((m) => m.role === 'owner')?.userId,
+      },
       StaffMemberSchema,
     );
     // The last read moves with the clock ("Read just now", "Read 1 min ago"): masked.
@@ -1021,8 +1033,76 @@ for (const width of WIDTHS) {
     await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
     await shots('more-calendar-connected');
 
-    // Google refuses the refresh at the connect's first read (`sandbox-expired`).
+    // A booking written to Google Calendar says so on its sheet (S71 top-up, AC-X-173).
     const origin = { origin: new URL(page.url()).origin };
+    const { timeZone } = CurrentBusinessResponseSchema.parse(
+      await (await page.request.get('/v1/tenant')).json(),
+    ).business;
+    const everyDay = await page.request.put(`/v1/staff/${dre.id}/hours`, {
+      data: {
+        intervals: [1, 2, 3, 4, 5, 6, 7].map((weekday) => ({
+          weekday,
+          start: '08:00',
+          end: '20:00',
+        })),
+      },
+      headers: origin,
+    });
+    expect(everyDay.ok(), await everyDay.text()).toBe(true);
+    const marcus = await post(page, '/v1/clients', { name: 'Marcus Bell' }, ClientSchema);
+    const day = addDays(toZoned(timeZone, Date.now()), 7);
+    const booked = BookingSchema.parse(
+      await post(
+        page,
+        '/v1/bookings',
+        {
+          clientId: marcus.id,
+          serviceId: fade.id,
+          staffMemberId: dre.id,
+          startsAt: new Date(fromZoned(timeZone, day, 10 * 60)).toISOString(),
+          notifyClient: false,
+        },
+        BookingSchema,
+      ),
+    );
+    await expect
+      .poll(
+        async () =>
+          BookingCalendarStateSchema.parse(
+            await (await page.request.get(`/v1/calendar/bookings/${booked.id}`)).json(),
+          ).state,
+        { timeout: 100_000, intervals: [2_000] },
+      )
+      .toBe('written');
+    for (const scheme of SCHEMES) {
+      await page.goto(`/calendar?date=${formatDate(day)}`);
+      await (await hydrated(page.getByTestId('booking-block'))).click();
+      const opened = page.getByRole('dialog');
+      await expect(opened.getByTestId('booking-google-calendar')).toHaveText(
+        'Also in Google Calendar',
+      );
+      await page.addStyleTag({ content: DATE_LINES_FIXED });
+      await still(page, scheme);
+      await expect
+        .soft(opened)
+        .toHaveScreenshot(`booking-sheet-google-${String(width)}-${scheme}.png`, {
+          ...SHOT,
+          mask: [opened.getByTestId('booking-when')],
+        });
+    }
+
+    // Busy times only: bookings aren't added, and Pepper offers to (S71, AC-X-167).
+    const busyOnly = await page.request.post('/v1/calendar/google/connect', { headers: origin });
+    expect(busyOnly.status(), await busyOnly.text()).toBe(200);
+    const busyBack = new URL(CalendarConnectStartSchema.parse(await busyOnly.json()).url);
+    const busyDone = await page.request.post('/v1/calendar/google/callback', {
+      data: { code: 'sandbox-busy-only', state: busyBack.searchParams.get('state') },
+      headers: origin,
+    });
+    expect(busyDone.status(), await busyDone.text()).toBe(200);
+    await shots('more-calendar-busy-only');
+
+    // Google refuses the refresh at the connect's first read (`sandbox-expired`).
     const connect = await page.request.post('/v1/calendar/google/connect', { headers: origin });
     expect(connect.status(), await connect.text()).toBe(200);
     const back = new URL(CalendarConnectStartSchema.parse(await connect.json()).url);

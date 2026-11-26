@@ -72,7 +72,7 @@ export interface CalendarWords {
   action:
     | 'Connect Google Calendar'
     | 'Reconnect Google Calendar'
-    | 'Add bookings to Google Calendar'
+    | 'Add bookings to Google'
     | null;
   /** Whether Disconnect is offered. */
   disconnect: boolean;
@@ -152,7 +152,7 @@ export function calendarWords(
           ...read,
           'Your bookings aren’t added to Google Calendar: Google wasn’t given that permission.',
         ],
-        action: 'Add bookings to Google Calendar',
+        action: 'Add bookings to Google',
         disconnect: true,
         disconnectNote,
       };

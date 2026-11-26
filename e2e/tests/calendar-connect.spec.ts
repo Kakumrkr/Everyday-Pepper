@@ -14,11 +14,16 @@ import {
   toZoned,
 } from '@pepper/contracts';
 import { expect, test, type Page } from '@playwright/test';
-import { callApi, hydrated, onboardOwner } from './helpers.js';
+import { callApi, hydrated, onboardOwner, ownClientAddress } from './helpers.js';
 
 // Google Calendar on screen (S70.2, AC-X-160…164, AC-X-166, ADR-0069), against the sandbox:
 // its consent page is the app's own return page with `code=sandbox-ok`, so the whole journey
 // runs in the browser without Google.
+
+// Each test its own client address: sign-up allows 3 a minute per address (S71: five tests).
+test.beforeEach(async ({ context }) => {
+  await ownClientAddress(context);
+});
 
 /** The owner takes bookings too, as a staff member linked to their own login. */
 async function ownerTakesBookings(page: Page, displayName = 'Ana'): Promise<string> {
@@ -285,10 +290,10 @@ test('a member who gave busy times only is offered to add bookings (S71, AC-X-16
   await expect(status(page)).toContainText('Connected');
   await expect(status(page)).toContainText('Your bookings aren’t added to Google Calendar');
   // The same consent again, this time with the bookings permission.
-  await page.getByRole('button', { name: 'Add bookings to Google Calendar' }).click();
+  await page.getByRole('button', { name: 'Add bookings to Google' }).click();
   await expect(page.getByRole('status').filter({ hasText: 'Connected.' })).toBeVisible();
   await expect(status(page)).toContainText('Your bookings are added to “Pepper bookings”');
-  await expect(page.getByRole('button', { name: 'Add bookings to Google Calendar' })).toHaveCount(
+  await expect(page.getByRole('button', { name: 'Add bookings to Google' })).toHaveCount(
     0,
   );
 });

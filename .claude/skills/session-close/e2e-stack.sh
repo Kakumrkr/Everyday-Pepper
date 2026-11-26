@@ -3,7 +3,7 @@
 # Redis, Mailpit and SeaweedFS (S47.2) in Docker; the built api, worker and web as plain Node
 # processes (building the app images takes far longer). Chat answers come from the journeys' scripted model, as in
 # CI (ADR-0031): OPENAI_API_KEY is removed from the services, so no model is ever called. The
-# worker runs the insights job every 10 s, as in CI (S35). The web serves the component gallery
+# worker runs the insights job (S35) and the calendar job (S71) every 10 s, as in CI. The web serves the component gallery
 # (PEPPER_GALLERY=1), as in CI (S40).
 #   .claude/skills/session-close/e2e-stack.sh start <log dir>   # then: pnpm test:e2e [spec]
 #   .claude/skills/session-close/e2e-stack.sh stop
@@ -26,7 +26,7 @@ case "${1:-}" in
       DEPLOYMENT_ENVIRONMENT=ci node --env-file=../../.env --import ./dist/instrument.js \
       dist/main.js) </dev/null >"$logs/api.log" 2>&1 &
     api=$!
-    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci INSIGHTS_POLL_MS=10000 DRAFTS_POLL_MS=10000 \
+    (cd apps/worker && exec setsid env -u OPENAI_API_KEY DEPLOYMENT_ENVIRONMENT=ci INSIGHTS_POLL_MS=10000 DRAFTS_POLL_MS=10000 CALENDAR_POLL_MS=10000 \
       node --env-file=../../.env --import ./dist/instrument.js dist/main.js) \
       </dev/null >"$logs/worker.log" 2>&1 &
     worker=$!
