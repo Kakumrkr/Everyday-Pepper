@@ -41,7 +41,7 @@ One app that lets small service businesses run day-to-day operations by talking 
 ## Plan
 - [**Status — start here**](plan/STATUS.md)
 - [Roadmap & phases](plan/roadmap-phases.md)
-- [**V1 playbook (Phases 9–17, every session to launch)**](plan/v1-playbook.md)
+- [**V1 playbook (Phases 9–18, every session to launch)**](plan/v1-playbook.md)
 - [Scorecard](plan/scorecard.md)
 - [Phase 6 playbook (AI agent + trust layer)](plan/phase-6-playbook.md)
 - [Dependency map](plan/dependency-map.md)
