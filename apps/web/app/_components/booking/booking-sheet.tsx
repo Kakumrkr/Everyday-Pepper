@@ -34,6 +34,7 @@ import { fetchJson, sendJson } from '../../../lib/client-api';
 import {
   bookingCalendarLine,
   bookingCalendarPath,
+  KEPT_OVER_GOOGLE,
   keptOverGoogleLine,
 } from '../../../lib/calendar-connect';
 import { teamCancelDepositWords, teamDepositLine } from '../../../lib/deposits';
@@ -60,6 +61,8 @@ export interface BookingSummary {
   clientConfirmedAt: string | null;
   /** The series of recurring visits it is part of (S72); `null` or absent: a single booking. */
   seriesId?: string | null;
+  /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
+  keptOverGoogle?: boolean;
 }
 
 /**
@@ -101,7 +104,7 @@ export function BookingSheet({
         <button
           type="button"
           data-testid="booking-block"
-          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}${confirmedByText(booking) === null ? '' : ', confirmed by text'}`}
+          aria-label={`${timeRange(timeZone, booking.startsAt, booking.endsAt)}, ${booking.service} with ${booking.client}${confirmedByText(booking) === null ? '' : ', confirmed by text'}${booking.keptOverGoogle === true ? `, ${KEPT_OVER_GOOGLE.toLowerCase()}` : ''}`}
           className={cx(className, 'cursor-pointer text-left font-normal')}
           style={style}
         >

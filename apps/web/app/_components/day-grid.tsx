@@ -1,6 +1,7 @@
 import type { BookingStatus, CivilDate, StaffMember } from '@pepper/contracts';
 import { cx, Icon } from '@pepper/ui';
 import { confirmedByText, type BookingSetup } from '../../lib/booking';
+import { KEPT_OVER_GOOGLE } from '../../lib/calendar-connect';
 import { hourLabel, layoutDay, staffTone, timeRange } from '../../lib/calendar';
 import { STAFF_TONE_CLASSES } from './staff-tone';
 import { BookingSheet } from './booking/booking-sheet';
@@ -22,6 +23,8 @@ export type CalendarEntry =
       clientConfirmedAt: string | null;
       /** The series of recurring visits it is part of (S72); `null`: a single booking. */
       seriesId?: string | null;
+      /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
+      keptOverGoogle?: boolean;
     }
   | { kind: 'busy'; startsAt: string; endsAt: string };
 
@@ -212,6 +215,15 @@ export function CalendarBlock({
         {confirmed ? (
           // A 30-minute block has room for two lines only: the tick shows it; the block's name says it.
           <Icon name="check" className="size-3 shrink-0 text-ok" />
+        ) : null}
+        {entry.keptOverGoogle === true ? (
+          // The sheet's words on hover; the block's name says them to a screen reader, and a tap
+          // opens the sheet, which says them too (AC-X-180).
+          <span
+            className="ml-auto size-2 shrink-0 rounded-full bg-info"
+            title={KEPT_OVER_GOOGLE}
+            data-testid="booking-kept-mark"
+          />
         ) : null}
       </span>
       {roomy ? (

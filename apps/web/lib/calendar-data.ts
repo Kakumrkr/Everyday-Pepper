@@ -1,6 +1,7 @@
 import {
   BookingsResponseSchema,
   BusyResponseSchema,
+  KeptBookingsResponseSchema,
   OutsideBusyResponseSchema,
   ClientNamesResponseSchema,
   MAX_CLIENT_NAMES,
@@ -81,6 +82,11 @@ export interface CalendarWeek extends CalendarDay {
    * when none is connected, or the read failed (the api still refuses those times).
    */
   outside: Timed[];
+  /**
+   * The bookings Pepper kept over a change made in Google in the last 7 days (S72 top-up,
+   * AC-X-188), read for the whole week at once; empty with Google Calendar off or none kept.
+   */
+  kept: ReadonlySet<string>;
 }
 
 /**
@@ -116,10 +122,11 @@ export async function loadCalendarWeek(
       hours: null,
       timeOff: [],
       outside: [],
+      kept: new Set(),
     };
   }
   const path = `/v1/staff/${encodeURIComponent(member.id)}`;
-  const [visits, hours, timeOff, outside] = await Promise.all([
+  const [visits, hours, timeOff, outside, kept] = await Promise.all([
     loadVisits(options, range, member.id),
     loadJson(`${path}/hours`, WeeklyHoursSchema, options),
     loadJson(
@@ -132,6 +139,11 @@ export async function loadCalendarWeek(
       OutsideBusyResponseSchema,
       options,
     ),
+    loadJson(
+      `/v1/calendar/kept?${new URLSearchParams({ ...range, staffMemberId: member.id }).toString()}`,
+      KeptBookingsResponseSchema,
+      options,
+    ),
   ]);
   return {
     ...base,
@@ -142,6 +154,7 @@ export async function loadCalendarWeek(
       .filter((entry) => entry.startsAt < range.to && entry.endsAt > range.from)
       .map(({ startsAt, endsAt }) => ({ startsAt, endsAt })),
     outside: (outside?.busy ?? []).map(({ startsAt, endsAt }) => ({ startsAt, endsAt })),
+    kept: new Set(kept?.bookingIds ?? []),
   };
 }
 
