@@ -33,10 +33,14 @@ vi.mock('@pepper/core', async (original) => ({
   deleteAllSupportScreenshotImages: core.deleteAllSupportScreenshotImages,
 }));
 vi.mock('@pepper/runtime', () => ({ DATABASE: Symbol('DATABASE'), MAILER: Symbol('MAILER') }));
-const calendar = vi.hoisted(() => ({ runDueCalendarReads: vi.fn() }));
+const calendar = vi.hoisted(() => ({
+  runDueCalendarReads: vi.fn(),
+  runDueCalendarWrites: vi.fn(),
+}));
 vi.mock('@pepper/google-calendar', async (original) => ({
   ...(await original<object>()),
   runDueCalendarReads: calendar.runDueCalendarReads,
+  runDueCalendarWrites: calendar.runDueCalendarWrites,
 }));
 const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
 vi.mock('./drafts.js', () => ({ morningDraftsJob: drafts.morningDraftsJob }));
@@ -341,6 +345,7 @@ describe('JobsRunner', () => {
   it('reads staff calendars only when configured, with the clock and the outbox key, counts only (S70)', async () => {
     expect(new JobsRunner(DB as never, OPTIONS).calendar).toBeNull();
     calendar.runDueCalendarReads.mockResolvedValue({ read: 3, failed: 1, needsReconnect: 1 });
+    calendar.runDueCalendarWrites.mockResolvedValue({ written: 4, failed: 2, waiting: 1 });
     const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
     const warn = vi.spyOn(Logger.prototype, 'warn').mockImplementation(() => undefined);
     const provider = { name: 'sandbox' } as never;
@@ -360,6 +365,18 @@ describe('JobsRunner', () => {
     expect(deps.tokenKey.equals(OPTIONS.key)).toBe(false);
     expect(log).toHaveBeenCalledWith('Calendar: 3 read');
     expect(warn).toHaveBeenCalledWith('Calendar: 1 failed, 1 need reconnecting');
+    // Then the bookings out (S71), with the same deps; counts only, never a booking.
+    expect(calendar.runDueCalendarWrites).toHaveBeenCalledWith(deps);
+    expect(log).toHaveBeenCalledWith('Calendar: 4 bookings written');
+    expect(warn).toHaveBeenCalledWith('Calendar: 2 writes failed, 1 waiting for a reconnect');
+    // A quiet pass says nothing.
+    log.mockClear();
+    warn.mockClear();
+    calendar.runDueCalendarReads.mockResolvedValue({ read: 0, failed: 0, needsReconnect: 0 });
+    calendar.runDueCalendarWrites.mockResolvedValue({ written: 0, failed: 0, waiting: 0 });
+    await runner.calendar?.runOnce();
+    expect(log).not.toHaveBeenCalled();
+    expect(warn).not.toHaveBeenCalled();
     log.mockRestore();
     warn.mockRestore();
     await runner.onApplicationShutdown();
