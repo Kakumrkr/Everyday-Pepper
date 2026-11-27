@@ -93,8 +93,9 @@ function booking(
   return [
     `INSERT INTO bookings (id, tenant_id, client_id, service_id, staff_member_id, starts_at,
                            ends_at, buffer_before_minutes, buffer_after_minutes, status, source,
-                           import_batch_id, created_at, updated_at)
-     VALUES ($1, $2, $3, $3, $4, $5, $6, 0, 0, $7, $8, $9, $10, $11)`,
+                           import_batch_id, created_at, updated_at, cancelled_at)
+     VALUES ($1, $2, $3, $3, $4, $5, $6, 0, 0, $7, $8, $9, $10, $11,
+             CASE WHEN $7 = 'cancelled' THEN $11::timestamptz END)`,
     [
       values.id ?? newId(),
       tenant,
