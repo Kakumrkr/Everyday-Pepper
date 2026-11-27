@@ -1,5 +1,6 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import {
+  DEFAULT_REMINDER_SETTINGS,
   ManageTokenSchema,
   MAX_VERIFICATION_ATTEMPTS,
   TenantIdSchema,
@@ -750,6 +751,7 @@ describe('the opt-in and confirmation texts (S62, AC-X-73)', () => {
     const p = await newPage();
     await withTenant(db, p.tenantId, (tx) =>
       setReminderSettings(tx, {
+        ...DEFAULT_REMINDER_SETTINGS,
         texts: false,
         dayBefore: true,
         sameDay: true,

@@ -1,5 +1,6 @@
 import {
   BookingIdSchema,
+  DEFAULT_REMINDER_SETTINGS,
   ManageTokenSchema,
   TenantIdSchema,
   TenantSlugSchema,
@@ -379,6 +380,7 @@ describe('reminder texts', () => {
     await book(b, at(3, '14:00'));
     await withTenant(db, b.tenantId, (tx) =>
       setReminderSettings(tx, {
+        ...DEFAULT_REMINDER_SETTINGS,
         texts: false,
         dayBefore: true,
         sameDay: true,
@@ -398,6 +400,7 @@ describe('reminder texts', () => {
     await book(b, at(3, '14:00'));
     await withTenant(db, b.tenantId, (tx) =>
       setReminderSettings(tx, {
+        ...DEFAULT_REMINDER_SETTINGS,
         texts: true,
         dayBefore: false,
         sameDay: false,
