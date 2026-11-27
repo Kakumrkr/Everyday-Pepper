@@ -1825,7 +1825,7 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - Accepted: two nits.
     - `/security-review`: none.
   - **Walkthrough:** the wrap at 375 px, light and dark (gallery component): "1 visit may be missed. Tony Russo · 11:30 am · missed 2 of 5 visits"; nothing wider than the screen; the privacy text shows.
-  - **Timing:** brief ~10 min; build ~45 min; review + fixes ~15 min; `pnpm check` 3.9 min; integration 2.7 min (stopped at the first failure) then 11 min; e2e ~3 min; CI unknown at writing.
+  - **Timing:** brief ~10 min; build ~45 min; review + fixes ~15 min; `pnpm check` 3.9 min; integration 2.7 min (stopped at the first failure) then 11 min; e2e ~3 min; CI run 1 green in 17 min (E2E shard 1/3 the longest, 16.6 min; lint/typecheck/build 6.7 min; integration 7.7 min).
   - **Not done / later:**
     - Record who cancelled (S78).
     - Score `not_confirmed` only after a reminder (S78).
