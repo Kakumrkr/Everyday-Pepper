@@ -232,7 +232,10 @@ export function toInsightBooking(row: InsightBookingRow): InsightBooking {
     source: BookingOriginSchema.parse(row.source),
     createdAt: row.createdAt.getTime(),
     clientConfirmedAt: row.clientConfirmedAt?.getTime() ?? null,
+    confirmAskedAt: row.confirmAskedAt?.getTime() ?? null,
     cancelledAt: row.cancelledAt?.getTime() ?? null,
+    cancelledBy:
+      row.cancelledBy === 'client' || row.cancelledBy === 'business' ? row.cancelledBy : null,
     secured: row.secured,
   };
 }

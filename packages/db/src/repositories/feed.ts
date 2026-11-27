@@ -457,7 +457,11 @@ export interface InsightBookingRow {
   source: string;
   createdAt: Date;
   clientConfirmedAt: Date | null;
+  /** When the client was last asked to confirm it at its current time (S78). */
+  confirmAskedAt: Date | null;
   cancelledAt: Date | null;
+  /** Who cancelled it (S78): `client`, `business`, or `null` (not cancelled, or unknown). */
+  cancelledBy: string | null;
   /** A deposit or a card was taken for it on the booking page (S66). */
   secured: boolean;
 }
@@ -479,7 +483,9 @@ export async function listInsightBookings(tx: TenantTx, since: Date): Promise<In
       source: bookings.source,
       createdAt: bookings.createdAt,
       clientConfirmedAt: bookings.clientConfirmedAt,
+      confirmAskedAt: bookings.confirmAskedAt,
       cancelledAt: bookings.cancelledAt,
+      cancelledBy: bookings.cancelledBy,
       secured: sql<boolean>`EXISTS (SELECT 1 FROM ${bookingPayments} p WHERE p.booking_id = ${bookings.id})`,
     })
     .from(bookings)

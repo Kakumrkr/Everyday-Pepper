@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S78** (Phase 18: confirm or release; may split at its brief). The day the domain is bought, S58a, S57, S58b and S60 go next instead (PCR-017). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+**S78 Confirm ask (Phase 18; split at the brief: S78.2 the release card).** Approved: "start with your recommendations" (D-1 commits under the owner's GitHub identity, set in `session-start.sh`; D-2 split; D-3 changed at the user's choice in chat: the early ask is a reminder under `sms-consent-v1`, no new wording; D-4 ask 72 h ahead, cut-off 24 h).
+Plan: (1) ACs AC-X-200…; migration 0090 (`cancelled_by`, `client_confirmed_via`, `confirm_asked_at`, reminder/text kind `confirm_ask`); a business's cancel no longer counts as the client's miss; `not_confirmed` only after an ask. (2) `askToConfirm` in reminder settings (off). (3) Confirm on the manage page (`POST booking/confirm`, the shown start must match). (4) The early ask for high-band visits 72 h ahead; the day-before email carries the confirm link. (5) Words: booking page, confirmation email, settings toggle, "Confirmed by link" on the sheet (top-up). (6) Privacy page, export.
+Done: task 1 (ACs, migration 0090, who cancelled, `not_confirmed` after an ask). Next: task 2 (the setting).
 
 ## Last sessions
 - **S77 Phase 18 · Visit risk with reasons (2026-11-27)** ([PR #116](https://github.com/Kakumrkr/Everyday-Pepper/pull/116), [ADR-0071](../adr/0071-visit-risk.md)). Full entry in [session-log.md](session-log.md).

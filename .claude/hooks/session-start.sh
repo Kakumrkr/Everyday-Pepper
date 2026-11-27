@@ -11,6 +11,11 @@ fi
 
 cd "${CLAUDE_PROJECT_DIR:-$(dirname "$0")/../..}"
 
+# Commits carry the owner's GitHub identity, not the container's default "Claude" (user, S78):
+# set in the repository's own config, which wins over the container's global one.
+git config user.name "Rama Kakumani"
+git config user.email "87325307+Kakumrkr@users.noreply.github.com"
+
 # pnpm version comes from package.json `packageManager` via Corepack.
 corepack enable >/dev/null 2>&1 || true
 pnpm install

@@ -150,6 +150,8 @@ export async function moveBooking(
         overridden: move.overridden,
         // A client's "C" was for the time they were reminded of (S62): a new time clears it.
         clientConfirmedAt: sql`CASE WHEN ${bookings.startsAt} = ${move.startsAt} THEN ${bookings.clientConfirmedAt} ELSE NULL END`,
+        // So was an ask to confirm (S78): the new time hasn't been asked about.
+        confirmAskedAt: sql`CASE WHEN ${bookings.startsAt} = ${move.startsAt} THEN ${bookings.confirmAskedAt} ELSE NULL END`,
       })
       .where(eq(bookings.id, Id.parse(id)))
       .returning();
@@ -157,18 +159,23 @@ export async function moveBooking(
   });
 }
 
+/** Who cancelled a booking (S78, AC-X-200): the client by their link, or the business. */
+export type BookingCancelledBy = 'client' | 'business';
+
 /**
  * Sets a booking's status (the trigger frees its time when cancelled). A cancel records `at` as
- * its time (S77, for a late cancel), keeping the first time if it was already cancelled; any
- * other status clears it.
+ * its time (S77, for a late cancel) and `by` as who cancelled (S78), keeping the first of both
+ * if it was already cancelled; any other status clears them.
  */
 export async function setBookingStatus(
   tx: TenantTx,
   id: BookingId,
   status: BookingStatus,
   at: Date,
+  by: BookingCancelledBy = 'business',
 ): Promise<BookingRow | undefined> {
   const next = BookingStatusSchema.parse(status);
+  const who = by === 'client' ? 'client' : 'business';
   return bookingWrite(async () => {
     const [row] = await tx
       .update(bookings)
@@ -177,6 +184,11 @@ export async function setBookingStatus(
         cancelledAt:
           next === 'cancelled'
             ? sql`COALESCE(${bookings.cancelledAt}, ${at.toISOString()}::timestamptz)`
+            : null,
+        // An earlier cancel's record stays (`cancelled_at` with it).
+        cancelledBy:
+          next === 'cancelled'
+            ? sql`CASE WHEN ${bookings.status} = 'cancelled' THEN ${bookings.cancelledBy} ELSE ${who} END`
             : null,
       })
       .where(eq(bookings.id, Id.parse(id)))

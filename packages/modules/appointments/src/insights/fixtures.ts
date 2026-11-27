@@ -66,7 +66,9 @@ export function booking(
     // Booked a day before it starts, by default.
     createdAt: at(start) - 86_400_000,
     clientConfirmedAt: null,
+    confirmAskedAt: null,
     cancelledAt: null,
+    cancelledBy: null,
     secured: false,
     ...overrides,
   };

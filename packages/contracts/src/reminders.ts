@@ -53,10 +53,20 @@ export const ReminderSettingsViewSchema = z
   .strict();
 export type ReminderSettingsView = z.infer<typeof ReminderSettingsViewSchema>;
 
-/** A booking's reminders: the day before (text or email) and the same day (text). */
-export const ReminderKindSchema = z.enum(['day_before', 'same_day']);
+/**
+ * A booking's reminders: the confirm ask (S78: 72 h ahead, high-band visits only, text or
+ * email, when the business asks clients to confirm), the day before (text or email) and the
+ * same day (text).
+ */
+export const ReminderKindSchema = z.enum(['confirm_ask', 'day_before', 'same_day']);
 export type ReminderKind = z.infer<typeof ReminderKindSchema>;
 
 /** What a text to a client was about (AC-X-76). */
-export const BookingTextKindSchema = z.enum(['opt_in', 'confirmation', 'day_before', 'same_day']);
+export const BookingTextKindSchema = z.enum([
+  'opt_in',
+  'confirmation',
+  'confirm_ask',
+  'day_before',
+  'same_day',
+]);
 export type BookingTextKind = z.infer<typeof BookingTextKindSchema>;

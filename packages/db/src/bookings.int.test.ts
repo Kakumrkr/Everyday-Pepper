@@ -41,6 +41,10 @@ import {
   type NewBooking,
 } from './repositories/bookings.js';
 import {
+  markBookingClientConfirmed,
+  markBookingConfirmAsked,
+} from './repositories/booking-texts.js';
+import {
   findClient,
   findClientsByContact,
   insertClient,
@@ -221,6 +225,67 @@ describe('the exclusion constraint', () => {
         sql`SELECT cancelled_at AS at FROM bookings WHERE id = ${id}`,
       );
       expect(raw[0]?.at).not.toBeNull();
+    });
+  });
+
+  it('a cancel records who cancelled, keeps the first, and other statuses clear it (S78, AC-X-200)', async () => {
+    const row = await book(b, booking(b, b.jess, '2026-11-05T20:00:00Z'));
+    const id = BookingIdSchema.parse(row.id);
+    const when = new Date('2026-11-04T09:00:00Z');
+    const byClient = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'cancelled', when, 'client'),
+    );
+    expect(byClient?.cancelledBy).toBe('client');
+    const again = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'cancelled', when, 'business'),
+    );
+    expect(again?.cancelledBy).toBe('client');
+    const back = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'confirmed', when),
+    );
+    expect(back?.cancelledBy).toBeNull();
+    const byBusiness = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'cancelled', when),
+    );
+    expect(byBusiness?.cancelledBy).toBe('business');
+    await withTenant(db, b.tenant, async (tx) => {
+      // Raw SQL back to confirmed clears it too, and an unknown value is refused.
+      await tx.execute(sql`UPDATE bookings SET status = 'confirmed' WHERE id = ${id}`);
+      const { rows } = await tx.execute<{ by: string | null }>(
+        sql`SELECT cancelled_by AS by FROM bookings WHERE id = ${id}`,
+      );
+      expect(rows[0]?.by).toBeNull();
+    });
+    await expect(
+      withTenant(db, b.tenant, (tx) =>
+        tx.execute(
+          sql`UPDATE bookings SET status = 'cancelled', cancelled_by = 'staff' WHERE id = ${id}`,
+        ),
+      ),
+    ).rejects.toThrow();
+  });
+
+  it('a move clears the client’s confirm, how they confirmed and the ask (S78)', async () => {
+    const row = await book(b, booking(b, b.jess, '2026-11-07T15:00:00Z'));
+    const id = BookingIdSchema.parse(row.id);
+    const now = new Date('2026-11-04T09:00:00Z');
+    await withTenant(db, b.tenant, async (tx) => {
+      await markBookingConfirmAsked(tx, id, now);
+      const marked = await markBookingClientConfirmed(tx, id, now, 'link');
+      expect(marked).toMatchObject({ clientConfirmedVia: 'link', confirmAskedAt: now });
+    });
+    const moved = await withTenant(db, b.tenant, (tx) =>
+      moveBooking(tx, id, {
+        staffMemberId: b.jess,
+        startsAt: at('2026-11-07T17:00:00Z'),
+        endsAt: at('2026-11-07T18:00:00Z'),
+        overridden: false,
+      }),
+    );
+    expect(moved).toMatchObject({
+      clientConfirmedAt: null,
+      clientConfirmedVia: null,
+      confirmAskedAt: null,
     });
   });
 

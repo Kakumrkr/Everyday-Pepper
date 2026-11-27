@@ -943,9 +943,18 @@ export const bookings = pgTable(
     manageTokenHash: text('manage_token_hash'),
     // When the client confirmed by text ("C" to a reminder, S62); NULL: not confirmed by them.
     clientConfirmedAt: timestamp('client_confirmed_at', { withTimezone: true }),
+    // How the client confirmed (S78): `text` ("C") or `link` (the manage page); NULL with
+    // `client_confirmed_at`, and older confirms (all by text).
+    clientConfirmedVia: text('client_confirmed_via'),
+    // When the client was last asked to confirm this visit at its current time (S78): a
+    // reminder text asking "C", or an email with the confirm link. A move clears it.
+    confirmAskedAt: timestamp('confirm_asked_at', { withTimezone: true }),
     // When it was cancelled (S77, ADR-0071), for a late cancel; NULL while it isn't cancelled.
     // Older cancels were backfilled from their audit entry, else `updated_at` (migration 0089).
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    // Who cancelled it (S78): `client` (their link) or `business` (the team or Pepper); NULL
+    // while it isn't cancelled, and for cancels before S78 (unknown).
+    cancelledBy: text('cancelled_by'),
     // Who made it; NULL for the booking page and once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
@@ -1003,6 +1012,14 @@ export const bookings = pgTable(
     check(
       'bookings_cancelled_at',
       sql`(${table.status} = 'cancelled') = (${table.cancelledAt} IS NOT NULL)`,
+    ),
+    check(
+      'bookings_cancelled_by_known',
+      sql`${table.cancelledBy} IS NULL OR (${table.status} = 'cancelled' AND ${table.cancelledBy} IN ('client', 'business'))`,
+    ),
+    check(
+      'bookings_client_confirmed_via_known',
+      sql`${table.clientConfirmedVia} IS NULL OR (${table.clientConfirmedAt} IS NOT NULL AND ${table.clientConfirmedVia} IN ('text', 'link'))`,
     ),
     check(
       'bookings_import_batch',
@@ -1488,7 +1505,10 @@ export const bookingReminders = pgTable(
   },
   (table) => [
     primaryKey({ name: 'booking_reminders_pkey', columns: [table.id, table.kind] }),
-    check('booking_reminders_kind_known', sql`${table.kind} IN ('day_before', 'same_day')`),
+    check(
+      'booking_reminders_kind_known',
+      sql`${table.kind} IN ('confirm_ask', 'day_before', 'same_day')`,
+    ),
     index('booking_reminders_due_at_idx').on(table.dueAt),
     check('booking_reminders_due_before_start', sql`${table.dueAt} < ${table.startsAt}`),
     foreignKey({
@@ -3540,7 +3560,7 @@ export const bookingTexts = pgTable(
     index('booking_texts_booking_idx').on(table.tenantId, table.bookingId),
     check(
       'booking_texts_kind_known',
-      sql`${table.kind} IN ('opt_in', 'confirmation', 'day_before', 'same_day')`,
+      sql`${table.kind} IN ('opt_in', 'confirmation', 'confirm_ask', 'day_before', 'same_day')`,
     ),
     foreignKey({
       name: 'booking_texts_message_fk',

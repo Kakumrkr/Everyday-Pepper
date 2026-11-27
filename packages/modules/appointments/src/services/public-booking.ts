@@ -889,6 +889,7 @@ export async function cancelManagedBooking(
         BookingIdSchema.parse(row.id),
         'cancelled',
         new Date(now),
+        'client',
       );
       if (cancelled === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, cancelled);
