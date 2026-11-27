@@ -263,6 +263,7 @@ describe('bookings', () => {
       source: 'team',
       overridden: false,
       clientConfirmedAt: null,
+      clientConfirmedVia: null,
       seriesId: null,
       createdAt: '2026-10-17T12:00:00.000Z',
       updatedAt: '2026-10-17T12:05:00.000Z',
