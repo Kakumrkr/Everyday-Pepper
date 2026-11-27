@@ -162,6 +162,9 @@ export const PRIVACY: LegalDocument = {
         p(
           'A business can text you about your appointments (confirmations, reminders and changes) only if you said yes: by ticking the box when you booked online. It is never needed to book. We keep a record of that yes for the business: the number, when, how, and the exact words you agreed to.',
         ),
+        p(
+          'If you are on a business’s waitlist, it can text you when a time you are waiting for opens up, only if you said yes to those texts: by ticking the box when you joined the waitlist online, or by telling the business when it added you (it records who did). That yes covers those texts only, not reminders, and a reminder yes doesn’t cover them. We record it the same way, and the first text says how to stop. An opening isn’t texted at night: it is emailed instead, or not offered to you if we have no email address.',
+        ),
         list(
           'Reply STOP to any text to stop them all, from every business that uses Pepper, at once. Reply START to get them again, HELP for help.',
           'Message frequency varies with your appointments. Message and data rates may apply.',
@@ -383,7 +386,8 @@ export const TERMS: LegalDocument = {
           'Message frequency varies. Message and data rates may apply.',
           'Reply STOP to stop all texts from Pepper’s number, START to get them again, HELP for help. You can also write to us.',
           'Carriers are not liable for delayed or undelivered messages.',
-          'Businesses: text only clients who said yes, about their appointments; never remove or change the opt-out words; and stop texting anyone who asks you to.',
+          'Waitlist texts: a business’s waitlist clients who said yes to them get a text when a time they are waiting for opens up, with a link to claim it.',
+          'Businesses: text only clients who said yes, about what they said yes to (record a yes to waitlist texts only when the client gave it to you); never remove or change the opt-out words; and stop texting anyone who asks you to.',
         ),
         link('How we handle your number', `${PRIVACY_PATH}#${SMS_TERMS_SECTION}`),
       ],

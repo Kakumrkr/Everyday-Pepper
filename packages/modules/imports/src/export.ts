@@ -11,6 +11,14 @@ import type { BusinessExportData } from '@pepper/db';
 import { strToU8, zipSync, type Zippable } from 'fflate';
 import { PEPPER_CLIENT_COLUMNS, PEPPER_VISIT_COLUMNS } from './pepper-format.js';
 
+/** How each consent was given, in the export's words (S79: a waitlist client's, two ways). */
+const CONSENT_HOW: Record<string, string> = {
+  booking_page: 'booking page',
+  member_settings: 'a team member, for themselves',
+  waitlist_join: 'joining the waitlist on the booking page',
+  staff_recorded: 'told the team, when added to the waitlist',
+};
+
 // The business export's files (S51, ADR-0053, AC-W1-37, AC-W1-38): what `readBusinessExport`
 // read, written as Pepper's own CSVs (the `pepper` preset reads them back) and JSON, and
 // zipped. Pure: the service reads, audits and hands the bytes to the api.
@@ -321,7 +329,7 @@ export function buildBusinessExport(
         data.smsConsents.map((consent) => ({
           clientId: consent.clientId,
           phone: consent.phone,
-          how: consent.source === 'booking_page' ? 'booking page' : 'a team member, for themselves',
+          how: CONSENT_HOW[consent.source] ?? consent.source,
           words: consent.shownText,
           wordingVersion: consent.wordingVersion,
           givenAt: at(consent.givenAt),

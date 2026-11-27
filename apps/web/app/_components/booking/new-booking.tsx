@@ -348,6 +348,7 @@ function NewBookingForm({
                     serviceId,
                     staffMemberId,
                   },
+                  phone: client.client.phone,
                   wanted: refused.wanted,
                   minutes: services.find((s) => s.id === serviceId)?.durationMinutes ?? 60,
                   onAdded: () => {

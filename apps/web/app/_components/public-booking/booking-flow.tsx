@@ -8,6 +8,7 @@ import {
   PRIVACY_PATH,
   SMS_CONSENT_WORDING_CURRENT,
   SMS_TERMS_SECTION,
+  SMS_WAITLIST_CONSENT_WORDING,
   smsConsentText,
   TERMS_PATH,
   SlotUnavailableSchema,
@@ -226,6 +227,8 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
             staffMemberId,
             date: waitlistDay.date,
             ...who,
+            // S79: the "Text me when a time opens up" box, by the version it showed.
+            smsConsent: smsOptIn && who.phone !== null ? SMS_WAITLIST_CONSENT_WORDING : null,
           })
         : chosen === null
           ? null
@@ -281,7 +284,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
       name: formText(form, 'name'),
       email: formText(form, 'email'),
       phone: formText(form, 'phone'),
-      smsOptIn: waitlistDay === null && smsOptIn,
+      smsOptIn,
     });
     if (!checked.ok) {
       flushSync(() => {
@@ -583,12 +586,16 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
             staffMemberId={staffMemberId}
             staffNames={staffNames}
             onPick={(chosen) => {
+              // A tick under the waitlist's words isn't a yes to reminders (S79).
+              if (waitlistDay !== null) setSmsOptIn(false);
               setSlot(chosen);
               setWaitlistDay(null);
               setAlternatives(null);
               go('details');
             }}
             onWaitlist={(day) => {
+              // Nor a tick under the booking's a yes to offers.
+              if (waitlistDay === null) setSmsOptIn(false);
               setWaitlistDay(day);
               setSlot(null);
               setAlternatives(null);
@@ -604,7 +611,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           <p className="m-0 type-body text-ink-2">
             {waitlistDay === null
               ? 'We’ll email you a code to confirm it’s you.'
-              : `We’ll email you a code to confirm it’s you. If a time opens up on ${waitlistDay.label}, we email you a link to claim it.`}
+              : `We’ll email you a code to confirm it’s you. If a time opens up on ${waitlistDay.label}, we send you a link to claim it.`}
           </p>
           <form
             id={formId}
@@ -639,12 +646,17 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
                 setPhoneTyped(event.target.value.trim() !== '');
               }}
             />
-            {waitlistDay === null &&
-            (phoneTyped || smsOptIn || (details?.phone ?? null) !== null) ? (
+            {phoneTyped || smsOptIn || (details?.phone ?? null) !== null ? (
               <div className="flex flex-col" data-testid="sms-opt-in">
                 <Checkbox
                   name="smsOptIn"
-                  label={smsConsentText(SMS_CONSENT_WORDING_CURRENT, business.name)}
+                  label={smsConsentText(
+                    // The waitlist's box names its offers (S79), the booking's its reminders.
+                    waitlistDay === null
+                      ? SMS_CONSENT_WORDING_CURRENT
+                      : SMS_WAITLIST_CONSENT_WORDING,
+                    business.name,
+                  )}
                   checked={smsOptIn}
                   onChange={(event) => {
                     setSmsOptIn(event.target.checked);
@@ -799,8 +811,18 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           <Done />
           {heading(`You’re on the waitlist, ${firstName}`)}
           <p className="m-0 type-body text-ink-2">
-            If a time opens up, we email <b className="text-ink">{details.email}</b> a link to claim
-            it. The first to claim it gets it.
+            {smsOptIn && details.phone !== null ? (
+              <>
+                If a time opens up, we text <b className="text-ink">{details.phone}</b> or email{' '}
+                <b className="text-ink">{details.email}</b> a link to claim it.
+              </>
+            ) : (
+              <>
+                If a time opens up, we email <b className="text-ink">{details.email}</b> a link to
+                claim it.
+              </>
+            )}{' '}
+            The first to claim it gets it.
           </p>
           <Summary
             rows={[

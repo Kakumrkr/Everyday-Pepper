@@ -140,4 +140,12 @@ describe('the text-message sections the SMS box links to (S61.2, AC-X-64)', () =
     expect(texts).toMatch(/never shared with or sold to anyone for their own marketing/);
     expect(section('sharing').text).toMatch(/Twilio/);
   });
+
+  it('names waitlist texts: their own yes, not reminders, and email at night (S79, AC-X-228)', () => {
+    const texts = section(SMS_TERMS_SECTION).text;
+    expect(texts).toMatch(/text you when a time you are waiting for opens up/);
+    expect(texts).toMatch(/That yes covers those texts only, not reminders/);
+    expect(texts).toMatch(/isn’t texted at night: it is emailed instead/);
+    expect(termsText()).toMatch(/Waitlist texts/);
+  });
 });

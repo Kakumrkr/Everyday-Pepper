@@ -12,7 +12,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 - [x] T2 contracts + db: v3, sources `waitlist_join`/`staff_recorded`, migration 0093 (source↔wording check), `purpose`/`validUntil` on the outbox text; member fixtures moved to v2
 - [x] T3 core: `smsPermission(tx, phone, purpose)`, delivery drops a text past `validUntil` (`SmsExpired`); profile labels for the new sources
 - [x] T4 domain: `waitlist-texts.ts` (`offerTextNumber`, `queueWaitlistOfferText`, opt-in), candidates take a v3 client without an email, the tool texts instead of emailing (held for the Undo grace via `scope.heldMessage`), the open-for line in texts and emails (top-up); the team's `smsConsent` (`staff_recorded`, never from the AI) and the public join's (`waitlist_join`); api wiring (`BookingEmails.waitlistOptIn`, `ChatOptions.texts`)
-- [ ] T5 API + screens: public join box, the team's box + opt-in text, legal, e2e
+- [x] T5 screens: the join step's v3 box (tick reset on switching), the team's "They agreed to texts about openings" + mobile, the profile's labels, privacy/terms, the export's "how" per source (fixed: every non-booking source read "a team member"); e2e `waitlist-texts.spec.ts` (2) and `booking.spec.ts` green on the stack
 - [ ] T6 close
 
 ## Last sessions
