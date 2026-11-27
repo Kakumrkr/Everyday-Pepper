@@ -1873,6 +1873,6 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Review:** `/code-review` 7, all fixed (holdback only while on; withdrawals by action and paged; a passed new cut-off checked now; a withdrawn card can come back; safeParse; two comments). `/security-review`: none.
   - **Walkthrough:** an owner turns on the ask, picks 12 hours and the holdback at 375 px in light and dark (nothing wider than the screen); the release card in both themes.
   - **Not done / for later:** S73 must leave out held-back visits asked after the switch went off; with a 12 h cut-off any unconfirmed visit the day-before text asked can get a card (ADR item 27).
-  - **Timing:** build and tasks unknown; `pnpm check` ~11 min then ~1.5 min (cache); integration ~1.5 min (failed) then unknown; e2e ~7 min screens, ~1.5 min gallery update, ~10 min final with the stack; CI pending at writing.
+  - **Timing:** build and tasks unknown; `pnpm check` ~11 min then ~1.5 min (cache); integration ~1.5 min (failed) then unknown; e2e ~7 min screens, ~1.5 min gallery update, ~10 min final with the stack; CI run 1 green in ~15 min (lint/test/build 8 min, integration 8, AI evals 5, e2e shards 11–15).
   - **Retro:** _went well_ writing the holdback's integration test with a real 24 h day surfaced the S78.2 overwrite that hid release cards · _do better_ typecheck every package's tests (`turbo typecheck --force`) after changing a shared type, not only the changed package · _top-up for S79_ the waitlist offer text names how long the offer stays open.
 
