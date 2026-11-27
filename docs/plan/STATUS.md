@@ -7,7 +7,10 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S78.3 · The holdback and the cut-off** (brief approved 2026-11-27: "Start with your recommendations and complete the session successfully"; D-1 1 in 5 high-band visits held back, by a hash of the booking id; D-2 the switch on Texts and reminders under "Ask clients to confirm"; D-3 cut-off 12, 24 or 48 h, every template 24; D-4 `bookings.confirm_held_back_at`, kept through a move. Claude: the template's cut-off is written into a new business's settings at creation, like its menu and hours; unset reads the platform's 24).
+- Tasks: 1 ACs · 2 contracts + templates · 3 migration 0092 + export · 4 holdback in the ask and the release check · 5 the cut-off threaded · 6 Texts and reminders screen · 7 top-up (release card's Then line) · 8 close.
+- Done: 1 AC-X-214…219 · 2 `ConfirmCutoffHoursSchema`, `confirmCutoffHours`/`holdback` settings, `inHoldbackShare` (20%), template `reminders` seeded at creation · 3 migration 0092 `confirm_held_back_at`, export · 4 holdback in `confirmAskOf` and `releaseCheck` (`held_back`) · 5 the cut-off in `confirmCutoffOf`, the release check, `withdrawUnfitReleaseCards`; card key adds the cut-off · fix: `markBookingConfirmAsked` keeps the first ask (the day-before at the 24 h cut-off made an early ask look late) · 6 Texts and reminders: "Confirm by" and "Measure what asking does"; legal sentence.
+- Next: task 6's e2e (`texts-settings.spec.ts`, Texts and privacy baselines), then task 7 (the card's Then line), then the close.
 
 ## Last sessions
 - **S78.2 Phase 18 · The release card (2026-11-27)** ([PR #118](https://github.com/Kakumrkr/Everyday-Pepper/pull/118), [ADR-0071](../adr/0071-visit-risk.md) §S78.2). Full entry in [session-log.md](session-log.md).

@@ -4,12 +4,12 @@ import {
   cancellationSentence,
   CancellationFeesSchema,
   ClientIdSchema,
-  CONFIRM_CUTOFF_HOURS,
   ManageTokenSchema,
   reminderSettingsFrom,
   ServiceIdSchema,
   StaffMemberIdSchema,
   type BookingId,
+  type ConfirmCutoffHours,
   type ManageToken,
   type PublicBookingDeposit,
 } from '@pepper/contracts';
@@ -65,9 +65,9 @@ export function asksToConfirm(
   );
 }
 
-/** The time to confirm by: `CONFIRM_CUTOFF_HOURS` before the start (S78). */
-export function confirmCutoffOf(startsAt: Date): Date {
-  return new Date(startsAt.getTime() - CONFIRM_CUTOFF_HOURS * 3_600_000);
+/** The time to confirm by: the business's cut-off before the start (S78; S78.3, AC-X-218). */
+export function confirmCutoffOf(startsAt: Date, cutoffHours: ConfirmCutoffHours): Date {
+  return new Date(startsAt.getTime() - cutoffHours * 3_600_000);
 }
 
 /**
@@ -82,7 +82,10 @@ export function confirmByOf(
   now: number,
 ): string | null {
   if (!asksToConfirm(tenant, row)) return null;
-  const by = confirmCutoffOf(row.startsAt);
+  const by = confirmCutoffOf(
+    row.startsAt,
+    reminderSettingsFrom(tenant.reminderSettings).confirmCutoffHours,
+  );
   return by.getTime() > now ? by.toISOString() : null;
 }
 

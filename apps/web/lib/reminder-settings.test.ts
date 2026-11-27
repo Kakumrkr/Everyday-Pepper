@@ -1,7 +1,10 @@
 import { DEFAULT_REMINDER_SETTINGS, type ReminderSettings } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
+  askToConfirmHint,
+  cutoffLabel,
   dayBeforeHint,
+  holdbackHint,
   leadLabel,
   remindersSummary,
   sameDayGoes,
@@ -74,5 +77,40 @@ describe('Texts and reminders wording (AC-X-77)', () => {
   it('applies a change over the settings, keeping the rest', () => {
     expect(withPatch(on, { sameDayLeadHours: 3 })).toEqual(with_({ sameDayLeadHours: 3 }));
     expect(withPatch(on, { texts: false })).toEqual(with_({ texts: false }));
+    expect(withPatch(on, { confirmCutoffHours: 48, holdback: true })).toEqual(
+      with_({ confirmCutoffHours: 48, holdback: true }),
+    );
+  });
+});
+
+describe('the cut-off and the holdback (S78.3, AC-X-214, AC-X-217)', () => {
+  const asking = with_({ askToConfirm: true });
+
+  it('names the cut-off the owner picked', () => {
+    expect([12, 24, 48].map((h) => cutoffLabel(h as 12 | 24 | 48))).toEqual([
+      '12 hours',
+      '1 day',
+      '2 days',
+    ]);
+    expect(askToConfirmHint(asking)).toBe(
+      'Clients are asked to confirm by a day before. Visits likely to be missed are asked 3 days ahead.',
+    );
+    expect(askToConfirmHint(with_({ askToConfirm: true, confirmCutoffHours: 12 }))).toContain(
+      'confirm by 12 hours before.',
+    );
+    expect(savedNote({ confirmCutoffHours: 48 }, with_({ confirmCutoffHours: 48 }))).toBe(
+      'Saved. Clients are asked to confirm by 2 days before.',
+    );
+  });
+
+  it('says what the holdback does, on and off', () => {
+    expect(holdbackHint(asking)).toBe('Off. Every visit likely to be missed is asked early.');
+    expect(holdbackHint(with_({ askToConfirm: true, holdback: true }))).toBe(
+      '1 in 5 visits likely to be missed aren’t asked early and get no release card, so you can see how many no-shows asking saves.',
+    );
+    expect(savedNote({ holdback: true }, with_({ holdback: true }))).toBe(
+      'Saved. 1 in 5 likely misses aren’t asked early.',
+    );
+    expect(savedNote({ holdback: false }, asking)).toBe('Saved. Every likely miss is asked early.');
   });
 });

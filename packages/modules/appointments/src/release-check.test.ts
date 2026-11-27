@@ -6,13 +6,14 @@ import { releaseCheck, releaseTargetKey } from './services/release-check.js';
 
 const HOUR = 3_600_000;
 const START = Date.UTC(2026, 11, 1, 19, 0);
-const asking = { askToConfirm: true };
+const asking = { askToConfirm: true, confirmCutoffHours: 24 } as const;
 const visit = (over: Partial<Parameters<typeof releaseCheck>[0]> = {}) => ({
   status: 'confirmed',
   startsAt: new Date(START),
   clientConfirmedAt: null,
   // The 72 h ask.
   confirmAskedAt: new Date(START - 72 * HOUR),
+  confirmHeldBackAt: null,
   ...over,
 });
 const atCutoff = START - 24 * HOUR;
@@ -30,7 +31,7 @@ describe('releaseCheck', () => {
   });
 
   it('needs the business to ask and the client to have been asked early enough', () => {
-    expect(releaseCheck(visit(), { askToConfirm: false }, atCutoff)).toBe('not_asking');
+    expect(releaseCheck(visit(), { ...asking, askToConfirm: false }, atCutoff)).toBe('not_asking');
     expect(releaseCheck(visit({ confirmAskedAt: null }), asking, atCutoff)).toBe('not_asked');
     // Exactly 12 h before the cut-off is early enough; a minute later (a day-before ask) isn't.
     expect(
@@ -51,6 +52,41 @@ describe('releaseCheck', () => {
     ).toBe('confirmed');
     expect(releaseCheck(visit({ status: 'cancelled' }), asking, atCutoff)).toBe('not_booked');
     expect(releaseCheck(visit(), asking, atCutoff, START + HOUR)).toBe('moved');
+  });
+
+  it('never releases a visit the holdback kept from its early ask (S78.3, AC-X-215)', () => {
+    const held = visit({ confirmHeldBackAt: new Date(START - 72 * HOUR) });
+    expect(releaseCheck(held, asking, atCutoff)).toBe('held_back');
+    // Whatever asked it later, at any cut-off: a 12 h cut-off makes the day-before ask early
+    // enough, and still no card.
+    const asked = { ...held, confirmAskedAt: new Date(START - 24 * HOUR) };
+    expect(releaseCheck(asked, { ...asking, confirmCutoffHours: 12 }, START - 12 * HOUR)).toBe(
+      'held_back',
+    );
+    expect(
+      releaseCheck(
+        visit({ confirmAskedAt: new Date(START - 24 * HOUR) }),
+        { ...asking, confirmCutoffHours: 12 },
+        START - 12 * HOUR,
+      ),
+    ).toBe('ok');
+  });
+
+  it('follows the business’s cut-off (S78.3, AC-X-218)', () => {
+    const twelve = { ...asking, confirmCutoffHours: 12 } as const;
+    const fortyEight = { ...asking, confirmCutoffHours: 48 } as const;
+    expect(releaseCheck(visit(), twelve, atCutoff)).toBe('before_cutoff');
+    expect(releaseCheck(visit(), twelve, START - 12 * HOUR)).toBe('ok');
+    expect(releaseCheck(visit(), fortyEight, START - 48 * HOUR)).toBe('ok');
+    expect(releaseCheck(visit(), fortyEight, START - 48 * HOUR - 1)).toBe('before_cutoff');
+    // At 48 h, the 72 h ask is 24 h ahead of it; one 12 h before the cut-off is the latest.
+    expect(
+      releaseCheck(
+        visit({ confirmAskedAt: new Date(START - 60 * HOUR + 60_000) }),
+        fortyEight,
+        START - 48 * HOUR,
+      ),
+    ).toBe('asked_late');
   });
 
   it('keys one card per visit', () => {

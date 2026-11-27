@@ -1,4 +1,10 @@
-import type { ReminderSettings, ReminderSettingsPatch, SameDayLeadHours } from '@pepper/contracts';
+import {
+  CONFIRM_HOLDBACK_PERCENT,
+  type ConfirmCutoffHours,
+  type ReminderSettings,
+  type ReminderSettingsPatch,
+  type SameDayLeadHours,
+} from '@pepper/contracts';
 
 // The words of "Texts and reminders" (S62.2, AC-X-77, ADR-0065): the More row's summary, each
 // switch's hint and the note after a save. The api decides what is sent; these only say it.
@@ -6,6 +12,21 @@ import type { ReminderSettings, ReminderSettingsPatch, SameDayLeadHours } from '
 export const REMINDER_SETTINGS_PATH = '/v1/reminders/settings';
 
 export const SAME_DAY_LEADS: readonly SameDayLeadHours[] = [1, 2, 3];
+
+export const CONFIRM_CUTOFFS: readonly ConfirmCutoffHours[] = [12, 24, 48];
+
+/** The confirm-by choice's label (S78.3, AC-X-217): "12 hours", "1 day", "2 days". */
+export function cutoffLabel(hours: ConfirmCutoffHours): string {
+  return hours === 12 ? '12 hours' : hours === 24 ? '1 day' : '2 days';
+}
+
+/** "12 hours before", "a day before", "2 days before". */
+function cutoffPhrase(hours: ConfirmCutoffHours): string {
+  return hours === 24 ? 'a day before' : `${cutoffLabel(hours)} before`;
+}
+
+/** The holdback's share in words (S78.3): "1 in 5". */
+export const HOLDBACK_SHARE_WORDS = `1 in ${String(Math.round(100 / CONFIRM_HOLDBACK_PERCENT))}`;
 
 /** "1 hour", "2 hours". */
 export function leadLabel(hours: SameDayLeadHours): string {
@@ -55,8 +76,15 @@ export function sameDayHint(settings: ReminderSettings): string {
 /** Under "Ask clients to confirm" (S78, AC-X-202). */
 export function askToConfirmHint(settings: ReminderSettings): string {
   return settings.askToConfirm
-    ? 'Clients are asked to confirm by a day before. Visits likely to be missed are asked 3 days ahead.'
+    ? `Clients are asked to confirm by ${cutoffPhrase(settings.confirmCutoffHours)}. Visits likely to be missed are asked 3 days ahead.`
     : 'Off. Clients can still confirm by replying C to a reminder text.';
+}
+
+/** Under "Measure what asking does" (S78.3, AC-X-214). */
+export function holdbackHint(settings: ReminderSettings): string {
+  return settings.holdback
+    ? `${HOLDBACK_SHARE_WORDS} visits likely to be missed aren’t asked early and get no release card, so you can see how many no-shows asking saves.`
+    : 'Off. Every visit likely to be missed is asked early.';
 }
 
 /** The toast after a save, from what changed and the settings it left. */
@@ -65,6 +93,14 @@ export function savedNote(patch: ReminderSettingsPatch, next: ReminderSettings):
     return next.askToConfirm
       ? 'Saved. Clients are asked to confirm their visits.'
       : 'Saved. Clients aren’t asked to confirm.';
+  }
+  if (patch.confirmCutoffHours !== undefined) {
+    return `Saved. Clients are asked to confirm by ${cutoffPhrase(next.confirmCutoffHours)}.`;
+  }
+  if (patch.holdback !== undefined) {
+    return next.holdback
+      ? `Saved. ${HOLDBACK_SHARE_WORDS} likely misses aren’t asked early.`
+      : 'Saved. Every likely miss is asked early.';
   }
   if (patch.texts !== undefined) {
     return next.texts ? 'Saved. Texts to clients are on.' : 'Saved. No texts go to clients.';
@@ -93,5 +129,7 @@ export function withPatch(
     sameDay: patch.sameDay ?? settings.sameDay,
     sameDayLeadHours: patch.sameDayLeadHours ?? settings.sameDayLeadHours,
     askToConfirm: patch.askToConfirm ?? settings.askToConfirm,
+    confirmCutoffHours: patch.confirmCutoffHours ?? settings.confirmCutoffHours,
+    holdback: patch.holdback ?? settings.holdback,
   };
 }

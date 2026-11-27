@@ -3,6 +3,7 @@ export {
   listTemplates,
   PLATFORM_INSIGHTS,
   templateDrafts,
+  templateReminders,
   templateWaitlist,
   templateInsights,
   templateRuleDefaults,

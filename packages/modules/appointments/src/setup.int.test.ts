@@ -1,9 +1,16 @@
-import { TenantIdSchema, TenantSlugSchema, type TenantId, type UserId } from '@pepper/contracts';
+import {
+  DEFAULT_REMINDER_SETTINGS,
+  TenantIdSchema,
+  TenantSlugSchema,
+  type TenantId,
+  type UserId,
+} from '@pepper/contracts';
 import { createBusiness, ForbiddenError, type Actor } from '@pepper/core';
 import {
   activationEvents,
   addMembership,
   findCurrentTenant,
+  findReminderSettings,
   insertBusinessPhoto,
   listAuditEntries,
   withTenant,
@@ -70,6 +77,7 @@ async function newBusiness(options: { seeded?: boolean } = {}) {
                 ],
                 owner: { userId: ownerId, displayName: 'Ana' },
                 hours: TUE_SAT,
+                reminders: { confirmCutoffHours: 12 },
               });
             }
           : undefined,
@@ -113,6 +121,18 @@ describe('the setup review (AC-W1-11)', () => {
       expect.objectContaining({ displayName: 'Ana', isYou: true, serviceCount: 3 }),
     ]);
     expect(review.providers[0]?.hours.intervals).toHaveLength(5);
+  });
+
+  it("starts the business at its type's confirm cut-off, the rest at the defaults (S78.3, AC-X-217)", async () => {
+    const { tenantId } = await newBusiness({ seeded: true });
+    expect(await withTenant(db, tenantId, findReminderSettings)).toEqual({
+      ...DEFAULT_REMINDER_SETTINGS,
+      confirmCutoffHours: 12,
+    });
+    const plain = await newBusiness();
+    expect((await withTenant(db, plain.tenantId, findReminderSettings)).confirmCutoffHours).toBe(
+      24,
+    );
   });
 
   it('remembers "checked" per business, once, without changing setup or activation', async () => {

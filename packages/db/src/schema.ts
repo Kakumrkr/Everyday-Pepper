@@ -946,9 +946,14 @@ export const bookings = pgTable(
     // How the client confirmed (S78): `text` ("C") or `link` (the manage page); NULL with
     // `client_confirmed_at`, and older confirms (all by text).
     clientConfirmedVia: text('client_confirmed_via'),
-    // When the client was last asked to confirm this visit at its current time (S78): a
+    // When the client was first asked to confirm this visit at its current time (S78): a
     // reminder text asking "C", or an email with the confirm link. A move clears it.
     confirmAskedAt: timestamp('confirm_asked_at', { withTimezone: true }),
+    // When the holdback kept this visit from its early ask (S78.3, ADR-0071): the business had
+    // it on and the visit, high-band and unconfirmed, fell in the held-back share. It never
+    // gets a release card; a move keeps the mark (the same visit stays held back), so S73 can
+    // compare these visits' no-shows with the asked ones'. NULL: not held back.
+    confirmHeldBackAt: timestamp('confirm_held_back_at', { withTimezone: true }),
     // When it was cancelled (S77, ADR-0071), for a late cancel; NULL while it isn't cancelled.
     // Older cancels were backfilled from their audit entry, else `updated_at` (migration 0089).
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),

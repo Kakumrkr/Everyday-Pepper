@@ -66,8 +66,15 @@ const thursdayAt = (time: string) => {
   return new Date(Date.UTC(2026, 10, 5, h + 5, m)).toISOString();
 };
 
-/** A business that asks clients to confirm, and Maria's Thursday 2 pm asked on Monday. */
-async function askedVisit(w: World, time = '14:00'): Promise<Booking> {
+/**
+ * A business that asks clients to confirm, and Maria's Thursday 2 pm asked on Monday (or at
+ * `askedAt`).
+ */
+async function askedVisit(
+  w: World,
+  time = '14:00',
+  askedAt: (booking: Booking) => Date = () => new Date(NOW),
+): Promise<Booking> {
   await updateReminderSettings(db, w.owner, { askToConfirm: true }, { clock: w.clock });
   const booking = await createBooking(
     db,
@@ -82,7 +89,7 @@ async function askedVisit(w: World, time = '14:00'): Promise<Booking> {
     { clock: w.clock },
   );
   await withTenant(db, w.tenantId, (tx) =>
-    markBookingConfirmAsked(tx, BookingIdSchema.parse(booking.id), new Date(NOW)),
+    markBookingConfirmAsked(tx, BookingIdSchema.parse(booking.id), askedAt(booking)),
   );
   return booking;
 }
@@ -172,10 +179,7 @@ describe('the release card at the cut-off (AC-X-207)', () => {
       },
       { clock: w.clock },
     );
-    const late = await askedVisit(w, '15:00');
-    await withTenant(db, w.tenantId, (tx) =>
-      markBookingConfirmAsked(tx, BookingIdSchema.parse(late.id), cutoffOf(late)),
-    );
+    const late = await askedVisit(w, '15:00', cutoffOf);
     w.clock.set(cutoffOf(late).toISOString());
     await releaseJob(w);
     expect(cutoffOf(unasked).getTime()).toBeLessThan(w.clock.now().getTime());
@@ -282,6 +286,26 @@ describe('what takes the card away (AC-X-210)', () => {
     await oneCard(w);
     await updateReminderSettings(db, w.owner, { askToConfirm: false }, { clock: w.clock });
     expect(await releaseCards(w)).toHaveLength(0);
+  });
+
+  it('a new cut-off it no longer fits; the job brings it back at the new one (S78.3, AC-X-218)', async () => {
+    const w = await newWorld(db);
+    const booking = await askedVisit(w);
+    w.clock.set(cutoffOf(booking).toISOString());
+    await releaseJob(w);
+    await oneCard(w);
+    // 48 h: the visit is past that cut-off too and was asked early enough, so the card stays.
+    await updateReminderSettings(db, w.owner, { confirmCutoffHours: 48 }, { clock: w.clock });
+    await oneCard(w);
+    // 12 h: not there yet, so it goes, and comes back at 12 h before the visit.
+    await updateReminderSettings(db, w.owner, { confirmCutoffHours: 12 }, { clock: w.clock });
+    expect(await releaseCards(w)).toHaveLength(0);
+    w.clock.set(new Date(Date.parse(booking.startsAt) - 12 * HOUR - 60_000).toISOString());
+    await releaseJob(w);
+    expect(await releaseCards(w)).toHaveLength(0);
+    w.clock.set(new Date(Date.parse(booking.startsAt) - 12 * HOUR).toISOString());
+    await releaseJob(w);
+    await oneCard(w);
   });
 
   it('a move', async () => {

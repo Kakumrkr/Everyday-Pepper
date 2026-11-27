@@ -251,8 +251,8 @@ export async function markBookingClientConfirmed(
 
 /**
  * Records that the client was asked to confirm the booking at `at` (S78, AC-X-201): a reminder
- * text asking "C", or an email with the confirm link. Visit risk scores `not_confirmed` only
- * after it; a move clears it.
+ * text asking "C", or an email with the confirm link. The first ask at the visit's time stays.
+ * Visit risk scores `not_confirmed` only after it; a move clears it.
  */
 export async function markBookingConfirmAsked(
   tx: TenantTx,
@@ -261,6 +261,27 @@ export async function markBookingConfirmAsked(
 ): Promise<void> {
   await tx
     .update(bookings)
-    .set({ confirmAskedAt: at })
+    // The first ask stays (S78.3 fix): the day-before reminder lands at the 24 h cut-off, the
+    // release check's own minute, and must not make an early ask look late.
+    .set({
+      confirmAskedAt: sql`COALESCE(${bookings.confirmAskedAt}, ${at.toISOString()}::timestamptz)`,
+    })
+    .where(eq(bookings.id, BookingIdSchema.parse(bookingId)));
+}
+
+/**
+ * Marks the visit held back from its early ask (S78.3, ADR-0071): the first time stays, so a
+ * re-planned ask after a move doesn't change when it was held back.
+ */
+export async function markBookingConfirmHeldBack(
+  tx: TenantTx,
+  bookingId: BookingId,
+  at: Date,
+): Promise<void> {
+  await tx
+    .update(bookings)
+    .set({
+      confirmHeldBackAt: sql`COALESCE(${bookings.confirmHeldBackAt}, ${at.toISOString()}::timestamptz)`,
+    })
     .where(eq(bookings.id, BookingIdSchema.parse(bookingId)));
 }

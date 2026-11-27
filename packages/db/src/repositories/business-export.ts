@@ -178,6 +178,8 @@ export interface BusinessExportData {
     clientConfirmedAt: Date | null;
     clientConfirmedVia: string | null;
     confirmAskedAt: Date | null;
+    /** When the holdback kept it from its early ask (S78.3); null: not held back. */
+    confirmHeldBackAt: Date | null;
   }[];
   waitlist: {
     id: string;
@@ -404,6 +406,7 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       clientConfirmedAt: bookings.clientConfirmedAt,
       clientConfirmedVia: bookings.clientConfirmedVia,
       confirmAskedAt: bookings.confirmAskedAt,
+      confirmHeldBackAt: bookings.confirmHeldBackAt,
     })
     .from(bookings)
     .orderBy(asc(bookings.startsAt), asc(bookings.id));

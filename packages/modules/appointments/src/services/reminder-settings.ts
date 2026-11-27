@@ -22,7 +22,7 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { BookingNotFoundError } from '../errors.js';
-import { withdrawReleaseCards } from './release-check.js';
+import { withdrawReleaseCards, withdrawUnfitReleaseCards } from './release-check.js';
 import { reminderSettingsOf, replanUpcomingReminders } from './reminders.js';
 
 // Texts and reminders (S62, AC-X-75): every member sees what the business sends its clients;
@@ -70,6 +70,10 @@ export async function updateReminderSettings(
     await replanUpcomingReminders(tx, tenant.timeZone, after, now);
     // No longer asking: the release cards waiting could no longer be approved (S78.2).
     if (before.askToConfirm && !after.askToConfirm) await withdrawReleaseCards(tx, now);
+    // A new cut-off: a card shown at the old one may not fit the new one yet (S78.3, AC-X-218).
+    else if (before.confirmCutoffHours !== after.confirmCutoffHours) {
+      await withdrawUnfitReleaseCards(tx, after, now);
+    }
     return viewOf(actor, after);
   });
 }

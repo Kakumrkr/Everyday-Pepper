@@ -1,10 +1,7 @@
-import {
-  CONFIRM_CUTOFF_HOURS,
-  RELEASE_ANSWER_HOURS,
-  type ReminderSettings,
-} from '@pepper/contracts';
+import { BookingIdSchema, RELEASE_ANSWER_HOURS, type ReminderSettings } from '@pepper/contracts';
 import { withdrawPendingProposal } from '@pepper/core';
 import {
+  findBooking,
   findPendingProposalFor,
   listPendingProposals,
   lockPendingProposalFor,
@@ -32,6 +29,7 @@ export type ReleaseCheck =
   | 'not_asking'
   | 'not_booked'
   | 'confirmed'
+  | 'held_back'
   | 'not_asked'
   | 'asked_late'
   | 'before_cutoff'
@@ -41,12 +39,17 @@ export type ReleaseCheck =
 /**
  * Whether the visit may be released at `now` (ms), from its row and the business's settings
  * (D-2): the business asks clients to confirm; the visit is booked, not started and unconfirmed;
- * its client was asked at least `RELEASE_ANSWER_HOURS` before the cut-off; the cut-off has come.
+ * the holdback didn't keep it from its early ask (S78.3, AC-X-215: whatever asked it since, so
+ * the held-back visits stay a fair comparison); its client was asked at least
+ * `RELEASE_ANSWER_HOURS` before the business's cut-off (S78.3, AC-X-218); the cut-off has come.
  * `shownStartsAt` (ms): the time the card showed, which must still be the visit's.
  */
 export function releaseCheck(
-  row: Pick<BookingRow, 'status' | 'startsAt' | 'clientConfirmedAt' | 'confirmAskedAt'>,
-  settings: Pick<ReminderSettings, 'askToConfirm'>,
+  row: Pick<
+    BookingRow,
+    'status' | 'startsAt' | 'clientConfirmedAt' | 'confirmAskedAt' | 'confirmHeldBackAt'
+  >,
+  settings: Pick<ReminderSettings, 'askToConfirm' | 'confirmCutoffHours'>,
   now: number,
   shownStartsAt?: number,
 ): ReleaseCheck {
@@ -56,8 +59,9 @@ export function releaseCheck(
   if (shownStartsAt !== undefined && shownStartsAt !== startsAt) return 'moved';
   if (startsAt <= now) return 'started';
   if (row.clientConfirmedAt !== null) return 'confirmed';
+  if (row.confirmHeldBackAt !== null) return 'held_back';
   if (row.confirmAskedAt === null) return 'not_asked';
-  const cutoff = startsAt - CONFIRM_CUTOFF_HOURS * HOUR_MS;
+  const cutoff = startsAt - settings.confirmCutoffHours * HOUR_MS;
   if (row.confirmAskedAt.getTime() > cutoff - RELEASE_ANSWER_HOURS * HOUR_MS) return 'asked_late';
   if (now < cutoff) return 'before_cutoff';
   return 'ok';
@@ -110,6 +114,33 @@ export async function withdrawReleaseCards(tx: TenantTx, now: number): Promise<n
   let withdrawn = 0;
   for (const proposal of await listPendingProposals(tx, at, WITHDRAW_PAGE)) {
     if (proposal.action !== 'booking.release') continue;
+    if (await withdrawPendingProposal(tx, proposal.targetKey, at)) withdrawn += 1;
+  }
+  return withdrawn;
+}
+
+/**
+ * Takes away the waiting release cards that no longer fit the business's new cut-off (S78.3,
+ * AC-X-218): a card shown at the old cut-off for a visit not yet at the new one, or whose ask no
+ * longer came early enough. The re-planned release check brings a card back at the new cut-off.
+ * Returns how many went.
+ */
+export async function withdrawUnfitReleaseCards(
+  tx: TenantTx,
+  settings: Pick<ReminderSettings, 'askToConfirm' | 'confirmCutoffHours'>,
+  now: number,
+): Promise<number> {
+  const at = new Date(now);
+  let withdrawn = 0;
+  for (const proposal of await listPendingProposals(tx, at, WITHDRAW_PAGE)) {
+    if (proposal.action !== 'booking.release') continue;
+    const payload = proposal.payload as { bookingId?: unknown; startsAt?: unknown } | null;
+    const row =
+      typeof payload?.bookingId === 'string'
+        ? await findBooking(tx, BookingIdSchema.parse(payload.bookingId))
+        : undefined;
+    const shown = typeof payload?.startsAt === 'string' ? Date.parse(payload.startsAt) : NaN;
+    if (row !== undefined && releaseCheck(row, settings, now, shown) === 'ok') continue;
     if (await withdrawPendingProposal(tx, proposal.targetKey, at)) withdrawn += 1;
   }
   return withdrawn;

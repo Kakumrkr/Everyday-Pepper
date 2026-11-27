@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { PriceCentsSchema, SERVICE_LIMITS, WeeklyHoursSchema } from './appointments.js';
 import { TemplateMemorySchema } from './memory.js';
+import { CONFIRM_CUTOFF_HOURS, ConfirmCutoffHoursSchema } from './reminders.js';
 import { RuleDefaultsSchema, type RuleDefaults } from './rules.js';
 import { TemplateIdSchema } from './tenancy.js';
 import { AutonomySettingsSchema } from './trust.js';
@@ -179,6 +180,19 @@ export type TemplateWaitlist = z.infer<typeof TemplateWaitlistSchema>;
 /** Without a template (or before one says otherwise): the top 3 at once (playbook D-6). */
 export const PLATFORM_WAITLIST: TemplateWaitlist = { offerFanOut: 3 };
 
+/**
+ * The confirm cut-off a new business of the type starts with (S78.3, AC-X-217): how many hours
+ * before a visit its clients are asked to confirm by. Like prices, it only pre-fills; the owner
+ * changes it on Texts and reminders.
+ */
+export const TemplateRemindersSchema = z
+  .object({ confirmCutoffHours: ConfirmCutoffHoursSchema })
+  .strict();
+export type TemplateReminders = z.infer<typeof TemplateRemindersSchema>;
+
+/** Without a template (or before one says otherwise): the platform's 24 hours (S78, D-4). */
+export const PLATFORM_REMINDERS: TemplateReminders = { confirmCutoffHours: CONFIRM_CUTOFF_HOURS };
+
 const Hint = z.string().trim().min(1).max(TEMPLATE_LIMITS.maxHintLength);
 
 /** What onboarding looks for on a website, price list or photo (Phase 9). */
@@ -230,6 +244,8 @@ export const TemplateSchema = z
     drafts: TemplateDraftsSchema.default(PLATFORM_DRAFTS),
     /** How many waiting clients a freed slot is offered to at once (S37). */
     waitlist: TemplateWaitlistSchema.default(PLATFORM_WAITLIST),
+    /** The confirm cut-off a new business starts with (S78.3). */
+    reminders: TemplateRemindersSchema.default(PLATFORM_REMINDERS),
     /** Domain hints added to the AI's instructions (Phase 6); never client data. */
     promptFragments: z
       .array(z.string().trim().min(1).max(TEMPLATE_LIMITS.maxPromptFragmentLength))

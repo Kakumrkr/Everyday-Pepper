@@ -242,6 +242,8 @@ describe('booking reminders', () => {
       sameDay: true,
       sameDayLeadHours: 2,
       askToConfirm: false,
+      confirmCutoffHours: 24,
+      holdback: false,
     });
     await withTenant(db, tenant, (tx) =>
       setReminderSettings(tx, {
@@ -250,6 +252,8 @@ describe('booking reminders', () => {
         sameDay: false,
         sameDayLeadHours: 3,
         askToConfirm: true,
+        confirmCutoffHours: 48,
+        holdback: true,
       }),
     );
     expect(await withTenant(db, tenant, (tx) => findReminderSettings(tx))).toMatchObject({
@@ -257,6 +261,8 @@ describe('booking reminders', () => {
       sameDay: false,
       sameDayLeadHours: 3,
       askToConfirm: true,
+      confirmCutoffHours: 48,
+      holdback: true,
     });
     // Another business keeps its own.
     expect(await withTenant(db, other, (tx) => findReminderSettings(tx))).toMatchObject({
