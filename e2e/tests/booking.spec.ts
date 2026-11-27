@@ -2,6 +2,7 @@ import {
   addDays,
   BookingSchema,
   ClientSchema,
+  ClientTextsSchema,
   ClientsResponseSchema,
   CreateInviteResponseSchema,
   CurrentBusinessResponseSchema,
@@ -161,6 +162,14 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await dialog.getByRole('button', { name: 'Add to the waitlist' }).click();
   await expect(dialog.getByLabel('From')).toHaveValue('10:30');
   await expect(dialog.getByLabel('Until')).toHaveValue('11:30');
+  // She told the team yes to texts about openings (S79, AC-X-223): a number Pepper can text.
+  await dialog.getByRole('checkbox', { name: 'They agreed to texts about openings' }).check();
+  await dialog.getByLabel('Their mobile').fill('+44 20 7183 8750');
+  await dialog.getByRole('button', { name: 'Add to the waitlist' }).click();
+  await expect(
+    dialog.getByText('Use a US or Canadian mobile number, or untick the box.'),
+  ).toBeVisible();
+  await dialog.getByLabel('Their mobile').fill('(555) 201-7788');
   await dialog.getByRole('button', { name: 'Add to the waitlist' }).click();
   await expect(dialog).toBeHidden();
   const waitlist = WaitlistResponseSchema.parse(
@@ -170,6 +179,15 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   expect(waitlist.entries[0]?.windows).toEqual([
     { date: formatDate(s.day), start: '10:30', end: '11:30' },
   ]);
+  const texts = ClientTextsSchema.parse(
+    await (
+      await page.request.get(`/v1/clients/${waitlist.entries[0]?.clientId ?? ''}/texts`)
+    ).json(),
+  );
+  expect(texts).toMatchObject({
+    status: 'on',
+    consent: { phone: '+15552017788', source: 'staff_recorded', wordingVersion: 'sms-consent-v3' },
+  });
 
   // Move the 10:00 booking to 1:00 PM.
   await jess.getByRole('button', { name: /^10:00\s?–\s?11:00\sAM/ }).click();

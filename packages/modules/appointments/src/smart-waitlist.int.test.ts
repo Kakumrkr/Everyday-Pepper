@@ -1,5 +1,7 @@
 import {
   BookingIdSchema,
+  OutboxMessageIdSchema,
+  OutboxSmsSchema,
   StaffMemberIdSchema,
   TenantIdSchema,
   WaitlistMatchIdSchema,
@@ -18,12 +20,20 @@ import {
   createBusiness,
   createClient,
   deleteClient,
+  ForbiddenError,
   ManualClock,
+  openOutboxContent,
+  outboxKeyFrom,
+  recordSmsConsent,
   type Actor,
 } from '@pepper/core';
 import {
   expireWaitlistOffers,
+  findActiveSmsConsent,
+  findCurrentTenant,
+  findOutboxMessage,
   insertBooking,
+  listAuditEntries,
   listWaitlistMatches,
   optOutClientEmail,
   withTenant,
@@ -61,6 +71,8 @@ import {
 import { createStaffMember, updateStaffMember } from './services/staff.js';
 import { addTimeOff, removeTimeOff } from './services/time-off.js';
 import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
+import { textableNumber } from './services/reminders.js';
+import { queueWaitlistOptInText, type WaitlistOptInNotify } from './services/waitlist-texts.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
 // The smart waitlist through the domain services, against real Postgres (S37, ADR-0041,
@@ -918,5 +930,132 @@ describe('never offered (S54, AC-W5-4: 0 wrong-client sends)', () => {
       ),
     );
     expect(made).toEqual([]);
+  });
+});
+
+describe('the team records a client’s yes to texts about openings (S79, AC-X-223)', () => {
+  const PHONE = '+15552347950';
+
+  const addWithTexts = (w: World, actor: Actor, optIn?: WaitlistOptInNotify) =>
+    whileFull(w, () =>
+      addToWaitlist(
+        db,
+        actor,
+        {
+          clientId: client(w, 1).id,
+          serviceId: w.haircut.id,
+          windows: [{ date: '2026-11-03', start: '09:00', end: '12:00' }],
+          smsConsent: { phone: PHONE, wordingVersion: 'sms-consent-v3' },
+        },
+        { clock: w.clock, ...(optIn !== undefined && { optIn }) },
+      ),
+    );
+
+  it('records v3 as `staff_recorded`, audited as the member, and queues one opt-in text', async () => {
+    const w = await newWorld();
+    const key = outboxKeyFrom('an-integration-test-outbox-secret-32+');
+    const queued: (string | undefined)[] = [];
+    const optIn: WaitlistOptInNotify = async (tx, notice) => {
+      const tenant = await findCurrentTenant(tx);
+      if (tenant === undefined) throw new Error('no business');
+      // Twice: one text an entry, whatever the retries.
+      for (let i = 0; i < 2; i += 1) {
+        queued.push(
+          await queueWaitlistOptInText(tx, tenant, notice, {
+            texts: true,
+            outboxKey: key,
+            now: w.clock.now(),
+          }),
+        );
+      }
+    };
+    const entry = await addWithTexts(w, w.owner, optIn);
+    const consent = await withTenant(db, w.tenantId, (tx) => findActiveSmsConsent(tx, PHONE));
+    expect(consent).toMatchObject({
+      source: 'staff_recorded',
+      clientId: client(w, 1).id,
+      wordingVersion: 'sms-consent-v3',
+      shownText: expect.stringContaining('opens up at Juniper Hair Studio') as unknown,
+    });
+    const audit = await withTenant(db, w.tenantId, (tx) => listAuditEntries(tx, { limit: 5 }));
+    expect(audit.find((e) => e.action === 'sms.consent_given')).toMatchObject({
+      actor: { kind: 'user', userId: w.owner.context.userId },
+    });
+    expect(queued[0]).toBeDefined();
+    expect(queued[1]).toBeUndefined();
+    const message = await withTenant(db, w.tenantId, (tx) =>
+      findOutboxMessage(tx, OutboxMessageIdSchema.parse(queued[0])),
+    );
+    expect(message?.type).toBe('sms');
+    const sms = OutboxSmsSchema.parse(
+      JSON.parse(
+        openOutboxContent(
+          key,
+          OutboxMessageIdSchema.parse(queued[0]),
+          message?.payload ?? Buffer.alloc(0),
+        ).toString('utf8'),
+      ),
+    );
+    expect(sms).toMatchObject({ to: PHONE, purpose: 'waitlist_offer' });
+    expect(sms.body).toContain("You're on the waitlist for Haircut.");
+    expect(entry.status).toBe('waiting');
+  });
+
+  it('queues no opt-in text while the business’s texts are off', async () => {
+    const w = await newWorld();
+    await withTenant(db, w.tenantId, async (tx) => {
+      const tenant = await findCurrentTenant(tx);
+      if (tenant === undefined) throw new Error('no business');
+      expect(
+        await queueWaitlistOptInText(
+          tx,
+          { reminderSettings: { texts: false } },
+          {
+            phone: PHONE,
+            entryId: client(w, 1).id,
+            details: { businessName: 'Juniper', serviceName: 'Haircut' },
+          },
+          {
+            texts: true,
+            outboxKey: outboxKeyFrom('an-integration-test-outbox-secret-32+'),
+            now: w.clock.now(),
+          },
+        ),
+      ).toBeUndefined();
+    });
+  });
+
+  it('texts a client only for what they said yes to, whoever else shares the number', async () => {
+    const w = await newWorld();
+    // Client 1 told the team yes to openings; client 2 ticked reminders on the same number.
+    await addWithTexts(w, w.owner);
+    await withTenant(db, w.tenantId, (tx) =>
+      recordSmsConsent(
+        tx,
+        {
+          phone: PHONE,
+          source: 'booking_page',
+          clientId: client(w, 2).id,
+          wordingVersion: 'sms-consent-v1',
+          givenAt: w.clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      ),
+    );
+    await withTenant(db, w.tenantId, async (tx) => {
+      expect(await textableNumber(tx, client(w, 1).id, 'waitlist_offer')).toBe(PHONE);
+      expect(await textableNumber(tx, client(w, 1).id, 'appointments')).toBeNull();
+      expect(await textableNumber(tx, client(w, 2).id, 'appointments')).toBe(PHONE);
+      expect(await textableNumber(tx, client(w, 2).id, 'waitlist_offer')).toBeNull();
+    });
+  });
+
+  it('never from the AI: refused, nothing added or recorded', async () => {
+    const w = await newWorld();
+    await expect(addWithTexts(w, { ...w.owner, via: 'ai' })).rejects.toBeInstanceOf(ForbiddenError);
+    expect(
+      await withTenant(db, w.tenantId, (tx) => findActiveSmsConsent(tx, PHONE)),
+    ).toBeUndefined();
+    expect(await listWaitlist(db, w.owner, {}, { clock: w.clock })).toEqual([]);
   });
 });

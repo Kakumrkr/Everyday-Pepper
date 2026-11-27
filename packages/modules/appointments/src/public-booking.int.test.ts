@@ -21,6 +21,7 @@ import {
   listClients,
   ManualClock,
   outboxKeyFrom,
+  smsPermission,
   updateBookingPage,
   type Actor,
   type SmsAccepted,
@@ -87,6 +88,7 @@ import { queueBookingText } from './services/booking-emails.js';
 import { createService, updateService } from './services/services.js';
 import { createStaffMember, listStaff } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
+import type { WaitlistOptInNotice, WaitlistOptInNotify } from './services/waitlist-texts.js';
 
 // The public booking page through the domain services, against real Postgres (ADR-0022): a
 // booking only after the emailed code (AC-W8-2), the attempt cap, the link scoped to one
@@ -1132,8 +1134,95 @@ describe('"Join the waitlist" on the booking page (S38a)', () => {
       },
       { codeKey: KEY, clock: p.clock },
     );
-  const confirmJoin = (p: Page, requestId: string, code: VerificationCode) =>
-    confirmWaitlistJoin(db, p.slug, requestId as never, { code }, { codeKey: KEY, clock: p.clock });
+  const confirmJoin = (
+    p: Page,
+    requestId: string,
+    code: VerificationCode,
+    optIn?: WaitlistOptInNotify,
+  ) =>
+    confirmWaitlistJoin(
+      db,
+      p.slug,
+      requestId as never,
+      { code },
+      { codeKey: KEY, clock: p.clock, ...(optIn !== undefined && { optIn }) },
+    );
+
+  it('records the "Text me when a time opens up" box once the code is typed (S79, AC-X-222)', async () => {
+    const p = await newPage();
+    const phone = '+15552347901';
+    const asked = await requestWaitlistJoin(
+      db,
+      p.slug,
+      {
+        serviceId: p.service.id,
+        staffMemberId: p.jess.id,
+        date: '2026-11-03',
+        name: 'Ana Ruiz',
+        email: 'ana@example.test',
+        phone,
+        smsConsent: 'sms-consent-v3',
+      },
+      { codeKey: KEY, clock: p.clock },
+    );
+    const consent = () => withTenant(db, p.tenantId, (tx) => findActiveSmsConsent(tx, phone));
+    expect(await consent()).toBeUndefined();
+    const told: WaitlistOptInNotice[] = [];
+    await confirmJoin(p, asked.requestId, asked.code, (_tx, notice) => {
+      told.push(notice);
+      return Promise.resolve();
+    });
+    const [client] = await listClients(db, p.owner, {});
+    expect(await consent()).toMatchObject({
+      source: 'waitlist_join',
+      clientId: client?.id,
+      wordingVersion: 'sms-consent-v3',
+      shownText: expect.stringContaining(
+        "Text me when a time I'm waiting for opens up at",
+      ) as unknown,
+    });
+    const [waiting] = await listWaitlist(db, p.owner, {}, { clock: p.clock });
+    expect(told).toEqual([
+      {
+        phone,
+        entryId: waiting?.id,
+        details: { businessName: expect.any(String) as unknown, serviceName: 'Haircut' },
+      },
+    ]);
+    // Offers only: no reminders on it.
+    expect(await withTenant(db, p.tenantId, (tx) => smsPermission(tx, phone, 'appointments'))).toBe(
+      'no_consent',
+    );
+    expect(
+      await withTenant(db, p.tenantId, (tx) => smsPermission(tx, phone, 'waitlist_offer')),
+    ).toBe('allowed');
+  });
+
+  it('records no consent for an unticked box (S79)', async () => {
+    const p = await newPage();
+    const phone = '+15552347902';
+    const asked = await requestWaitlistJoin(
+      db,
+      p.slug,
+      {
+        serviceId: p.service.id,
+        date: '2026-11-03',
+        name: 'Ana Ruiz',
+        email: 'ana@example.test',
+        phone,
+      },
+      { codeKey: KEY, clock: p.clock },
+    );
+    let told = 0;
+    await confirmJoin(p, asked.requestId, asked.code, () => {
+      told += 1;
+      return Promise.resolve();
+    });
+    expect(
+      await withTenant(db, p.tenantId, (tx) => findActiveSmsConsent(tx, phone)),
+    ).toBeUndefined();
+    expect(told).toBe(0);
+  });
 
   it('refuses an expired code and a used one, adding no second entry (S38b)', async () => {
     const p = await newPage();

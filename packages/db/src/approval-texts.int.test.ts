@@ -265,7 +265,7 @@ describe('who gets cards by text (AC-X-81, AC-X-82)', () => {
           phone: numbers.get(user) ?? '',
           source: 'member_settings',
           userId: user,
-          wordingVersion: 'sms-consent-v1',
+          wordingVersion: 'sms-consent-v2',
           shownText: SHOWN,
           givenAt: T0,
         });
@@ -309,7 +309,7 @@ describe('who gets cards by text (AC-X-81, AC-X-82)', () => {
         phone: number,
         source: 'member_settings',
         userId: member,
-        wordingVersion: 'sms-consent-v1',
+        wordingVersion: 'sms-consent-v2',
         shownText: SHOWN,
         givenAt: T0,
       });

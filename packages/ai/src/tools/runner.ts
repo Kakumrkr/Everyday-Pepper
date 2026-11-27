@@ -179,7 +179,16 @@ async function run(
     emails.push({ template: email.template, clientId: email.clientId });
     queued.push(id);
   };
-  const scope: WriteScope = { ...(await scopeOf(tx, actor, deps)), notifyClient, emailClient };
+  const heldMessage = (id: OutboxMessageId, to: WouldBeEmail) => {
+    emails.push(to);
+    queued.push(id);
+  };
+  const scope: WriteScope = {
+    ...(await scopeOf(tx, actor, deps)),
+    notifyClient,
+    emailClient,
+    heldMessage,
+  };
   const performed = await tool.perform(scope, args);
   return { performed, emails, queued };
 }

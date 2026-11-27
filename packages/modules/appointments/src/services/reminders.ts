@@ -15,6 +15,9 @@ import {
   type TenantId,
   type ReminderKind,
   type ReminderSettings,
+  SMS_PURPOSE_WORDINGS,
+  SmsConsentWordingVersionSchema,
+  type SmsPurpose,
 } from '@pepper/contracts';
 import { queueEmail, queueSms, smsPermission, type Clock } from '@pepper/core';
 import {
@@ -401,12 +404,20 @@ async function dropLink(
 
 /**
  * The number on the client's consent in force that the business may text now (opted out or
- * not textable ones skipped), the latest first; `null` for none. Reminders go there, not to
+ * not textable ones skipped), the latest first, whose words name `purpose`; `null` for none. Reminders go there, not to
  * `clients.phone`: the booking page's phone isn't verified (ADR-0065, S61.2).
  */
-export async function textableNumber(tx: TenantTx, clientId: string): Promise<string | null> {
+export async function textableNumber(
+  tx: TenantTx,
+  clientId: string,
+  purpose: SmsPurpose = 'appointments',
+): Promise<string | null> {
   for (const consent of await listActiveSmsConsentsForClient(tx, clientId)) {
-    if ((await smsPermission(tx, consent.phone)) === 'allowed') return consent.phone;
+    // S79: this client's own yes must name the purpose (a v3 number gets no reminders, a v1 no
+    // offers), whoever else said yes on the same number.
+    const version = SmsConsentWordingVersionSchema.parse(consent.wordingVersion);
+    if (!SMS_PURPOSE_WORDINGS[purpose].includes(version)) continue;
+    if ((await smsPermission(tx, consent.phone, purpose)) === 'allowed') return consent.phone;
   }
   return null;
 }

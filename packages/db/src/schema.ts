@@ -1234,7 +1234,8 @@ export const bookingVerifications = pgTable(
   (table) => [
     check(
       'booking_verifications_sms_consent',
-      sql`${table.smsConsentVersion} IS NULL OR (${table.smsConsentVersion} ~ '^sms-consent-v[0-9]{1,3}$' AND ${table.purpose} = 'booking' AND ${table.phone} ~ '^[+]1[2-9][0-9]{9}$')`,
+      // The booking's box shows v1, the waitlist's v3 (S79).
+      sql`${table.smsConsentVersion} IS NULL OR (${table.phone} ~ '^[+]1[2-9][0-9]{9}$' AND ((${table.purpose} = 'booking' AND ${table.smsConsentVersion} = 'sms-consent-v1') OR (${table.purpose} = 'waitlist' AND ${table.smsConsentVersion} = 'sms-consent-v3')))`,
     ),
     index('booking_verifications_email_idx').on(table.tenantId, table.email, table.expiresAt),
     index('booking_verifications_waitlist_entry_idx').on(table.tenantId, table.waitlistEntryId),
@@ -3442,7 +3443,7 @@ function smsPhone(column: SQLWrapper): SQL {
 /**
  * A person's consent to the business's texts (S61, ADR-0065 §3, §7): the business's TCPA record of
  * when, how (`booking_page`: a client ticked the box; `member_settings`: a member, for texts to
- * themselves) and which wording (`SMS_CONSENT_WORDING`, never edited in place), with the words
+ * themselves; `waitlist_join` and `staff_recorded`: a waitlist client's offers, S79) and which wording (`SMS_CONSENT_WORDING`, never edited in place), with the words
  * as shown (the business's name in them, as it was then). At most one is active a number and source (S63); a new one replaces it, a revoked one stays as the record. Delivery checks it at
  * send time. In the export; removed with the business, and with a client who is forgotten.
  */
@@ -3483,7 +3484,12 @@ export const smsConsents = pgTable(
     check('sms_consents_phone_format', smsPhone(table.phone)),
     check(
       'sms_consents_source_subject',
-      sql`(${table.source} = 'booking_page' AND ${table.clientId} IS NOT NULL AND ${table.userId} IS NULL) OR (${table.source} = 'member_settings' AND ${table.userId} IS NOT NULL AND ${table.clientId} IS NULL)`,
+      sql`(${table.source} IN ('booking_page', 'waitlist_join', 'staff_recorded') AND ${table.clientId} IS NOT NULL AND ${table.userId} IS NULL) OR (${table.source} = 'member_settings' AND ${table.userId} IS NOT NULL AND ${table.clientId} IS NULL)`,
+    ),
+    // Each source records only its own words (S79, `SMS_SOURCE_WORDINGS`).
+    check(
+      'sms_consents_source_wording',
+      sql`(${table.source} = 'booking_page' AND ${table.wordingVersion} = 'sms-consent-v1') OR (${table.source} = 'member_settings' AND ${table.wordingVersion} = 'sms-consent-v2') OR (${table.source} IN ('waitlist_join', 'staff_recorded') AND ${table.wordingVersion} = 'sms-consent-v3')`,
     ),
     check(
       'sms_consents_wording_format',

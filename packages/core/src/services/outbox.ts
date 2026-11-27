@@ -330,7 +330,7 @@ export async function deliverOutboxMessage(
 type SmsOutcome =
   | { kind: 'sent'; accepted: SmsAccepted }
   | { kind: 'postponed'; until: Date }
-  | { kind: 'dropped'; reason: 'SmsOptedOut' | 'SmsNoConsent' | 'SmsNotTextable' };
+  | { kind: 'dropped'; reason: 'SmsOptedOut' | 'SmsNoConsent' | 'SmsNotTextable' | 'SmsExpired' };
 
 const DROP_REASON = {
   opted_out: 'SmsOptedOut',
@@ -339,8 +339,8 @@ const DROP_REASON = {
 } as const;
 
 /**
- * Sends one queued text after the domain's checks at send time (ADR-0065 §3): opted out or
- * without the business's consent, it is dropped; outside the quiet hours (unless urgent), held
+ * Sends one queued text after the domain's checks at send time (ADR-0065 §3): past its
+ * `validUntil`, opted out or without the business's consent for its purpose, it is dropped; outside the quiet hours (unless urgent), held
  * until the next 8:00 in the business's zone. Twilio's "unsubscribed recipient" answer records the
  * opt-out and drops it. Other failures throw, for `failureOutcome`.
  */
@@ -356,7 +356,11 @@ async function sendSms(
   if (sender === null) throw new ChannelUnavailableError('sms');
   const now = options.clock.now();
   const gate = await withTenant(db, tenantId, async (tx): Promise<SmsOutcome | null> => {
-    const permission = await smsPermission(tx, sms.to);
+    // Past its time (a waitlist offer's close, S79): it would offer what is no longer offered.
+    if (sms.validUntil !== undefined && now.getTime() >= Date.parse(sms.validUntil)) {
+      return { kind: 'dropped', reason: 'SmsExpired' };
+    }
+    const permission = await smsPermission(tx, sms.to, sms.purpose ?? 'appointments');
     // The one text the person just asked for (a code, S63) needs no standing consent.
     const allowed =
       permission === 'allowed' || (permission === 'no_consent' && sms.requested === true);

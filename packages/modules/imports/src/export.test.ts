@@ -327,10 +327,21 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               phone: '+15552340002',
               source: 'member_settings',
               clientId: null,
-              wordingVersion: 'sms-consent-v1',
+              wordingVersion: 'sms-consent-v2',
               shownText: 'Text me reminders from Plum Salon at this number, for a member.',
               givenAt: AT,
               revokedAt: AT,
+            },
+            {
+              id: '0190a000-0000-7000-8000-000000000b03',
+              phone: '+15552340003',
+              source: 'staff_recorded',
+              clientId: CLIENT,
+              wordingVersion: 'sms-consent-v3',
+              shownText:
+                "Text me when a time I'm waiting for opens up at Plum Salon, at this number.",
+              givenAt: AT,
+              revokedAt: null,
             },
           ],
         }),
@@ -338,7 +349,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       ).bytes,
     );
     const consents = JSON.parse(files['text-consents.json'] ?? '') as Record<string, unknown>[];
-    expect(consents).toHaveLength(2);
+    expect(consents).toHaveLength(3);
     expect(consents[0]).toMatchObject({
       clientId: CLIENT,
       phone: '+15552340001',
@@ -355,6 +366,11 @@ describe('buildBusinessExport (AC-W1-37)', () => {
     expect(consents[1]).toMatchObject({
       how: 'a team member, for themselves',
       revokedAt: AT.toISOString(),
+    });
+    // A waitlist client's yes the team recorded (S79, AC-X-228).
+    expect(consents[2]).toMatchObject({
+      how: 'told the team, when added to the waitlist',
+      wordingVersion: 'sms-consent-v3',
     });
   });
 

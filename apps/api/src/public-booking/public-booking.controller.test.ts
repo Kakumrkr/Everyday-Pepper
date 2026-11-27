@@ -394,6 +394,7 @@ describe('the public booking page api (no session)', () => {
       ...join,
       email: 'ana@example.test',
       phone: null,
+      smsConsent: null,
     });
     expect(hits).toEqual([
       { limit: 'request-ip', key: '203.0.113.7' },

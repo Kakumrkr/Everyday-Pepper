@@ -1,6 +1,6 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S79** next
+**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S80** next
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
@@ -10,12 +10,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 Nothing in progress.
 
 ## Last sessions
+- **S79 Phase 18 · Waitlist offers by text (2026-11-27)** ([PR #120](https://github.com/Kakumrkr/Everyday-Pepper/pull/120), [ADR-0065](../adr/0065-sms-channel.md) §S79). Full entry in [session-log.md](session-log.md).
+  - **Built:** `sms-consent-v3` (openings only; each consent allows only its purpose's texts); a v3 waitlist client, even with no email, gets the offer by text instead of email (held for Undo, quiet hours, dropped once closed); the yes on the join step and the team's add (`staff_recorded`), with an opt-in text; the offer says how long it stays open (top-up); migration 0093. AC-X-220…228.
+  - **Checks:** `pnpm check` green on the second run (api branch coverage); affected integration 122 files; e2e 16 + legal/screens (privacy and terms baselines redrawn); review 4 fixed; security none.
 - **S78.3 Phase 18 · The holdback and the cut-off (2026-11-27)** ([PR #119](https://github.com/Kakumrkr/Everyday-Pepper/pull/119), [ADR-0071](../adr/0071-visit-risk.md) §S78.3). Full entry in [session-log.md](session-log.md).
   - **Built:** "Measure what asking does" (off): 1 in 5 high-band visits get no early ask and no release card, marked `confirm_held_back_at` (migration 0092); "Confirm by" 12 h, 1 day or 2 days, the template's seeded at creation; the release card's Then line names the email (top-up); fix: the first ask to confirm is kept. AC-X-214…219.
   - **Checks:** `pnpm check` green; affected integration 122 files; e2e 76 (gallery and privacy baselines redrawn); review 7 fixed; security none.
-- **S78.2 Phase 18 · The release card (2026-11-27)** ([PR #118](https://github.com/Kakumrkr/Everyday-Pepper/pull/118), [ADR-0071](../adr/0071-visit-risk.md) §S78.2). Full entry in [session-log.md](session-log.md).
-  - **Built:** "Release it and offer it?" at the confirm cut-off (`booking.release` ask-only, a system tool from the reminder job, migration 0091): business cancel, kind email, full deposit refund, the fill loop, no Undo; taken away by a confirm, move, cancel or the ask off; the top risk reason on the card (top-up); Activity "Released …"; "Who cancelled?" on the team's cancel. AC-X-207…213.
-  - **Checks:** `pnpm check` green; affected integration 122 files; e2e booking, gallery, screens (×2), legal, chat (gallery, Autonomy, privacy baselines redrawn; the new-booking shot made date-proof); review 3 fixed, 2 skipped; security none.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S79 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 the team records `staff_recorded` v3 + an opt-in text; D-2 a text instead of the email; D-3 one session; D-4 ADR-0065 §S79). Full wording in [decisions.md](decisions.md) and [ADR-0065](../adr/0065-sms-channel.md) §S79.
 - **S78.3 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 1 in 5 held back by the booking id; D-2 the switch on Texts and reminders; D-3 12, 24 or 48 h, every template 24; D-4 `confirm_held_back_at`, kept through a move). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.3.
 - **S78.2 (user, 2026-11-27):** "Go ahead with your recommendations and complete the session successfully" (D-1 split → S78.3 the holdback and the cut-off template default; D-2 a card only after an ask 12 h before the cut-off; D-3 the business's cancel; D-4 email only; D-5 no Undo). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.2.
 - **S78 (user, 2026-11-27):** "start with your recommendations and complete successfully" (D-1 commits under the owner's GitHub identity, in `session-start.sh`; D-2 split → S78.2 the release card; D-3 changed in chat: the early ask is a reminder under `sms-consent-v1`; D-4 ask 72 h ahead, confirm by 24 h before). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.
@@ -121,13 +122,12 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, S78.3, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, S78.3, S79, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 **The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S79 | Waitlist offers by text (sandbox, `sms-consent-v3`) | 18 | A v3 client with no email is offered by text |
 | S80 | Client texts kept (routed to one business, an owner card with Reply) | 18 | A text two businesses fit is stored in neither; isolation 100% |
 | S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
 | S81b | Client texts understood ("b", Rec) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |

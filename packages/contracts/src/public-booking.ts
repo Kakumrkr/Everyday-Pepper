@@ -10,7 +10,7 @@ import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingStatusSchema } from './bookings.js';
 import { ClientEmailSchema, PhoneSchema } from './clients.js';
 import { LocalDateSchema } from './rules.js';
-import { SmsConsentWordingVersionSchema, SmsPhoneSchema } from './sms.js';
+import { SmsPhoneSchema, smsConsentVersionFor } from './sms.js';
 import { BrandColorSchema, TenantSlugSchema, TimeZoneSchema } from './tenancy.js';
 import { UtcDateTimeSchema } from './time.js';
 
@@ -111,17 +111,22 @@ export const BookingRequestInputSchema = z
     name: z.string().trim().min(1).max(120),
     email: z.string().trim().max(254).pipe(ClientEmailSchema),
     phone: PhoneSchema.nullable().default(null),
-    smsConsent: SmsConsentWordingVersionSchema.nullable().default(null),
+    smsConsent: smsConsentVersionFor('booking_page').nullable().default(null),
   })
   .strict()
-  .superRefine((request, context) => {
-    if (request.smsConsent === null) return;
-    if (request.phone === null) {
-      context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_NO_PHONE_MESSAGE });
-    } else if (!SmsPhoneSchema.safeParse(request.phone).success) {
-      context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_PHONE_MESSAGE });
-    }
-  });
+  .superRefine(textablePhoneForConsent);
+/** A ticked SMS box needs a number Pepper can text (AC-X-64; the waitlist's too, S79). */
+function textablePhoneForConsent(
+  request: { phone: string | null; smsConsent: string | null },
+  context: z.RefinementCtx,
+): void {
+  if (request.smsConsent === null) return;
+  if (request.phone === null) {
+    context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_NO_PHONE_MESSAGE });
+  } else if (!SmsPhoneSchema.safeParse(request.phone).success) {
+    context.addIssue({ code: 'custom', path: ['phone'], message: SMS_OPT_IN_PHONE_MESSAGE });
+  }
+}
 export type BookingRequestInput = z.input<typeof BookingRequestInputSchema>;
 export type BookingRequest = z.output<typeof BookingRequestInputSchema>;
 
@@ -273,6 +278,8 @@ export type PublicOfferResponse = z.infer<typeof PublicOfferResponseSchema>;
  * `POST /v1/public/businesses/:slug/waitlist-requests` (S38a, ADR-0042): "Join the waitlist"
  * when nothing fits on a day. Like a booking, it waits for the code emailed to the client;
  * the code adds them to the waitlist for that local day, with the staff member or anyone.
+ * `smsConsent` (S79, AC-X-222): the "Text me when a time opens up" box (`sms-consent-v3`),
+ * recorded only when the code is confirmed; it needs a number Pepper can text.
  */
 export const WaitlistRequestInputSchema = z
   .object({
@@ -282,8 +289,10 @@ export const WaitlistRequestInputSchema = z
     name: z.string().trim().min(1).max(120),
     email: z.string().trim().max(254).pipe(ClientEmailSchema),
     phone: PhoneSchema.nullable().default(null),
+    smsConsent: smsConsentVersionFor('waitlist_join').nullable().default(null),
   })
-  .strict();
+  .strict()
+  .superRefine(textablePhoneForConsent);
 export type WaitlistRequestInput = z.input<typeof WaitlistRequestInputSchema>;
 export type WaitlistRequest = z.output<typeof WaitlistRequestInputSchema>;
 

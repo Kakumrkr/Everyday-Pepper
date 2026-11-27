@@ -531,7 +531,22 @@ describe('waitlist', () => {
     expect(bookings.addToWaitlist).toHaveBeenCalledWith(context(), {
       ...newEntry,
       staffMemberId: null,
+      smsConsent: null,
     });
+  });
+
+  it('takes the texts a client agreed to (v3 only, a number Pepper can text; S79)', async () => {
+    const smsConsent = { phone: '+15125550123', wordingVersion: 'sms-consent-v3' };
+    await send('post', '/v1/waitlist', { ...newEntry, smsConsent }).expect(201);
+    expect(bookings.addToWaitlist).toHaveBeenLastCalledWith(context(), {
+      ...newEntry,
+      staffMemberId: null,
+      smsConsent,
+    });
+    await send('post', '/v1/waitlist', {
+      ...newEntry,
+      smsConsent: { ...smsConsent, wordingVersion: 'sms-consent-v1' },
+    }).expect(400);
   });
 
   it('400 waitlist_expired when every window has passed', async () => {

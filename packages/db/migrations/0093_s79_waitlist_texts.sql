@@ -1,0 +1,9 @@
+-- S79 (ADR-0065 §S79): a waitlist client's consent to texts about openings (sms-consent-v3), kept
+-- under its own sources beside the reminder consent; each source records only its own words.
+-- The two word checks are NOT VALID: every new row is checked, and a consent recorded before
+-- them (a TCPA record, never rewritten) stays as it was, so the migration can't fail on one.
+ALTER TABLE "booking_verifications" DROP CONSTRAINT "booking_verifications_sms_consent";--> statement-breakpoint
+ALTER TABLE "sms_consents" DROP CONSTRAINT "sms_consents_source_subject";--> statement-breakpoint
+ALTER TABLE "booking_verifications" ADD CONSTRAINT "booking_verifications_sms_consent" CHECK ("booking_verifications"."sms_consent_version" IS NULL OR ("booking_verifications"."phone" ~ '^[+]1[2-9][0-9]{9}$' AND (("booking_verifications"."purpose" = 'booking' AND "booking_verifications"."sms_consent_version" = 'sms-consent-v1') OR ("booking_verifications"."purpose" = 'waitlist' AND "booking_verifications"."sms_consent_version" = 'sms-consent-v3')))) NOT VALID;--> statement-breakpoint
+ALTER TABLE "sms_consents" ADD CONSTRAINT "sms_consents_source_wording" CHECK (("sms_consents"."source" = 'booking_page' AND "sms_consents"."wording_version" = 'sms-consent-v1') OR ("sms_consents"."source" = 'member_settings' AND "sms_consents"."wording_version" = 'sms-consent-v2') OR ("sms_consents"."source" IN ('waitlist_join', 'staff_recorded') AND "sms_consents"."wording_version" = 'sms-consent-v3')) NOT VALID;--> statement-breakpoint
+ALTER TABLE "sms_consents" ADD CONSTRAINT "sms_consents_source_subject" CHECK (("sms_consents"."source" IN ('booking_page', 'waitlist_join', 'staff_recorded') AND "sms_consents"."client_id" IS NOT NULL AND "sms_consents"."user_id" IS NULL) OR ("sms_consents"."source" = 'member_settings' AND "sms_consents"."user_id" IS NOT NULL AND "sms_consents"."client_id" IS NULL));

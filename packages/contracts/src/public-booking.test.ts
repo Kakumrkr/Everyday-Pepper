@@ -9,6 +9,7 @@ import {
   SMS_OPT_IN_NO_PHONE_MESSAGE,
   SMS_OPT_IN_PHONE_MESSAGE,
   VerificationCodeSchema,
+  WaitlistRequestInputSchema,
 } from './public-booking.js';
 
 const TOKEN = 'q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
@@ -87,6 +88,9 @@ describe('BookingRequestInputSchema', () => {
     ['a blank name', { name: '  ' }],
     ['an unknown SMS wording', { phone: '+15551234567', smsConsent: 'sms-consent-v9' }],
     ['an SMS box as a boolean', { phone: '+15551234567', smsConsent: true }],
+    // S79: the booking box shows v1; another box's words aren't the booking's.
+    ['the waitlist box’s wording', { phone: '+15551234567', smsConsent: 'sms-consent-v3' }],
+    ['a member’s wording', { phone: '+15551234567', smsConsent: 'sms-consent-v2' }],
     ['a long name', { name: 'a'.repeat(121) }],
     ['no email', { email: '' }],
     ['a bad email', { email: 'ana@' }],
@@ -152,5 +156,33 @@ describe('PublicBusinessSchema', () => {
     });
     expect(parsed.brandColor).toBe('#7a3e6c');
     expect(parsed.phone).toBe('+15551234567');
+  });
+});
+
+describe('WaitlistRequestInputSchema (S79, AC-X-222)', () => {
+  const JOIN = {
+    serviceId: SERVICE,
+    date: '2026-12-01',
+    name: 'Ana Ruiz',
+    email: 'ana@example.com',
+  };
+
+  it('takes the "Text me when a time opens up" box with a number Pepper can text', () => {
+    expect(WaitlistRequestInputSchema.parse(JOIN)).toMatchObject({ phone: null, smsConsent: null });
+    expect(
+      WaitlistRequestInputSchema.parse({
+        ...JOIN,
+        phone: '+15125550123',
+        smsConsent: 'sms-consent-v3',
+      }),
+    ).toMatchObject({ phone: '+15125550123', smsConsent: 'sms-consent-v3' });
+  });
+
+  it.each([
+    ['the booking box’s wording', { phone: '+15125550123', smsConsent: 'sms-consent-v1' }],
+    ['no phone', { smsConsent: 'sms-consent-v3' }],
+    ['a number Pepper can’t text', { phone: '+447700900123', smsConsent: 'sms-consent-v3' }],
+  ])('rejects %s', (_label, change) => {
+    expect(WaitlistRequestInputSchema.safeParse({ ...JOIN, ...change }).success).toBe(false);
   });
 });

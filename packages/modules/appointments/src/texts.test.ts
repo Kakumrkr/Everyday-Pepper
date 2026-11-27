@@ -5,8 +5,11 @@ import {
   confirmationText,
   confirmedReply,
   formatTextWhen,
+  openForLabel,
   optInText,
   reminderText,
+  waitlistOfferText,
+  waitlistOptInText,
   type ReminderTextInput,
 } from './texts.js';
 
@@ -103,6 +106,14 @@ describe('reminder texts', () => {
         today: false,
       }),
       optInText(LONGEST, LONG_LINK),
+      // S79: the waitlist's offer and opt-in, with the longest names.
+      waitlistOfferText(
+        LONGEST,
+        LONG_LINK,
+        '2026-11-17T17:00:00.000Z',
+        Date.parse('2026-11-17T15:00:00.000Z'),
+      ),
+      waitlistOptInText(LONGEST),
       confirmationText(LONGEST, LONG_LINK),
       confirmedReply(LONGEST, false),
     ];
@@ -164,5 +175,51 @@ describe('opt-in and confirmation texts (AC-X-73)', () => {
       "Fades by Marco via Pepper: Thanks, you're confirmed for Skin fade with Marco on Tue, Nov 17 at 2:00 PM. See you then!",
     );
     expect(confirmedReply(DETAILS, true)).toContain("You're already confirmed");
+  });
+});
+
+describe('waitlist offers by text (S79, AC-X-224, AC-X-227)', () => {
+  const CLAIM = `https://app.example.com/book/fades-by-marco/offer#${'b'.repeat(43)}`;
+
+  it('names the time, how long it is open from when it goes, the link and STOP', () => {
+    // Sent at 11:00 in New York; the offer closes at 13:00, an hour before the 14:00 slot.
+    const text = waitlistOfferText(
+      DETAILS,
+      CLAIM,
+      '2026-11-17T18:00:00.000Z',
+      Date.parse('2026-11-17T16:00:00.000Z'),
+    );
+    expect(text.split('\n')).toEqual([
+      "Fades by Marco via Pepper: A time you're waiting for opened up: Skin fade with Marco on Tue, Nov 17 at 2:00 PM.",
+      `Open for 2 hours, until 1:00 PM. First to claim it gets it: ${CLAIM}`,
+      'Reply STOP to opt out.',
+    ]);
+  });
+
+  it('counts the time left from when the text can go, not when the offer was made', () => {
+    // Held to 8:00 by the quiet hours, closing at 9:15.
+    const text = waitlistOfferText(
+      DETAILS,
+      CLAIM,
+      '2026-11-17T14:15:00.000Z',
+      Date.parse('2026-11-17T13:00:00.000Z'),
+    );
+    expect(text).toContain('Open for 1 hour 15 minutes, until 9:15 AM.');
+  });
+
+  it('says how long in hours and minutes, never "0 minutes"', () => {
+    expect(openForLabel(2 * 3_600_000)).toBe('2 hours');
+    expect(openForLabel(3_600_000)).toBe('1 hour');
+    expect(openForLabel(90 * 60_000)).toBe('1 hour 30 minutes');
+    expect(openForLabel(61 * 60_000 + 59_000)).toBe('1 hour 1 minute');
+    expect(openForLabel(45 * 60_000)).toBe('45 minutes');
+    expect(openForLabel(10_000)).toBe('1 minute');
+  });
+
+  it('confirms the yes in the first text: who, what, how often, rates, HELP and STOP', () => {
+    expect(waitlistOptInText(DETAILS).split('\n')).toEqual([
+      "Fades by Marco via Pepper: You're on the waitlist for Skin fade. We'll text you when a time you're waiting for opens up.",
+      'Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.',
+    ]);
   });
 });

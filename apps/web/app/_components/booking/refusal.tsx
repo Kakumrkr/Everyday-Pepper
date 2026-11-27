@@ -1,13 +1,16 @@
 'use client';
 
 import {
+  normalizePhone,
   SlotUnavailableSchema,
+  SMS_WAITLIST_CONSENT_WORDING,
+  SmsPhoneSchema,
   WaitlistEntrySchema,
   WaitlistTimesFreeSchema,
   type AvailableSlot,
   type WaitlistEntryInput,
 } from '@pepper/contracts';
-import { Button, Input, TimeChip } from '@pepper/ui';
+import { Button, Checkbox, Input, TimeChip } from '@pepper/ui';
 import { useEffect, useRef, useState, type SubmitEvent } from 'react';
 import { dateTimeLabel, suggestedWindow } from '../../../lib/booking';
 import { sendJson, type CallResult } from '../../../lib/client-api';
@@ -39,7 +42,8 @@ export function Refusal({
   /** For a new booking: the entry to add, without its windows, and the wanted start. */
   waitlist?:
     | {
-        entry: Omit<WaitlistEntryInput, 'windows'>;
+        entry: Omit<WaitlistEntryInput, 'windows' | 'smsConsent'>;
+        phone?: string | null;
         wanted: string;
         minutes: number;
         onAdded: () => void;
@@ -85,12 +89,15 @@ export function Refusal({
 function WaitlistOffer({
   timeZone,
   entry,
+  phone,
   wanted,
   minutes,
   onAdded,
 }: {
   timeZone: string;
-  entry: Omit<WaitlistEntryInput, 'windows'>;
+  entry: Omit<WaitlistEntryInput, 'windows' | 'smsConsent'>;
+  /** The client's number on file, for "They agreed to texts about openings" (S79). */
+  phone?: string | null;
   wanted: string;
   /** The service's length: the suggested window is exactly the wanted appointment. */
   minutes: number;
@@ -99,14 +106,29 @@ function WaitlistOffer({
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [texts, setTexts] = useState(false);
+  const [phoneError, setPhoneError] = useState<string | undefined>(undefined);
   const suggested = suggestedWindow(timeZone, wanted, minutes);
 
   async function add(event: SubmitEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     const form = event.currentTarget;
+    // What the client told the team (S79, AC-X-223): a number Pepper can text, or nothing sent.
+    let smsConsent = null;
+    if (texts) {
+      const number = SmsPhoneSchema.safeParse(normalizePhone(formText(form, 'textsPhone')));
+      if (!number.success) {
+        setPhoneError('Use a US or Canadian mobile number, or untick the box.');
+        form.querySelector<HTMLElement>('[name="textsPhone"]')?.focus();
+        return;
+      }
+      smsConsent = { phone: number.data, wordingVersion: SMS_WAITLIST_CONSENT_WORDING };
+    }
+    setPhoneError(undefined);
     setBusy(true);
     const answer = await sendJson('POST', '/v1/waitlist', {
       ...entry,
+      smsConsent,
       windows: [
         {
           date: formText(form, 'date'),
@@ -165,6 +187,25 @@ function WaitlistOffer({
           defaultValue={suggested.end === '24:00' ? '23:59' : suggested.end}
         />
       </div>
+      <Checkbox
+        name="texts"
+        label="They agreed to texts about openings"
+        hint="Only if they said yes. I text them when a time opens up, and once now with how to stop."
+        checked={texts}
+        onChange={(event) => {
+          setTexts(event.target.checked);
+        }}
+      />
+      {texts ? (
+        <Input
+          label="Their mobile"
+          type="tel"
+          name="textsPhone"
+          autoComplete="off"
+          defaultValue={phone ?? ''}
+          error={phoneError}
+        />
+      ) : null}
       {error === null ? null : <Notice tone="error">{error}</Notice>}
       <Button type="submit" size="sm" busy={busy} className="justify-self-start">
         Add to the waitlist

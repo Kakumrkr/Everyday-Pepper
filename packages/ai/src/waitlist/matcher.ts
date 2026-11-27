@@ -6,6 +6,7 @@ import {
   type TemplateRuleDefaultsOf,
 } from '@pepper/appointments';
 import {
+  AI_EMAIL_GRACE_SECONDS,
   TemplateIdSchema,
   UserIdSchema,
   WaitlistMatchIdSchema,
@@ -66,7 +67,8 @@ export interface MatcherOptions {
   emails: { baseUrl: string; outboxKey: Buffer };
   /**
    * Whether this deployment sends texts (S63): an offer waiting for an OK is also texted to the
-   * owners and managers who asked for cards by text. Default no.
+   * owners and managers who asked for cards by text; a waitlist client with a v3 consent gets
+   * the offer by text (S79). Default no.
    */
   texts?: boolean;
 }
@@ -151,6 +153,8 @@ async function matchIn(
     now,
     fanOut: options.waitlistOf(templateId).offerFanOut,
     templateRuleDefaults: options.templateRuleDefaults,
+    texts: options.texts === true,
+    holdSeconds: AI_EMAIL_GRACE_SECONDS,
   });
   if (ranked.length === 0) return 'no_match';
 
@@ -169,7 +173,8 @@ async function matchIn(
       templateRuleDefaults: options.templateRuleDefaults,
     }),
     autonomy: { templateDefaults: options.autonomyOf(templateId) },
-    emails: options.emails,
+    // S79: a waitlist client with a v3 consent is offered by text.
+    emails: { ...options.emails, texts: options.texts === true },
   };
   const payload: TrustJson = {
     matchId: match.id,

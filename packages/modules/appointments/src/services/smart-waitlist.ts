@@ -56,6 +56,7 @@ import { waitlistAuditValues } from '../mapping.js';
 import { serviceToBook, type TemplateRuleDefaultsOf } from './availability.js';
 import { isBookable } from './bookings.js';
 import { requestInsights } from './insights.js';
+import { offerTextNumber, type WaitlistTextOptions } from './waitlist-texts.js';
 
 // The smart waitlist (S37, ADR-0041, AC-W5-1), the domain's half. A booking cancelled or moved
 // away from a time asks, in its own transaction, for that time to be matched
@@ -119,13 +120,18 @@ export type WaitlistCandidateView =
 export interface CandidateOptions {
   now: Date;
   fanOut: number;
+  /** Whether this deployment sends texts (S79: a waitlist client without an email by text). */
+  texts?: boolean | undefined;
+  /** Seconds an offer's text waits before it may go (the AI's undo-send grace, S79). */
+  holdSeconds?: number | undefined;
   templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
 /**
  * The best entries to offer a freed time to, best first (the published ranking): waiting,
  * not expired, for this staff member or anyone, with a window that holds the whole
- * appointment of their service, a client with an email address, and that service bookable with this staff member at exactly
+ * appointment of their service, a client with an email address or an offer text they may get
+ * (S79), and that service bookable with this staff member at exactly
  * that time now (hours, rules, notice, buffers, other bookings: the availability engine). A
  * time partly re-booked meanwhile fits no one.
  */
@@ -157,9 +163,22 @@ export async function waitlistCandidatesIn(
     if (!service?.active) continue;
     const windows = WaitlistEntryInputSchema.shape.windows.parse(entry.windows);
     if (!windowsHold(windows, tenant.timeZone, start, service.durationMinutes)) continue;
-    // Offers go by email (V1): a client without an address can't be offered one.
+    // Offers go by email, or by text on a v3 consent (S79): a client who can be sent neither
+    // isn't offered one.
     const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
-    if (client === undefined || client.email === null) continue;
+    if (client === undefined) continue;
+    if (
+      client.email === null &&
+      (await offerTextNumber(
+        tx,
+        tenant,
+        client.id,
+        { closesAt: offerExpiry(now, start), now },
+        { texts: options.texts, holdSeconds: options.holdSeconds },
+      )) === null
+    ) {
+      continue;
+    }
     if (!fits.has(service.id)) {
       fits.set(
         service.id,
@@ -354,10 +373,15 @@ export async function makeWaitlistOffersIn(
     freedBookingId?: BookingId | null;
     entries: readonly OfferTarget[];
   },
-  options: { now: Date; templateRuleDefaults?: TemplateRuleDefaultsOf | undefined },
+  options: {
+    now: Date;
+    templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
+  } & WaitlistTextOptions,
 ): Promise<MadeOffer[]> {
   requirePermission(actor, 'bookings.manage', { ownerUserId: null });
   if (!stillOfferable(input.startsAt, options.now)) return [];
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) throw new Error('No tenant in this transaction');
   const expiresAt = new Date(offerExpiry(options.now.getTime(), input.startsAt.getTime()));
   const made: MadeOffer[] = [];
   const offeredClients = new Set<string>();
@@ -396,6 +420,22 @@ export async function makeWaitlistOffersIn(
         templateRuleDefaults: options.templateRuleDefaults,
       });
       if (!bookable) continue;
+      // Reachable now (S79): an address, or a text that can still go before it closes. An
+      // offer no one can be told of would hold the entry until it expires.
+      const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
+      if (client === undefined) continue;
+      if (
+        client.email === null &&
+        (await offerTextNumber(
+          tx,
+          tenant,
+          client.id,
+          { closesAt: expiresAt.getTime(), now: options.now.getTime() },
+          options,
+        )) === null
+      ) {
+        continue;
+      }
       clientId = ClientIdSchema.parse(entry.clientId);
       serviceId = ServiceIdSchema.parse(entry.serviceId);
     }

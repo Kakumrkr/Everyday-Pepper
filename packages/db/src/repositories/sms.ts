@@ -10,7 +10,7 @@ import {
   type SmsDeliveryStatus,
   type SmsKeyword,
 } from '@pepper/contracts';
-import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
 import { smsConsents, smsDeliveries, smsKeywordEvents, type SmsConsentRow } from '../schema.js';
@@ -105,17 +105,31 @@ async function revokeActive(
   return rows.map((row) => row.id);
 }
 
-/** The number's active consent in the business (any source: either lets the business text it). */
+/**
+ * The number's active consent in the business with one of `wordings` (S79: a consent lets the
+ * business send only the texts its words name, `SMS_PURPOSE_WORDINGS`); by default any.
+ */
 export async function findActiveSmsConsent(
   tx: TenantTx,
   phone: string,
+  wordings: readonly SmsConsentWordingVersion[] = SmsConsentWordingVersionSchema.options,
 ): Promise<SmsConsentRow | undefined> {
   const parsed = SmsPhoneSchema.safeParse(phone);
-  if (!parsed.success) return undefined;
+  if (!parsed.success || wordings.length === 0) return undefined;
   const [row] = await tx
     .select()
     .from(smsConsents)
-    .where(and(eq(smsConsents.phone, parsed.data), isNull(smsConsents.revokedAt)));
+    .where(
+      and(
+        eq(smsConsents.phone, parsed.data),
+        isNull(smsConsents.revokedAt),
+        inArray(
+          smsConsents.wordingVersion,
+          wordings.map((version) => SmsConsentWordingVersionSchema.parse(version)),
+        ),
+      ),
+    )
+    .limit(1);
   return row;
 }
 

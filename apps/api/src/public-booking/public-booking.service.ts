@@ -171,7 +171,10 @@ export class PublicBookingService {
     requestId: BookingRequestId,
     input: WaitlistConfirmInput,
   ): Promise<WaitlistConfirmResponse> {
-    return confirmWaitlistJoin(this.db, slug, requestId, input, { codeKey: this.options.codeKey });
+    return confirmWaitlistJoin(this.db, slug, requestId, input, {
+      codeKey: this.options.codeKey,
+      optIn: this.emails.waitlistOptIn,
+    });
   }
 
   /** Confirms with the code; `device`: the new secret when the client asked to be remembered. */

@@ -126,3 +126,51 @@ export function confirmedReply(details: BookingEmailDetails, already: boolean): 
 /** The answer to a "C" that confirms nothing (AC-X-74). */
 export const NOTHING_TO_CONFIRM_REPLY =
   "Pepper: We couldn't find an upcoming appointment to confirm for this number. Please contact the business directly. Reply HELP for help.";
+
+/**
+ * How long an offer stays open (S79 top-up, AC-X-227): "2 hours", "1 hour 30 minutes",
+ * "45 minutes" (whole minutes, rounded down; at least 1).
+ */
+export function openForLabel(ms: number): string {
+  const total = Math.max(1, Math.floor(ms / 60_000));
+  const hours = Math.floor(total / 60);
+  const minutes = total % 60;
+  const unit = (n: number, word: string) => `${String(n)} ${word}${n === 1 ? '' : 's'}`;
+  if (hours === 0) return unit(minutes, 'minute');
+  return minutes === 0 ? unit(hours, 'hour') : `${unit(hours, 'hour')} ${unit(minutes, 'minute')}`;
+}
+
+/** "Open for 2 hours, until 3:15 PM": from `from` (when the client reads it) to the close. */
+export function offerOpenLine(from: number, expiresAt: string, timeZone: string): string {
+  return `Open for ${openForLabel(Date.parse(expiresAt) - from)}, until ${formatTextTime(expiresAt, timeZone)}.`;
+}
+
+/**
+ * A freed time offered to a waitlist client by text (S79, AC-X-224): the time, how long it is
+ * open from when the text goes (`sendAt`, after the quiet hours), and the claim link.
+ */
+export function waitlistOfferText(
+  details: BookingEmailDetails,
+  claimUrl: string,
+  expiresAt: string,
+  sendAt: number,
+): string {
+  return [
+    `${sender(details)}: A time you're waiting for opened up: ${serviceWith(details)} on ${formatTextWhen(details.startsAt, details.timeZone)}.`,
+    `${offerOpenLine(sendAt, expiresAt, details.timeZone)} First to claim it gets it: ${claimUrl}`,
+    'Reply STOP to opt out.',
+  ].join('\n');
+}
+
+/**
+ * The first text after a waitlist client's yes (S79, AC-X-223): who texts, what about, how
+ * often, rates, HELP and STOP (the carriers' recommended first message).
+ */
+export function waitlistOptInText(
+  details: Pick<BookingEmailDetails, 'businessName' | 'serviceName'>,
+): string {
+  return [
+    `${smsReplySender([details.businessName])}: You're on the waitlist for ${smsPlainText(details.serviceName, OPT_IN_SERVICE_MAX) || 'your appointment'}. We'll text you when a time you're waiting for opens up.`,
+    'Msg frequency varies. Msg & data rates may apply. Reply HELP for help, STOP to opt out.',
+  ].join('\n');
+}
