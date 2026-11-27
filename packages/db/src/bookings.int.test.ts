@@ -209,11 +209,19 @@ describe('the exclusion constraint', () => {
       setBookingStatus(tx, id, 'confirmed', new Date('2026-11-04T11:00:00Z')),
     );
     expect(back?.cancelledAt).toBeNull();
-    // The column and the status agree (a check constraint).
-    const error: unknown = await withTenant(db, b.tenant, (tx) =>
-      tx.execute(sql`UPDATE bookings SET cancelled_at = now() WHERE id = ${id}`),
-    ).catch((caught: unknown) => caught);
-    expect(sqlState(error)).toBe('23514');
+    // The database keeps the column and the status in step whatever path writes them.
+    await withTenant(db, b.tenant, async (tx) => {
+      await tx.execute(sql`UPDATE bookings SET cancelled_at = now() WHERE id = ${id}`);
+      const { rows: kept } = await tx.execute<{ at: Date | null }>(
+        sql`SELECT cancelled_at AS at FROM bookings WHERE id = ${id}`,
+      );
+      expect(kept[0]?.at).toBeNull();
+      await tx.execute(sql`UPDATE bookings SET status = 'cancelled' WHERE id = ${id}`);
+      const { rows: raw } = await tx.execute<{ at: Date | null }>(
+        sql`SELECT cancelled_at AS at FROM bookings WHERE id = ${id}`,
+      );
+      expect(raw[0]?.at).not.toBeNull();
+    });
   });
 
   it('refuses a move onto a taken time; a move within its own time is fine', async () => {

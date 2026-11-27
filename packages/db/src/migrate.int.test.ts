@@ -126,6 +126,7 @@ describe('runMigrations', () => {
     // Both cancelled as before 0089: no cancel time, an old updated_at; one has its audit entry.
     const url = database.migrationUrl;
     await query(url, 'ALTER TABLE bookings DROP CONSTRAINT bookings_cancelled_at');
+    await query(url, 'DROP TRIGGER bookings_keep_cancelled_at ON bookings');
     {
       await query(
         url,

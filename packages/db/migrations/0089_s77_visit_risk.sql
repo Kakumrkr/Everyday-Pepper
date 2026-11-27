@@ -40,6 +40,27 @@ ALTER TABLE "audit_log" FORCE ROW LEVEL SECURITY;
 --> statement-breakpoint
 ALTER TABLE "bookings" FORCE ROW LEVEL SECURITY;
 --> statement-breakpoint
+-- Every path that cancels a booking records when, even one that doesn't say (raw SQL, a later
+-- service): a cancel without a time takes the statement's, a time already set stays, and any
+-- other status clears it. `setBookingStatus` passes the domain clock's instant.
+CREATE OR REPLACE FUNCTION bookings_keep_cancelled_at() RETURNS trigger
+  LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.status = 'cancelled' THEN
+    IF TG_OP = 'UPDATE' AND OLD.status = 'cancelled' AND NEW.cancelled_at IS NULL THEN
+      NEW.cancelled_at := OLD.cancelled_at;
+    END IF;
+    NEW.cancelled_at := COALESCE(NEW.cancelled_at, now());
+  ELSE
+    NEW.cancelled_at := NULL;
+  END IF;
+  RETURN NEW;
+END
+$$;
+--> statement-breakpoint
+CREATE TRIGGER "bookings_keep_cancelled_at" BEFORE INSERT OR UPDATE OF "status", "cancelled_at"
+  ON "bookings" FOR EACH ROW EXECUTE FUNCTION bookings_keep_cancelled_at();
+--> statement-breakpoint
 ALTER TABLE "bookings" ADD CONSTRAINT "bookings_cancelled_at" CHECK (("bookings"."status" = 'cancelled') = ("bookings"."cancelled_at" IS NOT NULL));
 --> statement-breakpoint
 -- S77 backfill ends.
