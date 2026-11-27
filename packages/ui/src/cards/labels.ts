@@ -426,11 +426,15 @@ export function releaseReasonLine(side: ChangeSide | null): string | null {
   return line === null ? null : line.charAt(0).toUpperCase() + line.slice(1);
 }
 
-/** What approving a release does, in one line (DESIGN §6: name the consequence). */
+/**
+ * What approving a release does, in one line (DESIGN §6: name the consequence), the email named
+ * with its client (S78.3 top-up, AC-X-219): the card has no separate email line.
+ */
 function releaseThenLine(side: ChangeSide | null): string {
   // A client with no email address gets none (the card then says "No email to the client").
+  const client = text(side, 'clientName') ?? 'the client';
   const steps = [
-    ...(side?.['emailed'] === false ? [] : ['email the client']),
+    ...(side?.['emailed'] === false ? [] : [`email ${client} that it’s cancelled`]),
     ...(side?.['refund'] === true ? ['refund the deposit in full'] : []),
   ];
   const offer = 'offer the time to your waitlist and regulars';

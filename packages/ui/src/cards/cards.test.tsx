@@ -107,6 +107,9 @@ describe('ChangeCard', () => {
     expect(within(card).getByText(/Release it and offer it\?$/)).toBeTruthy();
     expect(within(card).getByText('Missed 2 of 5 visits')).toBeTruthy();
     expect(within(card).getByText(/refund the deposit in full/)).toBeTruthy();
+    // One line names the email (S78.3 top-up, AC-X-219): no separate "Emails …" line.
+    expect(within(card).getByText(/^Email Maria L\. that it’s cancelled, refund/)).toBeTruthy();
+    expect(within(card).queryByText(/^Emails /)).toBeNull();
     expect(
       within(card).getByText('Nothing changes until you tap. A release can’t be undone.'),
     ).toBeTruthy();
