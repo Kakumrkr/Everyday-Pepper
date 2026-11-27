@@ -7,7 +7,13 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress.
+**S79 Waitlist offers by text** (brief approved 2026-11-27: "Start with your recommendations and complete the session successfully": D-1a the team's box records `staff_recorded` v3 + an opt-in text; D-2a text instead of email; D-3a one session; D-4a ADR-0065 §S79). ACs AC-X-220…228. "On the booking page" read as the booking page's "Join the waitlist" step (no v3 box on the booking form itself).
+- [x] T1 ACs + traceability
+- [ ] T2 contracts + db (v3, sources, migration 0093, `purpose`/`validUntil` on the outbox text)
+- [ ] T3 core: `smsPermission` per purpose, delivery drops a closed offer's text
+- [ ] T4 domain: candidates, offer text, the open-for line (top-up), tool sends text or email
+- [ ] T5 API + screens: public join box, the team's box + opt-in text, legal, e2e
+- [ ] T6 close
 
 ## Last sessions
 - **S78.3 Phase 18 · The holdback and the cut-off (2026-11-27)** ([PR #119](https://github.com/Kakumrkr/Everyday-Pepper/pull/119), [ADR-0071](../adr/0071-visit-risk.md) §S78.3). Full entry in [session-log.md](session-log.md).
