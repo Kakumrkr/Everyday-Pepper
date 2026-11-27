@@ -1,24 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S78.3** next
+**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S79** next
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S78.3 · The holdback and the cut-off** (brief approved 2026-11-27: "Start with your recommendations and complete the session successfully"; D-1 1 in 5 high-band visits held back, by a hash of the booking id; D-2 the switch on Texts and reminders under "Ask clients to confirm"; D-3 cut-off 12, 24 or 48 h, every template 24; D-4 `bookings.confirm_held_back_at`, kept through a move. Claude: the template's cut-off is written into a new business's settings at creation, like its menu and hours; unset reads the platform's 24).
-- Tasks: 1 ACs · 2 contracts + templates · 3 migration 0092 + export · 4 holdback in the ask and the release check · 5 the cut-off threaded · 6 Texts and reminders screen · 7 top-up (release card's Then line) · 8 close.
-- Done: 1 AC-X-214…219 · 2 `ConfirmCutoffHoursSchema`, `confirmCutoffHours`/`holdback` settings, `inHoldbackShare` (20%), template `reminders` seeded at creation · 3 migration 0092 `confirm_held_back_at`, export · 4 holdback in `confirmAskOf` and `releaseCheck` (`held_back`) · 5 the cut-off in `confirmCutoffOf`, the release check, `withdrawUnfitReleaseCards`; card key adds the cut-off · fix: `markBookingConfirmAsked` keeps the first ask (the day-before at the 24 h cut-off made an early ask look late) · 6 Texts and reminders: "Confirm by" and "Measure what asking does"; legal sentence.
-- Next: task 6's e2e (`texts-settings.spec.ts`, Texts and privacy baselines), then task 7 (the card's Then line), then the close.
+Nothing in progress.
 
 ## Last sessions
+- **S78.3 Phase 18 · The holdback and the cut-off (2026-11-27)** ([PR #119](https://github.com/Kakumrkr/Everyday-Pepper/pull/119), [ADR-0071](../adr/0071-visit-risk.md) §S78.3). Full entry in [session-log.md](session-log.md).
+  - **Built:** "Measure what asking does" (off): 1 in 5 high-band visits get no early ask and no release card, marked `confirm_held_back_at` (migration 0092); "Confirm by" 12 h, 1 day or 2 days, the template's seeded at creation; the release card's Then line names the email (top-up); fix: the first ask to confirm is kept. AC-X-214…219.
+  - **Checks:** `pnpm check` green; affected integration 122 files; e2e 76 (gallery and privacy baselines redrawn); review 7 fixed; security none.
 - **S78.2 Phase 18 · The release card (2026-11-27)** ([PR #118](https://github.com/Kakumrkr/Everyday-Pepper/pull/118), [ADR-0071](../adr/0071-visit-risk.md) §S78.2). Full entry in [session-log.md](session-log.md).
   - **Built:** "Release it and offer it?" at the confirm cut-off (`booking.release` ask-only, a system tool from the reminder job, migration 0091): business cancel, kind email, full deposit refund, the fill loop, no Undo; taken away by a confirm, move, cancel or the ask off; the top risk reason on the card (top-up); Activity "Released …"; "Who cancelled?" on the team's cancel. AC-X-207…213.
   - **Checks:** `pnpm check` green; affected integration 122 files; e2e booking, gallery, screens (×2), legal, chat (gallery, Autonomy, privacy baselines redrawn; the new-booking shot made date-proof); review 3 fixed, 2 skipped; security none.
-- **S78 Phase 18 · The confirm ask (2026-11-27)** ([PR #117](https://github.com/Kakumrkr/Everyday-Pepper/pull/117), [ADR-0071](../adr/0071-visit-risk.md) §S78). Full entry in [session-log.md](session-log.md).
-  - **Built:** "Ask clients to confirm" (off): the booked screen and emails say "Please confirm by …"; "Confirm my visit" on the manage link; high-band visits asked 72 h ahead by text (`sms-consent-v1`) or email; `cancelled_by`, `confirm_asked_at`, `client_confirmed_via`; "Confirmed by link" on the sheet (top-up). AC-X-200…206. Commits now carry the owner's GitHub identity.
-  - **Checks:** `pnpm check` green; affected integration 26/26; e2e public-booking, texts-settings, confirm-by-text, legal, screens (Texts and privacy baselines updated); review 1 important fixed; security none.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -35,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S78.3 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 1 in 5 held back by the booking id; D-2 the switch on Texts and reminders; D-3 12, 24 or 48 h, every template 24; D-4 `confirm_held_back_at`, kept through a move). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.3.
 - **S78.2 (user, 2026-11-27):** "Go ahead with your recommendations and complete the session successfully" (D-1 split → S78.3 the holdback and the cut-off template default; D-2 a card only after an ask 12 h before the cut-off; D-3 the business's cancel; D-4 email only; D-5 no Undo). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.2.
 - **S78 (user, 2026-11-27):** "start with your recommendations and complete successfully" (D-1 commits under the owner's GitHub identity, in `session-start.sh`; D-2 split → S78.2 the release card; D-3 changed in chat: the early ask is a reminder under `sms-consent-v1`; D-4 ask 72 h ahead, confirm by 24 h before). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.
 - **S77 (user, 2026-11-27):** "Go ahead, start with your recommendations and complete the session successfully" (D-1 `cancelled_at` from the audit log; D-2 the points and bands; D-3 the wrap's high-band visits; D-4 the wrap only, the fact for S78). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md).
@@ -123,13 +121,12 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, S78.3, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 **The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S78.3 | The holdback switch and the confirm cut-off as a template default (S78.2 split) | 18 | Holdback visits get no ask and no card; the cut-off read from the template |
 | S79 | Waitlist offers by text (sandbox, `sms-consent-v3`) | 18 | A v3 client with no email is offered by text |
 | S80 | Client texts kept (routed to one business, an owner card with Reply) | 18 | A text two businesses fit is stored in neither; isolation 100% |
 | S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |

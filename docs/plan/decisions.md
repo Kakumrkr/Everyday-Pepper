@@ -591,6 +591,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - S78 and S81a may split at their briefs;
     - five pilot metrics for the AI layer in scorecard §3 (the top-up);
     - S72.2's carried top-up kept on S58a's row.
+- **S78.3 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully." Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78.3):
+  - **D-1** the holdback share is 1 in 5 (`CONFIRM_HOLDBACK_PERCENT` 20), picked by a hash of the booking id.
+  - **D-2** the switch sits on Texts and reminders under "Ask clients to confirm", shown only while the ask is on ("Measure what asking does").
+  - **D-3** the cut-off is 12, 24 or 48 h before the visit; every V1 template starts at 24 h, today's behaviour.
+  - **D-4** the mark is `bookings.confirm_held_back_at`, set when the skipped ask would have gone, kept through a move.
+  - **Claude:**
+    - the template's cut-off is written into a new business's settings at creation (like the menu and hours), not resolved live like `morningHour`, so no booking write path needs the template and a template change never moves a promised time;
+    - the mark holds a visit back only while the holdback is on (review);
+    - a changed cut-off withdraws cards that no longer fit and checks visits already past it at once (review);
+    - `markBookingConfirmAsked` keeps the first ask (a bug found while testing: the day-before reminder at the 24 h cut-off overwrote the early ask);
+    - the hook's request to rewrite commits to Claude's identity was not followed: S78 D-1 keeps the owner's GitHub identity.
 - **S78.2 (user, 2026-11-27):** "Go ahead with your recommendations and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78.2):
   - **D-1** split: S78.2 the release card, the full refund, the fill loop, the Activity line, "Who cancelled?" and the top reason (top-up); **S78.3** the holdback switch and the cut-off as a template default.
   - **D-2** a card only for a visit whose client was asked at least 12 h before the cut-off (`RELEASE_ANSWER_HOURS`), from the cut-off until the start.
