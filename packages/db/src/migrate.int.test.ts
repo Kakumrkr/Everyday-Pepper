@@ -123,7 +123,6 @@ describe('runMigrations', () => {
         });
       return [await book('2026-10-20T14:00:00Z'), await book('2026-10-21T14:00:00Z')];
     });
-    if (audited === undefined || unaudited === undefined) throw new Error('not booked');
     // Both cancelled as before 0089: no cancel time, an old updated_at; one has its audit entry.
     const url = database.migrationUrl;
     await query(url, 'ALTER TABLE bookings DROP CONSTRAINT bookings_cancelled_at');
