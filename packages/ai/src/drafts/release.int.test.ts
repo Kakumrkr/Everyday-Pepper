@@ -308,6 +308,23 @@ describe('what takes the card away (AC-X-210)', () => {
     await oneCard(w);
   });
 
+  it('back to an earlier cut-off already passed, the card comes at once (review)', async () => {
+    const w = await newWorld(db);
+    const booking = await askedVisit(w);
+    w.clock.set(cutoffOf(booking).toISOString());
+    await releaseJob(w);
+    await oneCard(w);
+    // 24 h → 12 h takes it away; back to 24 h, a cut-off already passed, it comes on the next
+    // pass, not at the 12 h time.
+    await updateReminderSettings(db, w.owner, { confirmCutoffHours: 12 }, { clock: w.clock });
+    expect(await releaseCards(w)).toHaveLength(0);
+    w.clock.set(new Date(cutoffOf(booking).getTime() + HOUR).toISOString());
+    await updateReminderSettings(db, w.owner, { confirmCutoffHours: 24 }, { clock: w.clock });
+    w.clock.set(new Date(cutoffOf(booking).getTime() + HOUR + 60_000).toISOString());
+    await releaseJob(w);
+    await oneCard(w);
+  });
+
   it('a move', async () => {
     const w = await newWorld(db);
     const booking = await askedVisit(w);

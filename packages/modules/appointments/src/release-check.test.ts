@@ -6,7 +6,7 @@ import { releaseCheck, releaseTargetKey } from './services/release-check.js';
 
 const HOUR = 3_600_000;
 const START = Date.UTC(2026, 11, 1, 19, 0);
-const asking = { askToConfirm: true, confirmCutoffHours: 24 } as const;
+const asking = { askToConfirm: true, confirmCutoffHours: 24, holdback: false } as const;
 const visit = (over: Partial<Parameters<typeof releaseCheck>[0]> = {}) => ({
   status: 'confirmed',
   startsAt: new Date(START),
@@ -56,11 +56,14 @@ describe('releaseCheck', () => {
 
   it('never releases a visit the holdback kept from its early ask (S78.3, AC-X-215)', () => {
     const held = visit({ confirmHeldBackAt: new Date(START - 72 * HOUR) });
-    expect(releaseCheck(held, asking, atCutoff)).toBe('held_back');
+    const holding = { ...asking, holdback: true };
+    expect(releaseCheck(held, holding, atCutoff)).toBe('held_back');
+    // Turned off, the mark no longer holds the visit back (review).
+    expect(releaseCheck(held, asking, atCutoff)).toBe('ok');
     // Whatever asked it later, at any cut-off: a 12 h cut-off makes the day-before ask early
     // enough, and still no card.
     const asked = { ...held, confirmAskedAt: new Date(START - 24 * HOUR) };
-    expect(releaseCheck(asked, { ...asking, confirmCutoffHours: 12 }, START - 12 * HOUR)).toBe(
+    expect(releaseCheck(asked, { ...holding, confirmCutoffHours: 12 }, START - 12 * HOUR)).toBe(
       'held_back',
     );
     expect(

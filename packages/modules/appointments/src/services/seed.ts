@@ -15,9 +15,11 @@ import { createStaffMemberIn } from './staff.js';
 // first staff member offering all of it, and the type's opening hours as that staff member's
 // week. Written in the business's creation transaction, as the owner, through the same
 // functions and audit entries as the screens, so everything stays editable. The type's confirm
-// cut-off (S78.3, AC-X-217) is written as the business's own setting, every other reminder
-// setting at its default: a pre-fill like the hours, so a later change to the template never
-// moves the time a business's clients were told to confirm by.
+// cut-off (S78.3, AC-X-217) is the one exception: written straight into the business's reminder
+// settings, every other one at its default, as the starting value the business is created with
+// (no change to audit), not through the settings screen's service. A pre-fill like the hours, so
+// a later change to the template never moves the time a business's clients were told to confirm
+// by.
 
 /** One service of the starting menu; `rebookAfterDays`: when a regular is due again. */
 export interface SeedService {

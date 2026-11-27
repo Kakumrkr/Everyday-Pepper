@@ -67,7 +67,9 @@ export async function updateReminderSettings(
       },
       requestId: actor.requestId,
     });
-    await replanUpcomingReminders(tx, tenant.timeZone, after, now);
+    await replanUpcomingReminders(tx, tenant.timeZone, after, now, {
+      cutoffMoved: before.confirmCutoffHours !== after.confirmCutoffHours,
+    });
     // No longer asking: the release cards waiting could no longer be approved (S78.2).
     if (before.askToConfirm && !after.askToConfirm) await withdrawReleaseCards(tx, now);
     // A new cut-off: a card shown at the old one may not fit the new one yet (S78.3, AC-X-218).

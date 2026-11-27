@@ -710,6 +710,27 @@ describe('the holdback (S78.3, AC-X-214, AC-X-215)', () => {
     expect(await releaseRun(b, at(7, '02:00'))).toEqual([]);
   });
 
+  it('turned off, a visit marked earlier is asked and carded like any other (review)', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const held = await highVisit(b, true);
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { askToConfirm: true, holdback: true },
+      { clock: b.clock },
+    );
+    await runAt(b, at(3, '14:00'));
+    expect((await rowOf(b, held))?.confirmHeldBackAt).not.toBeNull();
+    await updateReminderSettings(db, b.owner, { holdback: false }, { clock: b.clock });
+    // Moved to Saturday: its new early ask goes, and the card comes at the cut-off.
+    b.clock.set(new Date(at(3, '15:00')));
+    await changeBooking(db, b.owner, held.id, { startsAt: at(7, '14:00') }, { clock: b.clock });
+    await runAt(b, at(4, '14:00'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect(await releaseRun(b, at(6, '14:00'))).toEqual([held.id]);
+  });
+
   it('a 12 h cut-off cards a visit the day-before text asked (AC-X-218)', async () => {
     const b = await newBusiness();
     await consent(b);
