@@ -120,13 +120,13 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 **The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S78 | Confirm or release (may split at its brief) | 18 | No release without the owner's tap; the race test |
+| S78.2 | The release card (S78 split; holdback, "Who cancelled?") | 18 | No release without the owner's tap; the race test |
 | S79 | Waitlist offers by text (sandbox, `sms-consent-v3`) | 18 | A v3 client with no email is offered by text |
 | S80 | Client texts kept (routed to one business, an owner card with Reply) | 18 | A text two businesses fit is stored in neither; isolation 100% |
 | S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
