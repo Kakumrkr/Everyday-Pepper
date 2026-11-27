@@ -147,7 +147,10 @@ export const PRIVACY: LegalDocument = {
           'The assistant never reads or changes the database itself. Everything it does goes through the same checks as the app’s screens, follows the business’s settings for what it may do without asking, is recorded with its reason, and can be undone where possible. When a business imports a file, the AI may be shown the column names and a masked sample of each column to suggest which is which.',
         ),
         p(
-          'To spot an appointment that may be missed, Pepper rates each visit in the next 14 days as low, medium or high risk, from the business’s own booking history only: earlier no-shows and late cancellations, a first visit, how far ahead and how it was booked, whether a deposit was taken and whether the client confirmed. Never a name, age, gender, address or anything standing in for them. The rating follows fixed rules, not an AI model, and only the business’s owners and managers see it.',
+          'To spot an appointment that may be missed, Pepper rates each visit in the next 14 days as low, medium or high risk, from the business’s own booking history only: earlier no-shows and late cancellations you made (not ones the business made), a first visit, how far ahead and how it was booked, whether a deposit was taken and whether you confirmed when asked. Never a name, age, gender, address or anything standing in for them. The rating follows fixed rules, not an AI model, and only the business’s owners and managers see it.',
+        ),
+        p(
+          'A business can ask its clients to confirm their visits. Then your confirmation and emails say by when, and a visit likely to be missed is asked 3 days ahead, by text if you said yes to texts, else by email. We record when you were asked, when and how you confirmed (by text or with your link), and who cancelled a visit (you or the business).',
         ),
         p('Development and testing use made-up data only.'),
       ],

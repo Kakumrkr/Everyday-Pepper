@@ -59,7 +59,7 @@ export async function hasReminderText(tx: TenantTx, clientId: string): Promise<b
     .where(
       and(
         eq(bookingTexts.clientId, Id.parse(clientId)),
-        inArray(bookingTexts.kind, ['day_before', 'same_day']),
+        inArray(bookingTexts.kind, ['confirm_ask', 'day_before', 'same_day']),
       ),
     )
     .limit(1);
@@ -218,7 +218,7 @@ export async function hasRecentReminderText(
     .where(
       and(
         eq(bookingTexts.bookingId, BookingIdSchema.parse(input.bookingId)),
-        inArray(bookingTexts.kind, ['day_before', 'same_day']),
+        inArray(bookingTexts.kind, ['confirm_ask', 'day_before', 'same_day']),
         eq(bookingTexts.startsAt, input.startsAt),
         sql`${bookingTexts.createdAt} > ${since}`,
         sql`${bookingTexts.createdAt} <= ${input.at}`,
@@ -229,20 +229,38 @@ export async function hasRecentReminderText(
 }
 
 /**
- * Marks a booking confirmed by its client at `at`, once: the row when this call marked it,
- * `undefined` when it was already marked (or isn't visible).
+ * Marks a booking confirmed by its client at `at`, once, by `via` ("C" by text or the manage
+ * page's link, S78): the row when this call marked it, `undefined` when it was already marked
+ * (or isn't visible).
  */
 export async function markBookingClientConfirmed(
   tx: TenantTx,
   bookingId: BookingId,
   at: Date,
+  via: 'text' | 'link' = 'text',
 ): Promise<BookingRow | undefined> {
   const [row] = await tx
     .update(bookings)
-    .set({ clientConfirmedAt: at })
+    .set({ clientConfirmedAt: at, clientConfirmedVia: via })
     .where(
       and(eq(bookings.id, BookingIdSchema.parse(bookingId)), isNull(bookings.clientConfirmedAt)),
     )
     .returning();
   return row;
+}
+
+/**
+ * Records that the client was asked to confirm the booking at `at` (S78, AC-X-201): a reminder
+ * text asking "C", or an email with the confirm link. Visit risk scores `not_confirmed` only
+ * after it; a move clears it.
+ */
+export async function markBookingConfirmAsked(
+  tx: TenantTx,
+  bookingId: BookingId,
+  at: Date,
+): Promise<void> {
+  await tx
+    .update(bookings)
+    .set({ confirmAskedAt: at })
+    .where(eq(bookings.id, BookingIdSchema.parse(bookingId)));
 }

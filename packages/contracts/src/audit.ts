@@ -676,7 +676,10 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       action: z.literal('booking.client_confirmed'),
       entity: entity('booking'),
       before: z.object({ clientConfirmed: z.literal(false) }).strict(),
-      after: z.object({ clientConfirmed: z.literal(true) }).strict(),
+      // How (S78): by link; a "C" by text, as before S78, says nothing.
+      after: z
+        .object({ clientConfirmed: z.literal(true), via: z.literal('link').optional() })
+        .strict(),
     })
     .strict(),
   // The business's texts and reminders (S62, AC-X-75).

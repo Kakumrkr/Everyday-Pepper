@@ -1,5 +1,6 @@
 import {
   cancelManagedBooking,
+  confirmManagedBooking,
   claimWaitlistOffer,
   confirmBookingRequest,
   findPublicAvailability,
@@ -250,6 +251,11 @@ export class PublicBookingService {
       deposits: this.deposits,
     });
     return cancelled.booking;
+  }
+
+  /** Confirms the visit behind a link, at the time the client saw (S78, AC-X-203). */
+  confirmVisit(slug: TenantSlug, token: ManageToken, startsAt: string): Promise<PublicBooking> {
+    return confirmManagedBooking(this.db, slug, token, startsAt, { deposits: this.deposits });
   }
 
   /** The waitlist offer behind a claim link (S37); reading it changes nothing. */

@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import type { Server } from 'node:http';
 import {
+  BookingMovedError,
   BookingPageNotFoundError,
   WaitlistOfferTakenError,
   SlotUnavailableError,
@@ -66,6 +67,7 @@ const BOOKING = {
   staff: { id: STAFF_ID, displayName: 'Jess' },
   changeable: true,
   deposit: null,
+  confirm: null,
 } as PublicBooking;
 const OFFER = {
   status: 'open',
@@ -100,6 +102,9 @@ const service = {
   managed: vi.fn(() => Promise.resolve(BOOKING)),
   reschedule: vi.fn(() => Promise.resolve(BOOKING)),
   cancel: vi.fn(() => Promise.resolve({ ...BOOKING, status: 'cancelled', changeable: false })),
+  confirmVisit: vi.fn(() =>
+    Promise.resolve({ ...BOOKING, confirm: { by: SLOT.startsAt, confirmed: true } }),
+  ),
   offer: vi.fn(() => Promise.resolve(OFFER)),
   claim: vi.fn(() => Promise.resolve({ booking: BOOKING, manageToken: TOKEN })),
   waitlistRequest: vi.fn(() =>
@@ -431,6 +436,22 @@ describe('the public booking page api (no session)', () => {
     const cancelled = await post('/booking/cancel', { token: TOKEN }).expect(200);
     expect(cancelled.body).toMatchObject({ booking: { status: 'cancelled' } });
     expect(hits.map((h) => h.limit)).toEqual(['link-ip', 'link-ip', 'link-ip']);
+  });
+
+  it('confirms the visit by link at the time the client saw (S78, AC-X-203)', async () => {
+    const confirmed = await post('/booking/confirm', {
+      token: TOKEN,
+      startsAt: SLOT.startsAt,
+    }).expect(200);
+    expect(confirmed.body).toMatchObject({ booking: { confirm: { confirmed: true } } });
+    expect(service.confirmVisit).toHaveBeenCalledWith('juniper', TOKEN, SLOT.startsAt);
+    expect(hits.map((h) => h.limit)).toEqual(['link-ip']);
+    // Without the time it was shown, nothing is confirmed.
+    await post('/booking/confirm', { token: TOKEN }).expect(400);
+    service.confirmVisit.mockRejectedValueOnce(new BookingMovedError());
+    const moved = await post('/booking/confirm', { token: TOKEN, startsAt: SLOT.startsAt });
+    expect(moved.status).toBe(409);
+    expect(moved.body).toMatchObject({ code: 'booking_moved' });
   });
 
   it('400 for a malformed link secret', async () => {

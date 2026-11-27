@@ -100,6 +100,7 @@ function onLine(consent: NonNullable<ClientTexts['consent']>, timeZone: string):
 const KIND: Record<BookingTextKind, string> = {
   opt_in: 'the welcome text',
   confirmation: 'a booking confirmation',
+  confirm_ask: 'the ask to confirm',
   day_before: 'the reminder the day before',
   same_day: 'the reminder on the day',
 };

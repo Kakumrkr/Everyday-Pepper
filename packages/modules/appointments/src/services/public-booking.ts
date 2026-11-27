@@ -83,6 +83,7 @@ import {
   lockBookingVerification,
   lockStaffMember,
   lockWaitlistEntry,
+  markBookingClientConfirmed,
   lockWaitlistMatch,
   markOfferClaimed,
   moveBooking,
@@ -104,6 +105,7 @@ import { businessPhotosIn } from './business-photos.js';
 import { addDays, formatDate, fromZoned, parseDate, toZoned } from '../availability/zoned-time.js';
 import { toAvailableSlot, waitlistExpiry } from '../bookings/planning.js';
 import {
+  BookingMovedError,
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingPageNotFoundError,
@@ -139,6 +141,8 @@ import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availabi
 import {
   changeOf,
   cancellationSentenceOf,
+  asksToConfirm,
+  confirmByOf,
   emailDetailsOf,
   policyWordsOf,
   manageTokenHash,
@@ -148,7 +152,7 @@ import {
 } from './notices.js';
 import { requestInsights } from './insights.js';
 import { recognizeDeviceIn, rememberDeviceIn } from './remembered-devices.js';
-import { keepReminderInStep } from './reminders.js';
+import { keepReminderInStep, reminderSettingsOf } from './reminders.js';
 import {
   isBookable,
   nearestAlternatives,
@@ -652,7 +656,7 @@ export async function confirmBookingRequest(
           { actor: { kind: 'system' } },
         );
       }
-      const booking = await toPublicBooking(tx, row, now, options.deposits);
+      const booking = await toPublicBooking(tx, tenant, row, now, options.deposits);
       const email: BookingEmailDetails = {
         businessName: tenant.name,
         slug: tenant.slug,
@@ -664,6 +668,8 @@ export async function confirmBookingRequest(
         clientName: client.name,
         policy: policyWordsOf(tenant),
         deposit: booking.deposit,
+        confirmBy: confirmByOf(tenant, row, now),
+        askConfirm: asksToConfirm(tenant, row),
       };
       await options.notify?.(tx, {
         kind: 'confirmed',
@@ -861,13 +867,50 @@ export async function getManagedBooking(
   return inPage(
     db,
     slug,
-    async (tx) => {
+    async (tx, tenant) => {
       const row = await findBookingByManageTokenHash(tx, hash);
       if (row === undefined) throw new BookingNotFoundError();
-      return toPublicBooking(tx, row, now, options.deposits);
+      return toPublicBooking(tx, tenant, row, now, options.deposits);
     },
     { readOnly: true, whileClosing: true },
   );
+}
+
+/**
+ * Confirms the visit behind a link (S78, AC-X-203): while it is confirmed, has not started and
+ * still starts at `startsAt` (the time the client saw; `BookingMovedError` otherwise). Marks it
+ * confirmed by the client once, by link (audited as the system), and asks for an insights run
+ * so its risk drops. A second confirm, by link or by "C", changes nothing.
+ */
+export async function confirmManagedBooking(
+  db: Database,
+  slug: TenantSlug,
+  token: ManageToken,
+  startsAt: string,
+  options: PublicOptions = {},
+): Promise<PublicBooking> {
+  const hash = manageTokenHash(ManageTokenSchema.parse(token));
+  const seen = Date.parse(UtcDateTimeSchema.parse(startsAt));
+  const now = nowOf(options);
+  return inPage(db, slug, async (tx, tenant) => {
+    const row = await lockChangeable(tx, hash, now);
+    if (row.startsAt.getTime() !== seen) throw new BookingMovedError();
+    const bookingId = BookingIdSchema.parse(row.id);
+    const marked = await markBookingClientConfirmed(tx, bookingId, new Date(now), 'link');
+    if (marked !== undefined) {
+      await appendAuditEntry(tx, {
+        actor: { kind: 'system' },
+        change: {
+          action: 'booking.client_confirmed',
+          entity: { type: 'booking', id: bookingId },
+          before: { clientConfirmed: false },
+          after: { clientConfirmed: true, via: 'link' },
+        },
+      });
+      await requestInsights(tx);
+    }
+    return toPublicBooking(tx, tenant, marked ?? row, now, options.deposits);
+  });
 }
 
 /** Cancels the booking behind a link, while it is confirmed and has not started. */
@@ -889,6 +932,7 @@ export async function cancelManagedBooking(
         BookingIdSchema.parse(row.id),
         'cancelled',
         new Date(now),
+        'client',
       );
       if (cancelled === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, cancelled);
@@ -1195,6 +1239,7 @@ async function auditUpdate(tx: TenantTx, before: BookingRow, after: BookingRow):
 /** A booking as its client sees it. */
 async function toPublicBooking(
   tx: TenantTx,
+  tenant: Tenant,
   row: BookingRow,
   now: number,
   deposits: PublicDeposits | undefined,
@@ -1216,6 +1261,12 @@ async function toPublicBooking(
         startsAt: row.startsAt,
         now: new Date(now),
       })) ?? null,
+    confirm: reminderSettingsOf(tenant).askToConfirm
+      ? {
+          by: confirmByOf(tenant, { ...row, clientConfirmedAt: null }, now),
+          confirmed: row.clientConfirmedAt !== null,
+        }
+      : null,
   });
 }
 
@@ -1227,9 +1278,9 @@ async function withEmail(
   deposits: PublicDeposits | undefined,
 ): Promise<{ booking: PublicBooking; email: BookingEmailDetails }> {
   return {
-    booking: await toPublicBooking(tx, row, now, deposits),
+    booking: await toPublicBooking(tx, tenant, row, now, deposits),
     // The address the link was sent to, or the one the business has on file now.
-    email: await emailDetailsOf(tx, tenant, row),
+    email: await emailDetailsOf(tx, tenant, row, now),
   };
 }
 

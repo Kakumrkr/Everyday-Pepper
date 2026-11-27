@@ -47,7 +47,11 @@ export interface InsightBooking extends Interval {
   source: BookingOrigin;
   createdAt: number;
   clientConfirmedAt: number | null;
+  /** When the client was last asked to confirm it at its current time (S78); `null`: never. */
+  confirmAskedAt: number | null;
   cancelledAt: number | null;
+  /** Who cancelled it (S78); `null`: not cancelled, or cancelled before S78 (unknown). */
+  cancelledBy: 'client' | 'business' | null;
   /** A deposit or a card was taken for it on the booking page. */
   secured: boolean;
 }

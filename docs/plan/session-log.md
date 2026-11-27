@@ -1831,3 +1831,21 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
     - Score `not_confirmed` only after a reminder (S78).
     - A risk chip on the booking sheet.
   - **Retro:** went well: one pure rule set feeding the pass, the wrap and the fact kept the three in step, and the proxy test makes "behaviour only" a check rather than a promise · do better: grep the repo for raw-SQL writes to a table before adding a check constraint to it, since that cost an extra integration run · top-up for S78: the release card shows the visit's top reason from S77.
+
+- **S78 Phase 18 · The confirm ask (2026-11-27)** ([PR #117](https://github.com/Kakumrkr/Everyday-Pepper/pull/117), [ADR-0071](../adr/0071-visit-risk.md) §S78; AC-X-200…206). Split at the brief: S78.2 the release card.
+  - **Built:**
+    - "Ask clients to confirm" (`reminder_settings.askToConfirm`, off): the booked screen and the confirmation, move and day-before emails say "Please confirm by …" (no time once it has passed).
+    - "Confirm my visit" on the manage link (`POST booking/confirm`, at the time shown).
+    - The `confirm_ask` reminder: high-band visits asked 72 h ahead, by text under `sms-consent-v1` or by email; "C" answers it.
+    - Migration 0090: `cancelled_by` (a business's cancel isn't the client's miss), `confirm_asked_at` (`not_confirmed` only after an ask), `client_confirmed_via`.
+    - "Confirmed by link" on the sheet (top-up); export and privacy page.
+    - Commits under the owner's GitHub identity (`session-start.sh`).
+  - **Checks:**
+    - `pnpm check` green on the second run; the first was red: an exact-shape mapping test.
+    - Affected integration 26/26; the first run was red: two insights tests stated the old rules, rewritten to the new ones with the client's case.
+    - e2e public-booking 14 with texts-settings, confirm-by-text and legal; screens 50 (Texts and privacy baselines updated on purpose); after the walkthrough fix, booking specs 24.
+  - **Review:** `/code-review` 3: the past confirm-by time fixed; the ADR section added; team-entered client cancels carried to S78.2. `/security-review`: none.
+  - **Walkthrough:** a client at 375 px books, sees the confirm-by line, confirms by the emailed link. Fix: Reschedule turns secondary while Confirm is asked.
+  - **Timing:** brief ~10 min; build ~70 min; review + fixes ~15 min; `pnpm check` 2.5 + 1.4 min; integration 5.5 min (stopped at the failure) + 9 min; e2e ~16 min with the rebuild; CI run 1 red in Integration: `deposits.int.test.ts` failed after all 155 api tests passed, because Docker refused to remove a just-killed container (409 "container is running"); the shared `stopContainer` now waits for Docker to report the exit (unit-tested), and the fix went in with these docs.
+  - **Not done / later:** the release card, holdback and "Who cancelled?" (S78.2); the cut-off as a template default (S78.2).
+  - **Retro:** went well: reading the consent code before building turned a planned new wording into the user's informed choice · do better: run the whole package's unit tests (not only the files touched) before `pnpm check`, since one exact-shape test cost a rerun · top-up for S78.2: the release card shows the visit's top reason from S77.

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   bookingBlockName,
   confirmedByText,
+  confirmedLabel,
   availabilityPath,
   bookableStaff,
   bookingAbilities,
@@ -255,6 +256,14 @@ describe('confirmedByText (AC-X-79)', () => {
   });
 });
 
+describe('confirmedLabel (S78 top-up, AC-X-205)', () => {
+  it('says how the client confirmed: by link, else by text', () => {
+    expect(confirmedLabel({ clientConfirmedVia: 'link' })).toBe('Confirmed by link');
+    expect(confirmedLabel({ clientConfirmedVia: 'text' })).toBe('Confirmed by text');
+    expect(confirmedLabel({})).toBe('Confirmed by text');
+  });
+});
+
 describe('bookingBlockName (S72, AC-X-188)', () => {
   const block = {
     startsAt: '2026-12-01T15:00:00.000Z',
@@ -278,6 +287,13 @@ describe('bookingBlockName (S72, AC-X-188)', () => {
     expect(bookingBlockName('America/New_York', { ...block, keptOverGoogle: false })).not.toContain(
       'Google',
     );
+    expect(
+      bookingBlockName('America/New_York', {
+        ...block,
+        clientConfirmedAt: '2026-11-30T15:00:00.000Z',
+        clientConfirmedVia: 'link',
+      }),
+    ).toMatch(/Maria Lopez, confirmed by link$/);
   });
 
   it('says a series visit’s place first among its marks (S72.2, AC-X-194)', () => {

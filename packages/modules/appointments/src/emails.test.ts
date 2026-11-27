@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   cancelledEmail,
   codeEmail,
+  confirmAskEmail,
   confirmationEmail,
   formatWhen,
   manageUrl,
@@ -83,6 +84,56 @@ describe('the booking page emails', () => {
       subject: 'Your booking at Juniper Hair Studio is cancelled',
     });
     expect(cancelledEmail(DETAILS).text).not.toContain('#');
+  });
+});
+
+describe('the ask to confirm (S78, AC-X-202, AC-X-204, AC-X-205)', () => {
+  const link = 'https://pepper.app/book/juniper/manage#q1W2e3R4t5Y6u7I8o9P0a_S-d1F2g3H4j5K6l7Z8x9C';
+  const asked: BookingEmailDetails = {
+    ...DETAILS,
+    confirmBy: '2026-11-02T15:00:00.000Z',
+    askConfirm: true,
+  };
+  const line =
+    'Please confirm by Monday, November 2 at 10:00 AM, or your time may be offered to others.';
+
+  it('the confirmation, reminder and move ask by when, and the link confirms too', () => {
+    for (const email of [
+      confirmationEmail(asked, link),
+      reminderEmail(asked, link),
+      rescheduledEmail(asked, link),
+    ]) {
+      expect(email.text).toContain(line);
+      expect(email.text).toContain(link);
+      expect(email.text).toMatch(/To confirm, (reschedule|change it again) or cancel/);
+    }
+  });
+
+  it('says nothing about confirming when the business doesn’t ask or the client confirmed', () => {
+    for (const details of [DETAILS, { ...DETAILS, askConfirm: false }]) {
+      expect(confirmationEmail(details, link).text).not.toContain('confirm by');
+      expect(reminderEmail(details, link).text).not.toContain('To confirm');
+    }
+    // No link, no ask: there would be nothing to answer it with.
+    expect(reminderEmail(asked).text).not.toContain('confirm by');
+  });
+
+  it('asks without a time once the time to confirm by has passed', () => {
+    const late = reminderEmail({ ...asked, confirmBy: null }, link);
+    expect(late.text).toContain('Please confirm your visit with the link below.');
+    expect(late.text).not.toContain('confirm by');
+    expect(late.text).toContain('To confirm, reschedule or cancel');
+  });
+
+  it('the early ask by email', () => {
+    const email = confirmAskEmail(asked, link);
+    expect(email).toMatchObject({
+      to: 'ana@example.test',
+      subject: 'Please confirm your booking at Juniper Hair Studio',
+    });
+    expect(email.text).toContain('Haircut with Jess, Tuesday, November 3 at 10:00 AM.');
+    expect(email.text).toContain(line);
+    expect(email.text).toContain(link);
   });
 });
 

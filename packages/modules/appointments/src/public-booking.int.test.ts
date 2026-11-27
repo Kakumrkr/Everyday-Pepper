@@ -30,7 +30,9 @@ import {
   findActiveSmsConsent,
   findCurrentTenant,
   findLastBookingText,
+  findReminderSettings,
   listAuditEntries,
+  listBookings as listBookingRows,
   listDueOutboxMessages,
   listSmsConsentsForClient,
   setReminderSettings,
@@ -41,6 +43,7 @@ import {
 } from '@pepper/db';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  BookingMovedError,
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingPageNotFoundError,
@@ -59,6 +62,7 @@ import { replaceWorkingHours } from './services/hours.js';
 import { addTimeOff } from './services/time-off.js';
 import {
   cancelManagedBooking,
+  confirmManagedBooking,
   codeHash,
   confirmBookingRequest,
   findPublicAvailability,
@@ -436,6 +440,7 @@ describe('confirmBookingRequest', () => {
       staff: { id: p.jess.id, displayName: 'Jess' },
       changeable: true,
       deposit: null,
+      confirm: null,
     });
     const [booking] = await bookingsOf(p);
     expect(booking).toMatchObject({ source: 'booking_page', staffMemberId: p.jess.id });
@@ -749,6 +754,7 @@ describe('the opt-in and confirmation texts (S62, AC-X-73)', () => {
         dayBefore: true,
         sameDay: true,
         sameDayLeadHours: 2,
+        askToConfirm: false,
       }),
     );
     const business = await bookAndText(p, { phone: '+15552347105', smsConsent: 'sms-consent-v1' });
@@ -932,6 +938,81 @@ describe('the reschedule/cancel link', () => {
     await expect(
       cancelManagedBooking(db, p.slug, token, { clock: p.clock }),
     ).rejects.toBeInstanceOf(BookingNotChangeableError);
+  });
+});
+
+describe('confirm by link (S78, AC-X-202, AC-X-203)', () => {
+  async function asking(p: Page): Promise<void> {
+    await withTenant(db, p.tenantId, async (tx) => {
+      const current = await findReminderSettings(tx);
+      await setReminderSettings(tx, { ...current, askToConfirm: true });
+    });
+  }
+
+  function rowsOf(p: Page) {
+    return withTenant(db, p.tenantId, (tx) =>
+      listBookingRows(tx, { from: new Date('2000-01-01'), to: new Date('2100-01-01') }),
+    );
+  }
+
+  it('says nothing about confirming while the business doesn’t ask', async () => {
+    const p = await newPage();
+    const confirmed = await book(p);
+    expect(confirmed.booking.confirm).toBeNull();
+  });
+
+  it('asks by a day before; confirms once, by link, audited, and a second tap changes nothing', async () => {
+    const p = await newPage();
+    await asking(p);
+    const { manageToken: token } = await book(p);
+    const shown = await getManagedBooking(db, p.slug, token, { clock: p.clock });
+    expect(shown.confirm).toEqual({
+      by: new Date(Date.parse(tue('10:00')) - 24 * 3_600_000).toISOString(),
+      confirmed: false,
+    });
+    const first = await confirmManagedBooking(db, p.slug, token, tue('10:00'), {
+      clock: p.clock,
+    });
+    expect(first.confirm?.confirmed).toBe(true);
+    const again = await confirmManagedBooking(db, p.slug, token, tue('10:00'), {
+      clock: p.clock,
+    });
+    expect(again.confirm?.confirmed).toBe(true);
+    const confirms = (await auditOf(p.tenantId)).filter(
+      (entry) => entry.action === 'booking.client_confirmed',
+    );
+    expect(confirms).toHaveLength(1);
+    expect(confirms[0]).toMatchObject({ actor: { kind: 'system' } });
+    const [row] = await rowsOf(p);
+    expect(row).toMatchObject({ clientConfirmedVia: 'link' });
+  });
+
+  it('refuses a moved visit, a cancelled one and one that has started', async () => {
+    const p = await newPage();
+    await asking(p);
+    const { manageToken: token } = await book(p);
+    await rescheduleManagedBooking(db, p.slug, token, tue('14:00'), { clock: p.clock });
+    await expect(
+      confirmManagedBooking(db, p.slug, token, tue('10:00'), { clock: p.clock }),
+    ).rejects.toBeInstanceOf(BookingMovedError);
+    p.clock.set(tue('14:00'));
+    await expect(
+      confirmManagedBooking(db, p.slug, token, tue('14:00'), { clock: p.clock }),
+    ).rejects.toBeInstanceOf(BookingNotChangeableError);
+    const other = await newPage();
+    const second = (await book(other)).manageToken;
+    await cancelManagedBooking(db, other.slug, second, { clock: other.clock });
+    await expect(
+      confirmManagedBooking(db, other.slug, second, tue('10:00'), { clock: other.clock }),
+    ).rejects.toBeInstanceOf(BookingNotChangeableError);
+  });
+
+  it('records the client’s own cancel as theirs (AC-X-200)', async () => {
+    const p = await newPage();
+    const { manageToken: token } = await book(p);
+    await cancelManagedBooking(db, p.slug, token, { clock: p.clock });
+    const [row] = await rowsOf(p);
+    expect(row).toMatchObject({ cancelledBy: 'client' });
   });
 });
 

@@ -50,6 +50,7 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   booking_not_found: 'No such booking in this business',
   slot_unavailable: 'That time cannot be booked',
   booking_not_changeable: 'This booking can no longer be changed this way',
+  booking_moved: 'This visit has moved; check its new time',
   booking_not_started: 'Mark a booking completed or no-show once it has started',
   idempotency_key_reused: 'This idempotency key was already used for a different booking',
   waitlist_entry_not_found: 'No such waitlist entry in this business',

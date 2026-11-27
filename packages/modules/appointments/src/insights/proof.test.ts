@@ -155,8 +155,9 @@ describe('buildEveningWrap', () => {
   });
 
   it('names the visits in the high risk band with their top reason (S77, AC-X-199)', () => {
-    // Sam missed 3 of 4 and hasn't confirmed: high. Maria missed 1 of 3: medium, not named.
-    const risky = tomorrowVisit(10, { clientId: SAM });
+    // Sam missed 3 of 4 and hasn't confirmed when asked: high. Maria missed 1 of 3: medium,
+    // not named.
+    const risky = tomorrowVisit(10, { clientId: SAM, confirmAskedAt: evening - 3_600_000 });
     const wrap = buildEveningWrap(
       [
         noShow('2026-09-01T15:00:00Z'),

@@ -172,6 +172,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof ClientDetails, string>>>({});
   const [busy, setBusy] = useState(false);
   const [booked, setBooked] = useState<BookingConfirmResponse | null>(null);
+  // The ask to confirm by a time (S78, AC-X-202), while it is still ahead and unanswered.
+  const confirmBy =
+    booked?.booking.confirm && !booked.booking.confirm.confirmed ? booked.booking.confirm.by : null;
   // The request's payment (S66.2): what Stripe's field needs and the terms in words.
   const [payment, setPayment] = useState<BookingPaymentStart | null>(null);
   // Stripe said yes to it: a later confirm books with it, never asks for the card again.
@@ -851,11 +854,18 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               },
             ]}
           />
+          {confirmBy === null ? null : (
+            <p className="m-0 type-body text-ink" data-testid="confirm-by">
+              {`Please confirm by ${dateTimeLabel(timeZone, confirmBy)}, or your time may be offered to others. You can confirm now with the link below or in your email.`}
+            </p>
+          )}
           <a
             href={managePath(slug, booked.manageToken)}
             className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
           >
-            Reschedule or cancel
+            {booked.booking.confirm === null || booked.booking.confirm.confirmed
+              ? 'Reschedule or cancel'
+              : 'Confirm, reschedule or cancel'}
           </a>
           <Policy business={business} />
           {withoutCode || remember ? (

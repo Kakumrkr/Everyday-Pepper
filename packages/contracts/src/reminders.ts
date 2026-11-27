@@ -7,11 +7,21 @@ import { z } from 'zod';
 export const SameDayLeadHoursSchema = z.union([z.literal(1), z.literal(2), z.literal(3)]);
 export type SameDayLeadHours = z.infer<typeof SameDayLeadHoursSchema>;
 
+/** How long before a visit the confirm ask goes (S78, D-4), before the night is kept out. */
+export const CONFIRM_ASK_LEAD_HOURS = 72;
+/**
+ * The client is asked to confirm by this many hours before the visit (S78, D-4); the booking
+ * page and emails say so. S78.2's release card waits for it.
+ */
+export const CONFIRM_CUTOFF_HOURS = 24;
+
 /**
  * A business's reminder settings (AC-X-75). `texts`: whether clients who said yes get texts at
  * all (off: reminders by email only, no confirmation or opt-in texts); `dayBefore`: the
  * reminder a day ahead (by text, else email); `sameDay`: a text `sameDayLeadHours` before the
- * start (text only). Stored with every field, so a missing one takes its default.
+ * start (text only); `askToConfirm` (S78, AC-X-202; off by default): clients are asked to
+ * confirm by `CONFIRM_CUTOFF_HOURS` before, high-band visits early (`CONFIRM_ASK_LEAD_HOURS`).
+ * Stored with every field, so a missing one takes its default.
  */
 export const ReminderSettingsSchema = z
   .object({
@@ -19,11 +29,12 @@ export const ReminderSettingsSchema = z
     dayBefore: z.boolean().default(true),
     sameDay: z.boolean().default(true),
     sameDayLeadHours: SameDayLeadHoursSchema.default(2),
+    askToConfirm: z.boolean().default(false),
   })
   .strict();
 export type ReminderSettings = z.infer<typeof ReminderSettingsSchema>;
 
-/** The defaults: everything on, the same-day text 2 hours ahead. */
+/** The defaults: every reminder on, the same-day text 2 hours ahead, no ask to confirm. */
 export const DEFAULT_REMINDER_SETTINGS: ReminderSettings = ReminderSettingsSchema.parse({});
 
 /** Stored settings as read: each missing field at its default, the defaults when unreadable. */
@@ -39,6 +50,7 @@ export const ReminderSettingsPatchSchema = z
     dayBefore: z.boolean().optional(),
     sameDay: z.boolean().optional(),
     sameDayLeadHours: SameDayLeadHoursSchema.optional(),
+    askToConfirm: z.boolean().optional(),
   })
   .strict()
   .refine((patch) => Object.keys(patch).length > 0, { message: 'Change at least one setting' });
@@ -53,10 +65,20 @@ export const ReminderSettingsViewSchema = z
   .strict();
 export type ReminderSettingsView = z.infer<typeof ReminderSettingsViewSchema>;
 
-/** A booking's reminders: the day before (text or email) and the same day (text). */
-export const ReminderKindSchema = z.enum(['day_before', 'same_day']);
+/**
+ * A booking's reminders: the confirm ask (S78: 72 h ahead, high-band visits only, text or
+ * email, when the business asks clients to confirm), the day before (text or email) and the
+ * same day (text).
+ */
+export const ReminderKindSchema = z.enum(['confirm_ask', 'day_before', 'same_day']);
 export type ReminderKind = z.infer<typeof ReminderKindSchema>;
 
 /** What a text to a client was about (AC-X-76). */
-export const BookingTextKindSchema = z.enum(['opt_in', 'confirmation', 'day_before', 'same_day']);
+export const BookingTextKindSchema = z.enum([
+  'opt_in',
+  'confirmation',
+  'confirm_ask',
+  'day_before',
+  'same_day',
+]);
 export type BookingTextKind = z.infer<typeof BookingTextKindSchema>;

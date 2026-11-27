@@ -22,6 +22,7 @@ import {
   bookingActions,
   bookingBlockName,
   confirmedByText,
+  confirmedLabel,
   dateTimeLabel,
   localParts,
   STATUS_LABELS,
@@ -58,6 +59,8 @@ export interface BookingSummary {
   overridden: boolean;
   /** When the client replied C to a reminder (S62); `null` until then, or once moved. */
   clientConfirmedAt: string | null;
+  /** How they confirmed (S78): by "C" or their link; `null` or absent: by text. */
+  clientConfirmedVia?: 'text' | 'link' | null;
   /** The series of recurring visits it is part of (S72); `null` or absent: a single booking. */
   seriesId?: string | null;
   /** Pepper kept it over a change made in Google lately (S72 top-up, AC-X-188). */
@@ -240,7 +243,7 @@ function BookingDetails({
                 label: 'Reply',
                 value: (
                   <span className="text-ok" data-testid="booking-confirmed-by-text">
-                    Confirmed by text
+                    {confirmedLabel(booking)}
                     <span
                       className="block text-ink-2 tabular-nums"
                       data-testid="booking-confirmed-when"

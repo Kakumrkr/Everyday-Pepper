@@ -60,19 +60,28 @@ export interface ReminderTextInput {
   today: boolean;
 }
 
-/** A reminder text (AC-X-72). */
+/** "Reply C to confirm." The early ask says by when, and why (S78, AC-X-204). */
+function confirmAsk(input: ReminderTextInput): string {
+  const by = input.details.confirmBy;
+  if (input.kind !== 'confirm_ask' || by === undefined || by === null) return 'Reply C to confirm.';
+  return `Reply C by ${formatTextWhen(by, input.details.timeZone)}, or your time may be offered to others.`;
+}
+
+/** A reminder text (AC-X-72; the confirm ask, S78). */
 export function reminderText(input: ReminderTextInput): string {
   const { details } = input;
   const opening =
-    input.kind === 'same_day' && input.today
-      ? `See you today at ${formatTextTime(details.startsAt, details.timeZone)} for ${serviceWith(details)}.`
-      : input.kind === 'same_day'
-        ? `See you ${formatTextWhen(details.startsAt, details.timeZone)} for ${serviceWith(details)}.`
-        : `Reminder: ${serviceWith(details)} on ${formatTextWhen(details.startsAt, details.timeZone)}.`;
+    input.kind === 'confirm_ask'
+      ? `Please confirm ${serviceWith(details)} on ${formatTextWhen(details.startsAt, details.timeZone)}.`
+      : input.kind === 'same_day' && input.today
+        ? `See you today at ${formatTextTime(details.startsAt, details.timeZone)} for ${serviceWith(details)}.`
+        : input.kind === 'same_day'
+          ? `See you ${formatTextWhen(details.startsAt, details.timeZone)} for ${serviceWith(details)}.`
+          : `Reminder: ${serviceWith(details)} on ${formatTextWhen(details.startsAt, details.timeZone)}.`;
   const lines = [
     [
       `${sender(details)}: ${opening}`,
-      input.askToConfirm ? 'Reply C to confirm.' : null,
+      input.askToConfirm ? confirmAsk(input) : null,
       input.link === null ? null : `Change or cancel: ${input.link}`,
     ]
       .filter((part) => part !== null)

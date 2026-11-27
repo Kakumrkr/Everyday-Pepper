@@ -70,9 +70,14 @@ interface History {
   misses: number;
 }
 
-/** A cancel inside the notice window (made before the visit started). */
+/**
+ * A client's cancel inside the notice window (made before the visit started). A business's
+ * cancel is never the client's miss (S78, AC-X-200); one from before S78, with nobody recorded,
+ * still counts as it did.
+ */
 function isLateCancel(booking: InsightBooking, noticeMs: number): boolean {
   if (booking.status !== 'cancelled' || booking.cancelledAt === null) return false;
+  if (booking.cancelledBy === 'business') return false;
   const ahead = booking.start - booking.cancelledAt;
   return ahead >= 0 && ahead < noticeMs;
 }
@@ -175,8 +180,11 @@ export function findVisitRisks(input: VisitRiskInput): ScoredVisit[] {
     if (visit.source === 'booking_page' && !visit.secured) {
       reasons.push({ signal: 'online_no_deposit', points: VISIT_RISK_POINTS.onlineNoDeposit });
     }
+    // Only a client who was asked and hasn't answered (S78, AC-X-201): one nobody asked
+    // couldn't confirm.
     if (
       visit.clientConfirmedAt === null &&
+      visit.confirmAskedAt !== null &&
       visit.start - now <= VISIT_RISK_RULES.confirmWithinHours * HOUR_MS
     ) {
       reasons.push({ signal: 'not_confirmed', points: VISIT_RISK_POINTS.notConfirmed });

@@ -25,7 +25,13 @@ const ORIGIN = 'http://localhost:3000';
 const TENANT = TenantIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708192');
 const USER = UserIdSchema.parse('0199f0a4-7c1e-7d2a-9b3c-4d5e6f708193');
 const VIEW: ReminderSettingsView = {
-  settings: { texts: true, dayBefore: true, sameDay: true, sameDayLeadHours: 2 },
+  settings: {
+    texts: true,
+    dayBefore: true,
+    sameDay: true,
+    sameDayLeadHours: 2,
+    askToConfirm: false,
+  },
   canChange: true,
 };
 

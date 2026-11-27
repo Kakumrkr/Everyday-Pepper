@@ -172,6 +172,12 @@ export interface BusinessExportData {
     createdAt: Date;
     /** When it was cancelled (S77); null while it isn't. */
     cancelledAt: Date | null;
+    /** Who cancelled it (S78): `client`, `business`, or null (not cancelled, or unknown). */
+    cancelledBy: string | null;
+    /** When and how the client confirmed it (S62, S78), and when they were last asked (S78). */
+    clientConfirmedAt: Date | null;
+    clientConfirmedVia: string | null;
+    confirmAskedAt: Date | null;
   }[];
   waitlist: {
     id: string;
@@ -394,6 +400,10 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       source: bookings.source,
       createdAt: bookings.createdAt,
       cancelledAt: bookings.cancelledAt,
+      cancelledBy: bookings.cancelledBy,
+      clientConfirmedAt: bookings.clientConfirmedAt,
+      clientConfirmedVia: bookings.clientConfirmedVia,
+      confirmAskedAt: bookings.confirmAskedAt,
     })
     .from(bookings)
     .orderBy(asc(bookings.startsAt), asc(bookings.id));

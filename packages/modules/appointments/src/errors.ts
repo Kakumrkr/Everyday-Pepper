@@ -52,6 +52,14 @@ export class BookingNotChangeableError extends Error {
   }
 }
 
+/** The visit's time is no longer the one the client saw (S78: a confirm by link). */
+export class BookingMovedError extends Error {
+  constructor() {
+    super('This visit has moved; check its new time');
+    this.name = 'BookingMovedError';
+  }
+}
+
 /** Completed and no-show record what happened, so the appointment must have started. */
 export class BookingNotStartedError extends Error {
   constructor() {

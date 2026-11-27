@@ -54,6 +54,7 @@ const MESSAGES: Record<string, string> = {
   booking_not_found: 'That booking is gone, or it isn’t yours to change.',
   slot_unavailable: 'That time can’t be booked. Pick another time.',
   booking_not_changeable: 'This booking can’t be changed any more.',
+  booking_moved: 'Your visit has moved. Check its new time below.',
   booking_not_started: 'Mark it done or a no-show once it has started.',
   waitlist_expired: 'Those times have already passed.',
   waitlist_times_free: 'A time in there is still free. Book it instead.',

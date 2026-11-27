@@ -44,8 +44,8 @@ describe('findVisitRisks', () => {
     expect(risk).toMatchObject({ bookingId: visit.id, band: 'low', points: 0, reasons: [] });
   });
 
-  it('a regular who has not confirmed tomorrow is still low', () => {
-    const [risk] = risks([...regularHistory(MARIA), ahead(1)]);
+  it('a regular who was asked and has not confirmed tomorrow is still low', () => {
+    const [risk] = risks([...regularHistory(MARIA), ahead(1, { confirmAskedAt: NOW - DAY })]);
     expect(risk).toMatchObject({
       band: 'low',
       reasons: [{ signal: 'not_confirmed', points: 1 }],
@@ -77,7 +77,7 @@ describe('findVisitRisks', () => {
       past(100, { status: 'no_show' }),
       past(140),
     ];
-    const [risk] = risks([...history, ahead(1)]);
+    const [risk] = risks([...history, ahead(1, { confirmAskedAt: NOW - DAY })]);
     expect(risk).toMatchObject({ band: 'high', points: 4 });
     expect(risk?.reasons[0]).toEqual({ signal: 'missed_before', points: 3, misses: 3, visits: 4 });
   });
@@ -110,6 +110,35 @@ describe('findVisitRisks', () => {
     // A longer notice makes the early one late too.
     const [longer] = risks([late, early, past(120), ahead(5)], { cancelNoticeHours: 168 });
     expect(longer?.reasons[0]).toMatchObject({ misses: 2, visits: 3 });
+  });
+
+  it('scores not_confirmed only once the client was asked (AC-X-201)', () => {
+    const [unasked] = risks([...regularHistory(MARIA), ahead(1)]);
+    expect(unasked?.reasons).toEqual([]);
+    const [asked] = risks([...regularHistory(MARIA), ahead(1, { confirmAskedAt: NOW - DAY })]);
+    expect(asked?.reasons).toEqual([{ signal: 'not_confirmed', points: 1 }]);
+    const [answered] = risks([
+      ...regularHistory(MARIA),
+      ahead(1, { confirmAskedAt: NOW - DAY, clientConfirmedAt: NOW - 3_600_000 }),
+    ]);
+    expect(answered?.reasons).toEqual([]);
+  });
+
+  it('a business’s late cancel is never the client’s miss; the client’s and an unknown one are (AC-X-200)', () => {
+    const lateStart = NOW - 40 * DAY;
+    const late = (cancelledBy: 'client' | 'business' | null) =>
+      past(40, { status: 'cancelled', cancelledAt: lateStart - 2 * 3_600_000, cancelledBy });
+    const [byBusiness] = risks([late('business'), past(80), past(120), ahead(5)]);
+    expect(byBusiness?.reasons).toEqual([]);
+    const [byClient] = risks([late('client'), past(80), past(120), ahead(5)]);
+    expect(byClient?.reasons[0]).toEqual({
+      signal: 'missed_before',
+      points: 2,
+      misses: 1,
+      visits: 3,
+    });
+    const [unknown] = risks([late(null), past(80), past(120), ahead(5)]);
+    expect(unknown?.reasons[0]).toMatchObject({ misses: 1, visits: 3 });
   });
 
   it('scores only confirmed visits from now to the horizon, earliest first', () => {
@@ -180,7 +209,7 @@ describe('visit risk signals (behaviour only, AC-X-197)', () => {
         ...regularHistory(MARIA),
         past(15, { clientId: SAM, status: 'no_show' }),
         past(25, { clientId: SAM, status: 'cancelled', cancelledAt: NOW - 25 * DAY - 3_600_000 }),
-        ahead(1, { clientId: SAM, source: 'booking_page' }, 20),
+        ahead(1, { clientId: SAM, source: 'booking_page', confirmAskedAt: NOW - DAY }, 20),
         ahead(4),
       ].map(watch),
     );
@@ -192,7 +221,9 @@ describe('visit risk signals (behaviour only, AC-X-197)', () => {
       'source',
       'createdAt',
       'clientConfirmedAt',
+      'confirmAskedAt',
       'cancelledAt',
+      'cancelledBy',
       'secured',
     ]);
     expect([...read].filter((key) => !allowed.has(key))).toEqual([]);

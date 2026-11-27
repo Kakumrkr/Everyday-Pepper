@@ -94,6 +94,14 @@ describe('reminder texts', () => {
         first: true,
         today: true,
       }),
+      reminderText({
+        kind: 'confirm_ask',
+        details: { ...LONGEST, confirmBy: '2026-11-16T19:00:00.000Z' },
+        link: LONG_LINK,
+        askToConfirm: true,
+        first: true,
+        today: false,
+      }),
       optInText(LONGEST, LONG_LINK),
       confirmationText(LONGEST, LONG_LINK),
       confirmedReply(LONGEST, false),
@@ -106,6 +114,25 @@ describe('reminder texts', () => {
         OutboxSmsSchema.safeParse({ to: '+12125550123', body, wordsBy: 'template' }).success,
       ).toBe(true);
     }
+  });
+});
+
+describe('the confirm ask by text (S78, AC-X-204)', () => {
+  it('asks for a "C" by the cut-off, says why, and keeps the link', () => {
+    expect(
+      reminder({
+        kind: 'confirm_ask',
+        details: { ...DETAILS, confirmBy: '2026-11-16T19:00:00.000Z' },
+      }),
+    ).toBe(
+      `Fades by Marco via Pepper: Please confirm Skin fade with Marco on Tue, Nov 17 at 2:00 PM. Reply C by Mon, Nov 16 at 2:00 PM, or your time may be offered to others. Change or cancel: ${LINK}`,
+    );
+  });
+
+  it('the day-before text still just asks "Reply C to confirm."', () => {
+    expect(reminder({ details: { ...DETAILS, confirmBy: '2026-11-16T19:00:00.000Z' } })).toContain(
+      'Reply C to confirm.',
+    );
   });
 });
 

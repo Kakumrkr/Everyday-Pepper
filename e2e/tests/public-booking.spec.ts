@@ -16,6 +16,7 @@ import {
   hydrated,
   onboardOwner,
   ownClientAddress,
+  toast,
   unique,
 } from './helpers.js';
 
@@ -166,6 +167,62 @@ test('a client books on the page in the business’s color, confirms the emailed
   );
   expect((await bookings())[0]?.status).toBe('cancelled');
   await expect(emailTo(email, 'is cancelled')).resolves.toContain('Hi Ana');
+});
+
+test('AC-X-202/203/205: with "Ask clients to confirm" on, a client is asked by a day before and confirms by the link; the owner sees "Confirmed by link"', async ({
+  page,
+  browser,
+  baseURL,
+}) => {
+  test.setTimeout(120_000);
+  await onboardOwner(page);
+  const slug = await salon(page);
+
+  // The owner turns the ask on.
+  await page.goto('/more/texts');
+  await (await hydrated(page.getByRole('switch', { name: 'Ask clients to confirm' }))).click();
+  await expect(toast(page)).toContainText('Saved. Clients are asked to confirm their visits.');
+
+  // A client books three days ahead.
+  const client = await anotherPerson(browser, baseURL);
+  const email = `${unique('client')}@example.test`;
+  await client.goto(`/book/${slug}`);
+  await (await hydrated(client.getByRole('button', { name: /Haircut/ }))).click();
+  await client.getByRole('button', { name: /Anyone available/ }).click();
+  await pickTime(client, 3);
+  await client.getByLabel('Full name').fill('Ana Ruiz');
+  await client.getByLabel('Email').fill(email);
+  await client.getByRole('button', { name: 'Send my code' }).click();
+  const code = /^ {4}(\d{6})$/m.exec(await emailTo(email, 'is your code'))?.[1] ?? '';
+  await client.getByLabel('Code').fill(code);
+  await client.getByRole('button', { name: 'Confirm booking' }).click();
+  await expect(client.getByRole('heading', { name: /You’re booked, Ana/ })).toBeVisible();
+  await expect(client.getByTestId('confirm-by')).toContainText(
+    'or your time may be offered to others.',
+  );
+
+  // The confirmation asks too, and its link confirms.
+  const confirmation = await emailTo(email, 'booked at');
+  expect(confirmation).toMatch(/Please confirm by .+, or your time may be offered to others\./);
+  const link = /(https?:\/\/\S+\/book\/\S+\/manage#[A-Za-z0-9_-]{43})/.exec(confirmation)?.[1];
+  await client.goto(new URL(link ?? '').pathname + new URL(link ?? '').hash);
+  const ask = client.getByTestId('confirm-ask');
+  await expect(ask).toContainText('Please confirm by');
+  await (await hydrated(ask.getByRole('button', { name: 'Confirm my visit' }))).click();
+  await expect(client.getByText('You’re confirmed. See you then.')).toBeVisible();
+  await expect(client.getByTestId('confirm-state')).toHaveText('You confirmed this visit.');
+  await client.reload();
+  await expect(client.getByTestId('confirm-state')).toBeVisible();
+
+  // The owner's calendar says how.
+  const range = `from=${encodeURIComponent(new Date().toISOString())}&to=${encodeURIComponent(
+    new Date(Date.now() + 14 * 86_400_000).toISOString(),
+  )}`;
+  const [booked] = BookingsResponseSchema.parse(
+    await (await page.request.get(`/v1/bookings?${range}`)).json(),
+  ).bookings;
+  expect(booked).toMatchObject({ clientConfirmedVia: 'link' });
+  expect(booked?.clientConfirmedAt).toEqual(expect.any(String));
 });
 
 test('AC-X-64…67: a client says yes to texts while booking, and the owner sees the exact words, then stops them', async ({

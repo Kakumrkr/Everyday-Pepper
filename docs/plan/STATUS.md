@@ -1,21 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → next **S78**
+**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → next **S78.2**
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S78** (Phase 18: confirm or release; may split at its brief). The day the domain is bought, S58a, S57, S58b and S60 go next instead (PCR-017). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+Nothing in progress. Next: **S78.2** (Phase 18: the release card, the holdback, "Who cancelled?"). The day the domain is bought, S58a, S57, S58b and S60 go next instead (PCR-017). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
 
 ## Last sessions
+- **S78 Phase 18 · The confirm ask (2026-11-27)** ([PR #117](https://github.com/Kakumrkr/Everyday-Pepper/pull/117), [ADR-0071](../adr/0071-visit-risk.md) §S78). Full entry in [session-log.md](session-log.md).
+  - **Built:** "Ask clients to confirm" (off): the booked screen and emails say "Please confirm by …"; "Confirm my visit" on the manage link; high-band visits asked 72 h ahead by text (`sms-consent-v1`) or email; `cancelled_by`, `confirm_asked_at`, `client_confirmed_via`; "Confirmed by link" on the sheet (top-up). AC-X-200…206. Commits now carry the owner's GitHub identity.
+  - **Checks:** `pnpm check` green; affected integration 26/26; e2e public-booking, texts-settings, confirm-by-text, legal, screens (Texts and privacy baselines updated); review 1 important fixed; security none.
 - **S77 Phase 18 · Visit risk with reasons (2026-11-27)** ([PR #116](https://github.com/Kakumrkr/Everyday-Pepper/pull/116), [ADR-0071](../adr/0071-visit-risk.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** `findVisitRisks` (named points from booking behaviour only, low/medium/high), `bookings.cancelled_at` for late cancels, `visit_risks` (owners and managers only) synced by the insights pass, in the export and on the privacy page; the evening wrap names tomorrow's high-band visits with their top reason (top-up); a `visit_risk` *Why?* fact for S78. AC-X-195…199.
   - **Checks:** `pnpm check` green; affected integration green (db 1,051, others 2,186); e2e gallery, legal, screens (privacy and gallery baselines updated); review 1 important fixed (the backfill kept `updated_at`), 2 limits for S78; security none.
-- **P2 Plan Phase 18, the AI layer (2026-11-26, prose only)** ([PCR-017](changes/PCR-017.md), plan 0.43). Full entry in [session-log.md](session-log.md).
-  - **Planned:** the user's draft checked against the code and fixed. Phase 18 is S77–S85, S73 (Reports, moved in from Phase 17) and S87, before Phase 17; S86 waits for the pilot. The domain rule; a $1.50 cap from Phase 12's unspent; waitlist offers by text on `sms-consent-v3`; client texts routed to one business or stored nowhere; five AI pilot metrics (top-up). The Claude Doc brought in line.
-  - **Checks:** tier 0 only (no runtime file): `git diff --check`, Prettier on the 10 changed docs, relative links (0 broken), session ids agree across STATUS, the playbook and the PCR.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -32,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S78 (user, 2026-11-27):** "start with your recommendations and complete successfully" (D-1 commits under the owner's GitHub identity, in `session-start.sh`; D-2 split → S78.2 the release card; D-3 changed in chat: the early ask is a reminder under `sms-consent-v1`; D-4 ask 72 h ahead, confirm by 24 h before). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.
 - **S77 (user, 2026-11-27):** "Go ahead, start with your recommendations and complete the session successfully" (D-1 `cancelled_at` from the audit log; D-2 the points and bands; D-3 the wrap's high-band visits; D-4 the wrap only, the fact for S78). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md).
 - **P2 (user, 2026-11-26):** "Sure, go ahead with your recommendations and complete the session successfully" (D-1 Phase 18 next, S58a–S60 the day the domain is bought; D-2 S73 into Phase 18; D-3 S86 after the pilot; D-4 waitlist offers by text on `sms-consent-v3`, regulars by email; D-5 $1.50 from Phase 12's unspent; D-6 S80 "client texts kept"); no training on shop data, "never". Full wording in [decisions.md](decisions.md) and [PCR-017](changes/PCR-017.md).
 - **S72.2 (user, 2026-11-26):** "Sure, let's start with your recommendations" (D-1 Day · Week · My week, staff open on My week; D-2 one week read of visit numbers; D-3 visits, hours booked, days off, no money; D-4 C6 scored honestly: 8). Full wording in [decisions.md](decisions.md).
@@ -118,13 +119,13 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 **The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S78 | Confirm or release (may split at its brief) | 18 | No release without the owner's tap; the race test |
+| S78.2 | The release card (S78 split; holdback, "Who cancelled?") | 18 | No release without the owner's tap; the race test |
 | S79 | Waitlist offers by text (sandbox, `sms-consent-v3`) | 18 | A v3 client with no email is offered by text |
 | S80 | Client texts kept (routed to one business, an owner card with Reply) | 18 | A text two businesses fit is stored in neither; isolation 100% |
 | S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
