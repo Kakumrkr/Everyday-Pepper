@@ -236,16 +236,26 @@ export async function decideProposal(
   return row;
 }
 
-/** Up to `limit` pending proposals not yet expired at `now`, oldest first. */
+/**
+ * Up to `limit` pending proposals not yet expired at `now`, oldest first; with `action`, only
+ * that action's (S78.3: the release cards a settings change looks over).
+ */
 export async function listPendingProposals(
   tx: TenantTx,
   now: Date,
   limit: number,
+  action?: AutonomyAction,
 ): Promise<AiActionProposalRow[]> {
   return tx
     .select()
     .from(aiActionProposals)
-    .where(and(eq(aiActionProposals.status, 'pending'), gt(aiActionProposals.expiresAt, now)))
+    .where(
+      and(
+        eq(aiActionProposals.status, 'pending'),
+        gt(aiActionProposals.expiresAt, now),
+        action === undefined ? undefined : eq(aiActionProposals.action, action),
+      ),
+    )
     .orderBy(asc(aiActionProposals.createdAt), asc(aiActionProposals.id))
     .limit(LimitSchema.parse(limit));
 }
@@ -504,4 +514,21 @@ export async function actionTrackRecord(
     const row = TrackRowSchema.parse(raw);
     return { action: row.action, doneSince30: row.done_30, correctInARow: row.correct };
   });
+}
+
+/**
+ * How many proposals for `targetKey` a later change took away (`superseded`, S78.3): a release
+ * card a new cut-off withdrew comes back under a new idempotency key.
+ */
+export async function countSupersededProposalsFor(
+  tx: TenantTx,
+  targetKey: string,
+): Promise<number> {
+  const [row] = await tx
+    .select({ n: sql<number>`count(*)::int` })
+    .from(aiActionProposals)
+    .where(
+      and(eq(aiActionProposals.targetKey, targetKey), eq(aiActionProposals.status, 'superseded')),
+    );
+  return row?.n ?? 0;
 }

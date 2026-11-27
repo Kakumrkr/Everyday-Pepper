@@ -8,7 +8,8 @@ const DISPLAY_NAME_MAX = StaffMemberInputSchema.shape.displayName.maxLength ?? 8
 
 /**
  * A new business's first week from its type (S45, ADR-0046): the template's whole starting
- * menu, the owner as the one staff member offering it, and the template's opening hours. A
+ * menu, the owner as the one staff member offering it, the template's opening hours and its
+ * confirm cut-off (S78.3). A
  * catalog range whose "to" equals its "from" is one price (services need "to" above "from").
  */
 export function seedFromTemplate(
@@ -33,6 +34,7 @@ export function seedFromTemplate(
     })),
     owner: { userId: owner.userId, displayName: displayNameOf(owner.name) },
     hours: template.defaultHours,
+    reminders: { confirmCutoffHours: template.reminders.confirmCutoffHours },
   };
 }
 

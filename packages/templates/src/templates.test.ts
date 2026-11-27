@@ -1,6 +1,7 @@
 import {
   AUTONOMY_ACTIONS,
   PLATFORM_DRAFTS,
+  PLATFORM_REMINDERS,
   PLATFORM_RULE_DEFAULTS,
   PLATFORM_WAITLIST,
   RULE_LIMITS,
@@ -19,6 +20,7 @@ import {
   templateInsights,
   templateRuleDefaults,
   templateSummaries,
+  templateReminders,
   templateWaitlist,
 } from './templates.js';
 
@@ -258,6 +260,17 @@ describe('templateWaitlist (S37)', () => {
       expect(templateWaitlist(template.id), template.id).toBe(template.waitlist);
       expect(template.waitlist.offerFanOut, template.id).toBeGreaterThanOrEqual(1);
       expect(template.waitlist.offerFanOut, template.id).toBeLessThanOrEqual(5);
+    }
+  });
+});
+
+describe('templateReminders (S78.3, AC-X-217)', () => {
+  it("starts at the platform's 24 h without a template; every V1 type starts at 24 h too", () => {
+    expect(templateReminders(null)).toBe(PLATFORM_REMINDERS);
+    expect(PLATFORM_REMINDERS.confirmCutoffHours).toBe(24);
+    for (const template of listTemplates()) {
+      expect(templateReminders(template.id), template.id).toBe(template.reminders);
+      expect(template.reminders.confirmCutoffHours, template.id).toBe(24);
     }
   });
 });

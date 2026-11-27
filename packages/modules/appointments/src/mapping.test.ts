@@ -230,6 +230,7 @@ const bookingRow: BookingRow = {
   cancelledBy: null,
   clientConfirmedVia: null,
   confirmAskedAt: null,
+  confirmHeldBackAt: null,
   bufferBeforeMinutes: 0,
   bufferAfterMinutes: 10,
   priceFromCents: 6500,

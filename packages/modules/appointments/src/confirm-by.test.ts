@@ -20,6 +20,19 @@ describe('confirmByOf', () => {
     expect(confirmByOf(asking, { ...visit, clientConfirmedAt: new Date(now) }, now)).toBeNull();
   });
 
+  it('follows the business’s cut-off (S78.3, AC-X-218)', () => {
+    const now = Date.parse('2026-11-17T12:00:00Z');
+    const at = (confirmCutoffHours: number) => ({
+      reminderSettings: { askToConfirm: true, confirmCutoffHours },
+    });
+    expect(confirmByOf(at(12), visit, now)).toBe('2026-11-20T03:00:00.000Z');
+    expect(confirmByOf(at(48), visit, now)).toBe('2026-11-18T15:00:00.000Z');
+    // Passed at 48 h, still ahead at 12 h.
+    const later = Date.parse('2026-11-19T00:00:00Z');
+    expect(confirmByOf(at(48), visit, later)).toBeNull();
+    expect(confirmByOf(at(12), visit, later)).toBe('2026-11-20T03:00:00.000Z');
+  });
+
   it('names no time already gone: a visit booked under a day ahead', () => {
     expect(confirmByOf(asking, visit, Date.parse(BY))).toBeNull();
     expect(confirmByOf(asking, visit, Date.parse('2026-11-20T09:00:00Z'))).toBeNull();

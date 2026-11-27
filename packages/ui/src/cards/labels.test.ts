@@ -543,7 +543,7 @@ describe('the release card (S78.2, AC-X-208, AC-X-213)', () => {
       ['Top reason', 'Missed 2 of 5 visits'],
       [
         'Then',
-        'Email the client, refund the deposit in full, and offer the time to your waitlist and regulars',
+        'Email Maria L. that it’s cancelled, refund the deposit in full, and offer the time to your waitlist and regulars',
       ],
     ]);
   });
@@ -556,7 +556,7 @@ describe('the release card (S78.2, AC-X-208, AC-X-213)', () => {
     });
     expect(rows.map((row) => row.label)).not.toContain('Top reason');
     expect(rows.at(-1)?.after).toBe(
-      'Email the client, and offer the time to your waitlist and regulars',
+      'Email Maria L. that it’s cancelled, and offer the time to your waitlist and regulars',
     );
     // A client with no email address: no email promised.
     expect(

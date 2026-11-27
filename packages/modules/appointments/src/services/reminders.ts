@@ -3,7 +3,7 @@ import {
   BookingIdSchema,
   ClientIdSchema,
   CONFIRM_ASK_LEAD_HOURS,
-  CONFIRM_CUTOFF_HOURS,
+  inHoldbackShare,
   ManageTokenSchema,
   OutboxDedupeKeySchema,
   reminderSettingsFrom,
@@ -29,6 +29,7 @@ import {
   listVisitRisks,
   lockBooking,
   markBookingConfirmAsked,
+  markBookingConfirmHeldBack,
   planBookingReminder,
   removeBookingReminder,
   takeDueBookingReminder,
@@ -61,7 +62,8 @@ import { keepReleaseCardInStep, releaseCheck } from './release-check.js';
 // confirm records the ask on the booking, so visit risk scores `not_confirmed` only after it.
 //
 // The release check (S78.2, AC-X-207): while the business asks, every visit has one planned at
-// its cut-off (`CONFIRM_CUTOFF_HOURS` before, not moved out of the night: it reaches no client).
+// its cut-off (`confirmCutoffHours` before, S78.3; not moved out of the night: it reaches no
+// client).
 // When due, a visit asked early enough and still unconfirmed gets the owner's release card
 // (`onReleaseDue`, the worker's proposer); nothing goes to the client.
 
@@ -106,7 +108,7 @@ export function reminderDueAt(
   settings: ReminderSettings,
 ): number | null {
   if (kind === 'release_check') {
-    return settings.askToConfirm ? startsAt - CONFIRM_CUTOFF_HOURS * HOUR_MS : null;
+    return settings.askToConfirm ? startsAt - settings.confirmCutoffHours * HOUR_MS : null;
   }
   if (kind === 'confirm_ask') {
     return settings.askToConfirm
@@ -148,7 +150,9 @@ export async function keepReminderInStep(
 /**
  * `keepDue`: a re-plan for a settings change leaves a reminder that is due but not yet taken
  * (between the job's polls, or a backlog) for the job, which checks the settings again; a
- * booking change replaces it, as it just told the client.
+ * booking change replaces it, as it just told the client. `cutoffMoved`: the business's cut-off
+ * changed (S78.3 review), so a visit already past its new cut-off has its release check now,
+ * not at the old time.
  */
 async function keepRemindersOf(
   tx: TenantTx,
@@ -156,14 +160,22 @@ async function keepRemindersOf(
   now: number,
   timeZone: string,
   settings: ReminderSettings,
-  options: { keepDue?: boolean } = {},
+  options: { keepDue?: boolean; cutoffMoved?: boolean } = {},
 ): Promise<void> {
   const bookingId = BookingIdSchema.parse(row.id);
   for (const kind of KINDS) {
-    const dueAt =
+    const planned =
       row.status === 'confirmed'
         ? reminderDueAt(kind, row.startsAt.getTime(), timeZone, settings)
         : null;
+    const dueAt =
+      kind === 'release_check' &&
+      options.cutoffMoved === true &&
+      planned !== null &&
+      planned <= now &&
+      row.startsAt.getTime() > now
+        ? now + 1
+        : planned;
     if (dueAt !== null && dueAt > now) {
       await planBookingReminder(tx, {
         bookingId,
@@ -191,6 +203,7 @@ export async function replanUpcomingReminders(
   timeZone: string,
   settings: ReminderSettings,
   now: number,
+  options: { cutoffMoved?: boolean } = {},
 ): Promise<number> {
   const to = new Date(now + REPLAN_HORIZON_MS);
   const seen = new Set<string>();
@@ -200,7 +213,7 @@ export async function replanUpcomingReminders(
     for (const row of page) {
       if (seen.has(row.id) || row.startsAt.getTime() <= now) continue;
       seen.add(row.id);
-      await keepRemindersOf(tx, row, now, timeZone, settings, { keepDue: true });
+      await keepRemindersOf(tx, row, now, timeZone, settings, { keepDue: true, ...options });
     }
     const last = page.at(-1);
     // The next page starts at the last start (rows there already seen are skipped).
@@ -282,8 +295,13 @@ export async function sendDueReminder(
       const tenantId = TenantIdSchema.parse(due.tenantId);
       return (await options.onReleaseDue(tx, { tenantId, bookingId })) ? 'queued' : 'skipped';
     }
-    // The confirm ask: only a high-band visit the client hasn't confirmed (AC-X-204).
-    if (due.kind === 'confirm_ask' && !(await needsConfirmAsk(tx, booking))) return 'skipped';
+    // The confirm ask: only a high-band visit the client hasn't confirmed (AC-X-204), and not one
+    // the holdback keeps back, which is marked instead (S78.3, AC-X-215).
+    if (due.kind === 'confirm_ask') {
+      const ask = await confirmAskOf(tx, booking, settings);
+      if (ask === 'held_back') await markBookingConfirmHeldBack(tx, bookingId, now);
+      if (ask !== 'ask') return 'skipped';
+    }
     const details = await emailDetailsOf(tx, tenant, booking, now.getTime());
     const phone =
       options.texts === true && settings.texts ? await textableNumber(tx, booking.clientId) : null;
@@ -353,11 +371,23 @@ export async function sendDueReminder(
   });
 }
 
-/** Whether the confirm ask goes: the client hasn't confirmed and the visit is high-band (S77). */
-async function needsConfirmAsk(tx: TenantTx, booking: BookingRow): Promise<boolean> {
-  if (booking.clientConfirmedAt !== null) return false;
+/**
+ * Whether the confirm ask goes: `ask` when the client hasn't confirmed and the visit is
+ * high-band (S77); `held_back` when, while the business has the holdback on, such a visit
+ * falls in the held-back share or was held back before a move (S78.3, AC-X-215); `skip`
+ * otherwise.
+ */
+async function confirmAskOf(
+  tx: TenantTx,
+  booking: BookingRow,
+  settings: Pick<ReminderSettings, 'holdback'>,
+): Promise<'ask' | 'held_back' | 'skip'> {
+  if (booking.clientConfirmedAt !== null) return 'skip';
   const [risk] = await listVisitRisks(tx, [BookingIdSchema.parse(booking.id)]);
-  return risk?.band === 'high';
+  if (risk?.band !== 'high') return 'skip';
+  // Turned off, nobody is held back, a visit marked earlier included (S78.3 review).
+  if (!settings.holdback) return 'ask';
+  return booking.confirmHeldBackAt !== null || inHoldbackShare(booking.id) ? 'held_back' : 'ask';
 }
 
 /** A reminder that was queued already: the new link it would have carried goes (`skipped`). */

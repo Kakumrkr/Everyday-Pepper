@@ -113,4 +113,13 @@ describe('reminderDueAt: the release check (S78.2, AC-X-207)', () => {
     // It reaches the owner, not the client: not moved out of the night.
     expect(reminderDueAt('release_check', ny(20, '06:00'), NY, asking)).toBe(ny(19, '06:00'));
   });
+
+  it('moves with the business’s cut-off (S78.3, AC-X-218)', () => {
+    const at = (confirmCutoffHours: 12 | 48) =>
+      settings({ askToConfirm: true, confirmCutoffHours });
+    expect(reminderDueAt('release_check', ny(20, '14:00'), NY, at(12))).toBe(ny(20, '02:00'));
+    expect(reminderDueAt('release_check', ny(20, '14:00'), NY, at(48))).toBe(ny(18, '14:00'));
+    // The early ask stays 72 h ahead.
+    expect(reminderDueAt('confirm_ask', ny(20, '14:00'), NY, at(48))).toBe(ny(17, '14:00'));
+  });
 });

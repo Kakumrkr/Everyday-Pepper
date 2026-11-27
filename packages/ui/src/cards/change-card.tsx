@@ -217,6 +217,12 @@ function EmailLines({
   status,
 }: ChangeCardProps) {
   const books = action.startsWith('booking');
+  // A release's Then line names its email until it is sent (S78.3 top-up, AC-X-219).
+  if (action === 'booking.release' && emails.every((email) => email.status === undefined)) {
+    return emails.length === 0 && status !== 'refused' ? (
+      <p className="m-0 type-caption text-ink-2">No email to the client.</p>
+    ) : null;
+  }
   if (emails.length === 0) {
     return books && status !== 'refused' ? (
       <p className="m-0 type-caption text-ink-2">No email to the client.</p>

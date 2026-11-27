@@ -36,6 +36,7 @@ function booking(id: string, clientId: string, startsAt: string, status: string)
     clientConfirmedAt: null,
     clientConfirmedVia: null,
     confirmAskedAt: null,
+    confirmHeldBackAt: null,
   };
 }
 
@@ -454,6 +455,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               ),
               cancelledAt: asked,
               cancelledBy: 'client',
+              confirmHeldBackAt: asked,
             },
           ],
         }),
@@ -468,6 +470,9 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       cancelledBy: null,
     });
     expect(appointments[1]).toMatchObject({ cancelledBy: 'client' });
+    // The holdback's mark (S78.3, AC-X-215).
+    expect(appointments[0]).toMatchObject({ confirmHeldBackAt: null });
+    expect(appointments[1]).toMatchObject({ confirmHeldBackAt: asked.toISOString() });
   });
 
   it('puts the team’s services, hours and time off with each member', () => {

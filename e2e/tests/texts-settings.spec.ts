@@ -72,6 +72,43 @@ test('an owner changes the reminders from More, and they stay changed', async ({
   );
 });
 
+test('AC-X-214/217: an owner picks when clients confirm by and turns on the holdback, and both stay', async ({
+  page,
+}) => {
+  test.setTimeout(90_000);
+  await onboardOwner(page);
+  await page.goto('/more/texts');
+  // Both wait for the ask.
+  await (await hydrated(page.getByRole('switch', { name: 'Ask clients to confirm' }))).click();
+  await expect(toast(page)).toContainText('Saved. Clients are asked to confirm their visits.');
+  // The type's cut-off to start with, a day before; the holdback off.
+  await expect(page.getByRole('radio', { name: '1 day' })).toBeChecked();
+  const holdback = page.getByRole('switch', { name: 'Measure what asking does' });
+  await expect(holdback).not.toBeChecked();
+  await expect(holdback).toHaveAccessibleDescription(
+    'Off. Every visit likely to be missed is asked early.',
+  );
+
+  await page.getByRole('radio', { name: '12 hours' }).click();
+  await expect(toast(page).last()).toContainText(
+    'Saved. Clients are asked to confirm by 12 hours before.',
+  );
+  await expect(
+    page.getByRole('switch', { name: 'Ask clients to confirm' }),
+  ).toHaveAccessibleDescription(/^Clients are asked to confirm by 12 hours before\./);
+  await holdback.click();
+  await expect(toast(page).last()).toContainText('Saved. 1 in 5 likely misses aren’t asked early.');
+
+  await page.reload();
+  await expect(await hydrated(page.getByRole('radio', { name: '12 hours' }))).toBeChecked();
+  await expect(page.getByRole('switch', { name: 'Measure what asking does' })).toBeChecked();
+  // Asking off: neither is offered.
+  await page.getByRole('switch', { name: 'Ask clients to confirm' }).click();
+  await expect(toast(page).last()).toContainText('Saved. Clients aren’t asked to confirm.');
+  await expect(page.getByRole('radio', { name: '12 hours' })).toHaveCount(0);
+  await expect(page.getByRole('switch', { name: 'Measure what asking does' })).toHaveCount(0);
+});
+
 test('staff read the reminders and cannot change them', async ({ page, browser, baseURL }) => {
   test.setTimeout(90_000);
   const owner = await onboardOwner(page);

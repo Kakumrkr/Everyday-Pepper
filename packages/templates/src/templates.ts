@@ -1,5 +1,6 @@
 import {
   PLATFORM_DRAFTS,
+  PLATFORM_REMINDERS,
   PLATFORM_WAITLIST,
   ruleDefaultsOf,
   TemplateIdSchema,
@@ -10,6 +11,7 @@ import {
   type TemplateId,
   type TemplateInput,
   type TemplateInsights,
+  type TemplateReminders,
   type TemplateSummary,
   type TemplateWaitlist,
 } from '@pepper/contracts';
@@ -112,6 +114,11 @@ function deepFreeze<T>(value: T): T {
 /** The voice of the business's rebooking emails and the morning pass's hour (S36). */
 export function templateDrafts(id: TemplateId | null): TemplateDrafts {
   return id === null ? PLATFORM_DRAFTS : getTemplate(id).drafts;
+}
+
+/** The confirm cut-off a new business of the type starts with (S78.3, AC-X-217). */
+export function templateReminders(id: TemplateId | null): TemplateReminders {
+  return id === null ? PLATFORM_REMINDERS : getTemplate(id).reminders;
 }
 
 /** How many waiting clients a freed slot is offered to at once (S37, ADR-0041). */

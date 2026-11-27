@@ -31,6 +31,8 @@ const VIEW: ReminderSettingsView = {
     sameDay: true,
     sameDayLeadHours: 2,
     askToConfirm: false,
+    confirmCutoffHours: 24,
+    holdback: false,
   },
   canChange: true,
 };
@@ -127,6 +129,9 @@ describe('/v1/reminders/settings', () => {
     role = 'owner';
     await patch({}).expect(400);
     await patch({ sameDayLeadHours: 4 }).expect(400);
+    // The cut-off is 12, 24 or 48 h; the holdback a yes or no (S78.3).
+    await patch({ confirmCutoffHours: 6 }).expect(400);
+    await patch({ holdback: 'yes' }).expect(400);
     await patch({ texts: 'no' }).expect(400);
     await patch({ tenantId: TENANT }).expect(400);
     await patch({ texts: false }, 'https://evil.example').expect(403);

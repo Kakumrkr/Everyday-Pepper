@@ -26,6 +26,8 @@ describe('seedFromTemplate (S45, AC-W1-7)', () => {
     });
     expect(seed.owner).toEqual({ userId, displayName: 'Marcus Reed' });
     expect(seed.hours).toEqual(template.defaultHours);
+    // The type's confirm cut-off (S78.3, AC-X-217).
+    expect(seed.reminders).toEqual({ confirmCutoffHours: template.reminders.confirmCutoffHours });
   });
 
   it.each(listTemplates().map((t) => [t.id, t] as const))(

@@ -11,7 +11,10 @@ import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import {
   askToConfirmHint,
+  CONFIRM_CUTOFFS,
+  cutoffLabel,
   dayBeforeHint,
+  holdbackHint,
   leadLabel,
   REMINDER_SETTINGS_PATH,
   SAME_DAY_LEADS,
@@ -62,7 +65,7 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
   }
 
   const toggle =
-    (key: keyof Omit<ReminderSettings, 'sameDayLeadHours'>) =>
+    (key: keyof Omit<ReminderSettings, 'sameDayLeadHours' | 'confirmCutoffHours'>) =>
     (event: { target: { checked: boolean } }) => {
       void change({ [key]: event.target.checked });
     };
@@ -139,14 +142,60 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
         <h2 id={`${leadId}-confirm`} className="m-0 type-heading">
           Confirming visits
         </h2>
-        <div className="rounded-lg bg-surface px-4 py-1">
-          <Switch
-            label="Ask clients to confirm"
-            hint={askToConfirmHint(settings)}
-            checked={settings.askToConfirm}
-            disabled={locked}
-            onChange={toggle('askToConfirm')}
-          />
+        {/* Off: the one switch, as before S78.3; on: the cut-off and the holdback below it. */}
+        <div
+          className={
+            settings.askToConfirm
+              ? 'flex flex-col divide-y divide-line rounded-lg bg-surface px-4'
+              : 'rounded-lg bg-surface px-4 py-1'
+          }
+        >
+          <div className={settings.askToConfirm ? 'flex flex-col gap-2 pb-3' : undefined}>
+            <Switch
+              label="Ask clients to confirm"
+              hint={askToConfirmHint(settings)}
+              checked={settings.askToConfirm}
+              disabled={locked}
+              onChange={toggle('askToConfirm')}
+            />
+            {/* The cut-off (S78.3, AC-X-217): when clients are asked to confirm by. */}
+            {settings.askToConfirm ? (
+              canChange ? (
+                <div className="flex flex-col gap-1">
+                  <span aria-hidden="true" className="type-label text-ink-2">
+                    Confirm by
+                  </span>
+                  <Segmented
+                    label="Confirm by"
+                    options={CONFIRM_CUTOFFS.map((hours) => ({
+                      value: String(hours),
+                      label: cutoffLabel(hours),
+                    }))}
+                    value={String(settings.confirmCutoffHours)}
+                    disabled={busy}
+                    onValueChange={(value) => {
+                      const hours = CONFIRM_CUTOFFS.find((cutoff) => String(cutoff) === value);
+                      if (hours !== undefined) void change({ confirmCutoffHours: hours });
+                    }}
+                  />
+                </div>
+              ) : (
+                <p className="m-0 type-caption text-ink-2" data-testid="confirm-cutoff">
+                  Confirm by {cutoffLabel(settings.confirmCutoffHours)} before.
+                </p>
+              )
+            ) : null}
+          </div>
+          {/* The holdback (S78.3, AC-X-214): only while clients are asked. */}
+          {settings.askToConfirm ? (
+            <Switch
+              label="Measure what asking does"
+              hint={holdbackHint(settings)}
+              checked={settings.holdback}
+              disabled={locked}
+              onChange={toggle('holdback')}
+            />
+          ) : null}
         </div>
       </section>
       {note === null ? null : (

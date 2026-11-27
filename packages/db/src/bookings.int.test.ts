@@ -271,6 +271,8 @@ describe('the exclusion constraint', () => {
     const now = new Date('2026-11-04T09:00:00Z');
     await withTenant(db, b.tenant, async (tx) => {
       await markBookingConfirmAsked(tx, id, now);
+      // A later ask (the day-before reminder) keeps the first (S78.3 fix).
+      await markBookingConfirmAsked(tx, id, new Date('2026-11-06T15:00:00Z'));
       const marked = await markBookingClientConfirmed(tx, id, now, 'link');
       expect(marked).toMatchObject({ clientConfirmedVia: 'link', confirmAskedAt: now });
     });

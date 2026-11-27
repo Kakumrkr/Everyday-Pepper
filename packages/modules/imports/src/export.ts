@@ -267,6 +267,8 @@ export function buildBusinessExport(
           clientConfirmedAt:
             booking.clientConfirmedAt === null ? null : at(booking.clientConfirmedAt),
           confirmAskedAt: booking.confirmAskedAt === null ? null : at(booking.confirmAskedAt),
+          confirmHeldBackAt:
+            booking.confirmHeldBackAt === null ? null : at(booking.confirmHeldBackAt),
         })),
       ),
     ],

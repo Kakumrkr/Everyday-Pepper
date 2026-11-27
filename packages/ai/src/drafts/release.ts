@@ -1,7 +1,17 @@
-import { BookingNotReleasableError, type TemplateRuleDefaultsOf } from '@pepper/appointments';
+import {
+  BookingNotReleasableError,
+  releaseTargetKey,
+  type TemplateRuleDefaultsOf,
+} from '@pepper/appointments';
 import { UserIdSchema, type BookingId, type TenantId } from '@pepper/contracts';
 import { proposeForBusiness, type Actor, type Clock } from '@pepper/core';
-import { listMemberships, lockBooking, type Database, type TenantTx } from '@pepper/db';
+import {
+  countSupersededProposalsFor,
+  listMemberships,
+  lockBooking,
+  type Database,
+  type TenantTx,
+} from '@pepper/db';
 import { releaseUnconfirmedBooking } from '../tools/catalog/release.js';
 import { writeRunner } from '../tools/runner.js';
 import type { ToolDeps } from '../tools/tool.js';
@@ -23,8 +33,8 @@ export interface ReleaseProposerOptions {
 
 /**
  * Proposes the release card for `bookingId` in `tx` (the business's), as its AI for the owner:
- * whether a card now waits. Idempotent by visit and time: a second call, or a second pass,
- * makes no second card.
+ * whether a card now waits. Idempotent by visit and time: a second call, or a second pass, makes
+ * no second card; one a new cut-off took away can come back.
  */
 export async function proposeReleaseIn(
   tx: TenantTx,
@@ -52,6 +62,9 @@ export async function proposeReleaseIn(
     autonomy: { templateDefaults: {} },
     emails: options.emails,
   };
+  // By visit and time; a card a new cut-off took away (S78.3) comes back under a new key.
+  const withdrawn = await countSupersededProposalsFor(tx, releaseTargetKey(bookingId));
+  const again = withdrawn === 0 ? '' : `.${String(withdrawn)}`;
   const startsAt = booking.startsAt.toISOString();
   const payload = { bookingId, startsAt };
   try {
@@ -62,7 +75,7 @@ export async function proposeReleaseIn(
         writeRunner(releaseUnconfirmedBooking, deps, payload).runner,
         {
           payload,
-          idempotencyKey: `release.${bookingId}.${String(booking.startsAt.getTime())}`,
+          idempotencyKey: `release.${bookingId}.${String(booking.startsAt.getTime())}${again}`,
           explanation: {
             requestMessageId: null,
             steps: [{ tool: 'release_check', input: {} }],

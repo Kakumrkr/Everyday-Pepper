@@ -1,5 +1,6 @@
 import {
   BookingIdSchema,
+  DEFAULT_REMINDER_SETTINGS,
   ManageTokenSchema,
   TenantIdSchema,
   TenantSlugSchema,
@@ -10,6 +11,7 @@ import {
   type TenantId,
   type TenantSlug,
 } from '@pepper/contracts';
+import type * as Contracts from '@pepper/contracts';
 import {
   createBusiness,
   createClient,
@@ -45,7 +47,7 @@ import {
   withTenant,
   type Database,
 } from '@pepper/db';
-import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { BookingNotFoundError } from './errors.js';
 import { changeBooking, createBooking, listBookings } from './services/bookings.js';
 import { confirmBookingByText } from './services/confirm-by-text.js';
@@ -61,6 +63,16 @@ import { sendDueReminder, sendDueReminders } from './services/reminders.js';
 import { createService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
+
+// The holdback's share (S78.3) is a hash of the booking id; a test puts a visit in or out of it.
+const inShare = vi.hoisted(() => new Map<string, boolean>());
+vi.mock('@pepper/contracts', async (importOriginal) => {
+  const actual = await importOriginal<typeof Contracts>();
+  return {
+    ...actual,
+    inHoldbackShare: (id: string) => inShare.get(id) ?? actual.inHoldbackShare(id),
+  };
+});
 
 // Reminders by text (S62, AC-X-70…72): to the number on the client's consent, the email when
 // they can't be texted, the same-day text, the reminder's own link, "Reply STOP" on the first,
@@ -368,6 +380,7 @@ describe('reminder texts', () => {
     await book(b, at(3, '14:00'));
     await withTenant(db, b.tenantId, (tx) =>
       setReminderSettings(tx, {
+        ...DEFAULT_REMINDER_SETTINGS,
         texts: false,
         dayBefore: true,
         sameDay: true,
@@ -387,6 +400,7 @@ describe('reminder texts', () => {
     await book(b, at(3, '14:00'));
     await withTenant(db, b.tenantId, (tx) =>
       setReminderSettings(tx, {
+        ...DEFAULT_REMINDER_SETTINGS,
         texts: true,
         dayBefore: false,
         sameDay: false,
@@ -530,6 +544,16 @@ describe('the confirm ask (S78, AC-X-201, AC-X-204, AC-X-205)', () => {
     expect(await rowOf(b, booking)).toMatchObject({ clientConfirmedVia: 'link' });
   });
 
+  it('names the business’s cut-off: 48 h before (S78.3, AC-X-218)', async () => {
+    const b = await newBusiness();
+    await askedVisit(b);
+    await updateReminderSettings(db, b.owner, { confirmCutoffHours: 48 }, { clock: b.clock });
+    await runAt(b, at(3, '14:00'));
+    expect(askEmails(b)[0]?.text).toContain(
+      'Please confirm by Wednesday, November 4 at 2:00 PM, or your time may be offered to others.',
+    );
+  });
+
   it('asks nobody else: a medium or unscored visit, a confirmed one, or with the ask off', async () => {
     const medium = await newBusiness();
     await consent(medium);
@@ -568,6 +592,161 @@ describe('the confirm ask (S78, AC-X-201, AC-X-204, AC-X-205)', () => {
     expect(email?.text).toContain('Please confirm your visit with the link below.');
     expect(email?.text).toContain('To confirm, reschedule or cancel');
     expect((await rowOf(b, booking))?.confirmAskedAt?.toISOString()).toBe(at(5, '14:00'));
+  });
+});
+
+describe('the holdback (S78.3, AC-X-214, AC-X-215)', () => {
+  /** Maria's Friday 14:00, in or out of the held-back share. */
+  async function visitOf(b: Business, held: boolean, startsAt = at(6, '14:00')) {
+    const booking = await book(b, startsAt);
+    inShare.set(booking.id, held);
+    return booking;
+  }
+
+  /** Scores `visits` high-band, in one pass (a pass replaces the business's scores). */
+  async function scoreHigh(b: Business, visits: Booking[]) {
+    await withTenant(db, b.tenantId, (tx) =>
+      syncVisitRisks(
+        tx,
+        visits.map((visit) => ({
+          bookingId: BookingIdSchema.parse(visit.id),
+          band: 'high' as const,
+          points: 4,
+          reasons: [{ signal: 'missed_before' as const, points: 4, misses: 3, visits: 4 }],
+        })),
+        b.clock.now(),
+      ),
+    );
+  }
+
+  /** One high-band visit. */
+  async function highVisit(b: Business, held: boolean) {
+    const booking = await visitOf(b, held);
+    await scoreHigh(b, [booking]);
+    return booking;
+  }
+
+  const rowOf = async (b: Business, booking: Booking) =>
+    (
+      await withTenant(db, b.tenantId, (tx) =>
+        listBookingRows(tx, { from: new Date(at(1, '00:00')), to: new Date(at(30, '00:00')) }),
+      )
+    ).find((row) => row.id === booking.id);
+
+  /** The reminder job with the release check wired: the visits it would put a card up for. */
+  async function releaseRun(b: Business, when: string) {
+    b.clock.set(new Date(when));
+    const carded: string[] = [];
+    await sendDueReminders(db, {
+      key: KEY,
+      clock: b.clock,
+      baseUrl: BASE,
+      texts: true,
+      onReleaseDue: (_tx, visit) => {
+        // The job runs over every business; this one's only.
+        if (visit.tenantId === b.tenantId) carded.push(visit.bookingId);
+        return Promise.resolve(true);
+      },
+    });
+    return carded;
+  }
+
+  it('holds nothing back while it is off, its default', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await highVisit(b, true);
+    await updateReminderSettings(db, b.owner, { askToConfirm: true }, { clock: b.clock });
+    expect((await getReminderSettings(db, b.owner)).settings.holdback).toBe(false);
+    await runAt(b, at(3, '14:00'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect(await rowOf(b, booking)).toMatchObject({ confirmHeldBackAt: null });
+    expect((await rowOf(b, booking))?.confirmAskedAt?.toISOString()).toBe(at(3, '14:00'));
+  });
+
+  it('while on, a visit in the share gets no ask and no card and is marked; the rest are asked', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const held = await visitOf(b, true);
+    const asked = await visitOf(b, false, at(6, '16:00'));
+    await scoreHigh(b, [held, asked]);
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { askToConfirm: true, holdback: true },
+      { clock: b.clock },
+    );
+    await runAt(b, at(3, '14:00'));
+    await runAt(b, at(3, '16:00'));
+    // One ask, for 4:00 PM only.
+    expect(b.sms.sent).toHaveLength(1);
+    expect(b.sms.sent[0]?.body).toContain('Fri, Nov 6 at 4:00 PM');
+    expect(await rowOf(b, held)).toMatchObject({ confirmAskedAt: null });
+    expect((await rowOf(b, held))?.confirmHeldBackAt?.toISOString()).toBe(at(3, '14:00'));
+    expect(await rowOf(b, asked)).toMatchObject({ confirmHeldBackAt: null });
+    // At the cut-off, a card for the asked visit only.
+    expect(await releaseRun(b, at(5, '16:00'))).toEqual([asked.id]);
+  });
+
+  it('keeps the mark through a move, and no card even when a later reminder asks in time', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const held = await highVisit(b, true);
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { askToConfirm: true, holdback: true, confirmCutoffHours: 12 },
+      { clock: b.clock },
+    );
+    await runAt(b, at(3, '14:00'));
+    const marked = (await rowOf(b, held))?.confirmHeldBackAt?.toISOString();
+    expect(marked).toBe(at(3, '14:00'));
+    // Moved to Saturday: its new early ask is held back too, the first mark kept.
+    b.clock.set(new Date(at(3, '15:00')));
+    await changeBooking(db, b.owner, held.id, { startsAt: at(7, '14:00') }, { clock: b.clock });
+    await runAt(b, at(4, '14:00'));
+    expect(b.sms.sent).toEqual([]);
+    expect((await rowOf(b, held))?.confirmHeldBackAt?.toISOString()).toBe(marked);
+    // The day-before text asks "C" 12 h before the 12 h cut-off: early enough, still no card.
+    await runAt(b, at(6, '14:00'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect((await rowOf(b, held))?.confirmAskedAt?.toISOString()).toBe(at(6, '14:00'));
+    expect(await releaseRun(b, at(7, '02:00'))).toEqual([]);
+  });
+
+  it('turned off, a visit marked earlier is asked and carded like any other (review)', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const held = await highVisit(b, true);
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { askToConfirm: true, holdback: true },
+      { clock: b.clock },
+    );
+    await runAt(b, at(3, '14:00'));
+    expect((await rowOf(b, held))?.confirmHeldBackAt).not.toBeNull();
+    await updateReminderSettings(db, b.owner, { holdback: false }, { clock: b.clock });
+    // Moved to Saturday: its new early ask goes, and the card comes at the cut-off.
+    b.clock.set(new Date(at(3, '15:00')));
+    await changeBooking(db, b.owner, held.id, { startsAt: at(7, '14:00') }, { clock: b.clock });
+    await runAt(b, at(4, '14:00'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect(await releaseRun(b, at(6, '14:00'))).toEqual([held.id]);
+  });
+
+  it('a 12 h cut-off cards a visit the day-before text asked (AC-X-218)', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const visit = await book(b, at(6, '14:00'));
+    await updateReminderSettings(
+      db,
+      b.owner,
+      { askToConfirm: true, confirmCutoffHours: 12 },
+      { clock: b.clock },
+    );
+    await runAt(b, at(5, '14:00'));
+    expect(await releaseRun(b, at(6, '01:59'))).toEqual([]);
+    expect(await releaseRun(b, at(6, '02:00'))).toEqual([visit.id]);
   });
 });
 
@@ -719,6 +898,8 @@ describe('texts and reminders settings (AC-X-75)', () => {
         sameDay: true,
         sameDayLeadHours: 2,
         askToConfirm: false,
+        confirmCutoffHours: 24,
+        holdback: false,
       },
       canChange: true,
     });
