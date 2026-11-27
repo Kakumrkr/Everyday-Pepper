@@ -564,7 +564,8 @@ describe('the confirm ask (S78, AC-X-201, AC-X-204, AC-X-205)', () => {
     const booking = await askedVisit(b, 'medium');
     await runAt(b, at(5, '14:00'));
     const [email] = reminderEmails(b);
-    expect(email?.text).toContain('Please confirm by Thursday, November 5 at 2:00 PM');
+    // It goes at the time to confirm by, so it asks without naming a time already gone.
+    expect(email?.text).toContain('Please confirm your visit with the link below.');
     expect(email?.text).toContain('To confirm, reschedule or cancel');
     expect((await rowOf(b, booking))?.confirmAskedAt?.toISOString()).toBe(at(5, '14:00'));
   });

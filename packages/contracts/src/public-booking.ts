@@ -179,10 +179,11 @@ export type WrongCode = z.infer<typeof WrongCodeSchema>;
 /** A booking as its client sees it on the booking page and behind their link. */
 /**
  * Whether the business asks its clients to confirm (S78, AC-X-202/203): `by`, when to confirm
- * by (`CONFIRM_CUTOFF_HOURS` before the start); `confirmed`, whether the client has.
+ * by (`CONFIRM_CUTOFF_HOURS` before the start; `null` once that has passed); `confirmed`,
+ * whether the client has.
  */
 export const PublicBookingConfirmSchema = z.object({
-  by: UtcDateTimeSchema,
+  by: UtcDateTimeSchema.nullable(),
   confirmed: z.boolean(),
 });
 export type PublicBookingConfirm = z.infer<typeof PublicBookingConfirmSchema>;

@@ -5,7 +5,6 @@ import {
   BookingIdSchema,
   BookingRequestIdSchema,
   BookingRequestInputSchema,
-  CONFIRM_CUTOFF_HOURS,
   depositApplies,
   depositTermsOf,
   noShowsSince,
@@ -142,6 +141,7 @@ import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availabi
 import {
   changeOf,
   cancellationSentenceOf,
+  asksToConfirm,
   confirmByOf,
   emailDetailsOf,
   policyWordsOf,
@@ -668,7 +668,8 @@ export async function confirmBookingRequest(
         clientName: client.name,
         policy: policyWordsOf(tenant),
         deposit: booking.deposit,
-        confirmBy: confirmByOf(tenant, row),
+        confirmBy: confirmByOf(tenant, row, now),
+        askConfirm: asksToConfirm(tenant, row),
       };
       await options.notify?.(tx, {
         kind: 'confirmed',
@@ -1262,7 +1263,7 @@ async function toPublicBooking(
       })) ?? null,
     confirm: reminderSettingsOf(tenant).askToConfirm
       ? {
-          by: new Date(row.startsAt.getTime() - CONFIRM_CUTOFF_HOURS * 3_600_000).toISOString(),
+          by: confirmByOf(tenant, { ...row, clientConfirmedAt: null }, now),
           confirmed: row.clientConfirmedAt !== null,
         }
       : null,
@@ -1279,7 +1280,7 @@ async function withEmail(
   return {
     booking: await toPublicBooking(tx, tenant, row, now, deposits),
     // The address the link was sent to, or the one the business has on file now.
-    email: await emailDetailsOf(tx, tenant, row),
+    email: await emailDetailsOf(tx, tenant, row, now),
   };
 }
 

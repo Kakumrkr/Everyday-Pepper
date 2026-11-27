@@ -255,7 +255,7 @@ export async function sendDueReminder(
     if (reminderDueAt(due.kind, startsAt, tenant.timeZone, settings) === null) return 'skipped';
     // The confirm ask: only a high-band visit the client hasn't confirmed (AC-X-204).
     if (due.kind === 'confirm_ask' && !(await needsConfirmAsk(tx, booking))) return 'skipped';
-    const details = await emailDetailsOf(tx, tenant, booking);
+    const details = await emailDetailsOf(tx, tenant, booking, now.getTime());
     const phone =
       options.texts === true && settings.texts ? await textableNumber(tx, booking.clientId) : null;
     if (phone === null && (due.kind === 'same_day' || details.email === '')) return 'skipped';
@@ -317,7 +317,7 @@ export async function sendDueReminder(
     });
     if (queued === undefined) return dropLink(tx, link);
     // The email asks only with its link, while the business asks (S78, AC-X-205).
-    if (link !== null && details.confirmBy !== undefined && details.confirmBy !== null) {
+    if (link !== null && details.askConfirm === true) {
       await markBookingConfirmAsked(tx, bookingId, now);
     }
     return 'queued';

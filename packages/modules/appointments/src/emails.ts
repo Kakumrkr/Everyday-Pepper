@@ -60,16 +60,19 @@ function depositLines(details: BookingEmailDetails): string[] {
  * client hasn't confirmed; the link then confirms too.
  */
 function confirmLines(details: BookingEmailDetails): string[] {
-  if (details.confirmBy === undefined || details.confirmBy === null) return [];
+  if (details.askConfirm !== true) return [];
+  const by = details.confirmBy ?? null;
   return [
     '',
-    `Please confirm by ${formatWhen(details.confirmBy, details.timeZone)}, or your time may be offered to others.`,
+    by === null
+      ? 'Please confirm your visit with the link below.'
+      : `Please confirm by ${formatWhen(by, details.timeZone)}, or your time may be offered to others.`,
   ];
 }
 
 /** What the link does: it confirms too while the client is asked to (S78). */
 function linkIntro(details: BookingEmailDetails, again = false): string {
-  const asked = details.confirmBy !== undefined && details.confirmBy !== null;
+  const asked = details.askConfirm === true;
   if (again)
     return asked ? 'To confirm, change it again or cancel:' : 'To change it again or cancel:';
   return asked

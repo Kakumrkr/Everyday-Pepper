@@ -192,7 +192,9 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
             data-testid="confirm-ask"
           >
             <p className="m-0 type-body text-ink">
-              {`Please confirm by ${dateTimeLabel(timeZone, booking.confirm.by)}, or your time may be offered to others.`}
+              {booking.confirm.by === null
+                ? 'Please confirm your visit.'
+                : `Please confirm by ${dateTimeLabel(timeZone, booking.confirm.by)}, or your time may be offered to others.`}
             </p>
             <Button
               className="self-start"

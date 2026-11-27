@@ -48,19 +48,42 @@ export interface BookingEmailDetails {
    * confirm and this client hasn't; the email then asks for it with the link.
    */
   confirmBy?: string | null;
+  /**
+   * Whether the email asks the client to confirm with its link (S78): while the business asks
+   * and they haven't, with `confirmBy` when that time is still ahead.
+   */
+  askConfirm?: boolean;
+}
+
+/** Whether the client of `row` is asked to confirm: the business asks, they haven't (S78). */
+export function asksToConfirm(
+  tenant: Pick<Tenant, 'reminderSettings'>,
+  row: Pick<BookingRow, 'clientConfirmedAt'>,
+): boolean {
+  return (
+    reminderSettingsFrom(tenant.reminderSettings).askToConfirm && row.clientConfirmedAt === null
+  );
+}
+
+/** The time to confirm by: `CONFIRM_CUTOFF_HOURS` before the start (S78). */
+export function confirmCutoffOf(startsAt: Date): Date {
+  return new Date(startsAt.getTime() - CONFIRM_CUTOFF_HOURS * 3_600_000);
 }
 
 /**
- * When the client of `row` is asked to confirm by (`CONFIRM_CUTOFF_HOURS` before the start),
- * or `null`: the business doesn't ask, or the client already confirmed.
+ * When the client of `row` is asked to confirm by, as of `now` (ms), or `null`: the business
+ * doesn't ask, the client already confirmed, or that time has passed (a visit booked under a
+ * day ahead, or an early visit's reminder moved out of the night), so no email names a time
+ * already gone.
  */
 export function confirmByOf(
   tenant: Pick<Tenant, 'reminderSettings'>,
   row: Pick<BookingRow, 'startsAt' | 'clientConfirmedAt'>,
+  now: number,
 ): string | null {
-  if (!reminderSettingsFrom(tenant.reminderSettings).askToConfirm) return null;
-  if (row.clientConfirmedAt !== null) return null;
-  return new Date(row.startsAt.getTime() - CONFIRM_CUTOFF_HOURS * 3_600_000).toISOString();
+  if (!asksToConfirm(tenant, row)) return null;
+  const by = confirmCutoffOf(row.startsAt);
+  return by.getTime() > now ? by.toISOString() : null;
 }
 
 /** The cancellation policy in words: Pepper's sentence and the owner's note; `null`: none. */
@@ -126,6 +149,7 @@ export async function emailDetailsOf(
   tx: TenantTx,
   tenant: Tenant,
   row: BookingRow,
+  now: number = Date.now(),
 ): Promise<BookingEmailDetails> {
   const service = await findService(tx, ServiceIdSchema.parse(row.serviceId));
   const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(row.staffMemberId));
@@ -144,7 +168,8 @@ export async function emailDetailsOf(
     email: client.email ?? '',
     clientName: client.name,
     policy: policyWordsOf(tenant),
-    confirmBy: confirmByOf(tenant, row),
+    confirmBy: confirmByOf(tenant, row, now),
+    askConfirm: asksToConfirm(tenant, row),
   };
 }
 
