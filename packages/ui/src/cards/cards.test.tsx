@@ -107,11 +107,15 @@ describe('ChangeCard', () => {
     expect(within(card).getByText(/Release it and offer it\?$/)).toBeTruthy();
     expect(within(card).getByText('Missed 2 of 5 visits')).toBeTruthy();
     expect(within(card).getByText(/refund the deposit in full/)).toBeTruthy();
-    expect(within(card).getByText('Nothing changes until you tap. A release can’t be undone.')).toBeTruthy();
+    expect(
+      within(card).getByText('Nothing changes until you tap. A release can’t be undone.'),
+    ).toBeTruthy();
     // Always asks: no setting to point at.
     expect(within(card).queryByRole('link', { name: 'Change' })).toBeNull();
     expect(within(card).getByRole('button', { name: 'Keep it' })).toBeTruthy();
-    await userEvent.setup().click(within(card).getByRole('button', { name: 'Release and offer it' }));
+    await userEvent
+      .setup()
+      .click(within(card).getByRole('button', { name: 'Release and offer it' }));
     expect(onApprove).toHaveBeenCalledTimes(1);
     await expectAccessible(container);
   });

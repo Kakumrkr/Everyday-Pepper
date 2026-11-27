@@ -93,7 +93,9 @@ describe('the release email (S78.2, AC-X-209)', () => {
     const page = 'https://pepper.app/book/juniper';
     const email = releasedEmail(DETAILS, { refunded: true, bookingPage: page });
     expect(email.subject).toBe('Your booking at Juniper Hair Studio was released');
-    expect(email.text).toContain("We didn't hear back, so we've let this time go for someone else:");
+    expect(email.text).toContain(
+      "We didn't hear back, so we've let this time go for someone else:",
+    );
     expect(email.text).toContain('Your deposit is refunded in full.');
     expect(email.text).toContain(page);
     expect(email.text).not.toContain('#');

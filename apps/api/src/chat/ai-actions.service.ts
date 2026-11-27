@@ -363,10 +363,18 @@ export class AiActionsService {
     execution: ActionExecution,
   ): Promise<Pick<AiActionView, 'fill'>> {
     let fill: WaitlistFill | undefined;
-    if (execution.action === 'message.waitlist_offer' && execution.entity.type === 'waitlist_match') {
-      fill = await waitlistFillOf(this.db, actor, WaitlistMatchIdSchema.parse(execution.entity.id), {
-        clock: this.clock,
-      });
+    if (
+      execution.action === 'message.waitlist_offer' &&
+      execution.entity.type === 'waitlist_match'
+    ) {
+      fill = await waitlistFillOf(
+        this.db,
+        actor,
+        WaitlistMatchIdSchema.parse(execution.entity.id),
+        {
+          clock: this.clock,
+        },
+      );
     } else if (execution.action === 'booking.release' && execution.entity.type === 'booking') {
       // S78.2 (AC-X-211): the released visit's time, as the fill loop offered it.
       fill = await releasedFillOf(this.db, actor, BookingIdSchema.parse(execution.entity.id), {

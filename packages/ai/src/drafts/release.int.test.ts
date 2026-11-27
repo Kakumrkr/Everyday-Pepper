@@ -138,7 +138,9 @@ describe('the release card at the cut-off (AC-X-207)', () => {
     await releaseJob(w);
     const card = await oneCard(w);
     const preview = card.preview as { summary?: string };
-    expect(preview.summary).toMatch(/^Maria L\.? hasn’t confirmed Thu, Nov 5, 2:00 pm\. Release it and offer it\?$/);
+    expect(preview.summary).toMatch(
+      /^Maria L\.? hasn’t confirmed Thu, Nov 5, 2:00 pm\. Release it and offer it\?$/,
+    );
     expect(card.requestedByUserId).toBeNull();
 
     // A second pass, or the proposer again, makes no second card.
@@ -234,7 +236,9 @@ describe('approving a release (AC-X-208, AC-X-209)', () => {
     expect(after).toMatchObject({ release: true, refund: true, emailed: true });
 
     // Staff can't approve it.
-    await expect(approveToolProposal(depsFor(w, w.jess), card.id, card.fingerprint)).rejects.toThrow();
+    await expect(
+      approveToolProposal(depsFor(w, w.jess), card.id, card.fingerprint),
+    ).rejects.toThrow();
 
     const result = await approveToolProposal(depsFor(w, w.manager), card.id, card.fingerprint);
     expect(result.kind).toBe('executed');

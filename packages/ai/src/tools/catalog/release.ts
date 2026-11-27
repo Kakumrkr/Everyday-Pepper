@@ -1,8 +1,4 @@
-import {
-  getBookingIn,
-  releaseTargetKey,
-  releaseUnconfirmedBookingIn,
-} from '@pepper/appointments';
+import { getBookingIn, releaseTargetKey, releaseUnconfirmedBookingIn } from '@pepper/appointments';
 import {
   BookingIdSchema,
   UtcDateTimeSchema,

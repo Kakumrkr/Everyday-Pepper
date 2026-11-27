@@ -76,7 +76,12 @@ export type ReminderSettingsView = z.infer<typeof ReminderSettingsViewSchema>;
  * same day (text), and the release check (S78.2: at the cut-off, the owner's release card for a
  * visit still unconfirmed; nothing goes to the client).
  */
-export const ReminderKindSchema = z.enum(['confirm_ask', 'day_before', 'same_day', 'release_check']);
+export const ReminderKindSchema = z.enum([
+  'confirm_ask',
+  'day_before',
+  'same_day',
+  'release_check',
+]);
 export type ReminderKind = z.infer<typeof ReminderKindSchema>;
 /** The reminders that reach the client (the release check is the owner's). */
 export type ClientReminderKind = Exclude<ReminderKind, 'release_check'>;

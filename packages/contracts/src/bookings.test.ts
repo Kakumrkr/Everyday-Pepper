@@ -105,9 +105,9 @@ describe('BookingChangeSchema', () => {
       notifyClient: true,
       cancelledBy: 'client',
     });
-    expect(BookingChangeSchema.safeParse({ status: 'no_show', cancelledBy: 'client' }).success).toBe(
-      false,
-    );
+    expect(
+      BookingChangeSchema.safeParse({ status: 'no_show', cancelledBy: 'client' }).success,
+    ).toBe(false);
     expect(
       BookingChangeSchema.safeParse({ status: 'cancelled', cancelledBy: 'someone' }).success,
     ).toBe(false);

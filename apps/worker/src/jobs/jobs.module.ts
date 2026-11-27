@@ -146,7 +146,8 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
     const { db } = database;
     const clock = options.clock ?? systemClock;
     const releaseBase = options.reminders?.baseUrl ?? null;
-    const releaseEmails = releaseBase === null ? null : { baseUrl: releaseBase, outboxKey: options.key };
+    const releaseEmails =
+      releaseBase === null ? null : { baseUrl: releaseBase, outboxKey: options.key };
     this.reminders = new Periodic(
       'Reminder job',
       options.reminderPollMs,

@@ -46,9 +46,9 @@ describe('releaseCheck', () => {
   });
 
   it('never releases a confirmed, cancelled or moved visit', () => {
-    expect(releaseCheck(visit({ clientConfirmedAt: new Date(atCutoff - HOUR) }), asking, atCutoff)).toBe(
-      'confirmed',
-    );
+    expect(
+      releaseCheck(visit({ clientConfirmedAt: new Date(atCutoff - HOUR) }), asking, atCutoff),
+    ).toBe('confirmed');
     expect(releaseCheck(visit({ status: 'cancelled' }), asking, atCutoff)).toBe('not_booked');
     expect(releaseCheck(visit(), asking, atCutoff, START + HOUR)).toBe('moved');
   });

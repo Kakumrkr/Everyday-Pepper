@@ -549,7 +549,11 @@ describe('the release card (S78.2, AC-X-208, AC-X-213)', () => {
   });
 
   it('leaves the reason out without one, and the refund without a deposit', () => {
-    const rows = changeRows('booking.release', before, { ...before, refund: false, riskSignal: null });
+    const rows = changeRows('booking.release', before, {
+      ...before,
+      refund: false,
+      riskSignal: null,
+    });
     expect(rows.map((row) => row.label)).not.toContain('Top reason');
     expect(rows.at(-1)?.after).toBe(
       'Email the client, and offer the time to your waitlist and regulars',

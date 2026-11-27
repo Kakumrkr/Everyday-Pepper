@@ -43,7 +43,12 @@ export async function releasableVisitIn(
   if (row === undefined) throw new BookingNotFoundError();
   const tenant = await findCurrentTenant(tx);
   if (tenant === undefined) throw new BookingNotFoundError();
-  const check = releaseCheck(row, reminderSettingsFrom(tenant.reminderSettings), now, shownStartsAt);
+  const check = releaseCheck(
+    row,
+    reminderSettingsFrom(tenant.reminderSettings),
+    now,
+    shownStartsAt,
+  );
   if (check !== 'ok') throw new BookingNotReleasableError(check);
   const payment = await findBookingPaymentByBooking(tx, id);
   const refundsDeposit =
@@ -77,4 +82,3 @@ export async function releaseUnconfirmedBookingIn(
     { ...options, released: { refunded: refundsDeposit } },
   );
 }
-
