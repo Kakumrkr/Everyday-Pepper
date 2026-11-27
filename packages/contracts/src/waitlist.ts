@@ -3,6 +3,7 @@ import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingIdSchema } from './bookings.js';
 import { ClientContactSchema, ClientIdSchema } from './clients.js';
 import { LocalDateSchema } from './rules.js';
+import { SmsPhoneSchema, smsConsentVersionFor } from './sms.js';
 import { UtcDateTimeSchema } from './time.js';
 
 // The waitlist (ADR-0017): a client who wants a service at times that are full. S12 stores the
@@ -62,6 +63,9 @@ function sortWindows(windows: WaitlistWindow[]): WaitlistWindow[] {
  * A waitlist entry as a team member adds it (`POST /v1/waitlist`). Without a staff member the
  * client takes anyone who offers the service. The entry expires when its last window ends.
  * `clientContact`: as for bookings, the exact email or phone staff found the client by.
+ * `smsConsent` (S79, AC-X-223): the client told the team they agree to texts about openings
+ * at this number (the words shown, `sms-consent-v3`); recorded as `staff_recorded`. Never from
+ * the AI: its `add_to_waitlist` has no such argument, and the domain refuses one.
  */
 export const WaitlistEntryInputSchema = z
   .object({
@@ -70,6 +74,14 @@ export const WaitlistEntryInputSchema = z
     serviceId: ServiceIdSchema,
     staffMemberId: StaffMemberIdSchema.nullable().default(null),
     windows: z.array(WaitlistWindowSchema).min(1).max(MAX_WAITLIST_WINDOWS).transform(sortWindows),
+    smsConsent: z
+      .object({
+        phone: SmsPhoneSchema,
+        wordingVersion: smsConsentVersionFor('staff_recorded'),
+      })
+      .strict()
+      .nullable()
+      .default(null),
   })
   .strict();
 export type WaitlistEntryInput = z.input<typeof WaitlistEntryInputSchema>;

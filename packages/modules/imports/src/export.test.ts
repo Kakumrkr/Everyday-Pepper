@@ -327,7 +327,7 @@ describe('buildBusinessExport (AC-W1-37)', () => {
               phone: '+15552340002',
               source: 'member_settings',
               clientId: null,
-              wordingVersion: 'sms-consent-v1',
+              wordingVersion: 'sms-consent-v2',
               shownText: 'Text me reminders from Plum Salon at this number, for a member.',
               givenAt: AT,
               revokedAt: AT,

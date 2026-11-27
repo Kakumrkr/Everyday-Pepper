@@ -45,7 +45,24 @@ describe('WaitlistEntryInputSchema', () => {
       serviceId: SERVICE,
       staffMemberId: null,
       windows: [monday, friday],
+      smsConsent: null,
     });
+  });
+
+  it('takes the texts a client agreed to only with v3 and a number Pepper can text (S79)', () => {
+    const base = { clientId: CLIENT, serviceId: SERVICE, windows: [monday] };
+    expect(
+      WaitlistEntryInputSchema.parse({
+        ...base,
+        smsConsent: { phone: '+15125550123', wordingVersion: 'sms-consent-v3' },
+      }).smsConsent,
+    ).toEqual({ phone: '+15125550123', wordingVersion: 'sms-consent-v3' });
+    for (const smsConsent of [
+      { phone: '+15125550123', wordingVersion: 'sms-consent-v1' },
+      { phone: '+442071838750', wordingVersion: 'sms-consent-v3' },
+    ]) {
+      expect(WaitlistEntryInputSchema.safeParse({ ...base, smsConsent }).success).toBe(false);
+    }
   });
 
   it('sorts windows of one day by start', () => {

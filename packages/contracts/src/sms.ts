@@ -154,6 +154,14 @@ function endsWithAiDisclosure(body: string): boolean {
 }
 
 /**
+ * What a text is about (S79, AC-X-221): `appointments` (confirmations, reminders, the confirm
+ * ask, a member's own cards: what v1 and v2 name) or `waitlist_offer` (a freed time offered to
+ * a waitlist client: what v3 names). A consent lets the business send only its purpose's texts.
+ */
+export const SmsPurposeSchema = z.enum(['appointments', 'waitlist_offer']);
+export type SmsPurpose = z.infer<typeof SmsPurposeSchema>;
+
+/**
  * One text, as queued (ADR-0065 §2). Its content is sealed like an email's and cleared once
  * sent. `urgent`: about today's appointment (running late), so the quiet hours don't hold it;
  * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69), always
@@ -172,6 +180,10 @@ export const OutboxSmsSchema = z
      */
     requested: z.literal(true).optional(),
     wordsBy: z.enum(['ai', 'template']),
+    /** What it is about (S79): checked at delivery against the consent; absent: appointments. */
+    purpose: SmsPurposeSchema.optional(),
+    /** Not sent after this instant (S79: a waitlist offer's close); dropped instead. */
+    validUntil: UtcDateTimeSchema.optional(),
   })
   .strict()
   .refine((sms) => sms.wordsBy !== 'ai' || endsWithAiDisclosure(sms.body), {
@@ -361,8 +373,18 @@ export function smsKeywordReply(
   }
 }
 
-/** How a consent was given (ADR-0065 §3): the booking page's box, or a member's own settings. */
-export const SmsConsentSourceSchema = z.enum(['booking_page', 'member_settings']);
+/**
+ * How a consent was given (ADR-0065 §3): the booking page's box, a member's own settings, the
+ * booking page's "Join the waitlist" box (S79), or the team recording what a client agreed to
+ * when adding them to the waitlist (S79). One is in force a number and source, so a client's
+ * waitlist consent stands beside their reminder consent.
+ */
+export const SmsConsentSourceSchema = z.enum([
+  'booking_page',
+  'member_settings',
+  'waitlist_join',
+  'staff_recorded',
+]);
 export type SmsConsentSource = z.infer<typeof SmsConsentSourceSchema>;
 
 /**
@@ -375,13 +397,44 @@ export const SMS_CONSENT_WORDING = {
   // A member's own cards by text (S63, ADR-0066 §2).
   'sms-consent-v2':
     'Text me cards that need my OK from {business} at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.',
+  // A waitlist client's offers (S79, ADR-0065 §S79): only the openings they asked for.
+  'sms-consent-v3':
+    "Text me when a time I'm waiting for opens up at {business}, at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to join.",
 } as const;
-export const SmsConsentWordingVersionSchema = z.enum(['sms-consent-v1', 'sms-consent-v2']);
+export const SmsConsentWordingVersionSchema = z.enum([
+  'sms-consent-v1',
+  'sms-consent-v2',
+  'sms-consent-v3',
+]);
 export type SmsConsentWordingVersion = z.infer<typeof SmsConsentWordingVersionSchema>;
 /** The wording shown with a new consent box. */
 export const SMS_CONSENT_WORDING_CURRENT: SmsConsentWordingVersion = 'sms-consent-v1';
 /** The wording a member agrees to when they turn "Text me cards" on (S63). */
 export const SMS_MEMBER_CONSENT_WORDING: SmsConsentWordingVersion = 'sms-consent-v2';
+/** The wording of the "Join the waitlist" box and the team's "They agreed to texts" (S79). */
+export const SMS_WAITLIST_CONSENT_WORDING: SmsConsentWordingVersion = 'sms-consent-v3';
+
+/** The wording versions whose consent allows each purpose's texts (never v3 for reminders). */
+export const SMS_PURPOSE_WORDINGS: Record<SmsPurpose, readonly SmsConsentWordingVersion[]> = {
+  appointments: ['sms-consent-v1', 'sms-consent-v2'],
+  waitlist_offer: ['sms-consent-v3'],
+};
+
+/** The wording versions each source may record (the database checks the same, migration 0093). */
+export const SMS_SOURCE_WORDINGS: Record<SmsConsentSource, readonly SmsConsentWordingVersion[]> = {
+  booking_page: ['sms-consent-v1'],
+  member_settings: ['sms-consent-v2'],
+  waitlist_join: ['sms-consent-v3'],
+  staff_recorded: ['sms-consent-v3'],
+};
+
+/** A wording version that `source` may record (S79): a box can't be sent another's words. */
+export function smsConsentVersionFor(source: SmsConsentSource) {
+  return SmsConsentWordingVersionSchema.refine(
+    (version) => SMS_SOURCE_WORDINGS[source].includes(version),
+    { message: 'This consent box shows other words' },
+  );
+}
 
 /** The consent wording with the business's name in it. */
 export function smsConsentText(version: SmsConsentWordingVersion, business: string): string {

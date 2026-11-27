@@ -25,6 +25,11 @@ import {
   TwilioInboundSmsSchema,
   TwilioStatusCallbackSchema,
   type SmsDeliveryStatus,
+  SMS_PURPOSE_WORDINGS,
+  SMS_SOURCE_WORDINGS,
+  SMS_WAITLIST_CONSENT_WORDING,
+  SmsConsentSourceSchema,
+  SmsConsentWordingVersionSchema,
 } from './sms.js';
 
 describe('SmsPhoneSchema (ADR-0065)', () => {
@@ -305,7 +310,11 @@ describe('the keyword replies and consent wording', () => {
     expect(text).toMatch(/STOP.*HELP/);
     expect(text).toContain('Msg & data rates may apply');
     expect(text).toContain('Not required to book');
-    expect(Object.keys(SMS_CONSENT_WORDING)).toEqual(['sms-consent-v1', 'sms-consent-v2']);
+    expect(Object.keys(SMS_CONSENT_WORDING)).toEqual([
+      'sms-consent-v1',
+      'sms-consent-v2',
+      'sms-consent-v3',
+    ]);
     // A member's own cards (S63): what, how often, rates, STOP and HELP, the business named.
     const member = smsConsentText('sms-consent-v2', 'Fade Bros');
     expect(member).toContain('cards that need my OK from Fade Bros at this number');
@@ -314,6 +323,54 @@ describe('the keyword replies and consent wording', () => {
     expect(smsConsentText('sms-consent-v1', "Nails $$ More $& $'")).toContain(
       "from Nails $$ More $& $' at this number",
     );
+  });
+});
+
+describe('waitlist offer consent (S79, AC-X-220, AC-X-221)', () => {
+  it('names the openings asked for, with STOP, HELP, rates and "not required to join"', () => {
+    const text = smsConsentText(SMS_WAITLIST_CONSENT_WORDING, 'Fade Bros');
+    expect(SMS_WAITLIST_CONSENT_WORDING).toBe('sms-consent-v3');
+    expect(text).toContain("Text me when a time I'm waiting for opens up at Fade Bros");
+    expect(text).toMatch(/Msg frequency varies.*Msg & data rates may apply.*STOP.*HELP/);
+    expect(text).toContain('Not required to join');
+  });
+
+  it('keeps v1 and v2 word for word (a version is never edited)', () => {
+    expect(SMS_CONSENT_WORDING['sms-consent-v1']).toBe(
+      'Text me appointment confirmations and reminders from {business} at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help. Not required to book.',
+    );
+    expect(SMS_CONSENT_WORDING['sms-consent-v2']).toBe(
+      'Text me cards that need my OK from {business} at this number. Msg frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.',
+    );
+  });
+
+  it('lets a consent allow only its own purpose, and a source record only its versions', () => {
+    expect(SMS_PURPOSE_WORDINGS.appointments).not.toContain('sms-consent-v3');
+    expect(SMS_PURPOSE_WORDINGS.waitlist_offer).toEqual(['sms-consent-v3']);
+    expect(SMS_SOURCE_WORDINGS.booking_page).toEqual(['sms-consent-v1']);
+    expect(SMS_SOURCE_WORDINGS.waitlist_join).toEqual(['sms-consent-v3']);
+    expect(SMS_SOURCE_WORDINGS.staff_recorded).toEqual(['sms-consent-v3']);
+    // Every version has a purpose, and every source a version.
+    for (const version of SmsConsentWordingVersionSchema.options) {
+      expect(Object.values(SMS_PURPOSE_WORDINGS).flat()).toContain(version);
+    }
+    for (const source of SmsConsentSourceSchema.options) {
+      expect(SMS_SOURCE_WORDINGS[source].length).toBeGreaterThan(0);
+    }
+  });
+
+  it('carries a purpose and a closing time on a queued text', () => {
+    const sms = OutboxSmsSchema.parse({
+      to: '+15125550123',
+      body: 'Fade Bros via Pepper: a time opened up.',
+      wordsBy: 'template',
+      purpose: 'waitlist_offer',
+      validUntil: '2026-12-01T15:00:00.000Z',
+    });
+    expect(sms).toMatchObject({ purpose: 'waitlist_offer' });
+    expect(() =>
+      OutboxSmsSchema.parse({ ...sms, purpose: 'marketing' }),
+    ).toThrow();
   });
 });
 

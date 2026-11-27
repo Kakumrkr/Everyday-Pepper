@@ -12,6 +12,7 @@ import {
   findOutboxMessage,
   findSmsDelivery,
   insertClient,
+  insertSmsConsent,
   isSmsOptedOut,
   listAuditEntries,
   withTenant,
@@ -90,25 +91,43 @@ function newPhone(): string {
   return `+1555300${String(phones).padStart(4, '0')}`;
 }
 
-async function consentFor(tenant: TenantId, phone: string): Promise<void> {
-  await withTenant(db, tenant, async (tx) => {
-    const client = await insertClient(tx, {
-      name: 'Sam',
-      email: null,
-      phone,
-      source: 'booking_page',
-    });
+async function consentFor(
+  tenant: TenantId,
+  phone: string,
+  kind: 'reminders' | 'waitlist' = 'reminders',
+  clientId?: string,
+): Promise<string> {
+  return withTenant(db, tenant, async (tx) => {
+    const id =
+      clientId ??
+      (
+        await insertClient(tx, {
+          name: 'Sam',
+          email: null,
+          phone,
+          source: 'booking_page',
+        })
+      ).id;
     await recordSmsConsent(
       tx,
-      {
-        phone,
-        source: 'booking_page',
-        clientId: client.id,
-        wordingVersion: 'sms-consent-v1',
-        givenAt: clock.now(),
-      },
+      kind === 'reminders'
+        ? {
+            phone,
+            source: 'booking_page',
+            clientId: id,
+            wordingVersion: 'sms-consent-v1',
+            givenAt: clock.now(),
+          }
+        : {
+            phone,
+            source: 'waitlist_join',
+            clientId: id,
+            wordingVersion: 'sms-consent-v3',
+            givenAt: clock.now(),
+          },
       { actor: { kind: 'system' } },
     );
+    return id;
   });
 }
 
@@ -116,7 +135,7 @@ async function queue(
   tenant: TenantId,
   to: string,
   body = 'Plum Salon: see you tomorrow at 2:30pm. Reply STOP to opt out.',
-  extra: { urgent?: true } = {},
+  extra: { urgent?: true; purpose?: 'waitlist_offer'; validUntil?: string } = {},
 ): Promise<OutboxMessageId> {
   keys += 1;
   const id = await withTenant(db, tenant, (tx) =>
@@ -251,6 +270,98 @@ describe('sending (AC-X-57)', () => {
     expect(await deliver(plum, id)).toBe('dropped');
     expect(await stored(plum, id)).toMatchObject({ status: 'dead', lastError: 'SmsOptedOut' });
     expect(await isSmsOptedOut(db, phone)).toBe(true);
+  });
+});
+
+describe('consent per purpose (S79, AC-X-220, AC-X-221)', () => {
+  it('keeps a waitlist consent beside the reminder one, each allowing only its own texts', async () => {
+    const reminders = newPhone();
+    const clientId = await consentFor(plum, reminders);
+    // The same client, the same number: v3 doesn't replace v1.
+    await consentFor(plum, reminders, 'waitlist', clientId);
+    const permission = (phone: string, purpose: 'appointments' | 'waitlist_offer') =>
+      withTenant(db, plum, (tx) => smsPermission(tx, phone, purpose));
+    expect(await permission(reminders, 'appointments')).toBe('allowed');
+    expect(await permission(reminders, 'waitlist_offer')).toBe('allowed');
+
+    const waitlistOnly = newPhone();
+    await consentFor(plum, waitlistOnly, 'waitlist');
+    expect(await permission(waitlistOnly, 'waitlist_offer')).toBe('allowed');
+    expect(await permission(waitlistOnly, 'appointments')).toBe('no_consent');
+    const remindersOnly = newPhone();
+    await consentFor(plum, remindersOnly);
+    expect(await permission(remindersOnly, 'waitlist_offer')).toBe('no_consent');
+
+    // A STOP stops both.
+    await inbound(reminders, 'STOP');
+    expect(await permission(reminders, 'appointments')).toBe('opted_out');
+    expect(await permission(reminders, 'waitlist_offer')).toBe('opted_out');
+  });
+
+  it('checks a queued text again for its purpose at delivery', async () => {
+    const phone = newPhone();
+    await consentFor(plum, phone);
+    const offer = await queue(plum, phone, 'Plum Salon: a time opened up.', {
+      purpose: 'waitlist_offer',
+    });
+    expect(await deliver(plum, offer)).toBe('dropped');
+    expect(await stored(plum, offer)).toMatchObject({ lastError: 'SmsNoConsent' });
+
+    const waitlistOnly = newPhone();
+    await consentFor(plum, waitlistOnly, 'waitlist');
+    const reminder = await queue(plum, waitlistOnly);
+    expect(await deliver(plum, reminder)).toBe('dropped');
+    const allowed = await queue(plum, waitlistOnly, 'Plum Salon: a time opened up.', {
+      purpose: 'waitlist_offer',
+    });
+    expect(await deliver(plum, allowed)).toBe('sent');
+    expect(sender.sent.map((sms) => sms.to)).toEqual([waitlistOnly]);
+  });
+
+  it('drops a text still unsent at its validUntil (an offer that closed, AC-X-225)', async () => {
+    const phone = newPhone();
+    await consentFor(plum, phone, 'waitlist');
+    const id = await queue(plum, phone, 'Plum Salon: a time opened up.', {
+      purpose: 'waitlist_offer',
+      validUntil: '2026-11-12T17:30:00.000Z',
+    });
+    clock.set('2026-11-12T17:30:00Z');
+    expect(await deliver(plum, id)).toBe('dropped');
+    expect(sender.sent).toEqual([]);
+    expect(await stored(plum, id)).toMatchObject({ status: 'dead', lastError: 'SmsExpired' });
+  });
+
+  it('records a source only with its own words (the service and the database)', async () => {
+    const phone = newPhone();
+    await withTenant(db, plum, async (tx) => {
+      const client = await insertClient(tx, { name: 'Ana', email: null, phone, source: 'team' });
+      await expect(
+        recordSmsConsent(
+          tx,
+          {
+            phone,
+            source: 'booking_page',
+            clientId: client.id,
+            wordingVersion: 'sms-consent-v3',
+            givenAt: clock.now(),
+          },
+          { actor: { kind: 'system' } },
+        ),
+      ).rejects.toThrow('other words');
+    });
+    await expect(
+      withTenant(db, plum, async (tx) => {
+        const client = await insertClient(tx, { name: 'Ana', email: null, phone, source: 'team' });
+        await insertSmsConsent(tx, {
+          phone,
+          source: 'staff_recorded',
+          clientId: client.id,
+          wordingVersion: 'sms-consent-v1',
+          shownText: 'Text me appointment confirmations and reminders.',
+          givenAt: clock.now(),
+        });
+      }),
+    ).rejects.toThrow();
   });
 });
 

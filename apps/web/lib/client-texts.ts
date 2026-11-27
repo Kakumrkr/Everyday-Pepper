@@ -1,5 +1,6 @@
 import type { BadgeTone } from '@pepper/ui';
 import { dateTimeLabel } from './booking';
+import { SMS_PURPOSE_WORDINGS } from '@pepper/contracts';
 import type {
   BookingTextKind,
   ClientTexts,
@@ -22,6 +23,9 @@ export interface TextsSummary {
 const HOW: Record<SmsConsentSource, string> = {
   booking_page: 'on your booking page',
   member_settings: 'in their Pepper settings',
+  // S79: a waitlist client's texts about openings.
+  waitlist_join: 'when they joined your waitlist online',
+  staff_recorded: 'to your team, when added to the waitlist',
 };
 
 /** A day with its year, in the business's time zone: "Nov 12, 2026". */
@@ -49,7 +53,9 @@ export function consentMomentLabel(timeZone: string, instant: string): string {
 
 /** How a consent was given, in words. */
 export function consentHowLabel(source: SmsConsentSource): string {
-  return `Ticked the box ${HOW[source]}`;
+  return source === 'staff_recorded'
+    ? 'Told your team, when added to the waitlist'
+    : `Ticked the box ${HOW[source]}`;
 }
 
 export function textsSummary(
@@ -63,7 +69,10 @@ export function textsSummary(
       return {
         badge: { text: 'On', tone: 'ok' },
         line: consent === null ? 'Texts are on.' : onLine(consent, options.timeZone),
-        next: 'I text their confirmations and reminders. They can reply STOP at any time.',
+        next:
+          consent !== null && SMS_PURPOSE_WORDINGS.waitlist_offer.includes(consent.wordingVersion)
+            ? 'I text them when a time they’re waiting for opens up. They can reply STOP at any time.'
+            : 'I text their confirmations and reminders. They can reply STOP at any time.',
       };
     case 'opted_out':
       return {

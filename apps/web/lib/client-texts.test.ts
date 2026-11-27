@@ -40,6 +40,19 @@ describe('textsSummary', () => {
     });
   });
 
+  it('says a waitlist client’s texts are about openings (S79)', () => {
+    const consent = {
+      ...CONSENT,
+      source: 'staff_recorded' as const,
+      wordingVersion: 'sms-consent-v3' as const,
+    };
+    expect(textsSummary(of({ consent }), 'Sam', options)).toEqual({
+      badge: { text: 'On', tone: 'ok' },
+      line: 'Said yes Nov 12, 2026 to your team, when added to the waitlist.',
+      next: 'I text them when a time they’re waiting for opens up. They can reply STOP at any time.',
+    });
+  });
+
   it('says a STOP turned them off, and how they come back', () => {
     expect(textsSummary(of({ status: 'opted_out' }), 'Sam', options)).toMatchObject({
       badge: { text: 'Off', tone: 'warn' },
@@ -84,6 +97,11 @@ describe('the record’s labels', () => {
 
   it('says how they said yes', () => {
     expect(consentHowLabel('booking_page')).toBe('Ticked the box on your booking page');
+    // S79: a waitlist client's consent, online or told to the team.
+    expect(consentHowLabel('waitlist_join')).toBe(
+      'Ticked the box when they joined your waitlist online',
+    );
+    expect(consentHowLabel('staff_recorded')).toBe('Told your team, when added to the waitlist');
   });
 });
 

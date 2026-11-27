@@ -12,6 +12,9 @@ import {
   smsConsentText,
   smsKeywordReply,
   SmsPhoneSchema,
+  SmsPurposeSchema,
+  SMS_PURPOSE_WORDINGS,
+  SMS_SOURCE_WORDINGS,
   smsSendableAt,
   TenantIdSchema,
   type AuditActor,
@@ -25,6 +28,7 @@ import {
   type SmsConsentSource,
   type SmsConsentWordingVersion,
   type SmsKeyword,
+  type SmsPurpose,
   type TenantId,
 } from '@pepper/contracts';
 import {
@@ -62,17 +66,23 @@ import { can } from '../permissions.js';
 // (`deliverOutboxMessage`) asks `smsPermission` again, so a forgotten check never sends a text.
 
 /**
- * Whether the business may text a number now (ADR-0065 §3): `allowed`; `not_textable` (not a
- * US or Canadian number); `opted_out` (replied STOP, for every business on Pepper's number);
- * `no_consent` (the business has no active consent for it). Callers fall back to email.
+ * Whether the business may text a number now about `purpose` (ADR-0065 §3, §S79): `allowed`;
+ * `not_textable` (not a US or Canadian number); `opted_out` (replied STOP, for every business
+ * on Pepper's number); `no_consent` (no active consent whose words name that purpose: a
+ * waitlist client's v3 allows offers only, a v1 reminders only). Callers fall back to email.
  */
 export type SmsPermission = 'allowed' | 'not_textable' | 'opted_out' | 'no_consent';
 
-export async function smsPermission(tx: TenantTx, phone: string): Promise<SmsPermission> {
+export async function smsPermission(
+  tx: TenantTx,
+  phone: string,
+  purpose: SmsPurpose = 'appointments',
+): Promise<SmsPermission> {
   const parsed = SmsPhoneSchema.safeParse(phone);
   if (!parsed.success) return 'not_textable';
   if (await isSmsOptedOut(tx, parsed.data)) return 'opted_out';
-  if ((await findActiveSmsConsent(tx, parsed.data)) === undefined) return 'no_consent';
+  const wordings = SMS_PURPOSE_WORDINGS[SmsPurposeSchema.parse(purpose)];
+  if ((await findActiveSmsConsent(tx, parsed.data, wordings)) === undefined) return 'no_consent';
   return 'allowed';
 }
 
@@ -107,7 +117,7 @@ export async function queueSms(
 export interface SmsConsentInput {
   phone: string;
   source: SmsConsentSource;
-  /** `booking_page`: the client who ticked the box. */
+  /** `booking_page`, `waitlist_join`, `staff_recorded`: the client who agreed. */
   clientId?: string | null;
   /** `member_settings`: the member, for texts to themselves. */
   userId?: string | null;
@@ -127,6 +137,10 @@ export async function recordSmsConsent(
 ): Promise<string> {
   const tenant = await findCurrentTenant(tx);
   if (tenant === undefined) throw new Error('A consent is recorded in a business’s transaction');
+  // A box records only the words it shows (S79; the database checks the same).
+  if (!SMS_SOURCE_WORDINGS[input.source].includes(input.wordingVersion)) {
+    throw new Error('A consent of this source has other words');
+  }
   const { id, replaced } = await insertSmsConsent(tx, {
     ...input,
     shownText: smsConsentText(input.wordingVersion, tenant.name),

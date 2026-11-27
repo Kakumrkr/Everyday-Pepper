@@ -9,8 +9,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S79 Waitlist offers by text** (brief approved 2026-11-27: "Start with your recommendations and complete the session successfully": D-1a the team's box records `staff_recorded` v3 + an opt-in text; D-2a text instead of email; D-3a one session; D-4a ADR-0065 §S79). ACs AC-X-220…228. "On the booking page" read as the booking page's "Join the waitlist" step (no v3 box on the booking form itself).
 - [x] T1 ACs + traceability
-- [ ] T2 contracts + db (v3, sources, migration 0093, `purpose`/`validUntil` on the outbox text)
-- [ ] T3 core: `smsPermission` per purpose, delivery drops a closed offer's text
+- [x] T2 contracts + db: v3, sources `waitlist_join`/`staff_recorded`, migration 0093 (source↔wording check), `purpose`/`validUntil` on the outbox text; member fixtures moved to v2
+- [x] T3 core: `smsPermission(tx, phone, purpose)`, delivery drops a text past `validUntil` (`SmsExpired`); profile labels for the new sources
 - [ ] T4 domain: candidates, offer text, the open-for line (top-up), tool sends text or email
 - [ ] T5 API + screens: public join box, the team's box + opt-in text, legal, e2e
 - [ ] T6 close
