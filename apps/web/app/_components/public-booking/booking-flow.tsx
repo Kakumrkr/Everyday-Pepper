@@ -851,11 +851,18 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               },
             ]}
           />
+          {booked.booking.confirm === null || booked.booking.confirm.confirmed ? null : (
+            <p className="m-0 type-body text-ink" data-testid="confirm-by">
+              {`Please confirm by ${dateTimeLabel(timeZone, booked.booking.confirm.by)}, or your time may be offered to others. You can confirm now with the link below or in your email.`}
+            </p>
+          )}
           <a
             href={managePath(slug, booked.manageToken)}
             className={cx(buttonStyle({ variant: 'secondary' }), 'self-start')}
           >
-            Reschedule or cancel
+            {booked.booking.confirm === null || booked.booking.confirm.confirmed
+              ? 'Reschedule or cancel'
+              : 'Confirm, reschedule or cancel'}
           </a>
           <Policy business={business} />
           {withoutCode || remember ? (

@@ -118,6 +118,7 @@ export default async function CalendarPage({
           status: booking.status,
           overridden: booking.overridden,
           clientConfirmedAt: booking.clientConfirmedAt ?? null,
+          clientConfirmedVia: booking.clientConfirmedVia ?? null,
           seriesId: booking.seriesId ?? null,
           visit: day.visits.get(booking.id) ?? null,
         })),

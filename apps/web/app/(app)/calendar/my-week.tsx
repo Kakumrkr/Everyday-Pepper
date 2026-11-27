@@ -74,6 +74,7 @@ export function MyWeek({
       status: booking.status,
       overridden: booking.overridden,
       clientConfirmedAt: booking.clientConfirmedAt ?? null,
+      clientConfirmedVia: booking.clientConfirmedVia ?? null,
       seriesId: booking.seriesId ?? null,
       keptOverGoogle: week.kept.has(booking.id),
       visit: week.visits.get(booking.id) ?? null,

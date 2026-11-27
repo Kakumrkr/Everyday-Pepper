@@ -143,6 +143,8 @@ export const BookingSchema = z.object({
   overridden: z.boolean(),
   /** When the client confirmed it by text ("C", S62); `null`: not by them. */
   clientConfirmedAt: UtcDateTimeSchema.nullable().optional(),
+  /** How they confirmed (S78): "C" by text or their link; `null` or absent: by text. */
+  clientConfirmedVia: z.enum(['text', 'link']).nullable().optional(),
   /** The series of recurring visits it is part of (S72); `null`: a single booking. */
   seriesId: BookingSeriesIdSchema.nullable().optional(),
   createdAt: UtcDateTimeSchema,

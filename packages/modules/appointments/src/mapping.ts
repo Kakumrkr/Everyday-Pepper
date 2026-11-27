@@ -155,6 +155,8 @@ export function toBooking(row: BookingRow): Booking {
     priceFromCents: row.priceFromCents,
     priceToCents: row.priceToCents,
     clientConfirmedAt: row.clientConfirmedAt?.toISOString() ?? null,
+    clientConfirmedVia:
+      row.clientConfirmedAt === null ? null : row.clientConfirmedVia === 'link' ? 'link' : 'text',
     seriesId: row.seriesId,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),

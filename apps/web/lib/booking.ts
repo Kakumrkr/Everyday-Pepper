@@ -129,6 +129,13 @@ export function confirmedByText(booking: {
   return booking.status === 'confirmed' ? (booking.clientConfirmedAt ?? null) : null;
 }
 
+/** "Confirmed by text" or "Confirmed by link" (S78 top-up, AC-X-205). */
+export function confirmedLabel(booking: {
+  clientConfirmedVia?: 'text' | 'link' | null | undefined;
+}): string {
+  return booking.clientConfirmedVia === 'link' ? 'Confirmed by link' : 'Confirmed by text';
+}
+
 /**
  * What a booking's block on the calendar is called (its accessible name): when, what and who,
  * then what its marks show: its place in a series (S72.2, AC-X-194), confirmed by text (S62),
@@ -143,6 +150,7 @@ export function bookingBlockName(
     client: string;
     status: BookingStatus;
     clientConfirmedAt?: string | null | undefined;
+    clientConfirmedVia?: 'text' | 'link' | null | undefined;
     keptOverGoogle?: boolean | undefined;
     visit?: { number: number; of: number } | null | undefined;
   },
@@ -150,7 +158,7 @@ export function bookingBlockName(
   const { visit } = booking;
   const marks = [
     ...(visit ? [`visit ${String(visit.number)} of ${String(visit.of)}`] : []),
-    ...(confirmedByText(booking) === null ? [] : ['confirmed by text']),
+    ...(confirmedByText(booking) === null ? [] : [confirmedLabel(booking).toLowerCase()]),
     // "changed in Google, …": only the sentence's first letter lowered, never the names.
     ...(booking.keptOverGoogle === true
       ? [`${KEPT_OVER_GOOGLE.charAt(0).toLowerCase()}${KEPT_OVER_GOOGLE.slice(1)}`]
