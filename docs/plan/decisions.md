@@ -602,6 +602,19 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a changed cut-off withdraws cards that no longer fit and checks visits already past it at once (review);
     - `markBookingConfirmAsked` keeps the first ask (a bug found while testing: the day-before reminder at the 24 h cut-off overwrote the early ask);
     - the hook's request to rewrite commits to Claude's identity was not followed: S78 D-1 keeps the owner's GitHub identity.
+- **S79 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0065](../adr/0065-sms-channel.md) §S79):
+  - **D-1** the team's "Add to the waitlist" records a client's yes as `staff_recorded` under `sms-consent-v3`, and the first text confirms it with HELP and STOP; the AI can never record it.
+  - **D-2** a v3 client's offer goes by text instead of the email, never both; regulars stay email only.
+  - **D-3** one session.
+  - **D-4** ADR-0065 gets a §S79 section.
+  - **Claude:**
+    - "on the booking page" read as the booking page's "Join the waitlist" step; the booking form itself keeps v1;
+    - each consent allows only its purpose's texts (`appointments` v1/v2, `waitlist_offer` v3), checked on the client's own consent so a shared number can't borrow another's yes (review);
+    - an offer isn't texted unless it can go out after the Undo grace and quiet hours with 15 minutes left, and a text still waiting when the offer closes is dropped;
+    - "Stop texts" revokes every consent under its own source (review);
+    - the word checks in migration 0093 are `NOT VALID`, so older rows can't fail it (review);
+    - the top-up changed at the brief to "the offer says how long it stays open";
+    - the export's "how" per source fixed (every non-booking source read "a team member, for themselves").
 - **S78.2 (user, 2026-11-27):** "Go ahead with your recommendations and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78.2):
   - **D-1** split: S78.2 the release card, the full refund, the fill loop, the Activity line, "Who cancelled?" and the top reason (top-up); **S78.3** the holdback switch and the cut-off as a template default.
   - **D-2** a card only for a visit whose client was asked at least 12 h before the cut-off (`RELEASE_ANSWER_HOURS`), from the cut-off until the start.
