@@ -187,7 +187,18 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await jess.getByRole('button', { name: /^1:00\s?–\s?2:00\sPM/ }).click();
   await sheet(page).getByRole('button', { name: 'Cancel booking' }).click();
   await sheet(page).getByLabel('Email the client that it is cancelled').uncheck();
+  // She phoned to cancel (S78.2, AC-X-212): the team says so, Us being the default.
+  const who = sheet(page).getByRole('group', { name: 'Who cancelled?' });
+  await expect(who.getByRole('radio', { name: 'Us' })).toHaveAttribute('aria-checked', 'true');
+  await who.getByRole('radio', { name: 'The client' }).click();
+  const cancelled = page.waitForRequest(
+    (request) => request.method() === 'PATCH' && request.url().includes('/v1/bookings/'),
+  );
   await sheet(page).getByRole('button', { name: 'Cancel booking' }).click();
+  expect((await cancelled).postDataJSON()).toMatchObject({
+    status: 'cancelled',
+    cancelledBy: 'client',
+  });
   await expect(sheet(page)).toBeHidden();
   await expect(jess.getByTestId('booking-block')).toHaveCount(1);
   // The worker sends queued emails within about a second; give it a few.

@@ -15,6 +15,7 @@ import {
   BriefingBlock,
   Button,
   Card,
+  ChangeCard,
   Checkbox,
   COLORS,
   DetailTable,
@@ -89,6 +90,19 @@ const TYPE_CLASS: Record<TypeToken, string> = {
   body: 'type-body',
   label: 'type-label',
   caption: 'type-caption',
+};
+
+/** The release card's sample visit (made-up). */
+const RELEASE_VISIT = {
+  bookingId: '0199f4b2-7c1e-7a00-8000-0000000000b9',
+  clientId: '0199f4b2-7c1e-7a00-8000-0000000000c9',
+  clientName: 'Maria L.',
+  serviceName: 'Haircut',
+  staffName: 'Jess',
+  date: '2026-12-01',
+  time: '14:00',
+  endTime: '15:00',
+  status: 'confirmed',
 };
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
@@ -634,6 +648,34 @@ export function Gallery() {
               onOpenChange={setToastOpen}
               title="Moved Darius Hill to 4:15. He has the email."
               action={{ label: 'Undo', altText: 'Undo the move', onClick: () => undefined }}
+            />
+          </Section>
+
+          {/* S78.2: the release card at the confirm cut-off (AC-X-207, AC-X-213). */}
+          <Section id="release" title="Release card">
+            <ChangeCard
+              action="booking.release"
+              status="proposed"
+              summary="Maria L. hasn’t confirmed Tue, Dec 1, 2:00 pm. Release it and offer it?"
+              before={RELEASE_VISIT}
+              after={{
+                ...RELEASE_VISIT,
+                status: 'cancelled',
+                release: true,
+                refund: true,
+                riskSignal: 'missed_before',
+                riskMisses: 2,
+                riskVisits: 5,
+              }}
+              emails={[{ template: 'cancelled', clientId: RELEASE_VISIT.clientId }]}
+              undoUntil={null}
+              canDecide
+              canUndo={false}
+              timeZone="America/New_York"
+              now={Date.parse('2026-11-30T19:00:00.000Z')}
+              onApprove={() => undefined}
+              onReject={() => undefined}
+              onWhy={() => undefined}
             />
           </Section>
 

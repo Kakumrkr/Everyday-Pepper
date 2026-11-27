@@ -9,7 +9,7 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S78.2 The release card** (user, 2026-11-27: "Go ahead with your recommendations": D-1 split, the holdback and the cut-off template default → **S78.3**; D-2 a card only for visits asked at least 12 h before the cut-off, from the cut-off to the start; D-3 a release is the business's cancel, never the client's miss; D-4 the release note by email only; D-5 no Undo, the card says so).
 Tasks: 1 ACs AC-X-207…213, contracts (`booking.release` ask-only, `release_check` reminder, `cancelledBy` on the team's cancel), migration 0091 · 2 domain `releaseUnconfirmedBookingIn` + withdrawal on confirm/move/cancel + race test · 3 system tool `release_unconfirmed_booking` + the reminder job's proposer · 4 card words, top reason, Activity line, e2e · 5 "Who cancelled?" on the sheet · 6 ADR-0071 §S78.2, docs.
-Done: (none yet). Next: task 1.
+Done: tasks 1–3 and 4's card words and Activity line (commit edcec4b; contracts, appointments, ai, ui, worker unit green; ai `release.int.test.ts` 6/6, appointments reminders/bookings/public-booking int green). Next: task 5 (the sheet's "Who cancelled?"), then the e2e `release-card.spec.ts`.
 
 ## Last sessions
 - **S78 Phase 18 · The confirm ask (2026-11-27)** ([PR #117](https://github.com/Kakumrkr/Everyday-Pepper/pull/117), [ADR-0071](../adr/0071-visit-risk.md) §S78). Full entry in [session-log.md](session-log.md).
