@@ -24,6 +24,7 @@ import {
   ManualClock,
   openOutboxContent,
   outboxKeyFrom,
+  recordSmsConsent,
   type Actor,
 } from '@pepper/core';
 import {
@@ -70,6 +71,7 @@ import {
 import { createStaffMember, updateStaffMember } from './services/staff.js';
 import { addTimeOff, removeTimeOff } from './services/time-off.js';
 import { addToWaitlist, changeWaitlistEntry, listWaitlist } from './services/waitlist.js';
+import { textableNumber } from './services/reminders.js';
 import { queueWaitlistOptInText, type WaitlistOptInNotify } from './services/waitlist-texts.js';
 import { insertUser, startTestDatabase, type TestDatabase } from './test-support.js';
 
@@ -1020,6 +1022,31 @@ describe('the team records a client’s yes to texts about openings (S79, AC-X-2
           },
         ),
       ).toBeUndefined();
+    });
+  });
+
+  it('texts a client only for what they said yes to, whoever else shares the number', async () => {
+    const w = await newWorld();
+    // Client 1 told the team yes to openings; client 2 ticked reminders on the same number.
+    await addWithTexts(w, w.owner);
+    await withTenant(db, w.tenantId, (tx) =>
+      recordSmsConsent(
+        tx,
+        {
+          phone: PHONE,
+          source: 'booking_page',
+          clientId: client(w, 2).id,
+          wordingVersion: 'sms-consent-v1',
+          givenAt: w.clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      ),
+    );
+    await withTenant(db, w.tenantId, async (tx) => {
+      expect(await textableNumber(tx, client(w, 1).id, 'waitlist_offer')).toBe(PHONE);
+      expect(await textableNumber(tx, client(w, 1).id, 'appointments')).toBeNull();
+      expect(await textableNumber(tx, client(w, 2).id, 'appointments')).toBe(PHONE);
+      expect(await textableNumber(tx, client(w, 2).id, 'waitlist_offer')).toBeNull();
     });
   });
 

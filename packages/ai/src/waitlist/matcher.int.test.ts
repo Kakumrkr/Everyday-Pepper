@@ -623,6 +623,33 @@ describe('S79: waitlist offers by text (AC-X-223…227)', () => {
     expect(await matchItems(w)).toMatchObject([{ state: 'offered', offered: 1 }]);
   });
 
+  it('an OK given too late to text her in time leaves no offer she can’t hear of', async () => {
+    // Monday 19:30 in New York: the card waits; the offer would close at 21:30.
+    const w = await world('2026-11-03T00:30:00.000Z');
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    await noEmail(w);
+    const options = { ...optionsFor(w), texts: true };
+    expect(await runWaitlistMatch(db, await dueMatch(w), options)).toBe('proposed');
+    const [proposal] = await offerProposals(w, w.actorFor('owner'));
+    if (proposal === undefined) throw new Error('no proposal');
+    // Approved at 19:59: held for the grace, the text could go only at 8:00.
+    w.clock.set('2026-11-03T00:59:00.000Z');
+    const approved = await approveToolProposal(
+      { ...depsAs(w, 'owner'), emails: { baseUrl: BASE_URL, outboxKey: OUTBOX_KEY, texts: true } },
+      proposal.id,
+      proposal.fingerprint,
+    );
+    expect(approved.kind).toBe('stale');
+    const left = await withTenant(db, w.tenantId, (tx) =>
+      tx
+        .select()
+        .from(waitlistOffers)
+        .where(eq(waitlistOffers.clientId, id(w, '{{client:sara}}'))),
+    );
+    expect(left).toEqual([]);
+    expect(await offerTexts(w)).toEqual([]);
+  });
+
   it('one text an offer, whatever the retries (AC-X-226)', async () => {
     const w = await world();
     await atAuto(w);

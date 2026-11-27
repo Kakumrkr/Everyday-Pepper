@@ -113,10 +113,11 @@ export interface WriteScope extends ToolScope {
   notifyClient(clientId: ClientId): BookingNotify;
   emailClient(email: ClientEmail): Promise<void>;
   /**
-   * Another message the write queued, held for the undo-send grace (S79: a waitlist offer's
-   * text), so Undo takes it back with the emails.
+   * Another message the write queued to a client, held for the undo-send grace (S79: a waitlist
+   * offer's text): counted with the emails (the card's recipients and fingerprint), and taken
+   * back by Undo with them.
    */
-  heldMessage(id: OutboxMessageId): void;
+  heldMessage(id: OutboxMessageId, to: WouldBeEmail): void;
 }
 
 /** What a write did (or, in the dry run, would do), as the domain computed it. */

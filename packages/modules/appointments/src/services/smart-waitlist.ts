@@ -56,7 +56,7 @@ import { waitlistAuditValues } from '../mapping.js';
 import { serviceToBook, type TemplateRuleDefaultsOf } from './availability.js';
 import { isBookable } from './bookings.js';
 import { requestInsights } from './insights.js';
-import { offerTextNumber } from './waitlist-texts.js';
+import { offerTextNumber, type WaitlistTextOptions } from './waitlist-texts.js';
 
 // The smart waitlist (S37, ADR-0041, AC-W5-1), the domain's half. A booking cancelled or moved
 // away from a time asks, in its own transaction, for that time to be matched
@@ -122,6 +122,8 @@ export interface CandidateOptions {
   fanOut: number;
   /** Whether this deployment sends texts (S79: a waitlist client without an email by text). */
   texts?: boolean | undefined;
+  /** Seconds an offer's text waits before it may go (the AI's undo-send grace, S79). */
+  holdSeconds?: number | undefined;
   templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
@@ -172,7 +174,7 @@ export async function waitlistCandidatesIn(
         tenant,
         client.id,
         { closesAt: offerExpiry(now, start), now },
-        { texts: options.texts },
+        { texts: options.texts, holdSeconds: options.holdSeconds },
       )) === null
     ) {
       continue;
@@ -371,10 +373,15 @@ export async function makeWaitlistOffersIn(
     freedBookingId?: BookingId | null;
     entries: readonly OfferTarget[];
   },
-  options: { now: Date; templateRuleDefaults?: TemplateRuleDefaultsOf | undefined },
+  options: {
+    now: Date;
+    templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
+  } & WaitlistTextOptions,
 ): Promise<MadeOffer[]> {
   requirePermission(actor, 'bookings.manage', { ownerUserId: null });
   if (!stillOfferable(input.startsAt, options.now)) return [];
+  const tenant = await findCurrentTenant(tx);
+  if (tenant === undefined) throw new Error('No tenant in this transaction');
   const expiresAt = new Date(offerExpiry(options.now.getTime(), input.startsAt.getTime()));
   const made: MadeOffer[] = [];
   const offeredClients = new Set<string>();
@@ -413,6 +420,22 @@ export async function makeWaitlistOffersIn(
         templateRuleDefaults: options.templateRuleDefaults,
       });
       if (!bookable) continue;
+      // Reachable now (S79): an address, or a text that can still go before it closes. An
+      // offer no one can be told of would hold the entry until it expires.
+      const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
+      if (client === undefined) continue;
+      if (
+        client.email === null &&
+        (await offerTextNumber(
+          tx,
+          tenant,
+          client.id,
+          { closesAt: expiresAt.getTime(), now: options.now.getTime() },
+          options,
+        )) === null
+      ) {
+        continue;
+      }
       clientId = ClientIdSchema.parse(entry.clientId);
       serviceId = ServiceIdSchema.parse(entry.serviceId);
     }

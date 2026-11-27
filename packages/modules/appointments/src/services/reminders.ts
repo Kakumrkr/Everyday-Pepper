@@ -15,6 +15,8 @@ import {
   type TenantId,
   type ReminderKind,
   type ReminderSettings,
+  SMS_PURPOSE_WORDINGS,
+  SmsConsentWordingVersionSchema,
   type SmsPurpose,
 } from '@pepper/contracts';
 import { queueEmail, queueSms, smsPermission, type Clock } from '@pepper/core';
@@ -411,7 +413,10 @@ export async function textableNumber(
   purpose: SmsPurpose = 'appointments',
 ): Promise<string | null> {
   for (const consent of await listActiveSmsConsentsForClient(tx, clientId)) {
-    // S79: a waitlist client's v3 number gets no reminders, a v1 number no offers.
+    // S79: this client's own yes must name the purpose (a v3 number gets no reminders, a v1 no
+    // offers), whoever else said yes on the same number.
+    const version = SmsConsentWordingVersionSchema.parse(consent.wordingVersion);
+    if (!SMS_PURPOSE_WORDINGS[purpose].includes(version)) continue;
     if ((await smsPermission(tx, consent.phone, purpose)) === 'allowed') return consent.phone;
   }
   return null;

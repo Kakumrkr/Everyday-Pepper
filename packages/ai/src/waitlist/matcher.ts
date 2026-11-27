@@ -6,6 +6,7 @@ import {
   type TemplateRuleDefaultsOf,
 } from '@pepper/appointments';
 import {
+  AI_EMAIL_GRACE_SECONDS,
   TemplateIdSchema,
   UserIdSchema,
   WaitlistMatchIdSchema,
@@ -153,6 +154,7 @@ async function matchIn(
     fanOut: options.waitlistOf(templateId).offerFanOut,
     templateRuleDefaults: options.templateRuleDefaults,
     texts: options.texts === true,
+    holdSeconds: AI_EMAIL_GRACE_SECONDS,
   });
   if (ranked.length === 0) return 'no_match';
 

@@ -187,6 +187,10 @@ export const sendWaitlistOffers: WriteTool = {
         ...(scope.deps.templateRuleDefaults !== undefined && {
           templateRuleDefaults: scope.deps.templateRuleDefaults,
         }),
+        // S79: a client without an address is offered only if the text, held for the grace,
+        // can still go before the offer closes.
+        texts: scope.deps.emails.texts,
+        holdSeconds: AI_EMAIL_GRACE_SECONDS,
       },
     );
     if (made.length === 0) throw new SlotUnavailableError([]);
@@ -213,7 +217,12 @@ export const sendWaitlistOffers: WriteTool = {
         },
       );
       // Held for the undo-send grace like the emails, so Undo takes it back too.
-      if (messageId !== undefined) scope.heldMessage(messageId);
+      if (messageId !== undefined) {
+        scope.heldMessage(messageId, {
+          template: 'waitlist_offer',
+          clientId: ClientIdSchema.parse(offer.clientId),
+        });
+      }
       // Candidates have an address or a text; one removed meanwhile is simply not emailed.
       if (!texted && details.email === '') continue;
       nameOf.set(offer.id, shortClientName(details.clientName));

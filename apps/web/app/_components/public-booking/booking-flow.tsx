@@ -813,8 +813,9 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
           <p className="m-0 type-body text-ink-2">
             {smsOptIn && details.phone !== null ? (
               <>
-                If a time opens up, we text <b className="text-ink">{details.phone}</b> or email{' '}
-                <b className="text-ink">{details.email}</b> a link to claim it.
+                If a time opens up, we send a link to claim it to{' '}
+                <b className="text-ink">{details.email}</b>, or by text to{' '}
+                <b className="text-ink">{details.phone}</b> when the business texts.
               </>
             ) : (
               <>

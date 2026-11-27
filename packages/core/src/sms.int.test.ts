@@ -1,4 +1,5 @@
 import {
+  ClientIdSchema,
   OutboxDedupeKeySchema,
   TenantIdSchema,
   UsagePeriodSchema,
@@ -543,6 +544,21 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
     expect(
       await getClientTexts(db, t.owner, await clientWith(t.tenantId, null, false)),
     ).toMatchObject({ status: 'never', textable: false });
+  });
+
+  it('stops a waitlist yes too (S79): every consent in force, each under its own source', async () => {
+    const t = await team();
+    const phone = newPhone();
+    const clientId = await consentFor(t.tenantId, phone, 'waitlist');
+    await consentFor(t.tenantId, phone, 'reminders', clientId);
+    const sam = ClientIdSchema.parse(clientId);
+    await stopClientTexts(db, t.owner, sam, { clock });
+    for (const purpose of ['appointments', 'waitlist_offer'] as const) {
+      expect(await withTenant(db, t.tenantId, (tx) => smsPermission(tx, phone, purpose))).toBe(
+        'no_consent',
+      );
+    }
+    expect(await getClientTexts(db, t.owner, sam)).toMatchObject({ status: 'stopped' });
   });
 
   it('says opted out after a STOP, and the owner may still stop them for good', async () => {

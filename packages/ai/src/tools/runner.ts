@@ -179,7 +179,8 @@ async function run(
     emails.push({ template: email.template, clientId: email.clientId });
     queued.push(id);
   };
-  const heldMessage = (id: OutboxMessageId) => {
+  const heldMessage = (id: OutboxMessageId, to: WouldBeEmail) => {
+    emails.push(to);
     queued.push(id);
   };
   const scope: WriteScope = {

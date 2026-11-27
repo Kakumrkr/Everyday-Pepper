@@ -203,8 +203,8 @@ export async function getClientTexts(
 }
 
 /**
- * Stops a client's texts from the profile (S61.2, AC-X-67): their consents in force are revoked
- * (audited as the member), so no text goes to the number from the next delivery. Only the
+ * Stops a client's texts from the profile (S61.2, AC-X-67): their consents in force are revoked,
+ * a waitlist yes too (S79; audited as the member), so no text goes to the number from the next delivery. Only the
  * client can turn texts back on, by ticking the booking page's box again (START only ends a
  * STOP; it gives no consent). Answers the new status;
  * nothing in force: the status unchanged.
@@ -223,7 +223,8 @@ export async function stopClientTexts(
     if (client === undefined) throw new ClientNotFoundError();
     // Every number the client said yes on (they may have booked with two).
     for (const consent of await listActiveSmsConsentsForClient(tx, id)) {
-      await revokeSmsConsentFor(tx, consent.phone, 'booking_page', {
+      // Each under its own source: reminders and waitlist offers (S79) alike.
+      await revokeSmsConsentFor(tx, consent.phone, SmsConsentSourceSchema.parse(consent.source), {
         actor: auditActorOf(actor),
         requestId: actor.requestId,
         now,

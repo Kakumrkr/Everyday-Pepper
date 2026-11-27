@@ -27,12 +27,14 @@ const MINUTE_MS = 60_000;
 export interface WaitlistTextOptions {
   /** Whether this deployment sends texts (`SMS_PROVIDER` set, ADR-0065); default no. */
   texts?: boolean | undefined;
+  /** Seconds the text waits before it may go (the AI's undo-send grace). */
+  holdSeconds?: number | undefined;
 }
 
 /**
  * The number a waitlist offer closing at `closesAt` may be texted to, made at `now` (ms), or
  * `null`: texts off (the deployment's or the business's), no v3 consent the business may text
- * now, or the first minute it may go (`smsSendableAt`) leaves less than
+ * now, or the first minute it may go (`smsSendableAt`, after `holdSeconds`) leaves less than
  * `WAITLIST_TEXT_MIN_OPEN_MINUTES` (an offer at 23:00 that closes at 01:00).
  */
 export async function offerTextNumber(
@@ -43,7 +45,7 @@ export async function offerTextNumber(
   options: WaitlistTextOptions,
 ): Promise<string | null> {
   if (options.texts !== true || !reminderSettingsOf(tenant).texts) return null;
-  const sendAt = smsSendableAt(tenant.timeZone, closes.now);
+  const sendAt = smsSendableAt(tenant.timeZone, closes.now + (options.holdSeconds ?? 0) * 1000);
   if (closes.closesAt - sendAt < WAITLIST_TEXT_MIN_OPEN_MINUTES * MINUTE_MS) return null;
   return textableNumber(tx, ClientIdSchema.parse(clientId), 'waitlist_offer');
 }
@@ -63,19 +65,20 @@ export async function queueWaitlistOfferText(
     token: OfferToken;
     details: BookingEmailDetails;
   },
-  options: WaitlistTextOptions & {
-    baseUrl: string;
-    outboxKey: Buffer;
-    now: Date;
-    holdSeconds?: number;
-  },
+  options: WaitlistTextOptions & { baseUrl: string; outboxKey: Buffer; now: Date },
 ): Promise<{ texted: boolean; messageId?: OutboxMessageId }> {
   const { offer } = input;
   if (offer.source !== 'waitlist') return { texted: false };
-  const now = options.now.getTime() + (options.holdSeconds ?? 0) * 1000;
   const closesAt = offer.expiresAt.getTime();
-  const phone = await offerTextNumber(tx, tenant, offer.clientId, { closesAt, now }, options);
+  const phone = await offerTextNumber(
+    tx,
+    tenant,
+    offer.clientId,
+    { closesAt, now: options.now.getTime() },
+    options,
+  );
   if (phone === null) return { texted: false };
+  const now = options.now.getTime() + (options.holdSeconds ?? 0) * 1000;
   const expiresAt = offer.expiresAt.toISOString();
   const messageId = await queueSms(
     tx,
