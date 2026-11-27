@@ -188,8 +188,8 @@ test('an owner books from the calendar: free times, a taken time with alternativ
   await sheet(page).getByRole('button', { name: 'Cancel booking' }).click();
   await sheet(page).getByLabel('Email the client that it is cancelled').uncheck();
   // She phoned to cancel (S78.2, AC-X-212): the team says so, Us being the default.
-  const who = sheet(page).getByRole('group', { name: 'Who cancelled?' });
-  await expect(who.getByRole('radio', { name: 'Us' })).toHaveAttribute('aria-checked', 'true');
+  const who = sheet(page).getByRole('radiogroup', { name: 'Who cancelled?' });
+  await expect(who.getByRole('radio', { name: 'Us' })).toBeChecked();
   await who.getByRole('radio', { name: 'The client' }).click();
   const cancelled = page.waitForRequest(
     (request) => request.method() === 'PATCH' && request.url().includes('/v1/bookings/'),

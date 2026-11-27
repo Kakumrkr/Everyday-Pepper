@@ -1471,6 +1471,12 @@ for (const width of WIDTHS) {
         await hydrated(page.getByRole('button', { name: 'New booking', exact: true }))
       ).click();
       await expect(dialog.getByTestId('free-times')).toBeVisible();
+      // The masked day line is as wide as the longer of "Calendar" and the day's name, so a
+      // short day ("Fri, Dec 4") shrank the mask and failed the shot on that day (S78.2): one
+      // fixed width, whatever the day.
+      await page.addStyleTag({
+        content: '[data-testid="calendar-day"] { width: 16rem !important; }',
+      });
       await still(page, scheme);
       await expect.soft(page).toHaveScreenshot(`new-booking-${String(width)}-${scheme}.png`, {
         ...SHOT,
