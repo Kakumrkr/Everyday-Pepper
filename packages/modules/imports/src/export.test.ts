@@ -32,6 +32,10 @@ function booking(id: string, clientId: string, startsAt: string, status: string)
     source: 'team',
     createdAt: AT,
     cancelledAt: null,
+    cancelledBy: null,
+    clientConfirmedAt: null,
+    clientConfirmedVia: null,
+    confirmAskedAt: null,
   };
 }
 
@@ -421,6 +425,49 @@ describe('buildBusinessExport (AC-W1-37)', () => {
     expect(lines.slice(2)).toEqual(['']);
     const appointments = JSON.parse(files['appointments.json'] ?? '[]') as { clientId: unknown }[];
     expect(appointments.map((a) => a.clientId)).toEqual([CLIENT, null]);
+  });
+
+  it('says who cancelled, how the client confirmed and when they were asked (S78, AC-X-206)', () => {
+    const asked = new Date('2026-11-01T15:00:00Z');
+    const confirmed = new Date('2026-11-01T16:00:00Z');
+    const files = unzip(
+      buildBusinessExport(
+        data({
+          bookings: [
+            {
+              ...booking(
+                '0190a000-0000-7000-8000-000000000102',
+                CLIENT,
+                '2099-03-05T15:00:00Z',
+                'confirmed',
+              ),
+              confirmAskedAt: asked,
+              clientConfirmedAt: confirmed,
+              clientConfirmedVia: 'link',
+            },
+            {
+              ...booking(
+                '0190a000-0000-7000-8000-000000000103',
+                CLIENT,
+                '2099-03-06T15:00:00Z',
+                'cancelled',
+              ),
+              cancelledAt: asked,
+              cancelledBy: 'client',
+            },
+          ],
+        }),
+        AT,
+      ).bytes,
+    );
+    const appointments = JSON.parse(files['appointments.json'] ?? '[]') as unknown[];
+    expect(appointments[0]).toMatchObject({
+      confirmAskedAt: asked.toISOString(),
+      clientConfirmedAt: confirmed.toISOString(),
+      clientConfirmedVia: 'link',
+      cancelledBy: null,
+    });
+    expect(appointments[1]).toMatchObject({ cancelledBy: 'client' });
   });
 
   it('puts the team’s services, hours and time off with each member', () => {

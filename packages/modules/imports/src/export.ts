@@ -264,6 +264,9 @@ export function buildBusinessExport(
           endsAt: at(booking.endsAt),
           createdAt: at(booking.createdAt),
           cancelledAt: booking.cancelledAt === null ? null : at(booking.cancelledAt),
+          clientConfirmedAt:
+            booking.clientConfirmedAt === null ? null : at(booking.clientConfirmedAt),
+          confirmAskedAt: booking.confirmAskedAt === null ? null : at(booking.confirmAskedAt),
         })),
       ),
     ],
