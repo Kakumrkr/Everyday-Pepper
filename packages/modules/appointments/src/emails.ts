@@ -1,6 +1,7 @@
 import { depositPaidLine } from '@pepper/contracts';
 import type { EmailMessage } from '@pepper/core';
 import type { BookingEmailDetails } from './services/notices.js';
+import { openForLabel } from './texts.js';
 
 // The emails to a booking's client (ADR-0022, ADR-0025): plain text, in the business's time
 // zone. They carry only what the client typed or booked; the code and the link are secrets for
@@ -331,6 +332,12 @@ export function manageUrl(baseUrl: string, slug: string, token: string): string 
   return `${baseUrl}/book/${encodeURIComponent(slug)}/manage#${token}`;
 }
 
+/** "The offer is open for 2 hours, until Tuesday, December 1 at 3:15 PM." (S79 top-up) */
+function offerOpenSentence(offeredAt: string, expiresAt: string, timeZone: string): string {
+  const openFor = openForLabel(Date.parse(expiresAt) - Date.parse(offeredAt));
+  return `The offer is open for ${openFor}, until ${formatWhen(expiresAt, timeZone)}.`;
+}
+
 /** The booking page's offer page; the claim secret goes in the fragment, never to a server. */
 export function offerUrl(baseUrl: string, slug: string, token: string): string {
   return `${baseUrl}/book/${encodeURIComponent(slug)}/offer#${token}`;
@@ -344,6 +351,7 @@ export function waitlistOfferEmail(
   details: BookingEmailDetails,
   claimUrl: string,
   expiresAt: string,
+  offeredAt: string,
 ): EmailMessage {
   return {
     to: details.email,
@@ -357,7 +365,7 @@ export function waitlistOfferEmail(
       'To take it, open this link (it is just for you):',
       claimUrl,
       '',
-      `It was offered to a few people on the waitlist; whoever claims it first gets it. The offer ends ${formatWhen(expiresAt, details.timeZone)}.`,
+      `It was offered to a few people on the waitlist; whoever claims it first gets it. ${offerOpenSentence(offeredAt, expiresAt, details.timeZone)}`,
     ].join('\n'),
   };
 }
@@ -371,6 +379,7 @@ export function regularOfferEmail(
   details: BookingEmailDetails,
   claimUrl: string,
   expiresAt: string,
+  offeredAt: string,
   footer: { mailingAddress: string; unsubscribeUrl: string },
 ): EmailMessage {
   return {
@@ -385,7 +394,7 @@ export function regularOfferEmail(
       'If you would like it, open this link (it is just for you):',
       claimUrl,
       '',
-      `It was offered to a few clients; whoever claims it first gets it. The offer ends ${formatWhen(expiresAt, details.timeZone)}.`,
+      `It was offered to a few clients; whoever claims it first gets it. ${offerOpenSentence(offeredAt, expiresAt, details.timeZone)}`,
       '',
       '--',
       details.businessName,

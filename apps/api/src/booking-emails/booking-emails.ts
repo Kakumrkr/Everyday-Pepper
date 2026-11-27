@@ -2,14 +2,17 @@ import {
   queueBookingEmail,
   queueBookingText,
   queueSeriesEmail,
+  queueWaitlistOptInText,
   queueWaitlistTakenEmail,
   type BookingEmailOptions,
   type BookingNotice,
   type BookingNotify,
   type SeriesNotify,
+  type WaitlistOptInNotify,
   type WaitlistTakenNotify,
 } from '@pepper/appointments';
-import type { TenantTx } from '@pepper/db';
+import { systemClock } from '@pepper/core';
+import { findCurrentTenant, type TenantTx } from '@pepper/db';
 import { Inject, Injectable, Module, type DynamicModule } from '@nestjs/common';
 
 export type BookingEmailsOptions = Omit<BookingEmailOptions, 'holdSeconds'>;
@@ -43,6 +46,17 @@ export class BookingEmails {
   /** Queues the "that time has been taken" email to a waitlist client (S37). */
   readonly waitlistTaken: WaitlistTakenNotify = async (tx, notice) => {
     await queueWaitlistTakenEmail(tx, notice, this.options);
+  };
+
+  /** Queues a waitlist client's opt-in text after their yes to texts about openings (S79). */
+  readonly waitlistOptIn: WaitlistOptInNotify = async (tx, notice) => {
+    const tenant = await findCurrentTenant(tx);
+    if (tenant === undefined) throw new Error('A text is queued in a business’s transaction');
+    await queueWaitlistOptInText(tx, tenant, notice, {
+      texts: this.options.texts,
+      outboxKey: this.options.outboxKey,
+      now: (this.options.clock ?? systemClock).now(),
+    });
   };
 }
 

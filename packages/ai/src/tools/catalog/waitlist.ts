@@ -2,7 +2,8 @@ import {
   addToWaitlistIn,
   changeWaitlistEntryIn,
   makeWaitlistOffersIn,
-  offerEmailDetails,
+  offerDetails,
+  queueWaitlistOfferText,
   offerUrl,
   regularOfferEmail,
   SlotUnavailableError,
@@ -10,6 +11,7 @@ import {
   waitlistOfferEmail,
 } from '@pepper/appointments';
 import {
+  AI_EMAIL_GRACE_SECONDS,
   BookingIdSchema,
   ClientIdSchema,
   MAX_WAITLIST_WINDOWS,
@@ -195,11 +197,28 @@ export const sendWaitlistOffers: WriteTool = {
     const services = new Set<string>();
     const { baseUrl, outboxKey } = scope.deps.emails;
     for (const { offer, token } of made) {
-      const details = await offerEmailDetails(scope.tx, tenant, offer);
-      // Candidates have an address; one removed meanwhile is simply not emailed.
+      const details = await offerDetails(scope.tx, tenant, offer);
       if (details === undefined) continue;
+      // A waitlist client with a v3 consent gets it by text instead of email (S79, AC-X-224).
+      const { texted, messageId } = await queueWaitlistOfferText(
+        scope.tx,
+        tenant,
+        { offer, token, details },
+        {
+          texts: scope.deps.emails.texts,
+          baseUrl,
+          outboxKey,
+          now: scope.now,
+          holdSeconds: AI_EMAIL_GRACE_SECONDS,
+        },
+      );
+      // Held for the undo-send grace like the emails, so Undo takes it back too.
+      if (messageId !== undefined) scope.heldMessage(messageId);
+      // Candidates have an address or a text; one removed meanwhile is simply not emailed.
+      if (!texted && details.email === '') continue;
       nameOf.set(offer.id, shortClientName(details.clientName));
       services.add(serviceName(directory, offer.serviceId));
+      if (texted) continue;
       const clientId = ClientIdSchema.parse(offer.clientId);
       const claimUrl = offerUrl(baseUrl, tenant.slug, token);
       // The domain offers a regular only with a mailing address on file (S54); never without
@@ -208,20 +227,22 @@ export const sendWaitlistOffers: WriteTool = {
         throw new Error('A regular was offered a time without a mailing address');
       }
       const expiresAt = offer.expiresAt.toISOString();
+      // Made now: `createdAt` is when it was offered.
+      const offeredAt = offer.createdAt.toISOString();
       await scope.emailClient({
         clientId,
         template: 'waitlist_offer',
         dedupeKey: `waitlist.offer:${offer.id}`,
         message:
           offer.source === 'regular' && tenant.mailingAddress !== null
-            ? regularOfferEmail(details, claimUrl, expiresAt, {
+            ? regularOfferEmail(details, claimUrl, expiresAt, offeredAt, {
                 mailingAddress: tenant.mailingAddress,
                 unsubscribeUrl: `${baseUrl}/unsubscribe/${unsubscribeToken(
                   unsubscribeKeyFrom(outboxKey),
                   { tenantId: scope.actor.context.tenantId, clientId },
                 )}`,
               })
-            : waitlistOfferEmail(details, claimUrl, expiresAt),
+            : waitlistOfferEmail(details, claimUrl, expiresAt, offeredAt),
       });
     }
     // The time's worth: the best-ranked offer's service at its listed price (an estimate:

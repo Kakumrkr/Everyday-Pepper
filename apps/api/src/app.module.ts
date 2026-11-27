@@ -94,6 +94,7 @@ export class AppModule {
           monthlyTokens: config.ai.monthlyTokens,
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),
+          texts: config.textsOn,
         }),
       ],
     };

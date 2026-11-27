@@ -6,12 +6,14 @@ import {
   confirmationEmail,
   formatWhen,
   manageUrl,
+  regularOfferEmail,
   reminderEmail,
   releasedEmail,
   rescheduledEmail,
   seriesCancelledEmail,
   seriesConfirmationEmail,
   waitlistCodeEmail,
+  waitlistOfferEmail,
 } from './emails.js';
 import type { BookingEmailDetails } from './services/notices.js';
 
@@ -262,6 +264,36 @@ describe('the series emails (S72, AC-X-185)', () => {
     expect(many.text).not.toContain('manage');
     expect(seriesCancelledEmail(DETAILS, visits.slice(0, 1)).subject).toBe(
       'A visit at Juniper Hair Studio is cancelled',
+    );
+  });
+});
+
+describe('the offer emails say how long they stay open (S79 top-up, AC-X-227)', () => {
+  const CLAIM = 'https://app.example.test/book/juniper/offer#token';
+
+  it('a waitlist offer: open for 2 hours, until when', () => {
+    const email = waitlistOfferEmail(
+      DETAILS,
+      CLAIM,
+      '2026-11-03T14:00:00.000Z',
+      '2026-11-03T12:00:00.000Z',
+    );
+    expect(email.text).toContain(
+      'whoever claims it first gets it. The offer is open for 2 hours, until Tuesday, November 3 at 9:00 AM.',
+    );
+    expect(email.text).not.toContain('The offer ends');
+  });
+
+  it('a regular’s offer: the same line, under an hour in minutes', () => {
+    const email = regularOfferEmail(
+      DETAILS,
+      CLAIM,
+      '2026-11-03T13:40:00.000Z',
+      '2026-11-03T13:00:00.000Z',
+      { mailingAddress: '1 Main St, Austin, TX', unsubscribeUrl: 'https://app.example.test/u/x' },
+    );
+    expect(email.text).toContain(
+      'The offer is open for 40 minutes, until Tuesday, November 3 at 8:40 AM.',
     );
   });
 });

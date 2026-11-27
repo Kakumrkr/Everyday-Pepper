@@ -6,6 +6,7 @@ import type {
   ClientId,
   MemoryWarningRule,
   OutboxEmailInput,
+  OutboxMessageId,
   RiskTier,
   ToolCard,
   TrustJson,
@@ -41,8 +42,11 @@ export interface ToolDeps {
    * when no embedding model is configured (memory search is then off; facts still recall).
    */
   embedder?: Embedder;
-  /** For the client emails a write queues (held for the undo-send grace). */
-  emails: { baseUrl: string; outboxKey: Buffer };
+  /**
+   * For the client emails a write queues (held for the undo-send grace); `texts`: whether this
+   * deployment sends texts (S79: a waitlist offer by text).
+   */
+  emails: { baseUrl: string; outboxKey: Buffer; texts?: boolean };
   /**
    * Whose request the call answers, when it isn't `actor`'s: a lead approving a staff member's
    * proposal (S26). "Me" in the request ("remind me", "block my lunch") stays the staff member.
@@ -108,6 +112,11 @@ export interface ClientEmail {
 export interface WriteScope extends ToolScope {
   notifyClient(clientId: ClientId): BookingNotify;
   emailClient(email: ClientEmail): Promise<void>;
+  /**
+   * Another message the write queued, held for the undo-send grace (S79: a waitlist offer's
+   * text), so Undo takes it back with the emails.
+   */
+  heldMessage(id: OutboxMessageId): void;
 }
 
 /** What a write did (or, in the dry run, would do), as the domain computed it. */

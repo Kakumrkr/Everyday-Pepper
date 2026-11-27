@@ -128,6 +128,7 @@ import {
   WrongVerificationCodeError,
 } from '../errors.js';
 import type { WaitlistTakenNotify } from './booking-emails.js';
+import type { WaitlistOptInNotify } from './waitlist-texts.js';
 import {
   changeEntryStatus,
   offerTokenHash,
@@ -751,6 +752,8 @@ export async function requestWaitlistJoin(
       codeHash: codeHash(options.codeKey, request.email, code),
       expiresAt,
       purpose: 'waitlist',
+      // The "Text me when a time opens up" box (S79): a consent only once the code is typed.
+      smsConsentVersion: request.smsConsent,
     });
     return {
       requestId: BookingRequestIdSchema.parse(row.id),
@@ -782,7 +785,7 @@ export async function confirmWaitlistJoin(
   slug: TenantSlug,
   requestId: BookingRequestId,
   input: WaitlistConfirmInput,
-  options: CodeOptions,
+  options: CodeOptions & { optIn?: WaitlistOptInNotify },
 ): Promise<{ entry: PublicWaitlistEntry }> {
   const id = BookingRequestIdSchema.parse(requestId);
   const { code } = WaitlistConfirmInputSchema.parse(input);
@@ -826,6 +829,25 @@ export async function confirmWaitlistJoin(
         createdBy: null,
       }));
     await setVerificationWaitlistEntry(tx, id, WaitlistEntryIdSchema.parse(row.id));
+    // The box the client ticked (S79, AC-X-222): their yes to texts about openings, now.
+    if (request.smsConsentVersion !== null && request.phone !== null) {
+      await recordSmsConsent(
+        tx,
+        {
+          phone: request.phone,
+          source: 'waitlist_join',
+          clientId,
+          wordingVersion: SmsConsentWordingVersionSchema.parse(request.smsConsentVersion),
+          givenAt: new Date(now),
+        },
+        { actor: { kind: 'system' } },
+      );
+      await options.optIn?.(tx, {
+        phone: request.phone,
+        entryId: row.id,
+        details: { businessName: tenant.name, serviceName: serviceRow.name },
+      });
+    }
     if (waiting === undefined) {
       await appendAuditEntry(tx, {
         actor: { kind: 'system' },
@@ -1525,8 +1547,21 @@ export async function offerEmailDetails(
   tenant: Pick<Tenant, 'name' | 'slug' | 'timeZone'>,
   offer: Pick<WaitlistOfferRow, 'clientId' | 'serviceId' | 'staffMemberId' | 'startsAt'>,
 ): Promise<BookingEmailDetails | undefined> {
+  const details = await offerDetails(tx, tenant, offer);
+  return details === undefined || details.email === '' ? undefined : details;
+}
+
+/**
+ * An offer's details for its text or email (S79): `email` is `''` for a client without an
+ * address; `undefined` only for a client no longer there.
+ */
+export async function offerDetails(
+  tx: TenantTx,
+  tenant: Pick<Tenant, 'name' | 'slug' | 'timeZone'>,
+  offer: Pick<WaitlistOfferRow, 'clientId' | 'serviceId' | 'staffMemberId' | 'startsAt'>,
+): Promise<BookingEmailDetails | undefined> {
   const client = await findClient(tx, ClientIdSchema.parse(offer.clientId));
-  if (client === undefined || client.email === null) return undefined;
+  if (client === undefined) return undefined;
   const service = await findService(tx, ServiceIdSchema.parse(offer.serviceId));
   const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(offer.staffMemberId));
   return {
@@ -1536,7 +1571,7 @@ export async function offerEmailDetails(
     serviceName: service?.name ?? 'Appointment',
     staffName: staff?.displayName ?? null,
     startsAt: offer.startsAt.toISOString(),
-    email: client.email,
+    email: client.email ?? '',
     clientName: client.name,
     // An offer's emails carry no policy: the claim's confirmation does (AC-X-133).
     policy: { sentence: null, note: null },

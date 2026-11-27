@@ -16,7 +16,15 @@ import {
   type AvailableSlot,
   type StaffMemberId,
 } from '@pepper/contracts';
-import { auditActorOf, requirePermission, systemClock, type Actor, type Clock } from '@pepper/core';
+import {
+  auditActorOf,
+  ForbiddenError,
+  recordSmsConsent,
+  requirePermission,
+  systemClock,
+  type Actor,
+  type Clock,
+} from '@pepper/core';
 import {
   appendAuditEntry,
   cancelWaitlistEntry as cancelWaitlistEntryRow,
@@ -38,6 +46,7 @@ import { serviceToBook, slotsFor, type TemplateRuleDefaultsOf } from './availabi
 import { ownStaffMemberId } from './bookings.js';
 import { findClientToBook } from './clients.js';
 import { withdrawOffersOfEntry } from './smart-waitlist.js';
+import type { WaitlistOptInNotify } from './waitlist-texts.js';
 import {
   ServiceNotFoundError,
   StaffMemberNotFoundError,
@@ -62,6 +71,8 @@ export interface WaitlistOptions {
   clock?: Clock;
   /** The template's booking rules, as availability takes them (the app passes them). */
   templateRuleDefaults?: TemplateRuleDefaultsOf;
+  /** Queues the opt-in text after the client's yes to texts about openings (S79, the api's). */
+  optIn?: WaitlistOptInNotify;
 }
 
 /**
@@ -88,6 +99,8 @@ export async function addToWaitlistIn(
 ): Promise<WaitlistEntry> {
   requirePermission(actor, 'bookings.manage');
   const entry = WaitlistEntryInputSchema.parse(input);
+  // Only a person records what a client agreed to (S79): never the AI, whatever its arguments.
+  if (entry.smsConsent !== null && actor.via === 'ai') throw new ForbiddenError();
   const now = (options.clock ?? systemClock).now();
   if (entry.staffMemberId === null) {
     requirePermission(actor, 'bookings.manage', { ownerUserId: null });
@@ -132,6 +145,25 @@ export async function addToWaitlistIn(
     },
     requestId: actor.requestId,
   });
+  if (entry.smsConsent !== null) {
+    // The client told the team yes to texts about openings (AC-X-223): recorded as the member.
+    await recordSmsConsent(
+      tx,
+      {
+        phone: entry.smsConsent.phone,
+        source: 'staff_recorded',
+        clientId: entry.clientId,
+        wordingVersion: entry.smsConsent.wordingVersion,
+        givenAt: now,
+      },
+      { actor: auditActorOf(actor), requestId: actor.requestId },
+    );
+    await options.optIn?.(tx, {
+      phone: entry.smsConsent.phone,
+      entryId: row.id,
+      details: { businessName: tenant.name, serviceName: service.name },
+    });
+  }
   return toWaitlistEntry(row, now);
 }
 

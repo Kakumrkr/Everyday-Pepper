@@ -64,6 +64,8 @@ export interface ChatOptions {
   /** For the client emails a write queues (booking links). */
   baseUrl: string;
   outboxKey: Buffer;
+  /** Whether this deployment sends texts (S79: an approved waitlist offer by text). */
+  texts?: boolean;
 }
 
 export function llmProviderFor(
@@ -314,7 +316,11 @@ export class ChatService implements OnModuleDestroy {
       templateRuleDefaults,
       autonomy: { templateDefaults: template?.defaultAutonomy ?? {} },
       memoryWarnings: template?.memory.warnings ?? [],
-      emails: { baseUrl: this.options.baseUrl, outboxKey: this.options.outboxKey },
+      emails: {
+        baseUrl: this.options.baseUrl,
+        outboxKey: this.options.outboxKey,
+        texts: this.options.texts === true,
+      },
       ...(this.embedder !== null && {
         embedder: budgetedEmbedder(this.embedder, (estimate) =>
           reserveLlmTokens(

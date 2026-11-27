@@ -4,6 +4,9 @@ import {
   changeBooking,
   removeTimeOff,
   claimWaitlistOffer,
+  getWaitlistOffer,
+  offerDetails,
+  queueWaitlistOfferText,
   runInsightsFor,
   updateService,
   waitlistFillOf,
@@ -27,6 +30,7 @@ import {
   listPendingProposals,
   listRecentActions,
   openOutboxContent,
+  recordSmsConsent,
   setMemberCardTexts,
   smsCodeKeyFrom,
   startMemberPhoneCheck,
@@ -34,16 +38,18 @@ import {
   type Actor,
 } from '@pepper/core';
 import {
+  findCurrentTenant,
   findOutboxMessage,
   listDueOutboxMessages,
   listDueWaitlistMatches,
   listOpenFeedItems,
   listWaitlistMatches,
   updateClient,
+  waitlistOffers,
   withTenant,
   type Database,
 } from '@pepper/db';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { seedEvalWorld, type EvalWorld } from '../evals/world.js';
 import { approveToolProposal, undoToolAction } from '../tools/registry.js';
@@ -72,11 +78,11 @@ afterAll(async () => {
 const NOW = '2026-11-02T12:00:00.000Z';
 const BASE_URL = 'https://app.pepper.test';
 
-const world = () =>
+const world = (now = NOW) =>
   seedEvalWorld(
     db,
     'juniper',
-    { now: new Date(NOW), timeZone: 'America/New_York' },
+    { now: new Date(now), timeZone: 'America/New_York' },
     { facts: [], memoryPaused: false },
   );
 
@@ -104,7 +110,11 @@ const depsAs = (w: EvalWorld, role: MembershipRole): ToolDeps => ({
 });
 
 /** Sara (anyone) and Ana (Jess) wait for Tuesday afternoon; Maria's 15:00 is cancelled. */
-async function cancelWithTwoWaiting(w: EvalWorld) {
+async function cancelWithTwoWaiting(
+  w: EvalWorld,
+  /** S79: what Sara told the team about texts when she was added. */
+  saraTexts: { phone: string } | null = null,
+) {
   const owner = w.actorFor('owner');
   const window = [{ date: '2026-11-03', start: '13:00', end: '17:00' }];
   const haircut = ServiceIdSchema.parse(id(w, '{{service:haircut}}'));
@@ -126,6 +136,8 @@ async function cancelWithTwoWaiting(w: EvalWorld) {
       clientId: ClientIdSchema.parse(id(w, '{{client:sara}}')),
       serviceId: haircut,
       windows: window,
+      smsConsent:
+        saraTexts === null ? null : { phone: saraTexts.phone, wordingVersion: 'sms-consent-v3' },
     },
     { clock: w.clock },
   );
@@ -448,6 +460,194 @@ describe('S63: the offer waiting for an OK, by text (AC-X-82, AC-X-83)', () => {
     await cancelWithTwoWaiting(w);
     expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('proposed');
     expect(await texts(w)).toEqual([]);
+  });
+});
+
+describe('S79: waitlist offers by text (AC-X-223…227)', () => {
+  const SARA = '+15557790101';
+
+  /** The waitlist offer texts queued in the business (pending), opened. */
+  async function offerTexts(w: EvalWorld) {
+    const due = (
+      await listDueOutboxMessages(db, new Date(w.clock.now().getTime() + 24 * 3_600_000), 100)
+    ).filter((m) => m.tenantId === w.tenantId);
+    const sent = [];
+    for (const message of due) {
+      const row = await withTenant(db, w.tenantId, (tx) =>
+        findOutboxMessage(tx, OutboxMessageIdSchema.parse(message.messageId)),
+      );
+      if (row?.type !== 'sms' || row.payload === null || row.status !== 'pending') continue;
+      const sms = OutboxSmsSchema.parse(
+        JSON.parse(openOutboxContent(OUTBOX_KEY, message.messageId, row.payload).toString('utf8')),
+      );
+      if (sms.body.includes('opened up')) sent.push({ ...sms, availableAt: row.availableAt });
+    }
+    return sent;
+  }
+
+  const atAuto = (w: EvalWorld) =>
+    changeAutonomy(
+      db,
+      w.actorFor('owner'),
+      { levels: { 'message.waitlist_offer': 'auto' } },
+      { templateDefaults: {} },
+    );
+
+  /** Sara without an address (the team has only her number). */
+  const noEmail = (w: EvalWorld) =>
+    withTenant(db, w.tenantId, (tx) =>
+      updateClient(tx, ClientIdSchema.parse(id(w, '{{client:sara}}')), {
+        name: 'Sara Kim',
+        email: null,
+        phone: SARA,
+      }),
+    );
+
+  it('texts a v3 client with no email instead, and emails the other', async () => {
+    const w = await world();
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    await noEmail(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'offered',
+    );
+
+    const [text, ...more] = await offerTexts(w);
+    expect(more).toEqual([]);
+    expect(text).toMatchObject({ to: SARA, purpose: 'waitlist_offer', wordsBy: 'template' });
+    // Made at 07:00 in New York, closing at 09:00: it can go at 08:00, so an hour is left.
+    expect(text?.validUntil).toBe('2026-11-02T14:00:00.000Z');
+    expect(text?.availableAt.toISOString()).toBe('2026-11-02T13:00:00.000Z');
+    expect(text?.body).toContain('Open for 1 hour, until 9:00 AM. First to claim it gets it:');
+    // The claim link in the text opens Sara's offer.
+    const tenant = await withTenant(db, w.tenantId, findCurrentTenant);
+    if (tenant === undefined) throw new Error('no business');
+    const offer = await getWaitlistOffer(
+      db,
+      TenantSlugSchema.parse(tenant.slug),
+      tokenOf(text?.body ?? ''),
+      { clock: w.clock },
+    );
+    expect(offer).toMatchObject({ status: 'open' });
+
+    // Ana has an address and no v3: her email, with how long it is open (top-up).
+    const emails = await offerEmails(w);
+    expect(emails.map((email) => email.to)).toEqual(['ana@example.test']);
+    expect(emails[0]?.text).toContain(
+      'The offer is open for 2 hours, until Monday, November 2 at 9:00 AM.',
+    );
+  });
+
+  it('holds the text for the Undo grace, and Undo takes it back', async () => {
+    // 10:00 in New York: inside the hours, so only the grace holds it.
+    const w = await world('2026-11-02T15:00:00.000Z');
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'offered',
+    );
+    const [text] = await offerTexts(w);
+    expect(text?.availableAt.getTime()).toBe(Date.parse('2026-11-02T15:02:00.000Z'));
+    // Sara has an address too: the text is instead of the email (D-2).
+    expect((await offerEmails(w)).map((email) => email.to)).toEqual(['ana@example.test']);
+    const [action] = (await listRecentActions(db, w.actorFor('owner'))).filter(
+      (a) => a.tool === 'send_waitlist_offers',
+    );
+    if (action === undefined) throw new Error('no action');
+    await undoToolAction(depsAs(w, 'owner'), action.id, null);
+    expect(await offerTexts(w)).toEqual([]);
+    expect(await offerEmails(w)).toEqual([]);
+  });
+
+  it('offers no one who can be sent neither: no address and no v3, or texts off', async () => {
+    const w = await world();
+    await atAuto(w);
+    await cancelWithTwoWaiting(w);
+    await noEmail(w);
+    // Sara said yes to reminders only (v1): no offer by text, and no address for an email.
+    await withTenant(db, w.tenantId, (tx) =>
+      recordSmsConsent(
+        tx,
+        {
+          phone: SARA,
+          source: 'booking_page',
+          clientId: id(w, '{{client:sara}}'),
+          wordingVersion: 'sms-consent-v1',
+          givenAt: w.clock.now(),
+        },
+        { actor: { kind: 'system' } },
+      ),
+    );
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'offered',
+    );
+    expect(await offerTexts(w)).toEqual([]);
+    expect((await offerEmails(w)).map((email) => email.to)).toEqual(['ana@example.test']);
+    expect(await matchItems(w)).toMatchObject([{ state: 'offered', offered: 1 }]);
+  });
+
+  it('a deployment that sends no texts offers a v3 client without an address nothing', async () => {
+    const w = await world();
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    await noEmail(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), optionsFor(w))).toBe('offered');
+    expect(await offerTexts(w)).toEqual([]);
+    expect(await matchItems(w)).toMatchObject([{ state: 'offered', offered: 1 }]);
+  });
+
+  it('an offer closing before 8:00 is not texted: emailed with an address, else not made', async () => {
+    // Monday 23:00 in New York: the offer closes at 01:00, before a text could go.
+    const w = await world('2026-11-03T04:00:00.000Z');
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'offered',
+    );
+    expect(await offerTexts(w)).toEqual([]);
+    expect((await offerEmails(w)).map((email) => email.to).sort()).toEqual([
+      'ana@example.test',
+      'sara@example.test',
+    ]);
+  });
+
+  it('a v3 client without an address, at night: not offered at all', async () => {
+    const w = await world('2026-11-03T04:00:00.000Z');
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    await noEmail(w);
+    expect(await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true })).toBe(
+      'offered',
+    );
+    expect(await offerTexts(w)).toEqual([]);
+    expect(await matchItems(w)).toMatchObject([{ state: 'offered', offered: 1 }]);
+  });
+
+  it('one text an offer, whatever the retries (AC-X-226)', async () => {
+    const w = await world();
+    await atAuto(w);
+    await cancelWithTwoWaiting(w, { phone: SARA });
+    await noEmail(w);
+    await runWaitlistMatch(db, await dueMatch(w), { ...optionsFor(w), texts: true });
+    const again = await withTenant(db, w.tenantId, async (tx) => {
+      const [offer] = await tx
+        .select()
+        .from(waitlistOffers)
+        .where(eq(waitlistOffers.clientId, id(w, '{{client:sara}}')));
+      if (offer === undefined) throw new Error('no offer');
+      const tenant = await findCurrentTenant(tx);
+      if (tenant === undefined) throw new Error('no business');
+      const details = await offerDetails(tx, tenant, offer);
+      if (details === undefined) throw new Error('no client');
+      return queueWaitlistOfferText(
+        tx,
+        tenant,
+        { offer, token: OfferTokenSchema.parse('c'.repeat(43)), details },
+        { texts: true, baseUrl: BASE_URL, outboxKey: OUTBOX_KEY, now: w.clock.now() },
+      );
+    });
+    expect(again).toEqual({ texted: true });
+    expect(await offerTexts(w)).toHaveLength(1);
   });
 });
 

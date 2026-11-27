@@ -56,6 +56,7 @@ import { waitlistAuditValues } from '../mapping.js';
 import { serviceToBook, type TemplateRuleDefaultsOf } from './availability.js';
 import { isBookable } from './bookings.js';
 import { requestInsights } from './insights.js';
+import { offerTextNumber } from './waitlist-texts.js';
 
 // The smart waitlist (S37, ADR-0041, AC-W5-1), the domain's half. A booking cancelled or moved
 // away from a time asks, in its own transaction, for that time to be matched
@@ -119,13 +120,16 @@ export type WaitlistCandidateView =
 export interface CandidateOptions {
   now: Date;
   fanOut: number;
+  /** Whether this deployment sends texts (S79: a waitlist client without an email by text). */
+  texts?: boolean | undefined;
   templateRuleDefaults?: TemplateRuleDefaultsOf | undefined;
 }
 
 /**
  * The best entries to offer a freed time to, best first (the published ranking): waiting,
  * not expired, for this staff member or anyone, with a window that holds the whole
- * appointment of their service, a client with an email address, and that service bookable with this staff member at exactly
+ * appointment of their service, a client with an email address or an offer text they may get
+ * (S79), and that service bookable with this staff member at exactly
  * that time now (hours, rules, notice, buffers, other bookings: the availability engine). A
  * time partly re-booked meanwhile fits no one.
  */
@@ -157,9 +161,22 @@ export async function waitlistCandidatesIn(
     if (!service?.active) continue;
     const windows = WaitlistEntryInputSchema.shape.windows.parse(entry.windows);
     if (!windowsHold(windows, tenant.timeZone, start, service.durationMinutes)) continue;
-    // Offers go by email (V1): a client without an address can't be offered one.
+    // Offers go by email, or by text on a v3 consent (S79): a client who can be sent neither
+    // isn't offered one.
     const client = await findClient(tx, ClientIdSchema.parse(entry.clientId));
-    if (client === undefined || client.email === null) continue;
+    if (client === undefined) continue;
+    if (
+      client.email === null &&
+      (await offerTextNumber(
+        tx,
+        tenant,
+        client.id,
+        { closesAt: offerExpiry(now, start), now },
+        { texts: options.texts },
+      )) === null
+    ) {
+      continue;
+    }
     if (!fits.has(service.id)) {
       fits.set(
         service.id,
