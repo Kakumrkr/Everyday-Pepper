@@ -55,6 +55,28 @@ function depositLines(details: BookingEmailDetails): string[] {
     : [depositPaidLine(deposit, details.timeZone)];
 }
 
+/**
+ * The ask to confirm (S78, AC-X-202): "Please confirm by …" while the business asks and the
+ * client hasn't confirmed; the link then confirms too.
+ */
+function confirmLines(details: BookingEmailDetails): string[] {
+  if (details.confirmBy === undefined || details.confirmBy === null) return [];
+  return [
+    '',
+    `Please confirm by ${formatWhen(details.confirmBy, details.timeZone)}, or your time may be offered to others.`,
+  ];
+}
+
+/** What the link does: it confirms too while the client is asked to (S78). */
+function linkIntro(details: BookingEmailDetails, again = false): string {
+  const asked = details.confirmBy !== undefined && details.confirmBy !== null;
+  if (again)
+    return asked ? 'To confirm, change it again or cancel:' : 'To change it again or cancel:';
+  return asked
+    ? 'To confirm, reschedule or cancel, use this link (it is just for you, so keep it private):'
+    : 'To reschedule or cancel, use this link (it is just for you, so keep it private):';
+}
+
 export function codeEmail(
   details: BookingEmailDetails,
   code: string,
@@ -122,8 +144,9 @@ export function confirmationEmail(details: BookingEmailDetails, manageUrl: strin
       `You're booked at ${details.businessName}:`,
       `${what(details)}.`,
       ...depositLines(details),
+      ...confirmLines(details),
       '',
-      'To reschedule or cancel, use this link (it is just for you, so keep it private):',
+      linkIntro(details),
       manageUrl,
       ...policyLines(details),
     ].join('\n'),
@@ -193,8 +216,9 @@ export function rescheduledEmail(details: BookingEmailDetails, manageUrl: string
       '',
       `Your booking at ${details.businessName} is now:`,
       `${what(details)}.`,
+      ...confirmLines(details),
       '',
-      'To change it again or cancel:',
+      linkIntro(details, true),
       manageUrl,
       ...policyLines(details),
     ].join('\n'),
@@ -233,16 +257,37 @@ export function reminderEmail(
       '',
       `This is a reminder of your booking at ${details.businessName}:`,
       `${what(details)}.`,
+      // The ask goes only with a link to answer it (S78, AC-X-205).
+      ...(link === null ? [] : confirmLines(details)),
       '',
       ...(link === null
         ? [
             'To reschedule or cancel, use the link in your booking confirmation email, or contact',
             `${details.businessName}.`,
           ]
-        : [
-            'To reschedule or cancel, use this link (it is just for you, so keep it private):',
-            link,
-          ]),
+        : [linkIntro(details), link]),
+      ...policyLines(details),
+    ].join('\n'),
+  };
+}
+
+/**
+ * The early ask to confirm (S78, AC-X-204): to a client whose visit is likely to be missed, 72
+ * hours ahead, by email when no text may go. `link` confirms, reschedules or cancels.
+ */
+export function confirmAskEmail(details: BookingEmailDetails, link: string): EmailMessage {
+  return {
+    to: details.email,
+    subject: `Please confirm your booking at ${details.businessName}`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `Please confirm your booking at ${details.businessName}:`,
+      `${what(details)}.`,
+      ...confirmLines(details),
+      '',
+      linkIntro(details),
+      link,
       ...policyLines(details),
     ].join('\n'),
   };

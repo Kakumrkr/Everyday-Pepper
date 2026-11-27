@@ -33,11 +33,14 @@ import {
   findLastBookingText,
   insertSmsKeywordEvent,
   listAuditEntries,
+  listBookings as listBookingRows,
   listBookingReminders,
   listDueOutboxMessages,
+  markBookingClientConfirmed,
   newId,
   planBookingReminder,
   setReminderSettings,
+  syncVisitRisks,
   withSmsInbound,
   withTenant,
   type Database,
@@ -49,7 +52,11 @@ import { confirmBookingByText } from './services/confirm-by-text.js';
 import { getReminderSettings, updateReminderSettings } from './services/reminder-settings.js';
 import { NOTHING_TO_CONFIRM_REPLY } from './texts.js';
 import { replaceWorkingHours } from './services/hours.js';
-import { getManagedBooking, rescheduleManagedBooking } from './services/public-booking.js';
+import {
+  confirmManagedBooking,
+  getManagedBooking,
+  rescheduleManagedBooking,
+} from './services/public-booking.js';
 import { sendDueReminder, sendDueReminders } from './services/reminders.js';
 import { createService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -442,6 +449,127 @@ describe('reminder texts', () => {
   });
 });
 
+describe('the confirm ask (S78, AC-X-201, AC-X-204, AC-X-205)', () => {
+  /** Maria on Friday 14:00 (booked Monday): her ask is due Tuesday 14:00, 72 hours ahead. */
+  async function askedVisit(
+    b: Business,
+    band: 'high' | 'medium' | null = 'high',
+  ): Promise<Booking> {
+    const booking = await book(b, at(6, '14:00'));
+    // Turned on after the booking: the settings change plans its ask.
+    await updateReminderSettings(db, b.owner, { askToConfirm: true }, { clock: b.clock });
+    if (band !== null) {
+      await withTenant(db, b.tenantId, (tx) =>
+        syncVisitRisks(
+          tx,
+          [
+            {
+              bookingId: BookingIdSchema.parse(booking.id),
+              band,
+              points: band === 'high' ? 4 : 2,
+              reasons: [
+                { signal: 'missed_before', points: band === 'high' ? 4 : 2, misses: 3, visits: 4 },
+              ],
+            },
+          ],
+          b.clock.now(),
+        ),
+      );
+    }
+    return booking;
+  }
+
+  const askEmails = (b: Business) =>
+    b.mailer.sent.filter((m) => m.subject.startsWith('Please confirm'));
+
+  async function rowOf(b: Business, booking: Booking) {
+    const rows = await withTenant(db, b.tenantId, (tx) =>
+      listBookingRows(tx, { from: new Date(at(6, '00:00')), to: new Date(at(7, '00:00')) }),
+    );
+    return rows.find((row) => row.id === booking.id);
+  }
+
+  it('texts a high-band visit 72 hours ahead, once, records the ask, and a "C" answers it', async () => {
+    const b = await newBusiness();
+    await consent(b);
+    const booking = await askedVisit(b);
+    await runAt(b, at(3, '13:59'));
+    expect(b.sms.sent).toEqual([]);
+    expect((await rowOf(b, booking))?.confirmAskedAt).toBeNull();
+    await runAt(b, at(3, '14:00'));
+    await runAt(b, at(3, '14:30'));
+    expect(b.sms.sent).toHaveLength(1);
+    expect(b.sms.sent[0]?.to).toBe(consentPhone(b));
+    expect(b.sms.sent[0]?.body).toContain(
+      'Juniper Hair Studio via Pepper: Please confirm Haircut with Jess on Fri, Nov 6 at 2:00 PM. Reply C by Thu, Nov 5 at 2:00 PM, or your time may be offered to others.',
+    );
+    expect((await rowOf(b, booking))?.confirmAskedAt?.toISOString()).toBe(at(3, '14:00'));
+    const answer = await confirmBookingByText(db, {
+      from: consentPhone(b),
+      receivedAt: new Date(at(3, '15:00')),
+    });
+    expect(answer.outcome).toBe('confirmed');
+    expect(await rowOf(b, booking)).toMatchObject({ clientConfirmedVia: 'text' });
+  });
+
+  it('emails the ask with the confirm link when the client can’t be texted', async () => {
+    const b = await newBusiness();
+    const booking = await askedVisit(b);
+    await runAt(b, at(3, '14:00'));
+    expect(b.sms.sent).toEqual([]);
+    const [email] = askEmails(b);
+    expect(askEmails(b)).toHaveLength(1);
+    expect(email?.text).toContain(
+      'Please confirm by Thursday, November 5 at 2:00 PM, or your time may be offered to others.',
+    );
+    const token = ManageTokenSchema.parse(tokenIn(email?.text ?? ''));
+    const confirmed = await confirmManagedBooking(db, b.slug, token, at(6, '14:00'), {
+      clock: b.clock,
+    });
+    expect(confirmed.confirm).toMatchObject({ confirmed: true });
+    expect(await rowOf(b, booking)).toMatchObject({ clientConfirmedVia: 'link' });
+  });
+
+  it('asks nobody else: a medium or unscored visit, a confirmed one, or with the ask off', async () => {
+    const medium = await newBusiness();
+    await consent(medium);
+    await askedVisit(medium, 'medium');
+    await runAt(medium, at(3, '14:00'));
+    const unscored = await newBusiness();
+    await askedVisit(unscored, null);
+    await runAt(unscored, at(3, '14:00'));
+    const confirmed = await newBusiness();
+    await consent(confirmed);
+    const visit = await askedVisit(confirmed);
+    await withTenant(db, confirmed.tenantId, (tx) =>
+      markBookingClientConfirmed(tx, BookingIdSchema.parse(visit.id), confirmed.clock.now()),
+    );
+    await runAt(confirmed, at(3, '14:00'));
+    for (const b of [medium, unscored, confirmed]) {
+      expect(b.sms.sent).toEqual([]);
+      expect(askEmails(b)).toEqual([]);
+    }
+    // Off: nothing is even planned.
+    const off = await newBusiness();
+    const plain = await book(off, at(6, '14:00'));
+    expect(
+      await withTenant(db, off.tenantId, (tx) =>
+        findBookingReminder(tx, BookingIdSchema.parse(plain.id), 'confirm_ask'),
+      ),
+    ).toBeUndefined();
+  });
+
+  it('the day-before email asks too while the business asks, and records it', async () => {
+    const b = await newBusiness();
+    const booking = await askedVisit(b, 'medium');
+    await runAt(b, at(5, '14:00'));
+    const [email] = reminderEmails(b);
+    expect(email?.text).toContain('Please confirm by Thursday, November 5 at 2:00 PM');
+    expect(email?.text).toContain('To confirm, reschedule or cancel');
+    expect((await rowOf(b, booking))?.confirmAskedAt?.toISOString()).toBe(at(5, '14:00'));
+  });
+});
+
 describe('"C" to confirm (AC-X-74)', () => {
   /** Maria booked on Tuesday 14:00, her day-before reminder texted on Monday 14:00. */
   async function reminded(b: Business): Promise<Booking> {
@@ -584,7 +712,13 @@ describe('texts and reminders settings (AC-X-75)', () => {
     await consent(b);
     const booking = await book(b, at(3, '14:00'));
     expect(await getReminderSettings(db, b.owner)).toEqual({
-      settings: { texts: true, dayBefore: true, sameDay: true, sameDayLeadHours: 2 },
+      settings: {
+        texts: true,
+        dayBefore: true,
+        sameDay: true,
+        sameDayLeadHours: 2,
+        askToConfirm: false,
+      },
       canChange: true,
     });
     const changed = await updateReminderSettings(

@@ -86,3 +86,21 @@ describe('reminderDueAt: the same day', () => {
     expect(reminderDueAt('same_day', ny(17, '14:00'), NY, settings({ texts: false }))).toBeNull();
   });
 });
+
+describe('reminderDueAt: the confirm ask (S78, AC-X-204)', () => {
+  it('is none while the business doesn’t ask clients to confirm', () => {
+    expect(reminderDueAt('confirm_ask', ny(20, '14:00'), NY, settings())).toBeNull();
+  });
+
+  it('is 72 hours ahead, kept out of the night', () => {
+    const asking = settings({ askToConfirm: true });
+    expect(reminderDueAt('confirm_ask', ny(20, '14:00'), NY, asking)).toBe(ny(17, '14:00'));
+    expect(reminderDueAt('confirm_ask', ny(20, '21:00'), NY, asking)).toBe(ny(17, '19:30'));
+    expect(reminderDueAt('confirm_ask', ny(20, '07:00'), NY, asking)).toBe(ny(17, '08:00'));
+  });
+
+  it('goes by email while texts are off: texts don’t decide it', () => {
+    const asking = settings({ askToConfirm: true, texts: false });
+    expect(reminderDueAt('confirm_ask', ny(20, '14:00'), NY, asking)).toBe(ny(17, '14:00'));
+  });
+});

@@ -59,7 +59,7 @@ export async function hasReminderText(tx: TenantTx, clientId: string): Promise<b
     .where(
       and(
         eq(bookingTexts.clientId, Id.parse(clientId)),
-        inArray(bookingTexts.kind, ['day_before', 'same_day']),
+        inArray(bookingTexts.kind, ['confirm_ask', 'day_before', 'same_day']),
       ),
     )
     .limit(1);
@@ -218,7 +218,7 @@ export async function hasRecentReminderText(
     .where(
       and(
         eq(bookingTexts.bookingId, BookingIdSchema.parse(input.bookingId)),
-        inArray(bookingTexts.kind, ['day_before', 'same_day']),
+        inArray(bookingTexts.kind, ['confirm_ask', 'day_before', 'same_day']),
         eq(bookingTexts.startsAt, input.startsAt),
         sql`${bookingTexts.createdAt} > ${since}`,
         sql`${bookingTexts.createdAt} <= ${input.at}`,

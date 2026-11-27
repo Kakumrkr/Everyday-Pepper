@@ -2,6 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 import {
   BookingIdSchema,
   ClientIdSchema,
+  CONFIRM_ASK_LEAD_HOURS,
   ManageTokenSchema,
   OutboxDedupeKeySchema,
   reminderSettingsFrom,
@@ -23,7 +24,9 @@ import {
   listActiveSmsConsentsForClient,
   listBookings,
   listDueBookingReminders,
+  listVisitRisks,
   lockBooking,
+  markBookingConfirmAsked,
   planBookingReminder,
   removeBookingReminder,
   takeDueBookingReminder,
@@ -34,7 +37,7 @@ import {
   type Tenant,
   type TenantTx,
 } from '@pepper/db';
-import { manageUrl, reminderEmail } from '../emails.js';
+import { confirmAskEmail, manageUrl, reminderEmail } from '../emails.js';
 import { reminderText } from '../texts.js';
 import { emailDetailsOf } from './notices.js';
 
@@ -47,6 +50,12 @@ import { emailDetailsOf } from './notices.js';
 // just been sent). The worker's reminder job sends what is due (`sendDueReminders`): it checks
 // the booking again under its lock and queues the text or email in the outbox in the same
 // transaction that takes the reminder, so each is queued at most once.
+//
+// The confirm ask (S78, AC-X-204): while the business asks clients to confirm, every visit
+// booked more than `CONFIRM_ASK_LEAD_HOURS` ahead has one planned that far ahead; when it falls
+// due it goes only if the visit is in the high risk band (S77) and the client hasn't confirmed,
+// by text where one may go, else by email with the confirm link. Any reminder that asks to
+// confirm records the ask on the booking, so visit risk scores `not_confirmed` only after it.
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -88,6 +97,11 @@ export function reminderDueAt(
   timeZone: string,
   settings: ReminderSettings,
 ): number | null {
+  if (kind === 'confirm_ask') {
+    return settings.askToConfirm
+      ? keptInHours(timeZone, startsAt - CONFIRM_ASK_LEAD_HOURS * HOUR_MS)
+      : null;
+  }
   if (kind === 'day_before') {
     return settings.dayBefore ? keptInHours(timeZone, startsAt - REMINDER_LEAD_MS) : null;
   }
@@ -97,7 +111,7 @@ export function reminderDueAt(
   return due <= startsAt - SAME_DAY_MIN_NOTICE_MS ? due : null;
 }
 
-const KINDS: readonly ReminderKind[] = ['day_before', 'same_day'];
+const KINDS: readonly ReminderKind[] = ['confirm_ask', 'day_before', 'same_day'];
 
 /** A business's reminder settings, each missing or unreadable field at its default. */
 export function reminderSettingsOf(tenant: Pick<Tenant, 'reminderSettings'>): ReminderSettings {
@@ -239,11 +253,16 @@ export async function sendDueReminder(
     const settings = reminderSettingsOf(tenant);
     // Turned off since it was planned.
     if (reminderDueAt(due.kind, startsAt, tenant.timeZone, settings) === null) return 'skipped';
+    // The confirm ask: only a high-band visit the client hasn't confirmed (AC-X-204).
+    if (due.kind === 'confirm_ask' && !(await needsConfirmAsk(tx, booking))) return 'skipped';
     const details = await emailDetailsOf(tx, tenant, booking);
     const phone =
       options.texts === true && settings.texts ? await textableNumber(tx, booking.clientId) : null;
     if (phone === null && (due.kind === 'same_day' || details.email === '')) return 'skipped';
     const link = await reminderLink(tx, tenant, booking, now, options.baseUrl ?? null);
+    // An emailed ask needs its link to be answered.
+    if (phone === null && due.kind === 'confirm_ask' && link === null) return 'skipped';
+    const askToConfirm = booking.clientConfirmedAt === null;
     if (phone !== null) {
       const clientId = ClientIdSchema.parse(booking.clientId);
       const sendable = smsSendableAt(tenant.timeZone, now.getTime());
@@ -255,7 +274,7 @@ export async function sendDueReminder(
             kind: due.kind,
             details,
             link: link?.url ?? null,
-            askToConfirm: booking.clientConfirmedAt === null,
+            askToConfirm,
             first: !(await hasReminderText(tx, clientId)),
             today: sameLocalDay(tenant.timeZone, sendable, startsAt),
           }),
@@ -279,16 +298,37 @@ export async function sendDueReminder(
         startsAt: booking.startsAt,
         createdAt: now,
       });
+      if (askToConfirm) await markBookingConfirmAsked(tx, bookingId, now);
       return 'queued';
     }
-    const queued = await queueEmail(tx, reminderEmail(details, link?.url ?? null), {
+    const email =
+      due.kind === 'confirm_ask' && link !== null
+        ? confirmAskEmail(details, link.url)
+        : reminderEmail(details, link?.url ?? null);
+    const queued = await queueEmail(tx, email, {
       key: options.key,
       // One reminder per booking and start, even if a reminder were somehow planned twice.
-      dedupeKey: OutboxDedupeKeySchema.parse(`booking.reminder:${bookingId}:${String(startsAt)}`),
+      dedupeKey: OutboxDedupeKeySchema.parse(
+        due.kind === 'confirm_ask'
+          ? `booking.confirm_ask:${bookingId}:${String(startsAt)}`
+          : `booking.reminder:${bookingId}:${String(startsAt)}`,
+      ),
       now,
     });
-    return queued === undefined ? dropLink(tx, link) : 'queued';
+    if (queued === undefined) return dropLink(tx, link);
+    // The email asks only with its link, while the business asks (S78, AC-X-205).
+    if (link !== null && details.confirmBy !== undefined && details.confirmBy !== null) {
+      await markBookingConfirmAsked(tx, bookingId, now);
+    }
+    return 'queued';
   });
+}
+
+/** Whether the confirm ask goes: the client hasn't confirmed and the visit is high-band (S77). */
+async function needsConfirmAsk(tx: TenantTx, booking: BookingRow): Promise<boolean> {
+  if (booking.clientConfirmedAt !== null) return false;
+  const [risk] = await listVisitRisks(tx, [BookingIdSchema.parse(booking.id)]);
+  return risk?.band === 'high';
 }
 
 /** A reminder that was queued already: the new link it would have carried goes (`skipped`). */
