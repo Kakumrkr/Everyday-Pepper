@@ -18,6 +18,7 @@ import {
   addMembership,
   listOpenFeedItems,
   listVisitRisks,
+  markBookingConfirmAsked,
   readFeedSettings,
   withMember,
   withTenant,
@@ -263,8 +264,19 @@ describe('visit risk in the insights pass', () => {
 
     const stored = await risksOf(b, [tomorrow.id, nextWeek.id, beyond.id]);
     expect(stored.map((risk) => risk.bookingId).sort()).toEqual([tomorrow.id, nextWeek.id].sort());
-    // Maria's first visit, not confirmed the day before: 2 points, medium.
+    // Maria's first visit; nobody asked her to confirm yet, so that scores nothing (S78).
     expect(stored.find((risk) => risk.bookingId === tomorrow.id)).toMatchObject({
+      band: 'low',
+      points: 1,
+      reasons: [{ signal: 'first_visit', points: 1 }],
+    });
+    // Asked and not answered the day before: 2 points, medium (AC-X-201).
+    await withTenant(db, b.tenantId, (tx) =>
+      markBookingConfirmAsked(tx, BookingIdSchema.parse(tomorrow.id), b.clock.now()),
+    );
+    b.clock.set(new Date(Date.parse(NOW) + MINUTE).toISOString());
+    await runInsightsFor(db, b.tenantId, b.options);
+    expect((await risksOf(b, [tomorrow.id]))[0]).toMatchObject({
       band: 'medium',
       points: 2,
       reasons: [
@@ -274,18 +286,18 @@ describe('visit risk in the insights pass', () => {
     });
 
     // The same book an hour later: nothing written.
-    b.clock.set(new Date(Date.parse(NOW) + 61 * MINUTE).toISOString());
+    b.clock.set(new Date(Date.parse(NOW) + 62 * MINUTE).toISOString());
     expect(await runInsightsFor(db, b.tenantId, b.options)).toMatchObject({
       risks: { written: 0, removed: 0 },
     });
   });
 
-  it('drops a cancelled visit and counts a late cancel as a miss', async () => {
+  it('drops a cancelled visit; the client’s late cancel is a miss, the business’s isn’t (AC-X-200)', async () => {
     const b = await newBusiness();
     const soon = await visit(b, '2026-11-02T16:00:00.000Z');
     const later = await visit(b, '2026-11-09T15:00:00.000Z');
     await runInsightsFor(db, b.tenantId, b.options);
-    // Cancelled 3 hours before it starts: inside the 24-hour notice.
+    // The owner cancels 3 hours before it starts: inside the notice, but the business's.
     b.clock.set('2026-11-02T13:00:00.000Z');
     await changeBooking(db, b.owner, soon.id, { status: 'cancelled' }, { clock: b.clock });
     b.clock.set('2026-11-02T17:00:00.000Z');
@@ -294,8 +306,19 @@ describe('visit risk in the insights pass', () => {
     });
     const [risk] = await risksOf(b, [soon.id, later.id]);
     expect(risk?.bookingId).toBe(later.id);
-    // (1 + 5 × 0.1) / (1 + 5) = 0.25: missed one of one.
-    expect(risk?.reasons[0]).toEqual({ signal: 'missed_before', points: 2, misses: 1, visits: 1 });
+    expect(risk?.reasons.map((reason) => reason.signal)).not.toContain('missed_before');
+
+    // Had the client cancelled it (by their link), it is a miss: (1 + 5 × 0.1) / (1 + 5) = 0.25.
+    await withTenant(db, b.tenantId, (tx) =>
+      // The id is a parsed UUID, so it can stand in the statement.
+      tx.execute(
+        `UPDATE bookings SET cancelled_by = 'client' WHERE id = '${BookingIdSchema.parse(soon.id)}'`,
+      ),
+    );
+    b.clock.set('2026-11-02T18:01:00.000Z');
+    await runInsightsFor(db, b.tenantId, b.options);
+    const [again] = await risksOf(b, [later.id]);
+    expect(again?.reasons[0]).toEqual({ signal: 'missed_before', points: 2, misses: 1, visits: 1 });
   });
 
   it('keeps risk current while suggestions are paused', async () => {
