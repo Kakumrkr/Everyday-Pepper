@@ -9,6 +9,7 @@ import {
   WAITLIST_OFFER_LIMITS,
   WaitlistEntryIdSchema,
   WaitlistEntryInputSchema,
+  WaitlistMatchIdSchema,
   WaitlistOfferIdSchema,
   WaitlistOfferSchema,
   type BookingId,
@@ -29,6 +30,7 @@ import {
   findClient,
   findCurrentTenant,
   findService,
+  findWaitlistMatchOfFreedBooking,
   insertWaitlistMatch,
   insertWaitlistOffer,
   listOpenOffersOfEntry,
@@ -486,6 +488,8 @@ export interface WaitlistFill {
   clientName: string | null;
   /** The booking's listed price in cents; `null` without one. */
   priceCents: number | null;
+  /** How many clients the time was offered to (S78.2). */
+  offered: number;
 }
 
 export async function waitlistFillOf(
@@ -508,11 +512,36 @@ export async function waitlistFillOf(
         // A client deleted since isn't named.
         clientName: client?.deletedAt === null ? client.name : null,
         priceCents: booking?.priceFromCents ?? null,
+        offered: offers.length,
       };
     }
     const open = offers.some((offer) => offer.status === 'offered' && offer.expiresAt > now);
-    return { state: open ? 'open' : 'unclaimed', clientName: null, priceCents: null };
+    return {
+      state: open ? 'open' : 'unclaimed',
+      clientName: null,
+      priceCents: null,
+      offered: offers.length,
+    };
   });
+}
+
+/**
+ * What the fill loop made of a released visit's time (S78.2, AC-X-211), for its Activity line:
+ * the match of the time the booking freed, read as `waitlistFillOf`; `undefined` before any
+ * offer (or when the viewer can't see them).
+ */
+export async function releasedFillOf(
+  db: Database,
+  actor: Actor,
+  bookingId: BookingId,
+  options: { clock?: Clock } = {},
+): Promise<WaitlistFill | undefined> {
+  requirePermission(actor, 'bookings.read');
+  const match = await withMember(db, actor.context, (tx) =>
+    findWaitlistMatchOfFreedBooking(tx, BookingIdSchema.parse(bookingId)),
+  );
+  if (match === undefined) return undefined;
+  return waitlistFillOf(db, actor, WaitlistMatchIdSchema.parse(match.id), options);
 }
 
 /** An offer as the team sees it; one past its time reads as expired before the pass runs. */

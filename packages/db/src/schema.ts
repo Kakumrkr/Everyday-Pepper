@@ -1507,7 +1507,7 @@ export const bookingReminders = pgTable(
     primaryKey({ name: 'booking_reminders_pkey', columns: [table.id, table.kind] }),
     check(
       'booking_reminders_kind_known',
-      sql`${table.kind} IN ('confirm_ask', 'day_before', 'same_day')`,
+      sql`${table.kind} IN ('confirm_ask', 'day_before', 'same_day', 'release_check')`,
     ),
     index('booking_reminders_due_at_idx').on(table.dueAt),
     check('booking_reminders_due_before_start', sql`${table.dueAt} < ${table.startsAt}`),
@@ -1632,12 +1632,12 @@ export const pushSubscriptions = pgTable(
 // once written, only a record's status fields may change (triggers in migration 0034).
 
 /**
- * The seventeen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
+ * The eighteen actions on the dial, for the checks (`AutonomyActionSchema`; S31: `rule.change`;
  * S37: `waitlist.change`; S55.2: `message.review_request`; S56a: `booking.no_show`,
- * `message.client`; S68: `payment.no_show_fee`).
+ * `message.client`; S68: `payment.no_show_fee`; S78.2: `booking.release`).
  */
 const autonomyActionList = sql.raw(
-  "'booking.create', 'booking.move', 'booking.cancel', 'booking.no_show', " +
+  "'booking.create', 'booking.move', 'booking.cancel', 'booking.no_show', 'booking.release', " +
     "'booking_request.accept', 'time.block', 'client_note.save', 'rule.change', 'task.create', " +
     "'waitlist.change', 'message.confirmation', 'message.rebooking_nudge', " +
     "'message.waitlist_offer', 'message.bulk', 'message.review_request', 'message.client', " +

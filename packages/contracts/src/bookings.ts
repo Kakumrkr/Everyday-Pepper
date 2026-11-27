@@ -120,8 +120,17 @@ export const BookingChangeSchema = z.union([
       status: BookingStatusSchema.exclude(['confirmed']),
       /** Email the client when the booking is cancelled (other statuses send nothing). */
       notifyClient: z.boolean().default(true),
+      /**
+       * Who cancelled (S78.2, AC-X-212): the team's "Who cancelled?" (a client who phoned is
+       * `client`, so a late one counts as their miss); default the business. Cancels only.
+       */
+      cancelledBy: z.enum(['client', 'business']).optional(),
     })
-    .strict(),
+    .strict()
+    .refine((change) => change.cancelledBy === undefined || change.status === 'cancelled', {
+      message: 'Only a cancel says who cancelled',
+      path: ['cancelledBy'],
+    }),
 ]);
 export type BookingChange = z.input<typeof BookingChangeSchema>;
 

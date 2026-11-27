@@ -58,6 +58,7 @@ describe('AUTONOMY_ACTIONS', () => {
       'booking.move': 'ask',
       'booking.cancel': 'ask',
       'booking.no_show': 'notify',
+      'booking.release': 'ask',
       'booking_request.accept': 'notify',
       'time.block': 'notify',
       'client_note.save': 'notify',
@@ -78,7 +79,12 @@ describe('AUTONOMY_ACTIONS', () => {
     const locked = Object.entries(AUTONOMY_ACTIONS)
       .filter(([, { allowsAuto }]) => !allowsAuto)
       .map(([action]) => action);
-    expect(locked).toEqual(['rule.change', 'message.bulk', 'payment.no_show_fee']);
+    expect(locked).toEqual([
+      'booking.release',
+      'rule.change',
+      'message.bulk',
+      'payment.no_show_fee',
+    ]);
   });
 
   it('locks learned rules to "ask" (S31, playbook D-10)', () => {
@@ -99,6 +105,19 @@ describe('AUTONOMY_ACTIONS', () => {
     expect(levelAllowed('payment.no_show_fee', 'notify')).toBe(false);
     expect(levelAllowed('payment.no_show_fee', 'auto')).toBe(false);
     expect(AUTONOMY_ACTIONS['payment.no_show_fee'].permission).toBe('payments.manage');
+  });
+
+  it('locks the release to "ask" in every preset (S78.2, AC-X-208)', () => {
+    expect(levelAllowed('booking.release', 'ask')).toBe(true);
+    expect(levelAllowed('booking.release', 'notify')).toBe(false);
+    expect(levelAllowed('booking.release', 'auto')).toBe(false);
+    const defaults = Object.fromEntries(
+      AutonomyActionSchema.options.map((action) => [action, AUTONOMY_ACTIONS[action].defaultLevel]),
+    ) as Record<AutonomyAction, AutonomyLevel>;
+    for (const preset of AutonomyPresetSchema.options) {
+      expect(presetLevels(preset, defaults)['booking.release']).toBe('ask');
+    }
+    expect(AUTONOMY_ACTIONS['booking.release'].permission).toBe('bookings.manage');
   });
 
   it('gives every action a known permission and an undo window', () => {

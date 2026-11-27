@@ -199,14 +199,17 @@ export const AiActionViewSchema = z.strictObject({
   /** Memory on the card (S30); absent when there is none. */
   memory: AiMemoryViewSchema.optional(),
   /**
-   * A waitlist offer's outcome (S54, AC-W5-5): claimed (who, short name, and the booking's
-   * price), still open, or closed unclaimed; absent for other actions.
+   * A waitlist offer's outcome (S54, AC-W5-5), or a released visit's (S78.2, AC-X-211): claimed
+   * (who, short name, and the booking's price), still open, or closed unclaimed; absent for other
+   * actions, and for a release whose time wasn't offered yet.
    */
   fill: z
     .strictObject({
       state: z.enum(['open', 'filled', 'unclaimed']),
       clientName: z.string().max(40).nullable(),
       priceCents: z.number().int().min(0).nullable(),
+      /** How many clients the time was offered to (S78.2: a release's line); absent before. */
+      offered: z.number().int().min(0).optional(),
     })
     .optional(),
 });

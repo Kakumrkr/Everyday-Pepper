@@ -8,9 +8,11 @@ import {
 import { queueEmail, queueSms, systemClock, type Clock, type EmailMessage } from '@pepper/core';
 import { findBooking, findCurrentTenant, insertBookingText, type TenantTx } from '@pepper/db';
 import {
+  bookingPageUrl,
   cancelledEmail,
   confirmationEmail,
   manageUrl,
+  releasedEmail,
   rescheduledEmail,
   seriesCancelledEmail,
   seriesConfirmationEmail,
@@ -52,7 +54,12 @@ export async function queueBookingEmail(
   const link = (token: string) => manageUrl(options.baseUrl, notice.email.slug, token);
   const message: EmailMessage =
     notice.kind === 'cancelled'
-      ? cancelledEmail(notice.email)
+      ? notice.released === undefined
+        ? cancelledEmail(notice.email)
+        : releasedEmail(notice.email, {
+            refunded: notice.released.refunded,
+            bookingPage: bookingPageUrl(options.baseUrl, notice.email.slug),
+          })
       : notice.kind === 'confirmed'
         ? confirmationEmail(notice.email, link(notice.manageToken))
         : rescheduledEmail(notice.email, link(notice.manageToken));

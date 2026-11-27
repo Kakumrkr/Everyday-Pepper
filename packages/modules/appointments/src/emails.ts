@@ -245,6 +245,36 @@ export function cancelledEmail(details: BookingEmailDetails): EmailMessage {
 }
 
 /**
+ * A visit the business released at the confirm cut-off (S78.2, AC-X-209, D-4): kind, never a
+ * telling-off; a paid deposit's full refund said plainly; the booking page to book again.
+ */
+export function releasedEmail(
+  details: BookingEmailDetails,
+  options: { refunded: boolean; bookingPage: string | null },
+): EmailMessage {
+  return {
+    to: details.email,
+    subject: `Your booking at ${details.businessName} was released`,
+    text: [
+      `Hi ${details.clientName},`,
+      '',
+      `We didn't hear back, so we've let this time go for someone else:`,
+      `${what(details)}.`,
+      ...(options.refunded ? ['', 'Your deposit is refunded in full.'] : []),
+      '',
+      options.bookingPage === null
+        ? 'We hope to see you another time.'
+        : `We'd love to see you another time: ${options.bookingPage}`,
+    ].join('\n'),
+  };
+}
+
+/** The business's booking page, for a client to book again (S78.2). */
+export function bookingPageUrl(baseUrl: string, slug: string): string {
+  return `${baseUrl}/book/${encodeURIComponent(slug)}`;
+}
+
+/**
  * The reminder a day before (AC-W6-1), with a reschedule/cancel link of its own (S62,
  * AC-X-72). Without the app's address (`link` null) it points to the confirmation's link.
  */

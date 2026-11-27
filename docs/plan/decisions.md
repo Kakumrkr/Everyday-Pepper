@@ -591,6 +591,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - S78 and S81a may split at their briefs;
     - five pilot metrics for the AI layer in scorecard §3 (the top-up);
     - S72.2's carried top-up kept on S58a's row.
+- **S78.2 (user, 2026-11-27):** "Go ahead with your recommendations and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78.2):
+  - **D-1** split: S78.2 the release card, the full refund, the fill loop, the Activity line, "Who cancelled?" and the top reason (top-up); **S78.3** the holdback switch and the cut-off as a template default.
+  - **D-2** a card only for a visit whose client was asked at least 12 h before the cut-off (`RELEASE_ANSWER_HOURS`), from the cut-off until the start.
+  - **D-3** a release is the business's cancel (`cancelled_by = business`), never the client's miss in visit risk.
+  - **D-4** the release note goes by email only (no text until S79's consent wording).
+  - **D-5** no Undo; the card says "A release can’t be undone."
+  - **Claude:**
+    - `booking.release` is ask-only in every preset, a system tool the model is never offered, decided by owners and managers;
+    - the card goes away on a confirm by text or link, a move, a cancel, or "Ask clients to confirm" turned off;
+    - a confirm locks the card before the visit, so a confirm and an approval leave one outcome (the race test found it);
+    - "Who cancelled?" defaults to Us; only a single-visit cancel asks.
 - **S78 (user, 2026-11-27):** "start with your recommendations and complete sucessfully". Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78):
   - **D-1** the user asked why commits show Claude's name: the container's git identity was "Claude", and squash merges added a `Co-authored-by: Claude` line. Commits now carry the owner's GitHub noreply identity, set in the repository's git config by `session-start.sh`. Session branch commits then show as Unverified on GitHub (the environment signs only its own identity); the squash merge into `main` is signed by GitHub. Asked again when the environment's hook flagged them, the user chose "Keep my name".
   - **D-2** split: S78 the confirm ask, S78.2 the release card (with the holdback).

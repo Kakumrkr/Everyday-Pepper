@@ -90,12 +90,44 @@ export function waitlistOfferTitle(action: AiActionView): string | null {
     : offered;
 }
 
+/**
+ * A released visit's line (S78.2, AC-X-211): "Released Tue, Dec 1, 2:00 pm", then what the fill
+ * loop made of the time ("offered to 3", "filled +$60"). `null` without the visit's time.
+ */
+export function releaseTitle(action: AiActionView): string | null {
+  const before = action.before;
+  const date = typeof before?.['date'] === 'string' ? before['date'] : null;
+  const time = typeof before?.['time'] === 'string' ? before['time'] : null;
+  if (date === null || time === null) return null;
+  const parts = [`Released ${formatDate(date)}, ${formatTime(time)}`];
+  const fill = action.fill;
+  if (fill !== undefined) {
+    const offered = fill.offered ?? 0;
+    if (offered > 0) parts.push(`offered to ${String(offered)}`);
+    if (fill.state === 'filled') {
+      parts.push(
+        fill.priceCents === null || fill.priceCents === 0
+          ? 'filled'
+          : `filled +${dollars(fill.priceCents)}`,
+      );
+    } else if (fill.state === 'unclaimed') {
+      parts.push('nobody claimed it');
+    }
+  }
+  return parts.join(', ');
+}
+
 /** One receipt in words: what was done, and when, by whose OK, and what it sent. */
 export function activityLine(
   action: AiActionView,
   timeZone: string,
 ): { title: string; meta: string } {
-  const offer = action.action === 'message.waitlist_offer' ? waitlistOfferTitle(action) : null;
+  const offer =
+    action.action === 'message.waitlist_offer'
+      ? waitlistOfferTitle(action)
+      : action.action === 'booking.release'
+        ? releaseTitle(action)
+        : null;
   const title =
     offer ??
     (action.summary === null || action.summary === ''

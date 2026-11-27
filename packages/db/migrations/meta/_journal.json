@@ -638,6 +638,13 @@
       "when": 1795746862903,
       "tag": "0090_s78_confirm_ask",
       "breakpoints": true
+    },
+    {
+      "idx": 91,
+      "version": "7",
+      "when": 1795753868141,
+      "tag": "0091_s78_2_release_card",
+      "breakpoints": true
     }
   ]
 }

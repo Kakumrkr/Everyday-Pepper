@@ -22,6 +22,7 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { BookingNotFoundError } from '../errors.js';
+import { withdrawReleaseCards } from './release-check.js';
 import { reminderSettingsOf, replanUpcomingReminders } from './reminders.js';
 
 // Texts and reminders (S62, AC-X-75): every member sees what the business sends its clients;
@@ -67,6 +68,8 @@ export async function updateReminderSettings(
       requestId: actor.requestId,
     });
     await replanUpcomingReminders(tx, tenant.timeZone, after, now);
+    // No longer asking: the release cards waiting could no longer be approved (S78.2).
+    if (before.askToConfirm && !after.askToConfirm) await withdrawReleaseCards(tx, now);
     return viewOf(actor, after);
   });
 }

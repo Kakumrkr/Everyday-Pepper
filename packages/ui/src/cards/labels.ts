@@ -13,7 +13,7 @@ import {
   type ScreenLink,
   type WouldBeEmail,
 } from '@pepper/contracts';
-import { visitRiskFactLine } from '../feed/visit-risk.js';
+import { visitRiskFactLine, visitRiskReasonLine } from '../feed/visit-risk.js';
 
 // The words of the AI's cards, the *Why?* sheet and the Autonomy page (S26, ADR-0031): pure
 // functions over the typed payloads, so every sentence a member reads about the AI's actions
@@ -26,6 +26,7 @@ export const ACTION_LABEL: Record<AutonomyAction, string> = {
   'booking.move': 'Move',
   'booking.cancel': 'Cancellation',
   'booking.no_show': 'No-show',
+  'booking.release': 'Not confirmed',
   'booking_request.accept': 'Booking request',
   'time.block': 'Blocked time',
   'client_note.save': 'Client note',
@@ -47,6 +48,7 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
   'booking.move': 'Move or reschedule a booking',
   'booking.cancel': 'Cancel a booking',
   'booking.no_show': 'Mark a visit as a no-show',
+  'booking.release': 'Release a visit the client didn’t confirm, and offer the time',
   'booking_request.accept': 'Accept requests from your booking page',
   'time.block': 'Block time on a calendar',
   'client_note.save': 'Save notes and preferences about clients',
@@ -67,6 +69,8 @@ export const DIAL_LABEL: Record<AutonomyAction, string> = {
  * its own reason (S68: the no-show fee's is money, not a booking rule's).
  */
 export const LOCKED_HELP: Partial<Record<AutonomyAction, string>> = {
+  'booking.release':
+    'Always needs your OK: the client is told, any deposit is refunded, and it can’t be undone.',
   'rule.change': 'Always needs your OK: a new rule changes when clients can book.',
   'message.bulk':
     'Always needs your OK when more than 10 people would get it. This protects your clients from a costly mistake.',
@@ -103,10 +107,11 @@ export const AUTONOMY_GROUPS: readonly {
     title: 'Messages to clients',
     description:
       'Emails leave Pepper, so I hold each one for 2 minutes in case you want to undo it.',
+    // S78.2: a release tells the client, so it sits with the messages.
     actions: AutonomyActionSchema.options.filter(
       (action) =>
         AUTONOMY_ACTIONS[action].riskTier === 'external_or_irreversible' &&
-        action.startsWith('message.'),
+        (action.startsWith('message.') || action === 'booking.release'),
     ),
   },
   {
@@ -125,6 +130,8 @@ export function decisionLabels(
   action: AutonomyAction,
   after: ChangeSide | null,
 ): { approve: string; reject: string } {
+  // S78.2: the owner reads what the tap does.
+  if (action === 'booking.release') return { approve: 'Release and offer it', reject: 'Keep it' };
   if (action === 'payment.no_show_fee') {
     const amount = after?.['amount'];
     return { approve: typeof amount === 'string' ? `Charge ${amount}` : 'Charge', reject: 'Waive' };
@@ -153,6 +160,8 @@ const STEP_LABEL: Record<string, string> = {
   // A one-tap win-back draft (S54.2): the member asked; the words are Pepper's template.
   win_back: 'Drafted the email you asked for',
   review_requests: 'Looked at yesterday’s visits',
+  // S78.2: the reminder job at the confirm cut-off.
+  release_check: 'Checked who hadn’t confirmed by the cut-off',
 };
 
 /** One step of the *Why?* trace, in words. */
@@ -357,6 +366,17 @@ export function changeRows(
       add('Visit', null, span(after, 'time', 'endTime'));
       add('Message', null, text(after, 'message'));
       return rows;
+    case 'booking.release': {
+      // `release_unconfirmed_booking` (S78.2): the visit, its top risk reason (S77, AC-X-213)
+      // and what approving does.
+      add('Client', null, text(before, 'clientName'));
+      add('When', null, span(before, 'time', 'endTime'));
+      add('Service', null, text(before, 'serviceName'));
+      add('With', null, text(before, 'staffName'));
+      add('Top reason', null, releaseReasonLine(after));
+      add('Then', null, releaseThenLine(after));
+      return rows;
+    }
     case 'payment.no_show_fee': {
       // `charge_no_show_fee` (S68): the missed visit, the card, the client's own terms and the
       // choice (the policy's fee, a kept deposit, what is charged now).
@@ -377,6 +397,45 @@ export function changeRows(
       // No tool makes these yet (messages: Phase 8); the summary says it all.
       return rows;
   }
+}
+
+/** The release card's top risk reason from its flat side, capitalised; `null` without one. */
+export function releaseReasonLine(side: ChangeSide | null): string | null {
+  const signal = side?.['riskSignal'];
+  const number = (key: string) => {
+    const value = side?.[key];
+    return typeof value === 'number' ? value : null;
+  };
+  let line: string | null = null;
+  if (signal === 'missed_before') {
+    const misses = number('riskMisses');
+    const visits = number('riskVisits');
+    if (misses !== null && visits !== null) {
+      line = visitRiskReasonLine({ signal, misses, visits });
+    }
+  } else if (signal === 'booked_far_ahead') {
+    const days = number('riskDays');
+    if (days !== null) line = visitRiskReasonLine({ signal, days });
+  } else if (
+    signal === 'first_visit' ||
+    signal === 'online_no_deposit' ||
+    signal === 'not_confirmed'
+  ) {
+    line = visitRiskReasonLine({ signal });
+  }
+  return line === null ? null : line.charAt(0).toUpperCase() + line.slice(1);
+}
+
+/** What approving a release does, in one line (DESIGN §6: name the consequence). */
+function releaseThenLine(side: ChangeSide | null): string {
+  // A client with no email address gets none (the card then says "No email to the client").
+  const steps = [
+    ...(side?.['emailed'] === false ? [] : ['email the client']),
+    ...(side?.['refund'] === true ? ['refund the deposit in full'] : []),
+  ];
+  const offer = 'offer the time to your waitlist and regulars';
+  const line = steps.length === 0 ? offer : `${steps.join(', ')}, and ${offer}`;
+  return line.charAt(0).toUpperCase() + line.slice(1);
 }
 
 const STATUS_LABEL: Record<string, string> = {

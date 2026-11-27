@@ -151,6 +151,7 @@ import {
   type BookingNotify,
 } from './notices.js';
 import { requestInsights } from './insights.js';
+import { keepReleaseCardInStep, lockReleaseCard } from './release-check.js';
 import { recognizeDeviceIn, rememberDeviceIn } from './remembered-devices.js';
 import { keepReminderInStep, reminderSettingsOf } from './reminders.js';
 import {
@@ -893,6 +894,9 @@ export async function confirmManagedBooking(
   const seen = Date.parse(UtcDateTimeSchema.parse(startsAt));
   const now = nowOf(options);
   return inPage(db, slug, async (tx, tenant) => {
+    // The visit's release card first, then the visit: an approval's order (S78.2, AC-X-210).
+    const found = await findBookingByManageTokenHash(tx, hash);
+    if (found !== undefined) await lockReleaseCard(tx, found.id);
     const row = await lockChangeable(tx, hash, now);
     if (row.startsAt.getTime() !== seen) throw new BookingMovedError();
     const bookingId = BookingIdSchema.parse(row.id);
@@ -908,6 +912,8 @@ export async function confirmManagedBooking(
         },
       });
       await requestInsights(tx);
+      // A release card waiting for this visit goes (S78.2, AC-X-210).
+      await keepReleaseCardInStep(tx, marked, now);
     }
     return toPublicBooking(tx, tenant, marked ?? row, now, options.deposits);
   });

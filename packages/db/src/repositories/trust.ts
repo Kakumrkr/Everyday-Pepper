@@ -169,8 +169,8 @@ export async function findProposalByKey(
   return row;
 }
 
-/** The pending proposal for `targetKey`, locked, if any. */
-export async function lockPendingProposalFor(
+/** The pending proposal for `targetKey`, if any (not locked; S78.2's release card check). */
+export async function findPendingProposalFor(
   tx: TenantTx,
   targetKey: string,
 ): Promise<AiActionProposalRow | undefined> {
@@ -183,7 +183,29 @@ export async function lockPendingProposalFor(
         eq(aiActionProposals.status, 'pending'),
       ),
     )
-    .for('update');
+    .limit(1);
+  return row;
+}
+
+/**
+ * The pending proposal for `targetKey`, locked, if any. With `skipLocked` (S78.2) one another
+ * transaction holds (being approved this moment) reads as none instead of waiting for it.
+ */
+export async function lockPendingProposalFor(
+  tx: TenantTx,
+  targetKey: string,
+  options: { skipLocked?: boolean } = {},
+): Promise<AiActionProposalRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(aiActionProposals)
+    .where(
+      and(
+        eq(aiActionProposals.targetKey, ActionTargetKeySchema.parse(targetKey)),
+        eq(aiActionProposals.status, 'pending'),
+      ),
+    )
+    .for('update', options.skipLocked === true ? { skipLocked: true } : {});
   return row;
 }
 

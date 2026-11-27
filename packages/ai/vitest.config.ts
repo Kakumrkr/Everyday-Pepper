@@ -28,6 +28,9 @@ export default defineConfig({
         // The no-show fee card's proposal in the no-show's transaction (S68): proven against
         // Postgres in `tools/writes.int.test.ts`; its words are the contracts' (unit-tested).
         'src/drafts/no-show-fees.ts',
+        // The release card's proposal in the reminder job's transaction (S78.2): proven against
+        // Postgres in `drafts/release.int.test.ts`; its words are the ui labels' (unit-tested).
+        'src/drafts/release.ts',
         // The eval subject and its seeded worlds run the loop on Postgres (evals.int.test.ts).
         'src/evals/subject.ts',
         'src/evals/world.ts',

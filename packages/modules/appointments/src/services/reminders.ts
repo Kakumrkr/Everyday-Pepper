@@ -3,6 +3,7 @@ import {
   BookingIdSchema,
   ClientIdSchema,
   CONFIRM_ASK_LEAD_HOURS,
+  CONFIRM_CUTOFF_HOURS,
   ManageTokenSchema,
   OutboxDedupeKeySchema,
   reminderSettingsFrom,
@@ -11,6 +12,7 @@ import {
   fromZoned,
   toZoned,
   type BookingId,
+  type TenantId,
   type ReminderKind,
   type ReminderSettings,
 } from '@pepper/contracts';
@@ -40,6 +42,7 @@ import {
 import { confirmAskEmail, manageUrl, reminderEmail } from '../emails.js';
 import { reminderText } from '../texts.js';
 import { emailDetailsOf } from './notices.js';
+import { keepReleaseCardInStep, releaseCheck } from './release-check.js';
 
 // Booking reminders (W6, AC-W6-1, ADR-0025; S62 AC-X-70…72): every confirmed booking has its
 // reminders planned in the booking's own transaction, so a cancelled booking never keeps one
@@ -56,6 +59,11 @@ import { emailDetailsOf } from './notices.js';
 // due it goes only if the visit is in the high risk band (S77) and the client hasn't confirmed,
 // by text where one may go, else by email with the confirm link. Any reminder that asks to
 // confirm records the ask on the booking, so visit risk scores `not_confirmed` only after it.
+//
+// The release check (S78.2, AC-X-207): while the business asks, every visit has one planned at
+// its cut-off (`CONFIRM_CUTOFF_HOURS` before, not moved out of the night: it reaches no client).
+// When due, a visit asked early enough and still unconfirmed gets the owner's release card
+// (`onReleaseDue`, the worker's proposer); nothing goes to the client.
 
 const MINUTE_MS = 60_000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -97,6 +105,9 @@ export function reminderDueAt(
   timeZone: string,
   settings: ReminderSettings,
 ): number | null {
+  if (kind === 'release_check') {
+    return settings.askToConfirm ? startsAt - CONFIRM_CUTOFF_HOURS * HOUR_MS : null;
+  }
   if (kind === 'confirm_ask') {
     return settings.askToConfirm
       ? keptInHours(timeZone, startsAt - CONFIRM_ASK_LEAD_HOURS * HOUR_MS)
@@ -111,7 +122,7 @@ export function reminderDueAt(
   return due <= startsAt - SAME_DAY_MIN_NOTICE_MS ? due : null;
 }
 
-const KINDS: readonly ReminderKind[] = ['confirm_ask', 'day_before', 'same_day'];
+const KINDS: readonly ReminderKind[] = ['confirm_ask', 'day_before', 'same_day', 'release_check'];
 
 /** A business's reminder settings, each missing or unreadable field at its default. */
 export function reminderSettingsOf(tenant: Pick<Tenant, 'reminderSettings'>): ReminderSettings {
@@ -130,6 +141,8 @@ export async function keepReminderInStep(
   const tenant = await findCurrentTenant(tx);
   if (tenant === undefined) throw new Error('A booking is written in its business’s transaction');
   await keepRemindersOf(tx, row, now, tenant.timeZone, reminderSettingsOf(tenant));
+  // A release card that no longer fits the visit goes (S78.2, AC-X-210).
+  await keepReleaseCardInStep(tx, row, now);
 }
 
 /**
@@ -215,6 +228,15 @@ export interface ReminderOptions {
   baseUrl?: string | null;
   /** Whether this deployment sends texts (`SMS_PROVIDER` set, ADR-0065); default no. */
   texts?: boolean;
+  /**
+   * Proposes the release card for a visit due at its cut-off (S78.2; the worker's, from
+   * `@pepper/ai`), in the reminder's transaction: whether a card now waits. Without it the
+   * release check is skipped.
+   */
+  onReleaseDue?: (
+    tx: TenantTx,
+    booking: { tenantId: TenantId; bookingId: BookingId },
+  ) => Promise<boolean>;
 }
 
 /** What handling one due reminder did. */
@@ -253,6 +275,13 @@ export async function sendDueReminder(
     const settings = reminderSettingsOf(tenant);
     // Turned off since it was planned.
     if (reminderDueAt(due.kind, startsAt, tenant.timeZone, settings) === null) return 'skipped';
+    // The release check reaches the owner, never the client (AC-X-207).
+    if (due.kind === 'release_check') {
+      if (options.onReleaseDue === undefined) return 'skipped';
+      if (releaseCheck(booking, settings, now.getTime()) !== 'ok') return 'skipped';
+      const tenantId = TenantIdSchema.parse(due.tenantId);
+      return (await options.onReleaseDue(tx, { tenantId, bookingId })) ? 'queued' : 'skipped';
+    }
     // The confirm ask: only a high-band visit the client hasn't confirmed (AC-X-204).
     if (due.kind === 'confirm_ask' && !(await needsConfirmAsk(tx, booking))) return 'skipped';
     const details = await emailDetailsOf(tx, tenant, booking, now.getTime());

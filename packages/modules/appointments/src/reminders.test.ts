@@ -104,3 +104,13 @@ describe('reminderDueAt: the confirm ask (S78, AC-X-204)', () => {
     expect(reminderDueAt('confirm_ask', ny(20, '14:00'), NY, asking)).toBe(ny(17, '14:00'));
   });
 });
+
+describe('reminderDueAt: the release check (S78.2, AC-X-207)', () => {
+  it('is due at the cut-off, night or day, only while the business asks', () => {
+    const asking = settings({ askToConfirm: true });
+    expect(reminderDueAt('release_check', ny(20, '14:00'), NY, settings())).toBeNull();
+    expect(reminderDueAt('release_check', ny(20, '14:00'), NY, asking)).toBe(ny(19, '14:00'));
+    // It reaches the owner, not the client: not moved out of the night.
+    expect(reminderDueAt('release_check', ny(20, '06:00'), NY, asking)).toBe(ny(19, '06:00'));
+  });
+});

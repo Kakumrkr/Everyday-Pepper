@@ -306,6 +306,20 @@ export async function findWaitlistOfferByTokenHash(
   return row;
 }
 
+/** The latest match of the time a booking freed (S78.2: a released visit's line), if any. */
+export async function findWaitlistMatchOfFreedBooking(
+  tx: TenantTx,
+  bookingId: BookingId,
+): Promise<WaitlistMatchRow | undefined> {
+  const [row] = await tx
+    .select()
+    .from(waitlistMatches)
+    .where(eq(waitlistMatches.bookingId, Id.parse(bookingId)))
+    .orderBy(desc(waitlistMatches.availableAt))
+    .limit(1);
+  return row;
+}
+
 /** A match's offers, best first. */
 export async function listOffersOfMatch(
   tx: TenantTx,

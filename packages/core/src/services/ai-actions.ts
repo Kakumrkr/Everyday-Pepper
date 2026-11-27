@@ -766,6 +766,41 @@ export async function expireProposals(tx: TenantTx, now: Date, limit: number): P
   return expired.length;
 }
 
+/**
+ * Takes away the card waiting for `targetKey`, in the caller's transaction, because the world
+ * changed under it (S78.2: the client confirmed, or the visit moved or went): the proposal is
+ * superseded by the system, its feed item expires, and the audit says so. A proposal another
+ * transaction holds (being approved this moment) is skipped rather than waited for, which would
+ * take the locks in the other order; a caller that must not miss it (a confirm) locks it first
+ * with `lockPendingProposalFor`, before its own rows. Returns whether a card was taken away.
+ */
+export async function withdrawPendingProposal(
+  tx: TenantTx,
+  targetKey: string,
+  now: Date,
+): Promise<boolean> {
+  const pending = await lockPendingProposalFor(tx, targetKey, { skipLocked: true });
+  if (pending === undefined) return false;
+  const decided = await decideProposal(tx, ActionProposalIdSchema.parse(pending.id), {
+    status: 'superseded',
+    by: null,
+    at: now,
+  });
+  if (decided === undefined) return false;
+  const action = AutonomyActionSchema.parse(pending.action);
+  await settleFeedItemsOf(tx, pending.id, 'expired', now);
+  await appendAuditEntry(tx, {
+    actor: { kind: 'system' },
+    change: {
+      action: 'ai_proposal.decided',
+      entity: { type: 'ai_action_proposal', id: pending.id },
+      before: { action, status: 'pending' },
+      after: { action, status: 'superseded' },
+    },
+  });
+  return true;
+}
+
 // ---------------------------------------------------------------------------------------------
 
 /** Ends a dry run: carries its preview out of the savepoint it rolls back. */

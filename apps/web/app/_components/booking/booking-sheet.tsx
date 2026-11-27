@@ -161,6 +161,8 @@ function BookingDetails({
   const repeats = series === null ? null : seriesLine(series, booking.id);
   const later = series === null ? [] : laterVisits(series, booking);
   const [cancelScope, setCancelScope] = useState<'this' | 'following'>('this');
+  // Who cancelled (S78.2, AC-X-212): a client who phoned is theirs, so a late one is a miss.
+  const [cancelledBy, setCancelledBy] = useState<'business' | 'client'>('business');
 
   async function cancelFollowing(): Promise<void> {
     setBusy(true);
@@ -323,6 +325,24 @@ function BookingDetails({
             </p>
           </>
         )}
+        {cancelScope === 'this' || later.length === 0 ? (
+          <div className="grid gap-2" data-testid="booking-cancel-who">
+            <p className="m-0 type-label text-ink-2" aria-hidden="true">
+              Who cancelled?
+            </p>
+            <Segmented
+              label="Who cancelled?"
+              options={[
+                { value: 'business', label: 'Us' },
+                { value: 'client', label: 'The client' },
+              ]}
+              value={cancelledBy}
+              onValueChange={(value) => {
+                setCancelledBy(value === 'client' ? 'client' : 'business');
+              }}
+            />
+          </div>
+        ) : null}
         {teamCancelDepositWords(depositRead) === null ? null : (
           <p className="m-0 type-body text-ink-2" data-testid="booking-cancel-deposit">
             {teamCancelDepositWords(depositRead)}
@@ -342,7 +362,7 @@ function BookingDetails({
             busy={busy}
             onClick={() => {
               if (cancelScope === 'following' && later.length > 0) void cancelFollowing();
-              else void change({ status: 'cancelled', notifyClient });
+              else void change({ status: 'cancelled', notifyClient, cancelledBy });
             }}
           >
             {cancelScope === 'following' && later.length > 0

@@ -273,3 +273,38 @@ describe('ActivityLog', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('already left');
   });
 });
+
+describe('a released visit (S78.2, AC-X-211)', () => {
+  const released = (fill?: Record<string, unknown>) =>
+    receipt({
+      action: 'booking.release',
+      tool: 'release_unconfirmed_booking',
+      outcome: 'propose',
+      summary: 'Maria L. hasn’t confirmed Tue, Dec 1, 2:00 pm. Release it and offer it?',
+      before: { date: '2026-12-01', time: '14:00', endTime: '15:00', clientName: 'Maria L.' },
+      undoUntil: null,
+      canUndo: false,
+      emails: [{ template: 'cancelled', clientId: CLIENT, status: 'sent', sendsAt: null }],
+      ...(fill !== undefined && { fill }),
+    });
+
+  it('says it was released, then offered, then filled', () => {
+    expect(activityLine(released(), NY).title).toBe('Released Tue, Dec 1, 2:00 pm');
+    expect(
+      activityLine(released({ state: 'open', clientName: null, priceCents: null, offered: 3 }), NY)
+        .title,
+    ).toBe('Released Tue, Dec 1, 2:00 pm, offered to 3');
+    expect(
+      activityLine(
+        released({ state: 'filled', clientName: 'Sara K.', priceCents: 6000, offered: 3 }),
+        NY,
+      ).title,
+    ).toBe('Released Tue, Dec 1, 2:00 pm, offered to 3, filled +$60');
+    expect(
+      activityLine(
+        released({ state: 'unclaimed', clientName: null, priceCents: null, offered: 2 }),
+        NY,
+      ).title,
+    ).toBe('Released Tue, Dec 1, 2:00 pm, offered to 2, nobody claimed it');
+  });
+});

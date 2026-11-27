@@ -78,6 +78,48 @@ describe('ChangeCard', () => {
     await expectAccessible(container);
   });
 
+  it('the release card: the visit, its top reason, its own buttons, and no Undo (S78.2)', async () => {
+    const onApprove = vi.fn();
+    const before = { ...side, bookingId: BOOKING, status: 'confirmed' };
+    const { container } = render(
+      <ChangeCard
+        {...change({
+          action: 'booking.release',
+          summary: 'Maria L. hasn’t confirmed Tue, Oct 27, 5:15 pm. Release it and offer it?',
+          before,
+          after: {
+            ...before,
+            status: 'cancelled',
+            release: true,
+            refund: true,
+            riskSignal: 'missed_before',
+            riskMisses: 2,
+            riskVisits: 5,
+          },
+          emails: [{ template: 'cancelled', clientId: CLIENT }],
+          onApprove,
+          onReject: vi.fn(),
+          settingsLink: <a href="/more/autonomy">Change</a>,
+        })}
+      />,
+    );
+    const card = screen.getByRole('article', { name: 'Not confirmed' });
+    expect(within(card).getByText(/Release it and offer it\?$/)).toBeTruthy();
+    expect(within(card).getByText('Missed 2 of 5 visits')).toBeTruthy();
+    expect(within(card).getByText(/refund the deposit in full/)).toBeTruthy();
+    expect(
+      within(card).getByText('Nothing changes until you tap. A release can’t be undone.'),
+    ).toBeTruthy();
+    // Always asks: no setting to point at.
+    expect(within(card).queryByRole('link', { name: 'Change' })).toBeNull();
+    expect(within(card).getByRole('button', { name: 'Keep it' })).toBeTruthy();
+    await userEvent
+      .setup()
+      .click(within(card).getByRole('button', { name: 'Release and offer it' }));
+    expect(onApprove).toHaveBeenCalledTimes(1);
+    await expectAccessible(container);
+  });
+
   it('never takes focus by itself (no focus theft while streaming)', () => {
     render(<ChangeCard {...change()} />);
     expect(document.activeElement).toBe(document.body);
