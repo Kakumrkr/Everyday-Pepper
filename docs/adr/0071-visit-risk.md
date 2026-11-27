@@ -28,4 +28,6 @@ A lost slot is the owner-operator's biggest daily loss. Before S77 Pepper only k
 - Changing a constant changes bands for every business at the next run; the fixtures in `visit-risk.test.ts` pin the rules' intent.
 - The hourly pass means "not confirmed" and the 14-day window move at most an hour late; a booking change or a "C" asks for a run sooner.
 - Old cancels without an audit entry are timed by `updated_at`, which may be later than the real cancel: such a cancel can read as late when it wasn't. New cancels are exact.
+- The backfill lifts forced RLS on `bookings` and `audit_log` for the owner only while it runs, and turns off the `updated_at` trigger, so old cancels keep their `updated_at` (S77 review; `migrate.int.test.ts`).
+- **Known limits, for S78's brief:** a cancel the business made (a sick barber) counts against the client like their own, since a booking doesn't record who cancelled; and `not_confirmed` scores where a client could not confirm (no text reminders, so no "C"). S78 decides whether to record who cancelled and to score `not_confirmed` only after a reminder went out.
 - No chat tool, prompt or instruction changed, so no recording was needed.

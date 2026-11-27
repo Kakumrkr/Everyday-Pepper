@@ -4,13 +4,21 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { TenantIdSchema } from '@pepper/contracts';
+import {
+  ClientIdSchema,
+  ServiceIdSchema,
+  StaffMemberIdSchema,
+  TenantIdSchema,
+} from '@pepper/contracts';
 import { postgresUrlAs } from '@pepper/testing';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase } from './client.js';
 import { APP_ROLE, provisionAppRole, runMigrations } from './migrate.js';
+import { insertBooking } from './repositories/bookings.js';
+import { insertClient } from './repositories/clients.js';
 import { addMembership } from './repositories/memberships.js';
+import { insertService, insertStaffMember } from './repositories/appointments.js';
 import { createTenant } from './repositories/tenants.js';
 import { withTenant } from './tenant.js';
 import {
@@ -62,6 +70,119 @@ describe('runMigrations', () => {
         before?.id,
       ]),
     ).toEqual([{ email_verified: true }]);
+  });
+
+  it('0089 times old cancels from their audit entry, else updated_at, and leaves updated_at as it was (S77)', async () => {
+    const tenant = TenantIdSchema.parse(
+      (
+        await createTenant(database.app.db, {
+          name: 'Old cancels',
+          slug: `old-cancels-${String(Date.now())}`,
+          timeZone: 'America/New_York',
+        })
+      ).id,
+    );
+    const [audited, unaudited] = await withTenant(database.app.db, tenant, async (tx) => {
+      const service = await insertService(tx, {
+        name: 'Cut',
+        category: null,
+        durationMinutes: 30,
+        bufferBeforeMinutes: 0,
+        bufferAfterMinutes: 0,
+        priceFromCents: null,
+        priceToCents: null,
+        active: true,
+      });
+      const staff = await insertStaffMember(tx, {
+        displayName: 'Jess',
+        color: '#2a7230',
+        active: true,
+        membershipId: null,
+      });
+      const client = await insertClient(tx, {
+        name: 'Maria',
+        email: null,
+        phone: null,
+        source: 'team',
+      });
+      const book = (startsAt: string) =>
+        insertBooking(tx, {
+          clientId: ClientIdSchema.parse(client.id),
+          serviceId: ServiceIdSchema.parse(service.id),
+          staffMemberId: StaffMemberIdSchema.parse(staff.id),
+          startsAt: new Date(startsAt),
+          endsAt: new Date(Date.parse(startsAt) + 30 * 60_000),
+          bufferBeforeMinutes: 0,
+          bufferAfterMinutes: 0,
+          priceFromCents: null,
+          priceToCents: null,
+          source: 'team',
+          overridden: false,
+          idempotencyKey: null,
+          createdBy: null,
+        });
+      return [await book('2026-10-20T14:00:00Z'), await book('2026-10-21T14:00:00Z')];
+    });
+    if (audited === undefined || unaudited === undefined) throw new Error('not booked');
+    // Both cancelled as before 0089: no cancel time, an old updated_at; one has its audit entry.
+    const url = database.migrationUrl;
+    await query(url, 'ALTER TABLE bookings DROP CONSTRAINT bookings_cancelled_at');
+    {
+      await query(
+        url,
+        `UPDATE bookings SET status = 'cancelled', cancelled_at = NULL WHERE id = ANY($1::uuid[])`,
+        [[audited.id, unaudited.id]],
+      );
+      await query(url, 'ALTER TABLE bookings DISABLE TRIGGER bookings_set_updated_at');
+      await query(
+        url,
+        `UPDATE bookings SET updated_at = '2026-10-05T10:00:00Z' WHERE id = ANY($1::uuid[])`,
+        [[audited.id, unaudited.id]],
+      );
+      await query(url, 'ALTER TABLE bookings ENABLE TRIGGER bookings_set_updated_at');
+      await query(
+        url,
+        `INSERT INTO audit_log (id, tenant_id, actor_kind, action, entity_type, entity_id, after, created_at)
+         VALUES (gen_random_uuid(), $1, 'system', 'booking.updated', 'booking', $2,
+                 '{"status":"cancelled"}', '2026-10-01T09:00:00Z')`,
+        [tenant, audited.id],
+      );
+    }
+    const file = await readFile(
+      new URL('../migrations/0089_s77_visit_risk.sql', import.meta.url),
+      'utf8',
+    );
+    // The backfill as the migration runs it, from its first line to the constraint it adds.
+    const backfill = file.slice(
+      file.indexOf('-- S77 (ADR-0071) backfill begins'),
+      file.indexOf('-- S77 backfill ends.'),
+    );
+    for (const statement of backfill.split('--> statement-breakpoint')) {
+      if (statement.trim() !== '') await query(url, statement);
+    }
+
+    const rows = await query<{ id: string; cancelled_at: Date; updated_at: Date }>(
+      url,
+      'SELECT id, cancelled_at, updated_at FROM bookings WHERE id = ANY($1::uuid[])',
+      [[audited.id, unaudited.id]],
+    );
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    expect(byId.get(audited.id)?.cancelled_at.toISOString()).toBe('2026-10-01T09:00:00.000Z');
+    expect(byId.get(unaudited.id)?.cancelled_at.toISOString()).toBe('2026-10-05T10:00:00.000Z');
+    for (const row of rows) expect(row.updated_at.toISOString()).toBe('2026-10-05T10:00:00.000Z');
+    // RLS is forced again, and the updated_at trigger is back on.
+    expect(
+      await query(
+        url,
+        "SELECT relname, relforcerowsecurity FROM pg_class WHERE relname IN ('bookings', 'audit_log') ORDER BY relname",
+      ),
+    ).toEqual([
+      { relname: 'audit_log', relforcerowsecurity: true },
+      { relname: 'bookings', relforcerowsecurity: true },
+    ]);
+    expect(
+      await query(url, "SELECT tgenabled FROM pg_trigger WHERE tgname = 'bookings_set_updated_at'"),
+    ).toEqual([{ tgenabled: 'O' }]);
   });
 
   it('0057 keeps episode embeddings in the row and moves earlier ones in, values unchanged (S47.3)', async () => {
