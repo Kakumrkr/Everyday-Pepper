@@ -1,4 +1,5 @@
 import {
+  BookingMovedError,
   BookingNotChangeableError,
   BookingNotFoundError,
   BookingNotStartedError,
@@ -171,6 +172,7 @@ const ANSWERS: readonly (readonly [ErrorClass, Answer, ApiErrorCode])[] = [
   [ClientMergeOverlapError, ConflictException, 'client_merge_overlap'],
   [BookingNotFoundError, NotFoundException, 'booking_not_found'],
   [BookingNotChangeableError, ConflictException, 'booking_not_changeable'],
+  [BookingMovedError, ConflictException, 'booking_moved'],
   [BookingNotStartedError, ConflictException, 'booking_not_started'],
   [IdempotencyKeyReusedError, ConflictException, 'idempotency_key_reused'],
   [WaitlistEntryNotFoundError, NotFoundException, 'waitlist_entry_not_found'],

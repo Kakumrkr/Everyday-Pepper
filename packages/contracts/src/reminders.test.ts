@@ -12,7 +12,12 @@ describe('reminder settings (S62, AC-X-75)', () => {
       dayBefore: true,
       sameDay: true,
       sameDayLeadHours: 2,
+      askToConfirm: false,
     });
+    // Settings stored before S78 read with the ask off (AC-X-202).
+    expect(
+      ReminderSettingsSchema.parse({ texts: true, dayBefore: true, sameDay: true }).askToConfirm,
+    ).toBe(false);
     expect(ReminderSettingsSchema.parse({ texts: false })).toEqual({
       ...DEFAULT_REMINDER_SETTINGS,
       texts: false,
@@ -29,6 +34,9 @@ describe('reminder settings (S62, AC-X-75)', () => {
     expect(ReminderSettingsPatchSchema.safeParse({}).success).toBe(false);
     expect(ReminderSettingsPatchSchema.parse({ sameDayLeadHours: 3 })).toEqual({
       sameDayLeadHours: 3,
+    });
+    expect(ReminderSettingsPatchSchema.parse({ askToConfirm: true })).toEqual({
+      askToConfirm: true,
     });
     expect(ReminderSettingsPatchSchema.safeParse({ tenantId: 'x' }).success).toBe(false);
   });

@@ -4,7 +4,9 @@ import {
   cancellationSentence,
   CancellationFeesSchema,
   ClientIdSchema,
+  CONFIRM_CUTOFF_HOURS,
   ManageTokenSchema,
+  reminderSettingsFrom,
   ServiceIdSchema,
   StaffMemberIdSchema,
   type BookingId,
@@ -41,6 +43,24 @@ export interface BookingEmailDetails {
   policy: CancellationPolicyWords;
   /** The deposit just paid, for the confirmation only (S67.2 top-up, AC-X-134). */
   deposit?: PublicBookingDeposit | null;
+  /**
+   * When the client should confirm by (S78, AC-X-202): set while the business asks clients to
+   * confirm and this client hasn't; the email then asks for it with the link.
+   */
+  confirmBy?: string | null;
+}
+
+/**
+ * When the client of `row` is asked to confirm by (`CONFIRM_CUTOFF_HOURS` before the start),
+ * or `null`: the business doesn't ask, or the client already confirmed.
+ */
+export function confirmByOf(
+  tenant: Pick<Tenant, 'reminderSettings'>,
+  row: Pick<BookingRow, 'startsAt' | 'clientConfirmedAt'>,
+): string | null {
+  if (!reminderSettingsFrom(tenant.reminderSettings).askToConfirm) return null;
+  if (row.clientConfirmedAt !== null) return null;
+  return new Date(row.startsAt.getTime() - CONFIRM_CUTOFF_HOURS * 3_600_000).toISOString();
 }
 
 /** The cancellation policy in words: Pepper's sentence and the owner's note; `null`: none. */
@@ -124,6 +144,7 @@ export async function emailDetailsOf(
     email: client.email ?? '',
     clientName: client.name,
     policy: policyWordsOf(tenant),
+    confirmBy: confirmByOf(tenant, row),
   };
 }
 

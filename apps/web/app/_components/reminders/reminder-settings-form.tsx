@@ -10,6 +10,7 @@ import { Segmented, Switch, Toast } from '@pepper/ui';
 import { useId, useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import {
+  askToConfirmHint,
   dayBeforeHint,
   leadLabel,
   REMINDER_SETTINGS_PATH,
@@ -133,6 +134,20 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
         <p className="m-0 type-caption text-ink-2">
           Texts never go at night: one due then waits until the morning.
         </p>
+      </section>
+      <section aria-labelledby={`${leadId}-confirm`} className="flex flex-col gap-2">
+        <h2 id={`${leadId}-confirm`} className="m-0 type-heading">
+          Confirming visits
+        </h2>
+        <div className="rounded-lg bg-surface px-4 py-1">
+          <Switch
+            label="Ask clients to confirm"
+            hint={askToConfirmHint(settings)}
+            checked={settings.askToConfirm}
+            disabled={locked}
+            onChange={toggle('askToConfirm')}
+          />
+        </div>
       </section>
       {note === null ? null : (
         <Toast

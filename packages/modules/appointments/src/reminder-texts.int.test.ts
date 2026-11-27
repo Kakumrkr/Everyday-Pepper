@@ -365,6 +365,7 @@ describe('reminder texts', () => {
         dayBefore: true,
         sameDay: true,
         sameDayLeadHours: 2,
+        askToConfirm: false,
       }),
     );
     await runAt(b, at(2, '14:00'));
@@ -383,6 +384,7 @@ describe('reminder texts', () => {
         dayBefore: false,
         sameDay: false,
         sameDayLeadHours: 2,
+        askToConfirm: false,
       }),
     );
     await runAt(b, at(2, '14:00'));

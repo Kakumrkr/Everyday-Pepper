@@ -177,6 +177,16 @@ export const WrongCodeSchema = z.object({
 export type WrongCode = z.infer<typeof WrongCodeSchema>;
 
 /** A booking as its client sees it on the booking page and behind their link. */
+/**
+ * Whether the business asks its clients to confirm (S78, AC-X-202/203): `by`, when to confirm
+ * by (`CONFIRM_CUTOFF_HOURS` before the start); `confirmed`, whether the client has.
+ */
+export const PublicBookingConfirmSchema = z.object({
+  by: UtcDateTimeSchema,
+  confirmed: z.boolean(),
+});
+export type PublicBookingConfirm = z.infer<typeof PublicBookingConfirmSchema>;
+
 export const PublicBookingSchema = z.object({
   status: BookingStatusSchema,
   startsAt: UtcDateTimeSchema,
@@ -187,6 +197,8 @@ export const PublicBookingSchema = z.object({
   changeable: z.boolean(),
   /** Its deposit or card on file (S66.2, AC-X-123); `null` when none was taken. */
   deposit: PublicBookingDepositSchema.nullable(),
+  /** The ask to confirm (S78); `null` when the business doesn't ask. */
+  confirm: PublicBookingConfirmSchema.nullable(),
 });
 export type PublicBooking = z.infer<typeof PublicBookingSchema>;
 
@@ -206,6 +218,15 @@ export const PublicRescheduleInputSchema = z
   .object({ token: ManageTokenSchema, startsAt: UtcDateTimeSchema })
   .strict();
 export type PublicRescheduleInput = z.input<typeof PublicRescheduleInputSchema>;
+
+/**
+ * `POST /v1/public/businesses/:slug/booking/confirm` (S78, AC-X-203): the link's secret and the
+ * start the client saw, so a visit moved meanwhile isn't confirmed for a time they never saw.
+ */
+export const PublicConfirmInputSchema = z
+  .object({ token: ManageTokenSchema, startsAt: UtcDateTimeSchema })
+  .strict();
+export type PublicConfirmInput = z.input<typeof PublicConfirmInputSchema>;
 
 /** The answer of the manage endpoints: the booking as it is now. */
 export const PublicBookingResponseSchema = z.object({ booking: PublicBookingSchema });

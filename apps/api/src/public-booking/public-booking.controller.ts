@@ -11,6 +11,7 @@ import {
   ManageBookingInputSchema,
   MAX_LIST_ITEMS,
   OfferTokenInputSchema,
+  PublicConfirmInputSchema,
   PublicRescheduleInputSchema,
   TenantSlugSchema,
   WaitlistConfirmInputSchema,
@@ -309,6 +310,23 @@ export class PublicBookingController {
     const { token } = parseBody(OfferTokenInputSchema, body);
     await this.limits.hit(OFFER_CLAIMS, clientAddress(request));
     return answering(() => this.booking.claim(slug, token));
+  }
+
+  /**
+   * Confirms the visit (S78, AC-X-203): once; 409 `booking_not_changeable` once it has started
+   * or was cancelled, `booking_moved` when its time is no longer `startsAt`.
+   */
+  @Post('booking/confirm')
+  @HttpCode(200)
+  async confirmVisit(
+    @Param() params: unknown,
+    @Body() body: unknown,
+    @Req() request: IncomingRequest,
+  ): Promise<PublicBookingResponse> {
+    const { slug } = parseBody(SlugParamsSchema, params);
+    const { token, startsAt } = parseBody(PublicConfirmInputSchema, body);
+    await this.limits.hit(LINK_USES, clientAddress(request));
+    return { booking: await answering(() => this.booking.confirmVisit(slug, token, startsAt)) };
   }
 
   /** Cancels the booking; 409 `booking_not_changeable` once it has started or was cancelled. */

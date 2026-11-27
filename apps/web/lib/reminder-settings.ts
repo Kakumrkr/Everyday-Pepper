@@ -52,8 +52,20 @@ export function sameDayHint(settings: ReminderSettings): string {
   return `A short text ${leadLabel(settings.sameDayLeadHours)} before they come in.`;
 }
 
+/** Under "Ask clients to confirm" (S78, AC-X-202). */
+export function askToConfirmHint(settings: ReminderSettings): string {
+  return settings.askToConfirm
+    ? 'Clients are asked to confirm by a day before. Visits likely to be missed are asked 3 days ahead.'
+    : 'Off. Clients can still confirm by replying C to a reminder text.';
+}
+
 /** The toast after a save, from what changed and the settings it left. */
 export function savedNote(patch: ReminderSettingsPatch, next: ReminderSettings): string {
+  if (patch.askToConfirm !== undefined) {
+    return next.askToConfirm
+      ? 'Saved. Clients are asked to confirm their visits.'
+      : 'Saved. Clients aren’t asked to confirm.';
+  }
   if (patch.texts !== undefined) {
     return next.texts ? 'Saved. Texts to clients are on.' : 'Saved. No texts go to clients.';
   }
@@ -80,5 +92,6 @@ export function withPatch(
     dayBefore: patch.dayBefore ?? settings.dayBefore,
     sameDay: patch.sameDay ?? settings.sameDay,
     sameDayLeadHours: patch.sameDayLeadHours ?? settings.sameDayLeadHours,
+    askToConfirm: patch.askToConfirm ?? settings.askToConfirm,
   };
 }

@@ -50,6 +50,7 @@ export const ApiErrorCodeSchema = z.enum([
   'booking_not_found',
   'slot_unavailable',
   'booking_not_changeable',
+  'booking_moved',
   'booking_not_started',
   'idempotency_key_reused',
   'waitlist_entry_not_found',

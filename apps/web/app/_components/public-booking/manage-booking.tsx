@@ -9,7 +9,7 @@ import {
 import { Button, buttonStyle, cx, chipStyle, DetailTable } from '@pepper/ui';
 import { useEffect, useMemo, useState } from 'react';
 import { dateTimeLabel, STATUS_LABELS } from '../../../lib/booking';
-import { sendJson, type CallResult } from '../../../lib/client-api';
+import { errorCodeOf, sendJson, type CallResult } from '../../../lib/client-api';
 import { manageDepositWords } from '../../../lib/deposits';
 import { publicApiPath, readManageToken } from '../../../lib/public-booking';
 import { Notice } from '../form-parts';
@@ -102,6 +102,25 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
     settle(answer, `Moved to ${dateTimeLabel(timeZone, startsAt)}. We emailed you the new time.`);
   }
 
+  async function confirmVisit(startsAt: string): Promise<void> {
+    if (token === null) return;
+    setBusy(true);
+    const answer = await sendJson('POST', publicApiPath(slug, '/booking/confirm'), {
+      token,
+      startsAt,
+    });
+    setBusy(false);
+    if (!answer.ok && errorCodeOf(answer.body) === 'booking_moved') {
+      // Show the visit as it is now, with the reason.
+      const fresh = await sendJson('POST', publicApiPath(slug, '/booking/lookup'), { token });
+      const parsed = fresh.ok ? PublicBookingResponseSchema.safeParse(fresh.data) : null;
+      if (parsed?.success === true) setView({ state: 'ready', booking: parsed.data.booking });
+      setNotice({ tone: 'error', text: answer.message });
+      return;
+    }
+    settle(answer, 'You’re confirmed. See you then.');
+  }
+
   async function cancel(): Promise<void> {
     if (token === null) return;
     setBusy(true);
@@ -161,6 +180,30 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
           {deposit.status}
         </p>
       )}
+      {booking.confirm !== null && booking.changeable && mode === 'view' ? (
+        booking.confirm.confirmed ? (
+          <p className="m-0 type-body text-ink-2" data-testid="confirm-state">
+            You confirmed this visit.
+          </p>
+        ) : (
+          <section
+            aria-label="Confirm your visit"
+            className="flex flex-col gap-3 rounded-lg bg-info-soft p-5"
+            data-testid="confirm-ask"
+          >
+            <p className="m-0 type-body text-ink">
+              {`Please confirm by ${dateTimeLabel(timeZone, booking.confirm.by)}, or your time may be offered to others.`}
+            </p>
+            <Button
+              className="self-start"
+              disabled={busy}
+              onClick={() => void confirmVisit(booking.startsAt)}
+            >
+              Confirm my visit
+            </Button>
+          </section>
+        )
+      ) : null}
       {!booking.changeable ? (
         booking.status === 'cancelled' ? (
           <a
