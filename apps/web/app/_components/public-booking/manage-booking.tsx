@@ -222,6 +222,10 @@ export function ManageBooking({ business, now }: { business: PublicBusiness; now
       ) : mode === 'view' ? (
         <div className="flex flex-wrap gap-3">
           <Button
+            // One main action at a time: confirming, while the client is asked (S78).
+            variant={
+              booking.confirm !== null && !booking.confirm.confirmed ? 'secondary' : 'primary'
+            }
             onClick={() => {
               setNotice(null);
               setMode('move');
