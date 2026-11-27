@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S77** (Phase 18: visit risk with reasons). The day the domain is bought, S58a, S57, S58b and S60 go next instead (PCR-017). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+**S77 Visit risk with reasons** (Phase 18), approved 2026-11-27: "Go ahead, start with your recommendations and complete the session successfully" (D-1 `bookings.cancelled_at`, backfilled from the audit log; D-2 the brief's points, low 0–1, medium 2–3, high 4+; D-3 the wrap lists tomorrow's high-band visits; D-4 the wrap only, the fact ready for S78).
+Tasks: 1 ACs + ADR-0071 + `cancelled_at` · 2 snapshot inputs · 3 `visitRisk` (test first) · 4 `visit_risks` table, export, isolation, sync · 5 fact + wrap top reason + legal · 6 close.
+Done: (none yet). Next: task 1.
 
 ## Last sessions
 - **P2 Plan Phase 18, the AI layer (2026-11-26, prose only)** ([PCR-017](changes/PCR-017.md), plan 0.43). Full entry in [session-log.md](session-log.md).
