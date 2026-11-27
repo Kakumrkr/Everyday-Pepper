@@ -42,6 +42,7 @@ export const FeedKindSchema = z.enum([
   ...FeedInsightKindSchema.options,
   'daily_briefing',
   'calendar_kept',
+  'client_text',
 ]);
 export type FeedKind = z.infer<typeof FeedKindSchema>;
 
@@ -154,6 +155,27 @@ export const DailyBriefingPayloadSchema = z
 export type DailyBriefingPayload = z.infer<typeof DailyBriefingPayloadSchema>;
 
 /**
+ * A client's own text, kept (S80, ADR-0072, AC-X-232): one card per client and local day, for
+ * owners and managers, quoting the latest (`body`, read with the item from `client_texts`, never
+ * stored on it) with how many came that day; the client's next visit is the item's booking
+ * (`nextVisitStartsAt`, `null` for none). Never in the AI's feed read in S80.
+ */
+export const ClientTextPayloadSchema = z
+  .object({
+    textId: z.uuid(),
+    receivedAt: UtcDateTimeSchema,
+    count: z.number().int().min(1).max(1000),
+    nextVisitStartsAt: UtcDateTimeSchema.nullable(),
+  })
+  .strict();
+export type ClientTextPayload = z.infer<typeof ClientTextPayloadSchema>;
+
+/** The card as read: the stored payload and the text's words. */
+export const ClientTextCardPayloadSchema = ClientTextPayloadSchema.extend({
+  body: z.string().min(1).max(1600),
+}).strict();
+
+/**
  * A Pepper booking changed in Google Calendar and put back as booked (S71.2, AC-X-176): what
  * was done to its event there (`moved`, `deleted`, or `edited`: its title), and the booking's
  * time in Pepper. Names come from the item's subjects, as for every kind.
@@ -175,6 +197,7 @@ export const FeedInsightSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('waitlist_match'), payload: WaitlistMatchPayloadSchema }),
   z.object({ kind: z.literal('daily_briefing'), payload: DailyBriefingPayloadSchema }),
   z.object({ kind: z.literal('calendar_kept'), payload: CalendarKeptPayloadSchema }),
+  z.object({ kind: z.literal('client_text'), payload: ClientTextCardPayloadSchema }),
 ]);
 export type FeedInsight = z.infer<typeof FeedInsightSchema>;
 

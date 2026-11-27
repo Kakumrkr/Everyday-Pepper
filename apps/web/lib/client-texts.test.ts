@@ -26,6 +26,9 @@ const of = (texts: Partial<ClientTexts>): ClientTexts => ({
   consent: CONSENT,
   canStop: true,
   lastText: null,
+  consents: [],
+  messages: [],
+  canReply: false,
   ...texts,
 });
 

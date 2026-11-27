@@ -63,6 +63,9 @@ function detailsOf(scope: ToolScope, item: FeedItem): Record<string, TrustJson> 
       const booking = at(item.payload.startsAt);
       return { changeInGoogle: item.payload.change, booking: `${booking.date} ${booking.time}` };
     }
+    // S80: a client's text never reaches the AI's feed read (`feedForAiIn` leaves it out).
+    case 'client_text':
+      return {};
   }
 }
 

@@ -7,7 +7,12 @@ import {
   type OutboxMessageId,
 } from '@pepper/contracts';
 import { queueSms } from '@pepper/core';
-import type { Tenant, TenantTx, WaitlistOfferRow } from '@pepper/db';
+import {
+  markWaitlistOfferTexted,
+  type Tenant,
+  type TenantTx,
+  type WaitlistOfferRow,
+} from '@pepper/db';
 import { offerUrl } from '../emails.js';
 import { waitlistOfferText, waitlistOptInText } from '../texts.js';
 import type { BookingEmailDetails } from './notices.js';
@@ -100,6 +105,8 @@ export async function queueWaitlistOfferText(
       now: new Date(now),
     },
   );
+  // A reply to it within the window comes back to this business (S80, ADR-0072).
+  if (messageId !== undefined) await markWaitlistOfferTexted(tx, offer.id, options.now);
   return messageId === undefined ? { texted: true } : { texted: true, messageId };
 }
 

@@ -101,6 +101,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     facts: [],
     support: { threads: [], messages: [], screenshots: [] },
     smsConsents: [],
+    clientTexts: [],
     payments: null,
     deposits: [],
     noShowFees: [],
@@ -303,6 +304,56 @@ describe('buildBusinessExport (AC-W1-37)', () => {
       { ...fee, agreedAt: iso, approvedAt: iso, chargedAt: iso },
     ]);
     expect(files['README.txt']).toContain('no-show-fees.json');
+  });
+
+  it('writes client-texts.json with what clients texted and the team replied (S80, AC-X-235)', () => {
+    const files = unzip(
+      buildBusinessExport(
+        data({
+          clientTexts: [
+            {
+              id: '0190a000-0000-7000-8000-000000000c01',
+              clientId: CLIENT,
+              direction: 'in',
+              body: 'Can I bring my daughter on Saturday?',
+              sentByUserId: null,
+              createdAt: AT,
+            },
+            {
+              id: '0190a000-0000-7000-8000-000000000c02',
+              clientId: CLIENT,
+              direction: 'out',
+              body: 'Of course, see you then',
+              sentByUserId: '0190a000-0000-7000-8000-000000000c99',
+              createdAt: AT,
+            },
+          ],
+        }),
+        AT,
+      ).bytes,
+    );
+    expect(JSON.parse(files['client-texts.json'] ?? 'null')).toEqual([
+      {
+        clientId: CLIENT,
+        from: 'client',
+        words: 'Can I bring my daughter on Saturday?',
+        sentBy: null,
+        at: AT.toISOString(),
+      },
+      {
+        clientId: CLIENT,
+        from: 'team',
+        words: 'Of course, see you then',
+        sentBy: '0190a000-0000-7000-8000-000000000c99',
+        at: AT.toISOString(),
+      },
+    ]);
+    expect(files['README.txt']).toContain('client-texts.json  Texts your clients sent you');
+  });
+
+  it('writes no client-texts.json without texts', () => {
+    const files = unzip(buildBusinessExport(data(), AT).bytes);
+    expect(files['client-texts.json']).toBeUndefined();
   });
 
   it('writes text-consents.json with the words each consent was given to (S61, ADR-0065 §7)', () => {

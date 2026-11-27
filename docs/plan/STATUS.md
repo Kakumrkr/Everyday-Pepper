@@ -9,11 +9,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S80 Client texts kept** (brief approved, user: "start with your recommendation and complete the session successfully": D-1 one session, Reply → S80.2 only if the context runs short; D-2 route by booking texts, waitlist offers by text and replies; D-3 7 days; D-4 a neutral reply naming no business, once a day; D-5 Reply needs a v1/v3 consent in force, owners and managers, 300 characters, Undo until sent). ADR-0072, AC-X-229…236.
 - [x] 1. ACs and traceability
-- [ ] 2. Migration 0094: `client_texts`, `waitlist_offers.texted_at`, `sms_reply_target`, isolation, export
-- [ ] 3. Inbound: route, keep, neutral reply (keywords first)
-- [ ] 4. The 90-day sweep, deletion, privacy page
-- [ ] 5. The `client_text` card (next visit) · 6. Reply + Undo · 7. Profile: texts and every consent (top-up) · 8. e2e at 375 px
-- Next: task 2.
+- [x] 2. Migration 0094: `client_texts`, `waitlist_offers.texted_at`, `sms_reply_target`, isolation, export (db int green; client deletion and merge handle the texts)
+- [x] 3. Inbound: route, keep, neutral reply (keywords first; api unit green)
+- [x] 4. The 90-day sweep, deletion (privacy page still to do)
+- [x] 6. Reply + Undo service and API (`POST/DELETE /v1/clients/:id/texts/replies`), appointments int green
+- [ ] 5. The card UI (`ClientTextCards` on Home) · 7. Profile UI: texts and every consent (top-up; API done) · privacy page · ADR-0072 · 8. e2e at 375 px
+- Next: the UI card on Home.
 
 ## Last sessions
 - **S79 Phase 18 · Waitlist offers by text (2026-11-27)** ([PR #120](https://github.com/Kakumrkr/Everyday-Pepper/pull/120), [ADR-0065](../adr/0065-sms-channel.md) §S79). Full entry in [session-log.md](session-log.md).

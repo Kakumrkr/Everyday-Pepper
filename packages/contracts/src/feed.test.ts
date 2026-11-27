@@ -31,7 +31,7 @@ const item = {
 };
 
 describe('feed kinds', () => {
-  it('writes every insight type from the insights pass, the briefing and the calendar note besides (S38a, S71.2)', () => {
+  it('writes every insight type from the insights pass, the briefing, the calendar note and client texts besides (S38a, S71.2, S80)', () => {
     expect(InsightTypeSchema.options).toContain('staff_overload');
     expect(FeedInsightKindSchema.options).toEqual([
       'schedule_gaps',
@@ -47,6 +47,8 @@ describe('feed kinds', () => {
       ...FeedInsightKindSchema.options,
       'daily_briefing',
       'calendar_kept',
+      // S80: a client's own text.
+      'client_text',
     ]);
   });
 });

@@ -43,6 +43,7 @@ import {
   insertSmsKeywordEvent,
   isSmsOptedOut,
   listActiveSmsConsentsForClient,
+  listClientTexts,
   listSmsConsentsForClient,
   newId,
   revokeSmsConsent,
@@ -246,6 +247,22 @@ async function clientTextsIn(
 ): Promise<ClientTexts> {
   const textable = SmsPhoneSchema.safeParse(client.phone ?? '').success;
   const inForce = await listActiveSmsConsentsForClient(tx, client.id);
+  // Each consent in force with its purpose (S80 top-up, AC-X-236), and whether its number said STOP.
+  const consents: ClientTexts['consents'] = [];
+  for (const consent of inForce) {
+    const wordingVersion = SmsConsentWordingVersionSchema.parse(consent.wordingVersion);
+    const purpose = CONSENT_PURPOSE[wordingVersion];
+    if (purpose === undefined) continue;
+    consents.push({
+      phone: SmsPhoneSchema.parse(consent.phone),
+      purpose,
+      source: SmsConsentSourceSchema.parse(consent.source),
+      wordingVersion,
+      words: consent.shownText,
+      givenAt: UtcDateTimeSchema.parse(consent.givenAt.toISOString()),
+      optedOut: await isSmsOptedOut(tx, consent.phone),
+    });
+  }
   let latest = inForce[0];
   let status: ClientTexts['status'] = 'stopped';
   if (latest !== undefined) {
@@ -261,6 +278,17 @@ async function clientTextsIn(
     latest = (await listSmsConsentsForClient(tx, client.id, 1))[0];
   }
   const lastText = lastTextOf(await findLastBookingText(tx, client.id));
+  // Their own texts and the replies (S80, AC-X-234), newest first.
+  const messages = (await listClientTexts(tx, client.id, CLIENT_TEXTS_SHOWN)).map((text) => ({
+    id: text.id,
+    from: text.direction === 'in' ? ('client' as const) : ('team' as const),
+    body: text.body,
+    at: UtcDateTimeSchema.parse(text.createdAt.toISOString()),
+  }));
+  // Owners and managers reply while a consent a reply may go on is in force and not stopped.
+  const canReply =
+    can(actor.context, 'clients.manage') &&
+    consents.some((consent) => !consent.optedOut && REPLY_WORDINGS.has(consent.wordingVersion));
   if (latest === undefined) {
     return ClientTextsSchema.parse({
       status: 'never',
@@ -268,6 +296,9 @@ async function clientTextsIn(
       consent: null,
       canStop: false,
       lastText,
+      consents,
+      messages,
+      canReply,
     });
   }
   const active = latest.revokedAt === null;
@@ -285,8 +316,25 @@ async function clientTextsIn(
     },
     canStop: active && can(actor.context, 'clients.manage'),
     lastText,
+    consents,
+    messages,
+    canReply,
   });
 }
+
+/** How many of the client's texts and replies their profile shows (AC-X-234). */
+const CLIENT_TEXTS_SHOWN = 20;
+
+/** What a client's consent lets the business text, by its words (a member's v2 is no client's). */
+const CONSENT_PURPOSE: Partial<
+  Record<SmsConsentWordingVersion, ClientTexts['consents'][number]['purpose']>
+> = {
+  'sms-consent-v1': 'appointments',
+  'sms-consent-v3': 'waitlist_offer',
+};
+
+/** The words a reply may go on (S80). */
+const REPLY_WORDINGS: ReadonlySet<string> = new Set(SMS_PURPOSE_WORDINGS.reply);
 
 /** Why a text was dropped at send time (`deliverOutboxMessage`), as the profile says it. */
 const NOT_SENT_REASON: Record<string, LastTextReason> = {
@@ -364,8 +412,8 @@ export interface InboundSmsResult {
 
 /**
  * Handles a text to Pepper's number in the webhook's own request (ADR-0065 §5, AC-X-59): STOP,
- * START or HELP is recorded once and answered; anything else is neither stored nor answered (two-way
- * texting is V1.1). After this returns for a STOP, the next delivery to the number is dropped.
+ * START or HELP is recorded once and answered; anything else is left to the caller ("C", a card's
+ * "Y"/"N", then a client's own text, S80). After this returns for a STOP, the next delivery to the number is dropped.
  * The reply names the businesses the number said yes to (S61.2).
  */
 export async function handleInboundSms(
@@ -392,6 +440,17 @@ export async function handleInboundSms(
     keyword,
     reply: businesses === null ? null : smsKeywordReply(keyword, options.helpUrl, businesses),
   };
+}
+
+/**
+ * Whether any business on Pepper has a consent in force for this number (S80): a text that fits
+ * no business gets the neutral reply only then, never a stranger's number.
+ */
+export async function isTextedNumber(db: Database, phone: string): Promise<boolean> {
+  const parsed = SmsPhoneSchema.safeParse(phone);
+  if (!parsed.success) return false;
+  const businesses = await withSmsInbound(db, (tx) => smsConsentBusinesses(tx, parsed.data));
+  return businesses.length > 0;
 }
 
 /**

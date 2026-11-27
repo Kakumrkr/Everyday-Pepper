@@ -25,6 +25,7 @@ const CONSENT_HOW: Record<string, string> = {
 
 /** Written only when the business has consent records (S61). */
 const SMS_CONSENTS_FILE = 'text-consents.json';
+const CLIENT_TEXTS_FILE = 'client-texts.json';
 const PAYMENTS_FILE = 'payments.json';
 const DEPOSITS_FILE = 'deposits.json';
 const NO_SHOW_FEES_FILE = 'no-show-fees.json';
@@ -89,6 +90,9 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
       : []),
     ...(data.smsConsents.length > 0
       ? [`${SMS_CONSENTS_FILE}  Who agreed to your texts, when, how and the words they saw`]
+      : []),
+    ...(data.clientTexts.length > 0
+      ? [`${CLIENT_TEXTS_FILE}  Texts your clients sent you and your replies (the last 90 days)`]
       : []),
     ...(data.payments === null
       ? []
@@ -334,6 +338,22 @@ export function buildBusinessExport(
           wordingVersion: consent.wordingVersion,
           givenAt: at(consent.givenAt),
           revokedAt: consent.revokedAt === null ? null : at(consent.revokedAt),
+        })),
+      ),
+    ]);
+  }
+
+  // Clients' own texts and the team's replies (S80, ADR-0072), when there are any.
+  if (data.clientTexts.length > 0) {
+    jsonFiles.push([
+      CLIENT_TEXTS_FILE,
+      json(
+        data.clientTexts.map((text) => ({
+          clientId: text.clientId,
+          from: text.direction === 'in' ? 'client' : 'team',
+          words: text.body,
+          sentBy: text.sentByUserId,
+          at: at(text.createdAt),
         })),
       ),
     ]);

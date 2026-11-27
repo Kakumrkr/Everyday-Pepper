@@ -2,6 +2,7 @@ import {
   clearExpiredMemoryPreviousValues,
   deleteExpiredBookingVerifications,
   deleteOldBookingManageLinks,
+  deleteOldClientTexts,
   deleteFinishedOutboxMessages,
   deleteOldMemoryEpisodes,
   deleteOldPaymentWebhookEvents,
@@ -12,7 +13,7 @@ import {
   withPaymentsWebhook,
   type Database,
 } from '@pepper/db';
-import { MEMORY_LIMITS, type TenantId } from '@pepper/contracts';
+import { CLIENT_TEXT_RETENTION_DAYS, MEMORY_LIMITS, type TenantId } from '@pepper/contracts';
 import type { Clock } from '../clock.js';
 import { expireProposals } from './ai-actions.js';
 import { deleteIdleConversationsIn } from './conversations.js';
@@ -26,7 +27,7 @@ import { deleteIdleConversationsIn } from './conversations.js';
 // episodes after a year; from S30 (ADR-0035) it deletes the AI's proposed saves whose proposal
 // is over; from S37 (ADR-0041) it closes waitlist offers past their time; from S62 it removes
 // reminders' reschedule links of bookings that started more than 30 days ago; from S65 (ADR-0067)
-// Stripe's webhook events after 30 days.
+// Stripe's webhook events after 30 days; from S80 (ADR-0072) clients' texts after 90 days.
 
 /** How long an expired booking request (name, email, phone) is kept after it expires. */
 export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
@@ -34,6 +35,8 @@ export const BOOKING_REQUEST_RETENTION_MS = 24 * 60 * 60_000;
 export const REMINDER_LINK_RETENTION_MS = 30 * 24 * 60 * 60_000;
 /** How long Stripe's webhook events are kept (S65, ADR-0067 §6.3): Stripe retries for 3 days. */
 export const PAYMENT_WEBHOOK_RETENTION_MS = 30 * 24 * 60 * 60_000;
+/** How long a client's text and a reply are kept (S80, ADR-0072, AC-X-235). */
+export const CLIENT_TEXT_RETENTION_MS = CLIENT_TEXT_RETENTION_DAYS * 24 * 60 * 60_000;
 /** How long a sent or given-up outbox message (content already cleared) is kept. */
 export const OUTBOX_RETENTION_MS = 30 * 24 * 60 * 60_000;
 
@@ -55,6 +58,7 @@ export interface CleanupResult {
   waitlistOffers: number;
   reminderLinks: number;
   paymentWebhookEvents: number;
+  clientTexts: number;
 }
 
 /** One clean-up pass over every business, as of `clock.now()`. */
@@ -63,6 +67,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
   const requestsBefore = new Date(now - BOOKING_REQUEST_RETENTION_MS);
   const outboxBefore = new Date(now - OUTBOX_RETENTION_MS);
   const linksBefore = new Date(now - REMINDER_LINK_RETENTION_MS);
+  const textsBefore = new Date(now - CLIENT_TEXT_RETENTION_MS);
   const result: CleanupResult = {
     businesses: 0,
     bookingRequests: 0,
@@ -75,6 +80,7 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
     waitlistOffers: 0,
     reminderLinks: 0,
     paymentWebhookEvents: 0,
+    clientTexts: 0,
   };
   const episodesBefore = new Date(now - MEMORY_LIMITS.episodeRetentionDays * 86_400_000);
   // A proposal waits at most a day; its proposed fact goes the day after (S30).
@@ -119,6 +125,9 @@ export async function cleanUp(db: Database, options: { clock: Clock }): Promise<
       );
       result.reminderLinks += await inBatches(db, tenantId, (tx) =>
         deleteOldBookingManageLinks(tx, linksBefore, DELETE_BATCH),
+      );
+      result.clientTexts += await inBatches(db, tenantId, (tx) =>
+        deleteOldClientTexts(tx, textsBefore, DELETE_BATCH),
       );
     }
     result.businesses += page.length;

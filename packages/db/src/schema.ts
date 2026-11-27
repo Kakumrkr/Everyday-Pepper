@@ -2344,7 +2344,7 @@ export const feedItems = pgTable(
     index('feed_items_action_proposal_idx').on(table.tenantId, table.actionProposalId),
     check(
       'feed_items_kind_known',
-      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match', 'daily_briefing', 'calendar_kept')`,
+      sql`${table.kind} IN ('schedule_gaps', 'rebooking_due', 'no_show_pattern', 'staff_overload', 'waitlist_match', 'daily_briefing', 'calendar_kept', 'client_text')`,
     ),
     check(
       'feed_items_status_known',
@@ -2605,6 +2605,8 @@ export const waitlistOffers = pgTable(
     status: text('status').notNull().default('offered'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     bookingId: uuid('booking_id'),
+    // When the offer was queued by text (S79, S80): a reply within the window comes back here.
+    textedAt: timestamp('texted_at', { withTimezone: true }),
     ...timestamps,
   },
   (table) => [
@@ -3592,6 +3594,65 @@ export const bookingTexts = pgTable(
   ],
 );
 export type BookingTextRow = typeof bookingTexts.$inferSelect;
+
+/**
+ * A client's own texts and the team's replies (S80, ADR-0072): a text to Pepper's number that
+ * isn't a keyword, kept by the one business it was routed to (`sms_reply_target`), and an owner's
+ * or manager's reply (its outbox message's id and who wrote it). The words are the client's or
+ * the member's; never logged, never shown to the model in S80. In the export; removed with the
+ * client, and 90 days after they came (`CLIENT_TEXT_RETENTION_MS`).
+ */
+export const clientTexts = pgTable(
+  'client_texts',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id').notNull().default(currentTenantId),
+    clientId: uuid('client_id').notNull(),
+    direction: text('direction').notNull(),
+    body: text('body').notNull(),
+    // `in`: the provider and its id for the text (a replay has the same one).
+    provider: text('provider'),
+    providerEventId: text('provider_event_id'),
+    // `out`: the reply's outbox message and the member who wrote it.
+    outboxMessageId: uuid('outbox_message_id'),
+    sentByUserId: uuid('sent_by_user_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('client_texts_provider_event_unique').on(
+      table.tenantId,
+      table.provider,
+      table.providerEventId,
+    ),
+    index('client_texts_client_idx').on(table.tenantId, table.clientId, table.createdAt),
+    index('client_texts_created_idx').on(table.tenantId, table.createdAt),
+    foreignKey({
+      name: 'client_texts_client_fk',
+      columns: [table.tenantId, table.clientId],
+      foreignColumns: [clients.tenantId, clients.id],
+    }).onDelete('cascade'),
+    check('client_texts_direction_known', sql`${table.direction} IN ('in', 'out')`),
+    check('client_texts_body_length', sql`length(${table.body}) BETWEEN 1 AND 1600`),
+    check(
+      'client_texts_in_has_event',
+      sql`(${table.direction} = 'in') = (${table.providerEventId} IS NOT NULL AND ${table.provider} IS NOT NULL)`,
+    ),
+    check(
+      'client_texts_out_has_message',
+      sql`(${table.direction} = 'out') = (${table.outboxMessageId} IS NOT NULL AND ${table.sentByUserId} IS NOT NULL)`,
+    ),
+    check(
+      'client_texts_provider_known',
+      sql`${table.provider} IS NULL OR ${table.provider} IN ('twilio', 'sandbox')`,
+    ),
+    check(
+      'client_texts_provider_event_format',
+      sql`${table.providerEventId} IS NULL OR ${table.providerEventId} ~ '^[A-Za-z0-9:_-]{1,100}$'`,
+    ),
+    tenantIsolation(sql.raw('tenant_id')),
+  ],
+);
+export type ClientTextRow = typeof clientTexts.$inferSelect;
 
 /**
  * A card sent to a member by text for their OK (S63, ADR-0066 §3): one row per queued text (the

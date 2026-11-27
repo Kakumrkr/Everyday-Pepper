@@ -19,6 +19,7 @@ import type { TenantTx } from '../tenant.js';
 import { listSupportScreenshotsForExport } from './support-screenshots.js';
 import { findPaymentAccount } from './payments.js';
 import { listSmsConsentsForExport } from './sms.js';
+import { listClientTextsForExport } from './client-texts.js';
 import { listSupportForExport } from './support.js';
 
 // A business's export (S51, ADR-0053, AC-W1-37): everything the owner can take with them, read
@@ -82,6 +83,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   support_reads: 'when each member last opened a support request',
   support_screenshots: true,
   sms_consents: true,
+  client_texts: true,
   payment_accounts: true,
   booking_payments: true,
   booking_fees: true,
@@ -222,6 +224,15 @@ export interface BusinessExportData {
     /** The screenshots sent with them (S59.2.3, AC-X-31): the images are read from storage. */
     screenshots: { id: string; messageId: string; widths: number[] }[];
   };
+  /** Clients' own texts and the team's replies (S80, ADR-0072), kept 90 days. */
+  clientTexts: {
+    id: string;
+    clientId: string;
+    direction: string;
+    body: string;
+    sentByUserId: string | null;
+    createdAt: Date;
+  }[];
   /** Consents to the business's texts (S61, ADR-0065 §7): its TCPA records, revoked ones too. */
   smsConsents: {
     id: string;
@@ -463,6 +474,7 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       ),
     },
     smsConsents: await listSmsConsentsForExport(tx),
+    clientTexts: await listClientTextsForExport(tx),
     payments: await paymentsForExport(tx),
     deposits: (await tx.select().from(bookingPayments).orderBy(asc(bookingPayments.createdAt))).map(
       (row) => ({
