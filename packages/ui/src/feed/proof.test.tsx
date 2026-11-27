@@ -38,7 +38,7 @@ const wrap = (overrides: Partial<Wrap> = {}) =>
         bookingId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700031',
         clientName: 'Sam Diaz',
         startsAt: '2026-11-06T16:00:00.000Z',
-        noShowCount: 2,
+        topReason: { signal: 'missed_before', points: 3, misses: 2, visits: 5 },
       },
     ],
     ...overrides,
@@ -113,11 +113,40 @@ describe('eveningLines', () => {
         {
           key: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700031',
           title: 'Sam Diaz',
-          meta: '11:00 am · missed 2 visits in 6 months',
+          meta: '11:00 am · missed 2 of 5 visits',
         },
       ],
       more: null,
     });
+  });
+
+  it("names each visit's top reason in plain words (S77)", () => {
+    const meta = (topReason: Wrap['atRisk'][number]['topReason']) =>
+      eveningLines(
+        wrap({
+          atRisk: [
+            {
+              bookingId:
+                '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700031' as Wrap['atRisk'][number]['bookingId'],
+              clientName: 'Sam Diaz',
+              startsAt: '2026-11-06T16:00:00.000Z' as Wrap['atRisk'][number]['startsAt'],
+              topReason,
+            },
+          ],
+        }),
+        NY,
+      ).atRisk[0]?.meta;
+    expect(meta({ signal: 'missed_before', points: 2, misses: 1, visits: 1 })).toBe(
+      '11:00 am · missed 1 of 1 visit',
+    );
+    expect(meta({ signal: 'first_visit', points: 1 })).toBe('11:00 am · first visit');
+    expect(meta({ signal: 'booked_far_ahead', points: 1, days: 21 })).toBe(
+      '11:00 am · booked 21 days ahead',
+    );
+    expect(meta({ signal: 'online_no_deposit', points: 1 })).toBe(
+      '11:00 am · booked online, no deposit',
+    );
+    expect(meta({ signal: 'not_confirmed', points: 1 })).toBe('11:00 am · not confirmed yet');
   });
 
   it('says how many more are at risk than it names', () => {
@@ -141,7 +170,7 @@ describe('EveningWrap', () => {
   it('lists the visits at risk, accessibly', async () => {
     const { container } = render(<EveningWrap evening={wrap()} timeZone={NY} />);
     const region = screen.getByRole('region', { name: /Tomorrow: 7 visits/ });
-    expect(within(region).getByText('1 visit at risk of a no-show.')).toBeTruthy();
+    expect(within(region).getByText('1 visit may be missed.')).toBeTruthy();
     expect(
       within(within(region).getByRole('list', { name: 'Visits at risk' })).getByText('Sam Diaz'),
     ).toBeTruthy();
@@ -150,6 +179,6 @@ describe('EveningWrap', () => {
 
   it('says nobody is at risk when nobody is', () => {
     render(<EveningWrap evening={wrap({ atRiskCount: 0, atRisk: [] })} timeZone={NY} />);
-    expect(screen.getByText('Nobody booked has missed visits lately.')).toBeTruthy();
+    expect(screen.getByText('No visit tomorrow looks at risk.')).toBeTruthy();
   });
 });

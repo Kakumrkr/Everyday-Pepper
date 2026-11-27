@@ -20,6 +20,7 @@ const SMS_CONSENTS_FILE = 'text-consents.json';
 const PAYMENTS_FILE = 'payments.json';
 const DEPOSITS_FILE = 'deposits.json';
 const NO_SHOW_FEES_FILE = 'no-show-fees.json';
+const VISIT_RISK_FILE = 'visit-risk.json';
 
 /**
  * A cell as a spreadsheet should show it: text that a spreadsheet would run as a formula
@@ -90,6 +91,11 @@ function readme(data: BusinessExportData, exportedAt: Date, csvNames: readonly s
     ...(data.noShowFees.length > 0
       ? [
           `${NO_SHOW_FEES_FILE}  No-show fees you approved: the policy the client saw, who approved, and the charge`,
+        ]
+      : []),
+    ...(data.visitRisks.length > 0
+      ? [
+          `${VISIT_RISK_FILE}  Upcoming visits Pepper thinks may be missed, and why (from booking history only)`,
         ]
       : []),
     '',
@@ -257,6 +263,7 @@ export function buildBusinessExport(
           startsAt: at(booking.startsAt),
           endsAt: at(booking.endsAt),
           createdAt: at(booking.createdAt),
+          cancelledAt: booking.cancelledAt === null ? null : at(booking.cancelledAt),
         })),
       ),
     ],
@@ -362,6 +369,14 @@ export function buildBusinessExport(
           chargedAt: fee.chargedAt === null ? null : at(fee.chargedAt),
         })),
       ),
+    ]);
+  }
+
+  // Upcoming visits' risk (S77, ADR-0071), when there is any.
+  if (data.visitRisks.length > 0) {
+    jsonFiles.push([
+      VISIT_RISK_FILE,
+      json(data.visitRisks.map((risk) => ({ ...risk, computedAt: at(risk.computedAt) }))),
     ]);
   }
 

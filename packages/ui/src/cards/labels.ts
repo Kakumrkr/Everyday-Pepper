@@ -13,6 +13,7 @@ import {
   type ScreenLink,
   type WouldBeEmail,
 } from '@pepper/contracts';
+import { visitRiskFactLine } from '../feed/visit-risk.js';
 
 // The words of the AI's cards, the *Why?* sheet and the Autonomy page (S26, ADR-0031): pure
 // functions over the typed payloads, so every sentence a member reads about the AI's actions
@@ -619,6 +620,9 @@ export function factLine(fact: AiWhyFact): string | null {
         ? null
         : `After ${String(visits)} visits they were due back on ${formatDate(dueOn)}, and nothing is booked.`;
     }
+    case 'visit_risk':
+      // An upcoming visit's band and reasons (S77, ADR-0071), for S78's confirm-or-release card.
+      return visitRiskFactLine(value);
     case 'rule_change': {
       // `propose_rule` (S31): the rule it makes, which only an owner or manager approves.
       const rule = str('rule');

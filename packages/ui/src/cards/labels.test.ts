@@ -2,6 +2,7 @@ import {
   AutonomyActionSchema,
   levelAllowed,
   MemoryFactShownSchema,
+  visitRiskFactValue,
   type AiWhy,
 } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
@@ -118,6 +119,24 @@ describe('changeRows', () => {
       'They came in on Wed, Nov 4, and I haven’t asked them for a review in the last 90 days.',
     );
     expect(factLine({ kind: 'review_visit', value: {} })).toBeNull();
+    // A visit's risk (S77, ADR-0071): the band and its reasons, the miss first.
+    expect(
+      factLine({
+        kind: 'visit_risk',
+        value: visitRiskFactValue({
+          band: 'high',
+          points: 4,
+          reasons: [
+            { signal: 'missed_before', points: 3, misses: 2, visits: 5 },
+            { signal: 'not_confirmed', points: 1 },
+          ],
+        }),
+      }),
+    ).toBe('I rated the risk of a missed visit high: missed 2 of 5 visits, not confirmed yet.');
+    expect(factLine({ kind: 'visit_risk', value: { band: 'low' } })).toBe(
+      'I rated the risk of a missed visit low.',
+    );
+    expect(factLine({ kind: 'visit_risk', value: { band: 'unknown' } })).toBeNull();
     // A message the member asked for (S56a): to whom, what kind, the visit and the words.
     expect(
       changeRows('message.client', null, {

@@ -22,7 +22,7 @@ import {
   type ClientId,
   type UserId,
 } from '@pepper/contracts';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createDatabase, type Database } from './client.js';
@@ -82,6 +82,8 @@ import { listDueInsightRuns, requestInsightRun, syncFeedItems } from './reposito
 import { createTenant, withPublicTenant } from './repositories/tenants.js';
 import { insertExecution, insertProposal, saveAutonomySettings } from './repositories/trust.js';
 import { addUsage } from './repositories/usage.js';
+import { syncVisitRisks } from './repositories/visit-risks.js';
+import { visitRisks } from './schema.js';
 import {
   insertWaitlistMatch,
   insertWaitlistOffer,
@@ -435,6 +437,26 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],
+  },
+  visit_risks: {
+    tenantColumn: 'tenant_id',
+    // An upcoming visit's risk band (S77, ADR-0071): owners and managers only, never staff.
+    seed: async (tx) => {
+      const bookingId = BookingIdSchema.parse(await seedBooking(tx));
+      await syncVisitRisks(
+        tx,
+        [{ bookingId, band: 'medium', points: 2, reasons: [{ signal: 'first_visit', points: 1 }] }],
+        new Date('2026-10-19T14:00:00Z'),
+      );
+      const [row] = await tx
+        .select({ id: visitRisks.id })
+        .from(visitRisks)
+        .where(eq(visitRisks.bookingId, bookingId));
+      if (row === undefined) throw new Error('visit risk not seeded');
+      return row.id;
+    },
+    touch: 'points = points',
+    memberScope: [{ policyname: 'member_scope', cmd: 'ALL', qual: SEES_ALL, with_check: SEES_ALL }],
   },
   booking_occupancy: {
     tenantColumn: 'tenant_id',

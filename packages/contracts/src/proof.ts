@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BookingIdSchema } from './bookings.js';
 import { UtcDateTimeSchema } from './time.js';
+import { VisitRiskReasonSchema } from './visit-risk.js';
 
 // Proof of value (S55, ADR-0058; AC-W4-10…13): what Pepper did for the business in the last
 // 7 days, and the evening wrap of tomorrow. Both are read when Home asks, from the bookings,
@@ -60,8 +61,8 @@ export const AtRiskVisitSchema = z.object({
   /** The client's name as the business keeps it. */
   clientName: z.string().max(200),
   startsAt: UtcDateTimeSchema,
-  /** No-shows in the pattern's window (at least the pattern's minimum). */
-  noShowCount: z.number().int().positive(),
+  /** Why the visit is at risk: its band's top reason (S77, ADR-0071). */
+  topReason: VisitRiskReasonSchema,
 });
 export type AtRiskVisit = z.infer<typeof AtRiskVisitSchema>;
 
@@ -70,7 +71,7 @@ export const EveningWrapSchema = z.object({
   day: z.iso.date(),
   visitCount: z.number().int().nonnegative(),
   firstStartsAt: UtcDateTimeSchema.nullable(),
-  /** Visits whose client has the no-show pattern (2 in 180 days). */
+  /** Tomorrow's visits in the high risk band (S77, ADR-0071). */
   atRiskCount: z.number().int().nonnegative(),
   atRisk: z.array(AtRiskVisitSchema).max(PROOF_LIMITS.atRiskNamed),
 });

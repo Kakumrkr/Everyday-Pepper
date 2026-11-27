@@ -184,7 +184,7 @@ describe('the trigger on bookings (AC-X-168)', () => {
         sql`UPDATE bookings SET staff_member_id = ${sam.staffMemberId} WHERE id = ${id}`,
       );
       expect(await versionOf(tx, id)).toBe(3);
-      await setBookingStatus(tx, id, 'cancelled');
+      await setBookingStatus(tx, id, 'cancelled', new Date());
       expect(await versionOf(tx, id)).toBe(4);
       // Removed (an undone import): the row stays, so its event is removed.
       await tx.execute(sql`DELETE FROM bookings WHERE id = ${id}`);
@@ -602,7 +602,7 @@ describe('putting Pepper back (S71.2, AC-X-176, AC-X-177)', () => {
       expect(held?.leasedUntil).toEqual(new Date(NOW.getTime() + LEASE));
       expect(await leaseEventSyncForStray(tx, row.id, NOW, LEASE)).toBeUndefined();
       // A change meanwhile can't be claimed by a writer until the lease is given back.
-      await setBookingStatus(tx, BookingIdSchema.parse(booking.id), 'cancelled');
+      await setBookingStatus(tx, BookingIdSchema.parse(booking.id), 'cancelled', new Date());
       expect(await claimCalendarEventSync(tx, booking.id, NOW, LEASE)).toBeUndefined();
       if (held === undefined) throw new Error('not held');
       await releaseEventSyncLease(tx, held);

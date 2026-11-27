@@ -454,7 +454,17 @@ describe('"C" to confirm (AC-X-74)', () => {
     const b = await newBusiness();
     const booking = await reminded(b);
     const from = consentPhone(b);
+    const requests = async () =>
+      withTenant(db, b.tenantId, async (tx) => {
+        const { rows } = await tx.execute<{ n: number }>(
+          'SELECT count(*)::int AS n FROM insight_requests',
+        );
+        return rows[0]?.n ?? 0;
+      });
+    const before = await requests();
     const first = await confirmBookingByText(db, { from, receivedAt: new Date(at(2, '14:05')) });
+    // The visit's risk is rescored on the next pass (S77).
+    expect(await requests()).toBe(before + 1);
     expect(first).toEqual({
       outcome: 'confirmed',
       reply:

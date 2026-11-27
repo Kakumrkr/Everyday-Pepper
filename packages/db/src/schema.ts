@@ -943,6 +943,9 @@ export const bookings = pgTable(
     manageTokenHash: text('manage_token_hash'),
     // When the client confirmed by text ("C" to a reminder, S62); NULL: not confirmed by them.
     clientConfirmedAt: timestamp('client_confirmed_at', { withTimezone: true }),
+    // When it was cancelled (S77, ADR-0071), for a late cancel; NULL while it isn't cancelled.
+    // Older cancels were backfilled from their audit entry, else `updated_at` (migration 0089).
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
     // Who made it; NULL for the booking page and once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
@@ -996,6 +999,10 @@ export const bookings = pgTable(
     check(
       'bookings_source_known',
       sql`${table.source} IN ('team', 'ai', 'booking_page', 'import')`,
+    ),
+    check(
+      'bookings_cancelled_at',
+      sql`(${table.status} = 'cancelled') = (${table.cancelledAt} IS NOT NULL)`,
     ),
     check(
       'bookings_import_batch',
@@ -2427,6 +2434,52 @@ export const insightRequests = pgTable(
     index('insight_requests_tenant_idx').on(table.tenantId, table.seq),
     tenantIsolation(sql.raw('tenant_id')),
     jobScan('insights'),
+  ],
+);
+
+/**
+ * An upcoming visit's risk of being lost (S77, ADR-0071): its band and the reasons behind it,
+ * from the rules in `appointments/src/insights/visit-risk.ts`. One row per confirmed visit in
+ * the next `VISIT_RISK_HORIZON_DAYS`, written by the insights pass, which changes a row only
+ * when its band or reasons changed and removes rows for visits no longer upcoming. Owners and
+ * managers only, like the no-show pattern: staff never read a client's risk.
+ */
+export const visitRisks = pgTable(
+  'visit_risks',
+  {
+    id: uuid('id').primaryKey().$defaultFn(newId),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .default(currentTenantId)
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    bookingId: uuid('booking_id').notNull(),
+    band: text('band').notNull(),
+    points: smallint('points').notNull(),
+    // `VisitRiskReason[]` (`@pepper/contracts`), most points first; counts and days only.
+    reasons: jsonb('reasons').notNull(),
+    computedAt: timestamp('computed_at', { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: 'visit_risks_booking_fk',
+      columns: [table.tenantId, table.bookingId],
+      foreignColumns: [bookings.tenantId, bookings.id],
+    }).onDelete('cascade'),
+    check('visit_risks_band_known', sql`${table.band} IN ('low', 'medium', 'high')`),
+    check('visit_risks_points_range', sql`${table.points} BETWEEN 0 AND 20`),
+    check(
+      'visit_risks_reasons_array',
+      sql`jsonb_typeof(${table.reasons}) = 'array' AND jsonb_array_length(${table.reasons}) <= 8`,
+    ),
+    uniqueIndex('visit_risks_booking_unique').on(table.tenantId, table.bookingId),
+    tenantIsolation(sql.raw('tenant_id')),
+    // Owners and managers only (and the insights pass, which has no user).
+    pgPolicy('member_scope', {
+      as: 'restrictive',
+      for: 'all',
+      using: memberSeesAll,
+      withCheck: memberSeesAll,
+    }),
   ],
 );
 

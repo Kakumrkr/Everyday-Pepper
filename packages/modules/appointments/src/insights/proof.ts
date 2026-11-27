@@ -5,15 +5,16 @@ import {
   type BookingId,
   type ClientId,
   type UtcDateTime,
+  type VisitRiskReason,
 } from '@pepper/contracts';
 import { addDays, formatDate, fromZoned, toZoned } from '../availability/zoned-time.js';
-import { NO_SHOW_PATTERN, type InsightBooking } from './types.js';
+import type { InsightBooking } from './types.js';
+import { findVisitRisks } from './visit-risk.js';
 
 // Proof of value (S55, ADR-0058; AC-W4-10…12): the week card's numbers and the evening wrap,
 // pure functions of the rows the service reads, like the insight providers. No clock, no
 // database: the tests feed fixtures and compare the sums.
 
-const DAY_MS = 86_400_000;
 const utc = (ms: number) => new Date(ms).toISOString() as UtcDateTime;
 
 /** A visit booked in the week, as `listWeekBookings` reads it. */
@@ -105,7 +106,7 @@ export interface WrapNumbers {
     bookingId: BookingId;
     clientId: ClientId;
     startsAt: UtcDateTime;
-    noShowCount: number;
+    topReason: VisitRiskReason;
   }[];
 }
 
@@ -116,28 +117,22 @@ export function isEvening(timeZone: string, now: number): boolean {
 
 /**
  * Tomorrow in the business's time zone, from its evening hour (`PROOF_LIMITS.eveningHour`)
- * until midnight; `null` before. `bookings` must reach back the no-show window
- * (`NO_SHOW_PATTERN.windowDays`) and cover tomorrow. A visit is at risk when its client has the
- * no-show pattern (the feed's rule: 2 in 180 days), earliest first.
+ * until midnight; `null` before. `bookings` must reach back the history window
+ * (`INSIGHT_HISTORY_DAYS`) and cover tomorrow. A visit is at risk when its risk band is high
+ * (S77, ADR-0071), earliest first, each with its top reason.
  */
 export function buildEveningWrap(
   bookings: readonly InsightBooking[],
   timeZone: string,
   now: number,
+  cancelNoticeHours: number,
 ): WrapNumbers | null {
   if (!isEvening(timeZone, now)) return null;
   const local = toZoned(timeZone, now);
   const tomorrow = addDays(local, 1);
   const from = fromZoned(timeZone, tomorrow, 0);
   const to = fromZoned(timeZone, addDays(tomorrow, 1), 0);
-  const windowStart = now - NO_SHOW_PATTERN.windowDays * DAY_MS;
 
-  const noShows = new Map<ClientId, number>();
-  for (const booking of bookings) {
-    if (booking.status === 'no_show' && booking.start >= windowStart && booking.start < now) {
-      noShows.set(booking.clientId, (noShows.get(booking.clientId) ?? 0) + 1);
-    }
-  }
   const visits = bookings
     .filter(
       (booking) =>
@@ -151,15 +146,15 @@ export function buildEveningWrap(
     day: formatDate(tomorrow),
     visitCount: visits.length,
     firstStartsAt: first === undefined ? null : utc(first.start),
-    atRisk: visits.flatMap((visit) => {
-      const count = noShows.get(visit.clientId) ?? 0;
-      return count >= NO_SHOW_PATTERN.minCount
+    atRisk: findVisitRisks({ now, bookings, cancelNoticeHours }).flatMap((risk) => {
+      const top = risk.reasons[0];
+      return risk.band === 'high' && top !== undefined && risk.start >= from && risk.start < to
         ? [
             {
-              bookingId: visit.id,
-              clientId: visit.clientId,
-              startsAt: utc(visit.start),
-              noShowCount: count,
+              bookingId: risk.bookingId,
+              clientId: risk.clientId,
+              startsAt: utc(risk.start),
+              topReason: top,
             },
           ]
         : [];

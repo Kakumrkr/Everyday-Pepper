@@ -591,3 +591,14 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - S78 and S81a may split at their briefs;
     - five pilot metrics for the AI layer in scorecard §3 (the top-up);
     - S72.2's carried top-up kept on S58a's row.
+- **S77 (user, 2026-11-27):** "Go ahead, start with your recommendations and complete the session successfully." Taken ([ADR-0071](../adr/0071-visit-risk.md)):
+  - **D-1** a late cancel's time is a new `bookings.cancelled_at`, set on cancel and backfilled from the audit log (else `updated_at`).
+  - **D-2** the points: a pulled miss rate 2 or 3; first visit, booked 14+ days ahead, online with no deposit, not confirmed within 48 h: 1 each; low 0–1, medium 2–3, high 4+.
+  - **D-3** the evening wrap names tomorrow's high-band visits with their top reason.
+  - **D-4** owners see risk in the wrap only this session; the `visit_risk` fact is ready for S78's card.
+  - **Claude:**
+    - risk stays current while suggestions are paused (a reading, not a suggestion);
+    - a "C" asks for an insights run;
+    - a trigger records the cancel time on any path that doesn't pass one;
+    - the backfill keeps `updated_at` and lifts forced RLS for the owner only (review);
+    - two known limits handed to S78 (a business's cancel counts against the client; `not_confirmed` without a reminder).

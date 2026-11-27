@@ -17,6 +17,7 @@ export * from './feed.js';
 export * from './win-back.js';
 export * from './review-requests.js';
 export * from './proof.js';
+export * from './visit-risk.js';
 export * from './health.js';
 export * from './imports.js';
 export * from './invites.js';

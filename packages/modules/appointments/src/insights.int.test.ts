@@ -1,5 +1,7 @@
 import {
+  BookingIdSchema,
   TenantIdSchema,
+  type Booking,
   type Client,
   type Service,
   type StaffMember,
@@ -15,6 +17,7 @@ import {
 import {
   addMembership,
   listOpenFeedItems,
+  listVisitRisks,
   readFeedSettings,
   withMember,
   withTenant,
@@ -133,6 +136,7 @@ describe('the insights pass', () => {
       updated: 0,
       expired: 0,
       snoozed: 0,
+      risks: { written: 0, removed: 0 },
     });
   });
 
@@ -188,7 +192,10 @@ describe('the insights pass', () => {
     await withTenant(db, b.tenantId, async (tx) =>
       writeFeedSettings(tx, { ...(await readFeedSettings(tx)), suggestionsPaused: true }),
     );
-    expect(await runInsightsFor(db, b.tenantId, b.options)).toEqual({ outcome: 'paused' });
+    expect(await runInsightsFor(db, b.tenantId, b.options)).toEqual({
+      outcome: 'paused',
+      risks: { written: 0, removed: 0 },
+    });
     expect(await feed(b)).toHaveLength(before);
     // Turning it back on (through the service) asks for a run at once.
     await changeFeedSettings(db, b.owner, { suggestionsPaused: false });
@@ -225,5 +232,92 @@ describe('the insights pass', () => {
     expect(seen.length).toBe(5);
     expect(new Set(seen.map((item) => item.audienceStaffId))).toEqual(new Set([b.jess.id]));
     expect((await feed(b)).some((item) => item.audienceStaffId === ben.id)).toBe(true);
+  });
+});
+
+// Visit risk (S77, ADR-0071; AC-X-195, AC-X-198): every confirmed visit in the next 14 days
+// gets a band and reasons; a second run writes nothing; staff never read them.
+describe('visit risk in the insights pass', () => {
+  const visit = async (b: Business, startsAt: string): Promise<Booking> =>
+    createBooking(
+      db,
+      b.owner,
+      { clientId: b.maria.id, serviceId: b.service.id, staffMemberId: b.jess.id, startsAt },
+      { clock: b.clock },
+    );
+  const risksOf = (b: Business, ids: readonly string[]) =>
+    withTenant(db, b.tenantId, (tx) =>
+      listVisitRisks(
+        tx,
+        ids.map((id) => BookingIdSchema.parse(id)),
+      ),
+    );
+
+  it('scores every confirmed visit in the next 14 days, once', async () => {
+    const b = await newBusiness();
+    const tomorrow = await visit(b, '2026-11-03T15:00:00.000Z');
+    const nextWeek = await visit(b, '2026-11-10T15:00:00.000Z');
+    const beyond = await visit(b, '2026-11-17T15:00:00.000Z');
+    const first = await runInsightsFor(db, b.tenantId, b.options);
+    expect(first).toMatchObject({ outcome: 'ran', risks: { written: 2, removed: 0 } });
+
+    const stored = await risksOf(b, [tomorrow.id, nextWeek.id, beyond.id]);
+    expect(stored.map((risk) => risk.bookingId).sort()).toEqual([tomorrow.id, nextWeek.id].sort());
+    // Maria's first visit, not confirmed the day before: 2 points, medium.
+    expect(stored.find((risk) => risk.bookingId === tomorrow.id)).toMatchObject({
+      band: 'medium',
+      points: 2,
+      reasons: [
+        { signal: 'first_visit', points: 1 },
+        { signal: 'not_confirmed', points: 1 },
+      ],
+    });
+
+    // The same book an hour later: nothing written.
+    b.clock.set(new Date(Date.parse(NOW) + 61 * MINUTE).toISOString());
+    expect(await runInsightsFor(db, b.tenantId, b.options)).toMatchObject({
+      risks: { written: 0, removed: 0 },
+    });
+  });
+
+  it('drops a cancelled visit and counts a late cancel as a miss', async () => {
+    const b = await newBusiness();
+    const soon = await visit(b, '2026-11-02T16:00:00.000Z');
+    const later = await visit(b, '2026-11-09T15:00:00.000Z');
+    await runInsightsFor(db, b.tenantId, b.options);
+    // Cancelled 3 hours before it starts: inside the 24-hour notice.
+    b.clock.set('2026-11-02T13:00:00.000Z');
+    await changeBooking(db, b.owner, soon.id, { status: 'cancelled' }, { clock: b.clock });
+    b.clock.set('2026-11-02T17:00:00.000Z');
+    expect(await runInsightsFor(db, b.tenantId, b.options)).toMatchObject({
+      risks: { written: 1, removed: 1 },
+    });
+    const [risk] = await risksOf(b, [soon.id, later.id]);
+    expect(risk?.bookingId).toBe(later.id);
+    // (1 + 5 × 0.1) / (1 + 5) = 0.25: missed one of one.
+    expect(risk?.reasons[0]).toEqual({ signal: 'missed_before', points: 2, misses: 1, visits: 1 });
+  });
+
+  it('keeps risk current while suggestions are paused', async () => {
+    const b = await newBusiness();
+    await withTenant(db, b.tenantId, async (tx) =>
+      writeFeedSettings(tx, { ...(await readFeedSettings(tx)), suggestionsPaused: true }),
+    );
+    await visit(b, '2026-11-04T15:00:00.000Z');
+    expect(await runInsightsFor(db, b.tenantId, b.options)).toEqual({
+      outcome: 'paused',
+      risks: { written: 1, removed: 0 },
+    });
+  });
+
+  it('staff read no visit risk, even of their own visits (AC-X-198)', async () => {
+    const b = await newBusiness();
+    const own = await visit(b, '2026-11-03T15:00:00.000Z');
+    await runInsightsFor(db, b.tenantId, b.options);
+    const seen = await withMember(db, { tenantId: b.tenantId, userId: b.staffUser }, (tx) =>
+      listVisitRisks(tx, [BookingIdSchema.parse(own.id)]),
+    );
+    expect(seen).toEqual([]);
+    expect(await risksOf(b, [own.id])).toHaveLength(1);
   });
 });
