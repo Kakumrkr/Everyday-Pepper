@@ -368,9 +368,7 @@ describe('waitlist offer consent (S79, AC-X-220, AC-X-221)', () => {
       validUntil: '2026-12-01T15:00:00.000Z',
     });
     expect(sms).toMatchObject({ purpose: 'waitlist_offer' });
-    expect(() =>
-      OutboxSmsSchema.parse({ ...sms, purpose: 'marketing' }),
-    ).toThrow();
+    expect(() => OutboxSmsSchema.parse({ ...sms, purpose: 'marketing' })).toThrow();
   });
 });
 
