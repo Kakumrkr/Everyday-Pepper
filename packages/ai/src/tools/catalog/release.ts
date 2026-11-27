@@ -42,8 +42,9 @@ function visitWords(startsAt: string, timeZone: string): string {
   }).format(instant);
   const time = new Intl.DateTimeFormat('en-US', { timeZone, hour: 'numeric', minute: '2-digit' })
     .format(instant)
-    .replace('AM', 'am')
-    .replace('PM', 'pm');
+    // ICU may put a narrow no-break space before AM/PM: one plain space, lower case.
+    .replace(/\s*AM$/u, ' am')
+    .replace(/\s*PM$/u, ' pm');
   return `${date}, ${time}`;
 }
 
@@ -86,13 +87,18 @@ export const releaseUnconfirmedBooking: WriteTool = {
     const before = await getBookingIn(scope.tx, scope.actor, id);
     const [risk] = await listVisitRisks(scope.tx, [id]);
     let refundsDeposit = false;
+    let emailed = false;
+    const notify = scope.notifyClient(before.clientId);
     const released = await releaseUnconfirmedBookingIn(
       scope.tx,
       scope.actor,
       { bookingId: id, startsAt: args.startsAt },
       {
         ...domainOptions(scope),
-        notify: scope.notifyClient(before.clientId),
+        notify: async (tx, notice) => {
+          emailed = notice.email.email !== '';
+          await notify(tx, notice);
+        },
         // The business released it: a paid deposit is refunded in full (AC-X-209).
         onCancelled: async (tx, booking) => {
           const settled = await settleDepositOnCancelIn(tx, {
@@ -121,6 +127,8 @@ export const releaseUnconfirmedBooking: WriteTool = {
         ...bookingSide(now, { withId: true }),
         release: true,
         refund: refundsDeposit,
+        // Whether the release email goes (a client with no address gets none).
+        emailed,
         ...topReasonSide(risk?.reasons[0]),
       },
       touched: {

@@ -428,8 +428,14 @@ export function releaseReasonLine(side: ChangeSide | null): string | null {
 
 /** What approving a release does, in one line (DESIGN §6: name the consequence). */
 function releaseThenLine(side: ChangeSide | null): string {
-  const refund = side?.['refund'] === true ? ', refund the deposit in full' : '';
-  return `Email the client${refund}, and offer the time to your waitlist and regulars`;
+  // A client with no email address gets none (the card then says "No email to the client").
+  const steps = [
+    ...(side?.['emailed'] === false ? [] : ['email the client']),
+    ...(side?.['refund'] === true ? ['refund the deposit in full'] : []),
+  ];
+  const offer = 'offer the time to your waitlist and regulars';
+  const line = steps.length === 0 ? offer : `${steps.join(', ')}, and ${offer}`;
+  return line.charAt(0).toUpperCase() + line.slice(1);
 }
 
 const STATUS_LABEL: Record<string, string> = {

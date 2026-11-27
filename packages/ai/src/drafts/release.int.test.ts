@@ -231,7 +231,7 @@ describe('approving a release (AC-X-208, AC-X-209)', () => {
     await releaseJob(w);
     const card = await oneCard(w);
     const after = (card.preview as { after?: Record<string, unknown> }).after;
-    expect(after).toMatchObject({ release: true, refund: true });
+    expect(after).toMatchObject({ release: true, refund: true, emailed: true });
 
     // Staff can't approve it.
     await expect(approveToolProposal(depsFor(w, w.jess), card.id, card.fingerprint)).rejects.toThrow();
@@ -267,6 +267,16 @@ describe('what takes the card away (AC-X-210)', () => {
     await oneCard(w);
     const link = await manageLink(w, booking);
     await confirmManagedBooking(db, link.slug, link.token, booking.startsAt, { clock: w.clock });
+    expect(await releaseCards(w)).toHaveLength(0);
+  });
+
+  it('the business no longer asking clients to confirm', async () => {
+    const w = await newWorld(db);
+    const booking = await askedVisit(w);
+    w.clock.set(cutoffOf(booking).toISOString());
+    await releaseJob(w);
+    await oneCard(w);
+    await updateReminderSettings(db, w.owner, { askToConfirm: false }, { clock: w.clock });
     expect(await releaseCards(w)).toHaveLength(0);
   });
 

@@ -4,7 +4,13 @@ import {
   type ReminderSettings,
 } from '@pepper/contracts';
 import { withdrawPendingProposal } from '@pepper/core';
-import { findPendingProposalFor, type BookingRow, type TenantTx } from '@pepper/db';
+import {
+  findPendingProposalFor,
+  listPendingProposals,
+  lockPendingProposalFor,
+  type BookingRow,
+  type TenantTx,
+} from '@pepper/db';
 
 // The release card (S78.2, ADR-0071 §S78.2; AC-X-207…210): while the business asks clients to
 // confirm, a visit asked early enough and still unconfirmed at the cut-off gets one owner card,
@@ -80,4 +86,31 @@ export async function keepReleaseCardInStep(
     return;
   }
   await withdrawPendingProposal(tx, target, new Date(now));
+}
+
+/**
+ * Waits for and locks the visit's release card, if one waits (S78.2 review): a confirm calls it
+ * before it locks the booking, the order an approval takes them (the card, then the booking), so
+ * a confirm and an approval never interleave. An approval's dry run releases the booking's lock
+ * when its savepoint rolls back; without this, a confirm landing in that gap left a card behind.
+ */
+export async function lockReleaseCard(tx: TenantTx, bookingId: string): Promise<void> {
+  await lockPendingProposalFor(tx, releaseTargetKey(bookingId));
+}
+
+/** Release cards taken away at a time when the business stops asking (more wait for the next). */
+const WITHDRAW_PAGE = 200;
+
+/**
+ * Takes every waiting release card away (S78.2 review): the business stopped asking clients to
+ * confirm, so none of them could be approved any more. Returns how many went.
+ */
+export async function withdrawReleaseCards(tx: TenantTx, now: number): Promise<number> {
+  const at = new Date(now);
+  let withdrawn = 0;
+  for (const proposal of await listPendingProposals(tx, at, WITHDRAW_PAGE)) {
+    if (proposal.action !== 'booking.release') continue;
+    if (await withdrawPendingProposal(tx, proposal.targetKey, at)) withdrawn += 1;
+  }
+  return withdrawn;
 }

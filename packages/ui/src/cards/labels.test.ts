@@ -554,6 +554,11 @@ describe('the release card (S78.2, AC-X-208, AC-X-213)', () => {
     expect(rows.at(-1)?.after).toBe(
       'Email the client, and offer the time to your waitlist and regulars',
     );
+    // A client with no email address: no email promised.
+    expect(
+      changeRows('booking.release', before, { ...before, emailed: false, refund: true }).at(-1)
+        ?.after,
+    ).toBe('Refund the deposit in full, and offer the time to your waitlist and regulars');
     expect(releaseReasonLine({ riskSignal: 'booked_far_ahead', riskDays: 21 })).toBe(
       'Booked 21 days ahead',
     );

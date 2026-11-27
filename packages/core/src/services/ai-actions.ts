@@ -769,10 +769,10 @@ export async function expireProposals(tx: TenantTx, now: Date, limit: number): P
 /**
  * Takes away the card waiting for `targetKey`, in the caller's transaction, because the world
  * changed under it (S78.2: the client confirmed, or the visit moved or went): the proposal is
- * superseded by the system, its feed item expires, and the audit says so. A proposal being
- * approved this moment (another transaction holds its lock) is left alone: that approval re-runs
- * its dry run on this transaction's outcome and is refused, so either way there is one outcome
- * and no lock is waited for in the other order. Returns whether a card was taken away.
+ * superseded by the system, its feed item expires, and the audit says so. A proposal another
+ * transaction holds (being approved this moment) is skipped rather than waited for, which would
+ * take the locks in the other order; a caller that must not miss it (a confirm) locks it first
+ * with `lockPendingProposalFor`, before its own rows. Returns whether a card was taken away.
  */
 export async function withdrawPendingProposal(
   tx: TenantTx,

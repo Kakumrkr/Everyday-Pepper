@@ -12,7 +12,7 @@ import {
 } from '@pepper/db';
 import { confirmedReply, NOTHING_TO_CONFIRM_REPLY } from '../texts.js';
 import { requestInsights } from './insights.js';
-import { keepReleaseCardInStep } from './release-check.js';
+import { keepReleaseCardInStep, lockReleaseCard } from './release-check.js';
 import { emailDetailsOf } from './notices.js';
 
 // "C" to confirm (S62, ADR-0065, AC-X-74). A client's reply reaches Pepper's one number with no
@@ -41,6 +41,8 @@ export async function confirmBookingByText(
   if (target === undefined) return answer({ outcome: 'nothing', reply: NOTHING_TO_CONFIRM_REPLY });
   return withTenant(db, target.tenantId, async (tx) => {
     const bookingId = BookingIdSchema.parse(target.bookingId);
+    // The visit's release card first, then the visit: an approval's order (S78.2, AC-X-210).
+    await lockReleaseCard(tx, bookingId);
     const booking = await lockBooking(tx, bookingId);
     const tenant = await findCurrentTenant(tx);
     // Changed between the lookup and the lock (cancelled, started or moved off the reminded time).
