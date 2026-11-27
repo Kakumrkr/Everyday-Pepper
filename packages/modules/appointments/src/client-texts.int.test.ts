@@ -1,6 +1,7 @@
 import {
   ClientIdSchema,
   DEFAULT_REMINDER_SETTINGS,
+  FeedItemIdSchema,
   OutboxMessageIdSchema,
   TenantIdSchema,
   type Booking,
@@ -27,6 +28,7 @@ import {
 } from '@pepper/core';
 import {
   addMembership,
+  closeFeedItem,
   insertBookingText,
   insertOutboxMessage,
   insertSmsKeywordEvent,
@@ -337,6 +339,20 @@ describe('Reply (AC-X-233)', () => {
     await expect(
       undoClientTextReply(db, b.owner, b.maria.id, reply.replyId, options(b)),
     ).rejects.toBeInstanceOf(ClientTextNotSendableError);
+  });
+
+  it('Undo of a reply from the profile leaves a card the owner closed closed', async () => {
+    const b = await newBusiness();
+    await keepClientText(db, text(b, 'Thanks'));
+    const [card] = await cards(b);
+    await withMember(db, b.owner.context, (tx) =>
+      closeFeedItem(tx, FeedItemIdSchema.parse(card?.id), 'done', b.clock.now()),
+    );
+    const reply = await replyToClientText(db, b.owner, b.maria.id, { body: 'Anytime' }, options(b));
+    expect(await undoClientTextReply(db, b.owner, b.maria.id, reply.replyId, options(b))).toEqual({
+      outcome: 'taken_back',
+    });
+    expect(await cards(b)).toEqual([]);
   });
 
   it('is too late once sent', async () => {

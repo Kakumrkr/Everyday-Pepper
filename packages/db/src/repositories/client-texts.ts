@@ -8,7 +8,13 @@ import {
 import { and, asc, desc, eq, gt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import type { Database } from '../client.js';
-import { bookings, clientTexts, waitlistOffers, type ClientTextRow } from '../schema.js';
+import {
+  bookings,
+  clientTexts,
+  waitlistEntries,
+  waitlistOffers,
+  type ClientTextRow,
+} from '../schema.js';
 import type { TenantTx } from '../tenant.js';
 
 // A client's own texts and the team's replies (S80, ADR-0072): the lookup that routes a text to
@@ -74,7 +80,15 @@ export async function insertInboundClientText(
 /** Records a member's reply, queued as `outboxMessageId`, in the transaction that queued it. */
 export async function insertClientTextReply(
   tx: TenantTx,
-  input: { clientId: string; body: string; outboxMessageId: string; userId: string; at: Date },
+  input: {
+    clientId: string;
+    body: string;
+    outboxMessageId: string;
+    userId: string;
+    /** The card the reply closed (Undo opens it again); `null` from the profile. */
+    feedItemId: string | null;
+    at: Date;
+  },
 ): Promise<ClientTextRow> {
   const [row] = await tx
     .insert(clientTexts)
@@ -84,6 +98,7 @@ export async function insertClientTextReply(
       body: BodySchema.parse(input.body),
       outboxMessageId: Id.parse(input.outboxMessageId),
       sentByUserId: Id.parse(input.userId),
+      feedItemId: input.feedItemId === null ? null : Id.parse(input.feedItemId),
       createdAt: input.at,
     })
     .returning();
@@ -177,6 +192,18 @@ export async function markWaitlistOfferTexted(
     .update(waitlistOffers)
     .set({ textedAt: at })
     .where(eq(waitlistOffers.id, Id.parse(offerId)));
+}
+
+/** Marks a waitlist entry's opt-in text as queued at `at` (S80: a reply to it comes back here). */
+export async function markWaitlistEntryTexted(
+  tx: TenantTx,
+  entryId: string,
+  at: Date,
+): Promise<void> {
+  await tx
+    .update(waitlistEntries)
+    .set({ textedAt: at })
+    .where(eq(waitlistEntries.id, Id.parse(entryId)));
 }
 
 /** Every kept text and reply, for the business's export (AC-X-235). */

@@ -75,6 +75,13 @@ export function clockTime(iso: string, timeZone: string): string {
   return formatInstant(iso, timeZone).split(', ').at(-1) ?? iso;
 }
 
+/** Whether `iso` falls on the same local day as `now` in the business's time zone. */
+function sameLocalDay(iso: string, now: number, timeZone: string): boolean {
+  const day = (instant: number) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone, dateStyle: 'short' }).format(instant);
+  return day(Date.parse(iso)) === day(now);
+}
+
 function weeksAgo(iso: string, now: number): string {
   const days = Math.max(0, Math.round((now - Date.parse(iso)) / 86_400_000));
   return days < 14 ? `${String(days)} days ago` : `${String(Math.round(days / 7))} weeks ago`;
@@ -165,10 +172,14 @@ export function feedLine(item: FeedItem, timeZone: string, now: number): FeedLin
       // S80 (AC-X-232): who texted and when; the card quotes the words. Its booking, if any, is
       // the client's next visit: likely what the text is about.
       const { count: texts, receivedAt, nextVisitStartsAt } = item.payload;
+      // Today's at its time; an older one (a card stays a week) with its day too.
+      const when = sameLocalDay(receivedAt, now, timeZone)
+        ? `at ${clockTime(receivedAt, timeZone)}`
+        : formatInstant(receivedAt, timeZone);
       const sent =
         texts === 1
-          ? `${client} texted at ${clockTime(receivedAt, timeZone)}`
-          : `${client} sent ${count(texts, 'text')}, the last at ${clockTime(receivedAt, timeZone)}`;
+          ? `${client} texted ${when}`
+          : `${client} sent ${count(texts, 'text')}, the last ${when}`;
       const service = item.names.service === null ? '' : ` for ${item.names.service}`;
       const withStaff = item.names.staff === null ? '' : ` with ${item.names.staff}`;
       return {

@@ -22,8 +22,8 @@ import {
   type DynamicModule,
 } from '@nestjs/common';
 import { z } from 'zod';
-import { CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
-import { answering } from '../http/domain-errors.js';
+import { apiError, CurrentTenant, RequirePermission, TenantGuard } from '../auth/guards.js';
+import { answering, TooManyRequestsException } from '../http/domain-errors.js';
 import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 import { parseBody } from '../http/zod-body.js';
 
@@ -73,8 +73,11 @@ export class ClientRepliesController {
   ): Promise<ClientTextReply> {
     const { clientId } = parseBody(ClientParamsSchema, params);
     const request = parseBody(ClientTextReplyRequestSchema, body);
-    await this.limits.hit(REPLIES_PER_TENANT, tenant.tenantId);
-    return ClientTextReplySchema.parse(
+    // Only a queued reply counts: a refused one costs no text.
+    if (await this.limits.spent(REPLIES_PER_TENANT, tenant.tenantId)) {
+      throw new TooManyRequestsException(apiError('too_many_requests'));
+    }
+    const reply = ClientTextReplySchema.parse(
       await answering(() =>
         replyToClientText(this.db, actorOf(tenant), clientId, request, {
           texts: this.options.texts,
@@ -83,6 +86,8 @@ export class ClientRepliesController {
         }),
       ),
     );
+    await this.limits.hit(REPLIES_PER_TENANT, tenant.tenantId).catch(() => undefined);
+    return reply;
   }
 
   /** Undo: 200 `{ outcome: 'taken_back' | 'too_late' }`; 404 `reply_not_found`. */

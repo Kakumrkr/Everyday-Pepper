@@ -1137,6 +1137,8 @@ export const waitlistEntries = pgTable(
     status: text('status').notNull().default('waiting'),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     bookingId: uuid('booking_id'),
+    // When its opt-in text was queued (S79, S80): a reply within the window comes back here.
+    textedAt: timestamp('texted_at', { withTimezone: true }),
     // Who added it; NULL once their account is deleted.
     createdByUserId: uuid('created_by_user_id').references(() => users.id, {
       onDelete: 'set null',
@@ -3616,6 +3618,8 @@ export const clientTexts = pgTable(
     // `out`: the reply's outbox message and the member who wrote it.
     outboxMessageId: uuid('outbox_message_id'),
     sentByUserId: uuid('sent_by_user_id'),
+    // The card the reply closed, opened again by Undo (none for a reply from the profile).
+    feedItemId: uuid('feed_item_id'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [

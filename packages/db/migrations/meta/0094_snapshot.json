@@ -1,5 +1,5 @@
 {
-  "id": "6d5adb32-e138-4eaf-ba0f-0c0b08031f38",
+  "id": "63b87269-28a5-4a80-8cba-71fab90b5951",
   "prevId": "c05044f3-15a8-48bc-9172-876bc460f241",
   "version": "7",
   "dialect": "postgresql",
@@ -5338,6 +5338,12 @@
         },
         "sent_by_user_id": {
           "name": "sent_by_user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "feed_item_id": {
+          "name": "feed_item_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -14255,6 +14261,12 @@
         "booking_id": {
           "name": "booking_id",
           "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "texted_at": {
+          "name": "texted_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
         },

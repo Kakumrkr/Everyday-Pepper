@@ -61,6 +61,8 @@ import { reminderSettingsOf, textableNumber } from './reminders.js';
 const DAY_MS = 86_400_000;
 /** How long a text's card stays open (a text a week old is no longer news). */
 export const CLIENT_TEXT_CARD_DAYS = CLIENT_TEXT_WINDOW_DAYS;
+/** The most texts a card counts ("1000 texts"; the webhook limits a number long before). */
+const CLIENT_TEXT_COUNT_MAX = 1000;
 /** Seconds a reply waits before it may go, so Undo can take it back (like the AI's emails). */
 export const CLIENT_TEXT_REPLY_HOLD_SECONDS = 10;
 
@@ -120,10 +122,13 @@ export async function keepClientText(
       textId: kept.id,
       receivedAt: text.receivedAt,
       // The texts of the client's local day so far, this one included.
-      count: await countInboundClientTexts(tx, target.clientId, {
-        from: new Date(fromZoned(timeZone, local, 0)),
-        to: new Date(at + 1),
-      }),
+      count: Math.min(
+        CLIENT_TEXT_COUNT_MAX,
+        await countInboundClientTexts(tx, target.clientId, {
+          from: new Date(fromZoned(timeZone, local, 0)),
+          to: new Date(at + 1),
+        }),
+      ),
       nextVisit: next ?? null,
       expiresAt: new Date(at + CLIENT_TEXT_CARD_DAYS * DAY_MS),
     });
@@ -183,6 +188,7 @@ export async function replyToClientText(
       body,
       outboxMessageId: messageId,
       userId: actor.context.userId,
+      feedItemId: feedItemId ?? null,
       at: now,
     });
     await appendAuditEntry(tx, {
@@ -236,7 +242,8 @@ export async function undoClientTextReply(
     );
     if (cancelled.length === 0) return { outcome: 'too_late' as const };
     await deleteClientTextReply(tx, reply.id);
-    await reopenClientTextCard(tx, id);
+    // The card the reply closed, if any, opens again; a card the member closed with Done stays.
+    if (reply.feedItemId !== null) await reopenClientTextCard(tx, reply.feedItemId);
     await appendAuditEntry(tx, {
       actor: auditActorOf(actor),
       change: {

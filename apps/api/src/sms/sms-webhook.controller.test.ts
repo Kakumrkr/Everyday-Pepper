@@ -269,6 +269,12 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
       expect(appointments.keepClientText).not.toHaveBeenCalled();
     });
 
+    it('drops a number’s texts past 60 an hour, unanswered (a looping phone)', async () => {
+      limits.spent.mockResolvedValue(true);
+      expect(await send('Again')).toBe(EMPTY);
+      expect(appointments.keepClientText).not.toHaveBeenCalled();
+    });
+
     it('answers a text no business fits once a day, naming none', async () => {
       db.isMemberPhone.mockResolvedValue(false);
       appointments.keepClientText.mockResolvedValue({ outcome: 'unrouted' });

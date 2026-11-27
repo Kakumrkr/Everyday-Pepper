@@ -44,9 +44,12 @@ export {
 } from './activity/activity-log.js';
 export {
   ClientTextCards,
+  ClientTextReplyBox,
   type ClientTextCardsProps,
   type ClientTextItem,
+  type ClientTextReplyBoxProps,
   type ClientTextReplyResult,
+  type ClientTextUndoResult,
 } from './feed/client-texts.js';
 export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
 export {

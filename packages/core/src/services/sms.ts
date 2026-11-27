@@ -14,6 +14,7 @@ import {
   SmsPhoneSchema,
   SmsPurposeSchema,
   SMS_PURPOSE_WORDINGS,
+  reminderSettingsFrom,
   SMS_SOURCE_WORDINGS,
   smsSendableAt,
   TenantIdSchema,
@@ -285,9 +286,13 @@ async function clientTextsIn(
     body: text.body,
     at: UtcDateTimeSchema.parse(text.createdAt.toISOString()),
   }));
-  // Owners and managers reply while a consent a reply may go on is in force and not stopped.
+  // Owners and managers reply while the business's texts are on and a consent a reply may go on
+  // is in force and not stopped (the deployment's switch is checked when the reply is sent).
+  const tenant = await findCurrentTenant(tx);
   const canReply =
     can(actor.context, 'clients.manage') &&
+    tenant !== undefined &&
+    reminderSettingsFrom(tenant.reminderSettings).texts &&
     consents.some((consent) => !consent.optedOut && REPLY_WORDINGS.has(consent.wordingVersion));
   if (latest === undefined) {
     return ClientTextsSchema.parse({

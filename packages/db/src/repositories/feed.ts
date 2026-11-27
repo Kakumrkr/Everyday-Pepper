@@ -5,6 +5,7 @@ import {
   DEFAULT_FEED_SETTINGS,
   FEED_SNOOZE_DAYS,
   FeedInsightKindSchema,
+  FeedKindSchema,
   FeedItemIdSchema,
   FeedSettingsSchema,
   DailyBriefingPayloadSchema,
@@ -12,6 +13,7 @@ import {
   TenantIdSchema,
   type DailyBriefingPayload,
   type FeedInsightKind,
+  type FeedKind,
   type FeedItemId,
   type TenantId,
 } from '@pepper/contracts';
@@ -196,9 +198,10 @@ export async function listOpenFeedItems(
   tx: TenantTx,
   now: Date,
   limit = 50,
-  options: { excludeKinds?: readonly FeedInsightKind[] } = {},
+  options: { excludeKinds?: readonly FeedKind[]; onlyKind?: FeedKind } = {},
 ): Promise<FeedItemWithNames[]> {
-  const excluded = (options.excludeKinds ?? []).map((kind) => FeedInsightKindSchema.parse(kind));
+  const excluded = (options.excludeKinds ?? []).map((kind) => FeedKindSchema.parse(kind));
+  const only = options.onlyKind === undefined ? undefined : FeedKindSchema.parse(options.onlyKind);
   const max = z.number().int().min(1).max(200).parse(limit);
   const rows = await tx
     .select({
@@ -227,6 +230,7 @@ export async function listOpenFeedItems(
         gt(feedItems.expiresAt, now),
         // The briefing informs; it is read on its own (`readBriefing`), never as a suggestion.
         notInArray(feedItems.kind, [...excluded, BRIEFING]),
+        only === undefined ? undefined : eq(feedItems.kind, only),
       ),
     )
     .orderBy(desc(feedItems.createdAt), asc(feedItems.id))
@@ -1022,12 +1026,16 @@ export async function writeClientTextCard(tx: TenantTx, card: ClientTextCard): P
     });
 }
 
-/** Opens the client's latest done text card again (its reply was taken back, S80). */
-export async function reopenClientTextCard(tx: TenantTx, clientId: string): Promise<void> {
-  await tx.execute(sql`
-    UPDATE feed_items SET status = 'suggestion', acted_at = NULL
-    WHERE id = (
-      SELECT id FROM feed_items
-      WHERE kind = ${CLIENT_TEXT} AND client_id = ${Id.parse(clientId)} AND status = 'done'
-      ORDER BY acted_at DESC NULLS LAST, id DESC LIMIT 1)`);
+/** Opens a client's text card again (its reply was taken back, S80): `id` only, if it is done. */
+export async function reopenClientTextCard(tx: TenantTx, id: string): Promise<void> {
+  await tx
+    .update(feedItems)
+    .set({ status: 'suggestion', actedAt: null })
+    .where(
+      and(
+        eq(feedItems.id, Id.parse(id)),
+        eq(feedItems.kind, CLIENT_TEXT),
+        eq(feedItems.status, 'done'),
+      ),
+    );
 }

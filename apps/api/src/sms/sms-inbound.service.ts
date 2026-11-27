@@ -52,6 +52,9 @@ export interface InboundText {
   body: string;
 }
 
+// A number's own texts kept: at most 60 an hour (a looping phone or an auto-responder is cut off).
+const KEPT_TEXTS: RateLimit = { name: 'sms-client-text', max: 60, windowSeconds: 3600 };
+
 // A text no business fits gets the neutral reply once a day per number (S80, AC-X-230).
 const NEUTRAL_REPLIES: RateLimit = { name: 'sms-neutral-reply', max: 1, windowSeconds: 86_400 };
 
@@ -139,17 +142,21 @@ export class SmsInboundService {
    * number some business texts, never after a STOP, never to a member's number.
    */
   private async keep(text: InboundText, receivedAt: Date): Promise<string | null> {
+    const counter = (name: string) =>
+      createHmac('sha256', this.codeKey).update(`${name}\n${text.from}`).digest('hex');
+    // Past the hour's limit a text is dropped, unanswered; without Redis it is still kept.
+    const flood = await this.limits.spent(KEPT_TEXTS, counter('client-text')).catch(() => false);
+    if (flood) return null;
+    await this.limits.hit(KEPT_TEXTS, counter('client-text')).catch(() => undefined);
     const kept = await keepClientText(this.db, { ...text, receivedAt });
     if (kept.outcome === 'kept') return null;
     if (await this.optedOut(text.from)) return null;
     if (await isMemberPhone(this.db, text.from)) return null;
     if (!(await isTextedNumber(this.db, text.from))) return null;
-    const counter = createHmac('sha256', this.codeKey)
-      .update(`neutral-reply\n${text.from}`)
-      .digest('hex');
+    const neutral = counter('neutral-reply');
     try {
-      if (await this.limits.spent(NEUTRAL_REPLIES, counter)) return null;
-      await this.limits.hit(NEUTRAL_REPLIES, counter);
+      if (await this.limits.spent(NEUTRAL_REPLIES, neutral)) return null;
+      await this.limits.hit(NEUTRAL_REPLIES, neutral);
     } catch {
       // Redis is away: no reply rather than one that may repeat (the text is stored nowhere).
       return null;

@@ -326,6 +326,7 @@ describe('waitlist entries', () => {
     expiresAt: new Date('2026-11-06T23:00:00.000Z'),
     bookingId: null,
     createdByUserId: USER,
+    textedAt: null,
     createdAt: CREATED,
     updatedAt: UPDATED,
   };

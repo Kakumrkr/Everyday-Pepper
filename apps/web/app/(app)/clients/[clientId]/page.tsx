@@ -228,6 +228,7 @@ export default async function ClientPage({
           initial={texts}
           timeZone={timeZone}
           hasPhone={client.phone !== null}
+          businessName={current.business.name}
         />
       )}
 

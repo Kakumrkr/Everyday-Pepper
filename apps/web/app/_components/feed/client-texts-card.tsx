@@ -1,10 +1,41 @@
 'use client';
 
 import { ClientTextReplySchema, ClientTextUndoSchema, type FeedResponse } from '@pepper/contracts';
-import { buttonStyle, ClientTextCards, type ClientTextItem } from '@pepper/ui';
+import {
+  buttonStyle,
+  ClientTextCards,
+  type ClientTextItem,
+  type ClientTextReplyResult,
+  type ClientTextUndoResult,
+} from '@pepper/ui';
 import Link from 'next/link';
 import { ROUTES } from '../../../lib/account';
 import { sendJson } from '../../../lib/client-api';
+
+/** Queues a reply to the client (S80, AC-X-233); from a card, it closes that card. */
+export async function sendReply(
+  clientId: string,
+  body: string,
+  feedItemId?: string,
+): Promise<ClientTextReplyResult> {
+  const answer = await sendJson('POST', `/v1/clients/${clientId}/texts/replies`, {
+    body,
+    ...(feedItemId === undefined ? {} : { feedItemId }),
+  });
+  if (!answer.ok) return { ok: false, message: answer.message };
+  const reply = ClientTextReplySchema.parse(answer.data);
+  return { ok: true, replyId: reply.replyId, sendsAt: reply.sendsAt };
+}
+
+/** Undo of a queued reply. */
+export async function undoReply(clientId: string, replyId: string): Promise<ClientTextUndoResult> {
+  const answer = await sendJson(
+    'DELETE',
+    `/v1/clients/${clientId}/texts/replies/${replyId}`,
+    undefined,
+  );
+  return answer.ok ? ClientTextUndoSchema.parse(answer.data).outcome : { error: answer.message };
+}
 
 /** The feed's client texts (S80): shown on their own cards, never on the suggestion board. */
 export function clientTextItems(feed: FeedResponse): ClientTextItem[] {
@@ -36,27 +67,13 @@ export function ClientTextsCard({
       now={Date.now()}
       onReply={async (item, body) => {
         const clientId = item.subjects.clientId;
-        if (clientId === null) return { ok: false, message: 'This client is gone.' };
-        const answer = await sendJson('POST', `/v1/clients/${clientId}/texts/replies`, {
-          body,
-          feedItemId: item.id,
-        });
-        if (!answer.ok) return { ok: false, message: answer.message };
-        const reply = ClientTextReplySchema.parse(answer.data);
-        return { ok: true, replyId: reply.replyId, sendsAt: reply.sendsAt };
+        return clientId === null
+          ? { ok: false, message: 'This client is gone.' }
+          : sendReply(clientId, body, item.id);
       }}
       onUndo={async (item, replyId) => {
         const clientId = item.subjects.clientId;
-        if (clientId === null) return 'This client is gone.';
-        const answer = await sendJson(
-          'DELETE',
-          `/v1/clients/${clientId}/texts/replies/${replyId}`,
-          undefined,
-        );
-        if (!answer.ok) return answer.message;
-        return ClientTextUndoSchema.parse(answer.data).outcome === 'taken_back'
-          ? null
-          : 'Too late: the reply was already sent.';
+        return clientId === null ? { error: 'This client is gone.' } : undoReply(clientId, replyId);
       }}
       onDone={async (item) => {
         const answer = await sendJson('POST', `/v1/feed/${item.id}/close`, { outcome: 'done' });

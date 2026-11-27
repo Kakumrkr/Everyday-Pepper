@@ -1,9 +1,19 @@
 'use client';
 
 import { ClientTextsSchema, type ClientTexts, type ClientTextsConsent } from '@pepper/contracts';
-import { Badge, Button, buttonStyle, DetailTable, List, Sheet, SheetFooter } from '@pepper/ui';
+import {
+  Badge,
+  Button,
+  buttonStyle,
+  ClientTextReplyBox,
+  DetailTable,
+  List,
+  Sheet,
+  SheetFooter,
+} from '@pepper/ui';
 import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
+import { sendReply, undoReply } from '../feed/client-texts-card';
 import { formatPhone } from '../../../lib/booking-profile';
 import { dateTimeLabel } from '../../../lib/booking';
 import {
@@ -28,12 +38,14 @@ export function ClientTextsSection({
   initial,
   timeZone,
   hasPhone,
+  businessName,
 }: {
   clientName: string;
   clientId: string;
   initial: ClientTexts;
   timeZone: string;
   hasPhone: boolean;
+  businessName: string;
 }) {
   const [texts, setTexts] = useState(initial);
   const summary = textsSummary(texts, clientName, { timeZone, hasPhone });
@@ -67,6 +79,16 @@ export function ClientTextsSection({
           </div>
         )}
       </div>
+      {texts.canReply ? (
+        // Reply by text from the profile too (S80): a card on Home is gone after a week.
+        <ClientTextReplyBox
+          clientName={clientName}
+          businessName={businessName}
+          timeZone={timeZone}
+          onReply={(body) => sendReply(clientId, body)}
+          onUndo={(replyId) => undoReply(clientId, replyId)}
+        />
+      ) : null}
       {texts.messages.length === 0 ? null : (
         <TextThread clientName={clientName} texts={texts} timeZone={timeZone} />
       )}
@@ -103,9 +125,7 @@ function TextThread({
           </li>
         ))}
       </List>
-      <p className="m-0 pb-2 type-caption text-ink-3">
-        Kept 90 days. Reply from the text’s card on Home.
-      </p>
+      <p className="m-0 pb-2 type-caption text-ink-3">Kept 90 days.</p>
     </div>
   );
 }
@@ -192,7 +212,7 @@ function AgreedSheet({
           // Each yes in force, with what it lets you text (S80 top-up, AC-X-236).
           texts.consents.map((given) => (
             <section
-              key={`${given.purpose}:${given.phone}`}
+              key={`${given.source}:${given.phone}:${given.givenAt}`}
               aria-label={PURPOSE_LABEL[given.purpose]}
               className="grid gap-3"
               data-testid="client-texts-consent"

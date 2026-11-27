@@ -8,6 +8,7 @@ import {
 } from '@pepper/contracts';
 import { queueSms } from '@pepper/core';
 import {
+  markWaitlistEntryTexted,
   markWaitlistOfferTexted,
   type Tenant,
   type TenantTx,
@@ -133,7 +134,7 @@ export async function queueWaitlistOptInText(
   options: WaitlistTextOptions & { outboxKey: Buffer; now: Date },
 ): Promise<OutboxMessageId | undefined> {
   if (options.texts !== true || !reminderSettingsOf(tenant).texts) return undefined;
-  return queueSms(
+  const messageId = await queueSms(
     tx,
     {
       to: notice.phone,
@@ -147,4 +148,7 @@ export async function queueWaitlistOptInText(
       now: options.now,
     },
   );
+  // A reply to it within the window comes back to this business (S80, ADR-0072).
+  if (messageId !== undefined) await markWaitlistEntryTexted(tx, notice.entryId, options.now);
+  return messageId;
 }

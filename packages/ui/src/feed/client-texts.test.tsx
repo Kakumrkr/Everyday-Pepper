@@ -4,7 +4,12 @@ import { userEvent } from '@testing-library/user-event';
 import axe from 'axe-core';
 import { FeedItemSchema } from '@pepper/contracts';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ClientTextCards, type ClientTextCardsProps, type ClientTextItem } from './client-texts.js';
+import {
+  ClientTextCards,
+  ClientTextReplyBox,
+  type ClientTextCardsProps,
+  type ClientTextItem,
+} from './client-texts.js';
 import { feedLine } from './feed-lines.js';
 
 // Clients' texts on Home (S80, AC-X-232, AC-X-233): the card quotes the text as written, names
@@ -55,7 +60,7 @@ function renderCards(overrides: Partial<ClientTextCardsProps> = {}) {
         sendsAt: new Date(Date.now() + 10_000).toISOString(),
       }),
     ),
-    onUndo: vi.fn(() => Promise.resolve(null)),
+    onUndo: vi.fn(() => Promise.resolve('taken_back' as const)),
     onDone: vi.fn(() => Promise.resolve(null)),
     renderClientLink: () => <a href={`/clients/${CLIENT}`}>Open Maria L.</a>,
     ...overrides,
@@ -73,6 +78,12 @@ describe('feedLine for a client text', () => {
       title: 'Maria L. sent 3 texts, the last at 9:42 am',
       why: 'No visit booked. Reply to answer by text.',
     });
+  });
+
+  it('names the day of a text from an earlier day', () => {
+    expect(feedLine(item(), NY, NOW + 3 * 86_400_000).title).toBe(
+      'Maria L. texted Mon, Nov 2, 9:42 am',
+    );
   });
 
   it('never puts the words in its sentences', () => {
@@ -122,6 +133,17 @@ describe('ClientTextCards', () => {
     expect(screen.getByRole('button', { name: 'Reply' })).toBeTruthy();
   });
 
+  it('says a reply went when Undo is too late, and offers Undo no more', async () => {
+    const user = userEvent.setup();
+    renderCards({ onUndo: () => Promise.resolve('too_late') });
+    await user.click(screen.getByRole('button', { name: 'Reply' }));
+    await user.type(screen.getByRole('textbox'), 'Hi');
+    await user.click(screen.getByRole('button', { name: 'Send reply' }));
+    await user.click(screen.getByRole('button', { name: /Undo/ }));
+    expect(screen.getByRole('status').textContent).toContain('Reply to Maria L. sent by text.');
+    expect(screen.queryByRole('button', { name: /Undo/ })).toBeNull();
+  });
+
   it('says when a reply waits for the morning', async () => {
     const user = userEvent.setup();
     renderCards({
@@ -159,5 +181,33 @@ describe('ClientTextCards', () => {
     await user.click(screen.getByRole('button', { name: 'Done' }));
     expect(props.onDone).toHaveBeenCalled();
     expect(screen.queryByTestId('client-text-card')).toBeNull();
+  });
+});
+
+describe('ClientTextReplyBox', () => {
+  it('replies from the profile and Undo brings the button back', async () => {
+    const user = userEvent.setup();
+    const onReply = vi.fn(() =>
+      Promise.resolve({
+        ok: true as const,
+        replyId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700401',
+        sendsAt: new Date(Date.now() + 10_000).toISOString(),
+      }),
+    );
+    render(
+      <ClientTextReplyBox
+        clientName="Maria L."
+        businessName="Juniper Hair Studio"
+        timeZone={NY}
+        onReply={onReply}
+        onUndo={() => Promise.resolve('taken_back')}
+      />,
+    );
+    await user.click(screen.getByRole('button', { name: 'Reply by text' }));
+    await user.type(screen.getByRole('textbox', { name: 'Your reply to Maria L.' }), 'See you');
+    await user.click(screen.getByRole('button', { name: 'Send reply' }));
+    expect(onReply).toHaveBeenCalledWith('See you');
+    await user.click(screen.getByRole('button', { name: /Undo/ }));
+    expect(screen.getByRole('button', { name: 'Reply by text' })).toBeTruthy();
   });
 });

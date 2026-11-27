@@ -18,7 +18,7 @@ import type { Database } from './client.js';
 import { newId } from './ids.js';
 import { insertService, insertStaffMember } from './repositories/appointments.js';
 import { insertBookingText } from './repositories/booking-texts.js';
-import { insertBooking } from './repositories/bookings.js';
+import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import {
   countInboundClientTexts,
   deleteClientTextReply,
@@ -26,6 +26,7 @@ import {
   insertClientTextReply,
   insertInboundClientText,
   listClientTexts,
+  markWaitlistEntryTexted,
   markWaitlistOfferTexted,
   smsReplyTarget,
 } from './repositories/client-texts.js';
@@ -285,6 +286,36 @@ describe('whose a text is (sms_reply_target, AC-X-229, AC-X-230)', () => {
     });
     expect((await smsReplyTarget(db, offered, now))?.clientId).toBe(clientId);
 
+    // A waitlist opt-in text counts the same (the client who joined and texts back).
+    const joined = phone();
+    const waiting = await consentedClient(tenantA, joined, now);
+    await withTenant(db, tenantA, async (tx) => {
+      const entry = await insertWaitlistEntry(tx, {
+        clientId: ClientIdSchema.parse(waiting),
+        serviceId: ServiceIdSchema.parse(
+          (
+            await insertService(tx, {
+              name: `Cut ${newId()}`,
+              category: null,
+              durationMinutes: 30,
+              bufferBeforeMinutes: 0,
+              bufferAfterMinutes: 0,
+              priceFromCents: null,
+              priceToCents: null,
+              active: true,
+            })
+          ).id,
+        ),
+        staffMemberId: null,
+        windows: [{ date: '2026-12-01', start: '09:00', end: '12:00' }],
+        expiresAt: new Date(now.getTime() + 7 * DAY),
+        createdBy: null,
+      });
+      expect(await smsReplyTarget(tx, joined, now)).toBeUndefined();
+      await markWaitlistEntryTexted(tx, entry.id, new Date(now.getTime() - HOUR));
+    });
+    expect((await smsReplyTarget(db, joined, now))?.clientId).toBe(waiting);
+
     const replied = phone();
     const other = await consentedClient(tenantA, replied, now);
     const reply = await withTenant(db, tenantA, async (tx) => {
@@ -301,6 +332,7 @@ describe('whose a text is (sms_reply_target, AC-X-229, AC-X-230)', () => {
         body: 'See you at 3',
         outboxMessageId: messageId,
         userId: newId(),
+        feedItemId: null,
         at: new Date(now.getTime() - HOUR),
       });
     });

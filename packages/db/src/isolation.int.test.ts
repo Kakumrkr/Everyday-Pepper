@@ -486,6 +486,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       ).id;
     },
     touch: "status = 'cancelled'",
+    // Whose a client's text is (S80, `sms_reply_target`): an opt-in that went by text.
+    ownerLookup: 'sms_reply_lookup',
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],
