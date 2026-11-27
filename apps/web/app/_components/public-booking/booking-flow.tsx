@@ -46,6 +46,7 @@ import {
 import Link from 'next/link';
 import { flushSync } from 'react-dom';
 import { dateTimeLabel, timeLabel } from '../../../lib/booking';
+import { formatPhone } from '../../../lib/booking-profile';
 import { errorCodeOf, sendJson, type CallResult } from '../../../lib/client-api';
 import { formText } from '../../../lib/form';
 import { photoAlt, photoSrc, photoSrcSet } from '../../../lib/photos';
@@ -815,7 +816,7 @@ export function BookingFlow({ business, now }: { business: PublicBusiness; now: 
               <>
                 If a time opens up, we send a link to claim it to{' '}
                 <b className="text-ink">{details.email}</b>, or by text to{' '}
-                <b className="text-ink">{details.phone}</b> when the business texts.
+                <b className="text-ink">{formatPhone(details.phone)}</b> when the business texts.
               </>
             ) : (
               <>

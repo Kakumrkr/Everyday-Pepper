@@ -91,6 +91,7 @@ test('AC-X-222: a client ticks the waitlist’s text box and gets the opt-in tex
   await client.getByRole('button', { name: 'Join the waitlist' }).click();
   await expect(client.getByRole('heading', { name: 'You’re on the waitlist, Ana' })).toBeVisible();
   await expect(client.getByText(/or by text to .+ when the business texts/)).toBeVisible();
+  await expect(client.getByText(typed(phone), { exact: true })).toBeVisible();
 
   const optIn = await textTo(client, phone, /You're on the waitlist for Haircut/);
   expect(optIn).toContain('Reply HELP for help, STOP to opt out.');
