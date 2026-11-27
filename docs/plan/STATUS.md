@@ -8,13 +8,12 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 
 ## In progress
 **S80 Client texts kept** (brief approved, user: "start with your recommendation and complete the session successfully": D-1 one session, Reply → S80.2 only if the context runs short; D-2 route by booking texts, waitlist offers by text and replies; D-3 7 days; D-4 a neutral reply naming no business, once a day; D-5 Reply needs a v1/v3 consent in force, owners and managers, 300 characters, Undo until sent). ADR-0072, AC-X-229…236.
-- [x] 1. ACs and traceability
-- [x] 2. Migration 0094: `client_texts`, `waitlist_offers.texted_at`, `sms_reply_target`, isolation, export (db int green; client deletion and merge handle the texts)
-- [x] 3. Inbound: route, keep, neutral reply (keywords first; api unit green)
-- [x] 4. The 90-day sweep, deletion (privacy page still to do)
-- [x] 6. Reply + Undo service and API (`POST/DELETE /v1/clients/:id/texts/replies`), appointments int green
-- [ ] 5. The card UI (`ClientTextCards` on Home) · 7. Profile UI: texts and every consent (top-up; API done) · privacy page · ADR-0072 · 8. e2e at 375 px
-- Next: the UI card on Home.
+- [x] 1–8 built and committed: migration 0094 (`client_texts`, `waitlist_entries/offers.texted_at`, `client_texts.feed_item_id`, `sms_reply_target` from the phone's consents), inbound keep + neutral reply + 60/h per number, Home "Texts from clients" card (Reply, Undo, Done), Reply on the profile, every consent with its purpose (top-up), privacy/terms, ADR-0072, e2e `client-texts.spec.ts`.
+- [x] Close step 1: `/code-review` (10 findings, all fixed in 56e0d1a), `/security-review` (no findings ≥ 8).
+- [x] Close step 2: `pnpm check` red on format + api branch coverage 79.61% → fixed (prettier on migration meta; `client-replies.controller.test.ts`, api 80.95%); affected integration green (26 tasks, 11.5 min).
+- [ ] Close step 3, e2e (stack: `.claude/skills/session-close/e2e-stack.sh start <scratchpad>`): `client-texts.spec.ts` passes; feed, clients, legal, waitlist-texts pass. Left: baselines to redraw on purpose (privacy, terms, `client-texts-record` in screens.spec "public pages" and "help centre"; `booking-confirmed-by-text` now shoots the sheet only, since the calendar behind it scrolls with the time of day). The `--update-snapshots` run did not write new files: check why (try `--update-snapshots=changed` or `all`, desktop project for screens), look at the images, run once more.
+- Then: full `pnpm check` once more, walkthrough (375 px, the card and profile screenshots from client-texts.spec's output), PR, close docs while CI runs (STATUS, session-log with retro, decisions.md S80 line), merge.
+- Not changed on purpose: commit author stays the owner's (S78 D-1), despite the stop hook.
 
 ## Last sessions
 - **S79 Phase 18 · Waitlist offers by text (2026-11-27)** ([PR #120](https://github.com/Kakumrkr/Everyday-Pepper/pull/120), [ADR-0065](../adr/0065-sms-channel.md) §S79). Full entry in [session-log.md](session-log.md).

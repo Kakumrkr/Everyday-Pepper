@@ -51,7 +51,7 @@ test('a client texts back and the owner replies from the card', async ({
   await ana.getByLabel('Code').fill(code);
   await ana.getByRole('button', { name: 'Confirm booking' }).click();
   await expect(ana.getByRole('heading', { name: /You’re booked, Ana/ })).toBeVisible();
-  await textTo(page, phone, /Reply STOP/);
+  await textTo(page, phone, /STOP to opt out/);
 
   // She texts back: kept for this business, answered by no automatic text.
   expect(await textIn(page, phone, 'Can I bring my daughter along?')).toBeNull();

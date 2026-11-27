@@ -129,7 +129,9 @@ test('a client replies C to the reminder and the visit says "Confirmed by text"'
   });
   for (const scheme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
-    await expect.soft(page).toHaveScreenshot(`booking-confirmed-by-text-375-${scheme}.png`, {
+    // The sheet alone (S80): the calendar behind it scrolls to the visit's hour, which moves
+    // with the time of day the test runs.
+    await expect.soft(sheet).toHaveScreenshot(`booking-confirmed-by-text-375-${scheme}.png`, {
       animations: 'disabled',
     });
   }
