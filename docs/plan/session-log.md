@@ -1806,3 +1806,28 @@ Phases 2, 3 and 4 are done and merged. Phase 5 (messaging + jobs) was split into
   - **Timing:** not measured by a tool. Roughly 30 min reading and code checks for the brief, 45 min for the docs, 15 min for the Claude Doc; tier 0 checks under a minute.
   - **Not done / later:** `PHASE_CAPS_USD[18]` (code, S81a); the 10DLC campaign must name waitlist offers and replies to clients (STATUS "Waiting on the user" 5); buying the domain triggers S58a–S60.
   - **Retro:** went well: checking each claim of the draft against the code before planning, since the consent wording, the shared sender and the missing phase cap changed the plan and not just its words · do better: keep the plan's rows in one place (the playbook) and point the doc at it, instead of two full copies kept in step by hand · top-up for S77: the evening wrap names each at-risk visit's top reason.
+
+- **S77 Phase 18 · Visit risk with reasons (2026-11-27)** ([PR #116](https://github.com/Kakumrkr/Everyday-Pepper/pull/116), [ADR-0071](../adr/0071-visit-risk.md); AC-X-195…199).
+  - **Built:**
+    - `findVisitRisks`: five behaviour signals, named points, low/medium/high.
+    - `bookings.cancelled_at` (migration 0089): set by `setBookingStatus` and a trigger; backfilled from the audit log.
+    - `visit_risks` (owners/managers only): synced by the insights pass, even while paused; a "C" asks for a run; in the export and the isolation suite; on the privacy page.
+    - The evening wrap names tomorrow's high-band visits with their top reason (top-up).
+    - A `visit_risk` *Why?* fact.
+  - **Checks:**
+    - Unit: appointments 198 (visit-risk 14), contracts 878, ui 291, api 574, imports 193.
+    - `pnpm check` green (after formatting the migration snapshot and one lint fix).
+    - Affected integration: db 1,051, others 2,186. First run red twice: raw-SQL cancels in older tests hit the new check, so the trigger now fills the time; a pilot-metrics seed with triggers off now passes `cancelled_at`.
+    - e2e: gallery 11, legal 2, screens. The privacy and gallery baselines were updated on purpose; the sheet baselines were left as they were.
+  - **Review:** `/code-review` found 5.
+    - Fixed: the backfill bumped `updated_at` and couldn't see rows under forced RLS; it now has a migration test.
+    - Left for S78: a business's cancel counts against the client; `not_confirmed` scores without a reminder.
+    - Accepted: two nits.
+    - `/security-review`: none.
+  - **Walkthrough:** the wrap at 375 px, light and dark (gallery component): "1 visit may be missed. Tony Russo · 11:30 am · missed 2 of 5 visits"; nothing wider than the screen; the privacy text shows.
+  - **Timing:** brief ~10 min; build ~45 min; review + fixes ~15 min; `pnpm check` 3.9 min; integration 2.7 min (stopped at the first failure) then 11 min; e2e ~3 min; CI unknown at writing.
+  - **Not done / later:**
+    - Record who cancelled (S78).
+    - Score `not_confirmed` only after a reminder (S78).
+    - A risk chip on the booking sheet.
+  - **Retro:** went well: one pure rule set feeding the pass, the wrap and the fact kept the three in step, and the proxy test makes "behaviour only" a check rather than a promise · do better: grep the repo for raw-SQL writes to a table before adding a check constraint to it, since that cost an extra integration run · top-up for S78: the release card shows the visit's top reason from S77.
