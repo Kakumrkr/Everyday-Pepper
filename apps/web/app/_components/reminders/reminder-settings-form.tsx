@@ -142,8 +142,15 @@ export function ReminderSettingsForm({ initial }: { initial: ReminderSettingsVie
         <h2 id={`${leadId}-confirm`} className="m-0 type-heading">
           Confirming visits
         </h2>
-        <div className="flex flex-col divide-y divide-line rounded-lg bg-surface px-4">
-          <div className="flex flex-col gap-2 pb-3">
+        {/* Off: the one switch, as before S78.3; on: the cut-off and the holdback below it. */}
+        <div
+          className={
+            settings.askToConfirm
+              ? 'flex flex-col divide-y divide-line rounded-lg bg-surface px-4'
+              : 'rounded-lg bg-surface px-4 py-1'
+          }
+        >
+          <div className={settings.askToConfirm ? 'flex flex-col gap-2 pb-3' : undefined}>
             <Switch
               label="Ask clients to confirm"
               hint={askToConfirmHint(settings)}
