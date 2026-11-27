@@ -99,6 +99,20 @@ describe('BookingChangeSchema', () => {
     });
   });
 
+  it('says who cancelled on a cancel only (S78.2, AC-X-212)', () => {
+    expect(BookingChangeSchema.parse({ status: 'cancelled', cancelledBy: 'client' })).toEqual({
+      status: 'cancelled',
+      notifyClient: true,
+      cancelledBy: 'client',
+    });
+    expect(BookingChangeSchema.safeParse({ status: 'no_show', cancelledBy: 'client' }).success).toBe(
+      false,
+    );
+    expect(
+      BookingChangeSchema.safeParse({ status: 'cancelled', cancelledBy: 'someone' }).success,
+    ).toBe(false);
+  });
+
   it.each([
     ['back to confirmed', { status: 'confirmed' }],
     ['a move and a status at once', { startsAt: booking.startsAt, status: 'cancelled' }],

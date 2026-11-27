@@ -1,13 +1,15 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → next **S78.2**
+**Last updated:** 2026-11-27 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S78.2** in progress
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress. Next: **S78.2** (Phase 18: the release card, the holdback, "Who cancelled?"). The day the domain is bought, S58a, S57, S58b and S60 go next instead (PCR-017). The real Google testing-mode run of S71/S71.2 waits for a session with the user ("Waiting on the user" 1).
+**S78.2 The release card** (user, 2026-11-27: "Go ahead with your recommendations": D-1 split, the holdback and the cut-off template default → **S78.3**; D-2 a card only for visits asked at least 12 h before the cut-off, from the cut-off to the start; D-3 a release is the business's cancel, never the client's miss; D-4 the release note by email only; D-5 no Undo, the card says so).
+Tasks: 1 ACs AC-X-207…213, contracts (`booking.release` ask-only, `release_check` reminder, `cancelledBy` on the team's cancel), migration 0091 · 2 domain `releaseUnconfirmedBookingIn` + withdrawal on confirm/move/cancel + race test · 3 system tool `release_unconfirmed_booking` + the reminder job's proposer · 4 card words, top reason, Activity line, e2e · 5 "Who cancelled?" on the sheet · 6 ADR-0071 §S78.2, docs.
+Done: (none yet). Next: task 1.
 
 ## Last sessions
 - **S78 Phase 18 · The confirm ask (2026-11-27)** ([PR #117](https://github.com/Kakumrkr/Everyday-Pepper/pull/117), [ADR-0071](../adr/0071-visit-risk.md) §S78). Full entry in [session-log.md](session-log.md).

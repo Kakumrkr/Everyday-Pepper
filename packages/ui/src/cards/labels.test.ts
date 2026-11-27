@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import {
   AUTONOMY_GROUPS,
   changeRows,
+  releaseReasonLine,
   decisionLabels,
   DIAL_LABEL,
   LOCKED_HELP,
@@ -509,5 +510,62 @@ describe('the no-show fee card (S68, AC-X-138)', () => {
       reject: 'Waive',
     });
     expect(decisionLabels('booking.move', null)).toEqual({ approve: 'Approve', reject: 'Not now' });
+  });
+});
+
+describe('the release card (S78.2, AC-X-208, AC-X-213)', () => {
+  const before = {
+    bookingId: 'b1',
+    date: '2026-12-01',
+    time: '14:00',
+    endTime: '15:00',
+    clientName: 'Maria L.',
+    serviceName: 'Haircut',
+    staffName: 'Jess',
+    status: 'confirmed',
+  };
+
+  it('names the visit, its top reason and what the tap does', () => {
+    const rows = changeRows('booking.release', before, {
+      ...before,
+      status: 'cancelled',
+      release: true,
+      refund: true,
+      riskSignal: 'missed_before',
+      riskMisses: 2,
+      riskVisits: 5,
+    });
+    expect(rows.map((row) => [row.label, row.after])).toEqual([
+      ['Client', 'Maria L.'],
+      ['When', 'Tue, Dec 1 · 2:00 pm–3:00 pm'],
+      ['Service', 'Haircut'],
+      ['With', 'Jess'],
+      ['Top reason', 'Missed 2 of 5 visits'],
+      [
+        'Then',
+        'Email the client, refund the deposit in full, and offer the time to your waitlist and regulars',
+      ],
+    ]);
+  });
+
+  it('leaves the reason out without one, and the refund without a deposit', () => {
+    const rows = changeRows('booking.release', before, { ...before, refund: false, riskSignal: null });
+    expect(rows.map((row) => row.label)).not.toContain('Top reason');
+    expect(rows.at(-1)?.after).toBe(
+      'Email the client, and offer the time to your waitlist and regulars',
+    );
+    expect(releaseReasonLine({ riskSignal: 'booked_far_ahead', riskDays: 21 })).toBe(
+      'Booked 21 days ahead',
+    );
+    expect(releaseReasonLine({ riskSignal: 'first_visit' })).toBe('First visit');
+  });
+
+  it('asks with its own buttons, and is locked to asking', () => {
+    expect(decisionLabels('booking.release', null)).toEqual({
+      approve: 'Release and offer it',
+      reject: 'Keep it',
+    });
+    expect(LOCKED_HELP['booking.release']).toContain('can’t be undone');
+    expect(AUTONOMY_GROUPS[1]?.actions).toContain('booking.release');
   });
 });

@@ -151,6 +151,7 @@ import {
   type BookingNotify,
 } from './notices.js';
 import { requestInsights } from './insights.js';
+import { keepReleaseCardInStep } from './release-check.js';
 import { recognizeDeviceIn, rememberDeviceIn } from './remembered-devices.js';
 import { keepReminderInStep, reminderSettingsOf } from './reminders.js';
 import {
@@ -908,6 +909,8 @@ export async function confirmManagedBooking(
         },
       });
       await requestInsights(tx);
+      // A release card waiting for this visit goes (S78.2, AC-X-210).
+      await keepReleaseCardInStep(tx, marked, now);
     }
     return toPublicBooking(tx, tenant, marked ?? row, now, options.deposits);
   });

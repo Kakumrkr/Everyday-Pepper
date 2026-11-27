@@ -408,6 +408,11 @@ export interface ChangeBookingOptions {
    * proposes the no-show fee card the client's terms allow, AC-X-137; it never charges).
    */
   onNoShow?: ((tx: TenantTx, booking: { bookingId: string }) => Promise<void>) | undefined;
+  /**
+   * A release at the confirm cut-off (S78.2, `releaseUnconfirmedBookingIn`): the client gets the
+   * release email instead of the plain cancel, with its refund line.
+   */
+  released?: { refunded: boolean };
 }
 
 /**
@@ -450,7 +455,14 @@ export async function changeBookingIn(
     if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {
       throw new BookingNotStartedError();
     }
-    const changed = await setBookingStatus(tx, id, parsed.status, new Date(now));
+    // Who cancelled (S78.2, AC-X-212): the team says when a client phoned; else the business.
+    const changed = await setBookingStatus(
+      tx,
+      id,
+      parsed.status,
+      new Date(now),
+      parsed.cancelledBy ?? 'business',
+    );
     // The row is locked, so it is still there.
     if (changed === undefined) throw new BookingNotFoundError();
     await keepReminderInStep(tx, changed, now);
@@ -465,7 +477,7 @@ export async function changeBookingIn(
       await options.onNoShow(tx, { bookingId: row.id });
     }
     if (parsed.status === 'cancelled' && parsed.notifyClient && options.notify) {
-      await tellClient(tx, changed, 'cancelled', options.notify);
+      await tellClient(tx, changed, 'cancelled', options.notify, options.released);
     }
     return audited(tx, actor, row, changed);
   }
@@ -748,6 +760,7 @@ async function tellClient(
   row: BookingRow,
   kind: 'confirmed' | 'rescheduled' | 'cancelled',
   notify: BookingNotify,
+  released?: { refunded: boolean },
 ): Promise<void> {
   const tenant = await findCurrentTenant(tx);
   // The transaction's own business always exists.
@@ -757,7 +770,12 @@ async function tellClient(
   if (kind === 'cancelled') {
     // The business cancelled, so its policy's costs aren't the client's to read (S67.2 review).
     const policy = { sentence: null, note: null };
-    await notify(tx, { kind, email: { ...email, policy }, change: changeOf(row) });
+    await notify(tx, {
+      kind,
+      email: { ...email, policy },
+      change: changeOf(row),
+      ...(released !== undefined && { released }),
+    });
     return;
   }
   const link = newManageToken();

@@ -38,6 +38,7 @@ export const ACTION_NOUN: Record<AutonomyAction, string> = {
   'booking.move': 'moves',
   'booking.cancel': 'cancellations',
   'booking.no_show': 'no-shows',
+  'booking.release': 'releasing unconfirmed visits',
   'booking_request.accept': 'accepting booking-page requests',
   'time.block': 'blocking time',
   'client_note.save': 'client notes',

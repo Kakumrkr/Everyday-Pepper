@@ -184,7 +184,10 @@ export function ChangeCard(props: ChangeCardProps) {
           </Button>
         )}
       </div>
-      {decide && props.settingsLink !== undefined && action !== 'payment.no_show_fee' ? (
+      {decide &&
+      props.settingsLink !== undefined &&
+      action !== 'payment.no_show_fee' &&
+      action !== 'booking.release' ? (
         <p className="m-0 type-caption text-ink-2">
           Your settings ask me to check with you first. {props.settingsLink}
         </p>
@@ -192,6 +195,12 @@ export function ChangeCard(props: ChangeCardProps) {
       {/* Money always asks the owner (S68): no setting to change. */}
       {decide && action === 'payment.no_show_fee' ? (
         <p className="m-0 type-caption text-ink-2">Nothing is charged until you tap.</p>
+      ) : null}
+      {/* A release always asks and can't be taken back (S78.2, D-5). */}
+      {decide && action === 'booking.release' ? (
+        <p className="m-0 type-caption text-ink-2">
+          Nothing changes until you tap. A release can’t be undone.
+        </p>
       ) : null}
     </article>
   );

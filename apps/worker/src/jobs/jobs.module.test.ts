@@ -1,5 +1,6 @@
 import { Logger } from '@nestjs/common';
 import 'reflect-metadata';
+import type * as Appointments from '@pepper/appointments';
 import type * as Core from '@pepper/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { templateInsights } from '@pepper/templates';
@@ -42,6 +43,10 @@ vi.mock('@pepper/google-calendar', async (original) => ({
   runDueCalendarReads: calendar.runDueCalendarReads,
   runDueCalendarWrites: calendar.runDueCalendarWrites,
 }));
+const ai = vi.hoisted(() => ({
+  proposeReleaseIn: vi.fn<(...args: unknown[]) => Promise<boolean>>(),
+}));
+vi.mock('@pepper/ai', () => ai);
 const drafts = vi.hoisted(() => ({ run: vi.fn(), morningDraftsJob: vi.fn() }));
 vi.mock('./drafts.js', () => ({ morningDraftsJob: drafts.morningDraftsJob }));
 
@@ -101,6 +106,29 @@ describe('JobsRunner', () => {
       clock,
       baseUrl: 'https://app.example.com',
       texts: true,
+      onReleaseDue: expect.any(Function) as unknown,
+    });
+  });
+
+  it('proposes the release card at the cut-off with the web origin (S78.2, AC-X-207)', async () => {
+    const runner = new JobsRunner(DB as never, {
+      ...OPTIONS,
+      reminders: { baseUrl: 'https://app.example.com', texts: false },
+    });
+    await runner.reminders.runOnce();
+    const call = appointments.sendDueReminders.mock.calls[0] as unknown[] | undefined;
+    const options = call?.[1] as Parameters<typeof Appointments.sendDueReminders>[1] | undefined;
+    const tx = {} as never;
+    ai.proposeReleaseIn.mockResolvedValue(true);
+    await expect(
+      options?.onReleaseDue?.(tx, { tenantId: 't1' as never, bookingId: 'b1' as never }),
+    ).resolves.toBe(true);
+    expect(ai.proposeReleaseIn).toHaveBeenCalledWith(tx, 't1', 'b1', {
+      db: DB.db,
+      clock,
+      emails: { baseUrl: 'https://app.example.com', outboxKey: OPTIONS.key },
+      templateRuleDefaults: expect.any(Function) as unknown,
+      onUnexpected: expect.any(Function) as unknown,
     });
   });
 

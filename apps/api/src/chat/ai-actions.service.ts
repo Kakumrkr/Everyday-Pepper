@@ -6,11 +6,12 @@ import {
   shownPreview,
   undoToolAction,
 } from '@pepper/ai';
-import { waitlistFillOf } from '@pepper/appointments';
+import { releasedFillOf, waitlistFillOf, type WaitlistFill } from '@pepper/appointments';
 import {
   AiEmailViewSchema,
   AiWhyFactSchema,
   AUTONOMY_ACTIONS,
+  BookingIdSchema,
   ClientIdSchema,
   MemoryFactIdSchema,
   type ActionExecution,
@@ -353,27 +354,32 @@ export class AiActionsService {
   }
 
   /**
-   * A waitlist offer's outcome for its Activity line (S54, AC-W5-5): who claimed it and the
-   * booking's price, or whether it is still open; nothing for other actions.
+   * A waitlist offer's outcome for its Activity line (S54, AC-W5-5), or a released visit's
+   * (S78.2): who claimed it and the booking's price, or whether it is still open, and how many
+   * it was offered to; nothing for other actions.
    */
   private async fillOf(
     actor: Actor,
     execution: ActionExecution,
   ): Promise<Pick<AiActionView, 'fill'>> {
-    if (execution.action !== 'message.waitlist_offer') return {};
-    if (execution.entity.type !== 'waitlist_match') return {};
-    const fill = await waitlistFillOf(
-      this.db,
-      actor,
-      WaitlistMatchIdSchema.parse(execution.entity.id),
-      { clock: this.clock },
-    );
+    let fill: WaitlistFill | undefined;
+    if (execution.action === 'message.waitlist_offer' && execution.entity.type === 'waitlist_match') {
+      fill = await waitlistFillOf(this.db, actor, WaitlistMatchIdSchema.parse(execution.entity.id), {
+        clock: this.clock,
+      });
+    } else if (execution.action === 'booking.release' && execution.entity.type === 'booking') {
+      // S78.2 (AC-X-211): the released visit's time, as the fill loop offered it.
+      fill = await releasedFillOf(this.db, actor, BookingIdSchema.parse(execution.entity.id), {
+        clock: this.clock,
+      });
+    }
     if (fill === undefined) return {};
     return {
       fill: {
         state: fill.state,
         clientName: fill.clientName === null ? null : shortClientName(fill.clientName),
         priceCents: fill.priceCents,
+        offered: fill.offered,
       },
     };
   }

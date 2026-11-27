@@ -33,9 +33,10 @@ import {
   type Mailer,
 } from '@pepper/core';
 import type { Database } from '@pepper/db';
+import { proposeReleaseIn } from '@pepper/ai';
 import { DATABASE, MAILER } from '@pepper/runtime';
 import { createScreenshotStore, type ObjectStore } from '@pepper/storage';
-import { templateDrafts, templateInsights } from '@pepper/templates';
+import { templateDrafts, templateInsights, templateRuleDefaults } from '@pepper/templates';
 import { morningDraftsJob, type DraftsJobConfig } from './drafts.js';
 import { Periodic } from './periodic.js';
 
@@ -144,6 +145,8 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
   ) {
     const { db } = database;
     const clock = options.clock ?? systemClock;
+    const releaseBase = options.reminders?.baseUrl ?? null;
+    const releaseEmails = releaseBase === null ? null : { baseUrl: releaseBase, outboxKey: options.key };
     this.reminders = new Periodic(
       'Reminder job',
       options.reminderPollMs,
@@ -153,6 +156,23 @@ export class JobsRunner implements OnApplicationBootstrap, OnApplicationShutdown
           clock,
           baseUrl: options.reminders?.baseUrl ?? null,
           texts: options.reminders?.texts ?? false,
+          ...(releaseEmails !== null && {
+            // The release card at the confirm cut-off (S78.2, AC-X-207): its approval emails the
+            // client, so it needs the web origin for the booking page link.
+            onReleaseDue: (tx, booking) =>
+              proposeReleaseIn(tx, booking.tenantId, booking.bookingId, {
+                db,
+                clock,
+                emails: releaseEmails,
+                templateRuleDefaults,
+                onUnexpected: (error) => {
+                  // Its name only: an error's message can hold a client's details.
+                  this.logger.warn(
+                    `Release card not made: ${error instanceof Error ? error.name : 'Error'}`,
+                  );
+                },
+              }),
+          }),
         }),
       this.logger,
     );

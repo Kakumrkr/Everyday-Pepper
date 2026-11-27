@@ -33,6 +33,7 @@ import {
 import {
   addMembership,
   ClientEmailTakenError,
+  findBooking,
   listAuditEntries,
   listOccupancy,
   withTenant,
@@ -561,6 +562,20 @@ describe('changeBooking', () => {
     await expect(
       changeBooking(db, b.owner, booking.id, { startsAt: tue('12:00') }, { clock: b.clock }),
     ).rejects.toBeInstanceOf(BookingNotChangeableError);
+  });
+
+  it('records who cancelled: the team says a client phoned, else the business (S78.2, AC-X-212)', async () => {
+    const b = await newBusiness();
+    await introduce(b);
+    const phoned = await book(b, b.owner, request(b, tue('10:00')));
+    const ours = await book(b, b.owner, request(b, tue('12:00')));
+    await changeBooking(db, b.owner, phoned.id, { status: 'cancelled', cancelledBy: 'client' });
+    await changeBooking(db, b.owner, ours.id, { status: 'cancelled' });
+    const rows = await withTenant(db, b.tenantId, async (tx) => [
+      await findBooking(tx, phoned.id),
+      await findBooking(tx, ours.id),
+    ]);
+    expect(rows.map((row) => row?.cancelledBy)).toEqual(['client', 'business']);
   });
 
   it('completed and no-show only once it has started; then it can no longer move', async () => {

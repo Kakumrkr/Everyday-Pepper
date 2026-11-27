@@ -60,6 +60,17 @@ export class BookingMovedError extends Error {
   }
 }
 
+/**
+ * The visit can't be released (S78.2, AC-X-210): the client confirmed, it moved, was cancelled
+ * or started, or the business stopped asking clients to confirm. `reason` names which.
+ */
+export class BookingNotReleasableError extends Error {
+  constructor(readonly reason: string) {
+    super('This visit can no longer be released');
+    this.name = 'BookingNotReleasableError';
+  }
+}
+
 /** Completed and no-show record what happened, so the appointment must have started. */
 export class BookingNotStartedError extends Error {
   constructor() {

@@ -1,6 +1,7 @@
 import {
   BookingAlreadyStartedError,
   BookingNotChangeableError,
+  BookingNotReleasableError,
   BookingNotFoundError,
   BookingNotStartedError,
   IdempotencyKeyReusedError,
@@ -154,6 +155,13 @@ export function toolRefusalOf(error: unknown): ToolRefusal {
       code: 'not_changeable',
       message:
         'That appointment hasn’t started yet, so it can’t be marked a no-show or done. Nothing was changed.',
+    };
+  }
+  if (error instanceof BookingNotReleasableError) {
+    return {
+      code: 'not_changeable',
+      message:
+        'The client confirmed or the visit changed since, so I didn’t release it. Nothing was changed.',
     };
   }
   if (error instanceof BookingNotChangeableError) {

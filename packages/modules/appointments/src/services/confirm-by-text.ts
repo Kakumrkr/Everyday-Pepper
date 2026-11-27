@@ -12,6 +12,7 @@ import {
 } from '@pepper/db';
 import { confirmedReply, NOTHING_TO_CONFIRM_REPLY } from '../texts.js';
 import { requestInsights } from './insights.js';
+import { keepReleaseCardInStep } from './release-check.js';
 import { emailDetailsOf } from './notices.js';
 
 // "C" to confirm (S62, ADR-0065, AC-X-74). A client's reply reaches Pepper's one number with no
@@ -69,6 +70,8 @@ export async function confirmBookingByText(
       });
       // A confirmed visit's risk drops (S77): the next insights pass rescores it.
       await requestInsights(tx);
+      // A release card waiting for this visit goes (S78.2, AC-X-210).
+      await keepReleaseCardInStep(tx, marked, input.receivedAt.getTime());
     }
     const details = await emailDetailsOf(tx, tenant, booking);
     const already = marked === undefined;

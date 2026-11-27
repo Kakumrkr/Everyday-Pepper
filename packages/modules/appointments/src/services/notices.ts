@@ -126,7 +126,13 @@ export type BookingNotice =
       manageToken: ManageToken;
       change: BookingChange;
     }
-  | { kind: 'cancelled'; email: BookingEmailDetails; change: BookingChange };
+  | {
+      kind: 'cancelled';
+      email: BookingEmailDetails;
+      change: BookingChange;
+      /** Released at the confirm cut-off (S78.2): the kind release email, and its refund line. */
+      released?: { refunded: boolean };
+    };
 
 /** Which booking changed, and when (the row's `updated_at`: one value per change). */
 export interface BookingChange {

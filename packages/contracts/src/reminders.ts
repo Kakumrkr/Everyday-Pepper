@@ -14,6 +14,11 @@ export const CONFIRM_ASK_LEAD_HOURS = 72;
  * page and emails say so. S78.2's release card waits for it.
  */
 export const CONFIRM_CUTOFF_HOURS = 24;
+/**
+ * The release card (S78.2, D-2) comes only for a visit whose client was asked at least this many
+ * hours before the cut-off: a reminder asking at the cut-off itself gave them no time to answer.
+ */
+export const RELEASE_ANSWER_HOURS = 12;
 
 /**
  * A business's reminder settings (AC-X-75). `texts`: whether clients who said yes get texts at
@@ -67,11 +72,14 @@ export type ReminderSettingsView = z.infer<typeof ReminderSettingsViewSchema>;
 
 /**
  * A booking's reminders: the confirm ask (S78: 72 h ahead, high-band visits only, text or
- * email, when the business asks clients to confirm), the day before (text or email) and the
- * same day (text).
+ * email, when the business asks clients to confirm), the day before (text or email), the
+ * same day (text), and the release check (S78.2: at the cut-off, the owner's release card for a
+ * visit still unconfirmed; nothing goes to the client).
  */
-export const ReminderKindSchema = z.enum(['confirm_ask', 'day_before', 'same_day']);
+export const ReminderKindSchema = z.enum(['confirm_ask', 'day_before', 'same_day', 'release_check']);
 export type ReminderKind = z.infer<typeof ReminderKindSchema>;
+/** The reminders that reach the client (the release check is the owner's). */
+export type ClientReminderKind = Exclude<ReminderKind, 'release_check'>;
 
 /** What a text to a client was about (AC-X-76). */
 export const BookingTextKindSchema = z.enum([

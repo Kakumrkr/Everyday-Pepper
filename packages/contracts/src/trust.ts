@@ -26,6 +26,7 @@ export const AutonomyActionSchema = z.enum([
   'booking.move',
   'booking.cancel',
   'booking.no_show',
+  'booking.release',
   'booking_request.accept',
   'time.block',
   'client_note.save',
@@ -95,6 +96,17 @@ export const AUTONOMY_ACTIONS = {
     allowsAuto: true,
     permission: 'bookings.manage',
     undo: { kind: 'for', minutes: DAY, notAfterAppointmentStart: false },
+  },
+  // An unconfirmed visit released at the confirm cut-off (S78.2, ADR-0071 §S78.2): the client is
+  // told and a deposit refunded, so a person always says yes (ask in every preset), and nothing
+  // takes it back (the card says so; Undo has no inverse to run).
+  'booking.release': {
+    riskTier: 'external_or_irreversible',
+    defaultLevel: 'ask',
+    allowsAuto: false,
+    askOnly: true,
+    permission: 'bookings.manage',
+    undo: UNTIL_SENT,
   },
   'booking_request.accept': {
     riskTier: 'internal_write',

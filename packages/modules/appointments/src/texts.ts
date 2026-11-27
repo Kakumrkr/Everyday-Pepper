@@ -1,4 +1,4 @@
-import { smsPlainText, smsReplySender, type ReminderKind } from '@pepper/contracts';
+import { smsPlainText, smsReplySender, type ClientReminderKind } from '@pepper/contracts';
 import type { BookingEmailDetails } from './services/notices.js';
 
 // The texts to a booking's client (S62, ADR-0065): Pepper's fixed words (`wordsBy: template`),
@@ -48,7 +48,7 @@ function serviceOnly(details: BookingEmailDetails, max: number): string {
 export const OPT_IN_SERVICE_MAX = 30;
 
 export interface ReminderTextInput {
-  kind: ReminderKind;
+  kind: ClientReminderKind;
   details: BookingEmailDetails;
   /** The reminder's reschedule/cancel link; `null` without the app's address. */
   link: string | null;
