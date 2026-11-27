@@ -1,5 +1,7 @@
 import type { BookingEmailDetails } from '@pepper/appointments';
+import type * as Appointments from '@pepper/appointments';
 import type * as Core from '@pepper/core';
+import type * as Db from '@pepper/db';
 import { ManualClock } from '@pepper/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BookingEmails } from './booking-emails.js';
@@ -8,6 +10,18 @@ const core = vi.hoisted(() => ({ queueEmail: vi.fn() }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
   queueEmail: core.queueEmail,
+}));
+
+const db = vi.hoisted(() => ({ findCurrentTenant: vi.fn() }));
+vi.mock('@pepper/db', async (original) => ({
+  ...(await original<typeof Db>()),
+  findCurrentTenant: db.findCurrentTenant,
+}));
+
+const appointments = vi.hoisted(() => ({ queueWaitlistOptInText: vi.fn() }));
+vi.mock('@pepper/appointments', async (original) => ({
+  ...(await original<typeof Appointments>()),
+  queueWaitlistOptInText: appointments.queueWaitlistOptInText,
 }));
 
 const DETAILS: BookingEmailDetails = {
@@ -126,5 +140,51 @@ describe('BookingEmails', () => {
     await systemNotify(TX as never, { kind: 'cancelled', email: DETAILS, change: CHANGE as never });
     const options = core.queueEmail.mock.calls.at(-1)?.at(2) as { now: Date };
     expect(options.now.getTime()).toBeGreaterThanOrEqual(before);
+  });
+});
+
+describe('BookingEmails.waitlistOptIn (S79)', () => {
+  const TENANT = { id: 't1', reminderSettings: {} };
+  const NOTICE = {
+    phone: '+15125550123',
+    entryId: '0199f4b2-7c1e-7a00-8000-0000000000e1',
+    details: { businessName: 'Juniper Hair Studio', serviceName: 'Haircut' },
+  };
+
+  it("queues the opt-in text with the business, in the join's transaction", async () => {
+    db.findCurrentTenant.mockResolvedValueOnce(TENANT);
+    const { waitlistOptIn } = new BookingEmails({ ...OPTIONS, texts: true });
+    await waitlistOptIn(TX as never, NOTICE);
+    expect(db.findCurrentTenant).toHaveBeenCalledWith(TX);
+    expect(appointments.queueWaitlistOptInText).toHaveBeenCalledWith(TX, TENANT, NOTICE, {
+      texts: true,
+      outboxKey: OPTIONS.outboxKey,
+      now: OPTIONS.clock.now(),
+    });
+  });
+
+  it('uses the system clock by default', async () => {
+    db.findCurrentTenant.mockResolvedValueOnce(TENANT);
+    const { waitlistOptIn } = new BookingEmails({
+      baseUrl: OPTIONS.baseUrl,
+      outboxKey: OPTIONS.outboxKey,
+    });
+    const before = Date.now();
+    await waitlistOptIn(TX as never, NOTICE);
+    const options = appointments.queueWaitlistOptInText.mock.calls.at(-1)?.at(3) as {
+      now: Date;
+      texts: unknown;
+    };
+    expect(options.now.getTime()).toBeGreaterThanOrEqual(before);
+    expect(options.texts).toBeUndefined();
+  });
+
+  it("refuses outside a business's transaction, and queues nothing", async () => {
+    db.findCurrentTenant.mockResolvedValueOnce(undefined);
+    const { waitlistOptIn } = new BookingEmails(OPTIONS);
+    await expect(waitlistOptIn(TX as never, NOTICE)).rejects.toThrow(
+      'A text is queued in a business’s transaction',
+    );
+    expect(appointments.queueWaitlistOptInText).not.toHaveBeenCalled();
   });
 });
