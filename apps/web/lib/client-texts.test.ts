@@ -35,6 +35,44 @@ const of = (texts: Partial<ClientTexts>): ClientTexts => ({
 describe('textsSummary', () => {
   const options = { timeZone: ZONE, hasPhone: true };
 
+  it('names both kinds of texts when both consents are in force (S80 top-up, AC-X-236)', () => {
+    const given = {
+      phone: '+15552345678',
+      source: 'booking_page' as const,
+      wordingVersion: 'sms-consent-v1' as const,
+      words: 'Text me appointment confirmations and reminders from Juniper at this number.',
+      givenAt: '2026-11-13T04:30:00.000Z' as never,
+      optedOut: false,
+    };
+    const both = of({
+      consents: [
+        {
+          ...given,
+          purpose: 'waitlist_offer',
+          source: 'staff_recorded',
+          wordingVersion: 'sms-consent-v3',
+        },
+        { ...given, purpose: 'appointments' },
+      ],
+    });
+    expect(textsSummary(both, 'Sam', options).next).toBe(
+      'I text their confirmations and reminders, and when a time they’re waiting for opens up. They can reply STOP at any time.',
+    );
+    const offersOnly = of({
+      consents: [
+        {
+          ...given,
+          purpose: 'waitlist_offer',
+          source: 'staff_recorded',
+          wordingVersion: 'sms-consent-v3',
+        },
+      ],
+    });
+    expect(textsSummary(offersOnly, 'Sam', options).next).toBe(
+      'I text them when a time they’re waiting for opens up. They can reply STOP at any time.',
+    );
+  });
+
   it('says since when and how texts are on, on the business’s day', () => {
     expect(textsSummary(of({}), 'Sam', options)).toEqual({
       badge: { text: 'On', tone: 'ok' },

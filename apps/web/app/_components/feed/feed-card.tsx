@@ -60,7 +60,8 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
     });
   return (
     <FeedSuggestions
-      items={feed.suggestions}
+      // A client's text has its own card with Reply (S80, `ClientTextsCard`).
+      items={feed.suggestions.filter((item) => item.kind !== 'client_text')}
       settings={feed.settings}
       canChangeSettings={feed.canChangeSettings}
       askToTurnOff={feed.askToTurnOff}

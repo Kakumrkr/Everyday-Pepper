@@ -27,6 +27,7 @@ import { AiActivity } from '../_components/chat/ai-activity';
 import { ReconnectCard } from '../_components/calendar-connect/reconnect-card';
 import { HomeDeletionLine } from '../_components/deletion/home-deletion-line';
 import { BriefingCard } from '../_components/feed/briefing-card';
+import { ClientTextsCard } from '../_components/feed/client-texts-card';
 import { FeedCard } from '../_components/feed/feed-card';
 import { kitLink } from '../_components/kit-link';
 import { SetupReviewCard } from '../_components/setup/setup-review-card';
@@ -142,6 +143,13 @@ export default async function HomePage() {
       ) : null}
       {current !== null && feed !== null ? (
         <BriefingCard feed={feed} timeZone={current.business.timeZone} />
+      ) : null}
+      {current !== null && feed !== null ? (
+        <ClientTextsCard
+          feed={feed}
+          businessName={current.business.name}
+          timeZone={current.business.timeZone}
+        />
       ) : null}
       {current !== null && proposals !== null && actions !== null ? (
         <AiActivity

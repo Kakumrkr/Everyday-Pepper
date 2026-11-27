@@ -42,6 +42,12 @@ export {
   type ActivityLogProps,
   type ActivityPage,
 } from './activity/activity-log.js';
+export {
+  ClientTextCards,
+  type ClientTextCardsProps,
+  type ClientTextItem,
+  type ClientTextReplyResult,
+} from './feed/client-texts.js';
 export { DailyBriefing, type DailyBriefingProps } from './feed/daily-briefing.js';
 export {
   EveningWrap,

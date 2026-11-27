@@ -4,6 +4,7 @@ import { SMS_PURPOSE_WORDINGS } from '@pepper/contracts';
 import type {
   BookingTextKind,
   ClientTexts,
+  ClientTextsConsent,
   LastText,
   LastTextReason,
   SmsConsentSource,
@@ -26,6 +27,12 @@ const HOW: Record<SmsConsentSource, string> = {
   // S79: a waitlist client's texts about openings.
   waitlist_join: 'when they joined your waitlist online',
   staff_recorded: 'to your team, when added to the waitlist',
+};
+
+/** What each consent lets the business text, as its heading on the profile (S80 top-up). */
+export const PURPOSE_LABEL: Record<ClientTextsConsent['purpose'], string> = {
+  appointments: 'Appointment texts',
+  waitlist_offer: 'Waitlist openings',
 };
 
 /** A day with its year, in the business's time zone: "Nov 12, 2026". */
@@ -69,10 +76,7 @@ export function textsSummary(
       return {
         badge: { text: 'On', tone: 'ok' },
         line: consent === null ? 'Texts are on.' : onLine(consent, options.timeZone),
-        next:
-          consent !== null && SMS_PURPOSE_WORDINGS.waitlist_offer.includes(consent.wordingVersion)
-            ? 'I text them when a time they’re waiting for opens up. They can reply STOP at any time.'
-            : 'I text their confirmations and reminders. They can reply STOP at any time.',
+        next: onNext(texts),
       };
     case 'opted_out':
       return {
@@ -100,6 +104,28 @@ export function textsSummary(
             : 'Their number can’t get texts: I text US and Canadian numbers only.',
       };
   }
+}
+
+/** What texts go, by the consents in force (S80 top-up: both, when they said yes to both). */
+function onNext(texts: ClientTexts): string {
+  const purposes = new Set(
+    texts.consents.filter((given) => !given.optedOut).map((given) => given.purpose),
+  );
+  const { consent } = texts;
+  if (purposes.size === 0 && consent !== null) {
+    purposes.add(
+      SMS_PURPOSE_WORDINGS.waitlist_offer.includes(consent.wordingVersion)
+        ? 'waitlist_offer'
+        : 'appointments',
+    );
+  }
+  const stop = 'They can reply STOP at any time.';
+  if (purposes.has('appointments') && purposes.has('waitlist_offer')) {
+    return `I text their confirmations and reminders, and when a time they’re waiting for opens up. ${stop}`;
+  }
+  return purposes.has('waitlist_offer')
+    ? `I text them when a time they’re waiting for opens up. ${stop}`
+    : `I text their confirmations and reminders. ${stop}`;
 }
 
 function onLine(consent: NonNullable<ClientTexts['consent']>, timeZone: string): string {
