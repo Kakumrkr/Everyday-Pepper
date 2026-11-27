@@ -547,6 +547,6 @@ describe('regulars (S54, AC-W5-3…5): what the waitlist leaves goes to overdue 
       await waitlistFillOf(db, owner, WaitlistMatchIdSchema.parse(receipt.entity.id), {
         clock: w.clock,
       }),
-    ).toEqual({ state: 'filled', clientName: 'Sara Kim', priceCents: 6000 });
+    ).toEqual({ state: 'filled', clientName: 'Sara Kim', priceCents: 6000, offered: 2 });
   });
 });
