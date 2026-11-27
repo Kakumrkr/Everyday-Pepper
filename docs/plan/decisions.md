@@ -591,6 +591,16 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - S78 and S81a may split at their briefs;
     - five pilot metrics for the AI layer in scorecard §3 (the top-up);
     - S72.2's carried top-up kept on S58a's row.
+- **S78 (user, 2026-11-27):** "start with your recommendations and complete sucessfully". Taken ([ADR-0071](../adr/0071-visit-risk.md) §S78):
+  - **D-1** the user asked why commits show Claude's name: the container's git identity was "Claude", and squash merges added a `Co-authored-by: Claude` line. Commits now carry the owner's GitHub noreply identity, set in the repository's git config by `session-start.sh`. Session branch commits then show as Unverified on GitHub (the environment signs only its own identity); the squash merge into `main` is signed by GitHub. Asked again when the environment's hook flagged them, the user chose "Keep my name".
+  - **D-2** split: S78 the confirm ask, S78.2 the release card (with the holdback).
+  - **D-3** changed by the user in chat (asked by Claude after reading the code): the early ask is a reminder asking to confirm, the kind of text `sms-consent-v1` names, so no new wording; `sms-consent-v3` stays S79's.
+  - **D-4** the ask 72 h ahead, the confirm-by time 24 h before (named constants until S78.2's template default).
+  - **Claude:**
+    - the confirm link is the manage link (its token in the fragment), and a tap confirms, never a page load;
+    - the confirm carries the time the client saw;
+    - every team or Pepper cancel is the business's, and a client's own late phone cancel is S78.2's "Who cancelled?";
+    - no confirm-by time already gone is named (review).
 - **S77 (user, 2026-11-27):** "Go ahead, start with your recommendations and complete the session successfully." Taken ([ADR-0071](../adr/0071-visit-risk.md)):
   - **D-1** a late cancel's time is a new `bookings.cancelled_at`, set on cancel and backfilled from the audit log (else `updated_at`).
   - **D-2** the points: a pulled miss rate 2 or 3; first visit, booked 14+ days ahead, online with no deposit, not confirmed within 48 h: 1 each; low 0–1, medium 2–3, high 4+.
