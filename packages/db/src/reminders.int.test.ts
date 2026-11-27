@@ -277,6 +277,9 @@ describe('booking reminders', () => {
       sameDay: true,
       sameDayLeadHours: 2,
       askToConfirm: false,
+      // Stored before S78.3: the platform's cut-off, no holdback.
+      confirmCutoffHours: 24,
+      holdback: false,
     });
   });
 
