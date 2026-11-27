@@ -181,16 +181,39 @@ describe('the exclusion constraint', () => {
   it('cancelling frees the time; completed and no-show keep it', async () => {
     const first = await book(b, booking(b, b.jess, '2026-11-05T14:00:00Z'));
     const id = BookingIdSchema.parse(first.id);
-    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'completed'));
+    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'completed', new Date()));
     await expect(book(b, booking(b, b.jess, '2026-11-05T14:30:00Z'))).rejects.toBeInstanceOf(
       BookingOverlapError,
     );
-    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'no_show'));
+    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'no_show', new Date()));
     await expect(book(b, booking(b, b.jess, '2026-11-05T14:30:00Z'))).rejects.toBeInstanceOf(
       BookingOverlapError,
     );
-    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'cancelled'));
+    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'cancelled', new Date()));
     await expect(book(b, booking(b, b.jess, '2026-11-05T14:30:00Z'))).resolves.toBeDefined();
+  });
+
+  it('a cancel records its first time; any other status clears it (S77)', async () => {
+    const row = await book(b, booking(b, b.jess, '2026-11-05T18:00:00Z'));
+    const id = BookingIdSchema.parse(row.id);
+    const first = new Date('2026-11-04T09:00:00Z');
+    const cancelled = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'cancelled', first),
+    );
+    expect(cancelled?.cancelledAt?.toISOString()).toBe(first.toISOString());
+    const again = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'cancelled', new Date('2026-11-04T10:00:00Z')),
+    );
+    expect(again?.cancelledAt?.toISOString()).toBe(first.toISOString());
+    const back = await withTenant(db, b.tenant, (tx) =>
+      setBookingStatus(tx, id, 'confirmed', new Date('2026-11-04T11:00:00Z')),
+    );
+    expect(back?.cancelledAt).toBeNull();
+    // The column and the status agree (a check constraint).
+    const error: unknown = await withTenant(db, b.tenant, (tx) =>
+      tx.execute(sql`UPDATE bookings SET cancelled_at = now() WHERE id = ${id}`),
+    ).catch((caught: unknown) => caught);
+    expect(sqlState(error)).toBe('23514');
   });
 
   it('refuses a move onto a taken time; a move within its own time is fine', async () => {
@@ -267,7 +290,7 @@ describe('booking_occupancy', () => {
       { bookingId: first.id, staffMemberId: b.marco, occupiedFrom: at('2026-11-02T17:45:00Z') },
     ]);
 
-    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'cancelled'));
+    await withTenant(db, b.tenant, (tx) => setBookingStatus(tx, id, 'cancelled', new Date()));
     expect(await occupancy()).toEqual([]);
   });
 
@@ -315,7 +338,7 @@ describe('bookings', () => {
     const late = await book(b, booking(b, b.jess, '2026-11-02T16:00:00Z'));
     const early = await book(b, booking(b, b.marco, '2026-11-02T14:00:00Z'));
     await withTenant(db, b.tenant, (tx) =>
-      setBookingStatus(tx, BookingIdSchema.parse(early.id), 'cancelled'),
+      setBookingStatus(tx, BookingIdSchema.parse(early.id), 'cancelled', new Date()),
     );
     const list = (options: Partial<Parameters<typeof listBookings>[1]> = {}) =>
       withTenant(db, b.tenant, (tx) =>
@@ -363,7 +386,7 @@ describe('bookings', () => {
     await book(b, booking(b, b.jess, '2026-12-01T14:00:00Z'));
     const cancelled = await book(b, booking(b, b.jess, '2026-11-01T14:00:00Z'));
     await withTenant(db, b.tenant, (tx) =>
-      setBookingStatus(tx, BookingIdSchema.parse(cancelled.id), 'cancelled'),
+      setBookingStatus(tx, BookingIdSchema.parse(cancelled.id), 'cancelled', new Date()),
     );
     await book(b, booking(b, b.marco, '2026-11-24T14:30:00Z'));
     expect(await standing()).toEqual({ endedVisits: 0, recentNoShows: 0 });
@@ -371,15 +394,15 @@ describe('bookings', () => {
     await book(b, booking(b, b.jess, '2026-10-01T14:00:00Z'));
     const done = await book(b, booking(b, b.jess, '2026-09-01T14:00:00Z'));
     await withTenant(db, b.tenant, (tx) =>
-      setBookingStatus(tx, BookingIdSchema.parse(done.id), 'completed'),
+      setBookingStatus(tx, BookingIdSchema.parse(done.id), 'completed', new Date()),
     );
     expect(await standing()).toEqual({ endedVisits: 2, recentNoShows: 0 });
     // A no-show inside the 12 months counts; an older one doesn't.
     const old = await book(b, booking(b, b.jess, '2025-06-01T14:00:00Z'));
     const recent = await book(b, booking(b, b.jess, '2026-08-01T14:00:00Z'));
     await withTenant(db, b.tenant, async (tx) => {
-      await setBookingStatus(tx, BookingIdSchema.parse(old.id), 'no_show');
-      await setBookingStatus(tx, BookingIdSchema.parse(recent.id), 'no_show');
+      await setBookingStatus(tx, BookingIdSchema.parse(old.id), 'no_show', new Date());
+      await setBookingStatus(tx, BookingIdSchema.parse(recent.id), 'no_show', new Date());
     });
     expect(await standing()).toEqual({ endedVisits: 2, recentNoShows: 1 });
     // Another client's visits are theirs.
@@ -401,7 +424,7 @@ describe('bookings', () => {
     const later = await book(b, booking(b, b.jess, '2027-03-01T15:00:00Z'));
     const dropped = await book(b, booking(b, b.marco, '2026-11-06T14:00:00Z'));
     await withTenant(db, b.tenant, (tx) =>
-      setBookingStatus(tx, BookingIdSchema.parse(dropped.id), 'cancelled'),
+      setBookingStatus(tx, BookingIdSchema.parse(dropped.id), 'cancelled', new Date()),
     );
     const of = (options: Partial<Parameters<typeof listClientBookings>[1]>) =>
       withTenant(db, b.tenant, async (tx) =>

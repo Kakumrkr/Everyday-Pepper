@@ -45,7 +45,7 @@ const PROOF: ProofResponse = {
         bookingId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f708190' as never,
         clientName: 'Sam Diaz',
         startsAt: '2026-11-06T16:00:00.000Z' as never,
-        noShowCount: 2,
+        topReason: { signal: 'missed_before', points: 3, misses: 2, visits: 5 },
       },
     ],
   },

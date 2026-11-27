@@ -34,6 +34,7 @@ import { z } from 'zod';
 import type { Database } from '../client.js';
 import {
   aiActionProposals,
+  bookingPayments,
   bookings,
   clients,
   feedItems,
@@ -408,6 +409,8 @@ export interface InsightTenant {
   mailingAddress: string | null;
   /** Where review requests send clients (S55.2); `null`: no review requests are drafted. */
   reviewUrl: string | null;
+  /** The cancellation notice in hours (`deposit_refund_hours`): a cancel inside it is late (S77). */
+  cancelNoticeHours: number;
 }
 
 export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | undefined> {
@@ -420,6 +423,7 @@ export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | u
       settings: tenants.feedSettings,
       mailingAddress: tenants.mailingAddress,
       reviewUrl: tenants.reviewUrl,
+      cancelNoticeHours: tenants.depositRefundHours,
     })
     .from(tenants);
   if (row === undefined) return undefined;
@@ -432,6 +436,7 @@ export async function readInsightTenant(tx: TenantTx): Promise<InsightTenant | u
     settings: parsed.success ? parsed.data : STORED_DEFAULT,
     mailingAddress: row.mailingAddress,
     reviewUrl: row.reviewUrl,
+    cancelNoticeHours: row.cancelNoticeHours,
   };
 }
 
@@ -448,6 +453,13 @@ export interface InsightBookingRow {
   status: string;
   /** The price the visit was booked (or imported) at, for "Haven't been back" (S54.2). */
   priceFromCents: number | null;
+  // For visit risk (S77, ADR-0071): booking behaviour only.
+  source: string;
+  createdAt: Date;
+  clientConfirmedAt: Date | null;
+  cancelledAt: Date | null;
+  /** A deposit or a card was taken for it on the booking page (S66). */
+  secured: boolean;
 }
 
 /** Every booking of the business (any status) starting at or after `since`, by start. */
@@ -464,6 +476,11 @@ export async function listInsightBookings(tx: TenantTx, since: Date): Promise<In
       bufferAfterMinutes: bookings.bufferAfterMinutes,
       status: bookings.status,
       priceFromCents: bookings.priceFromCents,
+      source: bookings.source,
+      createdAt: bookings.createdAt,
+      clientConfirmedAt: bookings.clientConfirmedAt,
+      cancelledAt: bookings.cancelledAt,
+      secured: sql<boolean>`EXISTS (SELECT 1 FROM ${bookingPayments} p WHERE p.booking_id = ${bookings.id})`,
     })
     .from(bookings)
     .where(

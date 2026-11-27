@@ -31,6 +31,7 @@ function booking(id: string, clientId: string, startsAt: string, status: string)
     status,
     source: 'team',
     createdAt: AT,
+    cancelledAt: null,
   };
 }
 
@@ -98,6 +99,7 @@ function data(overrides: Partial<BusinessExportData> = {}): BusinessExportData {
     payments: null,
     deposits: [],
     noShowFees: [],
+    visitRisks: [],
     ...overrides,
   };
 }

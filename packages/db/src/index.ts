@@ -50,6 +50,7 @@ export * from './repositories/tenants.js';
 export * from './repositories/trust.js';
 export * from './repositories/usage.js';
 export * from './repositories/users.js';
+export * from './repositories/visit-risks.js';
 export * from './schema.js';
 export * from './tenant.js';
 export * from './operators.js';

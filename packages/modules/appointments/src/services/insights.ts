@@ -1,5 +1,6 @@
 import {
   BookingIdSchema,
+  BookingOriginSchema,
   BookingStatusSchema,
   ClientIdSchema,
   FeedInsightKindSchema,
@@ -25,19 +26,24 @@ import {
   requestInsightRun,
   startInsightRun,
   syncFeedItems,
+  syncVisitRisks,
   withTenant,
   type Database,
   type FeedCandidate,
   type FeedSyncResult,
+  type InsightBookingRow,
   type TenantTx,
+  type VisitRiskSyncResult,
 } from '@pepper/db';
 import { findInsights } from '../insights/providers.js';
 import {
   INSIGHT_HISTORY_DAYS,
   INSIGHT_HORIZON_DAYS,
+  type InsightBooking,
   type InsightCandidate,
   type InsightSnapshot,
 } from '../insights/types.js';
+import { findVisitRisks } from '../insights/visit-risk.js';
 
 // The insights pass (S35, ADR-0039): the worker runs it every minute. It lists the businesses
 // whose insights are due (never run, asked for by a booking change since the last run, or an
@@ -66,7 +72,9 @@ export interface InsightsOptions {
 }
 
 export type InsightRunResult =
-  ({ outcome: 'ran' } & FeedSyncResult) | { outcome: 'paused' | 'busy' | 'gone' };
+  | ({ outcome: 'ran'; risks: VisitRiskSyncResult } & FeedSyncResult)
+  | { outcome: 'paused'; risks: VisitRiskSyncResult }
+  | { outcome: 'busy' | 'gone' };
 
 /**
  * Asks for the business's insights to run again soon. Call it in the transaction that changed
@@ -118,10 +126,24 @@ export async function runInsightsFor(
     if (seen === undefined) return { outcome: 'busy' };
     const tenant = await readInsightTenant(tx);
     if (tenant === undefined) return { outcome: 'gone' };
+    // Visit risk is a reading of the book, not a suggestion: it is kept current even while
+    // suggestions are paused (S77, ADR-0071).
+    const history = (
+      await listInsightBookings(tx, new Date(startedAt.getTime() - INSIGHT_HISTORY_DAYS * DAY_MS))
+    ).map(toInsightBooking);
+    const risks = await syncVisitRisks(
+      tx,
+      findVisitRisks({
+        now: startedAt.getTime(),
+        bookings: history,
+        cancelNoticeHours: tenant.cancelNoticeHours,
+      }),
+      startedAt,
+    );
     // Paused: nothing new is found and what is there stays as it was (hidden by the api).
     if (tenant.settings.suggestionsPaused) {
       await markInsightRun(tx, startedAt, seen);
-      return { outcome: 'paused' };
+      return { outcome: 'paused', risks };
     }
     const template = options.insightsOf(TemplateIdSchema.nullable().parse(tenant.templateId));
     const off = new Set(tenant.settings.disabledKinds);
@@ -129,15 +151,19 @@ export async function runInsightsFor(
       (kind): kind is FeedInsightKind =>
         FeedInsightKindSchema.safeParse(kind).success && !off.has(kind),
     );
-    const snapshot = await loadSnapshot(tx, {
-      now: startedAt.getTime(),
-      timeZone: tenant.timeZone,
-      minGapMinutes: template.minGapMinutes,
-    });
+    const snapshot = await loadSnapshot(
+      tx,
+      {
+        now: startedAt.getTime(),
+        timeZone: tenant.timeZone,
+        minGapMinutes: template.minGapMinutes,
+      },
+      history,
+    );
     const candidates = findInsights(snapshot, enabled).map(toFeedCandidate);
     const result = await syncFeedItems(tx, candidates, startedAt);
     await markInsightRun(tx, startedAt, seen);
-    return { outcome: 'ran', ...result };
+    return { outcome: 'ran', ...result, risks };
   });
 }
 
@@ -145,6 +171,8 @@ export async function runInsightsFor(
 export async function loadSnapshot(
   tx: TenantTx,
   base: Pick<InsightSnapshot, 'now' | 'timeZone' | 'minGapMinutes'>,
+  /** The history window's bookings, when the caller has read them already. */
+  history?: readonly InsightBooking[],
 ): Promise<InsightSnapshot> {
   const staffRows = await listStaffMembers(tx);
   const staffIds = staffRows.map((row) => StaffMemberIdSchema.parse(row.id));
@@ -157,7 +185,10 @@ export async function loadSnapshot(
     await listWorkingHoursOf(tx, staffIds),
     await listTimeOffBetween(tx, staffIds, range),
     await listServices(tx),
-    await listInsightBookings(tx, new Date(base.now - INSIGHT_HISTORY_DAYS * DAY_MS)),
+    history ??
+      (await listInsightBookings(tx, new Date(base.now - INSIGHT_HISTORY_DAYS * DAY_MS))).map(
+        toInsightBooking,
+      ),
     await listActiveWaitlistMatches(tx, new Date(base.now)),
   ];
   return {
@@ -174,17 +205,7 @@ export async function loadSnapshot(
       id: ServiceIdSchema.parse(row.id),
       rebookAfterDays: row.rebookAfterDays,
     })),
-    bookings: bookings.map((row) => ({
-      id: BookingIdSchema.parse(row.id),
-      clientId: ClientIdSchema.parse(row.clientId),
-      serviceId: ServiceIdSchema.parse(row.serviceId),
-      staffMemberId: StaffMemberIdSchema.parse(row.staffMemberId),
-      start: row.startsAt.getTime(),
-      end: row.endsAt.getTime(),
-      bufferBeforeMinutes: row.bufferBeforeMinutes,
-      bufferAfterMinutes: row.bufferAfterMinutes,
-      status: BookingStatusSchema.parse(row.status),
-    })),
+    bookings: [...bookings],
     waitlistMatches: matches.map((match) => ({
       bookingId: BookingIdSchema.parse(match.bookingId),
       staffMemberId: StaffMemberIdSchema.parse(match.staffMemberId),
@@ -193,6 +214,26 @@ export async function loadSnapshot(
       state: match.state,
       offered: match.offered,
     })),
+  };
+}
+
+/** A booking row as the insight providers read it. */
+export function toInsightBooking(row: InsightBookingRow): InsightBooking {
+  return {
+    id: BookingIdSchema.parse(row.id),
+    clientId: ClientIdSchema.parse(row.clientId),
+    serviceId: ServiceIdSchema.parse(row.serviceId),
+    staffMemberId: StaffMemberIdSchema.parse(row.staffMemberId),
+    start: row.startsAt.getTime(),
+    end: row.endsAt.getTime(),
+    bufferBeforeMinutes: row.bufferBeforeMinutes,
+    bufferAfterMinutes: row.bufferAfterMinutes,
+    status: BookingStatusSchema.parse(row.status),
+    source: BookingOriginSchema.parse(row.source),
+    createdAt: row.createdAt.getTime(),
+    clientConfirmedAt: row.clientConfirmedAt?.getTime() ?? null,
+    cancelledAt: row.cancelledAt?.getTime() ?? null,
+    secured: row.secured,
   };
 }
 

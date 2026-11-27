@@ -342,7 +342,7 @@ describe('confirm by text (AC-X-74)', () => {
     const start = new Date(now.getTime() + 20 * HOUR);
     const cancelled = phone();
     const { bookingId } = await remindedBooking(tenantA, cancelled, start, now);
-    await withTenant(db, tenantA, (tx) => setBookingStatus(tx, bookingId, 'cancelled'));
+    await withTenant(db, tenantA, (tx) => setBookingStatus(tx, bookingId, 'cancelled', new Date()));
     expect(await smsConfirmTarget(db, cancelled, now)).toBeUndefined();
 
     const moved = phone();

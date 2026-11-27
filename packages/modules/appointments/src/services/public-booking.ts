@@ -884,7 +884,12 @@ export async function cancelManagedBooking(
     slug,
     async (tx, tenant) => {
       const row = await lockChangeable(tx, hash, now);
-      const cancelled = await setBookingStatus(tx, BookingIdSchema.parse(row.id), 'cancelled');
+      const cancelled = await setBookingStatus(
+        tx,
+        BookingIdSchema.parse(row.id),
+        'cancelled',
+        new Date(now),
+      );
       if (cancelled === undefined) throw new BookingNotFoundError();
       await auditUpdate(tx, row, cancelled);
       // The deposit by the window agreed, until the refund's stored end (S66, AC-X-117).

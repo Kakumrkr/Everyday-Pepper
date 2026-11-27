@@ -157,16 +157,28 @@ export async function moveBooking(
   });
 }
 
-/** Sets a booking's status (the trigger frees its time when cancelled). */
+/**
+ * Sets a booking's status (the trigger frees its time when cancelled). A cancel records `at` as
+ * its time (S77, for a late cancel), keeping the first time if it was already cancelled; any
+ * other status clears it.
+ */
 export async function setBookingStatus(
   tx: TenantTx,
   id: BookingId,
   status: BookingStatus,
+  at: Date,
 ): Promise<BookingRow | undefined> {
+  const next = BookingStatusSchema.parse(status);
   return bookingWrite(async () => {
     const [row] = await tx
       .update(bookings)
-      .set({ status: BookingStatusSchema.parse(status) })
+      .set({
+        status: next,
+        cancelledAt:
+          next === 'cancelled'
+            ? sql`COALESCE(${bookings.cancelledAt}, ${at.toISOString()}::timestamptz)`
+            : null,
+      })
       .where(eq(bookings.id, Id.parse(id)))
       .returning();
     return row;

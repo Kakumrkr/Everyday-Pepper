@@ -127,7 +127,7 @@ describe('buildEveningWrap', () => {
     booking(iso, iso, { clientId, status: 'no_show' });
 
   it('is null before the evening hour', () => {
-    expect(buildEveningWrap([tomorrowVisit(9)], NY, at('2026-11-04T21:59:00Z'))).toBeNull();
+    expect(buildEveningWrap([tomorrowVisit(9)], NY, at('2026-11-04T21:59:00Z'), 24)).toBeNull();
   });
 
   it("counts tomorrow's standing visits from the first, in local time", () => {
@@ -143,6 +143,7 @@ describe('buildEveningWrap', () => {
       ],
       NY,
       evening,
+      24,
     );
     expect(wrap).toEqual({
       day: '2026-11-05',
@@ -153,29 +154,56 @@ describe('buildEveningWrap', () => {
     expect(first.start).toBe(at('2026-11-05T14:00:00Z'));
   });
 
-  it('names a visit at risk when its client has the no-show pattern', () => {
+  it('names the visits in the high risk band with their top reason (S77, AC-X-199)', () => {
+    // Sam missed 3 of 4 and hasn't confirmed: high. Maria missed 1 of 3: medium, not named.
     const risky = tomorrowVisit(10, { clientId: SAM });
     const wrap = buildEveningWrap(
       [
         noShow('2026-09-01T15:00:00Z'),
         noShow('2026-10-01T15:00:00Z'),
-        // One no-show is no pattern; one 200 days ago is outside the window.
+        noShow('2026-10-15T15:00:00Z'),
+        booking('2026-08-01T15:00:00Z', '2026-08-01T16:00:00Z', {
+          clientId: SAM,
+          status: 'completed',
+        }),
         noShow('2026-10-02T15:00:00Z', MARIA),
-        noShow('2026-04-18T15:00:00Z', MARIA),
+        booking('2026-08-02T15:00:00Z', '2026-08-02T16:00:00Z', { status: 'completed' }),
+        booking('2026-07-02T15:00:00Z', '2026-07-02T16:00:00Z', { status: 'completed' }),
         risky,
         tomorrowVisit(12, { clientId: MARIA }),
       ],
       NY,
       evening,
+      24,
     );
     expect(wrap?.visitCount).toBe(2);
     expect(wrap?.atRisk).toEqual([
-      { bookingId: risky.id, clientId: SAM, startsAt: '2026-11-05T15:00:00.000Z', noShowCount: 2 },
+      {
+        bookingId: risky.id,
+        clientId: SAM,
+        startsAt: '2026-11-05T15:00:00.000Z',
+        topReason: { signal: 'missed_before', points: 3, misses: 3, visits: 4 },
+      },
     ]);
   });
 
+  it('leaves out a high-band visit that is not tomorrow', () => {
+    const later = booking('2026-11-07T15:00:00Z', '2026-11-07T16:00:00Z', {
+      clientId: SAM,
+      source: 'booking_page',
+      createdAt: at('2026-10-01T15:00:00Z'),
+    });
+    const wrap = buildEveningWrap(
+      [noShow('2026-09-01T15:00:00Z'), noShow('2026-10-01T15:00:00Z'), later],
+      NY,
+      evening,
+      24,
+    );
+    expect(wrap?.atRisk).toEqual([]);
+  });
+
   it('is an empty tomorrow, not null, when nothing is booked', () => {
-    expect(buildEveningWrap([], NY, evening)).toEqual({
+    expect(buildEveningWrap([], NY, evening, 24)).toEqual({
       day: '2026-11-05',
       visitCount: 0,
       firstStartsAt: null,
@@ -192,6 +220,7 @@ describe('buildEveningWrap', () => {
       ],
       KOLKATA,
       at('2026-11-04T12:30:00Z'),
+      24,
     );
     expect(wrap).toMatchObject({ day: '2026-11-05', visitCount: 1 });
   });

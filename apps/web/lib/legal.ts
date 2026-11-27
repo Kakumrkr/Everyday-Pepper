@@ -40,7 +40,7 @@ export const LEGAL_DRAFT_NOTICE =
   'It describes how Pepper works today and waits for a lawyer’s review, so it isn’t in force yet. The company’s legal name, address and governing state are added before it is.';
 
 /** The date both texts last changed. */
-const UPDATED = '2026-11-12';
+const UPDATED = '2026-11-27';
 
 /** Where a person writes to us: the help centre's form, open without an account. */
 const CONTACT = { text: 'Write to us', href: HELP_CONTACT_PATH } as const;
@@ -146,6 +146,9 @@ export const PRIVACY: LegalDocument = {
         p(
           'The assistant never reads or changes the database itself. Everything it does goes through the same checks as the app’s screens, follows the business’s settings for what it may do without asking, is recorded with its reason, and can be undone where possible. When a business imports a file, the AI may be shown the column names and a masked sample of each column to suggest which is which.',
         ),
+        p(
+          'To spot an appointment that may be missed, Pepper rates each visit in the next 14 days as low, medium or high risk, from the business’s own booking history only: earlier no-shows and late cancellations, a first visit, how far ahead and how it was booked, whether a deposit was taken and whether the client confirmed. Never a name, age, gender, address or anything standing in for them. The rating follows fixed rules, not an AI model, and only the business’s owners and managers see it.',
+        ),
         p('Development and testing use made-up data only.'),
       ],
     },
@@ -228,6 +231,7 @@ export const PRIVACY: LegalDocument = {
           'Support requests and screenshots: while the business uses Pepper. Screenshots never sent: 24 hours.',
           'Sent emails’ delivery records: 30 days. Unconfirmed booking requests: 24 hours.',
           'Import working rows: 24 hours for a preview not imported; 7 days for an import, while it can be undone.',
+          'A visit’s risk rating: until the visit is no longer upcoming (within the hour), or deleted with the visit.',
           'A remembered phone on the booking page: 90 days from its last use, or until the client taps “Forget this phone”.',
           'Backups: overwritten on a fixed schedule, stated here before this policy takes effect.',
         ),

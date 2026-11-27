@@ -171,7 +171,7 @@ export const TOMORROW = {
       bookingId: '0199f0a4-7c1e-7d2a-9b3c-4d5e6f700931',
       clientName: 'Tony Russo',
       startsAt: '2026-10-28T16:30:00.000Z',
-      noShowCount: 2,
+      topReason: { signal: 'missed_before', points: 3, misses: 2, visits: 5 },
     },
   ],
 } as const;

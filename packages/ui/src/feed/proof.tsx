@@ -3,6 +3,7 @@ import { useId } from 'react';
 import { List, ListRow } from '../kit/blocks.js';
 import { MoneyChip } from '../kit/marks.js';
 import { clockTime, formatDuration } from './feed-lines.js';
+import { visitRiskReasonLine } from './visit-risk.js';
 
 // Proof of value on Home (S55, ADR-0058; AC-W4-10…12): what Pepper did this week and, in the
 // evening, tomorrow. Flat hairline blocks, not raised cards: nothing here needs a decision
@@ -99,7 +100,7 @@ export function eveningLines(
     atRisk: evening.atRisk.map((visit) => ({
       key: visit.bookingId,
       title: visit.clientName,
-      meta: `${clockTime(visit.startsAt, timeZone)} · missed ${String(visit.noShowCount)} visits in 6 months`,
+      meta: `${clockTime(visit.startsAt, timeZone)} · ${visitRiskReasonLine(visit.topReason)}`,
     })),
     more:
       evening.atRiskCount > named
@@ -114,7 +115,7 @@ export interface EveningWrapProps {
   timeZone: string;
 }
 
-/** "Tomorrow: 7 visits, the first at 9:00 am", and the visits at risk of a no-show. */
+/** "Tomorrow: 7 visits, the first at 9:00 am", and the visits at high risk of being missed (S77). */
 export function EveningWrap({ evening, timeZone }: EveningWrapProps) {
   const headingId = useId();
   if (evening === null) return null;
@@ -130,12 +131,12 @@ export function EveningWrap({ evening, timeZone }: EveningWrapProps) {
       </h2>
       {evening.atRiskCount === 0 ? (
         evening.visitCount === 0 ? null : (
-          <p className="m-0 type-body text-ink-2">Nobody booked has missed visits lately.</p>
+          <p className="m-0 type-body text-ink-2">No visit tomorrow looks at risk.</p>
         )
       ) : (
         <>
           <p className="m-0 type-body text-ink-2">
-            {count(evening.atRiskCount, 'visit')} at risk of a no-show.
+            {count(evening.atRiskCount, 'visit')} may be missed.
           </p>
           <List label="Visits at risk">
             {words.atRisk.map((row) => (

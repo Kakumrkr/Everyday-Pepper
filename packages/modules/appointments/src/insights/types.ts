@@ -1,6 +1,7 @@
 import { FEED_HORIZON_DAYS } from '@pepper/contracts';
 import type {
   BookingId,
+  BookingOrigin,
   BookingStatus,
   ClientId,
   FeedInsight,
@@ -42,6 +43,13 @@ export interface InsightBooking extends Interval {
   bufferBeforeMinutes: number;
   bufferAfterMinutes: number;
   status: BookingStatus;
+  // Booking behaviour for visit risk (S77, ADR-0071); epoch ms.
+  source: BookingOrigin;
+  createdAt: number;
+  clientConfirmedAt: number | null;
+  cancelledAt: number | null;
+  /** A deposit or a card was taken for it on the booking page. */
+  secured: boolean;
 }
 
 export interface InsightService {

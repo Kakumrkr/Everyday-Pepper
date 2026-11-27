@@ -226,6 +226,7 @@ const bookingRow: BookingRow = {
   startsAt: new Date('2026-11-02T14:00:00.000Z'),
   endsAt: new Date('2026-11-02T15:00:00.000Z'),
   clientConfirmedAt: null,
+  cancelledAt: null,
   bufferBeforeMinutes: 0,
   bufferAfterMinutes: 10,
   priceFromCents: 6500,

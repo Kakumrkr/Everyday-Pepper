@@ -62,6 +62,12 @@ export function booking(
     bufferBeforeMinutes: 0,
     bufferAfterMinutes: 0,
     status: 'confirmed',
+    source: 'team',
+    // Booked a day before it starts, by default.
+    createdAt: at(start) - 86_400_000,
+    clientConfirmedAt: null,
+    cancelledAt: null,
+    secured: false,
     ...overrides,
   };
 }

@@ -450,7 +450,7 @@ export async function changeBookingIn(
     if (statusNeedsStart(parsed.status) && row.startsAt.getTime() > now) {
       throw new BookingNotStartedError();
     }
-    const changed = await setBookingStatus(tx, id, parsed.status);
+    const changed = await setBookingStatus(tx, id, parsed.status, new Date(now));
     // The row is locked, so it is still there.
     if (changed === undefined) throw new BookingNotFoundError();
     await keepReminderInStep(tx, changed, now);
@@ -528,7 +528,7 @@ export async function undoNoShowIn(
   const now = (options.clock ?? systemClock).now().getTime();
   const { row } = await lockOwnBooking(tx, actor, id);
   if (row.status !== 'no_show') throw new BookingNotChangeableError();
-  const changed = await setBookingStatus(tx, id, 'confirmed');
+  const changed = await setBookingStatus(tx, id, 'confirmed', new Date(now));
   if (changed === undefined) throw new BookingNotFoundError();
   await keepReminderInStep(tx, changed, now);
   await requestInsights(tx);
@@ -566,7 +566,7 @@ export async function reinstateBookingIn(
   if (!fits) throw await unavailable(tx, search);
   let restored: BookingRow | undefined;
   try {
-    restored = await inSavepoint(tx, (sp) => setBookingStatus(sp, id, 'confirmed'));
+    restored = await inSavepoint(tx, (sp) => setBookingStatus(sp, id, 'confirmed', new Date(now)));
   } catch (error) {
     if (error instanceof BookingOverlapError) throw await unavailable(tx, search);
     throw error;

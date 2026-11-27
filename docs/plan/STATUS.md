@@ -9,7 +9,13 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 ## In progress
 **S77 Visit risk with reasons** (Phase 18), approved 2026-11-27: "Go ahead, start with your recommendations and complete the session successfully" (D-1 `bookings.cancelled_at`, backfilled from the audit log; D-2 the brief's points, low 0–1, medium 2–3, high 4+; D-3 the wrap lists tomorrow's high-band visits; D-4 the wrap only, the fact ready for S78).
 Tasks: 1 ACs + ADR-0071 + `cancelled_at` · 2 snapshot inputs · 3 `visitRisk` (test first) · 4 `visit_risks` table, export, isolation, sync · 5 fact + wrap top reason + legal · 6 close.
-Done: (none yet). Next: task 1.
+Done (code, checks green):
+- 1 `bookings.cancelled_at` (migration 0089, backfilled from the audit log; set by `setBookingStatus`).
+- 2 the insights read carries source, booked-at, the client's confirm, the cancel time, `secured`.
+- 3 `findVisitRisks` (`appointments/src/insights/visit-risk.ts`) with its signal-list test.
+- 4 `visit_risks` (owners/managers only), export `visit-risk.json`, isolation, the pass syncs it (even paused); a "C" asks for a run.
+- 5 (code) the wrap names tomorrow's high-band visits with the top reason; `visit_risk` fact line; privacy page.
+Next: ACs + traceability + ADR-0071 (docs), then the close.
 
 ## Last sessions
 - **P2 Plan Phase 18, the AI layer (2026-11-26, prose only)** ([PCR-017](changes/PCR-017.md), plan 0.43). Full entry in [session-log.md](session-log.md).

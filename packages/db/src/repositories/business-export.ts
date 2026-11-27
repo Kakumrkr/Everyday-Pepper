@@ -11,6 +11,7 @@ import {
   staffServices,
   tenants,
   timeOff,
+  visitRisks,
   waitlistEntries,
   workingHours,
 } from '../schema.js';
@@ -40,6 +41,7 @@ export const BUSINESS_EXPORT_TABLES: Readonly<Record<string, true | string>> = {
   time_off: true,
   clients: true,
   bookings: true,
+  visit_risks: true,
   waitlist_entries: true,
   memory_facts: true,
   memberships: 'who signs in: accounts, not business records',
@@ -168,6 +170,8 @@ export interface BusinessExportData {
     status: string;
     source: string;
     createdAt: Date;
+    /** When it was cancelled (S77); null while it isn't. */
+    cancelledAt: Date | null;
   }[];
   waitlist: {
     id: string;
@@ -262,6 +266,14 @@ export interface BusinessExportData {
     stripePayment: string | null;
     stripeRefund: string | null;
     chargedAt: Date | null;
+  }[];
+  /** Upcoming visits' risk bands and their reasons (S77, ADR-0071): counts and days only. */
+  visitRisks: {
+    bookingId: string;
+    band: string;
+    points: number;
+    reasons: unknown;
+    computedAt: Date;
   }[];
 }
 
@@ -381,6 +393,7 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
       status: bookings.status,
       source: bookings.source,
       createdAt: bookings.createdAt,
+      cancelledAt: bookings.cancelledAt,
     })
     .from(bookings)
     .orderBy(asc(bookings.startsAt), asc(bookings.id));
@@ -465,6 +478,16 @@ export async function readBusinessExport(tx: TenantTx): Promise<BusinessExportDa
         chargedAt: row.chargedAt,
       }),
     ),
+    visitRisks: await tx
+      .select({
+        bookingId: visitRisks.bookingId,
+        band: visitRisks.band,
+        points: visitRisks.points,
+        reasons: visitRisks.reasons,
+        computedAt: visitRisks.computedAt,
+      })
+      .from(visitRisks)
+      .orderBy(asc(visitRisks.bookingId)),
   };
 }
 

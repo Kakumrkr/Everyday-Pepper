@@ -1,13 +1,4 @@
-import {
-  BookingIdSchema,
-  BookingStatusSchema,
-  ClientIdSchema,
-  PROOF_LIMITS,
-  ProofResponseSchema,
-  ServiceIdSchema,
-  StaffMemberIdSchema,
-  type ProofResponse,
-} from '@pepper/contracts';
+import { PROOF_LIMITS, ProofResponseSchema, type ProofResponse } from '@pepper/contracts';
 import { systemClock, type Actor, type Clock } from '@pepper/core';
 import {
   countWeekActions,
@@ -18,7 +9,8 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { buildEveningWrap, buildWeekValue, isEvening } from '../insights/proof.js';
-import { NO_SHOW_PATTERN } from '../insights/types.js';
+import { INSIGHT_HISTORY_DAYS } from '../insights/types.js';
+import { toInsightBooking } from './insights.js';
 import { requireWinBackAccess } from './win-back.js';
 
 // Proof of value (S55, ADR-0058; AC-W4-10…13): the week card and the evening wrap, read when
@@ -44,9 +36,9 @@ export async function readProofIn(
     await countWeekActions(tx, { from, to: now }),
   );
 
-  // The half year of bookings is read only in the evening, when the wrap shows.
+  // The history is read only in the evening, when the wrap shows.
   const evening = isEvening(tenant.timeZone, now.getTime())
-    ? await readEveningWrap(tx, tenant.timeZone, now)
+    ? await readEveningWrap(tx, tenant.timeZone, tenant.depositRefundHours, now)
     : null;
   return ProofResponseSchema.parse({
     week: { from: from.toISOString(), to: now.toISOString(), ...week },
@@ -58,24 +50,16 @@ export async function readProofIn(
 async function readEveningWrap(
   tx: TenantTx,
   timeZone: string,
+  cancelNoticeHours: number,
   now: Date,
 ): Promise<ProofResponse['evening']> {
   const wrap = buildEveningWrap(
-    (
-      await listInsightBookings(tx, new Date(now.getTime() - NO_SHOW_PATTERN.windowDays * DAY_MS))
-    ).map((row) => ({
-      id: BookingIdSchema.parse(row.id),
-      clientId: ClientIdSchema.parse(row.clientId),
-      serviceId: ServiceIdSchema.parse(row.serviceId),
-      staffMemberId: StaffMemberIdSchema.parse(row.staffMemberId),
-      start: row.startsAt.getTime(),
-      end: row.endsAt.getTime(),
-      bufferBeforeMinutes: row.bufferBeforeMinutes,
-      bufferAfterMinutes: row.bufferAfterMinutes,
-      status: BookingStatusSchema.parse(row.status),
-    })),
+    (await listInsightBookings(tx, new Date(now.getTime() - INSIGHT_HISTORY_DAYS * DAY_MS))).map(
+      toInsightBooking,
+    ),
     timeZone,
     now.getTime(),
+    cancelNoticeHours,
   );
   if (wrap === null) return null;
   const named = wrap.atRisk.slice(0, PROOF_LIMITS.atRiskNamed);
@@ -96,7 +80,7 @@ async function readEveningWrap(
       bookingId: visit.bookingId,
       clientName: names.get(visit.clientId) ?? 'Client',
       startsAt: visit.startsAt,
-      noShowCount: visit.noShowCount,
+      topReason: visit.topReason,
     })),
   };
 }

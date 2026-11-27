@@ -1,9 +1,5 @@
 import {
-  BookingIdSchema,
-  BookingStatusSchema,
-  ClientIdSchema,
   ServiceIdSchema,
-  StaffMemberIdSchema,
   WIN_BACK_LIMITS,
   WinBackResponseSchema,
   type WinBackResponse,
@@ -26,6 +22,7 @@ import {
   type TenantTx,
 } from '@pepper/db';
 import { INSIGHT_HISTORY_DAYS } from '../insights/types.js';
+import { toInsightBooking } from './insights.js';
 import { findWinBack, type WinBackClient } from '../insights/win-back.js';
 
 // "Haven't been back" (S54.2, ADR-0057; AC-W4-6, AC-W4-8): the win-back rule over the
@@ -87,17 +84,7 @@ async function loadWinBack(tx: TenantTx, actor: Actor, now: Date) {
       id: ServiceIdSchema.parse(row.id),
       rebookAfterDays: row.rebookAfterDays,
     })),
-    bookings: bookingRows.map((row) => ({
-      id: BookingIdSchema.parse(row.id),
-      clientId: ClientIdSchema.parse(row.clientId),
-      serviceId: ServiceIdSchema.parse(row.serviceId),
-      staffMemberId: StaffMemberIdSchema.parse(row.staffMemberId),
-      start: row.startsAt.getTime(),
-      end: row.endsAt.getTime(),
-      bufferBeforeMinutes: row.bufferBeforeMinutes,
-      bufferAfterMinutes: row.bufferAfterMinutes,
-      status: BookingStatusSchema.parse(row.status),
-    })),
+    bookings: bookingRows.map(toInsightBooking),
   });
   const clients = new Map(
     (

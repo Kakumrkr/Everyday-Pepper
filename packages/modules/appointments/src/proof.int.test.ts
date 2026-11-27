@@ -235,8 +235,13 @@ describe('the evening wrap (AC-W4-12)', () => {
     );
   }
 
-  /** Past no-shows, brought in as history. */
-  async function noShows(w: World, client: Client, isoDays: readonly string[]): Promise<void> {
+  /** Past visits brought in as history: no-shows unless said otherwise. */
+  async function noShows(
+    w: World,
+    client: Client,
+    isoDays: readonly string[],
+    status: 'no_show' | 'completed' = 'no_show',
+  ): Promise<void> {
     await withTenant(db, w.tenantId, async (tx) => {
       const batch = await insertImportBatch(tx, {
         createdByUserId: null,
@@ -261,19 +266,26 @@ describe('the evening wrap (AC-W4-12)', () => {
           bufferBeforeMinutes: 0,
           bufferAfterMinutes: 0,
           priceFromCents: 4500,
-          status: 'no_show' as const,
+          status,
           createdBy: null,
         })),
       );
     });
   }
 
-  it("counts tomorrow from the first visit and names the client who doesn't show", async () => {
+  it("counts tomorrow from the first visit and names the high-risk visit's top reason", async () => {
     const w = await newWorld();
     const sam = await createClient(db, w.owner, { name: 'Sam Diaz' });
     const maria = await createClient(db, w.owner, { name: 'Maria Lopez' });
     await noShows(w, sam, ['2099-01-10', '2099-02-14']);
+    // One miss among six visits is no risk on its own (S77: pulled toward the shop's rate).
     await noShows(w, maria, ['2099-02-20']);
+    await noShows(
+      w,
+      maria,
+      ['2098-09-01', '2098-10-01', '2098-11-01', '2098-12-01', '2099-01-01', '2099-02-01'],
+      'completed',
+    );
     await visitTomorrow(w, maria, 9);
     await visitTomorrow(w, sam, 11);
     await visitTomorrow(w, maria, 15);
@@ -284,7 +296,13 @@ describe('the evening wrap (AC-W4-12)', () => {
       visitCount: 3,
       firstStartsAt: '2099-03-05T14:00:00.000Z',
       atRiskCount: 1,
-      atRisk: [{ clientName: 'Sam Diaz', startsAt: '2099-03-05T16:00:00.000Z', noShowCount: 2 }],
+      atRisk: [
+        {
+          clientName: 'Sam Diaz',
+          startsAt: '2099-03-05T16:00:00.000Z',
+          topReason: { signal: 'missed_before', points: 3, misses: 2, visits: 2 },
+        },
+      ],
     });
   });
 
