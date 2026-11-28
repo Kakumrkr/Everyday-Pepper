@@ -34,6 +34,7 @@ export * from './rules.js';
 export * from './setup.js';
 export * from './reminders.js';
 export * from './sms.js';
+export * from './client-text-reading.js';
 export * from './pilot-metrics.js';
 export * from './support.js';
 export * from './inbound-email.js';

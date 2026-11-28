@@ -13,3 +13,4 @@ export * from './memory/episodes.js';
 export * from './drafts/index.js';
 export * from './waitlist/matcher.js';
 export * from './imports/mapping-suggester.js';
+export * from './client-texts/reader.js';
