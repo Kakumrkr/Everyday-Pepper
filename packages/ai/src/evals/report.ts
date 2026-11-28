@@ -36,13 +36,18 @@ function classifierLines(set: SetSummary): string[] {
       (label) =>
         `| ${label.label} | ${String(label.expected)} | ${String(label.read)} | ${maybePercent(label.precision)} | ${maybePercent(label.recall)} | ${percent(label.gate.precision)} / ${percent(label.gate.recall)} ${label.meetsGate ? '✅' : '❌'} |`,
     ),
-    '',
-    `| Expected ↓ / read → | ${columns.join(' | ')} |`,
-    `|---|${columns.map(() => '---|').join('')}`,
-    ...rows.map(
-      (row) =>
-        `| ${row} | ${columns.map((column) => String(classifier.confusion[row]?.[column] ?? 0)).join(' | ')} |`,
-    ),
+    // No reading at all (every trial failed before one): no confusion to show.
+    ...(rows.length === 0
+      ? []
+      : [
+          '',
+          `| Expected ↓ / read → | ${columns.join(' | ')} |`,
+          `|---|${columns.map(() => '---|').join('')}`,
+          ...rows.map(
+            (row) =>
+              `| ${row} | ${columns.map((column) => String(classifier.confusion[row]?.[column] ?? 0)).join(' | ')} |`,
+          ),
+        ]),
   ];
 }
 

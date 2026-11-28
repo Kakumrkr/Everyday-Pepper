@@ -65,6 +65,14 @@ describe('EvalCaseSchema: a client text', () => {
   });
 });
 
+describe('the reading expectation', () => {
+  it('refuses a minutes-late range whose min is over its max', () => {
+    expect(() =>
+      textCase('bad', { intent: 'running_late', minutesLate: { min: 15, max: 10 } }),
+    ).toThrow();
+  });
+});
+
 describe('the reading grader', () => {
   it('passes a label the case accepts, and fails another with the reason', () => {
     const wanted = textCase('late', { intent: 'running_late', alsoAccept: ['other'] });
@@ -198,6 +206,19 @@ describe('classifier sets in the summary and the report', () => {
     expect(report).toContain('| confirm | 19 | 20 | 95% | 100% | 100% / 80% ❌ |');
     expect(report).toContain('| Expected ↓ / read → | confirm |');
     expect(report).toContain('| cancel | 1 |');
+    // No reading at all: the labels, but no confusion table to draw.
+    const failed = results.map((result) => ({
+      ...result,
+      trials: result.trials.map(({ passed, reasons, usage, models }) => ({
+        passed,
+        reasons,
+        usage,
+        models,
+      })),
+    }));
+    expect(
+      markdownReport(failed, { provider: 'x', trials: 1, costUsd: null, startedAt: 'now' }),
+    ).not.toContain('Expected ↓ / read →');
   });
 
   it('counts a label the case also accepts as right, and refused as its own column', async () => {

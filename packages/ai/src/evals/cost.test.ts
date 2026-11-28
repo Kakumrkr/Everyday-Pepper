@@ -1,4 +1,4 @@
-import { DRAFT_LIMITS, IMPORT_SUGGESTION_LIMITS } from '@pepper/contracts';
+import { DRAFT_LIMITS, CLIENT_TEXT_READ_LIMITS, IMPORT_SUGGESTION_LIMITS } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
 import {
   costOfUsage,
@@ -113,6 +113,18 @@ describe('estimateRunCost (the budget guard, playbook §4)', () => {
       inputTokens: IMPORT_SUGGESTION_LIMITS.maxTokens,
       cachedInputTokens: 0,
       outputTokens: IMPORT_SUGGESTION_LIMITS.maxOutputTokens,
+    });
+  });
+
+  it('counts a client text as one reader call’s whole allowance (S81a)', () => {
+    const text = evalCase({
+      turns: [{ action: { clientText: { text: 'Running 10 late', visits: [] } } }],
+      set: 'client_replies',
+    });
+    expect(estimateRunCost([text], 3, PRICE).usage).toEqual({
+      inputTokens: 3 * CLIENT_TEXT_READ_LIMITS.maxTokens,
+      cachedInputTokens: 0,
+      outputTokens: 3 * CLIENT_TEXT_READ_LIMITS.maxOutputTokens,
     });
   });
 

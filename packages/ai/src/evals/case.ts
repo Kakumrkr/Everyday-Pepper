@@ -457,6 +457,7 @@ export const EvalCaseSchema = z.strictObject({
         visit: z.int().min(1).max(CLIENT_TEXT_READ_LIMITS.visits).nullable().optional(),
         minutesLate: z
           .strictObject({ min: z.int().min(1), max: z.int().min(1) })
+          .refine((range) => range.min <= range.max, 'min is at most max')
           .nullable()
           .optional(),
         askedFor: z

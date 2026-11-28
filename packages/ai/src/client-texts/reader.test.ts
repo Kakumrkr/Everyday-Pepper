@@ -187,6 +187,15 @@ describe('readClientText', () => {
     }
   });
 
+  it('returns the visit id as the contract has it, lower case', async () => {
+    const { deps: d } = deps(new ScriptedProvider([answer(args())]));
+    const shouted = {
+      ...question,
+      visits: [{ ...question.visits[0], id: V1.toUpperCase() as BookingId }],
+    } as ClientTextQuestion;
+    expect(await readClientText(d, TENANT, shouted)).toMatchObject({ reading: { visitId: V1 } });
+  });
+
   it('calls nothing without a reservation', async () => {
     const provider = new ScriptedProvider([]);
     const { deps: d } = deps(provider, 'none');

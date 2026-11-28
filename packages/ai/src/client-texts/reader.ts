@@ -94,7 +94,10 @@ const labelOf = (index: number) => `v${String(index + 1)}`;
 
 /** The request for one text (AC-X-237): the visits as labels, never their ids. */
 export function clientTextRequest(question: ClientTextQuestion): LlmRequest {
-  const parsed = ClientTextQuestionSchema.parse(question);
+  return requestFor(ClientTextQuestionSchema.parse(question));
+}
+
+function requestFor(parsed: ClientTextQuestion): LlmRequest {
   return {
     route: 'routine',
     instructions: CLIENT_TEXT_INSTRUCTIONS,
@@ -173,7 +176,9 @@ export async function readClientText(
   tenantId: TenantId,
   question: ClientTextQuestion,
 ): Promise<ClientTextOutcome> {
-  const request = clientTextRequest(question);
+  // Parsed once: the request and the reading use the same visits (ids as the contract has them).
+  const parsed = ClientTextQuestionSchema.parse(question);
+  const request = requestFor(parsed);
   const reservation = await deps.reserve(tenantId, CLIENT_TEXT_READ_LIMITS.maxTokens);
   if (reservation === null) return { kind: 'no_budget' };
   let tokens = 0;
@@ -189,7 +194,7 @@ export async function readClientText(
     } catch {
       return { kind: 'refused', tokens };
     }
-    const reading = readingFrom(args, question.visits);
+    const reading = readingFrom(args, parsed.visits);
     return reading === null ? { kind: 'refused', tokens } : { kind: 'read', reading, tokens };
   } catch (error) {
     if (tokens === 0) await reservation.settle(0);

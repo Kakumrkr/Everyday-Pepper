@@ -1,4 +1,9 @@
-import { DRAFT_LIMITS, IMPORT_SUGGESTION_LIMITS, type LlmUsage } from '@pepper/contracts';
+import {
+  CLIENT_TEXT_READ_LIMITS,
+  DRAFT_LIMITS,
+  IMPORT_SUGGESTION_LIMITS,
+  type LlmUsage,
+} from '@pepper/contracts';
 import { z } from 'zod';
 import { agentTools, instructionsFor } from '../agent/context.js';
 import { DEFAULT_LIMITS } from '../agent/loop.js';
@@ -94,6 +99,12 @@ export function estimateRunCost(
       if (!('user' in turn) && 'importFile' in turn.action) {
         inputTokens += IMPORT_SUGGESTION_LIMITS.maxTokens;
         outputTokens += IMPORT_SUGGESTION_LIMITS.maxOutputTokens;
+        continue;
+      }
+      // A client's text (S81a): one reader call, its whole allowance in and out.
+      if (!('user' in turn) && 'clientText' in turn.action) {
+        inputTokens += CLIENT_TEXT_READ_LIMITS.maxTokens;
+        outputTokens += CLIENT_TEXT_READ_LIMITS.maxOutputTokens;
         continue;
       }
       if (!('user' in turn)) continue;
