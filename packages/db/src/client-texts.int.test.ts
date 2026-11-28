@@ -448,16 +448,16 @@ describe('kept texts (AC-X-229, AC-X-234, AC-X-235)', () => {
       const visits = await findClientUpcomingVisits(tx, clientId, now, 5);
       expect(visits.map((v) => v.bookingId)).toEqual([soon, later]);
       expect(visits.map((v) => v.bookingId)).not.toContain(past);
-      expect((await findClientUpcomingVisits(tx, clientId, now, 1)).map((v) => v.bookingId)).toEqual(
-        [soon],
-      );
+      expect(
+        (await findClientUpcomingVisits(tx, clientId, now, 1)).map((v) => v.bookingId),
+      ).toEqual([soon]);
       await expect(findClientUpcomingVisits(tx, clientId, now, 0)).rejects.toThrow();
     });
     // Another business sees none of them.
     const other = await withTenant(db, tenantA, seedClient);
-    expect(await withTenant(db, tenantB, (tx) => findClientUpcomingVisits(tx, other, now, 5))).toEqual(
-      [],
-    );
+    expect(
+      await withTenant(db, tenantB, (tx) => findClientUpcomingVisits(tx, other, now, 5)),
+    ).toEqual([]);
   });
 
   it('moves texts to the kept client when two are merged', async () => {

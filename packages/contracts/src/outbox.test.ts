@@ -18,7 +18,14 @@ describe('outbox schemas', () => {
   });
 
   it('knows the message types and statuses', () => {
-    expect(OutboxMessageTypeSchema.options).toEqual(['email', 'push', 'episode', 'sms', 'payment']);
+    expect(OutboxMessageTypeSchema.options).toEqual([
+      'email',
+      'push',
+      'episode',
+      'sms',
+      'payment',
+      'client_text',
+    ]);
     expect(OutboxStatusSchema.options).toEqual(['pending', 'sent', 'dead', 'cancelled']);
   });
 
