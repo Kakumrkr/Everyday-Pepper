@@ -165,6 +165,9 @@ export const PRIVACY: LegalDocument = {
         p(
           'If you are on a business’s waitlist, it can text you when a time you are waiting for opens up, only if you said yes to those texts: by ticking the box when you joined the waitlist online, or by telling the business when it added you (it records who did). That yes covers those texts only, not reminders, and a reminder yes doesn’t cover them. We record it the same way, and the first text says how to stop. An opening isn’t texted at night: it is emailed instead, or not offered to you if we have no email address.',
         ),
+        p(
+          'If you text back, your text goes to the business that texted you in the last 7 days, and only to it: it shows to its owners and managers, on your profile there, and in its data export, for 90 days. If no business texted you in that time, or more than one did, your text isn’t passed on or kept, and we answer once a day that we couldn’t tell which business it is for. The business can reply by text, in its own words, under the yes you gave it.',
+        ),
         list(
           'Reply STOP to any text to stop them all, from every business that uses Pepper, at once. Reply START to get them again, HELP for help.',
           'Message frequency varies with your appointments. Message and data rates may apply.',
@@ -238,6 +241,7 @@ export const PRIVACY: LegalDocument = {
           'Sent emails’ delivery records: 30 days. Unconfirmed booking requests: 24 hours.',
           'Import working rows: 24 hours for a preview not imported; 7 days for an import, while it can be undone.',
           'A visit’s risk rating: until the visit is no longer upcoming (within the hour), or deleted with the visit.',
+          'A client’s text to a business, and its replies: 90 days, or deleted with the client.',
           'A remembered phone on the booking page: 90 days from its last use, or until the client taps “Forget this phone”.',
           'Backups: overwritten on a fixed schedule, stated here before this policy takes effect.',
         ),
@@ -387,7 +391,8 @@ export const TERMS: LegalDocument = {
           'Reply STOP to stop all texts from Pepper’s number, START to get them again, HELP for help. You can also write to us.',
           'Carriers are not liable for delayed or undelivered messages.',
           'Waitlist texts: a business’s waitlist clients who said yes to them get a text when a time they are waiting for opens up, with a link to claim it.',
-          'Businesses: text only clients who said yes, about what they said yes to (record a yes to waitlist texts only when the client gave it to you); never remove or change the opt-out words; and stop texting anyone who asks you to.',
+          'Replies: a client who texts back reaches the business that texted them in the last 7 days, which may answer by text in its own words.',
+          'Businesses: text only clients who said yes, about what they said yes to (record a yes to waitlist texts only when the client gave it to you); keep replies to what the client asked, never marketing; never remove or change the opt-out words; and stop texting anyone who asks you to.',
         ),
         link('How we handle your number', `${PRIVACY_PATH}#${SMS_TERMS_SECTION}`),
       ],

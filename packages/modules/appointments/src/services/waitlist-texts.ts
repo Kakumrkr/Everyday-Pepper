@@ -7,7 +7,13 @@ import {
   type OutboxMessageId,
 } from '@pepper/contracts';
 import { queueSms } from '@pepper/core';
-import type { Tenant, TenantTx, WaitlistOfferRow } from '@pepper/db';
+import {
+  markWaitlistEntryTexted,
+  markWaitlistOfferTexted,
+  type Tenant,
+  type TenantTx,
+  type WaitlistOfferRow,
+} from '@pepper/db';
 import { offerUrl } from '../emails.js';
 import { waitlistOfferText, waitlistOptInText } from '../texts.js';
 import type { BookingEmailDetails } from './notices.js';
@@ -100,6 +106,8 @@ export async function queueWaitlistOfferText(
       now: new Date(now),
     },
   );
+  // A reply to it within the window comes back to this business (S80, ADR-0072).
+  if (messageId !== undefined) await markWaitlistOfferTexted(tx, offer.id, options.now);
   return messageId === undefined ? { texted: true } : { texted: true, messageId };
 }
 
@@ -126,7 +134,7 @@ export async function queueWaitlistOptInText(
   options: WaitlistTextOptions & { outboxKey: Buffer; now: Date },
 ): Promise<OutboxMessageId | undefined> {
   if (options.texts !== true || !reminderSettingsOf(tenant).texts) return undefined;
-  return queueSms(
+  const messageId = await queueSms(
     tx,
     {
       to: notice.phone,
@@ -140,4 +148,7 @@ export async function queueWaitlistOptInText(
       now: options.now,
     },
   );
+  // A reply to it within the window comes back to this business (S80, ADR-0072).
+  if (messageId !== undefined) await markWaitlistEntryTexted(tx, notice.entryId, options.now);
+  return messageId;
 }

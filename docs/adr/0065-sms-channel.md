@@ -63,6 +63,7 @@ Approved at the S79 brief ("Start with your recommendations and complete the ses
 
 ## Not done
 - Approve by text (S63): [ADR-0066](0066-approve-by-text.md).
+- Two-way texting (§5's "anything else is neither stored nor answered"): a client's own text is kept by the one business it fits and answered from a card since S80, [ADR-0072](0072-client-texts-kept.md).
 - S62.2: the owner's "Texts and reminders" screen in More, the profile's last-text line, and "Confirmed by text" on the visit.
 - Marketing texts (separate consent; not in V1). MMS. Numbers outside the US and Canada. A number per business.
 - How long consent records are kept after a business is deleted (the TCPA's four-year limit); for the lawyer's review with the privacy policy.

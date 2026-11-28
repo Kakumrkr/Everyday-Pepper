@@ -659,6 +659,13 @@
       "when": 1795794448864,
       "tag": "0093_s79_waitlist_texts",
       "breakpoints": true
+    },
+    {
+      "idx": 94,
+      "version": "7",
+      "when": 1795813969115,
+      "tag": "0094_s80_client_texts",
+      "breakpoints": true
     }
   ]
 }

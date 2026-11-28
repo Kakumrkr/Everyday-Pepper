@@ -156,9 +156,11 @@ function endsWithAiDisclosure(body: string): boolean {
 /**
  * What a text is about (S79, AC-X-221): `appointments` (confirmations, reminders, the confirm
  * ask, a member's own cards: what v1 and v2 name) or `waitlist_offer` (a freed time offered to
- * a waitlist client: what v3 names). A consent lets the business send only its purpose's texts.
+ * a waitlist client: what v3 names) or `reply` (S80, ADR-0072: a member's answer to the client's
+ * own text, on any consent the client gave, v1 or v3). A consent lets the business send only its
+ * purpose's texts.
  */
-export const SmsPurposeSchema = z.enum(['appointments', 'waitlist_offer']);
+export const SmsPurposeSchema = z.enum(['appointments', 'waitlist_offer', 'reply']);
 export type SmsPurpose = z.infer<typeof SmsPurposeSchema>;
 
 /**
@@ -167,7 +169,8 @@ export type SmsPurpose = z.infer<typeof SmsPurposeSchema>;
  * set by domain code only, never from a model's arguments. `wordsBy` (S61.2, AC-X-69), always
  * said, so no caller can forget it: `ai` when the AI wrote the words, which then must end with
  * the disclosure (`smsWithAiDisclosure`, counted in the segments); `template` for Pepper's fixed
- * words. The link's host is the caller's (the app's base URL); only its path is checked here.
+ * words; `member` for a member's own reply (S80). The link's host is the caller's (the app's
+ * base URL); only its path is checked here.
  */
 export const OutboxSmsSchema = z
   .object({
@@ -179,7 +182,7 @@ export const OutboxSmsSchema = z
      * without a standing consent; a STOP still drops it.
      */
     requested: z.literal(true).optional(),
-    wordsBy: z.enum(['ai', 'template']),
+    wordsBy: z.enum(['ai', 'template', 'member']),
     /** What it is about (S79): checked at delivery against the consent; absent: appointments. */
     purpose: SmsPurposeSchema.optional(),
     /** Not sent after this instant (S79: a waitlist offer's close); dropped instead. */
@@ -418,6 +421,8 @@ export const SMS_WAITLIST_CONSENT_WORDING: SmsConsentWordingVersion = 'sms-conse
 export const SMS_PURPOSE_WORDINGS: Record<SmsPurpose, readonly SmsConsentWordingVersion[]> = {
   appointments: ['sms-consent-v1', 'sms-consent-v2'],
   waitlist_offer: ['sms-consent-v3'],
+  // An answer to a text the client sent (S80): conversational, on whichever consent they gave.
+  reply: ['sms-consent-v1', 'sms-consent-v3'],
 };
 
 /** The wording versions each source may record (the database checks the same, migration 0093). */
@@ -481,6 +486,67 @@ export const LastTextSchema = z
   .strict();
 export type LastText = z.infer<typeof LastTextSchema>;
 
+/** How many days after a business's last text to a number a reply from it comes back (S80). */
+export const CLIENT_TEXT_WINDOW_DAYS = 7;
+/** How long a client's text and a reply are kept (S80, ADR-0072, AC-X-235). */
+export const CLIENT_TEXT_RETENTION_DAYS = 90;
+/** The most a member's reply may say (S80, AC-X-233); the business's name goes before it. */
+export const CLIENT_TEXT_REPLY_MAX = 300;
+
+/** What a consent in force lets the business text (S80 top-up, AC-X-236). */
+export const SmsConsentPurposeSchema = z.enum(['appointments', 'waitlist_offer']);
+
+/** One consent in force on the client's profile, with what it is for (AC-X-236). */
+export const ClientTextsConsentSchema = z
+  .object({
+    phone: SmsPhoneSchema,
+    purpose: SmsConsentPurposeSchema,
+    source: SmsConsentSourceSchema,
+    wordingVersion: SmsConsentWordingVersionSchema,
+    words: z.string().min(1),
+    givenAt: UtcDateTimeSchema,
+    /** The number replied STOP (for every business on Pepper). */
+    optedOut: z.boolean(),
+  })
+  .strict();
+export type ClientTextsConsent = z.infer<typeof ClientTextsConsentSchema>;
+
+/** A client's own text or a member's reply, on the profile (S80, AC-X-234). */
+export const ClientTextEntrySchema = z
+  .object({
+    id: z.uuid(),
+    from: z.enum(['client', 'team']),
+    body: z.string().min(1).max(1600),
+    at: UtcDateTimeSchema,
+  })
+  .strict();
+export type ClientTextEntry = z.infer<typeof ClientTextEntrySchema>;
+
+/** `POST /v1/clients/:clientId/texts/replies`: a member's reply, from its card or the profile. */
+export const ClientTextReplyRequestSchema = z
+  .object({
+    body: z.string().trim().min(1, 'Write a reply').max(CLIENT_TEXT_REPLY_MAX),
+    /** The card it answers, closed as done. */
+    feedItemId: z.uuid().optional(),
+  })
+  .strict();
+export type ClientTextReplyRequest = z.infer<typeof ClientTextReplyRequestSchema>;
+
+/** The queued reply: Undo takes it back (`DELETE …/replies/:replyId`) until `sendsAt` passes. */
+export const ClientTextReplySchema = z
+  .object({
+    replyId: z.uuid(),
+    /** When it may go out (after the hold and the quiet hours). */
+    sendsAt: UtcDateTimeSchema,
+  })
+  .strict();
+export type ClientTextReply = z.infer<typeof ClientTextReplySchema>;
+
+/** What Undo did: `taken_back`, or `too_late` (it is being sent or was sent). */
+export const ClientTextUndoSchema = z
+  .object({ outcome: z.enum(['taken_back', 'too_late']) })
+  .strict();
+
 /**
  * `GET /v1/clients/:clientId/texts` (and the answer of `POST …/texts/stop`): the status, the
  * client's latest consent with the words exactly as shown, whether their own phone can get texts
@@ -502,6 +568,12 @@ export const ClientTextsSchema = z.object({
     .nullable(),
   canStop: z.boolean(),
   lastText: LastTextSchema.nullable(),
+  /** Each consent in force, with its purpose (S80 top-up, AC-X-236). */
+  consents: z.array(ClientTextsConsentSchema),
+  /** Their own texts and the replies, newest first (S80, AC-X-234). */
+  messages: z.array(ClientTextEntrySchema),
+  /** Whether this member may reply by text now (owners and managers, a consent in force). */
+  canReply: z.boolean(),
 });
 export type ClientTexts = z.infer<typeof ClientTextsSchema>;
 

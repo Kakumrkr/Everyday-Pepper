@@ -41,6 +41,7 @@ import { appendAuditEntry } from './repositories/audit.js';
 import { recordFunnelStep } from './repositories/booking-funnel.js';
 import { insertApprovalText } from './repositories/approval-texts.js';
 import { insertBookingManageLink, insertBookingText } from './repositories/booking-texts.js';
+import { insertInboundClientText } from './repositories/client-texts.js';
 import { insertBookingVerification } from './repositories/booking-verifications.js';
 import { insertBusinessPhoto } from './repositories/business-photos.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
@@ -485,6 +486,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       ).id;
     },
     touch: "status = 'cancelled'",
+    // Whose a client's text is (S80, `sms_reply_target`): an opt-in that went by text.
+    ownerLookup: 'sms_reply_lookup',
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
     ],
@@ -533,6 +536,8 @@ const TENANT_TABLES: Record<string, TenantTable> = {
       ).id;
     },
     touch: 'rank = rank',
+    // Whose a client's text is (S80, `sms_reply_target`): an offer that went by text.
+    ownerLookup: 'sms_reply_lookup',
     memberScope: [
       { policyname: 'member_scope', cmd: 'ALL', qual: OWN_STAFF, with_check: OWN_STAFF },
       { policyname: 'member_scope_insert', cmd: 'INSERT', qual: null, with_check: SEES_ALL },
@@ -989,6 +994,24 @@ const TENANT_TABLES: Record<string, TenantTable> = {
     },
     touch: 'kind = kind',
     ownerLookup: 'sms_confirm_lookup',
+  },
+  client_texts: {
+    tenantColumn: 'tenant_id',
+    // A client's own text, kept by the business it was routed to (S80, ADR-0072).
+    seed: async (tx) => {
+      const row = await insertInboundClientText(tx, {
+        clientId: await seedClient(tx),
+        body: 'Running 10 late',
+        provider: 'sandbox',
+        eventId: `SM${randomBytes(8).toString('hex')}`,
+        receivedAt: new Date(),
+      });
+      if (row === undefined) throw new Error('seed client text not stored');
+      return row.id;
+    },
+    touch: 'body = body',
+    // Whose a client's text is (S80, `sms_reply_target`): a reply went from here.
+    ownerLookup: 'sms_reply_lookup',
   },
   approval_texts: {
     tenantColumn: 'tenant_id',

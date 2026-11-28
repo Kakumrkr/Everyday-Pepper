@@ -14,7 +14,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 import { SameOriginGuard } from '../auth/guards.js';
 import { AiActionsService } from '../chat/ai-actions.service.js';
 import { RateLimiter } from '../http/rate-limit.js';
-import { APPROVAL_REPLIES } from './sms-inbound.service.js';
+import { APPROVAL_REPLIES, NEUTRAL_REPLY } from './sms-inbound.service.js';
 import { SmsWebhookModule } from './sms-webhook.controller.js';
 import { twilioSignatureOf } from './twilio-signature.js';
 
@@ -28,9 +28,11 @@ const core = vi.hoisted(() => ({
   recordSmsStatus: vi.fn(),
   claimApprovalText: vi.fn(),
   recordTextApproval: vi.fn(),
+  isTextedNumber: vi.fn(),
 }));
 vi.mock('@pepper/core', async (original) => ({
   ...(await original<typeof Core>()),
+  isTextedNumber: core.isTextedNumber,
   handleInboundSms: core.handleInboundSms,
   recordSmsStatus: core.recordSmsStatus,
   claimApprovalText: core.claimApprovalText,
@@ -42,10 +44,11 @@ vi.mock('@pepper/db', async (original) => ({
   isSmsOptedOut: db.isSmsOptedOut,
   isMemberPhone: db.isMemberPhone,
 }));
-const appointments = vi.hoisted(() => ({ confirmBookingByText: vi.fn() }));
+const appointments = vi.hoisted(() => ({ confirmBookingByText: vi.fn(), keepClientText: vi.fn() }));
 vi.mock('@pepper/appointments', async (original) => ({
   ...(await original<typeof Appointments>()),
   confirmBookingByText: appointments.confirmBookingByText,
+  keepClientText: appointments.keepClientText,
 }));
 
 const ORIGIN = 'http://localhost:3000';
@@ -158,6 +161,10 @@ beforeEach(() => {
   db.isSmsOptedOut.mockResolvedValue(false);
   db.isMemberPhone.mockReset();
   db.isMemberPhone.mockResolvedValue(true);
+  core.isTextedNumber.mockReset();
+  core.isTextedNumber.mockResolvedValue(true);
+  appointments.keepClientText.mockReset();
+  appointments.keepClientText.mockResolvedValue({ outcome: 'kept', replay: false });
   appointments.confirmBookingByText.mockReset();
   appointments.confirmBookingByText.mockResolvedValue({
     outcome: 'confirmed',
@@ -219,6 +226,84 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
     const c = form(inbound('Confirm'));
     const response = await post(path, c, signature(path, c)).expect(200);
     expect(response.text).toBe('<?xml version="1.0" encoding="UTF-8"?><Response></Response>');
+  });
+
+  describe("a client's own text (S80, AC-X-229…231)", () => {
+    const EMPTY = '<?xml version="1.0" encoding="UTF-8"?><Response></Response>';
+    const send = async (text: string) => {
+      core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+      const body = form(inbound(text));
+      return (await post(path, body, signature(path, body)).expect(200)).text;
+    };
+
+    it('keeps a text that is no keyword, "C" or a card\'s "Y", and answers nothing', async () => {
+      expect(await send('Can I come at 3 instead?')).toBe(EMPTY);
+      expect(appointments.keepClientText).toHaveBeenCalledWith(
+        {},
+        {
+          provider: 'twilio',
+          eventId: `SM${'a'.repeat(32)}`,
+          from: '+15552340001',
+          body: 'Can I come at 3 instead?',
+          receivedAt: NOW,
+        },
+      );
+      expect(appointments.confirmBookingByText).not.toHaveBeenCalled();
+    });
+
+    it('keeps a client\'s bare "Y" or "No", never a member\'s', async () => {
+      db.isMemberPhone.mockResolvedValue(false);
+      expect(await send('No')).toBe(EMPTY);
+      expect(appointments.keepClientText).toHaveBeenCalledTimes(1);
+      db.isMemberPhone.mockResolvedValue(true);
+      await send('Y');
+      expect(appointments.keepClientText).toHaveBeenCalledTimes(1);
+    });
+
+    it('leaves keywords and "C" to their own answers', async () => {
+      const stop = form(inbound('STOP'));
+      await post(path, stop, signature(path, stop)).expect(200);
+      core.handleInboundSms.mockResolvedValue({ keyword: null, reply: null });
+      const c = form(inbound('C'));
+      await post(path, c, signature(path, c)).expect(200);
+      expect(appointments.keepClientText).not.toHaveBeenCalled();
+    });
+
+    it('drops a number’s texts past 60 an hour, unanswered (a looping phone)', async () => {
+      limits.spent.mockResolvedValue(true);
+      expect(await send('Again')).toBe(EMPTY);
+      expect(appointments.keepClientText).not.toHaveBeenCalled();
+    });
+
+    it('answers a text no business fits once a day, naming none', async () => {
+      db.isMemberPhone.mockResolvedValue(false);
+      appointments.keepClientText.mockResolvedValue({ outcome: 'unrouted' });
+      expect(await send('Hello?')).toBe(
+        `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${NEUTRAL_REPLY.replaceAll("'", '&apos;')}</Message></Response>`,
+      );
+      expect(NEUTRAL_REPLY).not.toMatch(/Juniper|Plum/);
+      expect(limits.hit).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'sms-neutral-reply', max: 1 }),
+        expect.stringMatching(/^[0-9a-f]{64}$/),
+      );
+      limits.spent.mockResolvedValue(true);
+      expect(await send('Hello?')).toBe(EMPTY);
+    });
+
+    it('sends no neutral reply after a STOP, to a member, to a stranger or without Redis', async () => {
+      appointments.keepClientText.mockResolvedValue({ outcome: 'unrouted' });
+      db.isMemberPhone.mockResolvedValue(true);
+      expect(await send('Hello?')).toBe(EMPTY);
+      db.isMemberPhone.mockResolvedValue(false);
+      db.isSmsOptedOut.mockResolvedValue(true);
+      expect(await send('Hello?')).toBe(EMPTY);
+      db.isSmsOptedOut.mockResolvedValue(false);
+      core.isTextedNumber.mockResolvedValue(false);
+      expect(await send('Hello?')).toBe(EMPTY);
+      core.isTextedNumber.mockResolvedValue(true);
+      limits.spent.mockRejectedValue(new Error('Redis is away'));
+      expect(await send('Hello?')).toBe(EMPTY);
+    });
   });
 
   describe('"Y" and a code (S63, AC-X-83…86)', () => {

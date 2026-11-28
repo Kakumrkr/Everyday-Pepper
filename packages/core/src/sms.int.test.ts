@@ -524,6 +524,20 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
       },
       canStop: true,
       lastText: null,
+      // S80: each consent in force with its purpose, the texts, and Reply for owners.
+      consents: [
+        {
+          phone,
+          purpose: 'appointments',
+          source: 'booking_page',
+          wordingVersion: 'sms-consent-v1',
+          words: texts.consent?.words,
+          givenAt: '2026-11-12T17:00:00.000Z',
+          optedOut: false,
+        },
+      ],
+      messages: [],
+      canReply: true,
     });
   });
 
@@ -537,6 +551,9 @@ describe('a client’s texts on their profile (S61.2, AC-X-66, AC-X-67)', () => 
       consent: null,
       canStop: false,
       lastText: null,
+      consents: [],
+      messages: [],
+      canReply: false,
     });
     expect(
       await getClientTexts(db, t.owner, await clientWith(t.tenantId, '+447700900123', false)),

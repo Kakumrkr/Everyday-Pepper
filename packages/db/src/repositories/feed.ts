@@ -1,9 +1,11 @@
 import {
   CalendarKeptPayloadSchema,
+  ClientTextPayloadSchema,
   type CalendarKeptPayload,
   DEFAULT_FEED_SETTINGS,
   FEED_SNOOZE_DAYS,
   FeedInsightKindSchema,
+  FeedKindSchema,
   FeedItemIdSchema,
   FeedSettingsSchema,
   DailyBriefingPayloadSchema,
@@ -11,6 +13,7 @@ import {
   TenantIdSchema,
   type DailyBriefingPayload,
   type FeedInsightKind,
+  type FeedKind,
   type FeedItemId,
   type TenantId,
 } from '@pepper/contracts';
@@ -36,6 +39,7 @@ import {
   aiActionProposals,
   bookingPayments,
   bookings,
+  clientTexts,
   clients,
   feedItems,
   insightRequests,
@@ -46,6 +50,9 @@ import {
   type FeedItemRow,
 } from '../schema.js';
 import { withJobScan, type TenantTx } from '../tenant.js';
+
+/** A client's text card's kind (S80). */
+const CLIENT_TEXT = 'client_text';
 
 // The operator feed's suggestions and the insights pass's bookkeeping (ADR-0039). Run inside
 // `withMember` for a member's request, where the `member_scope` policy limits staff to the
@@ -191,9 +198,10 @@ export async function listOpenFeedItems(
   tx: TenantTx,
   now: Date,
   limit = 50,
-  options: { excludeKinds?: readonly FeedInsightKind[] } = {},
+  options: { excludeKinds?: readonly FeedKind[]; onlyKind?: FeedKind } = {},
 ): Promise<FeedItemWithNames[]> {
-  const excluded = (options.excludeKinds ?? []).map((kind) => FeedInsightKindSchema.parse(kind));
+  const excluded = (options.excludeKinds ?? []).map((kind) => FeedKindSchema.parse(kind));
+  const only = options.onlyKind === undefined ? undefined : FeedKindSchema.parse(options.onlyKind);
   const max = z.number().int().min(1).max(200).parse(limit);
   const rows = await tx
     .select({
@@ -201,23 +209,35 @@ export async function listOpenFeedItems(
       staffName: staffMembers.displayName,
       clientName: clients.name,
       serviceName: services.name,
+      textBody: clientTexts.body,
     })
     .from(feedItems)
     .leftJoin(staffMembers, eq(staffMembers.id, feedItems.staffMemberId))
     .leftJoin(clients, eq(clients.id, feedItems.clientId))
     .leftJoin(services, eq(services.id, feedItems.serviceId))
+    // A client's text card quotes the text, kept on its own (S80): a card whose text is gone
+    // reads without words and is left out.
+    .leftJoin(
+      clientTexts,
+      and(
+        eq(feedItems.kind, CLIENT_TEXT),
+        sql`${clientTexts.id}::text = ${feedItems.payload}->>'textId'`,
+      ),
+    )
     .where(
       and(
         eq(feedItems.status, 'suggestion'),
         gt(feedItems.expiresAt, now),
         // The briefing informs; it is read on its own (`readBriefing`), never as a suggestion.
         notInArray(feedItems.kind, [...excluded, BRIEFING]),
+        only === undefined ? undefined : eq(feedItems.kind, only),
       ),
     )
     .orderBy(desc(feedItems.createdAt), asc(feedItems.id))
     .limit(max);
   return rows.map((row) => ({
     ...row.item,
+    payload: withTextBody(row.item.kind, row.item.payload, row.textBody),
     staffName: row.staffName,
     clientName: row.clientName,
     serviceName: row.serviceName,
@@ -932,4 +952,90 @@ export async function writeCalendarKeptNote(tx: TenantTx, note: CalendarKeptNote
       set: { payload: sql`excluded.payload`, expiresAt: sql`excluded.expires_at` },
       setWhere: sql`${feedItems.status} = 'suggestion'`,
     });
+}
+
+// ---------------------------------------------------------------------------------------------
+// A client's text (S80, ADR-0072, AC-X-232): one card per client and local day, for owners and
+// managers (no audience staff member). A later text that day updates it and opens it again, even
+// after it was done or dismissed: a new text is new. Ids and counts only; the words stay in
+// `client_texts` and are read with the card.
+
+/** The stored payload with the text's words, for a client's text card; others as they are. */
+function withTextBody(kind: string, payload: unknown, body: string | null): unknown {
+  if (kind !== CLIENT_TEXT || body === null || typeof payload !== 'object' || payload === null) {
+    return payload;
+  }
+  return { ...payload, body };
+}
+
+export interface ClientTextCard {
+  clientId: string;
+  /** The client's local day the text came. */
+  day: string;
+  textId: string;
+  receivedAt: Date;
+  /** How many texts the client sent that day. */
+  count: number;
+  /** The client's next visit, if one is booked. */
+  nextVisit: {
+    bookingId: string;
+    staffMemberId: string;
+    serviceId: string;
+    startsAt: Date;
+  } | null;
+  expiresAt: Date;
+}
+
+export async function writeClientTextCard(tx: TenantTx, card: ClientTextCard): Promise<void> {
+  const clientId = Id.parse(card.clientId);
+  const day = LocalDateSchema.parse(card.day);
+  const subjectKey = `client:${clientId}`;
+  const next = card.nextVisit;
+  await tx
+    .insert(feedItems)
+    .values({
+      kind: CLIENT_TEXT,
+      subjectKey,
+      day,
+      dedupeKey: `${CLIENT_TEXT}:${subjectKey}:${day}`,
+      audienceStaffId: null,
+      clientId,
+      bookingId: next === null ? null : Id.parse(next.bookingId),
+      staffMemberId: next === null ? null : Id.parse(next.staffMemberId),
+      serviceId: next === null ? null : Id.parse(next.serviceId),
+      payload: ClientTextPayloadSchema.parse({
+        textId: card.textId,
+        receivedAt: card.receivedAt.toISOString(),
+        count: card.count,
+        nextVisitStartsAt: next === null ? null : next.startsAt.toISOString(),
+      }),
+      expiresAt: card.expiresAt,
+    })
+    .onConflictDoUpdate({
+      target: [feedItems.tenantId, feedItems.dedupeKey],
+      set: {
+        payload: sql`excluded.payload`,
+        expiresAt: sql`excluded.expires_at`,
+        bookingId: sql`excluded.booking_id`,
+        staffMemberId: sql`excluded.staff_member_id`,
+        serviceId: sql`excluded.service_id`,
+        status: 'suggestion',
+        actedAt: null,
+        snoozedUntil: null,
+      },
+    });
+}
+
+/** Opens a client's text card again (its reply was taken back, S80): `id` only, if it is done. */
+export async function reopenClientTextCard(tx: TenantTx, id: string): Promise<void> {
+  await tx
+    .update(feedItems)
+    .set({ status: 'suggestion', actedAt: null })
+    .where(
+      and(
+        eq(feedItems.id, Id.parse(id)),
+        eq(feedItems.kind, CLIENT_TEXT),
+        eq(feedItems.status, 'done'),
+      ),
+    );
 }

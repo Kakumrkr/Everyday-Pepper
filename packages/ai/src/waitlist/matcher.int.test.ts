@@ -675,6 +675,14 @@ describe('S79: waitlist offers by text (AC-X-223…227)', () => {
     });
     expect(again).toEqual({ texted: true });
     expect(await offerTexts(w)).toHaveLength(1);
+    // Marked as texted, so a reply within the window comes back here (S80, AC-X-229).
+    const [marked] = await withTenant(db, w.tenantId, (tx) =>
+      tx
+        .select({ textedAt: waitlistOffers.textedAt })
+        .from(waitlistOffers)
+        .where(eq(waitlistOffers.clientId, id(w, '{{client:sara}}'))),
+    );
+    expect(marked?.textedAt).toBeInstanceOf(Date);
   });
 });
 

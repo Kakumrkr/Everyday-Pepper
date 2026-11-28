@@ -7,6 +7,7 @@ import {
   BookingRequestExpiredError,
   BookingRequestNotFoundError,
   BookingRequestUsedError,
+  ClientTextNotSendableError,
   GalleryFullError,
   PhotoNotFoundError,
   IdempotencyKeyReusedError,
@@ -346,6 +347,18 @@ export function toHttpError(error: unknown): unknown {
   }
   const imported = importAnswer(error);
   if (imported !== undefined) return imported;
+  if (error instanceof ClientTextNotSendableError) {
+    switch (error.reason) {
+      case 'texts_off':
+        return new ConflictException(apiError('texts_off'));
+      case 'no_consent':
+        return new ConflictException(apiError('client_not_textable'));
+      case 'too_long':
+        return new UnprocessableEntityException(apiError('reply_too_long'));
+      case 'not_found':
+        return new NotFoundException(apiError('reply_not_found'));
+    }
+  }
   if (error instanceof PhoneCheckError) {
     switch (error.reason) {
       case 'not_textable':

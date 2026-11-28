@@ -399,6 +399,8 @@ export async function mergeClientRows(
   );
   // Their consent to texts stays the business's record (S61, ADR-0065 §7): it follows them.
   await tx.execute(sql`UPDATE sms_consents SET client_id = ${keep} WHERE client_id = ${other}`);
+  // Their own texts and the replies follow them too (S80, ADR-0072).
+  await tx.execute(sql`UPDATE client_texts SET client_id = ${keep} WHERE client_id = ${other}`);
   // An import's Undo no longer removes either: the client kept now holds both's history.
   await tx.execute(sql`
     UPDATE import_rows SET client_id = ${keep}, created_client = false
@@ -486,6 +488,8 @@ export async function deleteClientRow(
   await tx.execute(sql`DELETE FROM client_import_refs WHERE client_id = ${clientId}`);
   // Their consent to texts goes with their number (S61, ADR-0065 §7): nothing is texted to them.
   await tx.execute(sql`DELETE FROM sms_consents WHERE client_id = ${clientId}`);
+  // Their own texts and the replies go too (S80, ADR-0072, AC-X-235).
+  await tx.execute(sql`DELETE FROM client_texts WHERE client_id = ${clientId}`);
   // Their old emails' reschedule/cancel links stop working (ADR-0022).
   await tx.execute(
     sql`UPDATE bookings SET manage_token_hash = NULL WHERE client_id = ${clientId} AND manage_token_hash IS NOT NULL`,

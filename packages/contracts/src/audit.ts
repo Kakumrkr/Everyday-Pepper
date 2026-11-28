@@ -439,6 +439,32 @@ export const AuditChangeSchema = z.discriminatedUnion('action', [
       after: z.object({ active: z.literal(false) }).strict(),
     })
     .strict(),
+  // A client's text kept, and a member's reply queued or taken back (S80, ADR-0072): ids only,
+  // never the words or the number.
+  z
+    .object({
+      action: z.literal('client_text.received'),
+      entity: entity('client_text'),
+      before: z.null(),
+      after: z.object({ clientId: ClientIdSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client_text.replied'),
+      entity: entity('client_text'),
+      before: z.null(),
+      after: z.object({ clientId: ClientIdSchema, outboxMessageId: z.uuid() }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal('client_text.reply_taken_back'),
+      entity: entity('client_text'),
+      before: z.object({ clientId: ClientIdSchema }).strict(),
+      after: z.null(),
+    })
+    .strict(),
   // Payments (S65, ADR-0067): the business's Stripe account was created, and each change of
   // where it stands. Statuses only: never what Stripe asked for or who the owner is.
   z

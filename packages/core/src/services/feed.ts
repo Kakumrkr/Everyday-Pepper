@@ -65,8 +65,18 @@ export interface FeedOptions {
   morningHourOf?: (templateId: TemplateId | null) => number;
 }
 
-/** Kinds that tell of something done, not suggest: shown in the quiet start and while paused. */
-const INFORMING_KINDS: ReadonlySet<string> = new Set(['calendar_kept']);
+/**
+ * Kinds that tell of something, not suggest: shown in the quiet start and while paused (S71.2: a
+ * booking kept over a Google change; S80: a client's text).
+ */
+const INFORMING_KINDS: ReadonlySet<string> = new Set(['calendar_kept', 'client_text']);
+/**
+ * Kinds the AI's feed read never shows (S80): a client's own words are outside text, and S80
+ * keeps every chat tool's output unchanged (reading texts is S81's).
+ */
+const NOT_FOR_AI = ['client_text'] as const;
+/** The most clients' text cards Home shows at once (newest first). */
+const CLIENT_TEXT_CARDS = 20;
 
 /** The member's feed: suggestions (none while paused), switches and the ask-once question. */
 export async function getFeed(
@@ -89,7 +99,12 @@ export async function getFeed(
     const history = await historyRead;
     // Kinds turned off are left out by the query, so they never take the feed's places. Paused
     // or quiet, only the notes that inform stay (S71.2: a booking kept over a Google change).
-    const open = await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds });
+    // Clients' texts (S80) are read on their own, so they never take the board's places.
+    const texts = await listOpenFeedItems(tx, now, CLIENT_TEXT_CARDS, { onlyKind: 'client_text' });
+    const board = await listOpenFeedItems(tx, now, 50, {
+      excludeKinds: [...stored.disabledKinds, 'client_text'],
+    });
+    const open = [...texts, ...board];
     const rows =
       stored.suggestionsPaused || !history
         ? open.filter((row) => INFORMING_KINDS.has(row.kind))
@@ -151,7 +166,9 @@ export async function feedForAiIn(
     !(stored.disabledKinds as readonly string[]).includes(row.kind) &&
     (options.kind === undefined || row.kind === options.kind);
   const [open, waiting] = [
-    await listOpenFeedItems(tx, now, 50, { excludeKinds: stored.disabledKinds }),
+    await listOpenFeedItems(tx, now, 50, {
+      excludeKinds: [...stored.disabledKinds, ...NOT_FOR_AI],
+    }),
     await listWaitingFeedItems(tx, 50),
   ];
   const items = (rows: FeedItemWithNames[]) =>

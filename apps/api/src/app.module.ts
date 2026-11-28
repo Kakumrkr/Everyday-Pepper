@@ -19,6 +19,7 @@ import { PushModule } from './push/push.module.js';
 import { FeedModule } from './feed/feed.module.js';
 import { RemindersModule } from './reminders/reminders.controller.js';
 import { InboundModule } from './inbound/inbound.controller.js';
+import { ClientRepliesModule } from './sms/client-replies.controller.js';
 import { MemberTextsModule } from './sms/member-texts.controller.js';
 import { GoogleCalendarModule } from './calendar/google-calendar.controller.js';
 import { PaymentsModule } from './payments/payments.controller.js';
@@ -78,6 +79,10 @@ export class AppModule {
           sandbox: config.smsSandbox,
         }),
         MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
+        ClientRepliesModule.forRoot({
+          outboxKey: outboxKeyFrom(config.outboxSecret),
+          texts: config.textsOn,
+        }),
         PaymentsModule.forRoot({
           config: config.payments,
           baseUrl: config.auth.baseUrl,

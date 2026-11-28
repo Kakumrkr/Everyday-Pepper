@@ -148,4 +148,18 @@ describe('the text-message sections the SMS box links to (S61.2, AC-X-64)', () =
     expect(texts).toMatch(/isn’t texted at night: it is emailed instead/);
     expect(termsText()).toMatch(/Waitlist texts/);
   });
+
+  it('names client texts: one business only, 90 days, the once-a-day answer (S80, AC-X-235)', () => {
+    const texts = section(SMS_TERMS_SECTION).text;
+    expect(texts).toMatch(
+      /your text goes to the business that texted you in the last 7 days, and only to it/,
+    );
+    expect(texts).toMatch(/for 90 days/);
+    expect(texts).toMatch(/more than one did, your text isn’t passed on or kept/);
+    expect(section('retention').text).toMatch(
+      /A client’s text to a business, and its replies: 90 days/,
+    );
+    expect(termsText()).toMatch(/Replies: a client who texts back/);
+    expect(termsText()).toMatch(/keep replies to what the client asked, never marketing/);
+  });
 });

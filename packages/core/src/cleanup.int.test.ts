@@ -14,11 +14,14 @@ import {
   createTenant,
   findOutboxMessage,
   insertBookingVerification,
+  insertClient,
+  insertInboundClientText,
   insertMemoryEpisode,
   insertMemoryFact,
   insertProposal,
   insertService,
   listAuditEntries,
+  listClientTexts,
   listMemoryEpisodes,
   lockBookingVerification,
   lockMemoryFact,
@@ -34,6 +37,7 @@ import { outboxKeyFrom, type Mailer } from './outbox.js';
 import {
   BOOKING_REQUEST_RETENTION_MS,
   cleanUp,
+  CLIENT_TEXT_RETENTION_MS,
   OUTBOX_RETENTION_MS,
   PAYMENT_WEBHOOK_RETENTION_MS,
 } from './services/cleanup.js';
@@ -163,6 +167,7 @@ describe('cleanUp', () => {
       waitlistOffers: 0,
       reminderLinks: 0,
       paymentWebhookEvents: 0,
+      clientTexts: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -185,6 +190,7 @@ describe('cleanUp', () => {
       waitlistOffers: 0,
       reminderLinks: 0,
       paymentWebhookEvents: 0,
+      clientTexts: 0,
     });
     for (const tenantId of businesses) {
       expect(await left(tenantId, rowsOf(tenantId))).toEqual({
@@ -192,6 +198,37 @@ describe('cleanUp', () => {
         messages: [false, true],
       });
     }
+  });
+
+  it('deletes clients’ texts 90 days after they came, and newer ones never (S80, AC-X-235)', async () => {
+    const tenantId = TenantIdSchema.parse(
+      (await createTenant(db, { name: 'Texts', slug: `texts-${newId()}`, timeZone: 'UTC' })).id,
+    );
+    const ids = await withTenant(db, tenantId, async (tx) => {
+      const client = await insertClient(tx, {
+        name: 'Maria Lopez',
+        email: null,
+        phone: null,
+        source: 'team',
+      });
+      const kept = [];
+      for (const days of [91, 89]) {
+        const row = await insertInboundClientText(tx, {
+          clientId: client.id,
+          body: `Sent ${String(days)} days ago`,
+          provider: 'sandbox',
+          eventId: `SM${newId().replaceAll('-', '')}`,
+          receivedAt: new Date(NOW - days * DAY),
+        });
+        kept.push(row?.id);
+      }
+      return { client: client.id, texts: kept };
+    });
+    const result = await cleanUp(db, { clock: new ManualClock(new Date(NOW)) });
+    expect(result.clientTexts).toBe(1);
+    expect(CLIENT_TEXT_RETENTION_MS).toBe(90 * DAY);
+    const left = await withTenant(db, tenantId, (tx) => listClientTexts(tx, ids.client));
+    expect(left.map((text) => text.id)).toEqual([ids.texts[1]]);
   });
 
   it('deletes Stripe’s webhook events after 30 days, and newer ones never (S65, AC-X-102)', async () => {

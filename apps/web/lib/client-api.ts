@@ -117,6 +117,11 @@ const MESSAGES: Record<string, string> = {
   phone_check_locked: 'Too many tries. Send a new code.',
   phone_check_wrong_code: 'That code isn’t right. Check the text and try again.',
   phone_not_checked: 'Check your number first.',
+  texts_off: 'Texts are off. Turn them on in Texts and reminders to reply by text.',
+  client_not_textable:
+    'This client can’t get texts now: they haven’t said yes to texts, or they replied STOP. Nothing was sent.',
+  reply_too_long: 'That’s too long for one text. Shorten it, or leave out emoji.',
+  reply_not_found: 'That reply is gone already.',
   // Payments (S65.2, ADR-0067).
   payments_rejected: 'Stripe can’t take payments for this business, so there’s nothing to finish.',
   payments_unavailable: 'Stripe isn’t answering right now. Try again in a few minutes.',

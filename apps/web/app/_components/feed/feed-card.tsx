@@ -37,8 +37,10 @@ function actionFor(item: FeedItem): FeedAction | null {
     // S71.2: the booking's day, where it can be moved or cancelled.
     case 'calendar_kept':
       return { label: 'Open the calendar', href: day(item.day) };
-    // Shown on its own card (`BriefingCard`), never as a suggestion.
+    // Shown on its own card (`BriefingCard`), never as a suggestion; S80's texts on their own
+    // cards (`ClientTextCards`), with Reply.
     case 'daily_briefing':
+    case 'client_text':
       return null;
   }
 }
@@ -58,7 +60,8 @@ export function FeedCard({ feed, timeZone }: { feed: FeedResponse; timeZone: str
     });
   return (
     <FeedSuggestions
-      items={feed.suggestions}
+      // A client's text has its own card with Reply (S80, `ClientTextsCard`).
+      items={feed.suggestions.filter((item) => item.kind !== 'client_text')}
       settings={feed.settings}
       canChangeSettings={feed.canChangeSettings}
       askToTurnOff={feed.askToTurnOff}

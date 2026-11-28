@@ -141,6 +141,11 @@ const MESSAGES: Record<ApiErrorCode, string> = {
   account_being_deleted: 'Your account is being deleted. Keep your account first',
   phone_not_textable: 'Use a US or Canadian mobile number',
   phone_opted_out: 'This number replied STOP. Text START to it from your phone first',
+  texts_off: 'Texts are off for this business',
+  client_not_textable:
+    'This client can’t be texted: no yes to texts in force, or they replied STOP',
+  reply_too_long: 'This reply is too long for one text',
+  reply_not_found: 'No such reply',
   phone_check_expired: 'That code has expired. Send a new one',
   phone_check_locked: 'Too many tries. Send a new code',
   phone_check_wrong_code: 'That code isn’t right. Check the text and try again',

@@ -88,6 +88,9 @@ const TEXTS: ClientTexts = {
   },
   canStop: false,
   lastText: null,
+  consents: [],
+  messages: [],
+  canReply: false,
 };
 
 @Global()

@@ -160,6 +160,11 @@ export const ApiErrorCodeSchema = z.enum([
   'phone_check_locked',
   'phone_check_wrong_code',
   'phone_not_checked',
+  // A member's reply to a client's text (S80, ADR-0072).
+  'texts_off',
+  'client_not_textable',
+  'reply_too_long',
+  'reply_not_found',
 ]);
 export type ApiErrorCode = z.infer<typeof ApiErrorCodeSchema>;
 

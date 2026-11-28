@@ -1,5 +1,5 @@
 import { createHmac } from 'node:crypto';
-import { confirmBookingByText } from '@pepper/appointments';
+import { confirmBookingByText, keepClientText } from '@pepper/appointments';
 import {
   approvalReplyOf,
   classifySmsReply,
@@ -12,6 +12,7 @@ import {
   type ApprovalClaim,
   ForbiddenError,
   handleInboundSms,
+  isTextedNumber,
   ProposalChangedError,
   ProposalNotFoundError,
   ProposalNotPendingError,
@@ -28,7 +29,9 @@ import { RateLimiter, type RateLimit } from '../http/rate-limit.js';
 // A text to Pepper's one number, whoever carried it (S61–S63, ADR-0065 §5, ADR-0066 §4): Twilio's
 // signed webhook, or the sandbox's path in tests (AC-X-87). Keywords first (an opt-out always
 // wins), then "C" to confirm a visit, then "Y" or "N" and a code to approve or skip a card
-// (S64). The reply is answered in the same request. Neither a number nor a text is logged.
+// (S64), then a client's own text, kept by the one business it fits or answered once a day with
+// a reply that names no business (S80, ADR-0072). The reply is answered in the same request.
+// Neither a number nor a text is logged.
 
 export interface SmsInboundOptions {
   /** The public origin (`AUTH_BASE_URL`), for the help link. */
@@ -48,6 +51,16 @@ export interface InboundText {
   from: string;
   body: string;
 }
+
+// A number's own texts kept: at most 60 an hour (a looping phone or an auto-responder is cut off).
+const KEPT_TEXTS: RateLimit = { name: 'sms-client-text', max: 60, windowSeconds: 3600 };
+
+// A text no business fits gets the neutral reply once a day per number (S80, AC-X-230).
+const NEUTRAL_REPLIES: RateLimit = { name: 'sms-neutral-reply', max: 1, windowSeconds: 86_400 };
+
+/** The answer to a text no business fits, or two do (AC-X-230): it names no business. */
+export const NEUTRAL_REPLY =
+  "Pepper: We couldn't tell which business this text is for, so it wasn't passed on. Please contact the business directly. Reply STOP to opt out.";
 
 // A number's wrong codes: after 5 in an hour its codes stop for the hour (AC-X-85).
 const MISSES: RateLimit = { name: 'sms-approval-miss', max: 5, windowSeconds: 3600 };
@@ -105,17 +118,50 @@ export class SmsInboundService {
       }
       case 'approve_without_code':
       case 'skip_without_code':
-        // Only to a member's checked number: a client's "Y" or "No" to a reminder gets no reply.
-        return (await isMemberPhone(this.db, text.from)) && !(await this.optedOut(text.from))
-          ? APPROVAL_REPLIES[kind === 'skip_without_code' ? 'skipWithoutCode' : 'withoutCode']
-          : null;
-      // The keywords were answered above; anything else gets what `handleInboundSms` said.
+        // To a member's checked number, how to answer a card; a client's "Y" or "No" to a
+        // reminder is their own text (S80).
+        if (await isMemberPhone(this.db, text.from)) {
+          return (await this.optedOut(text.from))
+            ? null
+            : APPROVAL_REPLIES[kind === 'skip_without_code' ? 'skipWithoutCode' : 'withoutCode'];
+        }
+        return this.keep(text, receivedAt);
+      // The keywords were answered above.
       case 'help':
       case 'start':
       case 'stop':
-      case null:
         return result.reply;
+      case null:
+        return this.keep(text, receivedAt);
     }
+  }
+
+  /**
+   * A client's own text (S80, AC-X-229, AC-X-230): kept by the one business it fits, unanswered
+   * (a member replies from its card); else stored nowhere, with the neutral reply once a day to a
+   * number some business texts, never after a STOP, never to a member's number.
+   */
+  private async keep(text: InboundText, receivedAt: Date): Promise<string | null> {
+    const counter = (name: string) =>
+      createHmac('sha256', this.codeKey).update(`${name}\n${text.from}`).digest('hex');
+    // Past the hour's limit a text is dropped, unanswered; without Redis it is still kept.
+    const flood = await this.limits.spent(KEPT_TEXTS, counter('client-text')).catch(() => false);
+    if (flood) return null;
+    await this.limits.hit(KEPT_TEXTS, counter('client-text')).catch(() => undefined);
+    const kept = await keepClientText(this.db, { ...text, receivedAt });
+    if (kept.outcome === 'kept') return null;
+    if (await this.optedOut(text.from)) return null;
+    if (await isMemberPhone(this.db, text.from)) return null;
+    if (!(await isTextedNumber(this.db, text.from))) return null;
+    const neutral = counter('neutral-reply');
+    try {
+      if (await this.limits.spent(NEUTRAL_REPLIES, neutral)) return null;
+      await this.limits.hit(NEUTRAL_REPLIES, neutral);
+    } catch {
+      // Redis is away: no reply rather than one that may repeat (the text is stored nowhere).
+      return null;
+    }
+    return NEUTRAL_REPLY;
   }
 
   /**

@@ -275,3 +275,15 @@ export class PaymentNotNeededError extends Error {
     this.name = 'PaymentNotNeededError';
   }
 }
+
+/**
+ * A member's reply to a client's text can't go (S80, ADR-0072): texts are off (the deployment's
+ * or the business's), the client has no consent in force Pepper may text now (or replied STOP),
+ * the words don't fit one text with the business's name, or no such reply to take back.
+ */
+export class ClientTextNotSendableError extends Error {
+  constructor(readonly reason: 'texts_off' | 'no_consent' | 'too_long' | 'not_found') {
+    super(`The reply can't be sent (${reason})`);
+    this.name = 'ClientTextNotSendableError';
+  }
+}
