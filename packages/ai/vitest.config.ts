@@ -31,6 +31,10 @@ export default defineConfig({
         // The release card's proposal in the reminder job's transaction (S78.2): proven against
         // Postgres in `drafts/release.int.test.ts`; its words are the ui labels' (unit-tested).
         'src/drafts/release.ts',
+        // A client text's job in the business's transactions (S81a.2): proven against Postgres in
+        // `client-texts/act.int.test.ts`; its decisions are `routeClientText`'s (unit-tested in
+        // appointments) and its words the ui's `clientTextOutcomeLine`.
+        'src/client-texts/act.ts',
         // The eval subject and its seeded worlds run the loop on Postgres (evals.int.test.ts).
         'src/evals/subject.ts',
         'src/evals/world.ts',
