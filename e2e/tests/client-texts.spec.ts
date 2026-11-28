@@ -101,6 +101,10 @@ test('a client texts back and the owner replies from the card', async ({
   await expect(thread.getByRole('listitem')).toHaveCount(2);
   await expect(thread.getByRole('listitem').first()).toContainText('Of course, see you then');
   await expect(thread.getByRole('listitem').last()).toContainText('Can I bring my daughter along?');
+  // The thread writes times the way Home's cards do (S81a top-up, AC-X-241): "Sat, Nov 28, 9:11 am".
+  await expect(thread.getByRole('listitem').last()).toContainText(
+    /· [A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, \d{1,2}:\d{2} [ap]m/,
+  );
   await page.getByRole('button', { name: 'What they agreed to' }).click();
   await expect(page.getByRole('dialog').getByTestId('client-texts-consent')).toHaveCount(1);
   await expect(page.getByRole('dialog')).toContainText('Appointment texts');

@@ -15,13 +15,13 @@ import { useState } from 'react';
 import { sendJson } from '../../../lib/client-api';
 import { sendReply, undoReply } from '../feed/client-texts-card';
 import { formatPhone } from '../../../lib/booking-profile';
-import { dateTimeLabel } from '../../../lib/booking';
 import {
   consentHowLabel,
   consentMomentLabel,
   lastTextLine,
   PURPOSE_LABEL,
   textsSummary,
+  threadTimeLabel,
 } from '../../../lib/client-texts';
 import { Notice } from '../form-parts';
 
@@ -118,7 +118,7 @@ function TextThread({
             <p className="m-0 type-label text-ink-2">
               {message.from === 'client' ? clientName : 'Your team'}
               <span className="font-normal text-ink-3 tabular-nums">
-                {` · ${dateTimeLabel(timeZone, message.at)}`}
+                {` · ${threadTimeLabel(timeZone, message.at)}`}
               </span>
             </p>
             <p className="m-0 type-body break-words whitespace-pre-wrap text-ink">{message.body}</p>

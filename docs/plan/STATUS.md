@@ -10,7 +10,8 @@ This file is kept short. The full history is in [session-log.md](session-log.md)
 **S81a** Client texts understood ("a", scripted only; branch pushed, no PR). User, 2026-11-28: "A and A, go ahead" (D-1 split: S81a eval support, `read_client_text`, the `client_replies` set; new **S81a.2** the routing and the card quoting the text; S81b merges both and records once. D-2 the profile time-format top-up stays in S81a).
 - Tasks: 1 ACs + ADR-0073 + dependency map · 2 classifier eval support (per-label precision/recall gates, "no never a yes", confusion table) · 3 `read_client_text` reader + contract schema · 4 `client_replies` set (~80) + scripted cassettes + `PHASE_CAPS_USD[18]` · 5 top-up: profile thread times as the cards ("9:11 am").
 - Done: 1 ADR-0073, AC-X-237…241, dependency row · 3 reader (`packages/ai/src/client-texts/reader.ts`, contracts `client-text-reading.ts`) · 2 classifier support (`classifier.test.ts`) · 4 sets 62 + 23 with scripted cassettes (generated once; scripted `evals.int` green, 89 s), cap 18 = $1.50.
-- Next: task 5 (profile thread time format), then `/session-close` (no PR: push the branch, give the S81a.2 prompt).
+- Done: 5 thread times via `threadTimeLabel` (web unit + e2e assertion; e2e run at close).
+- Next: `/session-close` (no PR: push the branch, give the S81a.2 prompt).
 
 ## Last sessions
 - **S80 Phase 18 · Client texts kept (2026-11-28)** ([PR #121](https://github.com/Kakumrkr/Everyday-Pepper/pull/121), [ADR-0072](../adr/0072-client-texts-kept.md)). Full entry in [session-log.md](session-log.md).

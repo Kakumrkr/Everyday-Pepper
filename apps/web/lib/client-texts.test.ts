@@ -6,6 +6,7 @@ import {
   consentMomentLabel,
   lastTextLine,
   textsSummary,
+  threadTimeLabel,
 } from './client-texts';
 
 // The profile's "Text messages" words (S61.2, AC-X-66).
@@ -196,5 +197,17 @@ describe('lastTextLine (AC-X-78)', () => {
     expect(notSent('not_textable')).toContain('Not sent: their number can’t get texts.');
     expect(notSent('failed')).toContain('Not sent: the text service failed.');
     expect(notSent(null)).toMatch(/PM\. Not sent\.$/);
+  });
+});
+
+describe('threadTimeLabel (S81a top-up, AC-X-241)', () => {
+  it('writes a thread time the way Home’s cards do, lower-case am and pm', () => {
+    expect(threadTimeLabel(ZONE, '2026-11-28T14:11:00.000Z')).toBe('Sat, Nov 28, 9:11 am');
+    expect(threadTimeLabel(ZONE, '2026-11-28T23:05:00.000Z')).toBe('Sat, Nov 28, 6:05 pm');
+    // Midnight and noon in the business's zone, not the server's.
+    expect(threadTimeLabel(ZONE, '2026-11-29T05:00:00.000Z')).toBe('Sun, Nov 29, 12:00 am');
+    expect(threadTimeLabel('America/Los_Angeles', '2026-11-28T20:00:00.000Z')).toBe(
+      'Sat, Nov 28, 12:00 pm',
+    );
   });
 });

@@ -1,4 +1,4 @@
-import type { BadgeTone } from '@pepper/ui';
+import { formatInstant, type BadgeTone } from '@pepper/ui';
 import { dateTimeLabel } from './booking';
 import { SMS_PURPOSE_WORDINGS } from '@pepper/contracts';
 import type {
@@ -146,6 +146,14 @@ const NOT_SENT: Record<LastTextReason, string> = {
   not_textable: 'their number can’t get texts',
   failed: 'the text service failed',
 };
+
+/**
+ * When a text in the profile's thread came or went (S81a top-up, AC-X-241): written the way
+ * Home's cards write it, "Sat, Nov 28, 9:11 am", one time format across Home and the profile.
+ */
+export function threadTimeLabel(timeZone: string, at: string): string {
+  return formatInstant(at, timeZone);
+}
 
 /**
  * The profile's last-text line (S62.2, AC-X-78): what it was, when it went (or will, after the
