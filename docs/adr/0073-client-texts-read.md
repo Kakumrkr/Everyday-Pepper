@@ -21,3 +21,14 @@ S80 keeps a client's own text ("Running 10 late", "Can I move to Friday?") and s
 - Self-reported confidence is coarse. It only holds an action back; it never lets one through that the domain would refuse.
 - A client with two visits who writes "running late" without saying which gets the card, not a guess. S81a.2 may pick today's visit when only one is today.
 - One more model call per kept text. Kept texts are few (one business, 7 days), and each is capped at 1,500 tokens.
+
+## S81a.2: built (2026-11-28)
+
+Approved at the S81a.2 brief ("Ok": D-1 A, D-2 A, D-3 A, D-4 A).
+
+- **The job.** `keepClientText` queues one `client_text` outbox message (ids only, `client_text:<textId>`, migration 0095) in the transaction that kept the text, when the api has OpenAI. The worker (`actOnClientText`) reads the text, its client and that client's next 5 confirmed visits (from an hour before the text, so a client late for one that just started is covered) from the database, calls the reader outside any transaction, and routes with `routeClientText`. The worker reads with OpenAI alone; without `AUTH_BASE_URL` it proposes no cancel or move.
+- **The route** (`routeClientText`, pure): only `sure` acts. A named visit must be in the list; none named: the only one shown, else the only one today, else the card asks which (a visit that just started counts, so "can't make it" never lands on next week's). Late is for a visit today; confirm, cancel and move for one still to come, as of when the job runs (a retried job never acts on a visit started meanwhile).
+- **Confirm** (D-2): `confirmClientVisitIn`, by booking id, for that client, booked and to come, under the release card's lock; no reminder needed; audited as the system with `via: text_read`. It doesn't go through the autonomy dial and has no Undo, like a "C" or the confirm link: it is the client's own word about their own visit, and changes nothing anyone else decides. The booking's `client_confirmed_via` stays `text` (it was by text).
+- **Running late:** a push to the visit's staff member's devices (`push.client_late:<textId>`), naming the service, the time and the minutes, never the client or the words; no linked login or device: the card alone.
+- **Cancel or move** (D-1): `proposeForBusiness` with the AI's `cancel_booking` or `move_booking`, `untrustedContext: true`, one per text; a move only to the time the client asked for when it is free with the same staff member (the visit's own time excluded: `findAvailabilityIn` takes `excludeBookingId`), else up to 3 free times on the card for the owner to offer. Pepper never picks a time nobody asked for.
+- **The card** (D-3): always shown; once read it moves to the visit the text was about and says what was done (`ClientTextCardOutcome`: confirmed, told staff, a cancel or a move waiting for an OK, free times, which visit). Nothing is said for a visit already confirmed.
