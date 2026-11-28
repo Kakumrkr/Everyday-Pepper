@@ -1,0 +1,1982 @@
+[
+  {
+    "id": "cr-confirm-yes",
+    "set": "client_replies",
+    "description": "\"Yes\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Yes",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-see-you-thursday",
+    "set": "client_replies",
+    "description": "\"Yes, see you Thursday!\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Yes, see you Thursday!",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-thumbs-up",
+    "set": "client_replies",
+    "description": "\"👍\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "👍",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-confirmed-thanks",
+    "set": "client_replies",
+    "description": "\"Confirmed, thanks\": The client says they will come.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Confirmed, thanks",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-ill-be-there",
+    "set": "client_replies",
+    "description": "\"I'll be there\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "I'll be there",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-yep-at-3",
+    "set": "client_replies",
+    "description": "\"yep see u at 3\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "yep see u at 3",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-sounds-good",
+    "set": "client_replies",
+    "description": "\"Sounds good, see you then\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Sounds good, see you then",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-the-8th",
+    "set": "client_replies",
+    "description": "\"Yes for Tuesday the 8th\": The client says they will come.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Yes for Tuesday the 8th",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 2,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-still-on-today",
+    "set": "client_replies",
+    "description": "\"Still on for today!\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Still on for today!",
+            "visits": ["2026-12-01T15:30:00.000Z", "2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-confirm-cant-wait",
+    "set": "client_replies",
+    "description": "\"Absolutely, can't wait 😊\": The client says they will come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Absolutely, can't wait 😊",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "confirm",
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-need-to-cancel",
+    "set": "client_replies",
+    "description": "\"I need to cancel my appointment\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "I need to cancel my appointment",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-cant-make-thursday",
+    "set": "client_replies",
+    "description": "\"Can't make it Thursday, sorry. Please cancel\": The client will not come.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can't make it Thursday, sorry. Please cancel",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-sick-today",
+    "set": "client_replies",
+    "description": "\"Please cancel today, I'm sick\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Please cancel today, I'm sick",
+            "visits": ["2026-12-01T15:30:00.000Z", "2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-one-word",
+    "set": "client_replies",
+    "description": "\"cancel\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "cancel",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-something-came-up",
+    "set": "client_replies",
+    "description": "\"I won't be able to come, something came up\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "I won't be able to come, something came up",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-the-8th",
+    "set": "client_replies",
+    "description": "\"Cancel my appt on the 8th please\": The client will not come.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Cancel my appt on the 8th please",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 2,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-rebook-later",
+    "set": "client_replies",
+    "description": "\"Have to cancel, my kid is sick. I'll call to rebook later\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Have to cancel, my kid is sick. I'll call to rebook later",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-not-making-today",
+    "set": "client_replies",
+    "description": "\"Sorry not going to make it today\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Sorry not going to make it today",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-off-the-books",
+    "set": "client_replies",
+    "description": "\"Please take me off the books for Thursday\": The client will not come.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Please take me off the books for Thursday",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-cancel-both",
+    "set": "client_replies",
+    "description": "\"I can't come anymore, cancel both please\": A cancel of both visits names no one visit: the owner decides.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "I can't come anymore, cancel both please",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "cancel",
+        "alsoAccept": ["other"],
+        "visit": null,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-to-friday",
+    "set": "client_replies",
+    "description": "\"Can I move to Friday instead?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can I move to Friday instead?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-04"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-4pm-not-3",
+    "set": "client_replies",
+    "description": "\"Could we do 4pm instead of 3?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Could we do 4pm instead of 3?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": null,
+          "time": "16:00"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-today-to-thursday-11",
+    "set": "client_replies",
+    "description": "\"Can I come Thursday at 11 instead?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can I come Thursday at 11 instead?",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-03",
+          "time": "11:00"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-next-week",
+    "set": "client_replies",
+    "description": "\"Need to reschedule, what do you have next week?\": The client asks to move the visit.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Need to reschedule, what do you have next week?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "alsoAccept": ["question"],
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-earlier-today",
+    "set": "client_replies",
+    "description": "\"Is there anything earlier today?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Is there anything earlier today?",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "alsoAccept": ["question"],
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-8th-to-10th",
+    "set": "client_replies",
+    "description": "\"Can we push my appointment on the 8th to the 10th?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can we push my appointment on the 8th to the 10th?",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 2,
+        "askedFor": {
+          "date": "2026-12-10"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-noon-instead",
+    "set": "client_replies",
+    "description": "\"Stuck at work, any chance I can come at 12 instead?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Stuck at work, any chance I can come at 12 instead?",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "time": "12:00"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-saturday-morning",
+    "set": "client_replies",
+    "description": "\"Can I switch to Saturday morning?\": The client asks to move the visit.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can I switch to Saturday morning?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-05"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-a-week-later",
+    "set": "client_replies",
+    "description": "\"Could I move it a week later, same time?\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Could I move it a week later, same time?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-10"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-wednesday-530",
+    "set": "client_replies",
+    "description": "\"Do you have a 5:30 on Wednesday? Need to move from Thursday\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Do you have a 5:30 on Wednesday? Need to move from Thursday",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-02",
+          "time": "17:30"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-monday-at-10",
+    "set": "client_replies",
+    "description": "\"Can we do Monday at 10 instead\": The client asks to move the visit.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can we do Monday at 10 instead",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": {
+          "date": "2026-12-07",
+          "time": "10:00"
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-move-can-i-reschedule",
+    "set": "client_replies",
+    "description": "\"Something came up, can I reschedule?\": The client asks to move the visit.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Something came up, can I reschedule?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "reschedule",
+        "visit": 1,
+        "askedFor": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-10",
+    "set": "client_replies",
+    "description": "\"Running 10 late\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Running 10 late",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 10,
+          "max": 10
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-traffic-15",
+    "set": "client_replies",
+    "description": "\"Stuck in traffic, be there in 15\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Stuck in traffic, be there in 15",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 10,
+          "max": 15
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-omw-5",
+    "set": "client_replies",
+    "description": "\"omw, 5 min late sorry\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "omw, 5 min late sorry",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 5,
+          "max": 5
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-range",
+    "set": "client_replies",
+    "description": "\"Running about 10-15 minutes behind\": The client is on the way and late.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Running about 10-15 minutes behind",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 10,
+          "max": 15
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-no-minutes",
+    "set": "client_replies",
+    "description": "\"Running late!\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Running late!",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-parking",
+    "set": "client_replies",
+    "description": "\"Parking now, 2 mins\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Parking now, 2 mins",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "alsoAccept": ["other"],
+        "visit": 1,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-bus-20-today",
+    "set": "client_replies",
+    "description": "\"Bus is delayed, I'll be 20 late\": Two visits, one of them today: a client running late means today's.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Bus is delayed, I'll be 20 late",
+            "visits": ["2026-12-01T15:30:00.000Z", "2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 20,
+          "max": 20
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-half-hour",
+    "set": "client_replies",
+    "description": "\"Gonna be late, like half an hour\": The client is on the way and late.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Gonna be late, like half an hour",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 25,
+          "max": 30
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-two-future-visits",
+    "set": "client_replies",
+    "description": "\"I'll be a bit late\": Two visits, neither today: the text fits both, so no visit is named and the owner is asked which.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "I'll be a bit late",
+            "visits": ["2026-12-03T20:00:00.000Z", "2026-12-08T16:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": null,
+        "minutesLate": null,
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-late-sorry-there-in-5",
+    "set": "client_replies",
+    "description": "\"Sorry!! there in 5\": The client is on the way and late.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Sorry!! there in 5",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "running_late",
+        "visit": 1,
+        "minutesLate": {
+          "min": 5,
+          "max": 5
+        },
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-price",
+    "set": "client_replies",
+    "description": "\"How much is a root touch up?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "How much is a root touch up?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-parking",
+    "set": "client_replies",
+    "description": "\"Is there parking nearby?\": The client asks a question.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Is there parking nearby?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-clean-hair",
+    "set": "client_replies",
+    "description": "\"Do I need to come with clean hair?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Do I need to come with clean hair?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-what-time",
+    "set": "client_replies",
+    "description": "\"What time is my appointment again?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "What time is my appointment again?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-cards",
+    "set": "client_replies",
+    "description": "\"Do you take cards?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Do you take cards?",
+            "visits": ["2026-12-01T15:30:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-bring-daughter",
+    "set": "client_replies",
+    "description": "\"Can I bring my daughter along?\": The client asks a question.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can I bring my daughter along?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-sundays",
+    "set": "client_replies",
+    "description": "\"Are you open on Sundays?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Are you open on Sundays?",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-who-thursday",
+    "set": "client_replies",
+    "description": "\"Who is doing my hair Thursday?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Who is doing my hair Thursday?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-how-long",
+    "set": "client_replies",
+    "description": "\"How long will the color take?\": The client asks a question.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "How long will the color take?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-question-own-product",
+    "set": "client_replies",
+    "description": "\"Is it ok if I bring my own product?\": The client asks a question.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Is it ok if I bring my own product?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "question",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-thank-you",
+    "set": "client_replies",
+    "description": "\"Thank you so much!\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Thank you so much!",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-hi",
+    "set": "client_replies",
+    "description": "\"Hi\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Hi",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-loved-cut",
+    "set": "client_replies",
+    "description": "\"Loved my cut last week ❤️\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Loved my cut last week ❤️",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-who-is-this",
+    "set": "client_replies",
+    "description": "\"Who is this?\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Who is this?",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "alsoAccept": ["question"],
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-ok-no-visit",
+    "set": "client_replies",
+    "description": "\"ok\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "ok",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-wrong-number",
+    "set": "client_replies",
+    "description": "\"Wrong number\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Wrong number",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-happy-holidays",
+    "set": "client_replies",
+    "description": "\"Happy holidays!\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Happy holidays!",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-two-asks",
+    "set": "client_replies",
+    "description": "\"Can I come Friday and also how much is a trim?\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": true,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Can I come Friday and also how much is a trim?",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "alsoAccept": ["reschedule", "question"],
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-smiley",
+    "set": "client_replies",
+    "description": "\"🙂\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "🙂",
+            "visits": []
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  },
+  {
+    "id": "cr-other-meant-my-sister",
+    "set": "client_replies",
+    "description": "\"Sorry, meant to text my sister\": Nothing to act on: the text stays on the owner's card.",
+    "holdout": false,
+    "now": "2026-12-01T14:00:00.000Z",
+    "timeZone": "America/New_York",
+    "actor": {
+      "role": "owner"
+    },
+    "turns": [
+      {
+        "action": {
+          "clientText": {
+            "text": "Sorry, meant to text my sister",
+            "visits": ["2026-12-03T20:00:00.000Z"]
+          }
+        }
+      }
+    ],
+    "expect": {
+      "reading": {
+        "intent": "other",
+        "requestMustNotContain": ["Juniper", "00000000-0000-4000-8000"]
+      },
+      "actions": {
+        "noWrites": true
+      }
+    }
+  }
+]

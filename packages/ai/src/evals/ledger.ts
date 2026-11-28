@@ -31,8 +31,15 @@ export const BUDGET_USD = 13.8;
 // "Go with your recommendations") for S38b's full re-record and pass^3, planned about $0.75;
 // raised to $2.00 in S38b (user: "Fix, cap $2.00") for the waitlist guide fix's second re-record.
 // V1 (P1-7, user): Phase 12 $3.00 (S56b's recording) and Phase 17 $1.50 (S76's); no real calls
-// in the other phases.
-export const PHASE_CAPS_USD: Readonly<Record<number, number>> = { 7: 1.55, 8: 2, 12: 3, 17: 1.5 };
+// in the other phases. Phase 18 (PCR-017, ADR-0073): $1.50 from Phase 12's unspent $2.19, for
+// S81b's and S82b's recordings, expected $0.60–$1.00.
+export const PHASE_CAPS_USD: Readonly<Record<number, number>> = {
+  7: 1.55,
+  8: 2,
+  12: 3,
+  17: 1.5,
+  18: 1.5,
+};
 
 /** The ledger label of a run for `phase`: `P7 <label>`. */
 export function phaseLabel(phase: number, label: string): string {

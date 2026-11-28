@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "read_client_text",
+              "arguments": "{\"intent\": \"reschedule\", \"visit\": \"v1\", \"askedForDate\": \"2026-12-03\", \"askedForTime\": \"11:00\", \"minutesLate\": null, \"confidence\": \"sure\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

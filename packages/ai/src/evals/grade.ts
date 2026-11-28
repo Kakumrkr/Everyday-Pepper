@@ -96,6 +96,69 @@ export function grade(evalCase: EvalCase, transcript: Transcript): string[] {
   reasons.push(...gradeRulesAndEpisodes(evalCase, transcript));
   reasons.push(...gradeDraftsAndFeed(evalCase, transcript));
   reasons.push(...gradeMapping(evalCase, transcript));
+  reasons.push(...gradeReading(evalCase, transcript));
+  return reasons;
+}
+
+/** The labels a case accepts for its text (S81a): the one expected, and any others it allows. */
+export function acceptedLabels(evalCase: EvalCase): readonly string[] {
+  const wanted = evalCase.expect.reading;
+  return wanted === undefined ? [] : [wanted.intent, ...wanted.alsoAccept];
+}
+
+/**
+ * The client text grader (S81a, AC-X-239): the text was read with a label the case accepts,
+ * about the visit it names, with the minutes late and the time asked for it expects, and no
+ * request to the reader held what it must not (the client's name, the business, a price).
+ */
+function gradeReading(evalCase: EvalCase, transcript: Transcript): string[] {
+  const wanted = evalCase.expect.reading;
+  if (wanted === undefined) return [];
+  const got = transcript.reading;
+  if (got === undefined) return ['the text was not read'];
+  const reasons: string[] = [];
+  if (!acceptedLabels(evalCase).includes(got.label)) {
+    reasons.push(`read as ${got.label}, expected ${acceptedLabels(evalCase).join(' or ')}`);
+  }
+  if (wanted.visit !== undefined && got.visit !== wanted.visit) {
+    reasons.push(`about visit ${String(got.visit)}, expected ${String(wanted.visit)}`);
+  }
+  if (wanted.minutesLate !== undefined) {
+    const range = wanted.minutesLate;
+    const late = got.minutesLate;
+    const fits =
+      range === null ? late === null : late !== null && late >= range.min && late <= range.max;
+    if (!fits) {
+      reasons.push(
+        `${String(late)} minutes late, expected ${range === null ? 'none' : `${String(range.min)}–${String(range.max)}`}`,
+      );
+    }
+  }
+  if (wanted.askedFor !== undefined) {
+    const asked = got.askedFor;
+    if (wanted.askedFor === null) {
+      if (asked !== null) reasons.push(`asked for ${JSON.stringify(asked)}, expected none`);
+    } else if (asked === null) {
+      reasons.push('asked for no time, expected one');
+    } else {
+      for (const field of ['date', 'time'] as const) {
+        const expected = wanted.askedFor[field];
+        if (expected !== undefined && asked[field] !== expected) {
+          reasons.push(`asked for ${field} ${String(asked[field])}, expected ${String(expected)}`);
+        }
+      }
+    }
+  }
+  const requests = (transcript.requests ?? []).filter((request) =>
+    request.text.includes('"name":"read_client_text"'),
+  );
+  if (requests.length === 0) reasons.push('the reader was not asked');
+  for (const pattern of wanted.requestMustNotContain) {
+    const regex = new RegExp(pattern, 'i');
+    if (requests.some((request) => regex.test(request.text))) {
+      reasons.push(`sent /${pattern}/i to the reader`);
+    }
+  }
   return reasons;
 }
 

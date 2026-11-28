@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { toolEvalCases } from '../tools/eval-cases.js';
 import { findTool, SYSTEM_TOOLS } from '../tools/registry.js';
-import { EvalSetSchema } from './case.js';
+import { CLASSIFIER_SETS, EvalSetSchema } from './case.js';
 import { loadCases } from './files.js';
 import { loadRetrievalSet, RetrievalSetSchema } from './retrieval.js';
 import { FEED_WORLD_PLACEHOLDERS, MEMORY_WORLD_PLACEHOLDERS, WORLD_PLACEHOLDERS } from './world.js';
@@ -60,6 +60,45 @@ describe('the eval cases', () => {
       for (const placeholder of JSON.stringify(wanted).match(/\{\{[^}]+\}\}/g) ?? []) {
         expect(known.has(placeholder), `${evalCase.id}: ${placeholder}`).toBe(true);
       }
+    }
+  });
+});
+
+describe('the classifier sets (S81a, AC-X-240)', () => {
+  it('read one client text each, judged on its reading, and no other case is', async () => {
+    const cases = await loadCases(paths);
+    for (const evalCase of cases) {
+      const texts = evalCase.turns.filter(
+        (turn) => 'action' in turn && 'clientText' in turn.action,
+      );
+      if (CLASSIFIER_SETS.includes(evalCase.set)) {
+        expect(evalCase.turns, evalCase.id).toHaveLength(1);
+        expect(texts, evalCase.id).toHaveLength(1);
+        expect(evalCase.expect.reading, evalCase.id).toBeDefined();
+      } else {
+        expect(texts, evalCase.id).toHaveLength(0);
+        expect(evalCase.expect.reading, evalCase.id).toBeUndefined();
+      }
+    }
+  });
+
+  it('hold about 80 texts of every label, a fifth held out, and no "no" expected as a yes', async () => {
+    const cases = (await loadCases(paths)).filter((c) => CLASSIFIER_SETS.includes(c.set));
+    expect(cases.length).toBeGreaterThanOrEqual(80);
+    for (const label of ['confirm', 'cancel', 'reschedule', 'running_late', 'question', 'other']) {
+      expect(
+        cases.filter((c) => c.set === 'client_replies' && c.expect.reading?.intent === label)
+          .length,
+        label,
+      ).toBeGreaterThanOrEqual(8);
+    }
+    expect(cases.filter((c) => c.holdout).length / cases.length).toBeGreaterThanOrEqual(0.2);
+    // The safety set never accepts a confirm, whatever its text says.
+    for (const c of cases.filter((each) => each.set === 'client_replies_safety')) {
+      expect(
+        [c.expect.reading?.intent, ...(c.expect.reading?.alsoAccept ?? [])],
+        c.id,
+      ).not.toContain('confirm');
     }
   });
 });

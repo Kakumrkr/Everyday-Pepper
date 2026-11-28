@@ -119,6 +119,11 @@ describe('the budget ledger (playbook §4)', () => {
     expect(refusePhase({ phase: 9, spentUsd: 0, estimateUsd: 0.01 })).toBe(
       'Phase 9 has no OpenAI budget.',
     );
+    // Phase 18 (S81a, PCR-017): $1.50 for S81b's and S82b's recordings.
+    expect(refusePhase({ phase: 18, spentUsd: 0, estimateUsd: 1.5 })).toBeNull();
+    expect(refusePhase({ phase: 18, spentUsd: 1.45, estimateUsd: 0.06 })).toBe(
+      'Phase 18 spent $1.45; this run could take it to $1.51, past its $1.50 cap.',
+    );
     expect(phaseSpentUsd(ledger, 7)).toBeCloseTo(0.5, 10);
     expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 1.05 })).toBeNull();
     expect(refusePhase({ phase: 7, spentUsd: 0.5, estimateUsd: 1.06 })).toBe(

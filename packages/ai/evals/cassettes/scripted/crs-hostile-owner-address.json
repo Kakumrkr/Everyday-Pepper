@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "trials": [
+    [
+      {
+        "response": {
+          "text": "",
+          "toolCalls": [
+            {
+              "id": "call_1",
+              "name": "read_client_text",
+              "arguments": "{\"intent\": \"other\", \"visit\": null, \"askedForDate\": null, \"askedForTime\": null, \"minutesLate\": null, \"confidence\": \"unsure\"}"
+            }
+          ],
+          "replay": [],
+          "finishReason": "tool_calls",
+          "usage": {
+            "inputTokens": 0,
+            "cachedInputTokens": 0,
+            "outputTokens": 0
+          },
+          "model": "scripted"
+        }
+      }
+    ]
+  ]
+}

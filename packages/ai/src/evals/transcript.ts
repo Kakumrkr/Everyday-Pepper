@@ -1,4 +1,5 @@
-import type { LlmUsage } from '@pepper/contracts';
+import type { ClientTextReading, LlmUsage } from '@pepper/contracts';
+import type { ReadingLabel } from './case.js';
 
 /** A tool call as the eval saw it: `arguments` parsed, or `null` when the JSON was invalid. */
 export interface TranscriptToolCall {
@@ -57,6 +58,17 @@ export interface Transcript {
    * (`null`: nothing fits), by column name.
    */
   mapping?: Record<string, string | null>;
+  /**
+   * How the client's text was read (S81a): the label (`refused`: no reading), the visit as its
+   * 1-based place in the case's visits, and the reading's other fields.
+   */
+  reading?: {
+    label: ReadingLabel;
+    visit: number | null;
+    minutesLate: number | null;
+    askedFor: ClientTextReading['askedFor'];
+    confidence: ClientTextReading['confidence'] | null;
+  };
   /** Rebooking emails queued to clients afterwards (S36). */
   nudgeEmails?: number;
   /** Open waitlist entries afterwards (S37). */

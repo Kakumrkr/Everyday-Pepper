@@ -9,6 +9,9 @@ import {
 import {
   OutboxEpisodeSchema,
   StaffMemberIdSchema,
+  UtcDateTimeSchema,
+  type BookingId,
+  type UtcDateTime,
   type ConversationId,
   type ConversationTurnId,
   type LlmRequest,
@@ -52,6 +55,7 @@ import type { LlmCallOptions, LlmProvider } from '../provider.js';
 import { runMorningDraftsFor } from '../drafts/morning.js';
 import { WRITE_DRAFT_TOOL } from '../drafts/writer.js';
 import { SUGGEST_MAPPING_TOOL, suggestImportColumns } from '../imports/mapping-suggester.js';
+import { READ_CLIENT_TEXT_TOOL, readClientText } from '../client-texts/reader.js';
 import { stageImport } from '@pepper/imports';
 import { approveToolProposal, shownPreview, undoToolAction } from '../tools/registry.js';
 import type { ToolDeps } from '../tools/tool.js';
@@ -139,9 +143,13 @@ function observed(
     // The draft writer's forced answer (S36) is its words, judged by the drafts grader; its
     // refusal is not a reply to the member either.
     // The mapping suggester's forced answer (S56a.2) is judged by the mapping grader, as stored.
+    // The client text reader's (S81a) by the reading grader, as the domain would get it.
     if (
       request.tools.some(
-        (tool) => tool.name === WRITE_DRAFT_TOOL.name || tool.name === SUGGEST_MAPPING_TOOL.name,
+        (tool) =>
+          tool.name === WRITE_DRAFT_TOOL.name ||
+          tool.name === SUGGEST_MAPPING_TOOL.name ||
+          tool.name === READ_CLIENT_TEXT_TOOL.name,
       )
     ) {
       return;
@@ -197,6 +205,48 @@ function observedEmbedder(embedder: Embedder, failures: unknown[]): Embedder {
         throw error;
       }
     },
+  };
+}
+
+/** The ids the case's visits get (the reader shows the model labels, never these). */
+const evalVisitId = (index: number) =>
+  `00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}` as BookingId;
+
+/**
+ * A client's text read as the domain will read it (S81a): once, with the case's visits; the
+ * reading's visit as its place in them.
+ */
+async function readEvalText(
+  provider: LlmProvider,
+  world: EvalWorld,
+  clientText: { text: string; visits: UtcDateTime[] },
+): Promise<NonNullable<Transcript['reading']>> {
+  const visits = clientText.visits.map((startsAt, index) => ({ id: evalVisitId(index), startsAt }));
+  const outcome = await readClientText(
+    {
+      provider,
+      // The run's own cost guard covers real calls; a business budget is not metered.
+      reserve: () => Promise.resolve({ state: 'ok', settle: () => Promise.resolve() }),
+    },
+    world.tenantId,
+    {
+      text: clientText.text,
+      now: UtcDateTimeSchema.parse(world.clock.now().toISOString()),
+      timeZone: world.timeZone,
+      visits,
+    },
+  );
+  if (outcome.kind !== 'read') {
+    return { label: 'refused', visit: null, minutesLate: null, askedFor: null, confidence: null };
+  }
+  const { reading } = outcome;
+  const at = visits.findIndex((visit) => visit.id === reading.visitId);
+  return {
+    label: reading.intent,
+    visit: at === -1 ? null : at + 1,
+    minutesLate: reading.minutesLate,
+    askedFor: reading.askedFor,
+    confidence: reading.confidence,
   };
 }
 
@@ -295,6 +345,8 @@ export function loopSubject(
               suggestion === null ? [] : [[column, suggestion.field]],
             ),
           );
+        } else if ('clientText' in turn.action) {
+          transcript.reading = await readEvalText(provider, world, turn.action.clientText);
         } else if ('advanceClock' in turn.action) {
           world.clock.advanceBy(turn.action.advanceClock * 60_000);
         } else if ('runInsights' in turn.action) {
