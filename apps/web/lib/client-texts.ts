@@ -1,5 +1,4 @@
 import { formatInstant, type BadgeTone } from '@pepper/ui';
-import { dateTimeLabel } from './booking';
 import { SMS_PURPOSE_WORDINGS } from '@pepper/contracts';
 import type {
   BookingTextKind,
@@ -45,17 +44,30 @@ export function consentDayLabel(timeZone: string, instant: string): string {
   }).format(new Date(instant));
 }
 
-/** The moment, to the minute, in the business's time zone: "Thu, Nov 12, 2026, 12:00 PM". */
+/**
+ * The moment, to the minute, in the business's time zone, with its year (a consent is a record):
+ * "Thu, Nov 12, 2026, 12:00 pm", "am" as the profile's other times write it (S81a.2, AC-X-248).
+ */
 export function consentMomentLabel(timeZone: string, instant: string): string {
-  return new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(instant));
+  return (
+    new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    })
+      .formatToParts(new Date(instant))
+      // Lower-case "pm", after a plain space (Intl puts a narrow no-break one before it).
+      .map((part) =>
+        part.type === 'dayPeriod'
+          ? part.value.toLowerCase()
+          : part.value.replace(/[\u202f\u00a0]/g, ' '),
+      )
+      .join('')
+  );
 }
 
 /** How a consent was given, in words. */
@@ -148,10 +160,11 @@ const NOT_SENT: Record<LastTextReason, string> = {
 };
 
 /**
- * When a text in the profile's thread came or went (S81a top-up, AC-X-241): written the way
- * Home's cards write it, "Sat, Nov 28, 9:11 am", one time format across Home and the profile.
+ * A time on a client's profile: when a text in its thread came or went (S81a top-up, AC-X-241),
+ * the last text and the visits (S81a.2, AC-X-248). Written the way Home's cards write it,
+ * "Sat, Nov 28, 9:11 am": one time format across Home and the whole profile.
  */
-export function threadTimeLabel(timeZone: string, at: string): string {
+export function profileTimeLabel(timeZone: string, at: string): string {
   return formatInstant(at, timeZone);
 }
 
@@ -162,7 +175,7 @@ export function threadTimeLabel(timeZone: string, at: string): string {
 export function lastTextLine(last: LastText | null, timeZone: string): string | null {
   if (last === null) return null;
   const what = KIND[last.kind];
-  const when = dateTimeLabel(timeZone, last.at);
+  const when = profileTimeLabel(timeZone, last.at);
   switch (last.state) {
     case 'waiting':
       return `Next text: ${what}, waiting to go ${when}.`;

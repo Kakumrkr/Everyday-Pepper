@@ -107,15 +107,15 @@ async function fixUndoDay(page: Page): Promise<void> {
 
 /**
  * A client's yes to texts at fixed dates for the shots (S62 CI): the real ones are the run's own,
- * and their length ("8:05 AM" or "10:05 AM", "Nov 2" or "Nov 12") decides whether the masked line
+ * and their length ("8:05 am" or "10:05 am", "Nov 2" or "Nov 12") decides whether the masked line
  * wraps, so the section's and the sheet's heights moved with the clock. The longest forms.
  */
 async function fixConsentMoments(part: Locator): Promise<void> {
   const fixed: [RegExp, string][] = [
     [/^Said yes /, 'Said yes Nov 12, 2026 on your booking page.'],
-    [/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/, 'Wed, Nov 12, 2026, 10:08 AM'],
+    [/^[A-Z][a-z]{2}, [A-Z][a-z]{2} \d/, 'Wed, Nov 12, 2026, 10:08 am'],
     // S62.2 (AC-X-78): the opt-in text's moment and state depend on the run's clock and worker.
-    [/^(Last|Next) text: /, 'Last text: the welcome text, sent Wed, Nov 12, 10:08 AM. Delivered.'],
+    [/^(Last|Next) text: /, 'Last text: the welcome text, sent Wed, Nov 12, 10:08 am. Delivered.'],
   ];
   for (const [pattern, text] of fixed) {
     const element = part.getByText(pattern);

@@ -17,10 +17,10 @@ import { ROUTES } from '../../../../lib/account';
 import {
   bookableStaff,
   bookingAbilities,
-  dateTimeLabel,
   STATUS_LABELS,
   type BookingSetup,
 } from '../../../../lib/booking';
+import { profileTimeLabel } from '../../../../lib/client-texts';
 import { birthdayLabel } from '../../../../lib/clients';
 import { localDateIn, splitVisits, visitRanges } from '../../../../lib/setup';
 import { NewBooking } from '../../../_components/booking/new-booking';
@@ -109,7 +109,7 @@ export default async function ClientPage({
     abilities.books &&
     bookableStaff(setup.staff, { userId, ownOnly: abilities.ownStaffOnly }).length > 0;
   const describe = (booking: Booking) => ({
-    when: dateTimeLabel(timeZone, booking.startsAt),
+    when: profileTimeLabel(timeZone, booking.startsAt),
     what: `${serviceNames.get(booking.serviceId) ?? 'Appointment'} with ${
       staffNames.get(booking.staffMemberId) ?? 'someone'
     }`,

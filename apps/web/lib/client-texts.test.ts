@@ -6,7 +6,7 @@ import {
   consentMomentLabel,
   lastTextLine,
   textsSummary,
-  threadTimeLabel,
+  profileTimeLabel,
 } from './client-texts';
 
 // The profile's "Text messages" words (S61.2, AC-X-66).
@@ -133,7 +133,7 @@ describe('textsSummary', () => {
 
 describe('the record’s labels', () => {
   it('shows the moment to the minute and the day with its year, in the business’s zone', () => {
-    expect(consentMomentLabel(ZONE, CONSENT.givenAt)).toBe('Thu, Nov 12, 2026, 11:30 PM');
+    expect(consentMomentLabel(ZONE, CONSENT.givenAt)).toBe('Thu, Nov 12, 2026, 11:30 pm');
     expect(consentDayLabel('America/Los_Angeles', CONSENT.givenAt)).toBe('Nov 12, 2026');
   });
 
@@ -164,7 +164,7 @@ describe('lastTextLine (AC-X-78)', () => {
 
   it('says what went, when, in the business’s time zone, and that it arrived', () => {
     expect(lastTextLine(last({}), ZONE)).toBe(
-      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 PM. Delivered.',
+      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 pm. Delivered.',
     );
   });
 
@@ -176,13 +176,13 @@ describe('lastTextLine (AC-X-78)', () => {
 
   it('says when a held text will go', () => {
     expect(lastTextLine(last({ state: 'waiting' }), ZONE)).toBe(
-      'Next text: the reminder the day before, waiting to go Tue, Nov 10, 3:10 PM.',
+      'Next text: the reminder the day before, waiting to go Tue, Nov 10, 3:10 pm.',
     );
   });
 
   it('says sent with no report yet, and not delivered', () => {
     expect(lastTextLine(last({ state: 'sent' }), ZONE)).toBe(
-      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 PM. No delivery report yet.',
+      'Last text: the reminder the day before, sent Tue, Nov 10, 3:10 pm. No delivery report yet.',
     );
     expect(lastTextLine(last({ state: 'not_delivered' }), ZONE)).toContain(
       'Not delivered: their carrier turned it away.',
@@ -196,17 +196,17 @@ describe('lastTextLine (AC-X-78)', () => {
     expect(notSent('no_consent')).toContain('Not sent: they hadn’t said yes to texts.');
     expect(notSent('not_textable')).toContain('Not sent: their number can’t get texts.');
     expect(notSent('failed')).toContain('Not sent: the text service failed.');
-    expect(notSent(null)).toMatch(/PM\. Not sent\.$/);
+    expect(notSent(null)).toMatch(/pm\. Not sent\.$/);
   });
 });
 
-describe('threadTimeLabel (S81a top-up, AC-X-241)', () => {
+describe('profileTimeLabel (S81a top-up, AC-X-241; S81a.2, AC-X-248)', () => {
   it('writes a thread time the way Home’s cards do, lower-case am and pm', () => {
-    expect(threadTimeLabel(ZONE, '2026-11-28T14:11:00.000Z')).toBe('Sat, Nov 28, 9:11 am');
-    expect(threadTimeLabel(ZONE, '2026-11-28T23:05:00.000Z')).toBe('Sat, Nov 28, 6:05 pm');
+    expect(profileTimeLabel(ZONE, '2026-11-28T14:11:00.000Z')).toBe('Sat, Nov 28, 9:11 am');
+    expect(profileTimeLabel(ZONE, '2026-11-28T23:05:00.000Z')).toBe('Sat, Nov 28, 6:05 pm');
     // Midnight and noon in the business's zone, not the server's.
-    expect(threadTimeLabel(ZONE, '2026-11-29T05:00:00.000Z')).toBe('Sun, Nov 29, 12:00 am');
-    expect(threadTimeLabel('America/Los_Angeles', '2026-11-28T20:00:00.000Z')).toBe(
+    expect(profileTimeLabel(ZONE, '2026-11-29T05:00:00.000Z')).toBe('Sun, Nov 29, 12:00 am');
+    expect(profileTimeLabel('America/Los_Angeles', '2026-11-28T20:00:00.000Z')).toBe(
       'Sat, Nov 28, 12:00 pm',
     );
   });

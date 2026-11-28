@@ -21,7 +21,7 @@ import {
   lastTextLine,
   PURPOSE_LABEL,
   textsSummary,
-  threadTimeLabel,
+  profileTimeLabel,
 } from '../../../lib/client-texts';
 import { Notice } from '../form-parts';
 
@@ -118,7 +118,7 @@ function TextThread({
             <p className="m-0 type-label text-ink-2">
               {message.from === 'client' ? clientName : 'Your team'}
               <span className="font-normal text-ink-3 tabular-nums">
-                {` · ${threadTimeLabel(timeZone, message.at)}`}
+                {` · ${profileTimeLabel(timeZone, message.at)}`}
               </span>
             </p>
             <p className="m-0 type-body break-words whitespace-pre-wrap text-ink">{message.body}</p>
