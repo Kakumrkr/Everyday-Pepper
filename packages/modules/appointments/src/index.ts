@@ -12,6 +12,7 @@ export * from './services/availability.js';
 export * from './services/booking-emails.js';
 export * from './services/client-texts.js';
 export * from './services/confirm-by-text.js';
+export * from './services/client-text-routing.js';
 export * from './services/reminder-settings.js';
 export * from './services/bookings.js';
 export * from './services/booking-series.js';

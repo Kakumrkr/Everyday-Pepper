@@ -1,4 +1,5 @@
 import {
+  BookingIdSchema,
   ClientIdSchema,
   DEFAULT_REMINDER_SETTINGS,
   FeedItemIdSchema,
@@ -52,6 +53,7 @@ import {
   undoClientTextReply,
   type InboundClientText,
 } from './services/client-texts.js';
+import { confirmClientVisitIn } from './services/confirm-by-text.js';
 import { replaceWorkingHours } from './services/hours.js';
 import { createService } from './services/services.js';
 import { createStaffMember } from './services/staff.js';
@@ -293,6 +295,25 @@ describe('a client’s text kept (AC-X-229, AC-X-232)', () => {
     expect(await keepClientText(db, text(a, 'Which one?'))).toEqual({ outcome: 'unrouted' });
     expect(await cards(a)).toEqual([]);
     expect(await cards(other)).toEqual([]);
+  });
+});
+
+describe('a visit confirmed by its id (AC-X-243)', () => {
+  it("confirms the client's own coming visit once, with no reminder, audited as read", async () => {
+    const b = await newBusiness();
+    const bookingId = BookingIdSchema.parse(b.visit.id);
+    const confirm = (clientId: string, at = b.clock.now()) =>
+      withTenant(db, b.tenantId, (tx) => confirmClientVisitIn(tx, { bookingId, clientId, at }));
+    // Not this client's visit: nothing.
+    expect((await confirm(newId())).outcome).toBe('nothing');
+    expect((await confirm(b.maria.id)).outcome).toBe('confirmed');
+    expect((await confirm(b.maria.id)).outcome).toBe('already');
+    // Once it has started: nothing.
+    expect((await confirm(b.maria.id, new Date(b.visit.startsAt))).outcome).toBe('nothing');
+    const audit = await withTenant(db, b.tenantId, (tx) => listAuditEntries(tx, { limit: 20 }));
+    const confirmed = audit.filter((entry) => entry.action === 'booking.client_confirmed');
+    expect(confirmed).toHaveLength(1);
+    expect(confirmed[0]?.after).toEqual({ clientConfirmed: true, via: 'text_read' });
   });
 });
 

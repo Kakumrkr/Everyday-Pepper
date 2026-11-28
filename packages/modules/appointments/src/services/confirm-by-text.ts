@@ -1,4 +1,4 @@
-import { BookingIdSchema, SmsPhoneSchema } from '@pepper/contracts';
+import { BookingIdSchema, SmsPhoneSchema, type BookingId } from '@pepper/contracts';
 import {
   appendAuditEntry,
   findCurrentTenant,
@@ -8,7 +8,9 @@ import {
   markBookingClientConfirmed,
   smsConfirmTarget,
   withTenant,
+  type BookingRow,
   type Database,
+  type TenantTx,
 } from '@pepper/db';
 import { confirmedReply, NOTHING_TO_CONFIRM_REPLY } from '../texts.js';
 import { requestInsights } from './insights.js';
@@ -59,27 +61,68 @@ export async function confirmBookingByText(
     ) {
       return answer({ outcome: 'nothing', reply: NOTHING_TO_CONFIRM_REPLY });
     }
-    const marked = await markBookingClientConfirmed(tx, bookingId, input.receivedAt);
-    if (marked !== undefined) {
-      await appendAuditEntry(tx, {
-        actor: { kind: 'system' },
-        change: {
-          action: 'booking.client_confirmed',
-          entity: { type: 'booking', id: bookingId },
-          before: { clientConfirmed: false },
-          after: { clientConfirmed: true },
-        },
-      });
-      // A confirmed visit's risk drops (S77): the next insights pass rescores it.
-      await requestInsights(tx);
-      // A release card waiting for this visit goes (S78.2, AC-X-210).
-      await keepReleaseCardInStep(tx, marked, input.receivedAt.getTime());
-    }
+    const marked = await markClientConfirmedIn(tx, bookingId, input.receivedAt, null);
     const details = await emailDetailsOf(tx, tenant, booking);
-    const already = marked === undefined;
+    const already = !marked;
     return answer({
       outcome: already ? 'already' : 'confirmed',
       reply: confirmedReply(details, already),
     });
   });
+}
+
+/**
+ * Marks a locked, coming visit confirmed by its client once (audited as the system, with `via`
+ * when it wasn't a "C"); whether it changed. The visit's risk is rescored and its release card
+ * goes (S77, S78.2).
+ */
+async function markClientConfirmedIn(
+  tx: TenantTx,
+  bookingId: BookingId,
+  at: Date,
+  via: 'text_read' | null,
+): Promise<boolean> {
+  const marked = await markBookingClientConfirmed(tx, bookingId, at);
+  if (marked === undefined) return false;
+  await appendAuditEntry(tx, {
+    actor: { kind: 'system' },
+    change: {
+      action: 'booking.client_confirmed',
+      entity: { type: 'booking', id: bookingId },
+      before: { clientConfirmed: false },
+      after: via === null ? { clientConfirmed: true } : { clientConfirmed: true, via },
+    },
+  });
+  // A confirmed visit's risk drops (S77): the next insights pass rescores it.
+  await requestInsights(tx);
+  // A release card waiting for this visit goes (S78.2, AC-X-210).
+  await keepReleaseCardInStep(tx, marked, at.getTime());
+  return true;
+}
+
+/** What confirming a visit by its id did (S81a.2): `nothing` when it isn't the client's coming visit. */
+export type ConfirmByIdOutcome = 'confirmed' | 'already' | 'nothing';
+
+/**
+ * Confirms a visit by its id for its client (S81a.2, ADR-0073; AC-X-243), in the business's
+ * transaction: a sure reading of the client's own text named it, from the visits the reader was
+ * given. No reminder is needed, but the visit must still be that client's, booked and to come,
+ * under its lock (release card first, as an approval). Audited as the system, `via: text_read`.
+ */
+export async function confirmClientVisitIn(
+  tx: TenantTx,
+  input: { bookingId: BookingId; clientId: string; at: Date },
+): Promise<{ outcome: ConfirmByIdOutcome; booking: BookingRow | undefined }> {
+  const bookingId = BookingIdSchema.parse(input.bookingId);
+  await lockReleaseCard(tx, bookingId);
+  const booking = await lockBooking(tx, bookingId);
+  if (
+    booking?.clientId !== input.clientId ||
+    booking.status !== 'confirmed' ||
+    booking.startsAt.getTime() <= input.at.getTime()
+  ) {
+    return { outcome: 'nothing', booking };
+  }
+  const marked = await markClientConfirmedIn(tx, bookingId, input.at, 'text_read');
+  return { outcome: marked ? 'confirmed' : 'already', booking };
 }
