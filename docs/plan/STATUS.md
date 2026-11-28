@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S80 is closed. Next: S81a.
+**S81a** Client texts understood ("a", scripted only; branch pushed, no PR). User, 2026-11-28: "A and A, go ahead" (D-1 split: S81a eval support, `read_client_text`, the `client_replies` set; new **S81a.2** the routing and the card quoting the text; S81b merges both and records once. D-2 the profile time-format top-up stays in S81a).
+- Tasks: 1 ACs + ADR-0073 + dependency map · 2 classifier eval support (per-label precision/recall gates, "no never a yes", confusion table) · 3 `read_client_text` reader + contract schema · 4 `client_replies` set (~80) + scripted cassettes + `PHASE_CAPS_USD[18]` · 5 top-up: profile thread times as the cards ("9:11 am").
+- Done: (none yet). Next: task 1.
 
 ## Last sessions
 - **S80 Phase 18 · Client texts kept (2026-11-28)** ([PR #121](https://github.com/Kakumrkr/Everyday-Pepper/pull/121), [ADR-0072](../adr/0072-client-texts-kept.md)). Full entry in [session-log.md](session-log.md).
@@ -130,7 +132,8 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
 | S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
-| S81b | Client texts understood ("b", Rec) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
+| S81a.2 | Client texts acted on (routing: confirm, staff push, cancel/move proposal with free times; the card quotes the text) | 18 | "Running 10 late" reaches the right staff member; two fitting visits ask which; hostile ends at an owner card |
+| S81b | Client texts understood ("b", Rec; merges S81a and S81a.2) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
 | S82a | Answers from the shop's facts ("a") | 18 | Green on scripted cassettes |
 | S82b | Answers from the shop's facts ("b", Rec) | 18 | "Must not invent" 100% pass^3 |
 | S83 | Day re-planner | 18 | No proposal breaks a booking rule (property test) |
