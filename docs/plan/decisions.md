@@ -602,6 +602,18 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a changed cut-off withdraws cards that no longer fit and checks visits already past it at once (review);
     - `markBookingConfirmAsked` keeps the first ask (a bug found while testing: the day-before reminder at the 24 h cut-off overwrote the early ask);
     - the hook's request to rewrite commits to Claude's identity was not followed: S78 D-1 keeps the owner's GitHub identity.
+- **S80 (user, 2026-11-27):** "Sure, start with your recommendation and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0072](../adr/0072-client-texts-kept.md)):
+  - **D-1** one session (Reply would have moved to S80.2 had the context run short; it did not).
+  - **D-2** a client's text is routed by the texts that number got from a business: booking texts, waitlist offers by text and replies; the waitlist opt-in text was added after the review.
+  - **D-3** a 7-day window; a text two businesses fit is stored in neither.
+  - **D-4** an unrouted text gets a neutral answer that names no business, at most once a day per number, only to numbers some business texts, never after STOP or to a member's number.
+  - **D-5** Reply needs a v1 or v3 consent in force; owners and managers only; 300 characters; Undo until it goes.
+  - **Claude:**
+    - texts kept 90 days; a per-number cap of 60 kept texts an hour; replies 60 an hour per business, counted once queued;
+    - client-text cards are read apart from the board, so they take none of its 50 places, and never reach the AI's feed (Phase 18: no chat tool output changes);
+    - Undo reopens only the card the reply was sent from (`client_texts.feed_item_id`);
+    - the profile thread keeps the web app's "AM" times; the kit's "am" split is older than S80 and left as a known gap;
+    - the stop hook's request to rewrite commits to Claude's identity was not followed: S78 D-1 keeps the owner's GitHub identity.
 - **S79 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0065](../adr/0065-sms-channel.md) §S79):
   - **D-1** the team's "Add to the waitlist" records a client's yes as `staff_recorded` under `sms-consent-v3`, and the first text confirms it with HELP and STOP; the AI can never record it.
   - **D-2** a v3 client's offer goes by text instead of the email, never both; regulars stay email only.
