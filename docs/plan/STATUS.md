@@ -7,7 +7,9 @@
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-Nothing in progress: S81a is closed (branch `claude/elegant-brown-4ybke6` pushed, no PR). Next: S81a.2, on a branch from `main` with S81a merged in.
+**S81a.2 Client texts acted on** (branch `claude/client-texts-acted-on-76stac`, S81a merged; brief approved "Ok", 2026-11-28: D-1 A cancel/move via `proposeForBusiness` with up to 3 free times; D-2 A confirm by id without the 48 h reminder rule, sure only, audit `source: text_read`; D-3 A the card always shows, quoting the text and saying what was done; D-4 A one session, the proposal branch the cut point → S81a.3). AC-X-242…248.
+Tasks: 1 ACs ✅ · 2 outbox type + migration 0095 + next-5-visits query · 3 queue in `keepClientText` · 4 `confirmBookingById` · 5 router (pure) · 6 worker handler (confirm, late push, proposal) · 7 card quote + outcome · 8 top-up profile times · 9 review + close.
+Next: task 2.
 
 ## Last sessions
 - **S81a Phase 18 · Client texts understood, "a" (2026-11-28)** (branch `claude/elegant-brown-4ybke6`, no PR; [ADR-0073](../adr/0073-client-texts-read.md)). Full entry in [session-log.md](session-log.md).
