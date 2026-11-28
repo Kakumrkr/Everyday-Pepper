@@ -1,25 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-28 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S81a** next
+**Last updated:** 2026-11-28 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S81a.2** next
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S81a** Client texts understood ("a", scripted only; branch pushed, no PR). User, 2026-11-28: "A and A, go ahead" (D-1 split: S81a eval support, `read_client_text`, the `client_replies` set; new **S81a.2** the routing and the card quoting the text; S81b merges both and records once. D-2 the profile time-format top-up stays in S81a).
-- Tasks: 1 ACs + ADR-0073 + dependency map · 2 classifier eval support (per-label precision/recall gates, "no never a yes", confusion table) · 3 `read_client_text` reader + contract schema · 4 `client_replies` set (~80) + scripted cassettes + `PHASE_CAPS_USD[18]` · 5 top-up: profile thread times as the cards ("9:11 am").
-- Done: 1 ADR-0073, AC-X-237…241, dependency row · 3 reader (`packages/ai/src/client-texts/reader.ts`, contracts `client-text-reading.ts`) · 2 classifier support (`classifier.test.ts`) · 4 sets 62 + 23 with scripted cassettes (generated once; scripted `evals.int` green, 89 s), cap 18 = $1.50.
-- Done: 5 thread times via `threadTimeLabel` (web unit + e2e assertion; e2e run at close).
-- Next: `/session-close` (no PR: push the branch, give the S81a.2 prompt).
+Nothing in progress: S81a is closed (branch `claude/elegant-brown-4ybke6` pushed, no PR). Next: S81a.2, on a branch from `main` with S81a merged in.
 
 ## Last sessions
+- **S81a Phase 18 · Client texts understood, "a" (2026-11-28)** (branch `claude/elegant-brown-4ybke6`, no PR; [ADR-0073](../adr/0073-client-texts-read.md)). Full entry in [session-log.md](session-log.md).
+  - **Built:** `readClientText`, one forced routine call (the text untrusted, visits as labels and local times; a strict reading, refused otherwise; metered); classifier eval support (per-label precision/recall gates, no false confirm, confusion table); `client_replies` (62) and `client_replies_safety` (23) green on scripted cassettes; Phase 18 cap $1.50; top-up: the profile thread's times as the cards write them. AC-X-237…241.
+  - **Checks:** `pnpm check` green; affected integration 26 tasks; e2e client-texts; review 4 fixed (one: client-text cases priced at $0); security none.
 - **S80 Phase 18 · Client texts kept (2026-11-28)** ([PR #121](https://github.com/Kakumrkr/Everyday-Pepper/pull/121), [ADR-0072](../adr/0072-client-texts-kept.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** a client's own text kept for the one business that texted the number in 7 days (`sms_reply_target`, migration 0094), else stored nowhere with a neutral once-a-day answer; Home's "Texts from clients" card (owners and managers, kept off the board's and the AI's places) with Reply by text (v1/v3 consent, 300 characters, Undo) and Done; the profile's thread, Reply, and every consent in force with its purpose (top-up); 90-day sweep, export, deletion, privacy and terms. AC-X-229…236.
   - **Checks:** `pnpm check` green (api branch coverage fixed with the controller's tests); affected integration 26 tasks; e2e client-texts + feed, clients, legal, waitlist-texts; baselines redrawn (privacy, terms, consent record, confirmed-by-text sheet); review 10 fixed; security none.
-- **S79 Phase 18 · Waitlist offers by text (2026-11-27)** ([PR #120](https://github.com/Kakumrkr/Everyday-Pepper/pull/120), [ADR-0065](../adr/0065-sms-channel.md) §S79). Full entry in [session-log.md](session-log.md).
-  - **Built:** `sms-consent-v3` (openings only; each consent allows only its purpose's texts); a v3 waitlist client, even with no email, gets the offer by text instead of email (held for Undo, quiet hours, dropped once closed); the yes on the join step and the team's add (`staff_recorded`), with an opt-in text; the offer says how long it stays open (top-up); migration 0093. AC-X-220…228.
-  - **Checks:** `pnpm check` green on the second run (api branch coverage); affected integration 122 files; e2e 16 + legal/screens (privacy and terms baselines redrawn); review 4 fixed; security none.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -36,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S81a (user, 2026-11-28):** "A and A, go ahead" (D-1 split: S81a.2 the routing and the card quoting the text, S81b merges both and records; D-2 the time-format top-up in S81a). Full wording in [decisions.md](decisions.md) and [ADR-0073](../adr/0073-client-texts-read.md).
 - **S80 (user, 2026-11-27):** "Sure, start with your recommendation and complete the session successfully" (D-1 one session; D-2 route by booking texts, waitlist offers and opt-ins by text, and replies; D-3 7 days; D-4 a neutral answer naming no business, once a day; D-5 Reply needs a v1/v3 consent, owners and managers, 300 characters, Undo). Full wording in [decisions.md](decisions.md) and [ADR-0072](../adr/0072-client-texts-kept.md).
 - **S79 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 the team records `staff_recorded` v3 + an opt-in text; D-2 a text instead of the email; D-3 one session; D-4 ADR-0065 §S79). Full wording in [decisions.md](decisions.md) and [ADR-0065](../adr/0065-sms-channel.md) §S79.
 - **S78.3 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 1 in 5 held back by the booking id; D-2 the switch on Texts and reminders; D-3 12, 24 or 48 h, every template 24; D-4 `confirm_held_back_at`, kept through a move). Full wording in [decisions.md](decisions.md) and [ADR-0071](../adr/0071-visit-risk.md) §S78.3.
@@ -127,13 +124,12 @@ Raised by Claude at the brief of the session named.
 (Done: "Require branches to be up to date before merging" is on for `main`, user, 2026-10-20.)
 
 ## Planned sessions (next first)
-S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, S78.3, S79, S80, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
+S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, S61, S61.2, S62, S62.2, S63, S63.2, S64, S65, S65.2, S66, S66.2, S67, S67.2, S68, S69, S70, S70.2, S71, S71.2, S72, S72.2, S77, S78, S78.2, S78.3, S79, S80, S81a, M1–M2, P1 and P2 are done (Phases 0–12, 14, 15 (in sandbox) and 16 (Google in testing mode): the re-plan, the new look on every screen, the first 10 minutes, switching and privacy, the employee; Phase 9–12 gates met; P2 planned Phase 18). Each row's tasks, skills and gates are in the [V1 playbook](v1-playbook.md) §5; the brief reads them from there.
 
 **The domain rule ([PCR-017](changes/PCR-017.md)):** the day the domain is bought, S58a, S57, S58b and S60 go next, after the session in progress, and the pilot runs alongside the rest of Phase 18.
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S81a | Client texts understood ("a": classifier evals, `read_client_text`, scripted) | 18 | Sets green on scripted cassettes; branch pushed |
 | S81a.2 | Client texts acted on (routing: confirm, staff push, cancel/move proposal with free times; the card quotes the text) | 18 | "Running 10 late" reaches the right staff member; two fitting visits ask which; hostile ends at an owner card |
 | S81b | Client texts understood ("b", Rec; merges S81a and S81a.2) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
 | S82a | Answers from the shop's facts ("a") | 18 | Green on scripted cassettes |
