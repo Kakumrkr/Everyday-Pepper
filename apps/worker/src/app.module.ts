@@ -20,19 +20,6 @@ import { WaitlistModule } from './waitlist/waitlist.module.js';
 
 const smsLogger = new Logger('SmsSandbox');
 
-/** The client text reader (S81a.2), with the drafts' model and origin; `null` without OpenAI. */
-function clientTextsOf(config: WorkerConfig) {
-  const drafts = config.drafts;
-  const openai = drafts?.openai ?? null;
-  if (drafts === null || openai === null) return null;
-  return clientTextRunnerFor({
-    openai,
-    monthlyTokens: drafts.monthlyTokens,
-    baseUrl: drafts.baseUrl,
-    outboxKey: outboxKeyFrom(config.outboxSecret),
-  });
-}
-
 @Module({})
 export class AppModule {
   static forRoot(config: WorkerConfig): DynamicModule {
@@ -49,7 +36,13 @@ export class AppModule {
           pusher: config.push === null ? null : new WebPusher(config.push),
           episodes: config.episodes === null ? null : episodeWriterFor(config.episodes),
           // The routine model reads client texts (S81a.2); the api queues them only with OpenAI.
-          clientTexts: clientTextsOf(config),
+          clientTexts:
+            config.clientTexts === null
+              ? null
+              : clientTextRunnerFor({
+                  ...config.clientTexts,
+                  outboxKey: outboxKeyFrom(config.outboxSecret),
+                }),
           sms: smsSenderFor(config.sms, (line) => {
             smsLogger.log(line);
           }),

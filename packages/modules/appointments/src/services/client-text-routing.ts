@@ -36,9 +36,10 @@ export type ClientTextRoute =
 
 /**
  * The route of one read text (AC-X-246). `reading` is `null` when the reader refused or had no
- * budget. A reading's visit must be one of `visits`; with none named, the only visit, else the
- * only one today, is the one meant; a client running late is only ever late for one today. A
- * confirm, cancel or move is only for a visit still to come.
+ * budget; `now` is when the job runs (a retried job never acts on a visit that has since started).
+ * A reading's visit must be one of `visits`; with none named, the only visit, else the only one
+ * today, is the one meant; a client running late is only ever late for one today. A confirm,
+ * cancel or move is only for a visit still to come.
  */
 export function routeClientText(input: {
   reading: ClientTextReading | null;
@@ -55,24 +56,25 @@ export function routeClientText(input: {
   const isToday = (visit: RoutableVisit) =>
     formatDate(toZoned(timeZone, visit.startsAt.getTime())) === today;
   const late = reading.intent === 'running_late';
-  // Running late is about a visit today, which may have just started; the rest about one to come.
-  const fits = input.visits.filter((visit) =>
-    late ? isToday(visit) : visit.startsAt.getTime() > now.getTime(),
-  );
   let visit: RoutableVisit | undefined;
   if (reading.visitId !== null) {
-    visit = fits.find((candidate) => candidate.bookingId === reading.visitId);
-    if (visit === undefined) return { kind: 'card', reason: 'no_visit' };
-  } else if (fits.length === 0) {
-    return { kind: 'card', reason: 'no_visit' };
-  } else if (fits.length === 1) {
-    visit = fits[0];
+    visit = input.visits.find((candidate) => candidate.bookingId === reading.visitId);
   } else {
-    const todays = fits.filter(isToday);
-    if (todays.length !== 1) return { kind: 'card', reason: 'which_visit' };
-    visit = todays[0];
+    // None named: every visit the reader was shown counts (one that just started too), so a text
+    // that may be about either asks which rather than landing on the next one.
+    const pool = late ? input.visits.filter(isToday) : input.visits;
+    if (pool.length > 1) {
+      const todays = pool.filter(isToday);
+      if (todays.length !== 1) return { kind: 'card', reason: 'which_visit' };
+      visit = todays[0];
+    } else {
+      visit = pool[0];
+    }
   }
-  if (visit === undefined) return { kind: 'card', reason: 'no_visit' };
+  // Running late is about a visit today, which may have just started; the rest about one to come.
+  if (visit === undefined || !(late ? isToday(visit) : visit.startsAt.getTime() > now.getTime())) {
+    return { kind: 'card', reason: 'no_visit' };
+  }
   switch (reading.intent) {
     case 'confirm':
       return { kind: 'confirm', visit };

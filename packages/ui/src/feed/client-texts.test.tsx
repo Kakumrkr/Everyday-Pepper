@@ -142,6 +142,18 @@ describe('what Pepper did with a text (S81a.2, AC-X-247)', () => {
     );
   });
 
+  it('reads well without a name', () => {
+    const nameless = (outcome: NonNullable<ClientTextItem['payload']['outcome']>) =>
+      clientTextOutcomeLine(item({ outcome }, { client: null, staff: null }), NY);
+    expect(nameless({ kind: 'told_staff', minutesLate: 10 })).toBe(
+      'I let your team know the client is about 10 min late.',
+    );
+    expect(nameless({ kind: 'which_visit' })).toMatch(/^The client has more/);
+    expect(nameless({ kind: 'free_times', times: ['2026-11-06T14:00:00.000Z'] as never })).toBe(
+      'Free then: Fri, Nov 6, 9:00 am. Reply to offer one.',
+    );
+  });
+
   it('shows the line on the card under the quote', () => {
     renderCards({ items: [item({ outcome: { kind: 'confirmed' } })] });
     expect(screen.getByTestId('client-text-outcome').textContent).toBe(

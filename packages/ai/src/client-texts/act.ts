@@ -59,8 +59,13 @@ const FREE_TIMES = 3;
 export interface ClientTextActorDeps extends ClientTextReaderDeps {
   db: Database;
   clock: Clock;
-  /** For the client email an approved cancel or move queues, and the staff push. */
-  emails: ToolDeps['emails'];
+  /** Seals the staff push. */
+  outboxKey: Buffer;
+  /**
+   * For the client email an approved cancel or move queues (`AUTH_BASE_URL`); `null`: none here,
+   * so no cancel or move is proposed and the card asks the owner.
+   */
+  emails: ToolDeps['emails'] | null;
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   /** Told when a cancel or a move can't be proposed (its name only), so the worker can log it. */
   onUnexpected?: (error: unknown) => void;
@@ -108,10 +113,13 @@ export async function actOnClientText(
       startsAt: UtcDateTimeSchema.parse(visit.startsAt.toISOString()),
     })),
   });
+  // The model reads the text as of when it came; the domain acts as of now (a retried job never
+  // confirms or tells anyone about a visit that has since started).
+  const now = deps.clock.now();
   const route = routeClientText({
     reading: outcome.kind === 'read' ? outcome.reading : null,
     visits,
-    now: receivedAt,
+    now,
     timeZone,
   });
 
@@ -121,10 +129,7 @@ export async function actOnClientText(
       deps,
       { tenantId, textId: text.id, clientId: text.clientId },
       route,
-      {
-        timeZone,
-        receivedAt,
-      },
+      { timeZone, now },
     );
     if (shown === null) return;
     await setClientTextCardOutcome(tx, {
@@ -142,7 +147,7 @@ async function act(
   deps: ClientTextActorDeps,
   text: { tenantId: TenantId; textId: string; clientId: string },
   route: ClientTextRoute,
-  at: { timeZone: string; receivedAt: Date },
+  at: { timeZone: string; now: Date },
 ): Promise<ClientTextCardOutcome | null> {
   switch (route.kind) {
     case 'card':
@@ -151,9 +156,10 @@ async function act(
       const { outcome } = await confirmClientVisitIn(tx, {
         bookingId: BookingIdSchema.parse(route.visit.bookingId),
         clientId: text.clientId,
-        at: at.receivedAt,
+        at: at.now,
       });
-      return outcome === 'nothing' ? null : { kind: 'confirmed' };
+      // Already confirmed (by link or a "C"): Pepper did nothing to say.
+      return outcome === 'confirmed' ? { kind: 'confirmed' } : null;
     }
     case 'late':
       return (await tellStaff(tx, deps, text.textId, route.visit, route.minutesLate, at))
@@ -175,7 +181,7 @@ async function tellStaff(
   textId: string,
   visit: RoutableVisit,
   minutesLate: number | null,
-  at: { timeZone: string; receivedAt: Date },
+  at: { timeZone: string; now: Date },
 ): Promise<boolean> {
   const staff = await findStaffMember(tx, StaffMemberIdSchema.parse(visit.staffMemberId));
   const service = await findService(tx, ServiceIdSchema.parse(visit.serviceId));
@@ -196,7 +202,7 @@ async function tellStaff(
       bookingId: visit.bookingId,
     }),
     {
-      key: deps.emails.outboxKey,
+      key: deps.outboxKey,
       dedupeKey: OutboxDedupeKeySchema.parse(`push.client_late:${textId}`),
       now: deps.clock.now(),
     },
@@ -215,7 +221,7 @@ async function move(
   text: { tenantId: TenantId; textId: string; clientId: string },
   visit: RoutableVisit,
   askedFor: { date: string | null; time: string | null } | null,
-  at: { timeZone: string; receivedAt: Date },
+  at: { timeZone: string; now: Date },
 ): Promise<ClientTextCardOutcome | null> {
   const ai = await aiOf(tx, text.tenantId, text.textId);
   if (ai === undefined) return null;
@@ -291,7 +297,7 @@ async function propose(
   payload: Record<string, string | null>,
 ): Promise<boolean> {
   const ai = await aiOf(tx, text.tenantId, text.textId);
-  if (ai === undefined) return false;
+  if (ai === undefined || deps.emails === null) return false;
   const toolDeps: ToolDeps = {
     db: deps.db,
     actor: ai,

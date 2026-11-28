@@ -92,6 +92,7 @@ function deps(w: World, provider: ScriptedProvider): ClientTextActorDeps {
     db,
     provider,
     clock: w.clock,
+    outboxKey: OUTBOX_KEY,
     emails: EMAILS,
     reserve: (tenantId, estimate) =>
       reserveLlmTokens(db, tenantId, { estimate, limits: DEFAULT_LLM_TOKEN_LIMITS }, w.clock),
@@ -224,6 +225,37 @@ describe('a client text read and acted on (AC-X-242…247)', () => {
     expect(payload.outcome).toEqual({ kind: 'confirmed' });
     expect(payload.nextVisitStartsAt).toBe(second.startsAt);
     expect(item.subjects.bookingId).toBe(second.id);
+  });
+
+  it('acts as of when the job runs: a visit started meanwhile is not confirmed', async () => {
+    const w = await newWorld(db);
+    const today = await visit(w, mondayAt('10:00'));
+    const textId = await kept(w, 'Yes see you at 10', today);
+    // The job ran late (the model was down): the visit started 5 minutes ago.
+    w.clock.set(mondayAt('10:05'));
+    const provider = new ScriptedProvider([answer({ intent: 'confirm', visit: 'v1' })]);
+    await actOnClientText(deps(w, provider), w.tenantId, { textId });
+    expect(await confirmedAt(w, today)).toBeNull();
+    expect(await outcomeOf(w)).toBeUndefined();
+  });
+
+  it('says nothing done for a visit already confirmed', async () => {
+    const w = await newWorld(db);
+    const thursday = await visit(w, mondayAt('14:00', 5));
+    const first = await kept(w, 'Yes', thursday);
+    await actOnClientText(
+      deps(w, new ScriptedProvider([answer({ intent: 'confirm', visit: 'v1' })])),
+      w.tenantId,
+      { textId: first },
+    );
+    w.clock.advanceBy(60_000);
+    const again = await kept(w, 'Yes!!', thursday);
+    await actOnClientText(
+      deps(w, new ScriptedProvider([answer({ intent: 'confirm', visit: 'v1' })])),
+      w.tenantId,
+      { textId: again },
+    );
+    expect(await outcomeOf(w)).toBeUndefined();
   });
 
   it('asks which when two visits fit and the text names none', async () => {

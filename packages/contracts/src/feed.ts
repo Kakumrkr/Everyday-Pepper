@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { ServiceIdSchema, StaffMemberIdSchema } from './appointments.js';
 import { BookingIdSchema } from './bookings.js';
+import { CLIENT_TEXT_READ_LIMITS } from './client-text-reading.js';
 import { ClientIdSchema } from './clients.js';
 import { MailingAddressSchema } from './drafts.js';
 import { REVIEW_REQUEST_LIMITS, ReviewUrlSchema } from './review-requests.js';
@@ -170,7 +171,10 @@ export type DailyBriefingPayload = z.infer<typeof DailyBriefingPayloadSchema>;
 export const ClientTextCardOutcomeSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('confirmed') }).strict(),
   z
-    .object({ kind: z.literal('told_staff'), minutesLate: z.int().min(1).max(180).nullable() })
+    .object({
+      kind: z.literal('told_staff'),
+      minutesLate: z.int().min(1).max(CLIENT_TEXT_READ_LIMITS.maxMinutesLate).nullable(),
+    })
     .strict(),
   z.object({ kind: z.literal('cancel_waiting') }).strict(),
   z.object({ kind: z.literal('move_waiting'), to: UtcDateTimeSchema }).strict(),

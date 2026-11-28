@@ -11,8 +11,8 @@ const logger = new Logger('ClientTexts');
 export function clientTextRunnerFor(config: {
   openai: OpenAiConfig;
   monthlyTokens: number;
-  /** For the client email an approved cancel or move queues (`AUTH_BASE_URL`). */
-  baseUrl: string;
+  /** For the client email an approved cancel or move queues (`AUTH_BASE_URL`); `null`: none. */
+  baseUrl: string | null;
   outboxKey: Buffer;
 }): ClientTextRunner {
   const provider = new OpenAiProvider(config.openai);
@@ -23,7 +23,9 @@ export function clientTextRunnerFor(config: {
         db,
         provider,
         clock: systemClock,
-        emails: { baseUrl: config.baseUrl, outboxKey: config.outboxKey },
+        outboxKey: config.outboxKey,
+        emails:
+          config.baseUrl === null ? null : { baseUrl: config.baseUrl, outboxKey: config.outboxKey },
         reserve: (tenant, estimate) =>
           reserveLlmTokens(db, tenant, { estimate, limits }, systemClock),
         onUnexpected: (error) => {

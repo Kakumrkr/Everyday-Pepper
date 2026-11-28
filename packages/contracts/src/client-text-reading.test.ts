@@ -35,6 +35,9 @@ describe('ClientTextReadingSchema (AC-X-238)', () => {
     for (const askedFor of [
       { date: null, time: null },
       { date: '2026-13-01', time: null },
+      // Days that don't exist (S81a.2).
+      { date: '2026-11-31', time: null },
+      { date: '2027-02-29', time: null },
       { date: null, time: '3pm' },
       { date: null, time: '24:00' },
     ]) {

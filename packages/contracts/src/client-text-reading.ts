@@ -30,7 +30,14 @@ export const ClientTextIntentSchema = z.enum(CLIENT_TEXT_INTENTS);
 export type ClientTextIntent = z.infer<typeof ClientTextIntentSchema>;
 
 /** A local date and time of day, as the business's clock shows them. */
-const LocalDateSchema = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/);
+const LocalDateSchema = z
+  .string()
+  .regex(/^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/)
+  // A day that exists: "Nov 31" is no date to look for free times on (S81a.2).
+  .refine((date) => {
+    const [year = 0, month = 0, day = 0] = date.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day)).getUTCDate() === day;
+  }, 'A date that exists');
 const LocalTimeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/);
 
 /** The reader's question: the text and the client's next visits, ids and times only (AC-X-237). */

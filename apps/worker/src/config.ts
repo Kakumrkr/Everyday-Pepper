@@ -129,6 +129,12 @@ export interface WorkerConfig extends ServiceConfig {
    */
   episodes: { openai: OpenAiConfig & { embeddingModel: string }; monthlyTokens: number } | null;
   /**
+   * Reads kept client texts (S81a.2, ADR-0073) with the routine model, as the api queues them:
+   * whenever OpenAI is configured. `baseUrl` (`AUTH_BASE_URL`) is for the email an approved cancel
+   * or move sends; `null`: none is proposed, the card asks the owner.
+   */
+  clientTexts: { openai: OpenAiConfig; monthlyTokens: number; baseUrl: string | null } | null;
+  /**
    * The morning drafts pass (S36, ADR-0040): the routine model writes rebooking emails for
    * owners to approve, and review requests are drafted in the domain's words (S55.2); `null`
    * without `AUTH_BASE_URL`. Without OpenAI (`openai: null`, S56a) only the review requests run.
@@ -223,6 +229,7 @@ export function loadWorkerConfig(env: NodeJS.ProcessEnv): WorkerConfig {
           },
     episodes: episodesConfig(loadOpenAiConfig(env), jobs.AI_MONTHLY_TOKENS),
     drafts: draftsConfig(loadOpenAiConfig(env), jobs),
+    clientTexts: clientTextsConfig(loadOpenAiConfig(env), jobs),
     waitlist:
       jobs.AUTH_BASE_URL === undefined
         ? null
@@ -257,6 +264,18 @@ function episodesConfig(
   const embeddingModel = openai?.embeddingModel;
   if (openai === null || embeddingModel === undefined) return null;
   return { openai: { ...openai, embeddingModel }, monthlyTokens };
+}
+
+function clientTextsConfig(
+  openai: OpenAiConfig | null,
+  jobs: z.infer<typeof JobsEnvSchema>,
+): WorkerConfig['clientTexts'] {
+  if (openai === null) return null;
+  return {
+    openai,
+    monthlyTokens: jobs.AI_MONTHLY_TOKENS,
+    baseUrl: jobs.AUTH_BASE_URL === undefined ? null : new URL(jobs.AUTH_BASE_URL).origin,
+  };
 }
 
 function draftsConfig(

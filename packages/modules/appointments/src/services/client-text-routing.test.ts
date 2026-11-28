@@ -92,9 +92,15 @@ describe('routeClientText (AC-X-243…246)', () => {
       kind: 'card',
       reason: 'no_visit',
     });
+    // "Can't make it" with none named, just after one started: it may be about that one, so
+    // nothing lands on tomorrow's (the started one is today's, and too late to cancel).
     expect(route(reading({ intent: 'cancel' }), [STARTED, TOMORROW])).toEqual({
-      kind: 'cancel',
-      visit: TOMORROW,
+      kind: 'card',
+      reason: 'no_visit',
+    });
+    expect(route(reading({ intent: 'confirm' }), [STARTED, TODAY, TOMORROW])).toEqual({
+      kind: 'card',
+      reason: 'which_visit',
     });
   });
 

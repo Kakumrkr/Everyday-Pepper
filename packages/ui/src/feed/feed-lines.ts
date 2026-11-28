@@ -209,8 +209,9 @@ export function clientTextOutcomeLine(
 ): string | null {
   const outcome = item.payload.outcome;
   if (outcome === undefined) return null;
-  const client = item.names.client ?? 'The client';
-  const staff = item.names.staff ?? 'the team';
+  // Mid-sentence words; a sentence that starts with the client capitalizes its own.
+  const client = item.names.client ?? 'the client';
+  const staff = item.names.staff ?? 'your team';
   switch (outcome.kind) {
     case 'confirmed':
       return 'I marked this visit confirmed.';
@@ -223,9 +224,11 @@ export function clientTextOutcomeLine(
     case 'move_waiting':
       return `I lined up a move to ${formatInstant(outcome.to, timeZone)}. It waits in Needs your OK, and ${client} gets an email once you OK it.`;
     case 'free_times':
-      return `Free with ${staff}: ${freeTimes(outcome.times, timeZone)}. Reply to offer one.`;
+      return item.names.staff === null
+        ? `Free then: ${freeTimes(outcome.times, timeZone)}. Reply to offer one.`
+        : `Free with ${staff}: ${freeTimes(outcome.times, timeZone)}. Reply to offer one.`;
     case 'which_visit':
-      return `${client} has more than one visit booked. Reply to ask which one.`;
+      return `${item.names.client ?? 'The client'} has more than one visit booked. Reply to ask which one.`;
   }
 }
 

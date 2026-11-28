@@ -117,6 +117,24 @@ describe('loadWorkerConfig', () => {
     });
   });
 
+  it('reads client texts whenever OpenAI is configured, as the api queues them (S81a.2)', () => {
+    const openai = {
+      OPENAI_API_KEY: 'sk-test-0123456789abcdefghij',
+      OPENAI_MODEL_ROUTINE: 'small-model',
+      OPENAI_MODEL_STRONG: 'big-model',
+    };
+    expect(loadWorkerConfig(required).clientTexts).toBeNull();
+    // Without the web origin it still reads; no cancel or move is proposed then.
+    expect(loadWorkerConfig({ ...required, ...openai }).clientTexts).toMatchObject({
+      openai: { models: { routine: 'small-model' } },
+      baseUrl: null,
+    });
+    expect(
+      loadWorkerConfig({ ...required, ...openai, AUTH_BASE_URL: 'https://app.example/x' })
+        .clientTexts?.baseUrl,
+    ).toBe('https://app.example');
+  });
+
   it('drafts with the web origin; rebooking emails need an OpenAI key, review requests don’t (S36, S56a)', () => {
     const openai = {
       OPENAI_API_KEY: 'sk-test-not-a-real-key-000000',
