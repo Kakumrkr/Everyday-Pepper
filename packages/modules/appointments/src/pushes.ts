@@ -81,3 +81,24 @@ export function briefingPush(payload: DailyBriefingPayload, timeZone: string): P
     tag: 'daily-briefing',
   };
 }
+
+/**
+ * The staff member's push about a client running late (S81a.2, AC-X-244), read from the client's
+ * own text: the service and the time, never the client or their words.
+ */
+export function runningLatePush(input: {
+  serviceName: string;
+  startsAt: string;
+  timeZone: string;
+  minutesLate: number | null;
+  bookingId: string;
+}): PushNotice {
+  const late =
+    input.minutesLate === null ? 'running late' : `about ${String(input.minutesLate)} min late`;
+  return {
+    title: 'A client is running late',
+    body: `${input.serviceName} at ${clockTime(input.startsAt, input.timeZone)}: ${late}`,
+    url: calendarUrl(input.startsAt, input.timeZone),
+    tag: `late-${input.bookingId}`,
+  };
+}

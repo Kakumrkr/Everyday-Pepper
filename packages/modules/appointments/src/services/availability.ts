@@ -60,6 +60,8 @@ export interface AvailabilityOptions {
   clock?: Clock;
   templateRuleDefaults?: TemplateRuleDefaultsOf;
   limit?: number;
+  /** A booking being moved (S81a.2): its own time does not block it. */
+  excludeBookingId?: string;
 }
 
 /** `findAvailability` inside the caller's transaction. */
@@ -81,6 +83,7 @@ export async function findAvailabilityIn(
     to: Date.parse(to),
     now,
     templateRuleDefaults: options.templateRuleDefaults,
+    ...(options.excludeBookingId !== undefined && { excludeBookingId: options.excludeBookingId }),
   });
   const kept = options.limit === undefined ? slots : slots.slice(0, options.limit);
   return kept.map(toAvailableSlot);

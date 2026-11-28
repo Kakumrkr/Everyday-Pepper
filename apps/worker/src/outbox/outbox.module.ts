@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import {
   systemClock,
+  type ClientTextRunner,
   type Clock,
   type EpisodeWriter,
   type Mailer,
@@ -46,6 +47,8 @@ export interface OutboxOptions {
   pusher?: Pusher | null;
   /** Writes episodes (S31); `null` or absent: no OpenAI here, so the api queues none. */
   episodes?: EpisodeWriter | null;
+  /** Reads kept client texts (S81a.2); `null` or absent: no OpenAI here, a queued one retries, then gives up. */
+  clientTexts?: ClientTextRunner | null;
   /** Sends texts (S61, ADR-0065); `null` or absent: SMS is off, a queued text retries, then gives up. */
   sms?: SmsSender | null;
   /** The web app's origin for Twilio's signed delivery reports; `null` or absent: none. */
@@ -113,6 +116,7 @@ export class OutboxRunner implements OnApplicationBootstrap, OnApplicationShutdo
       mailer,
       pusher: this.options.pusher ?? null,
       episodes: this.options.episodes ?? null,
+      clientTexts: this.options.clientTexts ?? null,
       sms:
         this.options.sandboxTextLog === true && this.options.sms instanceof SandboxSmsSender
           ? this.options.sms.withTextLog(new SandboxTextLog(connection))

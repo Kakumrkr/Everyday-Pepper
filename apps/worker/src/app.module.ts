@@ -13,11 +13,25 @@ import { ImportsModule } from './imports/imports.module.js';
 import { calendarProviderFor } from '@pepper/google-calendar';
 import { JobsModule } from './jobs/jobs.module.js';
 import { OutboxModule } from './outbox/outbox.module.js';
+import { clientTextRunnerFor } from './outbox/client-texts.js';
 import { episodeWriterFor } from './outbox/episodes.js';
 import { WebPusher } from './push/web-pusher.js';
 import { WaitlistModule } from './waitlist/waitlist.module.js';
 
 const smsLogger = new Logger('SmsSandbox');
+
+/** The client text reader (S81a.2), with the drafts' model and origin; `null` without OpenAI. */
+function clientTextsOf(config: WorkerConfig) {
+  const drafts = config.drafts;
+  const openai = drafts?.openai ?? null;
+  if (drafts === null || openai === null) return null;
+  return clientTextRunnerFor({
+    openai,
+    monthlyTokens: drafts.monthlyTokens,
+    baseUrl: drafts.baseUrl,
+    outboxKey: outboxKeyFrom(config.outboxSecret),
+  });
+}
 
 @Module({})
 export class AppModule {
@@ -34,6 +48,8 @@ export class AppModule {
           pollMs: config.outboxPollMs,
           pusher: config.push === null ? null : new WebPusher(config.push),
           episodes: config.episodes === null ? null : episodeWriterFor(config.episodes),
+          // The routine model reads client texts (S81a.2); the api queues them only with OpenAI.
+          clientTexts: clientTextsOf(config),
           sms: smsSenderFor(config.sms, (line) => {
             smsLogger.log(line);
           }),

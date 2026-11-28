@@ -1,6 +1,8 @@
 import {
   CalendarKeptPayloadSchema,
+  ClientTextCardOutcomeSchema,
   ClientTextPayloadSchema,
+  type ClientTextCardOutcome,
   type CalendarKeptPayload,
   DEFAULT_FEED_SETTINGS,
   FEED_SNOOZE_DAYS,
@@ -1024,6 +1026,46 @@ export async function writeClientTextCard(tx: TenantTx, card: ClientTextCard): P
         snoozedUntil: null,
       },
     });
+}
+
+/**
+ * Says on the card what was done with its text once read (S81a.2, AC-X-247), and moves it to the
+ * visit the text was about (`visit`; `undefined`: the one it names stays). Only while the card's
+ * latest text is still `textId`: a newer text has a card of its own to say. Whether it changed.
+ */
+export async function setClientTextCardOutcome(
+  tx: TenantTx,
+  input: {
+    textId: string;
+    outcome: ClientTextCardOutcome;
+    visit?: { bookingId: string; staffMemberId: string; serviceId: string; startsAt: Date };
+  },
+): Promise<boolean> {
+  const textId = Id.parse(input.textId);
+  const [row] = await tx
+    .select({ id: feedItems.id, payload: feedItems.payload })
+    .from(feedItems)
+    .where(and(eq(feedItems.kind, CLIENT_TEXT), sql`${feedItems.payload}->>'textId' = ${textId}`))
+    .for('update');
+  if (row === undefined) return false;
+  const payload = ClientTextPayloadSchema.parse(row.payload);
+  const visit = input.visit;
+  await tx
+    .update(feedItems)
+    .set({
+      payload: ClientTextPayloadSchema.parse({
+        ...payload,
+        outcome: ClientTextCardOutcomeSchema.parse(input.outcome),
+        ...(visit !== undefined && { nextVisitStartsAt: visit.startsAt.toISOString() }),
+      }),
+      ...(visit !== undefined && {
+        bookingId: Id.parse(visit.bookingId),
+        staffMemberId: Id.parse(visit.staffMemberId),
+        serviceId: Id.parse(visit.serviceId),
+      }),
+    })
+    .where(eq(feedItems.id, row.id));
+  return true;
 }
 
 /** Opens a client's text card again (its reply was taken back, S80): `id` only, if it is done. */

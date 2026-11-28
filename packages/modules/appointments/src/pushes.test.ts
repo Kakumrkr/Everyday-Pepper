@@ -1,6 +1,12 @@
 import { DailyBriefingPayloadSchema } from '@pepper/contracts';
 import { describe, expect, it } from 'vitest';
-import { bookingPagePush, briefingPush, calendarUrl, shortWhen } from './pushes.js';
+import {
+  bookingPagePush,
+  briefingPush,
+  calendarUrl,
+  runningLatePush,
+  shortWhen,
+} from './pushes.js';
 
 const NY = 'America/New_York';
 // Tuesday, November 3, 2026, 10:00 AM in New York.
@@ -24,6 +30,19 @@ describe('team pushes (ADR-0026)', () => {
       title: 'Booking cancelled',
       body: 'Haircut, Tue, Nov 3, 10:00 AM',
     });
+  });
+
+  it('tell the staff member a client is late without naming them (AC-X-244)', () => {
+    const late = { serviceName: 'Haircut', startsAt: START, timeZone: NY, bookingId: ID };
+    expect(runningLatePush({ ...late, minutesLate: 10 })).toEqual({
+      title: 'A client is running late',
+      body: 'Haircut at 10:00 AM: about 10 min late',
+      url: '/calendar?date=2026-11-03',
+      tag: `late-${ID}`,
+    });
+    expect(runningLatePush({ ...late, minutesLate: null }).body).toBe(
+      'Haircut at 10:00 AM: running late',
+    );
   });
 
   it('use the business clock for the day and time', () => {

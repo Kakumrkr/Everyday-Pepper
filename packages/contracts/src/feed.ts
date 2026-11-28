@@ -158,14 +158,37 @@ export type DailyBriefingPayload = z.infer<typeof DailyBriefingPayloadSchema>;
  * A client's own text, kept (S80, ADR-0072, AC-X-232): one card per client and local day, for
  * owners and managers, quoting the latest (`body`, read with the item from `client_texts`, never
  * stored on it) with how many came that day; the client's next visit is the item's booking
- * (`nextVisitStartsAt`, `null` for none). Never in the AI's feed read in S80.
+ * (`nextVisitStartsAt`, `null` for none). Never in the AI's feed read. Once the text is read
+ * (S81a.2) the card is about the visit it was read as about, and says what was done.
  */
+/**
+ * What Pepper did with the card's latest text once it was read (S81a.2, ADR-0073; AC-X-247):
+ * confirmed the visit, told its staff member the client is late, a cancel or a move waiting for
+ * an OK ("Needs your OK"), the free times near the one asked for, or more than one visit fits.
+ * Absent: not read (no model), or nothing to say.
+ */
+export const ClientTextCardOutcomeSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('confirmed') }).strict(),
+  z
+    .object({ kind: z.literal('told_staff'), minutesLate: z.int().min(1).max(180).nullable() })
+    .strict(),
+  z.object({ kind: z.literal('cancel_waiting') }).strict(),
+  z.object({ kind: z.literal('move_waiting'), to: UtcDateTimeSchema }).strict(),
+  z
+    .object({ kind: z.literal('free_times'), times: z.array(UtcDateTimeSchema).min(1).max(3) })
+    .strict(),
+  z.object({ kind: z.literal('which_visit') }).strict(),
+]);
+export type ClientTextCardOutcome = z.infer<typeof ClientTextCardOutcomeSchema>;
+
 export const ClientTextPayloadSchema = z
   .object({
     textId: z.uuid(),
     receivedAt: UtcDateTimeSchema,
     count: z.number().int().min(1).max(1000),
+    /** The visit the card is about: the client's next, or the one the text was read as about. */
     nextVisitStartsAt: UtcDateTimeSchema.nullable(),
+    outcome: ClientTextCardOutcomeSchema.optional(),
   })
   .strict();
 export type ClientTextPayload = z.infer<typeof ClientTextPayloadSchema>;
