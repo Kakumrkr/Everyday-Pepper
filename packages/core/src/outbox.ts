@@ -121,7 +121,7 @@ export class SmsRejectedError extends Error {
 
 /** A channel that this worker has not configured (push without VAPID keys, SMS off). */
 export class ChannelUnavailableError extends Error {
-  constructor(channel: 'push' | 'episode' | 'sms' | 'payment') {
+  constructor(channel: 'push' | 'episode' | 'sms' | 'payment' | 'client_text') {
     super(`No ${channel} sender is configured`);
     this.name = 'ChannelUnavailableError';
   }

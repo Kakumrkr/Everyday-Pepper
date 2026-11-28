@@ -230,15 +230,26 @@ export async function listClientTextsForExport(tx: TenantTx): Promise<
     .orderBy(asc(clientTexts.createdAt), asc(clientTexts.id));
 }
 
-/** The client's next confirmed visit after `after` (the card names it: likely what a text is about). */
-export async function findClientNextVisit(
+/** One of a client's coming confirmed visits, by ids (S80's card, S81a.2's reading). */
+export interface ClientUpcomingVisit {
+  bookingId: string;
+  staffMemberId: string;
+  serviceId: string;
+  startsAt: Date;
+}
+
+/**
+ * The client's next confirmed visits after `after`, soonest first, at most `limit` (1–20):
+ * what a client's text is likely about (S81a.2 reads it with at most 5).
+ */
+export async function findClientUpcomingVisits(
   tx: TenantTx,
   clientId: string,
   after: Date,
-): Promise<
-  { bookingId: string; staffMemberId: string; serviceId: string; startsAt: Date } | undefined
-> {
-  const [row] = await tx
+  limit: number,
+): Promise<ClientUpcomingVisit[]> {
+  const count = z.number().int().min(1).max(20).parse(limit);
+  return tx
     .select({
       bookingId: bookings.id,
       staffMemberId: bookings.staffMemberId,
@@ -254,6 +265,15 @@ export async function findClientNextVisit(
       ),
     )
     .orderBy(asc(bookings.startsAt), asc(bookings.id))
-    .limit(1);
+    .limit(count);
+}
+
+/** The client's next confirmed visit after `after` (the card names it: likely what a text is about). */
+export async function findClientNextVisit(
+  tx: TenantTx,
+  clientId: string,
+  after: Date,
+): Promise<ClientUpcomingVisit | undefined> {
+  const [row] = await findClientUpcomingVisits(tx, clientId, after, 1);
   return row;
 }

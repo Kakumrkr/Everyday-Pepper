@@ -666,6 +666,13 @@
       "when": 1795813969115,
       "tag": "0094_s80_client_texts",
       "breakpoints": true
+    },
+    {
+      "idx": 95,
+      "version": "7",
+      "when": 1795831225328,
+      "tag": "0095_s81a_2_client_text_job",
+      "breakpoints": true
     }
   ]
 }

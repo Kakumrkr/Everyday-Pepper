@@ -21,6 +21,7 @@ import { insertBookingText } from './repositories/booking-texts.js';
 import { insertBooking, insertWaitlistEntry } from './repositories/bookings.js';
 import {
   countInboundClientTexts,
+  findClientUpcomingVisits,
   deleteClientTextReply,
   deleteOldClientTexts,
   insertClientTextReply,
@@ -433,6 +434,30 @@ describe('kept texts (AC-X-229, AC-X-234, AC-X-235)', () => {
       });
       expect(await listClientTexts(tx, clientId)).toEqual([]);
     });
+  });
+
+  it("lists a client's next confirmed visits, soonest first, at most the limit (AC-X-242)", async () => {
+    const now = new Date();
+    await withTenant(db, tenantA, async (tx) => {
+      const clientId = await seedClient(tx);
+      const past = await seedBooking(tx, clientId, new Date(now.getTime() - DAY));
+      const later = await seedBooking(tx, clientId, new Date(now.getTime() + 3 * DAY));
+      const soon = await seedBooking(tx, clientId, new Date(now.getTime() + DAY));
+      const cancelled = await seedBooking(tx, clientId, new Date(now.getTime() + 2 * DAY));
+      await tx.execute(sql`UPDATE bookings SET status = 'cancelled' WHERE id = ${cancelled}`);
+      const visits = await findClientUpcomingVisits(tx, clientId, now, 5);
+      expect(visits.map((v) => v.bookingId)).toEqual([soon, later]);
+      expect(visits.map((v) => v.bookingId)).not.toContain(past);
+      expect((await findClientUpcomingVisits(tx, clientId, now, 1)).map((v) => v.bookingId)).toEqual(
+        [soon],
+      );
+      await expect(findClientUpcomingVisits(tx, clientId, now, 0)).rejects.toThrow();
+    });
+    // Another business sees none of them.
+    const other = await withTenant(db, tenantA, seedClient);
+    expect(await withTenant(db, tenantB, (tx) => findClientUpcomingVisits(tx, other, now, 5))).toEqual(
+      [],
+    );
   });
 
   it('moves texts to the kept client when two are merged', async () => {

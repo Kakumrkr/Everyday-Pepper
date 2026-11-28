@@ -1,0 +1,1 @@
+ALTER TYPE "public"."outbox_message_type" ADD VALUE 'client_text';

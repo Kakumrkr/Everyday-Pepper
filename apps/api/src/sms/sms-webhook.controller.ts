@@ -47,6 +47,11 @@ export interface SmsWebhookOptions {
   outboxKey: Buffer;
   /** The sandbox's text path for tests (`/v1/dev/sms`, AC-X-87); off: 404. */
   sandbox: boolean;
+  /**
+   * Whether a kept client text is queued for the worker to read (S81a.2, ADR-0073): only with
+   * a real model configured (`OPENAI_*`), never with the scripted one.
+   */
+  readClientTexts?: boolean;
   clock?: Clock;
 }
 
@@ -194,6 +199,7 @@ export class SmsWebhookModule {
           useValue: {
             baseUrl: options.baseUrl,
             outboxKey: options.outboxKey,
+            readClientTexts: options.readClientTexts ?? false,
             clock: options.clock,
           },
         },

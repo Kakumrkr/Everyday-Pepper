@@ -38,6 +38,8 @@ export interface SmsInboundOptions {
   baseUrl: string;
   /** Seals the outbox; the codes' key derives from it. */
   outboxKey: Buffer;
+  /** Queue a kept client text's reading (S81a.2): only with a model configured. */
+  readClientTexts?: boolean;
   clock?: Clock;
 }
 
@@ -148,7 +150,11 @@ export class SmsInboundService {
     const flood = await this.limits.spent(KEPT_TEXTS, counter('client-text')).catch(() => false);
     if (flood) return null;
     await this.limits.hit(KEPT_TEXTS, counter('client-text')).catch(() => undefined);
-    const kept = await keepClientText(this.db, { ...text, receivedAt });
+    const kept = await keepClientText(
+      this.db,
+      { ...text, receivedAt },
+      { read: this.options.readClientTexts === true ? { key: this.options.outboxKey } : null },
+    );
     if (kept.outcome === 'kept') return null;
     if (await this.optedOut(text.from)) return null;
     if (await isMemberPhone(this.db, text.from)) return null;

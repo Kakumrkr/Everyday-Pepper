@@ -20,6 +20,7 @@ import {
   ClientNotFoundError,
   FeedItemNotFoundError,
   auditActorOf,
+  queueClientTextRead,
   queueSms,
   requirePermission,
   systemClock,
@@ -56,7 +57,9 @@ import { reminderSettingsOf, textableNumber } from './reminders.js';
 // consent in force is for the number, that texted it in the last 7 days. Anything else is stored
 // nowhere. The kept text becomes one card a day per client for owners and managers, naming the
 // client's next visit; they answer with Reply, a text in their own words under the client's
-// consent, held for Undo and the quiet hours. No model reads the words in S80.
+// consent, held for Undo and the quiet hours. With a model configured, the same transaction
+// queues one reading of the text (S81a.2, ADR-0073): the worker reads it and acts only on a sure
+// reading; the card shows either way.
 
 const DAY_MS = 86_400_000;
 /** How long a text's card stays open (a text a week old is no longer news). */
@@ -79,6 +82,14 @@ export interface InboundClientText {
 /** What became of it: `kept` (by one business; `replay` when already kept) or `unrouted`. */
 export type KeepClientTextResult = { outcome: 'kept'; replay: boolean } | { outcome: 'unrouted' };
 
+export interface KeepClientTextOptions {
+  /**
+   * Queues the text's reading (S81a.2, AC-X-242), sealed with the outbox key; `null` or absent:
+   * no model is configured, so the card alone.
+   */
+  read?: { key: Buffer } | null;
+}
+
 /**
  * Keeps a client's text by the one business it belongs to (AC-X-229) and puts it on the card for
  * owners and managers (AC-X-232), in that business's transaction; `unrouted` when no business,
@@ -87,6 +98,7 @@ export type KeepClientTextResult = { outcome: 'kept'; replay: boolean } | { outc
 export async function keepClientText(
   db: Database,
   text: InboundClientText,
+  options: KeepClientTextOptions = {},
 ): Promise<KeepClientTextResult> {
   const body = text.body.trim();
   if (body.length === 0) return { outcome: 'unrouted' };
@@ -132,6 +144,11 @@ export async function keepClientText(
       nextVisit: next ?? null,
       expiresAt: new Date(at + CLIENT_TEXT_CARD_DAYS * DAY_MS),
     });
+    const read = options.read ?? null;
+    if (read !== null) {
+      // Ids only; the worker takes the client and the visits from the kept text (ADR-0073).
+      await queueClientTextRead(tx, { textId: kept.id }, { key: read.key, now: text.receivedAt });
+    }
     return { outcome: 'kept', replay: false };
   });
 }

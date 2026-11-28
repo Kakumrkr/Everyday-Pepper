@@ -83,6 +83,7 @@ async function start(twilio: { accountSid: string; authToken: string } | null) {
         baseUrl: BASE,
         outboxKey: Buffer.alloc(32, 7),
         sandbox: false,
+        readClientTexts: true,
         clock: { now: () => NOW },
       }),
     ],
@@ -247,6 +248,8 @@ describe('POST /v1/webhooks/sms (AC-X-59, AC-X-61)', () => {
           body: 'Can I come at 3 instead?',
           receivedAt: NOW,
         },
+        // Queued for the worker to read with the outbox's key (S81a.2, AC-X-242).
+        { read: { key: Buffer.alloc(32, 7) } },
       );
       expect(appointments.confirmBookingByText).not.toHaveBeenCalled();
     });

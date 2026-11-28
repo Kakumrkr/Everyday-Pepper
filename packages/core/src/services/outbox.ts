@@ -1,4 +1,5 @@
 import {
+  OutboxClientTextSchema,
   OutboxDedupeKeySchema,
   OutboxEmailSchema,
   OutboxEpisodeSchema,
@@ -17,6 +18,7 @@ import {
   type OutboxMessageId,
   type OutboxPushInput,
   type OutboxPayment,
+  type OutboxClientText,
 } from '@pepper/contracts';
 import {
   addUsage,
@@ -126,6 +128,28 @@ export async function queuePayment(
 }
 
 /**
+ * Queues the reading of a kept client text (S81a.2, ADR-0073; AC-X-242) in the transaction that
+ * kept it: ids only, once per text (`client_text:<textId>`), due now. Returns the message id, or
+ * `undefined` when the text already has one.
+ */
+export async function queueClientTextRead(
+  tx: TenantTx,
+  job: OutboxClientText,
+  options: { key: Buffer; now: Date },
+): Promise<OutboxMessageId | undefined> {
+  const content = OutboxClientTextSchema.parse(job);
+  const id = OutboxMessageIdSchema.parse(newId());
+  const row = await insertOutboxMessage(tx, {
+    id,
+    type: 'client_text',
+    dedupeKey: OutboxDedupeKeySchema.parse(`client_text:${content.textId}`),
+    payload: sealOutboxContent(options.key, id, Buffer.from(JSON.stringify(content))),
+    availableAt: options.now,
+  });
+  return row === undefined ? undefined : id;
+}
+
+/**
  * What one delivery call did. `dropped`: a push whose device is gone (the member turned it
  * off, or the push service no longer knows it); nothing is wrong, so nothing is alerted.
  */
@@ -157,6 +181,16 @@ export type PaymentRunner = (
   job: OutboxPayment,
 ) => Promise<unknown>;
 
+/**
+ * Reads a kept client text and acts on a sure reading (S81a.2, ADR-0073): `@pepper/ai`'s
+ * reader, given by the worker. It throws to be retried (the model unavailable).
+ */
+export type ClientTextRunner = (
+  db: Database,
+  tenantId: TenantId,
+  job: OutboxClientText,
+) => Promise<unknown>;
+
 export interface DeliveryOptions {
   key: Buffer;
   mailer: Mailer;
@@ -170,6 +204,11 @@ export interface DeliveryOptions {
    * gives up with an alert): the api queues them only with payments configured.
    */
   payments?: PaymentRunner | null;
+  /**
+   * `null` or absent: this worker reads no client texts, so a queued one fails (and retries,
+   * then gives up with an alert): the api queues them only when a model is configured.
+   */
+  clientTexts?: ClientTextRunner | null;
   /**
    * `null` or absent: this worker has no VAPID keys, so a queued push fails (and retries,
    * then gives up with an alert): the api queues pushes only when push is configured, so
@@ -249,6 +288,10 @@ export async function deliverOutboxMessage(
       const runner = options.payments ?? null;
       if (runner === null) throw new ChannelUnavailableError('payment');
       await runner(db, tenantId, OutboxPaymentSchema.parse(opened));
+    } else if (claimed.type === 'client_text') {
+      const runner = options.clientTexts ?? null;
+      if (runner === null) throw new ChannelUnavailableError('client_text');
+      await runner(db, tenantId, OutboxClientTextSchema.parse(opened));
     } else if (claimed.type === 'episode') {
       const writer = options.episodes ?? null;
       if (writer === null) throw new ChannelUnavailableError('episode');

@@ -1406,6 +1406,7 @@ export const outboxMessageType = pgEnum('outbox_message_type', [
   'episode',
   'sms',
   'payment',
+  'client_text',
 ]);
 export const outboxStatus = pgEnum('outbox_status', ['pending', 'sent', 'dead', 'cancelled']);
 

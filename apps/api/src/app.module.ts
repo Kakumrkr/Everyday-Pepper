@@ -77,6 +77,7 @@ export class AppModule {
           baseUrl: config.auth.baseUrl,
           outboxKey: outboxKeyFrom(config.outboxSecret),
           sandbox: config.smsSandbox,
+          readClientTexts: config.ai.openai !== null,
         }),
         MemberTextsModule.forRoot({ outboxKey: outboxKeyFrom(config.outboxSecret) }),
         ClientRepliesModule.forRoot({

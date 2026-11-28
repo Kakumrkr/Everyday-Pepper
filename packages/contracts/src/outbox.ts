@@ -13,9 +13,17 @@ export type OutboxMessageId = z.infer<typeof OutboxMessageIdSchema>;
  * What a message does when delivered: an email, a push to one device (ADR-0026), writing the
  * summary of a conversation that went quiet (`episode`, S31, ADR-0037), or a text (`sms`, S61,
  * ADR-0065; its content is `OutboxSmsSchema` in `sms.ts`), or a payment step (`payment`, S66,
- * ADR-0068: a refund; `OutboxPaymentSchema` in `deposits.ts`).
+ * ADR-0068: a refund; `OutboxPaymentSchema` in `deposits.ts`), or reading a kept client text
+ * and acting on a sure reading (`client_text`, S81a.2, ADR-0073; `OutboxClientTextSchema`).
  */
-export const OutboxMessageTypeSchema = z.enum(['email', 'push', 'episode', 'sms', 'payment']);
+export const OutboxMessageTypeSchema = z.enum([
+  'email',
+  'push',
+  'episode',
+  'sms',
+  'payment',
+  'client_text',
+]);
 export type OutboxMessageType = z.infer<typeof OutboxMessageTypeSchema>;
 
 /**
@@ -95,6 +103,14 @@ export const OutboxEpisodeSchema = z
   .object({ conversationId: z.uuid(), userId: z.uuid(), turnId: z.uuid() })
   .strict();
 export type OutboxEpisode = z.infer<typeof OutboxEpisodeSchema>;
+
+/**
+ * A kept client text to read (S81a.2, ADR-0073): queued with the text in `keepClientText`'s
+ * transaction. Ids only: the worker reads the text, its client and the client's next visits
+ * from the database, never from the queue or the model.
+ */
+export const OutboxClientTextSchema = z.object({ textId: z.uuid() }).strict();
+export type OutboxClientText = z.infer<typeof OutboxClientTextSchema>;
 
 /** Delivery attempts before a message is `dead`. */
 export const OUTBOX_MAX_ATTEMPTS = 8;

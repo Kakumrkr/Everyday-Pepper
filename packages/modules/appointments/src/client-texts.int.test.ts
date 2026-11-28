@@ -40,6 +40,7 @@ import {
   withSmsInbound,
   withTenant,
   type Database,
+  countOutboxMessagesByKey,
 } from '@pepper/db';
 import { randomBytes } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -239,6 +240,26 @@ describe('a client’s text kept (AC-X-229, AC-X-232)', () => {
     const received = audit.filter((entry) => entry.action === 'client_text.received');
     expect(received).toHaveLength(2);
     expect(JSON.stringify(received)).not.toContain('late');
+  });
+
+  it('queues one reading per kept text when a model is configured (AC-X-242)', async () => {
+    const b = await newBusiness();
+    const readings = async () =>
+      withTenant(db, b.tenantId, (tx) => countOutboxMessagesByKey(tx, 'client_text:'));
+    // Without a model: the card alone.
+    await keepClientText(db, text(b, 'See you then'));
+    expect(await readings()).toBe(0);
+    const sent = text(b, 'Running 10 late', new Date(b.clock.now().getTime() + MINUTE));
+    expect(await keepClientText(db, sent, { read: { key: KEY } })).toEqual({
+      outcome: 'kept',
+      replay: false,
+    });
+    // A replay queues nothing more.
+    await keepClientText(db, sent, { read: { key: KEY } });
+    expect(await readings()).toBe(1);
+    // A text no business fits queues nothing.
+    await keepClientText(db, { ...text(b, 'Hello'), from: '+15550000000' }, { read: { key: KEY } });
+    expect(await readings()).toBe(1);
   });
 
   it('shows the card to owners only, never to staff or in the AI’s feed read', async () => {
