@@ -1,4 +1,4 @@
-import type { DailyBriefingPayload, FeedItem, FeedKind } from '@pepper/contracts';
+import type { DailyBriefingPayload, FeedInsight, FeedItem, FeedKind } from '@pepper/contracts';
 import { formatDate, formatInstant } from '../cards/labels.js';
 
 // The words of a feed suggestion (S35, ADR-0039), written by code from the item's ids, numbers
@@ -182,13 +182,62 @@ export function feedLine(item: FeedItem, timeZone: string, now: number): FeedLin
           : `${client} sent ${count(texts, 'text')}, the last ${when}`;
       const service = item.names.service === null ? '' : ` for ${item.names.service}`;
       const withStaff = item.names.staff === null ? '' : ` with ${item.names.staff}`;
+      // S81a.2 (AC-X-247): once read, the card is about the visit the text was about.
+      const outcome = item.payload.outcome;
+      const read = outcome !== undefined && outcome.kind !== 'which_visit';
       return {
         title: sent,
         why:
           nextVisitStartsAt === null
             ? 'No visit booked. Reply to answer by text.'
-            : `Likely about their next visit: ${formatInstant(nextVisitStartsAt, timeZone)}${service}${withStaff}.`,
+            : read
+              ? `About their visit ${formatInstant(nextVisitStartsAt, timeZone)}${service}${withStaff}.`
+              : `Likely about their next visit: ${formatInstant(nextVisitStartsAt, timeZone)}${service}${withStaff}.`,
       };
     }
   }
+}
+
+/**
+ * What Pepper did with a client's text once it read it (S81a.2, AC-X-247), in its own words
+ * beside the quote; `null`: not read, or nothing done. Each action that waits names what the OK
+ * does.
+ */
+export function clientTextOutcomeLine(
+  item: Extract<FeedInsight, { kind: 'client_text' }> & Pick<FeedItem, 'names'>,
+  timeZone: string,
+): string | null {
+  const outcome = item.payload.outcome;
+  if (outcome === undefined) return null;
+  const client = item.names.client ?? 'The client';
+  const staff = item.names.staff ?? 'the team';
+  switch (outcome.kind) {
+    case 'confirmed':
+      return 'I marked this visit confirmed.';
+    case 'told_staff':
+      return outcome.minutesLate === null
+        ? `I let ${staff} know ${client} is running late.`
+        : `I let ${staff} know ${client} is about ${String(outcome.minutesLate)} min late.`;
+    case 'cancel_waiting':
+      return `I lined up the cancel. It waits in Needs your OK, and ${client} gets an email once you OK it.`;
+    case 'move_waiting':
+      return `I lined up a move to ${formatInstant(outcome.to, timeZone)}. It waits in Needs your OK, and ${client} gets an email once you OK it.`;
+    case 'free_times':
+      return `Free with ${staff}: ${freeTimes(outcome.times, timeZone)}. Reply to offer one.`;
+    case 'which_visit':
+      return `${client} has more than one visit booked. Reply to ask which one.`;
+  }
+}
+
+/** "Fri, Nov 6, 9:00 am, 9:15 am or 9:30 am": the day once when the times share it. */
+function freeTimes(times: readonly string[], timeZone: string): string {
+  const labels = times.map((iso) => formatInstant(iso, timeZone));
+  const day = (label: string) => label.split(', ').slice(0, 2).join(', ');
+  const first = labels[0] ?? '';
+  const sameDay = labels.every((label) => day(label) === day(first));
+  const shown = sameDay
+    ? [first, ...times.slice(1).map((iso) => clockTime(iso, timeZone))]
+    : labels;
+  if (shown.length <= 1) return shown.join('');
+  return `${shown.slice(0, -1).join(', ')} or ${shown.at(-1) ?? ''}`;
 }

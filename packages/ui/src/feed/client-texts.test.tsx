@@ -10,7 +10,7 @@ import {
   type ClientTextCardsProps,
   type ClientTextItem,
 } from './client-texts.js';
-import { feedLine } from './feed-lines.js';
+import { clientTextOutcomeLine, feedLine } from './feed-lines.js';
 
 // Clients' texts on Home (S80, AC-X-232, AC-X-233): the card quotes the text as written, names
 // the visit it's likely about, and Reply writes a text with Undo.
@@ -89,6 +89,64 @@ describe('feedLine for a client text', () => {
   it('never puts the words in its sentences', () => {
     const line = feedLine(item(), NY, NOW);
     expect(`${line.title} ${line.why}`).not.toContain('daughter');
+  });
+});
+
+describe('what Pepper did with a text (S81a.2, AC-X-247)', () => {
+  const line = (outcome: NonNullable<ClientTextItem['payload']['outcome']>) =>
+    clientTextOutcomeLine(item({ outcome }), NY);
+
+  it('says nothing for a text not read', () => {
+    expect(clientTextOutcomeLine(item(), NY)).toBeNull();
+  });
+
+  it('names the visit it was about once read', () => {
+    expect(feedLine(item({ outcome: { kind: 'confirmed' } }), NY, NOW).why).toBe(
+      'About their visit Thu, Nov 5, 2:00 pm for Haircut with Jess.',
+    );
+    // More than one visit fits: still only likely.
+    expect(feedLine(item({ outcome: { kind: 'which_visit' } }), NY, NOW).why).toMatch(/^Likely/);
+  });
+
+  it('says what was done, and what an OK does', () => {
+    expect(line({ kind: 'confirmed' })).toBe('I marked this visit confirmed.');
+    expect(line({ kind: 'told_staff', minutesLate: 10 })).toBe(
+      'I let Jess know Maria L. is about 10 min late.',
+    );
+    expect(line({ kind: 'told_staff', minutesLate: null })).toBe(
+      'I let Jess know Maria L. is running late.',
+    );
+    expect(line({ kind: 'cancel_waiting' })).toBe(
+      'I lined up the cancel. It waits in Needs your OK, and Maria L. gets an email once you OK it.',
+    );
+    expect(line({ kind: 'move_waiting', to: '2026-11-05T20:00:00.000Z' as never })).toBe(
+      'I lined up a move to Thu, Nov 5, 3:00 pm. It waits in Needs your OK, and Maria L. gets an email once you OK it.',
+    );
+    expect(line({ kind: 'which_visit' })).toBe(
+      'Maria L. has more than one visit booked. Reply to ask which one.',
+    );
+  });
+
+  it('lists free times with their day once', () => {
+    const friday = [
+      '2026-11-06T14:00:00.000Z',
+      '2026-11-06T14:15:00.000Z',
+      '2026-11-06T14:30:00.000Z',
+    ];
+    expect(line({ kind: 'free_times', times: friday as never })).toBe(
+      'Free with Jess: Fri, Nov 6, 9:00 am, 9:15 am or 9:30 am. Reply to offer one.',
+    );
+    const twoDays = ['2026-11-06T14:00:00.000Z', '2026-11-09T14:00:00.000Z'];
+    expect(line({ kind: 'free_times', times: twoDays as never })).toBe(
+      'Free with Jess: Fri, Nov 6, 9:00 am or Mon, Nov 9, 9:00 am. Reply to offer one.',
+    );
+  });
+
+  it('shows the line on the card under the quote', () => {
+    renderCards({ items: [item({ outcome: { kind: 'confirmed' } })] });
+    expect(screen.getByTestId('client-text-outcome').textContent).toBe(
+      'I marked this visit confirmed.',
+    );
   });
 });
 

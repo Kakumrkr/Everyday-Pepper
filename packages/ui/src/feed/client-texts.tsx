@@ -5,11 +5,12 @@ import { useEffect, useId, useState, type ReactNode } from 'react';
 import { Receipt } from '../kit/blocks.js';
 import { Button, buttonStyle } from '../kit/button.js';
 import { Textarea } from '../kit/fields.js';
-import { clockTime, feedLine } from './feed-lines.js';
+import { clientTextOutcomeLine, clockTime, feedLine } from './feed-lines.js';
 
 // Clients' own texts on Home (S80, ADR-0072, AC-X-232, AC-X-233): one raised card a client a
 // day for owners and managers, quoting the latest text (shown as the client wrote it, never
-// inside Pepper's sentences), naming the visit it's likely about, with Reply (a text in the
+// inside Pepper's sentences), naming the visit it's likely about beside it (once read, S81a.2:
+// the visit it was about, and what Pepper did), with Reply (a text in the
 // member's words, from the business), "Open {client}" and Done. A reply queued shows a receipt
 // with Undo until it goes. The profile reuses the reply box (`ClientTextReplyBox`). Every
 // sentence but the quote comes from `feedLine`.
@@ -103,6 +104,7 @@ function ClientTextCard({
   const [error, setError] = useState<string | null>(null);
   const { state, setState, send } = useReply((body) => onReply(item, body));
   const line = feedLine(item, timeZone, now);
+  const done = clientTextOutcomeLine(item, timeZone);
   const client = item.names.client ?? 'this client';
   if (closed) return null;
 
@@ -144,7 +146,14 @@ function ClientTextCard({
       >
         {item.payload.body}
       </blockquote>
-      <p className="m-0 type-body text-ink-2">{line.why}</p>
+      <p className="m-0 type-body text-ink-2" data-testid="client-text-visit">
+        {line.why}
+      </p>
+      {done === null ? null : (
+        <p className="m-0 type-body text-ink" data-testid="client-text-outcome">
+          {done}
+        </p>
+      )}
       {state.step === 'writing' ? (
         <ReplyForm
           client={client}
