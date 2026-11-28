@@ -105,15 +105,23 @@ test('a client texts back and the owner replies from the card', async ({
   await expect(thread.getByRole('listitem').last()).toContainText(
     /· [A-Z][a-z]{2}, [A-Z][a-z]{2} \d{1,2}, \d{1,2}:\d{2} [ap]m/,
   );
+  // One time format on the whole profile (S81a.2 top-up, AC-X-248): no "AM" or "PM" anywhere.
+  await expect(page.getByTestId('client-texts')).toContainText(/\d:\d{2} [ap]m/);
+  await expect(page.getByTestId('client-texts')).not.toContainText(/\d [AP]M\b/);
   await page.getByRole('button', { name: 'What they agreed to' }).click();
   await expect(page.getByRole('dialog').getByTestId('client-texts-consent')).toHaveCount(1);
   await expect(page.getByRole('dialog')).toContainText('Appointment texts');
+  await expect(page.getByRole('dialog')).toContainText(/, \d{4}, \d{1,2}:\d{2} [ap]m/);
+  await expect(page.getByRole('dialog')).not.toContainText(/\d [AP]M\b/);
   if (test.info().project.name === 'mobile') {
     await page.keyboard.press('Escape');
     for (const scheme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme: scheme, reducedMotion: 'reduce' });
       await thread.screenshot({
         path: test.info().outputPath(`client-text-thread-375-${scheme}.png`),
+      });
+      await page.getByTestId('client-texts').screenshot({
+        path: test.info().outputPath(`client-texts-profile-375-${scheme}.png`),
       });
     }
   }

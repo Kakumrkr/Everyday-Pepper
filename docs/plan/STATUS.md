@@ -1,23 +1,21 @@
 # Project Status — read this first in every new session
 
-**Last updated:** 2026-11-28 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S81a.2** next
+**Last updated:** 2026-11-28 · **Plan version:** 0.43 ([PCR-017](changes/PCR-017.md)) · **Current phase:** 18, the AI layer (planned in P2; before Phase 17; Phase 13's S58a–S60 go next the day the domain is bought) → **S81b** next
 
 **The plan for every session from S39 to launch is the [V1 playbook](v1-playbook.md)** (one row per session, the session standard in §3, skills in §4). Phases end at a [scorecard](scorecard.md) gate. Screens follow [DESIGN.md](../design/DESIGN.md).
 
 This file is kept short. The full history is in [session-log.md](session-log.md) (what every session did, its checks and leftovers) and [decisions.md](decisions.md) (every decision made in chat). Open them when a task needs that history; they are not needed to start a session.
 
 ## In progress
-**S81a.2 Client texts acted on** (branch `claude/client-texts-acted-on-76stac`, S81a merged; brief approved "Ok", 2026-11-28: D-1 A cancel/move via `proposeForBusiness` with up to 3 free times; D-2 A confirm by id without the 48 h reminder rule, sure only, audit `via: text_read`; D-3 A the card always shows, quoting the text and saying what was done; D-4 A one session, the proposal branch the cut point → S81a.3). AC-X-242…248.
-Tasks: 1 ACs ✅ · 2 outbox type + migration 0095 + next-5-visits query · 3 queue in `keepClientText` · 4 `confirmBookingById` · 5 router (pure) · 6 worker handler (confirm, late push, proposal) · 7 card quote + outcome · 8 top-up profile times · 9 review + close.
-Tasks 2–3 ✅ (outbox `client_text` + 0095, `findClientUpcomingVisits`, `queueClientTextRead`, keepClientText queues when the api has OpenAI). Tasks 4–5 ✅ (`confirmClientVisitIn` by id, audit `via: text_read`; pure `routeClientText`). Task 6 ✅ (`actOnClientText` in `packages/ai/src/client-texts/act.ts`: confirm; staff push `push.client_late:<textId>`; cancel/move proposals `client_text.<kind>.<textId>`, a move only to the time the client asked for when free, else up to 3 free times on the card (Pepper never picks a time nobody asked for); `setClientTextCardOutcome`; `findAvailabilityIn` takes `excludeBookingId`; worker `clientTextRunnerFor`). Task 7 ✅ (the card names the visit it was about beside the quote and says what was done: `clientTextOutcomeLine`). Task 8 ✅ (`profileTimeLabel` for the thread, the last text and the visits; consents keep their year with "pm"; screens.spec fixed moments lowercase; profile baselines to redraw at close). Next: task 9 (review + close).
+Nothing in progress: S81a.2 is closed (branch `claude/client-texts-acted-on-76stac` pushed, S81a merged in, no PR). Next: S81b merges this branch and records once.
 
 ## Last sessions
+- **S81a.2 Phase 18 · Client texts acted on (2026-11-28)** (branch `claude/client-texts-acted-on-76stac`, no PR; [ADR-0073](../adr/0073-client-texts-read.md) §S81a.2). Full entry in [session-log.md](session-log.md).
+  - **Built:** a kept text queues one `client_text` job (migration 0095); `actOnClientText` reads it and `routeClientText` decides: a sure confirm confirms the visit by id, running late pushes the visit's staff member, a cancel or a move to the time asked waits in "Needs your OK" (else up to 3 free times on the card), the rest is the card; the card names the visit beside the quote and says what was done. Top-up: the whole profile writes "am". AC-X-242…248.
+  - **Checks:** `pnpm check` green (third run: an outbox types test and ai coverage fixed); affected integration 26 tasks; e2e client-texts, confirm-by-text, clients, screens (50); review 3 important + 5 nits fixed; security none.
 - **S81a Phase 18 · Client texts understood, "a" (2026-11-28)** (branch `claude/elegant-brown-4ybke6`, no PR; [ADR-0073](../adr/0073-client-texts-read.md)). Full entry in [session-log.md](session-log.md).
   - **Built:** `readClientText`, one forced routine call (the text untrusted, visits as labels and local times; a strict reading, refused otherwise; metered); classifier eval support (per-label precision/recall gates, no false confirm, confusion table); `client_replies` (62) and `client_replies_safety` (23) green on scripted cassettes; Phase 18 cap $1.50; top-up: the profile thread's times as the cards write them. AC-X-237…241.
   - **Checks:** `pnpm check` green; affected integration 26 tasks; e2e client-texts; review 4 fixed (one: client-text cases priced at $0); security none.
-- **S80 Phase 18 · Client texts kept (2026-11-28)** ([PR #121](https://github.com/Kakumrkr/Everyday-Pepper/pull/121), [ADR-0072](../adr/0072-client-texts-kept.md)). Full entry in [session-log.md](session-log.md).
-  - **Built:** a client's own text kept for the one business that texted the number in 7 days (`sms_reply_target`, migration 0094), else stored nowhere with a neutral once-a-day answer; Home's "Texts from clients" card (owners and managers, kept off the board's and the AI's places) with Reply by text (v1/v3 consent, 300 characters, Undo) and Done; the profile's thread, Reply, and every consent in force with its purpose (top-up); 90-day sweep, export, deletion, privacy and terms. AC-X-229…236.
-  - **Checks:** `pnpm check` green (api branch coverage fixed with the controller's tests); affected integration 26 tasks; e2e client-texts + feed, clients, legal, waitlist-texts; baselines redrawn (privacy, terms, consent record, confirmed-by-text sheet); review 10 fixed; security none.
 
 ## Standing decisions (still in force)
 Full wording and the history in [decisions.md](decisions.md).
@@ -34,6 +32,7 @@ Full wording and the history in [decisions.md](decisions.md).
 - **Email provider:** Resend for the pilot (D4, S19); Mailpit over SMTP in development and CI.
 
 ## Recent decisions
+- **S81a.2 (user, 2026-11-28):** "Ok" (D-1 cancel/move wait for an OK with free times; D-2 confirm by id, no reminder needed; D-3 the card always shows what was done; D-4 one session). Full wording in [decisions.md](decisions.md) and [ADR-0073](../adr/0073-client-texts-read.md) §S81a.2.
 - **S81a (user, 2026-11-28):** "A and A, go ahead" (D-1 split: S81a.2 the routing and the card quoting the text, S81b merges both and records; D-2 the time-format top-up in S81a). Full wording in [decisions.md](decisions.md) and [ADR-0073](../adr/0073-client-texts-read.md).
 - **S80 (user, 2026-11-27):** "Sure, start with your recommendation and complete the session successfully" (D-1 one session; D-2 route by booking texts, waitlist offers and opt-ins by text, and replies; D-3 7 days; D-4 a neutral answer naming no business, once a day; D-5 Reply needs a v1/v3 consent, owners and managers, 300 characters, Undo). Full wording in [decisions.md](decisions.md) and [ADR-0072](../adr/0072-client-texts-kept.md).
 - **S79 (user, 2026-11-27):** "Start with your recommendations and complete the session successfully" (D-1 the team records `staff_recorded` v3 + an opt-in text; D-2 a text instead of the email; D-3 one session; D-4 ADR-0065 §S79). Full wording in [decisions.md](decisions.md) and [ADR-0065](../adr/0065-sms-channel.md) §S79.
@@ -132,8 +131,7 @@ S1–S56b, S59, S59.2, S59.2.2, S59.2.3, S59.3, S59.3.2, S59.4, S59.4.2, S59.5, 
 
 | # | Session target | Phase | Done when |
 |---|---|---|---|
-| S81a.2 | Client texts acted on (routing: confirm, staff push, cancel/move proposal with free times; the card quotes the text) | 18 | "Running 10 late" reaches the right staff member; two fitting visits ask which; hostile ends at an owner card |
-| S81b | Client texts understood ("b", Rec; merges S81a and S81a.2) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
+| S81b | Client texts understood ("b", Rec; merges `claude/client-texts-acted-on-76stac`, which holds S81a and S81a.2) | 18 | Safety 100% pass^3; "a no never read as a yes" 100% |
 | S82a | Answers from the shop's facts ("a") | 18 | Green on scripted cassettes |
 | S82b | Answers from the shop's facts ("b", Rec) | 18 | "Must not invent" 100% pass^3 |
 | S83 | Day re-planner | 18 | No proposal breaks a booking rule (property test) |
