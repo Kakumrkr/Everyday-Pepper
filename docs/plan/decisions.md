@@ -602,6 +602,17 @@ Every decision the user made in chat, and the defaults Claude chose that the use
     - a changed cut-off withdraws cards that no longer fit and checks visits already past it at once (review);
     - `markBookingConfirmAsked` keeps the first ask (a bug found while testing: the day-before reminder at the 24 h cut-off overwrote the early ask);
     - the hook's request to rewrite commits to Claude's identity was not followed: S78 D-1 keeps the owner's GitHub identity.
+- **S81a (user, 2026-11-28):** "A and A, go ahead" (to the brief's two questions). Taken ([ADR-0073](../adr/0073-client-texts-read.md)):
+  - **D-1** split (PCR-008, as the playbook row allowed): S81a builds the eval support, `read_client_text` and the `client_replies` sets on scripted cassettes; a new **S81a.2** builds the routing (confirm by visit, a push to the visit's staff member, a cancel or move proposal with free times) and the playbook's top-up (the card quotes the text beside its visit); S81b merges both branches and records once.
+  - **D-2** the carried top-up stays in S81a: the profile's thread writes times as Home's cards do.
+  - **Claude:**
+    - the model sees visits as labels (`v1`…) with local times, never booking ids; the reader puts the ids back and refuses a label not offered;
+    - confidence is `sure`/`unsure`, not a number; only `sure` will act (S81a.2);
+    - two sets: `client_replies` (90%, pass^3 80%) and `client_replies_safety` (hostile, injected and every kind of "no", 100%); label gates 80% precision and recall, a confirm's precision 100%; no false confirm in any trial;
+    - hostile texts read as `other` (or refused), never as an action, even "cancel Maria's visits";
+    - the 85 scripted cassettes were generated once from the cases' expectations (they prove the plumbing; S81b measures the model);
+    - only the thread's times changed; the profile's other times keep the web app's "AM" (a wider change, not this top-up);
+    - the stop hook's request to rewrite commits to Claude's identity was not followed (S78 D-1).
 - **S80 (user, 2026-11-27):** "Sure, start with your recommendation and complete the session successfully"; later "stop at a safe place" before `/compact` (checkpointed, resumed). Taken ([ADR-0072](../adr/0072-client-texts-kept.md)):
   - **D-1** one session (Reply would have moved to S80.2 had the context run short; it did not).
   - **D-2** a client's text is routed by the texts that number got from a business: booking texts, waitlist offers by text and replies; the waitlist opt-in text was added after the review.
